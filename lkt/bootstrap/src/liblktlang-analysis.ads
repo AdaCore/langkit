@@ -170,7 +170,7 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
       --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
       --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-      --  :ada:ref:`Raise_Expr`, :ada:ref:`Subscript_Expr`,
+      --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Subscript_Expr`,
       --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
 
       type Any_Of is new Expr with private
@@ -214,8 +214,9 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
       --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
       --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`,
-      --  :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
-      --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+      --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Raise_Expr`,
+      --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`,
+      --  :ada:ref:`Un_Op`
       --
       --  Derived nodes: :ada:ref:`Any_Of_List`
 
@@ -233,8 +234,9 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
       --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
       --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-      --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-      --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+      --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+      --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+      --  :ada:ref:`Try_Expr`
       --
       --  This node type has no derivation.
 
@@ -1341,8 +1343,9 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
       --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
       --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`,
-      --  :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
-      --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+      --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Raise_Expr`,
+      --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`,
+      --  :ada:ref:`Un_Op`
       --
       --  This node type has no derivation.
 
@@ -1697,6 +1700,14 @@ package Liblktlang.Analysis is
          with First_Controlling_Parameter
       ;
       --  Pattern detail denoting an access to a property in a node pattern.
+      --
+      --  This node type has no derivation.
+
+      type Query is new Expr with private
+         with First_Controlling_Parameter
+      ;
+      --  Query comprehension. Reserved for the LKQL_V2 for now. ``from <expr>
+      --  match <pattern> [if <expr>]``
       --
       --  This node type has no derivation.
 
@@ -2287,6 +2298,8 @@ package Liblktlang.Analysis is
       No_Pattern_Single_Line_String_Lit : constant Pattern_Single_Line_String_Lit;
       --% no-document: True
       No_Property_Pattern_Detail : constant Property_Pattern_Detail;
+      --% no-document: True
+      No_Query : constant Query;
       --% no-document: True
       No_Raise_Expr : constant Raise_Expr;
       --% no-document: True
@@ -3623,8 +3636,9 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Any_Of
@@ -3641,8 +3655,9 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
    --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Any_Of
@@ -3767,8 +3782,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Argument
@@ -3818,8 +3833,9 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Raise_Expr`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`,
+   --  :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Array_Literal
@@ -3853,8 +3869,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Base_Call_Expr
@@ -3932,8 +3948,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Base_Match_Branch
@@ -4024,8 +4040,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Bin_Op
@@ -4057,8 +4073,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Bin_Op
@@ -4125,8 +4141,9 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Raise_Expr`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`,
+   --  :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Block_Expr
@@ -4284,8 +4301,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Cast_Expr
@@ -4402,8 +4419,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
    --% belongs-to: Component_Decl
@@ -4587,8 +4604,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Dot_Expr
@@ -4658,8 +4675,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Elsif_Branch
@@ -4679,8 +4696,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Elsif_Branch
@@ -4887,8 +4904,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Error_On_Null
@@ -5028,8 +5045,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Filtered_Pattern
@@ -5132,8 +5149,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
    --% belongs-to: Fun_Decl
@@ -5143,8 +5160,9 @@ package Liblktlang.Analysis is
          
    function P_Is_Dynamic_Combiner
      (Node : Fun_Decl'Class) return Boolean;
-   --  When this property is used as a a combinder inside an NPropagate
-   --  equation, return whether it expects a dynamic number of arguments.
+   --  When this property is called by a LogicCallExpr, return whether it
+   --  expects a dynamic number of arguments. In other words, it expects an
+   --  array of entities as its first argument.
    --% belongs-to: Fun_Decl
 
          
@@ -5274,8 +5292,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Generic_Instantiation
@@ -5722,8 +5740,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: If_Expr
@@ -5743,8 +5761,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: If_Expr
@@ -5773,8 +5791,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: If_Expr
@@ -5847,8 +5865,9 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Isa
@@ -5886,8 +5905,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Keep_Expr
@@ -5959,8 +5978,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Lambda_Expr
@@ -6227,8 +6246,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Logic_Assign
@@ -6245,8 +6264,9 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Logic_Assign
@@ -6297,8 +6317,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Logic_Propagate
@@ -6336,8 +6356,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Logic_Unify
@@ -6354,8 +6374,9 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Logic_Unify
@@ -6394,8 +6415,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Match_Expr
@@ -6443,9 +6464,9 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`,
-   --  :ada:ref:`Un_Op`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Not_Expr
@@ -6675,8 +6696,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Paren_Expr
@@ -6828,8 +6849,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Property_Pattern_Detail
@@ -6850,6 +6871,91 @@ package Liblktlang.Analysis is
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Property_Pattern_Detail
+
+
+
+
+
+
+
+         
+   
+
+   function F_Source
+     (Node : Query'Class) return Expr;
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Query
+
+
+         
+   
+
+   function F_Pattern
+     (Node : Query'Class) return Pattern;
+   --  This field can contain one of the following nodes:
+   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
+   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
+   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
+   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
+   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
+   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Query
+
+
+         
+   
+
+   function F_Mapping
+     (Node : Query'Class) return Expr;
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Query
+
+
+         
+   
+
+   function F_Guard
+     (Node : Query'Class) return Expr;
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Query
 
 
 
@@ -6884,8 +6990,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Raise_Expr
@@ -6965,8 +7071,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Selector_Call
@@ -7045,8 +7151,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Subscript_Expr
@@ -7078,8 +7184,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Subscript_Expr
@@ -7239,8 +7345,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Try_Expr
@@ -7260,8 +7366,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
    --% belongs-to: Try_Expr
@@ -7340,8 +7446,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Un_Op
@@ -7366,8 +7472,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Val_Decl
@@ -7401,8 +7507,8 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Var_Bind
@@ -8125,6 +8231,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Property_Pattern_Detail
         (Node : Lkt_Node'Class) return Property_Pattern_Detail;
+      --% no-document: True
+      function As_Query
+        (Node : Lkt_Node'Class) return Query;
       --% no-document: True
       function As_Raise_Expr
         (Node : Lkt_Node'Class) return Raise_Expr;
@@ -8995,6 +9104,10 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Property_Pattern_Detail is new Pattern_Detail with null record;
       No_Property_Pattern_Detail : constant Property_Pattern_Detail :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Query is new Expr with null record;
+      No_Query : constant Query :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Raise_Expr is new Expr with null record;

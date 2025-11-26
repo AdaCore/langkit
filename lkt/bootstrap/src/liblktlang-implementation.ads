@@ -681,6 +681,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Paren_Expr)
                or else Kind (Bare_Paren_Expr) in Lkt_Paren_Expr_Range;
+         subtype Bare_Query is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Query)
+               or else Kind (Bare_Query) in Lkt_Query_Range;
          subtype Bare_Raise_Expr is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Raise_Expr)
@@ -2407,6 +2411,10 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Query;
+      
+
+         
       type Internal_Entity_Raise_Expr;
       
 
@@ -2624,6 +2632,10 @@ private package Liblktlang.Implementation is
          
    type Internal_Entity_Fun_Decl_Array_Record;
    type Internal_Entity_Fun_Decl_Array_Access is access all Internal_Entity_Fun_Decl_Array_Record;
+
+         
+   type Internal_Entity_Fun_Param_Decl_Array_Record;
+   type Internal_Entity_Fun_Param_Decl_Array_Access is access all Internal_Entity_Fun_Param_Decl_Array_Record;
 
          
    type Internal_Entity_Generic_Param_Type_Decl_Array_Record;
@@ -8131,6 +8143,34 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Query is record
+
+               Node : aliased Bare_Query;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Query : constant Internal_Entity_Query;
+
+
+      function Create_Internal_Entity_Query
+        (Node : Bare_Query; Info : Internal_Entity_Info)
+         return Internal_Entity_Query;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Query) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Raise_Expr is record
 
                Node : aliased Bare_Raise_Expr;
@@ -9778,6 +9818,62 @@ private package Liblktlang.Implementation is
 
    
 
+   type Internal_Internal_Entity_Fun_Param_Decl_Array is
+      array (Positive range <>) of Internal_Entity_Fun_Param_Decl;
+
+   type Internal_Entity_Fun_Param_Decl_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Internal_Entity_Fun_Param_Decl_Array (1 .. N);
+   end record;
+
+   Empty_Internal_Entity_Fun_Param_Decl_Array_Record : aliased Internal_Entity_Fun_Param_Decl_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Internal_Entity_Fun_Param_Decl_Array_Type : constant Internal_Entity_Fun_Param_Decl_Array_Access :=
+      Empty_Internal_Entity_Fun_Param_Decl_Array_Record'Access;
+
+
+   function Create_Internal_Entity_Fun_Param_Decl_Array (Items_Count : Natural) return Internal_Entity_Fun_Param_Decl_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Internal_Entity_Fun_Param_Decl_Array
+     (Items : Internal_Internal_Entity_Fun_Param_Decl_Array) return Internal_Entity_Fun_Param_Decl_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Internal_Entity_Fun_Param_Decl_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Internal_Entity_Fun_Param_Decl;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Internal_Entity_Fun_Param_Decl_Array_Access) return Internal_Entity_Fun_Param_Decl_Array_Access;
+
+
+   function Length (T : Internal_Entity_Fun_Param_Decl_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Internal_Entity_Fun_Param_Decl_Array_Access);
+   procedure Dec_Ref (T : in out Internal_Entity_Fun_Param_Decl_Array_Access);
+
+   function Equivalent (L, R : Internal_Entity_Fun_Param_Decl_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Internal_Entity_Fun_Param_Decl_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Internal_Entity_Fun_Param_Decl_Array_Record, Internal_Entity_Fun_Param_Decl_Array_Access);
+
+         
+
+   
+
    type Internal_Internal_Entity_Generic_Param_Type_Decl_Array is
       array (Positive range <>) of Internal_Entity_Generic_Param_Type_Decl;
 
@@ -11058,6 +11154,7 @@ Lkt_Logic_Unify => 2,
 Lkt_Match_Expr => 2, 
 Lkt_Not_Expr => 1, 
 Lkt_Paren_Expr => 1, 
+Lkt_Query => 4, 
 Lkt_Raise_Expr => 2, 
 Lkt_Subscript_Expr => 3, 
 Lkt_Try_Expr => 2, 
@@ -13116,6 +13213,25 @@ Lkt_Var_Bind => 2);
 
 
             Paren_Expr_F_Expr : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
+                  when Lkt_Query_Range =>
+                     
+         
+
+
+            Query_F_Source : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+            Query_F_Pattern : aliased Bare_Pattern :=
+               No_Bare_Lkt_Node;
+            Query_F_Mapping : aliased Bare_Expr :=
+               No_Bare_Lkt_Node;
+            Query_F_Guard : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
 
          
@@ -15482,24 +15598,6 @@ function Lkt_Node_P_Solve_Generic_Types
 
 
 
-function Lkt_Node_P_Unmatched_Argument
-   
-  (Node : Bare_Lkt_Node
-      ; Callee_Type : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Predicate used to emit an error when a CallExpr argument could not be
---  matched with a parameter.
-
-         
-
-
-
-
 function Lkt_Node_P_Function_Type_Helper
    
   (Node : Bare_Lkt_Node
@@ -16676,6 +16774,46 @@ function Decl_P_Is_Directly_Referenceable
 
 
 
+function Decl_P_Extraneous_Parameter
+   
+  (Node : Bare_Decl
+      ; Callee_Type : Internal_Entity_Type_Decl
+      ; Callee : Internal_Entity_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+--  Predicate used to emit an error when when a CallExpr has a named argument
+--  undefined in the callee.
+--
+--  If ``callee`` is null, return true: an other diagnostic should have been
+--  emitted to raise that issue.
+
+         
+
+
+
+
+function Decl_P_Unmatched_Argument
+   
+  (Node : Bare_Decl
+      ; Callee_Type : Internal_Entity_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+   ;
+--  Predicate used to emit an error when a CallExpr argument could not be
+--  matched with a parameter.
+
+         
+
+
+
+
 function Internal_Env_Mappings_1
    
   (Node : Bare_Decl
@@ -17696,8 +17834,9 @@ function Fun_Decl_P_Is_Dynamic_Combiner
 
    return Boolean
    ;
---  When this property is used as a a combinder inside an NPropagate equation,
---  return whether it expects a dynamic number of arguments.
+--  When this property is called by a LogicCallExpr, return whether it expects
+--  a dynamic number of arguments. In other words, it expects an array of
+--  entities as its first argument.
 
          
 
@@ -20379,46 +20518,6 @@ function Expr_P_Expected_Type_Equation
 
 
 
-function Expr_P_Call_Generic_Type_Equation
-   
-  (Node : Bare_Expr
-      ; Name : Internal_Entity_Expr
-      ; Args : Internal_Entity_Argument_List
-      ; In_Logic_Call : Boolean
-         := False
-  )
-
-   return Logic_Equation
-   ;
---  Build an equation for solving the generic types call nodes (CallExpr,
---  LogicPropage and LogicPredicate) children.
---
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Expr_P_Call_Expected_Type_Equation
-   
-  (Node : Bare_Expr
-      ; Name : Internal_Entity_Expr
-      ; Args : Internal_Entity_Argument_List
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Compute the expected type of name and expressions in args.
-
-         
-
-
-
-
 function Expr_P_Match_Params
    
   (Node : Bare_Expr
@@ -20429,55 +20528,6 @@ function Expr_P_Match_Params
    return Internal_Param_Match_Array_Access
    ;
 --  Match a function's parameters with the arguments of the CallExpr.
-
-         
-
-
-
-
-function Expr_P_Xref_Call_Args_Equation
-   
-  (Node : Bare_Expr
-      ; Name : Internal_Entity_Expr
-      ; Args : Internal_Entity_Argument_List
-      ; In_Logic_Call : Boolean
-         := False
-  )
-
-   return Logic_Equation
-   ;
---  Build an equation for name and type resolution of calls.
---
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Expr_P_Xref_Call_Equation
-   
-  (Node : Bare_Expr
-      ; Name : Internal_Entity_Expr
-      ; Args : Internal_Entity_Argument_List
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Build an equation to solve type and name resolution for calling ``name``
---  with ``args`` as the arguments.
---
---  CallExprs, LogicPredicates and LogicPropagate are all calls to a given
---  callee, but their only common ancestor is Expr, so it is necessary to build
---  the equation here.
---
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
 
          
 
@@ -20802,6 +20852,25 @@ function Array_Literal_P_Xref_Equation
 
 
 
+function Base_Call_Expr_P_Generic_Type_Equation_Helper
+   
+  (Node : Bare_Base_Call_Expr
+      ; In_Logic_Call : Boolean
+         := False
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
+
+         
+
+
+
+
 function Base_Call_Expr_P_Generic_Type_Equation
    
   (Node : Bare_Base_Call_Expr
@@ -20827,7 +20896,51 @@ function Base_Call_Expr_P_Expected_Type_Equation
 
    return Logic_Equation
    ;
+--  Compute the expected type of name and expressions in args.
 
+         
+
+
+
+
+function Base_Call_Expr_P_Xref_Call_Args_Equation
+   
+  (Node : Bare_Base_Call_Expr
+      ; In_Logic_Call : Boolean
+         := False
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+--  Build an equation to match arguments of the call to the parameters of the
+--  called entity.
+--
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
+
+         
+
+
+
+
+function Base_Call_Expr_P_Xref_Call_Equation
+   
+  (Node : Bare_Base_Call_Expr
+      ; In_Logic_Call : Boolean
+         := False
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+   ;
+--  Build an equation to solve type and name resolution for calling this
+--  BaseCallExpr
+--
+--  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
+--  LogicPredicate.
 
          
 
@@ -20954,22 +21067,6 @@ function Base_Call_Expr_P_Xlogic_Equation
 
 
 function Logic_Predicate_P_Generic_Type_Equation
-   
-  (Node : Bare_Logic_Predicate
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Logic_Predicate_P_Expected_Type_Equation
    
   (Node : Bare_Logic_Predicate
    ; E_Info : Internal_Entity_Info :=
@@ -23239,22 +23336,6 @@ function Logic_Propagate_P_Generic_Type_Equation
 
 
 
-function Logic_Propagate_P_Expected_Type_Equation
-   
-  (Node : Bare_Logic_Propagate
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
 function Logic_Propagate_P_Xref_Equation
    
   (Node : Bare_Logic_Propagate
@@ -23504,6 +23585,42 @@ function Paren_Expr_P_Has_Context_Free_Type
 
    return Boolean
    ;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Query
+        (Self : Bare_Query
+         ; Query_F_Source : Bare_Expr
+         ; Query_F_Pattern : Bare_Pattern
+         ; Query_F_Mapping : Bare_Expr
+         ; Query_F_Guard : Bare_Expr
+        );
+
+      
+   function Query_F_Source
+     (Node : Bare_Query) return Bare_Expr;
+
+      
+   function Query_F_Pattern
+     (Node : Bare_Query) return Bare_Pattern;
+
+      
+   function Query_F_Mapping
+     (Node : Bare_Query) return Bare_Expr;
+
+      
+   function Query_F_Guard
+     (Node : Bare_Query) return Bare_Expr;
 
 
 
@@ -28900,6 +29017,18 @@ private
 
 
       No_Entity_Property_Pattern_Detail : constant Internal_Entity_Property_Pattern_Detail :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Query : constant Internal_Entity_Query :=
       (
                Node =>
                   No_Bare_Lkt_Node, 

@@ -6031,6 +6031,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Query
+        (Node : Lkt_Node'Class) return Query
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Query;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Query_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to Query";
+         
+            end if;
+      end;
       function As_Raise_Expr
         (Node : Lkt_Node'Class) return Raise_Expr
       is
@@ -6914,6 +6942,9 @@ package body Liblktlang.Analysis is
             end loop;
          end return;
       end;
+
+
+      
 
 
       
@@ -15970,6 +16001,103 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Expected_Value;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Source
+     (Node : Query'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Query_F_Source (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Source;
+
+
+         
+   
+
+   function F_Pattern
+     (Node : Query'Class) return Pattern
+   is
+      Result : Bare_Pattern;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Query_F_Pattern (Node.Internal.Node);
+         if Result = null then
+            return No_Pattern;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Pattern;
+
+
+         
+   
+
+   function F_Mapping
+     (Node : Query'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Query_F_Mapping (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Mapping;
+
+
+         
+   
+
+   function F_Guard
+     (Node : Query'Class) return Expr
+   is
+      Result : Bare_Expr;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Query_F_Guard (Node.Internal.Node);
+         if Result = null then
+            return No_Expr;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Guard;
 
 
 

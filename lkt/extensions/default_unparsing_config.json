@@ -1222,6 +1222,7 @@
         }
       }
     },
+    "Query": {},
     "RaiseExpr": {
       "fields": {
         "f_except_expr": ["whitespace", "recurse"]

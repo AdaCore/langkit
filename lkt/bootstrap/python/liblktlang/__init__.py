@@ -657,10 +657,11 @@ class GrammarRule(_Enum):
     args_rule = 'args_rule'
     decl_annotation_args_rule = 'decl_annotation_args_rule'
     decl_annotation_rule = 'decl_annotation_rule'
+    query_comprehension_rule = 'query_comprehension_rule'
 
     _name = 'GrammarRule'
     _c_to_py = [
-        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, def_id_rule, doc_rule, import_stmt_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, lexer_family_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, fil_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, tuple_pattern_rule, pattern_arg_rule, selector_call_rule, expr_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule]
+        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, def_id_rule, doc_rule, import_stmt_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, lexer_family_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, fil_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, tuple_pattern_rule, pattern_arg_rule, selector_call_rule, expr_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule, query_comprehension_rule]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 class LookupKind(_Enum):
     """
@@ -3499,8 +3500,8 @@ class Argument(LktNode):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -3702,8 +3703,8 @@ class BaseMatchBranch(LktNode):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -4597,8 +4598,8 @@ class ComponentDecl(ExplicitlyTypedDecl):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         This field may be null even when there are no parsing errors.
         """
@@ -4812,8 +4813,8 @@ class ValDecl(ExplicitlyTypedDecl):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -4922,8 +4923,8 @@ class FunDecl(UserValDecl):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         This field may be null even when there are no parsing errors.
         """
@@ -4942,8 +4943,9 @@ class FunDecl(UserValDecl):
         self
     ) -> bool:
         """
-        When this property is used as a a combinder inside an NPropagate
-        equation, return whether it expects a dynamic number of arguments.
+        When this property is called by a LogicCallExpr, return whether it
+        expects a dynamic number of arguments. In other words, it expects an
+        array of entities as its first argument.
         """
         
 
@@ -5921,8 +5923,8 @@ class ElsifBranch(LktNode):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -5950,8 +5952,8 @@ class ElsifBranch(LktNode):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6118,8 +6120,8 @@ class Expr(LktNode):
     :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicAssign`,
     :py:class:`LogicExpr`, :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
     :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-    :py:class:`RaiseExpr`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`,
-    :py:class:`UnOp`
+    :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`SubscriptExpr`,
+    :py:class:`TryExpr`, :py:class:`UnOp`
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -6241,8 +6243,9 @@ class AnyOf(Expr):
         :py:class:`GenericInstantiation`, :py:class:`IfExpr`,
         :py:class:`KeepExpr`, :py:class:`LambdaExpr`, :py:class:`Lit`,
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RaiseExpr`,
-        :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
+        :py:class:`TryExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6267,8 +6270,9 @@ class AnyOf(Expr):
         :py:class:`ErrorOnNull`, :py:class:`GenericInstantiation`,
         :py:class:`IfExpr`, :py:class:`KeepExpr`, :py:class:`LambdaExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RaiseExpr`,
-        :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
+        :py:class:`TryExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6321,8 +6325,9 @@ class ArrayLiteral(Expr):
         :py:class:`LogicAssign`, :py:class:`LogicExpr`,
         :py:class:`LogicPredicate`, :py:class:`LogicPropagate`,
         :py:class:`LogicUnify`, :py:class:`MatchExpr`, :py:class:`NotExpr`,
-        :py:class:`ParenExpr`, :py:class:`RaiseExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`ParenExpr`, :py:class:`Query`, :py:class:`RaiseExpr`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`,
+        :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6392,8 +6397,8 @@ class BaseCallExpr(Expr):
         :py:class:`CastExpr`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
         :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6557,8 +6562,8 @@ class BinOp(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6603,8 +6608,8 @@ class BinOp(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6659,8 +6664,9 @@ class BlockExpr(Expr):
         :py:class:`LogicAssign`, :py:class:`LogicExpr`,
         :py:class:`LogicPredicate`, :py:class:`LogicPropagate`,
         :py:class:`LogicUnify`, :py:class:`MatchExpr`, :py:class:`NotExpr`,
-        :py:class:`ParenExpr`, :py:class:`RaiseExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`ParenExpr`, :py:class:`Query`, :py:class:`RaiseExpr`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`,
+        :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6708,8 +6714,8 @@ class CastExpr(Expr):
         :py:class:`CastExpr`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
         :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6815,8 +6821,8 @@ class DotExpr(Expr):
         :py:class:`CastExpr`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
         :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6900,8 +6906,8 @@ class ErrorOnNull(Expr):
         :py:class:`CastExpr`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
         :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -6949,8 +6955,8 @@ class GenericInstantiation(Expr):
         :py:class:`CastExpr`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
         :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -8362,8 +8368,8 @@ class IfExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -8391,8 +8397,8 @@ class IfExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -8437,8 +8443,8 @@ class IfExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -8490,8 +8496,9 @@ class Isa(Expr):
         :py:class:`GenericInstantiation`, :py:class:`IfExpr`,
         :py:class:`KeepExpr`, :py:class:`LambdaExpr`, :py:class:`Lit`,
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RaiseExpr`,
-        :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
+        :py:class:`TryExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -8565,8 +8572,8 @@ class KeepExpr(Expr):
         :py:class:`CastExpr`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
         :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -8696,8 +8703,8 @@ class LambdaExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9108,8 +9115,8 @@ class LogicAssign(Expr):
         :py:class:`LogicAssign`, :py:class:`LogicExpr`,
         :py:class:`LogicPredicate`, :py:class:`LogicPropagate`,
         :py:class:`LogicUnify`, :py:class:`MatchExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9134,8 +9141,9 @@ class LogicAssign(Expr):
         :py:class:`GenericInstantiation`, :py:class:`IfExpr`,
         :py:class:`KeepExpr`, :py:class:`LambdaExpr`, :py:class:`Lit`,
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RaiseExpr`,
-        :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
+        :py:class:`TryExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9231,8 +9239,8 @@ class LogicPropagate(Expr):
         :py:class:`LogicAssign`, :py:class:`LogicExpr`,
         :py:class:`LogicPredicate`, :py:class:`LogicPropagate`,
         :py:class:`LogicUnify`, :py:class:`MatchExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9301,8 +9309,8 @@ class LogicUnify(Expr):
         :py:class:`LogicAssign`, :py:class:`LogicExpr`,
         :py:class:`LogicPredicate`, :py:class:`LogicPropagate`,
         :py:class:`LogicUnify`, :py:class:`MatchExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9327,8 +9335,9 @@ class LogicUnify(Expr):
         :py:class:`GenericInstantiation`, :py:class:`IfExpr`,
         :py:class:`KeepExpr`, :py:class:`LambdaExpr`, :py:class:`Lit`,
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RaiseExpr`,
-        :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
+        :py:class:`TryExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9381,8 +9390,8 @@ class MatchExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9451,9 +9460,9 @@ class NotExpr(Expr):
         :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicAssign`,
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RaiseExpr`,
-        :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`,
-        :py:class:`UnOp`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
+        :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9505,8 +9514,8 @@ class ParenExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9525,6 +9534,146 @@ class ParenExpr(Expr):
     )
 
     _kind_name = 'ParenExpr'
+
+
+
+
+
+
+class Query(Expr):
+    """
+    Subclass of :py:class:`Expr`.
+
+    Query comprehension. Reserved for the LKQL_V2 for now. ``from <expr> match
+    <pattern> [if <expr>]``
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+    
+    @property
+    def f_source(
+        self
+    ) -> Expr:
+        """
+        This field can contain one of the following nodes: :py:class:`AnyOf`,
+        :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
+        :py:class:`CallExpr`, :py:class:`CastExpr`, :py:class:`DotExpr`,
+        :py:class:`ErrorOnNull`, :py:class:`GenericInstantiation`,
+        :py:class:`IfExpr`, :py:class:`Isa`, :py:class:`KeepExpr`,
+        :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicAssign`,
+        :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
+        :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
+        :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
+
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_query_f_source)
+
+
+
+        return result
+    
+    @property
+    def f_pattern(
+        self
+    ) -> Pattern:
+        """
+        This field can contain one of the following nodes:
+        :py:class:`BindingPattern`, :py:class:`BoolPattern`,
+        :py:class:`ExtendedPattern`, :py:class:`FilteredPattern`,
+        :py:class:`IntegerPattern`, :py:class:`ListPattern`,
+        :py:class:`NotPattern`, :py:class:`NullPattern`, :py:class:`OrPattern`,
+        :py:class:`ParenPattern`, :py:class:`RegexPattern`,
+        :py:class:`TuplePattern`, :py:class:`TypePattern`
+
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_query_f_pattern)
+
+
+
+        return result
+    
+    @property
+    def f_mapping(
+        self
+    ) -> Expr:
+        """
+        This field can contain one of the following nodes: :py:class:`AnyOf`,
+        :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
+        :py:class:`CallExpr`, :py:class:`CastExpr`, :py:class:`DotExpr`,
+        :py:class:`ErrorOnNull`, :py:class:`GenericInstantiation`,
+        :py:class:`IfExpr`, :py:class:`Isa`, :py:class:`KeepExpr`,
+        :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicAssign`,
+        :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
+        :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
+        :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
+
+        This field may be null even when there are no parsing errors.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_query_f_mapping)
+
+
+
+        return result
+    
+    @property
+    def f_guard(
+        self
+    ) -> Expr:
+        """
+        This field can contain one of the following nodes: :py:class:`AnyOf`,
+        :py:class:`ArrayLiteral`, :py:class:`BinOp`, :py:class:`BlockExpr`,
+        :py:class:`CallExpr`, :py:class:`CastExpr`, :py:class:`DotExpr`,
+        :py:class:`ErrorOnNull`, :py:class:`GenericInstantiation`,
+        :py:class:`IfExpr`, :py:class:`Isa`, :py:class:`KeepExpr`,
+        :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicAssign`,
+        :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
+        :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
+        :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
+
+        This field may be null even when there are no parsing errors.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_query_f_guard)
+
+
+
+        return result
+
+    _field_names = Expr._field_names + (
+        "f_source",
+        "f_pattern",
+        "f_mapping",
+        "f_guard",
+    )
+
+    _kind_name = 'Query'
 
 
 
@@ -9579,8 +9728,8 @@ class RaiseExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9629,8 +9778,8 @@ class SubscriptExpr(Expr):
         :py:class:`CastExpr`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
         :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9675,8 +9824,8 @@ class SubscriptExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9730,8 +9879,8 @@ class TryExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -9759,8 +9908,8 @@ class TryExpr(Expr):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         This field may be null even when there are no parsing errors.
         """
@@ -9832,8 +9981,8 @@ class UnOp(Expr):
         :py:class:`LogicAssign`, :py:class:`LogicExpr`,
         :py:class:`LogicPredicate`, :py:class:`LogicPropagate`,
         :py:class:`LogicUnify`, :py:class:`MatchExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -10753,9 +10902,9 @@ class ExprList(LktNodeBaseList):
     :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicAssign`,
     :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
     :py:class:`LogicPropagate`, :py:class:`LogicUnify`, :py:class:`MatchExpr`,
-    :py:class:`NotExpr`, :py:class:`ParenExpr`, :py:class:`RaiseExpr`,
-    :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`,
-    :py:class:`UnOp`
+    :py:class:`NotExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+    :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
+    :py:class:`TryExpr`, :py:class:`UnOp`
 
     Derived nodes: :py:class:`AnyOfList`
     """
@@ -10800,8 +10949,8 @@ class AnyOfList(ExprList):
     :py:class:`GenericInstantiation`, :py:class:`IfExpr`, :py:class:`KeepExpr`,
     :py:class:`LambdaExpr`, :py:class:`Lit`, :py:class:`LogicExpr`,
     :py:class:`LogicPredicate`, :py:class:`MatchExpr`, :py:class:`ParenExpr`,
-    :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-    :py:class:`TryExpr`
+    :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+    :py:class:`SubscriptExpr`, :py:class:`TryExpr`
 
     This node type has no derivation.
     """
@@ -11127,9 +11276,9 @@ class LktNodeList(LktNodeBaseList):
     :py:class:`LexerCaseRule`, :py:class:`Lit`, :py:class:`LogicAssign`,
     :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
     :py:class:`LogicPropagate`, :py:class:`LogicUnify`, :py:class:`MatchExpr`,
-    :py:class:`NotExpr`, :py:class:`ParenExpr`, :py:class:`RaiseExpr`,
-    :py:class:`RefId`, :py:class:`SubscriptExpr`, :py:class:`TryExpr`,
-    :py:class:`UnOp`
+    :py:class:`NotExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+    :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
+    :py:class:`TryExpr`, :py:class:`UnOp`
 
     This node type has no derivation.
     """
@@ -12217,8 +12366,8 @@ class FilteredPattern(Pattern):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -12756,8 +12905,8 @@ class PropertyPatternDetail(PatternDetail):
         :py:class:`CastExpr`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
         :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -12932,8 +13081,8 @@ class SelectorCall(LktNode):
         :py:class:`CastExpr`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
         :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
         :py:class:`Lit`, :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`RefId`,
-        :py:class:`SubscriptExpr`
+        :py:class:`MatchExpr`, :py:class:`ParenExpr`, :py:class:`Query`,
+        :py:class:`RefId`, :py:class:`SubscriptExpr`
 
         When there are no parsing errors, this field is never null.
         """
@@ -13246,8 +13395,8 @@ class VarBind(LktNode):
         :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
         :py:class:`LogicPropagate`, :py:class:`LogicUnify`,
         :py:class:`MatchExpr`, :py:class:`NotExpr`, :py:class:`ParenExpr`,
-        :py:class:`RaiseExpr`, :py:class:`RefId`, :py:class:`SubscriptExpr`,
-        :py:class:`TryExpr`, :py:class:`UnOp`
+        :py:class:`Query`, :py:class:`RaiseExpr`, :py:class:`RefId`,
+        :py:class:`SubscriptExpr`, :py:class:`TryExpr`, :py:class:`UnOp`
 
         When there are no parsing errors, this field is never null.
         """
@@ -16000,6 +16149,30 @@ _paren_expr_f_expr = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
+_query_f_source = _import_func(
+    'lkt_query_f_source',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_query_f_pattern = _import_func(
+    'lkt_query_f_pattern',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_query_f_mapping = _import_func(
+    'lkt_query_f_mapping',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_query_f_guard = _import_func(
+    'lkt_query_f_guard',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
 _raise_expr_f_dest_type = _import_func(
     'lkt_raise_expr_f_dest_type',
     [ctypes.POINTER(_Entity_c_type),
@@ -16543,89 +16716,90 @@ _kind_to_astnode_cls = {
     101: MatchExpr,
     102: NotExpr,
     103: ParenExpr,
-    104: RaiseExpr,
-    105: SubscriptExpr,
-    106: TryExpr,
-    107: UnOp,
-    108: FullDecl,
-    109: GrammarListSep,
-    110: Import,
-    111: LangkitRoot,
-    112: LexerCaseRule,
-    113: LexerCaseRuleSend,
-    114: ListKindOne,
-    115: ListKindZero,
-    116: ArgumentList,
-    117: BaseLexerCaseRuleAltList,
-    118: BaseMatchBranchList,
-    119: BlockStringLineList,
-    120: CallExprList,
-    121: DeclAnnotationList,
-    122: ElsifBranchList,
-    123: EnumClassAltDeclList,
-    124: EnumClassCaseList,
-    125: EnumLitDeclList,
-    126: ExprList,
-    127: AnyOfList,
-    128: FullDeclList,
-    129: DeclBlock,
-    130: GenericParamDeclList,
-    131: FunParamDeclList,
-    132: GrammarExprList,
-    133: GrammarExprListList,
-    134: ImportList,
-    135: LambdaParamDeclList,
-    136: LktNodeList,
-    137: PatternDetailList,
-    138: PatternList,
-    139: RefIdList,
-    140: TypeRefList,
-    141: SyntheticTypeRefList,
-    142: NullCondQualifierAbsent,
-    143: NullCondQualifierPresent,
-    144: OpAmp,
-    145: OpAnd,
-    146: OpDiv,
-    147: OpEq,
-    148: OpGt,
-    149: OpGte,
-    150: OpLogicAnd,
-    151: OpLogicOr,
-    152: OpLt,
-    153: OpLte,
-    154: OpMinus,
-    155: OpMult,
-    156: OpNe,
-    157: OpOr,
-    158: OpOrInt,
-    159: OpPlus,
-    160: OpStreamConcat,
-    161: OpStreamCons,
-    162: AnyTypePattern,
-    163: BindingPattern,
-    164: BoolPatternFalse,
-    165: BoolPatternTrue,
-    166: EllipsisPattern,
-    167: ExtendedPattern,
-    168: FilteredPattern,
-    169: IntegerPattern,
-    170: ListPattern,
-    171: NotPattern,
-    172: NullPattern,
-    173: OrPattern,
-    174: ParenPattern,
-    175: RegexPattern,
-    176: TuplePattern,
-    177: TypePattern,
-    178: FieldPatternDetail,
-    179: PropertyPatternDetail,
-    180: SelectorPatternDetail,
-    181: SelectorCall,
-    182: DefaultListTypeRef,
-    183: FunctionTypeRef,
-    184: GenericTypeRef,
-    185: SimpleTypeRef,
-    186: VarBind,
+    104: Query,
+    105: RaiseExpr,
+    106: SubscriptExpr,
+    107: TryExpr,
+    108: UnOp,
+    109: FullDecl,
+    110: GrammarListSep,
+    111: Import,
+    112: LangkitRoot,
+    113: LexerCaseRule,
+    114: LexerCaseRuleSend,
+    115: ListKindOne,
+    116: ListKindZero,
+    117: ArgumentList,
+    118: BaseLexerCaseRuleAltList,
+    119: BaseMatchBranchList,
+    120: BlockStringLineList,
+    121: CallExprList,
+    122: DeclAnnotationList,
+    123: ElsifBranchList,
+    124: EnumClassAltDeclList,
+    125: EnumClassCaseList,
+    126: EnumLitDeclList,
+    127: ExprList,
+    128: AnyOfList,
+    129: FullDeclList,
+    130: DeclBlock,
+    131: GenericParamDeclList,
+    132: FunParamDeclList,
+    133: GrammarExprList,
+    134: GrammarExprListList,
+    135: ImportList,
+    136: LambdaParamDeclList,
+    137: LktNodeList,
+    138: PatternDetailList,
+    139: PatternList,
+    140: RefIdList,
+    141: TypeRefList,
+    142: SyntheticTypeRefList,
+    143: NullCondQualifierAbsent,
+    144: NullCondQualifierPresent,
+    145: OpAmp,
+    146: OpAnd,
+    147: OpDiv,
+    148: OpEq,
+    149: OpGt,
+    150: OpGte,
+    151: OpLogicAnd,
+    152: OpLogicOr,
+    153: OpLt,
+    154: OpLte,
+    155: OpMinus,
+    156: OpMult,
+    157: OpNe,
+    158: OpOr,
+    159: OpOrInt,
+    160: OpPlus,
+    161: OpStreamConcat,
+    162: OpStreamCons,
+    163: AnyTypePattern,
+    164: BindingPattern,
+    165: BoolPatternFalse,
+    166: BoolPatternTrue,
+    167: EllipsisPattern,
+    168: ExtendedPattern,
+    169: FilteredPattern,
+    170: IntegerPattern,
+    171: ListPattern,
+    172: NotPattern,
+    173: NullPattern,
+    174: OrPattern,
+    175: ParenPattern,
+    176: RegexPattern,
+    177: TuplePattern,
+    178: TypePattern,
+    179: FieldPatternDetail,
+    180: PropertyPatternDetail,
+    181: SelectorPatternDetail,
+    182: SelectorCall,
+    183: DefaultListTypeRef,
+    184: FunctionTypeRef,
+    185: GenericTypeRef,
+    186: SimpleTypeRef,
+    187: VarBind,
 }
 
 

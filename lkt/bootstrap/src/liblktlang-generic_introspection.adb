@@ -5369,6 +5369,74 @@ end;
 when others => null;
 end case;
 end;
+when Lkt_Query_Range =>
+declare
+N_Bare_Query : constant Analysis.Query := N_Bare_Expr.As_Query;
+begin
+case Member is
+when Member_Index_For_Query_F_Source =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Query.F_Source);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Query_F_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Query.F_Pattern);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Query_F_Mapping =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Query.F_Mapping);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Query_F_Guard =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Query.F_Guard);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Raise_Expr_Range =>
 declare
 N_Bare_Raise_Expr : constant Analysis.Raise_Expr := N_Bare_Expr.As_Raise_Expr;

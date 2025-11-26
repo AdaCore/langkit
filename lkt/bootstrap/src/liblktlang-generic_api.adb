@@ -405,6 +405,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Not_Expr;
                   when Type_Index_For_Paren_Expr =>
                      return Lkt_Paren_Expr;
+                  when Type_Index_For_Query =>
+                     return Lkt_Query;
                   when Type_Index_For_Raise_Expr =>
                      return Lkt_Raise_Expr;
                   when Type_Index_For_Subscript_Expr =>

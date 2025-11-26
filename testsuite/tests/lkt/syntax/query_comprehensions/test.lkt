@@ -1,0 +1,2 @@
+fun foo(n: AdaNode): Any =
+    from [1,2,3] match i select i*i if i < 2

@@ -636,6 +636,7 @@ package body Liblktlang.Implementation.C is
       Lkt_Match_Expr => new Text_Type'(To_Text ("MatchExpr")),
       Lkt_Not_Expr => new Text_Type'(To_Text ("NotExpr")),
       Lkt_Paren_Expr => new Text_Type'(To_Text ("ParenExpr")),
+      Lkt_Query => new Text_Type'(To_Text ("Query")),
       Lkt_Raise_Expr => new Text_Type'(To_Text ("RaiseExpr")),
       Lkt_Subscript_Expr => new Text_Type'(To_Text ("SubscriptExpr")),
       Lkt_Try_Expr => new Text_Type'(To_Text ("TryExpr")),
@@ -11993,6 +11994,210 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_paren_expr_f_expr;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_query_f_source
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Query_Range then
+
+         declare
+            
+
+            Result : Bare_Expr;
+         begin
+            Result := Query_F_Source
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_query_f_source;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_query_f_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Query_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Query_F_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_query_f_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_query_f_mapping
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Query_Range then
+
+         declare
+            
+
+            Result : Bare_Expr;
+         begin
+            Result := Query_F_Mapping
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_query_f_mapping;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_query_f_guard
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Query_Range then
+
+         declare
+            
+
+            Result : Bare_Expr;
+         begin
+            Result := Query_F_Guard
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_query_f_guard;
 
 
            

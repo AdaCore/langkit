@@ -3090,6 +3090,35 @@ package body Liblktlang.Parsers_Impl is
             return Bare_Paren_Expr (Result);
          end Allocate_Paren_Expr;
 
+      package Bare_Query_Memos is new Liblktlang_Support.Packrat.Tables
+        (Bare_Query);
+
+         
+         subtype Subtype_For_Query is
+            Root_Node_Record (Lkt_Query);
+         type Access_To_Subtype_For_Query is access all Subtype_For_Query;
+         pragma No_Strict_Aliasing (Access_To_Subtype_For_Query);
+         package Bare_Query_Alloc is new Alloc
+           (Subtype_For_Query, Access_To_Subtype_For_Query);
+
+         function Allocate_Query
+           (Pool : Bump_Ptr_Pool) return Bare_Query;
+
+         function Allocate_Query
+           (Pool : Bump_Ptr_Pool) return Bare_Query
+         is
+            Result      : constant Access_To_Subtype_For_Query := Bare_Query_Alloc.Alloc (Pool);
+            Result_Kind : Lkt_Node_Kind_Type
+               with Import, Address => Result.Kind'Address;
+            --  Result.Kind is a discriminant, so we can't modify it directly.
+            --  We need to initialize it manually, though, as we don't use a
+            --  standard Ada allocator for nodes. Use an overlay to workaround
+            --  Ada's restrictions.
+         begin
+            Result_Kind := Lkt_Query;
+            return Bare_Query (Result);
+         end Allocate_Query;
+
       package Bare_Raise_Expr_Memos is new Liblktlang_Support.Packrat.Tables
         (Bare_Raise_Expr);
 
@@ -5737,6 +5766,8 @@ package body Liblktlang.Parsers_Impl is
       
       Primary_Or_Parse0_Memo : Bare_Expr_Memos.Memo_Type;
       
+      Query_Comprehension_Transform_Parse0_Memo : Bare_Query_Memos.Memo_Type;
+      
       Raise_Expr_Transform_Parse0_Memo : Bare_Raise_Expr_Memos.Memo_Type;
       
       Ref_Id_Transform_Parse0_Memo : Bare_Ref_Id_Memos.Memo_Type;
@@ -6274,6 +6305,11 @@ function Pattern_Arg_Or_Parse0
 function Primary_Or_Parse0
   (Parser : in out Parser_Type;
    Pos    : Token_Index) return Bare_Expr;
+
+   
+function Query_Comprehension_Transform_Parse0
+  (Parser : in out Parser_Type;
+   Pos    : Token_Index) return Bare_Query;
 
    
 function Raise_Expr_Transform_Parse0
@@ -6890,6 +6926,9 @@ function Var_Bind_Transform_Parse0
          when Decl_Annotation_Rule =>
             Result := Decl_Annotation_Transform_Parse0
               (Parser, First_Token_Index);
+         when Query_Comprehension_Rule =>
+            Result := Query_Comprehension_Transform_Parse0
+              (Parser, First_Token_Index);
       end case;
       Process_Parsing_Error (Parser, Check_Complete);
       Set_Parents (Result, null);
@@ -6937,25 +6976,25 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <List (root of 'args') at parser.lkt:474:13>
+--  BEGIN <List (root of 'args') at parser.lkt:475:13>
 --  pos=List_Pos0, res=List_Res0, nobt=None
     List_Pos0 := Pos;
 Lst_Cpos0 := Pos;
 Tmp_List0 := Get_Parse_List (Parser);
 Diag_Mark0 := Parser.Last_Diag;
 loop
---  BEGIN <Defer (for 'argument') at parser.lkt:474:19>
+--  BEGIN <Defer (for 'argument') at parser.lkt:475:19>
 --  pos=Defer_Pos0, res=Defer_Res0, nobt=None
 Defer_Res0 :=
    Argument_Transform_Parse0 (Parser, Lst_Cpos0);
 Defer_Pos0 := Parser.Current_Pos;
---  END <Defer (for 'argument') at parser.lkt:474:19>
+--  END <Defer (for 'argument') at parser.lkt:475:19>
    exit when Defer_Pos0 = No_Token_Index;
    List_Pos0 := Defer_Pos0;
    Lst_Cpos0 := List_Pos0;
    Diag_Mark0 := Parser.Last_Diag;
    Tmp_List0.Nodes.Append (Defer_Res0);
---  BEGIN <Token(<WithText Comma>, ) (root of 'args') at parser.lkt:474:29>
+--  BEGIN <Token(<WithText Comma>, ) (root of 'args') at parser.lkt:475:29>
 --  pos=Token_Pos0, res=Token_Res0, nobt=None
 Token_Res0 := Lst_Cpos0;
 declare
@@ -6978,7 +7017,7 @@ begin
           Token_Pos0 := Lst_Cpos0 + 1;
    end if;
 end;
---  END <Token(<WithText Comma>, ) (root of 'args') at parser.lkt:474:29>
+--  END <Token(<WithText Comma>, ) (root of 'args') at parser.lkt:475:29>
       exit when Token_Pos0 = No_Token_Index;
       Lst_Cpos0 := Token_Pos0;
 end loop;
@@ -7020,7 +7059,7 @@ begin
    end;
 end;
 Release_Parse_List (Parser, Tmp_List0);
---  END <List (root of 'args') at parser.lkt:474:13>
+--  END <List (root of 'args') at parser.lkt:475:13>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
@@ -7072,32 +7111,32 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType Argument>) (root of 'argument') at parser.lkt:473:17>
+--  BEGIN <Transform(<ASTNodeType Argument>) (root of 'argument') at parser.lkt:474:17>
 --  pos=Row_Pos0, res=Transform_Res0, nobt=None
---  BEGIN <_Row (root of 'argument') at parser.lkt:473:17>
+--  BEGIN <_Row (root of 'argument') at parser.lkt:474:17>
 --  pos=Row_Pos0, res=None, nobt=None
 Row_Pos0 := Pos;
---  BEGIN <Opt (root of 'argument') at parser.lkt:473:26>
+--  BEGIN <Opt (root of 'argument') at parser.lkt:474:26>
 --  pos=Row_Pos1, res=Defer_Res1, nobt=None
 Diag_Mark1 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'argument') at parser.lkt:473:27>
+--  BEGIN <_Extract (root of 'argument') at parser.lkt:474:27>
 --  pos=Row_Pos1, res=Defer_Res1, nobt=None
---  BEGIN <_Row (root of 'argument') at parser.lkt:473:27>
+--  BEGIN <_Row (root of 'argument') at parser.lkt:474:27>
 --  pos=Row_Pos1, res=None, nobt=None
 Row_Pos1 := Row_Pos0;
---  BEGIN <Defer (for 'ref_id') at parser.lkt:473:32>
+--  BEGIN <Defer (for 'ref_id') at parser.lkt:474:32>
 --  pos=Defer_Pos1, res=Defer_Res1, nobt=None
 Defer_Res1 :=
    Ref_Id_Transform_Parse0 (Parser, Row_Pos1);
 Defer_Pos1 := Parser.Current_Pos;
---  END <Defer (for 'ref_id') at parser.lkt:473:32>
+--  END <Defer (for 'ref_id') at parser.lkt:474:32>
 if Defer_Pos1 /= No_Token_Index then
    Row_Pos1 := Defer_Pos1;
 else
    Row_Pos1 := No_Token_Index;
    goto Exit_Row1_0;
 end if;
---  BEGIN <Token(<WithText Equal>, ) (root of 'argument') at parser.lkt:473:39>
+--  BEGIN <Token(<WithText Equal>, ) (root of 'argument') at parser.lkt:474:39>
 --  pos=Token_Pos1, res=Token_Res1, nobt=None
 Token_Res1 := Row_Pos1;
 declare
@@ -7120,7 +7159,7 @@ begin
           Token_Pos1 := Row_Pos1 + 1;
    end if;
 end;
---  END <Token(<WithText Equal>, ) (root of 'argument') at parser.lkt:473:39>
+--  END <Token(<WithText Equal>, ) (root of 'argument') at parser.lkt:474:39>
 if Token_Pos1 /= No_Token_Index then
    Row_Pos1 := Token_Pos1;
 else
@@ -7130,26 +7169,26 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row1_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'argument') at parser.lkt:473:27>
---  END <_Extract (root of 'argument') at parser.lkt:473:27>
+--  END <_Row (root of 'argument') at parser.lkt:474:27>
+--  END <_Extract (root of 'argument') at parser.lkt:474:27>
 if Row_Pos1 = No_Token_Index then
    Defer_Res1 := No_Bare_Lkt_Node;
    Row_Pos1 := Row_Pos0;
       Parser.Last_Diag := Diag_Mark1;
 end if;
---  END <Opt (root of 'argument') at parser.lkt:473:26>
+--  END <Opt (root of 'argument') at parser.lkt:474:26>
 if Row_Pos1 /= No_Token_Index then
    Row_Pos0 := Row_Pos1;
 else
    Row_Pos0 := No_Token_Index;
    goto Exit_Row0_0;
 end if;
---  BEGIN <Defer (for 'expr') at parser.lkt:473:44>
+--  BEGIN <Defer (for 'expr') at parser.lkt:474:44>
 --  pos=Defer_Pos2, res=Defer_Res2, nobt=None
 Defer_Res2 :=
    Expr_Or_Parse1 (Parser, Row_Pos0);
 Defer_Pos2 := Parser.Current_Pos;
---  END <Defer (for 'expr') at parser.lkt:473:44>
+--  END <Defer (for 'expr') at parser.lkt:474:44>
 if Defer_Pos2 /= No_Token_Index then
    Row_Pos0 := Defer_Pos2;
 else
@@ -7159,7 +7198,7 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row0_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'argument') at parser.lkt:473:17>
+--  END <_Row (root of 'argument') at parser.lkt:474:17>
 if Row_Pos0 /= No_Token_Index then
    Transform_Res0 := Allocate_Argument (Parser.Mem_Pool);
    Initialize
@@ -7185,7 +7224,7 @@ if Row_Pos0 /= No_Token_Index then
             Transform_Res0.Last_Attempted_Child := -1;
          end if;
 end if;
---  END <Transform(<ASTNodeType Argument>) (root of 'argument') at parser.lkt:473:17>
+--  END <Transform(<ASTNodeType Argument>) (root of 'argument') at parser.lkt:474:17>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
@@ -10984,7 +11023,7 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Or (root of 'basic_name') at parser.lkt:466:19>
+--  BEGIN <Or (root of 'basic_name') at parser.lkt:467:19>
 --  pos=Or_Pos8, res=Or_Res8, nobt=None
 Or_Pos8 := No_Token_Index;
 Or_Res8 := No_Bare_Lkt_Node;
@@ -10994,17 +11033,17 @@ Branch_Diag_Mark8 := Parser.Last_Diag;
 Branch_Last_Fail8 := Parser.Last_Fail;
     Parser.Last_Diag := Diag_Mark13;
     Parser.Last_Fail := Last_Fail8;
---  BEGIN <Transform(<ASTNodeType DotExpr>) (root of 'basic_name') at parser.lkt:467:9>
+--  BEGIN <Transform(<ASTNodeType DotExpr>) (root of 'basic_name') at parser.lkt:468:9>
 --  pos=Row_Pos26, res=Transform_Res24, nobt=Nobt9
---  BEGIN <_Row (root of 'basic_name') at parser.lkt:467:9>
+--  BEGIN <_Row (root of 'basic_name') at parser.lkt:468:9>
 --  pos=Row_Pos26, res=None, nobt=Nobt9
 Row_Pos26 := Pos;
---  BEGIN <Defer (for 'basic_name') at parser.lkt:467:17>
+--  BEGIN <Defer (for 'basic_name') at parser.lkt:468:17>
 --  pos=Defer_Pos47, res=Defer_Res47, nobt=None
 Defer_Res47 :=
    Basic_Name_Or_Parse0 (Parser, Row_Pos26);
 Defer_Pos47 := Parser.Current_Pos;
---  END <Defer (for 'basic_name') at parser.lkt:467:17>
+--  END <Defer (for 'basic_name') at parser.lkt:468:17>
 Row_Progress9 := 1;
 if Defer_Pos47 /= No_Token_Index then
    Row_Pos26 := Defer_Pos47;
@@ -11012,7 +11051,7 @@ else
    Row_Pos26 := No_Token_Index;
    goto Exit_Row26_0;
 end if;
---  BEGIN <Null (root of 'basic_name') at parser.lkt:467:28>
+--  BEGIN <Null (root of 'basic_name') at parser.lkt:468:28>
 --  pos=Row_Pos26, res=Null_Res0, nobt=None
    Null_Res0 := Allocate_Null_Cond_Qualifier_Absent (Parser.Mem_Pool);
    Initialize
@@ -11021,7 +11060,7 @@ end if;
       Unit              => Parser.Unit,
       Token_Start_Index => Row_Pos26,
       Token_End_Index   => No_Token_Index);
---  END <Null (root of 'basic_name') at parser.lkt:467:28>
+--  END <Null (root of 'basic_name') at parser.lkt:468:28>
 Row_Progress9 := 2;
 if Row_Pos26 /= No_Token_Index then
    Row_Pos26 := Row_Pos26;
@@ -11029,7 +11068,7 @@ else
    Row_Pos26 := No_Token_Index;
    goto Exit_Row26_0;
 end if;
---  BEGIN <Token(<WithText Dot>, ) (root of 'basic_name') at parser.lkt:467:52>
+--  BEGIN <Token(<WithText Dot>, ) (root of 'basic_name') at parser.lkt:468:52>
 --  pos=Token_Pos37, res=Token_Res37, nobt=None
 Token_Res37 := Row_Pos26;
 declare
@@ -11052,7 +11091,7 @@ begin
           Token_Pos37 := Row_Pos26 + 1;
    end if;
 end;
---  END <Token(<WithText Dot>, ) (root of 'basic_name') at parser.lkt:467:52>
+--  END <Token(<WithText Dot>, ) (root of 'basic_name') at parser.lkt:468:52>
 Row_Progress9 := 3;
 if Token_Pos37 /= No_Token_Index then
    Row_Pos26 := Token_Pos37;
@@ -11060,10 +11099,10 @@ else
    Row_Pos26 := No_Token_Index;
    goto Exit_Row26_0;
 end if;
---  BEGIN <Cut (root of 'basic_name') at parser.lkt:467:56>
+--  BEGIN <Cut (root of 'basic_name') at parser.lkt:468:56>
 --  pos=Row_Pos26, res=None, nobt=Nobt9
 Nobt9 := True;
---  END <Cut (root of 'basic_name') at parser.lkt:467:56>
+--  END <Cut (root of 'basic_name') at parser.lkt:468:56>
 Row_Progress9 := 4;
 if Row_Pos26 /= No_Token_Index then
    Row_Pos26 := Row_Pos26;
@@ -11071,12 +11110,12 @@ else
    Row_Pos26 := No_Token_Index;
    goto Exit_Row26_0;
 end if;
---  BEGIN <Defer (for 'ref_id') at parser.lkt:467:58>
+--  BEGIN <Defer (for 'ref_id') at parser.lkt:468:58>
 --  pos=Defer_Pos48, res=Defer_Res48, nobt=None
 Defer_Res48 :=
    Ref_Id_Transform_Parse0 (Parser, Row_Pos26);
 Defer_Pos48 := Parser.Current_Pos;
---  END <Defer (for 'ref_id') at parser.lkt:467:58>
+--  END <Defer (for 'ref_id') at parser.lkt:468:58>
 Row_Progress9 := 5;
 if Defer_Pos48 /= No_Token_Index then
    Row_Pos26 := Defer_Pos48;
@@ -11087,7 +11126,7 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row26_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'basic_name') at parser.lkt:467:9>
+--  END <_Row (root of 'basic_name') at parser.lkt:468:9>
 if Row_Pos26 = No_Token_Index and then Nobt9 then
    Row_Pos26 := Parser.Last_Fail.Pos;
    Transform_Has_Failed9 := True;
@@ -11129,7 +11168,7 @@ if Row_Pos26 /= No_Token_Index then
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 end if;
---  END <Transform(<ASTNodeType DotExpr>) (root of 'basic_name') at parser.lkt:467:9>
+--  END <Transform(<ASTNodeType DotExpr>) (root of 'basic_name') at parser.lkt:468:9>
     if Row_Pos26 /= No_Token_Index then
         Or_Pos8 := Row_Pos26;
         Or_Res8 := Transform_Res24;
@@ -11141,12 +11180,12 @@ end if;
     end if;
     Parser.Last_Diag := Diag_Mark13;
     Parser.Last_Fail := Last_Fail8;
---  BEGIN <Defer (for 'ref_id') at parser.lkt:467:68>
+--  BEGIN <Defer (for 'ref_id') at parser.lkt:468:68>
 --  pos=Defer_Pos49, res=Defer_Res49, nobt=None
 Defer_Res49 :=
    Ref_Id_Transform_Parse0 (Parser, Pos);
 Defer_Pos49 := Parser.Current_Pos;
---  END <Defer (for 'ref_id') at parser.lkt:467:68>
+--  END <Defer (for 'ref_id') at parser.lkt:468:68>
     if Defer_Pos49 /= No_Token_Index then
         Or_Pos8 := Defer_Pos49;
         Or_Res8 := Defer_Res49;
@@ -11159,7 +11198,7 @@ Defer_Pos49 := Parser.Current_Pos;
 Parser.Last_Diag := Branch_Diag_Mark8;
 Parser.Last_Fail := Branch_Last_Fail8;
 <<Exit_Or9>>
---  END <Or (root of 'basic_name') at parser.lkt:466:19>
+--  END <Or (root of 'basic_name') at parser.lkt:467:19>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
@@ -12706,12 +12745,12 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType DeclAnnotation>) (root of 'decl_annotation') at parser.lkt:476:24>
+--  BEGIN <Transform(<ASTNodeType DeclAnnotation>) (root of 'decl_annotation') at parser.lkt:477:24>
 --  pos=Row_Pos38, res=Transform_Res36, nobt=Nobt11
---  BEGIN <_Row (root of 'decl_annotation') at parser.lkt:476:24>
+--  BEGIN <_Row (root of 'decl_annotation') at parser.lkt:477:24>
 --  pos=Row_Pos38, res=None, nobt=Nobt11
 Row_Pos38 := Pos;
---  BEGIN <Token(<WithText At>, ) (root of 'decl_annotation') at parser.lkt:476:39>
+--  BEGIN <Token(<WithText At>, ) (root of 'decl_annotation') at parser.lkt:477:39>
 --  pos=Token_Pos47, res=Token_Res47, nobt=None
 Token_Res47 := Row_Pos38;
 declare
@@ -12734,7 +12773,7 @@ begin
           Token_Pos47 := Row_Pos38 + 1;
    end if;
 end;
---  END <Token(<WithText At>, ) (root of 'decl_annotation') at parser.lkt:476:39>
+--  END <Token(<WithText At>, ) (root of 'decl_annotation') at parser.lkt:477:39>
 Row_Progress11 := 1;
 if Token_Pos47 /= No_Token_Index then
    Row_Pos38 := Token_Pos47;
@@ -12742,10 +12781,10 @@ else
    Row_Pos38 := No_Token_Index;
    goto Exit_Row38_0;
 end if;
---  BEGIN <Cut (root of 'decl_annotation') at parser.lkt:476:43>
+--  BEGIN <Cut (root of 'decl_annotation') at parser.lkt:477:43>
 --  pos=Row_Pos38, res=None, nobt=Nobt11
 Nobt11 := True;
---  END <Cut (root of 'decl_annotation') at parser.lkt:476:43>
+--  END <Cut (root of 'decl_annotation') at parser.lkt:477:43>
 Row_Progress11 := 2;
 if Row_Pos38 /= No_Token_Index then
    Row_Pos38 := Row_Pos38;
@@ -12753,12 +12792,12 @@ else
    Row_Pos38 := No_Token_Index;
    goto Exit_Row38_0;
 end if;
---  BEGIN <Defer (for 'id') at parser.lkt:476:45>
+--  BEGIN <Defer (for 'id') at parser.lkt:477:45>
 --  pos=Defer_Pos59, res=Defer_Res59, nobt=None
 Defer_Res59 :=
    Id_Transform_Parse0 (Parser, Row_Pos38);
 Defer_Pos59 := Parser.Current_Pos;
---  END <Defer (for 'id') at parser.lkt:476:45>
+--  END <Defer (for 'id') at parser.lkt:477:45>
 Row_Progress11 := 3;
 if Defer_Pos59 /= No_Token_Index then
    Row_Pos38 := Defer_Pos59;
@@ -12766,12 +12805,12 @@ else
    Row_Pos38 := No_Token_Index;
    goto Exit_Row38_0;
 end if;
---  BEGIN <Defer (for 'decl_annotation_args') at parser.lkt:476:48>
+--  BEGIN <Defer (for 'decl_annotation_args') at parser.lkt:477:48>
 --  pos=Defer_Pos60, res=Defer_Res60, nobt=None
 Defer_Res60 :=
    Decl_Annotation_Args_Opt_Parse0 (Parser, Row_Pos38);
 Defer_Pos60 := Parser.Current_Pos;
---  END <Defer (for 'decl_annotation_args') at parser.lkt:476:48>
+--  END <Defer (for 'decl_annotation_args') at parser.lkt:477:48>
 Row_Progress11 := 4;
 if Defer_Pos60 /= No_Token_Index then
    Row_Pos38 := Defer_Pos60;
@@ -12782,7 +12821,7 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row38_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'decl_annotation') at parser.lkt:476:24>
+--  END <_Row (root of 'decl_annotation') at parser.lkt:477:24>
 if Row_Pos38 = No_Token_Index and then Nobt11 then
    Row_Pos38 := Parser.Last_Fail.Pos;
    Transform_Has_Failed11 := True;
@@ -12818,7 +12857,7 @@ if Row_Pos38 /= No_Token_Index then
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 end if;
---  END <Transform(<ASTNodeType DeclAnnotation>) (root of 'decl_annotation') at parser.lkt:476:24>
+--  END <Transform(<ASTNodeType DeclAnnotation>) (root of 'decl_annotation') at parser.lkt:477:24>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
@@ -12869,15 +12908,15 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Opt (root of 'decl_annotation_args') at parser.lkt:475:29>
+--  BEGIN <Opt (root of 'decl_annotation_args') at parser.lkt:476:29>
 --  pos=Row_Pos39, res=Transform_Res37, nobt=None
 Diag_Mark21 := Parser.Last_Diag;
---  BEGIN <Transform(<ASTNodeType DeclAnnotationArgs>) (root of 'decl_annotation_args') at parser.lkt:475:30>
+--  BEGIN <Transform(<ASTNodeType DeclAnnotationArgs>) (root of 'decl_annotation_args') at parser.lkt:476:30>
 --  pos=Row_Pos39, res=Transform_Res37, nobt=None
---  BEGIN <_Row (root of 'decl_annotation_args') at parser.lkt:475:30>
+--  BEGIN <_Row (root of 'decl_annotation_args') at parser.lkt:476:30>
 --  pos=Row_Pos39, res=None, nobt=None
 Row_Pos39 := Pos;
---  BEGIN <Token(<WithText LPar>, ) (root of 'decl_annotation_args') at parser.lkt:475:49>
+--  BEGIN <Token(<WithText LPar>, ) (root of 'decl_annotation_args') at parser.lkt:476:49>
 --  pos=Token_Pos48, res=Token_Res48, nobt=None
 Token_Res48 := Row_Pos39;
 declare
@@ -12900,26 +12939,26 @@ begin
           Token_Pos48 := Row_Pos39 + 1;
    end if;
 end;
---  END <Token(<WithText LPar>, ) (root of 'decl_annotation_args') at parser.lkt:475:49>
+--  END <Token(<WithText LPar>, ) (root of 'decl_annotation_args') at parser.lkt:476:49>
 if Token_Pos48 /= No_Token_Index then
    Row_Pos39 := Token_Pos48;
 else
    Row_Pos39 := No_Token_Index;
    goto Exit_Row39_0;
 end if;
---  BEGIN <Defer (for 'args') at parser.lkt:475:53>
+--  BEGIN <Defer (for 'args') at parser.lkt:476:53>
 --  pos=Defer_Pos61, res=Defer_Res61, nobt=None
 Defer_Res61 :=
    Args_List_Parse0 (Parser, Row_Pos39);
 Defer_Pos61 := Parser.Current_Pos;
---  END <Defer (for 'args') at parser.lkt:475:53>
+--  END <Defer (for 'args') at parser.lkt:476:53>
 if Defer_Pos61 /= No_Token_Index then
    Row_Pos39 := Defer_Pos61;
 else
    Row_Pos39 := No_Token_Index;
    goto Exit_Row39_0;
 end if;
---  BEGIN <Token(<WithText RPar>, ) (root of 'decl_annotation_args') at parser.lkt:475:58>
+--  BEGIN <Token(<WithText RPar>, ) (root of 'decl_annotation_args') at parser.lkt:476:58>
 --  pos=Token_Pos49, res=Token_Res49, nobt=None
 Token_Res49 := Row_Pos39;
 declare
@@ -12942,7 +12981,7 @@ begin
           Token_Pos49 := Row_Pos39 + 1;
    end if;
 end;
---  END <Token(<WithText RPar>, ) (root of 'decl_annotation_args') at parser.lkt:475:58>
+--  END <Token(<WithText RPar>, ) (root of 'decl_annotation_args') at parser.lkt:476:58>
 if Token_Pos49 /= No_Token_Index then
    Row_Pos39 := Token_Pos49;
 else
@@ -12952,7 +12991,7 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row39_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'decl_annotation_args') at parser.lkt:475:30>
+--  END <_Row (root of 'decl_annotation_args') at parser.lkt:476:30>
 if Row_Pos39 /= No_Token_Index then
    Transform_Res37 := Allocate_Decl_Annotation_Args (Parser.Mem_Pool);
    Initialize
@@ -12972,13 +13011,13 @@ if Row_Pos39 /= No_Token_Index then
             Transform_Res37.Last_Attempted_Child := -1;
          end if;
 end if;
---  END <Transform(<ASTNodeType DeclAnnotationArgs>) (root of 'decl_annotation_args') at parser.lkt:475:30>
+--  END <Transform(<ASTNodeType DeclAnnotationArgs>) (root of 'decl_annotation_args') at parser.lkt:476:30>
 if Row_Pos39 = No_Token_Index then
    Transform_Res37 := No_Bare_Lkt_Node;
    Row_Pos39 := Pos;
       Parser.Last_Diag := Diag_Mark21;
 end if;
---  END <Opt (root of 'decl_annotation_args') at parser.lkt:475:29>
+--  END <Opt (root of 'decl_annotation_args') at parser.lkt:476:29>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
@@ -26055,12 +26094,12 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType LambdaExpr>) (root of 'lambda_expr') at parser.lkt:469:20>
+--  BEGIN <Transform(<ASTNodeType LambdaExpr>) (root of 'lambda_expr') at parser.lkt:470:20>
 --  pos=Row_Pos133, res=Transform_Res103, nobt=Nobt26
---  BEGIN <_Row (root of 'lambda_expr') at parser.lkt:469:20>
+--  BEGIN <_Row (root of 'lambda_expr') at parser.lkt:470:20>
 --  pos=Row_Pos133, res=None, nobt=Nobt26
 Row_Pos133 := Pos;
---  BEGIN <Token(<WithText LPar>, ) (root of 'lambda_expr') at parser.lkt:470:9>
+--  BEGIN <Token(<WithText LPar>, ) (root of 'lambda_expr') at parser.lkt:471:9>
 --  pos=Token_Pos178, res=Token_Res178, nobt=None
 Token_Res178 := Row_Pos133;
 declare
@@ -26083,7 +26122,7 @@ begin
           Token_Pos178 := Row_Pos133 + 1;
    end if;
 end;
---  END <Token(<WithText LPar>, ) (root of 'lambda_expr') at parser.lkt:470:9>
+--  END <Token(<WithText LPar>, ) (root of 'lambda_expr') at parser.lkt:471:9>
 Row_Progress26 := 1;
 if Token_Pos178 /= No_Token_Index then
    Row_Pos133 := Token_Pos178;
@@ -26091,12 +26130,12 @@ else
    Row_Pos133 := No_Token_Index;
    goto Exit_Row133_0;
 end if;
---  BEGIN <Defer (for 'lambda_param_list') at parser.lkt:470:13>
+--  BEGIN <Defer (for 'lambda_param_list') at parser.lkt:471:13>
 --  pos=Defer_Pos161, res=Defer_Res161, nobt=None
 Defer_Res161 :=
    Lambda_Param_List_List_Parse0 (Parser, Row_Pos133);
 Defer_Pos161 := Parser.Current_Pos;
---  END <Defer (for 'lambda_param_list') at parser.lkt:470:13>
+--  END <Defer (for 'lambda_param_list') at parser.lkt:471:13>
 Row_Progress26 := 2;
 if Defer_Pos161 /= No_Token_Index then
    Row_Pos133 := Defer_Pos161;
@@ -26104,7 +26143,7 @@ else
    Row_Pos133 := No_Token_Index;
    goto Exit_Row133_0;
 end if;
---  BEGIN <Token(<WithText RPar>, ) (root of 'lambda_expr') at parser.lkt:470:31>
+--  BEGIN <Token(<WithText RPar>, ) (root of 'lambda_expr') at parser.lkt:471:31>
 --  pos=Token_Pos179, res=Token_Res179, nobt=None
 Token_Res179 := Row_Pos133;
 declare
@@ -26127,7 +26166,7 @@ begin
           Token_Pos179 := Row_Pos133 + 1;
    end if;
 end;
---  END <Token(<WithText RPar>, ) (root of 'lambda_expr') at parser.lkt:470:31>
+--  END <Token(<WithText RPar>, ) (root of 'lambda_expr') at parser.lkt:471:31>
 Row_Progress26 := 3;
 if Token_Pos179 /= No_Token_Index then
    Row_Pos133 := Token_Pos179;
@@ -26135,15 +26174,15 @@ else
    Row_Pos133 := No_Token_Index;
    goto Exit_Row133_0;
 end if;
---  BEGIN <Opt (root of 'lambda_expr') at parser.lkt:470:35>
+--  BEGIN <Opt (root of 'lambda_expr') at parser.lkt:471:35>
 --  pos=Row_Pos134, res=Defer_Res162, nobt=None
 Diag_Mark63 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'lambda_expr') at parser.lkt:470:36>
+--  BEGIN <_Extract (root of 'lambda_expr') at parser.lkt:471:36>
 --  pos=Row_Pos134, res=Defer_Res162, nobt=None
---  BEGIN <_Row (root of 'lambda_expr') at parser.lkt:470:36>
+--  BEGIN <_Row (root of 'lambda_expr') at parser.lkt:471:36>
 --  pos=Row_Pos134, res=None, nobt=None
 Row_Pos134 := Row_Pos133;
---  BEGIN <Token(<WithText Colon>, ) (root of 'lambda_expr') at parser.lkt:470:41>
+--  BEGIN <Token(<WithText Colon>, ) (root of 'lambda_expr') at parser.lkt:471:41>
 --  pos=Token_Pos180, res=Token_Res180, nobt=None
 Token_Res180 := Row_Pos134;
 declare
@@ -26166,19 +26205,19 @@ begin
           Token_Pos180 := Row_Pos134 + 1;
    end if;
 end;
---  END <Token(<WithText Colon>, ) (root of 'lambda_expr') at parser.lkt:470:41>
+--  END <Token(<WithText Colon>, ) (root of 'lambda_expr') at parser.lkt:471:41>
 if Token_Pos180 /= No_Token_Index then
    Row_Pos134 := Token_Pos180;
 else
    Row_Pos134 := No_Token_Index;
    goto Exit_Row134_0;
 end if;
---  BEGIN <Defer (for 'type_ref') at parser.lkt:470:45>
+--  BEGIN <Defer (for 'type_ref') at parser.lkt:471:45>
 --  pos=Defer_Pos162, res=Defer_Res162, nobt=None
 Defer_Res162 :=
    Type_Ref_Or_Parse0 (Parser, Row_Pos134);
 Defer_Pos162 := Parser.Current_Pos;
---  END <Defer (for 'type_ref') at parser.lkt:470:45>
+--  END <Defer (for 'type_ref') at parser.lkt:471:45>
 if Defer_Pos162 /= No_Token_Index then
    Row_Pos134 := Defer_Pos162;
 else
@@ -26188,14 +26227,14 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row134_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'lambda_expr') at parser.lkt:470:36>
---  END <_Extract (root of 'lambda_expr') at parser.lkt:470:36>
+--  END <_Row (root of 'lambda_expr') at parser.lkt:471:36>
+--  END <_Extract (root of 'lambda_expr') at parser.lkt:471:36>
 if Row_Pos134 = No_Token_Index then
    Defer_Res162 := No_Bare_Lkt_Node;
    Row_Pos134 := Row_Pos133;
       Parser.Last_Diag := Diag_Mark63;
 end if;
---  END <Opt (root of 'lambda_expr') at parser.lkt:470:35>
+--  END <Opt (root of 'lambda_expr') at parser.lkt:471:35>
 Row_Progress26 := 4;
 if Row_Pos134 /= No_Token_Index then
    Row_Pos133 := Row_Pos134;
@@ -26203,7 +26242,7 @@ else
    Row_Pos133 := No_Token_Index;
    goto Exit_Row133_0;
 end if;
---  BEGIN <Token(<WithText FatRightArrow>, ) (root of 'lambda_expr') at parser.lkt:470:55>
+--  BEGIN <Token(<WithText FatRightArrow>, ) (root of 'lambda_expr') at parser.lkt:471:55>
 --  pos=Token_Pos181, res=Token_Res181, nobt=None
 Token_Res181 := Row_Pos133;
 declare
@@ -26226,7 +26265,7 @@ begin
           Token_Pos181 := Row_Pos133 + 1;
    end if;
 end;
---  END <Token(<WithText FatRightArrow>, ) (root of 'lambda_expr') at parser.lkt:470:55>
+--  END <Token(<WithText FatRightArrow>, ) (root of 'lambda_expr') at parser.lkt:471:55>
 Row_Progress26 := 5;
 if Token_Pos181 /= No_Token_Index then
    Row_Pos133 := Token_Pos181;
@@ -26234,10 +26273,10 @@ else
    Row_Pos133 := No_Token_Index;
    goto Exit_Row133_0;
 end if;
---  BEGIN <Cut (root of 'lambda_expr') at parser.lkt:470:60>
+--  BEGIN <Cut (root of 'lambda_expr') at parser.lkt:471:60>
 --  pos=Row_Pos133, res=None, nobt=Nobt26
 Nobt26 := True;
---  END <Cut (root of 'lambda_expr') at parser.lkt:470:60>
+--  END <Cut (root of 'lambda_expr') at parser.lkt:471:60>
 Row_Progress26 := 6;
 if Row_Pos133 /= No_Token_Index then
    Row_Pos133 := Row_Pos133;
@@ -26245,12 +26284,12 @@ else
    Row_Pos133 := No_Token_Index;
    goto Exit_Row133_0;
 end if;
---  BEGIN <Defer (for 'expr') at parser.lkt:470:62>
+--  BEGIN <Defer (for 'expr') at parser.lkt:471:62>
 --  pos=Defer_Pos163, res=Defer_Res163, nobt=None
 Defer_Res163 :=
    Expr_Or_Parse1 (Parser, Row_Pos133);
 Defer_Pos163 := Parser.Current_Pos;
---  END <Defer (for 'expr') at parser.lkt:470:62>
+--  END <Defer (for 'expr') at parser.lkt:471:62>
 Row_Progress26 := 7;
 if Defer_Pos163 /= No_Token_Index then
    Row_Pos133 := Defer_Pos163;
@@ -26261,7 +26300,7 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row133_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'lambda_expr') at parser.lkt:469:20>
+--  END <_Row (root of 'lambda_expr') at parser.lkt:470:20>
 if Row_Pos133 = No_Token_Index and then Nobt26 then
    Row_Pos133 := Parser.Last_Fail.Pos;
    Transform_Has_Failed26 := True;
@@ -26303,7 +26342,7 @@ if Row_Pos133 /= No_Token_Index then
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 end if;
---  END <Transform(<ASTNodeType LambdaExpr>) (root of 'lambda_expr') at parser.lkt:469:20>
+--  END <Transform(<ASTNodeType LambdaExpr>) (root of 'lambda_expr') at parser.lkt:470:20>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
@@ -29996,12 +30035,12 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType NullLit>) (root of 'null_lit') at parser.lkt:472:17>
+--  BEGIN <Transform(<ASTNodeType NullLit>) (root of 'null_lit') at parser.lkt:473:17>
 --  pos=Row_Pos153, res=Transform_Res119, nobt=Nobt37
---  BEGIN <_Row (root of 'null_lit') at parser.lkt:472:17>
+--  BEGIN <_Row (root of 'null_lit') at parser.lkt:473:17>
 --  pos=Row_Pos153, res=None, nobt=Nobt37
 Row_Pos153 := Pos;
---  BEGIN <Token(<WithText NullKw>, ) (root of 'null_lit') at parser.lkt:472:25>
+--  BEGIN <Token(<WithText NullKw>, ) (root of 'null_lit') at parser.lkt:473:25>
 --  pos=Token_Pos220, res=Token_Res220, nobt=None
 Token_Res220 := Row_Pos153;
 declare
@@ -30024,7 +30063,7 @@ begin
           Token_Pos220 := Row_Pos153 + 1;
    end if;
 end;
---  END <Token(<WithText NullKw>, ) (root of 'null_lit') at parser.lkt:472:25>
+--  END <Token(<WithText NullKw>, ) (root of 'null_lit') at parser.lkt:473:25>
 Row_Progress37 := 1;
 if Token_Pos220 /= No_Token_Index then
    Row_Pos153 := Token_Pos220;
@@ -30032,10 +30071,10 @@ else
    Row_Pos153 := No_Token_Index;
    goto Exit_Row153_0;
 end if;
---  BEGIN <Cut (root of 'null_lit') at parser.lkt:472:32>
+--  BEGIN <Cut (root of 'null_lit') at parser.lkt:473:32>
 --  pos=Row_Pos153, res=None, nobt=Nobt37
 Nobt37 := True;
---  END <Cut (root of 'null_lit') at parser.lkt:472:32>
+--  END <Cut (root of 'null_lit') at parser.lkt:473:32>
 Row_Progress37 := 2;
 if Row_Pos153 /= No_Token_Index then
    Row_Pos153 := Row_Pos153;
@@ -30043,15 +30082,15 @@ else
    Row_Pos153 := No_Token_Index;
    goto Exit_Row153_0;
 end if;
---  BEGIN <Opt (root of 'null_lit') at parser.lkt:472:34>
+--  BEGIN <Opt (root of 'null_lit') at parser.lkt:473:34>
 --  pos=Row_Pos154, res=Defer_Res192, nobt=Nobt38
 Diag_Mark79 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'null_lit') at parser.lkt:472:35>
+--  BEGIN <_Extract (root of 'null_lit') at parser.lkt:473:35>
 --  pos=Row_Pos154, res=Defer_Res192, nobt=Nobt38
---  BEGIN <_Row (root of 'null_lit') at parser.lkt:472:35>
+--  BEGIN <_Row (root of 'null_lit') at parser.lkt:473:35>
 --  pos=Row_Pos154, res=None, nobt=Nobt38
 Row_Pos154 := Row_Pos153;
---  BEGIN <Token(<WithText LBrack>, ) (root of 'null_lit') at parser.lkt:472:40>
+--  BEGIN <Token(<WithText LBrack>, ) (root of 'null_lit') at parser.lkt:473:40>
 --  pos=Token_Pos221, res=Token_Res221, nobt=None
 Token_Res221 := Row_Pos154;
 declare
@@ -30074,36 +30113,36 @@ begin
           Token_Pos221 := Row_Pos154 + 1;
    end if;
 end;
---  END <Token(<WithText LBrack>, ) (root of 'null_lit') at parser.lkt:472:40>
+--  END <Token(<WithText LBrack>, ) (root of 'null_lit') at parser.lkt:473:40>
 if Token_Pos221 /= No_Token_Index then
    Row_Pos154 := Token_Pos221;
 else
    Row_Pos154 := No_Token_Index;
    goto Exit_Row154_0;
 end if;
---  BEGIN <Cut (root of 'null_lit') at parser.lkt:472:44>
+--  BEGIN <Cut (root of 'null_lit') at parser.lkt:473:44>
 --  pos=Row_Pos154, res=None, nobt=Nobt38
 Nobt38 := True;
---  END <Cut (root of 'null_lit') at parser.lkt:472:44>
+--  END <Cut (root of 'null_lit') at parser.lkt:473:44>
 if Row_Pos154 /= No_Token_Index then
    Row_Pos154 := Row_Pos154;
 else
    Row_Pos154 := No_Token_Index;
    goto Exit_Row154_0;
 end if;
---  BEGIN <Defer (for 'type_ref') at parser.lkt:472:46>
+--  BEGIN <Defer (for 'type_ref') at parser.lkt:473:46>
 --  pos=Defer_Pos192, res=Defer_Res192, nobt=None
 Defer_Res192 :=
    Type_Ref_Or_Parse0 (Parser, Row_Pos154);
 Defer_Pos192 := Parser.Current_Pos;
---  END <Defer (for 'type_ref') at parser.lkt:472:46>
+--  END <Defer (for 'type_ref') at parser.lkt:473:46>
 if Defer_Pos192 /= No_Token_Index then
    Row_Pos154 := Defer_Pos192;
 else
    Row_Pos154 := No_Token_Index;
    goto Exit_Row154_0;
 end if;
---  BEGIN <Token(<WithText RBrack>, ) (root of 'null_lit') at parser.lkt:472:55>
+--  BEGIN <Token(<WithText RBrack>, ) (root of 'null_lit') at parser.lkt:473:55>
 --  pos=Token_Pos222, res=Token_Res222, nobt=None
 Token_Res222 := Row_Pos154;
 declare
@@ -30126,7 +30165,7 @@ begin
           Token_Pos222 := Row_Pos154 + 1;
    end if;
 end;
---  END <Token(<WithText RBrack>, ) (root of 'null_lit') at parser.lkt:472:55>
+--  END <Token(<WithText RBrack>, ) (root of 'null_lit') at parser.lkt:473:55>
 if Token_Pos222 /= No_Token_Index then
    Row_Pos154 := Token_Pos222;
 else
@@ -30136,8 +30175,8 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row154_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'null_lit') at parser.lkt:472:35>
---  END <_Extract (root of 'null_lit') at parser.lkt:472:35>
+--  END <_Row (root of 'null_lit') at parser.lkt:473:35>
+--  END <_Extract (root of 'null_lit') at parser.lkt:473:35>
 if Row_Pos154 = No_Token_Index then
    if Nobt38 then
       Row_Pos154 := Parser.Last_Fail.Pos;
@@ -30152,7 +30191,7 @@ if Row_Pos154 = No_Token_Index then
       Parser.Last_Diag := Diag_Mark79;
        end if;
 end if;
---  END <Opt (root of 'null_lit') at parser.lkt:472:34>
+--  END <Opt (root of 'null_lit') at parser.lkt:473:34>
    Nobt37 := Nobt38;
 Row_Progress37 := 3;
 if Row_Pos154 /= No_Token_Index then
@@ -30164,7 +30203,7 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row153_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'null_lit') at parser.lkt:472:17>
+--  END <_Row (root of 'null_lit') at parser.lkt:473:17>
 if Row_Pos153 = No_Token_Index and then Nobt37 then
    Row_Pos153 := Parser.Last_Fail.Pos;
    Transform_Has_Failed37 := True;
@@ -30194,7 +30233,7 @@ if Row_Pos153 /= No_Token_Index then
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 end if;
---  END <Transform(<ASTNodeType NullLit>) (root of 'null_lit') at parser.lkt:472:17>
+--  END <Transform(<ASTNodeType NullLit>) (root of 'null_lit') at parser.lkt:473:17>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
@@ -31367,32 +31406,36 @@ Parser.Last_Fail := Branch_Last_Fail32;
    Parser.Current_Pos := Or_Pos32;
    return Or_Res32;
 end Primary_Or_Parse0;
-   function Raise_Expr_Transform_Parse0
+   function Query_Comprehension_Transform_Parse0
   (Parser : in out Parser_Type;
-   Pos    : Token_Index) return Bare_Raise_Expr
+   Pos    : Token_Index) return Bare_Query
 is
-   use Bare_Raise_Expr_Memos;
-      Nobt42 : Boolean := False;
-      Nobt43 : Boolean := False;
+   use Bare_Query_Memos;
       Row_Pos161 : Token_Index := No_Token_Index;
       Token_Pos230 : Token_Index := No_Token_Index;
       Token_Res230 : Token_Index := No_Token_Index;
-      Row_Pos162 : Token_Index := No_Token_Index;
+      Defer_Pos209 : Token_Index := No_Token_Index;
+      Defer_Res209 : Bare_Expr := No_Bare_Lkt_Node;
       Token_Pos231 : Token_Index := No_Token_Index;
       Token_Res231 : Token_Index := No_Token_Index;
-      Defer_Pos209 : Token_Index := No_Token_Index;
-      Defer_Res209 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Defer_Pos210 : Token_Index := No_Token_Index;
+      Defer_Res210 : Bare_Pattern := No_Bare_Lkt_Node;
+      Row_Pos162 : Token_Index := No_Token_Index;
       Token_Pos232 : Token_Index := No_Token_Index;
       Token_Res232 : Token_Index := No_Token_Index;
+      Defer_Pos211 : Token_Index := No_Token_Index;
+      Defer_Res211 : Bare_Expr := No_Bare_Lkt_Node;
       Diag_Mark84 : Diagnostic_Mark;
-      Defer_Pos210 : Token_Index := No_Token_Index;
-      Defer_Res210 : Bare_Expr := No_Bare_Lkt_Node;
-      Row_Progress41 : Integer := 0;
-      Transform_Res126 : Bare_Raise_Expr := No_Bare_Lkt_Node;
-      Transform_Has_Failed41 : Boolean := False;
+      Row_Pos163 : Token_Index := No_Token_Index;
+      Token_Pos233 : Token_Index := No_Token_Index;
+      Token_Res233 : Token_Index := No_Token_Index;
+      Defer_Pos212 : Token_Index := No_Token_Index;
+      Defer_Res212 : Bare_Expr := No_Bare_Lkt_Node;
+      Diag_Mark85 : Diagnostic_Mark;
+      Transform_Res126 : Bare_Query := No_Bare_Lkt_Node;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
-   M  : Memo_Entry := Get (PP.Raise_Expr_Transform_Parse0_Memo, Pos);
+   M  : Memo_Entry := Get (PP.Query_Comprehension_Transform_Parse0_Memo, Pos);
 begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
@@ -31407,12 +31450,12 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType RaiseExpr>) (root of 'raise_expr') at parser.lkt:420:19>
---  pos=Row_Pos161, res=Transform_Res126, nobt=Nobt42
---  BEGIN <_Row (root of 'raise_expr') at parser.lkt:420:19>
---  pos=Row_Pos161, res=None, nobt=Nobt42
+--  BEGIN <Transform(<ASTNodeType Query>) (root of 'query_comprehension') at parser.lkt:478:28>
+--  pos=Row_Pos161, res=Transform_Res126, nobt=None
+--  BEGIN <_Row (root of 'query_comprehension') at parser.lkt:478:28>
+--  pos=Row_Pos161, res=None, nobt=None
 Row_Pos161 := Pos;
---  BEGIN <Token(<WithText RaiseKw>, ) (root of 'raise_expr') at parser.lkt:420:29>
+--  BEGIN <Token(<WithText FromKw>, ) (root of 'query_comprehension') at parser.lkt:479:9>
 --  pos=Token_Pos230, res=Token_Res230, nobt=None
 Token_Res230 := Row_Pos161;
 declare
@@ -31420,7 +31463,7 @@ declare
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res230));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_Raise_Kw)
+      T.Kind /= From_Token_Kind (Lkt_From_Kw)
    then
        Token_Pos230 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Row_Pos161 then
@@ -31428,93 +31471,83 @@ begin
             (Pos  => Row_Pos161,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Raise_Kw,
+                Expected_Token_Id => Lkt_From_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
           Token_Pos230 := Row_Pos161 + 1;
    end if;
 end;
---  END <Token(<WithText RaiseKw>, ) (root of 'raise_expr') at parser.lkt:420:29>
-Row_Progress41 := 1;
+--  END <Token(<WithText FromKw>, ) (root of 'query_comprehension') at parser.lkt:479:9>
 if Token_Pos230 /= No_Token_Index then
    Row_Pos161 := Token_Pos230;
 else
    Row_Pos161 := No_Token_Index;
    goto Exit_Row161_0;
 end if;
---  BEGIN <Cut (root of 'raise_expr') at parser.lkt:420:37>
---  pos=Row_Pos161, res=None, nobt=Nobt42
-Nobt42 := True;
---  END <Cut (root of 'raise_expr') at parser.lkt:420:37>
-Row_Progress41 := 2;
-if Row_Pos161 /= No_Token_Index then
-   Row_Pos161 := Row_Pos161;
+--  BEGIN <Defer (for 'expr') at parser.lkt:479:16>
+--  pos=Defer_Pos209, res=Defer_Res209, nobt=None
+Defer_Res209 :=
+   Expr_Or_Parse1 (Parser, Row_Pos161);
+Defer_Pos209 := Parser.Current_Pos;
+--  END <Defer (for 'expr') at parser.lkt:479:16>
+if Defer_Pos209 /= No_Token_Index then
+   Row_Pos161 := Defer_Pos209;
 else
    Row_Pos161 := No_Token_Index;
    goto Exit_Row161_0;
 end if;
---  BEGIN <Opt (root of 'raise_expr') at parser.lkt:420:39>
---  pos=Row_Pos162, res=Defer_Res209, nobt=Nobt43
-Diag_Mark84 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'raise_expr') at parser.lkt:420:40>
---  pos=Row_Pos162, res=Defer_Res209, nobt=Nobt43
---  BEGIN <_Row (root of 'raise_expr') at parser.lkt:420:40>
---  pos=Row_Pos162, res=None, nobt=Nobt43
-Row_Pos162 := Row_Pos161;
---  BEGIN <Token(<WithText LBrack>, ) (root of 'raise_expr') at parser.lkt:420:45>
+--  BEGIN <Token(<WithText MatchKw>, ) (root of 'query_comprehension') at parser.lkt:480:9>
 --  pos=Token_Pos231, res=Token_Res231, nobt=None
-Token_Res231 := Row_Pos162;
+Token_Res231 := Row_Pos161;
 declare
    T : constant Stored_Token_Data :=
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res231));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_L_Brack)
+      T.Kind /= From_Token_Kind (Lkt_Match_Kw)
    then
        Token_Pos231 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos162 then
+       if Parser.Last_Fail.Pos <= Row_Pos161 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos162,
+            (Pos  => Row_Pos161,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_L_Brack,
+                Expected_Token_Id => Lkt_Match_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos231 := Row_Pos162 + 1;
+          Token_Pos231 := Row_Pos161 + 1;
    end if;
 end;
---  END <Token(<WithText LBrack>, ) (root of 'raise_expr') at parser.lkt:420:45>
+--  END <Token(<WithText MatchKw>, ) (root of 'query_comprehension') at parser.lkt:480:9>
 if Token_Pos231 /= No_Token_Index then
-   Row_Pos162 := Token_Pos231;
+   Row_Pos161 := Token_Pos231;
 else
-   Row_Pos162 := No_Token_Index;
-   goto Exit_Row162_0;
+   Row_Pos161 := No_Token_Index;
+   goto Exit_Row161_0;
 end if;
---  BEGIN <Cut (root of 'raise_expr') at parser.lkt:420:49>
---  pos=Row_Pos162, res=None, nobt=Nobt43
-Nobt43 := True;
---  END <Cut (root of 'raise_expr') at parser.lkt:420:49>
-if Row_Pos162 /= No_Token_Index then
-   Row_Pos162 := Row_Pos162;
+--  BEGIN <Defer (for 'pattern') at parser.lkt:480:17>
+--  pos=Defer_Pos210, res=Defer_Res210, nobt=None
+Defer_Res210 :=
+   Pattern_Or_Parse0 (Parser, Row_Pos161);
+Defer_Pos210 := Parser.Current_Pos;
+--  END <Defer (for 'pattern') at parser.lkt:480:17>
+if Defer_Pos210 /= No_Token_Index then
+   Row_Pos161 := Defer_Pos210;
 else
-   Row_Pos162 := No_Token_Index;
-   goto Exit_Row162_0;
+   Row_Pos161 := No_Token_Index;
+   goto Exit_Row161_0;
 end if;
---  BEGIN <Defer (for 'type_ref') at parser.lkt:420:51>
---  pos=Defer_Pos209, res=Defer_Res209, nobt=None
-Defer_Res209 :=
-   Type_Ref_Or_Parse0 (Parser, Row_Pos162);
-Defer_Pos209 := Parser.Current_Pos;
---  END <Defer (for 'type_ref') at parser.lkt:420:51>
-if Defer_Pos209 /= No_Token_Index then
-   Row_Pos162 := Defer_Pos209;
-else
-   Row_Pos162 := No_Token_Index;
-   goto Exit_Row162_0;
-end if;
---  BEGIN <Token(<WithText RBrack>, ) (root of 'raise_expr') at parser.lkt:420:60>
+--  BEGIN <Opt (root of 'query_comprehension') at parser.lkt:481:9>
+--  pos=Row_Pos162, res=Defer_Res211, nobt=None
+Diag_Mark84 := Parser.Last_Diag;
+--  BEGIN <_Extract (root of 'query_comprehension') at parser.lkt:481:10>
+--  pos=Row_Pos162, res=Defer_Res211, nobt=None
+--  BEGIN <_Row (root of 'query_comprehension') at parser.lkt:481:10>
+--  pos=Row_Pos162, res=None, nobt=None
+Row_Pos162 := Row_Pos161;
+--  BEGIN <Token(<WithText SelectKw>, ) (root of 'query_comprehension') at parser.lkt:481:15>
 --  pos=Token_Pos232, res=Token_Res232, nobt=None
 Token_Res232 := Row_Pos162;
 declare
@@ -31522,7 +31555,7 @@ declare
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res232));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_R_Brack)
+      T.Kind /= From_Token_Kind (Lkt_Select_Kw)
    then
        Token_Pos232 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Row_Pos162 then
@@ -31530,16 +31563,28 @@ begin
             (Pos  => Row_Pos162,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_R_Brack,
+                Expected_Token_Id => Lkt_Select_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
           Token_Pos232 := Row_Pos162 + 1;
    end if;
 end;
---  END <Token(<WithText RBrack>, ) (root of 'raise_expr') at parser.lkt:420:60>
+--  END <Token(<WithText SelectKw>, ) (root of 'query_comprehension') at parser.lkt:481:15>
 if Token_Pos232 /= No_Token_Index then
    Row_Pos162 := Token_Pos232;
+else
+   Row_Pos162 := No_Token_Index;
+   goto Exit_Row162_0;
+end if;
+--  BEGIN <Defer (for 'expr') at parser.lkt:481:24>
+--  pos=Defer_Pos211, res=Defer_Res211, nobt=None
+Defer_Res211 :=
+   Expr_Or_Parse1 (Parser, Row_Pos162);
+Defer_Pos211 := Parser.Current_Pos;
+--  END <Defer (for 'expr') at parser.lkt:481:24>
+if Defer_Pos211 /= No_Token_Index then
+   Row_Pos162 := Defer_Pos211;
 else
    Row_Pos162 := No_Token_Index;
    goto Exit_Row162_0;
@@ -31547,40 +31592,83 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row162_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'raise_expr') at parser.lkt:420:40>
---  END <_Extract (root of 'raise_expr') at parser.lkt:420:40>
+--  END <_Row (root of 'query_comprehension') at parser.lkt:481:10>
+--  END <_Extract (root of 'query_comprehension') at parser.lkt:481:10>
 if Row_Pos162 = No_Token_Index then
-   if Nobt43 then
-      Row_Pos162 := Parser.Last_Fail.Pos;
-      Append (Parser, Row_Pos162, "Cannot parse <raise_expr>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
-         if not Nobt43 then
-   Defer_Res209 := No_Bare_Lkt_Node;
-         end if;
-       if not Nobt43 then
+   Defer_Res211 := No_Bare_Lkt_Node;
    Row_Pos162 := Row_Pos161;
       Parser.Last_Diag := Diag_Mark84;
-       end if;
 end if;
---  END <Opt (root of 'raise_expr') at parser.lkt:420:39>
-   Nobt42 := Nobt43;
-Row_Progress41 := 3;
+--  END <Opt (root of 'query_comprehension') at parser.lkt:481:9>
 if Row_Pos162 /= No_Token_Index then
    Row_Pos161 := Row_Pos162;
 else
    Row_Pos161 := No_Token_Index;
    goto Exit_Row161_0;
 end if;
---  BEGIN <Defer (for 'expr') at parser.lkt:420:65>
---  pos=Defer_Pos210, res=Defer_Res210, nobt=None
-Defer_Res210 :=
-   Expr_Or_Parse1 (Parser, Row_Pos161);
-Defer_Pos210 := Parser.Current_Pos;
---  END <Defer (for 'expr') at parser.lkt:420:65>
-Row_Progress41 := 4;
-if Defer_Pos210 /= No_Token_Index then
-   Row_Pos161 := Defer_Pos210;
+--  BEGIN <Opt (root of 'query_comprehension') at parser.lkt:482:9>
+--  pos=Row_Pos163, res=Defer_Res212, nobt=None
+Diag_Mark85 := Parser.Last_Diag;
+--  BEGIN <_Extract (root of 'query_comprehension') at parser.lkt:482:10>
+--  pos=Row_Pos163, res=Defer_Res212, nobt=None
+--  BEGIN <_Row (root of 'query_comprehension') at parser.lkt:482:10>
+--  pos=Row_Pos163, res=None, nobt=None
+Row_Pos163 := Row_Pos161;
+--  BEGIN <Token(<WithText IfKw>, ) (root of 'query_comprehension') at parser.lkt:482:15>
+--  pos=Token_Pos233, res=Token_Res233, nobt=None
+Token_Res233 := Row_Pos163;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res233));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_If_Kw)
+   then
+       Token_Pos233 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos163 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos163,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_If_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos233 := Row_Pos163 + 1;
+   end if;
+end;
+--  END <Token(<WithText IfKw>, ) (root of 'query_comprehension') at parser.lkt:482:15>
+if Token_Pos233 /= No_Token_Index then
+   Row_Pos163 := Token_Pos233;
+else
+   Row_Pos163 := No_Token_Index;
+   goto Exit_Row163_0;
+end if;
+--  BEGIN <Defer (for 'expr') at parser.lkt:482:20>
+--  pos=Defer_Pos212, res=Defer_Res212, nobt=None
+Defer_Res212 :=
+   Expr_Or_Parse1 (Parser, Row_Pos163);
+Defer_Pos212 := Parser.Current_Pos;
+--  END <Defer (for 'expr') at parser.lkt:482:20>
+if Defer_Pos212 /= No_Token_Index then
+   Row_Pos163 := Defer_Pos212;
+else
+   Row_Pos163 := No_Token_Index;
+   goto Exit_Row163_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row163_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'query_comprehension') at parser.lkt:482:10>
+--  END <_Extract (root of 'query_comprehension') at parser.lkt:482:10>
+if Row_Pos163 = No_Token_Index then
+   Defer_Res212 := No_Bare_Lkt_Node;
+   Row_Pos163 := Row_Pos161;
+      Parser.Last_Diag := Diag_Mark85;
+end if;
+--  END <Opt (root of 'query_comprehension') at parser.lkt:482:9>
+if Row_Pos163 /= No_Token_Index then
+   Row_Pos161 := Row_Pos163;
 else
    Row_Pos161 := No_Token_Index;
    goto Exit_Row161_0;
@@ -31588,25 +31676,23 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row161_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'raise_expr') at parser.lkt:420:19>
-if Row_Pos161 = No_Token_Index and then Nobt42 then
-   Row_Pos161 := Parser.Last_Fail.Pos;
-   Transform_Has_Failed41 := True;
-end if;
+--  END <_Row (root of 'query_comprehension') at parser.lkt:478:28>
 if Row_Pos161 /= No_Token_Index then
-   Transform_Res126 := Allocate_Raise_Expr (Parser.Mem_Pool);
+   Transform_Res126 := Allocate_Query (Parser.Mem_Pool);
    Initialize
      (Self => Transform_Res126,
-      Kind => Lkt_Raise_Expr,
+      Kind => Lkt_Query,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
       Token_End_Index   => (if Row_Pos161 = Pos
                             then No_Token_Index
                             else Row_Pos161 - 1));
-      Initialize_Fields_For_Raise_Expr
+      Initialize_Fields_For_Query
         (Self => Transform_Res126,
-         Raise_Expr_F_Dest_Type => Defer_Res209,
-         Raise_Expr_F_Except_Expr => Defer_Res210);
+         Query_F_Source => Defer_Res209,
+         Query_F_Pattern => Defer_Res210,
+         Query_F_Mapping => Defer_Res211,
+         Query_F_Guard => Defer_Res212);
          if Defer_Res209 /= null and then Is_Incomplete (Defer_Res209) then
             Transform_Res126.Last_Attempted_Child := 0;
          elsif Defer_Res209 /= null and then not Is_Ghost (Defer_Res209) then
@@ -31617,19 +31703,23 @@ if Row_Pos161 /= No_Token_Index then
          elsif Defer_Res210 /= null and then not Is_Ghost (Defer_Res210) then
             Transform_Res126.Last_Attempted_Child := -1;
          end if;
-   if Transform_Has_Failed41 then
-      Transform_Res126.Last_Attempted_Child :=
-         Row_Progress41;
-      Append (Parser, Pos, "Cannot parse <raise_expr>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
+         if Defer_Res211 /= null and then Is_Incomplete (Defer_Res211) then
+            Transform_Res126.Last_Attempted_Child := 0;
+         elsif Defer_Res211 /= null and then not Is_Ghost (Defer_Res211) then
+            Transform_Res126.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res212 /= null and then Is_Incomplete (Defer_Res212) then
+            Transform_Res126.Last_Attempted_Child := 0;
+         elsif Defer_Res212 /= null and then not Is_Ghost (Defer_Res212) then
+            Transform_Res126.Last_Attempted_Child := -1;
+         end if;
 end if;
---  END <Transform(<ASTNodeType RaiseExpr>) (root of 'raise_expr') at parser.lkt:420:19>
+--  END <Transform(<ASTNodeType Query>) (root of 'query_comprehension') at parser.lkt:478:28>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
    Set
-     (PP.Raise_Expr_Transform_Parse0_Memo,
+     (PP.Query_Comprehension_Transform_Parse0_Memo,
       Row_Pos161 /= No_Token_Index,
       Transform_Res126,
       Parser.Last_Diag,
@@ -31643,19 +31733,33 @@ end if;
    end;
    Parser.Current_Pos := Row_Pos161;
    return Transform_Res126;
-end Raise_Expr_Transform_Parse0;
-   function Ref_Id_Transform_Parse0
+end Query_Comprehension_Transform_Parse0;
+   function Raise_Expr_Transform_Parse0
   (Parser : in out Parser_Type;
-   Pos    : Token_Index) return Bare_Ref_Id
+   Pos    : Token_Index) return Bare_Raise_Expr
 is
-   use Bare_Ref_Id_Memos;
-      Row_Pos163 : Token_Index := No_Token_Index;
-      Token_Pos233 : Token_Index := No_Token_Index;
-      Token_Res233 : Token_Index := No_Token_Index;
-      Transform_Res127 : Bare_Ref_Id := No_Bare_Lkt_Node;
+   use Bare_Raise_Expr_Memos;
+      Nobt42 : Boolean := False;
+      Nobt43 : Boolean := False;
+      Row_Pos164 : Token_Index := No_Token_Index;
+      Token_Pos234 : Token_Index := No_Token_Index;
+      Token_Res234 : Token_Index := No_Token_Index;
+      Row_Pos165 : Token_Index := No_Token_Index;
+      Token_Pos235 : Token_Index := No_Token_Index;
+      Token_Res235 : Token_Index := No_Token_Index;
+      Defer_Pos213 : Token_Index := No_Token_Index;
+      Defer_Res213 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Token_Pos236 : Token_Index := No_Token_Index;
+      Token_Res236 : Token_Index := No_Token_Index;
+      Diag_Mark86 : Diagnostic_Mark;
+      Defer_Pos214 : Token_Index := No_Token_Index;
+      Defer_Res214 : Bare_Expr := No_Bare_Lkt_Node;
+      Row_Progress41 : Integer := 0;
+      Transform_Res127 : Bare_Raise_Expr := No_Bare_Lkt_Node;
+      Transform_Has_Failed41 : Boolean := False;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
-   M  : Memo_Entry := Get (PP.Ref_Id_Transform_Parse0_Memo, Pos);
+   M  : Memo_Entry := Get (PP.Raise_Expr_Transform_Parse0_Memo, Pos);
 begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
@@ -31670,90 +31774,255 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType RefId>) (root of 'ref_id') at parser.lkt:7:15>
---  pos=Row_Pos163, res=Transform_Res127, nobt=None
---  BEGIN <_Row (root of 'ref_id') at parser.lkt:7:15>
---  pos=Row_Pos163, res=None, nobt=None
-Row_Pos163 := Pos;
---  BEGIN <Token(<WithSymbol Identifier>, ) (root of 'ref_id') at parser.lkt:7:21>
---  pos=Token_Pos233, res=Token_Res233, nobt=None
-Token_Res233 := Row_Pos163;
+--  BEGIN <Transform(<ASTNodeType RaiseExpr>) (root of 'raise_expr') at parser.lkt:420:19>
+--  pos=Row_Pos164, res=Transform_Res127, nobt=Nobt42
+--  BEGIN <_Row (root of 'raise_expr') at parser.lkt:420:19>
+--  pos=Row_Pos164, res=None, nobt=Nobt42
+Row_Pos164 := Pos;
+--  BEGIN <Token(<WithText RaiseKw>, ) (root of 'raise_expr') at parser.lkt:420:29>
+--  pos=Token_Pos234, res=Token_Res234, nobt=None
+Token_Res234 := Row_Pos164;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res233));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res234));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_Identifier)
+      T.Kind /= From_Token_Kind (Lkt_Raise_Kw)
    then
-       Token_Pos233 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos163 then
+       Token_Pos234 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos164 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos163,
+            (Pos  => Row_Pos164,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Identifier,
+                Expected_Token_Id => Lkt_Raise_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos233 := Row_Pos163 + 1;
+          Token_Pos234 := Row_Pos164 + 1;
    end if;
 end;
---  END <Token(<WithSymbol Identifier>, ) (root of 'ref_id') at parser.lkt:7:21>
-if Token_Pos233 /= No_Token_Index then
-   Row_Pos163 := Token_Pos233;
+--  END <Token(<WithText RaiseKw>, ) (root of 'raise_expr') at parser.lkt:420:29>
+Row_Progress41 := 1;
+if Token_Pos234 /= No_Token_Index then
+   Row_Pos164 := Token_Pos234;
 else
-   Row_Pos163 := No_Token_Index;
-   goto Exit_Row163_0;
+   Row_Pos164 := No_Token_Index;
+   goto Exit_Row164_0;
+end if;
+--  BEGIN <Cut (root of 'raise_expr') at parser.lkt:420:37>
+--  pos=Row_Pos164, res=None, nobt=Nobt42
+Nobt42 := True;
+--  END <Cut (root of 'raise_expr') at parser.lkt:420:37>
+Row_Progress41 := 2;
+if Row_Pos164 /= No_Token_Index then
+   Row_Pos164 := Row_Pos164;
+else
+   Row_Pos164 := No_Token_Index;
+   goto Exit_Row164_0;
+end if;
+--  BEGIN <Opt (root of 'raise_expr') at parser.lkt:420:39>
+--  pos=Row_Pos165, res=Defer_Res213, nobt=Nobt43
+Diag_Mark86 := Parser.Last_Diag;
+--  BEGIN <_Extract (root of 'raise_expr') at parser.lkt:420:40>
+--  pos=Row_Pos165, res=Defer_Res213, nobt=Nobt43
+--  BEGIN <_Row (root of 'raise_expr') at parser.lkt:420:40>
+--  pos=Row_Pos165, res=None, nobt=Nobt43
+Row_Pos165 := Row_Pos164;
+--  BEGIN <Token(<WithText LBrack>, ) (root of 'raise_expr') at parser.lkt:420:45>
+--  pos=Token_Pos235, res=Token_Res235, nobt=None
+Token_Res235 := Row_Pos165;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res235));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_L_Brack)
+   then
+       Token_Pos235 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos165 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos165,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_L_Brack,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos235 := Row_Pos165 + 1;
+   end if;
+end;
+--  END <Token(<WithText LBrack>, ) (root of 'raise_expr') at parser.lkt:420:45>
+if Token_Pos235 /= No_Token_Index then
+   Row_Pos165 := Token_Pos235;
+else
+   Row_Pos165 := No_Token_Index;
+   goto Exit_Row165_0;
+end if;
+--  BEGIN <Cut (root of 'raise_expr') at parser.lkt:420:49>
+--  pos=Row_Pos165, res=None, nobt=Nobt43
+Nobt43 := True;
+--  END <Cut (root of 'raise_expr') at parser.lkt:420:49>
+if Row_Pos165 /= No_Token_Index then
+   Row_Pos165 := Row_Pos165;
+else
+   Row_Pos165 := No_Token_Index;
+   goto Exit_Row165_0;
+end if;
+--  BEGIN <Defer (for 'type_ref') at parser.lkt:420:51>
+--  pos=Defer_Pos213, res=Defer_Res213, nobt=None
+Defer_Res213 :=
+   Type_Ref_Or_Parse0 (Parser, Row_Pos165);
+Defer_Pos213 := Parser.Current_Pos;
+--  END <Defer (for 'type_ref') at parser.lkt:420:51>
+if Defer_Pos213 /= No_Token_Index then
+   Row_Pos165 := Defer_Pos213;
+else
+   Row_Pos165 := No_Token_Index;
+   goto Exit_Row165_0;
+end if;
+--  BEGIN <Token(<WithText RBrack>, ) (root of 'raise_expr') at parser.lkt:420:60>
+--  pos=Token_Pos236, res=Token_Res236, nobt=None
+Token_Res236 := Row_Pos165;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res236));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_R_Brack)
+   then
+       Token_Pos236 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos165 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos165,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_R_Brack,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos236 := Row_Pos165 + 1;
+   end if;
+end;
+--  END <Token(<WithText RBrack>, ) (root of 'raise_expr') at parser.lkt:420:60>
+if Token_Pos236 /= No_Token_Index then
+   Row_Pos165 := Token_Pos236;
+else
+   Row_Pos165 := No_Token_Index;
+   goto Exit_Row165_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row163_0>>
+<<Exit_Row165_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'ref_id') at parser.lkt:7:15>
-if Row_Pos163 /= No_Token_Index then
-   Transform_Res127 := Allocate_Ref_Id (Parser.Mem_Pool);
+--  END <_Row (root of 'raise_expr') at parser.lkt:420:40>
+--  END <_Extract (root of 'raise_expr') at parser.lkt:420:40>
+if Row_Pos165 = No_Token_Index then
+   if Nobt43 then
+      Row_Pos165 := Parser.Last_Fail.Pos;
+      Append (Parser, Row_Pos165, "Cannot parse <raise_expr>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
+         if not Nobt43 then
+   Defer_Res213 := No_Bare_Lkt_Node;
+         end if;
+       if not Nobt43 then
+   Row_Pos165 := Row_Pos164;
+      Parser.Last_Diag := Diag_Mark86;
+       end if;
+end if;
+--  END <Opt (root of 'raise_expr') at parser.lkt:420:39>
+   Nobt42 := Nobt43;
+Row_Progress41 := 3;
+if Row_Pos165 /= No_Token_Index then
+   Row_Pos164 := Row_Pos165;
+else
+   Row_Pos164 := No_Token_Index;
+   goto Exit_Row164_0;
+end if;
+--  BEGIN <Defer (for 'expr') at parser.lkt:420:65>
+--  pos=Defer_Pos214, res=Defer_Res214, nobt=None
+Defer_Res214 :=
+   Expr_Or_Parse1 (Parser, Row_Pos164);
+Defer_Pos214 := Parser.Current_Pos;
+--  END <Defer (for 'expr') at parser.lkt:420:65>
+Row_Progress41 := 4;
+if Defer_Pos214 /= No_Token_Index then
+   Row_Pos164 := Defer_Pos214;
+else
+   Row_Pos164 := No_Token_Index;
+   goto Exit_Row164_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row164_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'raise_expr') at parser.lkt:420:19>
+if Row_Pos164 = No_Token_Index and then Nobt42 then
+   Row_Pos164 := Parser.Last_Fail.Pos;
+   Transform_Has_Failed41 := True;
+end if;
+if Row_Pos164 /= No_Token_Index then
+   Transform_Res127 := Allocate_Raise_Expr (Parser.Mem_Pool);
    Initialize
      (Self => Transform_Res127,
-      Kind => Lkt_Ref_Id,
+      Kind => Lkt_Raise_Expr,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos163 = Pos
+      Token_End_Index   => (if Row_Pos164 = Pos
                             then No_Token_Index
-                            else Row_Pos163 - 1));
-      Initialize_Fields_For_Ref_Id
-        (Self => Transform_Res127);
+                            else Row_Pos164 - 1));
+      Initialize_Fields_For_Raise_Expr
+        (Self => Transform_Res127,
+         Raise_Expr_F_Dest_Type => Defer_Res213,
+         Raise_Expr_F_Except_Expr => Defer_Res214);
+         if Defer_Res213 /= null and then Is_Incomplete (Defer_Res213) then
+            Transform_Res127.Last_Attempted_Child := 0;
+         elsif Defer_Res213 /= null and then not Is_Ghost (Defer_Res213) then
+            Transform_Res127.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res214 /= null and then Is_Incomplete (Defer_Res214) then
+            Transform_Res127.Last_Attempted_Child := 0;
+         elsif Defer_Res214 /= null and then not Is_Ghost (Defer_Res214) then
+            Transform_Res127.Last_Attempted_Child := -1;
+         end if;
+   if Transform_Has_Failed41 then
+      Transform_Res127.Last_Attempted_Child :=
+         Row_Progress41;
+      Append (Parser, Pos, "Cannot parse <raise_expr>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
 end if;
---  END <Transform(<ASTNodeType RefId>) (root of 'ref_id') at parser.lkt:7:15>
+--  END <Transform(<ASTNodeType RaiseExpr>) (root of 'raise_expr') at parser.lkt:420:19>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
    Set
-     (PP.Ref_Id_Transform_Parse0_Memo,
-      Row_Pos163 /= No_Token_Index,
+     (PP.Raise_Expr_Transform_Parse0_Memo,
+      Row_Pos164 /= No_Token_Index,
       Transform_Res127,
       Parser.Last_Diag,
       Pos,
-      Row_Pos163);
+      Row_Pos164);
    declare
       Top : constant Diagnostic_Mark := Parser.Last_Diag;
    begin
       Parser.Last_Diag := Mark_On_Entry;
       Append_Group (Parser.Pool, Parser.Last_Diag, Top);
    end;
-   Parser.Current_Pos := Row_Pos163;
+   Parser.Current_Pos := Row_Pos164;
    return Transform_Res127;
-end Ref_Id_Transform_Parse0;
-   function Regex_Pattern_Transform_Parse0
+end Raise_Expr_Transform_Parse0;
+   function Ref_Id_Transform_Parse0
   (Parser : in out Parser_Type;
-   Pos    : Token_Index) return Bare_Regex_Pattern
+   Pos    : Token_Index) return Bare_Ref_Id
 is
-   use Bare_Regex_Pattern_Memos;
-      Row_Pos164 : Token_Index := No_Token_Index;
-      Token_Pos234 : Token_Index := No_Token_Index;
-      Token_Res234 : Token_Index := No_Token_Index;
-      Transform_Res128 : Bare_Regex_Pattern := No_Bare_Lkt_Node;
+   use Bare_Ref_Id_Memos;
+      Row_Pos166 : Token_Index := No_Token_Index;
+      Token_Pos237 : Token_Index := No_Token_Index;
+      Token_Res237 : Token_Index := No_Token_Index;
+      Transform_Res128 : Bare_Ref_Id := No_Bare_Lkt_Node;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
-   M  : Memo_Entry := Get (PP.Regex_Pattern_Transform_Parse0_Memo, Pos);
+   M  : Memo_Entry := Get (PP.Ref_Id_Transform_Parse0_Memo, Pos);
 begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
@@ -31768,55 +32037,153 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType RegexPattern>) (root of 'regex_pattern') at parser.lkt:309:22>
---  pos=Row_Pos164, res=Transform_Res128, nobt=None
---  BEGIN <_Row (root of 'regex_pattern') at parser.lkt:309:22>
---  pos=Row_Pos164, res=None, nobt=None
-Row_Pos164 := Pos;
---  BEGIN <Token(<WithText String>, ) (root of 'regex_pattern') at parser.lkt:309:35>
---  pos=Token_Pos234, res=Token_Res234, nobt=None
-Token_Res234 := Row_Pos164;
+--  BEGIN <Transform(<ASTNodeType RefId>) (root of 'ref_id') at parser.lkt:7:15>
+--  pos=Row_Pos166, res=Transform_Res128, nobt=None
+--  BEGIN <_Row (root of 'ref_id') at parser.lkt:7:15>
+--  pos=Row_Pos166, res=None, nobt=None
+Row_Pos166 := Pos;
+--  BEGIN <Token(<WithSymbol Identifier>, ) (root of 'ref_id') at parser.lkt:7:21>
+--  pos=Token_Pos237, res=Token_Res237, nobt=None
+Token_Res237 := Row_Pos166;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res234));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res237));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Identifier)
+   then
+       Token_Pos237 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos166 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos166,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Identifier,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos237 := Row_Pos166 + 1;
+   end if;
+end;
+--  END <Token(<WithSymbol Identifier>, ) (root of 'ref_id') at parser.lkt:7:21>
+if Token_Pos237 /= No_Token_Index then
+   Row_Pos166 := Token_Pos237;
+else
+   Row_Pos166 := No_Token_Index;
+   goto Exit_Row166_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row166_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'ref_id') at parser.lkt:7:15>
+if Row_Pos166 /= No_Token_Index then
+   Transform_Res128 := Allocate_Ref_Id (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res128,
+      Kind => Lkt_Ref_Id,
+      Unit => Parser.Unit,
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos166 = Pos
+                            then No_Token_Index
+                            else Row_Pos166 - 1));
+      Initialize_Fields_For_Ref_Id
+        (Self => Transform_Res128);
+end if;
+--  END <Transform(<ASTNodeType RefId>) (root of 'ref_id') at parser.lkt:7:15>
+   -------------------------------
+   -- END MAIN COMBINATORS CODE --
+   -------------------------------
+   Set
+     (PP.Ref_Id_Transform_Parse0_Memo,
+      Row_Pos166 /= No_Token_Index,
+      Transform_Res128,
+      Parser.Last_Diag,
+      Pos,
+      Row_Pos166);
+   declare
+      Top : constant Diagnostic_Mark := Parser.Last_Diag;
+   begin
+      Parser.Last_Diag := Mark_On_Entry;
+      Append_Group (Parser.Pool, Parser.Last_Diag, Top);
+   end;
+   Parser.Current_Pos := Row_Pos166;
+   return Transform_Res128;
+end Ref_Id_Transform_Parse0;
+   function Regex_Pattern_Transform_Parse0
+  (Parser : in out Parser_Type;
+   Pos    : Token_Index) return Bare_Regex_Pattern
+is
+   use Bare_Regex_Pattern_Memos;
+      Row_Pos167 : Token_Index := No_Token_Index;
+      Token_Pos238 : Token_Index := No_Token_Index;
+      Token_Res238 : Token_Index := No_Token_Index;
+      Transform_Res129 : Bare_Regex_Pattern := No_Bare_Lkt_Node;
+   Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
+   PP : constant Parser_Private_Part := +Parser.Private_Part;
+   M  : Memo_Entry := Get (PP.Regex_Pattern_Transform_Parse0_Memo, Pos);
+begin
+   if M.State = Success then
+      Parser.Current_Pos := M.Final_Pos;
+      Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
+      Transform_Res129 := M.Instance;
+      return Transform_Res129;
+   elsif M.State = Failure then
+      Parser.Current_Pos := No_Token_Index;
+      return Transform_Res129;
+   end if;
+   Parser.Last_Diag := No_Diagnostic;
+   ---------------------------
+   -- MAIN COMBINATORS CODE --
+   ---------------------------
+--  BEGIN <Transform(<ASTNodeType RegexPattern>) (root of 'regex_pattern') at parser.lkt:309:22>
+--  pos=Row_Pos167, res=Transform_Res129, nobt=None
+--  BEGIN <_Row (root of 'regex_pattern') at parser.lkt:309:22>
+--  pos=Row_Pos167, res=None, nobt=None
+Row_Pos167 := Pos;
+--  BEGIN <Token(<WithText String>, ) (root of 'regex_pattern') at parser.lkt:309:35>
+--  pos=Token_Pos238, res=Token_Res238, nobt=None
+Token_Res238 := Row_Pos167;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res238));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_String)
    then
-       Token_Pos234 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos164 then
+       Token_Pos238 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos167 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos164,
+            (Pos  => Row_Pos167,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_String,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos234 := Row_Pos164 + 1;
+          Token_Pos238 := Row_Pos167 + 1;
    end if;
 end;
 --  END <Token(<WithText String>, ) (root of 'regex_pattern') at parser.lkt:309:35>
-if Token_Pos234 /= No_Token_Index then
-   Row_Pos164 := Token_Pos234;
+if Token_Pos238 /= No_Token_Index then
+   Row_Pos167 := Token_Pos238;
 else
-   Row_Pos164 := No_Token_Index;
-   goto Exit_Row164_0;
+   Row_Pos167 := No_Token_Index;
+   goto Exit_Row167_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row164_0>>
+<<Exit_Row167_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'regex_pattern') at parser.lkt:309:22>
-if Row_Pos164 /= No_Token_Index then
-   Transform_Res128 := Allocate_Regex_Pattern (Parser.Mem_Pool);
+if Row_Pos167 /= No_Token_Index then
+   Transform_Res129 := Allocate_Regex_Pattern (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res128,
+     (Self => Transform_Res129,
       Kind => Lkt_Regex_Pattern,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos164 = Pos
+      Token_End_Index   => (if Row_Pos167 = Pos
                             then No_Token_Index
-                            else Row_Pos164 - 1));
+                            else Row_Pos167 - 1));
 end if;
 --  END <Transform(<ASTNodeType RegexPattern>) (root of 'regex_pattern') at parser.lkt:309:22>
    -------------------------------
@@ -31824,36 +32191,36 @@ end if;
    -------------------------------
    Set
      (PP.Regex_Pattern_Transform_Parse0_Memo,
-      Row_Pos164 /= No_Token_Index,
-      Transform_Res128,
+      Row_Pos167 /= No_Token_Index,
+      Transform_Res129,
       Parser.Last_Diag,
       Pos,
-      Row_Pos164);
+      Row_Pos167);
    declare
       Top : constant Diagnostic_Mark := Parser.Last_Diag;
    begin
       Parser.Last_Diag := Mark_On_Entry;
       Append_Group (Parser.Pool, Parser.Last_Diag, Top);
    end;
-   Parser.Current_Pos := Row_Pos164;
-   return Transform_Res128;
+   Parser.Current_Pos := Row_Pos167;
+   return Transform_Res129;
 end Regex_Pattern_Transform_Parse0;
    function Rel_Or_Parse0
   (Parser : in out Parser_Type;
    Pos    : Token_Index) return Bare_Expr
 is
    use Bare_Expr_Memos;
-      Row_Pos165 : Token_Index := No_Token_Index;
-      Token_Pos235 : Token_Index := No_Token_Index;
-      Token_Res235 : Token_Index := No_Token_Index;
-      Defer_Pos211 : Token_Index := No_Token_Index;
-      Defer_Res211 : Bare_Expr := No_Bare_Lkt_Node;
-      Transform_Res129 : Bare_Not_Expr := No_Bare_Lkt_Node;
-      Defer_Pos212 : Token_Index := No_Token_Index;
-      Defer_Res212 : Bare_Expr := No_Bare_Lkt_Node;
+      Row_Pos168 : Token_Index := No_Token_Index;
+      Token_Pos239 : Token_Index := No_Token_Index;
+      Token_Res239 : Token_Index := No_Token_Index;
+      Defer_Pos215 : Token_Index := No_Token_Index;
+      Defer_Res215 : Bare_Expr := No_Bare_Lkt_Node;
+      Transform_Res130 : Bare_Not_Expr := No_Bare_Lkt_Node;
+      Defer_Pos216 : Token_Index := No_Token_Index;
+      Defer_Res216 : Bare_Expr := No_Bare_Lkt_Node;
       Or_Pos33 : Token_Index := No_Token_Index;
       Or_Res33 : Bare_Expr := No_Bare_Lkt_Node;
-      Diag_Mark85 : Diagnostic_Mark;
+      Diag_Mark87 : Diagnostic_Mark;
       Last_Fail33 : Fail_Info;
       Branch_Diag_Mark33 : Diagnostic_Mark;
       Branch_Last_Fail33 : Fail_Info;
@@ -31878,103 +32245,103 @@ begin
 --  pos=Or_Pos33, res=Or_Res33, nobt=None
 Or_Pos33 := No_Token_Index;
 Or_Res33 := No_Bare_Lkt_Node;
-Diag_Mark85 := Parser.Last_Diag;
+Diag_Mark87 := Parser.Last_Diag;
 Last_Fail33 := Parser.Last_Fail;
 Branch_Diag_Mark33 := Parser.Last_Diag;
 Branch_Last_Fail33 := Parser.Last_Fail;
-    Parser.Last_Diag := Diag_Mark85;
+    Parser.Last_Diag := Diag_Mark87;
     Parser.Last_Fail := Last_Fail33;
 --  BEGIN <Transform(<ASTNodeType NotExpr>) (root of 'rel') at parser.lkt:348:15>
---  pos=Row_Pos165, res=Transform_Res129, nobt=None
+--  pos=Row_Pos168, res=Transform_Res130, nobt=None
 --  BEGIN <_Row (root of 'rel') at parser.lkt:348:15>
---  pos=Row_Pos165, res=None, nobt=None
-Row_Pos165 := Pos;
+--  pos=Row_Pos168, res=None, nobt=None
+Row_Pos168 := Pos;
 --  BEGIN <Token(<WithText NotKw>, ) (root of 'rel') at parser.lkt:348:23>
---  pos=Token_Pos235, res=Token_Res235, nobt=None
-Token_Res235 := Row_Pos165;
+--  pos=Token_Pos239, res=Token_Res239, nobt=None
+Token_Res239 := Row_Pos168;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res235));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res239));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Not_Kw)
    then
-       Token_Pos235 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos165 then
+       Token_Pos239 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos168 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos165,
+            (Pos  => Row_Pos168,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Not_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos235 := Row_Pos165 + 1;
+          Token_Pos239 := Row_Pos168 + 1;
    end if;
 end;
 --  END <Token(<WithText NotKw>, ) (root of 'rel') at parser.lkt:348:23>
-if Token_Pos235 /= No_Token_Index then
-   Row_Pos165 := Token_Pos235;
+if Token_Pos239 /= No_Token_Index then
+   Row_Pos168 := Token_Pos239;
 else
-   Row_Pos165 := No_Token_Index;
-   goto Exit_Row165_0;
+   Row_Pos168 := No_Token_Index;
+   goto Exit_Row168_0;
 end if;
 --  BEGIN <Defer (for 'eq') at parser.lkt:348:29>
---  pos=Defer_Pos211, res=Defer_Res211, nobt=None
-Defer_Res211 :=
-   Eq_Or_Parse1 (Parser, Row_Pos165);
-Defer_Pos211 := Parser.Current_Pos;
+--  pos=Defer_Pos215, res=Defer_Res215, nobt=None
+Defer_Res215 :=
+   Eq_Or_Parse1 (Parser, Row_Pos168);
+Defer_Pos215 := Parser.Current_Pos;
 --  END <Defer (for 'eq') at parser.lkt:348:29>
-if Defer_Pos211 /= No_Token_Index then
-   Row_Pos165 := Defer_Pos211;
+if Defer_Pos215 /= No_Token_Index then
+   Row_Pos168 := Defer_Pos215;
 else
-   Row_Pos165 := No_Token_Index;
-   goto Exit_Row165_0;
+   Row_Pos168 := No_Token_Index;
+   goto Exit_Row168_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row165_0>>
+<<Exit_Row168_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'rel') at parser.lkt:348:15>
-if Row_Pos165 /= No_Token_Index then
-   Transform_Res129 := Allocate_Not_Expr (Parser.Mem_Pool);
+if Row_Pos168 /= No_Token_Index then
+   Transform_Res130 := Allocate_Not_Expr (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res129,
+     (Self => Transform_Res130,
       Kind => Lkt_Not_Expr,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos165 = Pos
+      Token_End_Index   => (if Row_Pos168 = Pos
                             then No_Token_Index
-                            else Row_Pos165 - 1));
+                            else Row_Pos168 - 1));
       Initialize_Fields_For_Not_Expr
-        (Self => Transform_Res129,
-         Not_Expr_F_Expr => Defer_Res211);
-         if Defer_Res211 /= null and then Is_Incomplete (Defer_Res211) then
-            Transform_Res129.Last_Attempted_Child := 0;
-         elsif Defer_Res211 /= null and then not Is_Ghost (Defer_Res211) then
-            Transform_Res129.Last_Attempted_Child := -1;
+        (Self => Transform_Res130,
+         Not_Expr_F_Expr => Defer_Res215);
+         if Defer_Res215 /= null and then Is_Incomplete (Defer_Res215) then
+            Transform_Res130.Last_Attempted_Child := 0;
+         elsif Defer_Res215 /= null and then not Is_Ghost (Defer_Res215) then
+            Transform_Res130.Last_Attempted_Child := -1;
          end if;
 end if;
 --  END <Transform(<ASTNodeType NotExpr>) (root of 'rel') at parser.lkt:348:15>
-    if Row_Pos165 /= No_Token_Index then
-        Or_Pos33 := Row_Pos165;
-        Or_Res33 := Transform_Res129;
+    if Row_Pos168 /= No_Token_Index then
+        Or_Pos33 := Row_Pos168;
+        Or_Res33 := Transform_Res130;
         goto Exit_Or37;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail33.Pos then
        Branch_Diag_Mark33 := Parser.Last_Diag;
        Branch_Last_Fail33 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark85;
+    Parser.Last_Diag := Diag_Mark87;
     Parser.Last_Fail := Last_Fail33;
 --  BEGIN <Defer (for 'eq') at parser.lkt:348:35>
---  pos=Defer_Pos212, res=Defer_Res212, nobt=None
-Defer_Res212 :=
+--  pos=Defer_Pos216, res=Defer_Res216, nobt=None
+Defer_Res216 :=
    Eq_Or_Parse1 (Parser, Pos);
-Defer_Pos212 := Parser.Current_Pos;
+Defer_Pos216 := Parser.Current_Pos;
 --  END <Defer (for 'eq') at parser.lkt:348:35>
-    if Defer_Pos212 /= No_Token_Index then
-        Or_Pos33 := Defer_Pos212;
-        Or_Res33 := Defer_Res212;
+    if Defer_Pos216 /= No_Token_Index then
+        Or_Pos33 := Defer_Pos216;
+        Or_Res33 := Defer_Res216;
         goto Exit_Or37;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail33.Pos then
@@ -32009,18 +32376,18 @@ end Rel_Or_Parse0;
    Pos    : Token_Index) return Bare_Selector_Call
 is
    use Bare_Selector_Call_Memos;
-      Row_Pos166 : Token_Index := No_Token_Index;
-      Defer_Pos213 : Token_Index := No_Token_Index;
-      Defer_Res213 : Bare_Id := No_Bare_Lkt_Node;
-      Row_Pos167 : Token_Index := No_Token_Index;
-      Defer_Pos214 : Token_Index := No_Token_Index;
-      Defer_Res214 : Bare_Id := No_Bare_Lkt_Node;
-      Token_Pos236 : Token_Index := No_Token_Index;
-      Token_Res236 : Token_Index := No_Token_Index;
-      Diag_Mark86 : Diagnostic_Mark;
-      Defer_Pos215 : Token_Index := No_Token_Index;
-      Defer_Res215 : Bare_Expr := No_Bare_Lkt_Node;
-      Transform_Res130 : Bare_Selector_Call := No_Bare_Lkt_Node;
+      Row_Pos169 : Token_Index := No_Token_Index;
+      Defer_Pos217 : Token_Index := No_Token_Index;
+      Defer_Res217 : Bare_Id := No_Bare_Lkt_Node;
+      Row_Pos170 : Token_Index := No_Token_Index;
+      Defer_Pos218 : Token_Index := No_Token_Index;
+      Defer_Res218 : Bare_Id := No_Bare_Lkt_Node;
+      Token_Pos240 : Token_Index := No_Token_Index;
+      Token_Res240 : Token_Index := No_Token_Index;
+      Diag_Mark88 : Diagnostic_Mark;
+      Defer_Pos219 : Token_Index := No_Token_Index;
+      Defer_Res219 : Bare_Expr := No_Bare_Lkt_Node;
+      Transform_Res131 : Bare_Selector_Call := No_Bare_Lkt_Node;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
    M  : Memo_Entry := Get (PP.Selector_Call_Transform_Parse0_Memo, Pos);
@@ -32028,145 +32395,145 @@ begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
       Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
-      Transform_Res130 := M.Instance;
-      return Transform_Res130;
+      Transform_Res131 := M.Instance;
+      return Transform_Res131;
    elsif M.State = Failure then
       Parser.Current_Pos := No_Token_Index;
-      return Transform_Res130;
+      return Transform_Res131;
    end if;
    Parser.Last_Diag := No_Diagnostic;
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
 --  BEGIN <Transform(<ASTNodeType SelectorCall>) (root of 'selector_call') at parser.lkt:331:22>
---  pos=Row_Pos166, res=Transform_Res130, nobt=None
+--  pos=Row_Pos169, res=Transform_Res131, nobt=None
 --  BEGIN <_Row (root of 'selector_call') at parser.lkt:331:22>
---  pos=Row_Pos166, res=None, nobt=None
-Row_Pos166 := Pos;
+--  pos=Row_Pos169, res=None, nobt=None
+Row_Pos169 := Pos;
 --  BEGIN <Defer (for 'id') at parser.lkt:331:35>
---  pos=Defer_Pos213, res=Defer_Res213, nobt=None
-Defer_Res213 :=
-   Id_Transform_Parse0 (Parser, Row_Pos166);
-Defer_Pos213 := Parser.Current_Pos;
+--  pos=Defer_Pos217, res=Defer_Res217, nobt=None
+Defer_Res217 :=
+   Id_Transform_Parse0 (Parser, Row_Pos169);
+Defer_Pos217 := Parser.Current_Pos;
 --  END <Defer (for 'id') at parser.lkt:331:35>
-if Defer_Pos213 /= No_Token_Index then
-   Row_Pos166 := Defer_Pos213;
+if Defer_Pos217 /= No_Token_Index then
+   Row_Pos169 := Defer_Pos217;
 else
-   Row_Pos166 := No_Token_Index;
-   goto Exit_Row166_0;
+   Row_Pos169 := No_Token_Index;
+   goto Exit_Row169_0;
 end if;
 --  BEGIN <Opt (root of 'selector_call') at parser.lkt:331:38>
---  pos=Row_Pos167, res=Defer_Res214, nobt=None
-Diag_Mark86 := Parser.Last_Diag;
+--  pos=Row_Pos170, res=Defer_Res218, nobt=None
+Diag_Mark88 := Parser.Last_Diag;
 --  BEGIN <_Extract (root of 'selector_call') at parser.lkt:331:39>
---  pos=Row_Pos167, res=Defer_Res214, nobt=None
+--  pos=Row_Pos170, res=Defer_Res218, nobt=None
 --  BEGIN <_Row (root of 'selector_call') at parser.lkt:331:39>
---  pos=Row_Pos167, res=None, nobt=None
-Row_Pos167 := Row_Pos166;
+--  pos=Row_Pos170, res=None, nobt=None
+Row_Pos170 := Row_Pos169;
 --  BEGIN <Defer (for 'id') at parser.lkt:331:44>
---  pos=Defer_Pos214, res=Defer_Res214, nobt=None
-Defer_Res214 :=
-   Id_Transform_Parse0 (Parser, Row_Pos167);
-Defer_Pos214 := Parser.Current_Pos;
+--  pos=Defer_Pos218, res=Defer_Res218, nobt=None
+Defer_Res218 :=
+   Id_Transform_Parse0 (Parser, Row_Pos170);
+Defer_Pos218 := Parser.Current_Pos;
 --  END <Defer (for 'id') at parser.lkt:331:44>
-if Defer_Pos214 /= No_Token_Index then
-   Row_Pos167 := Defer_Pos214;
+if Defer_Pos218 /= No_Token_Index then
+   Row_Pos170 := Defer_Pos218;
 else
-   Row_Pos167 := No_Token_Index;
-   goto Exit_Row167_0;
+   Row_Pos170 := No_Token_Index;
+   goto Exit_Row170_0;
 end if;
 --  BEGIN <Token(<WithText At>, ) (root of 'selector_call') at parser.lkt:331:47>
---  pos=Token_Pos236, res=Token_Res236, nobt=None
-Token_Res236 := Row_Pos167;
+--  pos=Token_Pos240, res=Token_Res240, nobt=None
+Token_Res240 := Row_Pos170;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res236));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res240));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_At)
    then
-       Token_Pos236 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos167 then
+       Token_Pos240 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos170 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos167,
+            (Pos  => Row_Pos170,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_At,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos236 := Row_Pos167 + 1;
+          Token_Pos240 := Row_Pos170 + 1;
    end if;
 end;
 --  END <Token(<WithText At>, ) (root of 'selector_call') at parser.lkt:331:47>
-if Token_Pos236 /= No_Token_Index then
-   Row_Pos167 := Token_Pos236;
+if Token_Pos240 /= No_Token_Index then
+   Row_Pos170 := Token_Pos240;
 else
-   Row_Pos167 := No_Token_Index;
-   goto Exit_Row167_0;
+   Row_Pos170 := No_Token_Index;
+   goto Exit_Row170_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row167_0>>
+<<Exit_Row170_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'selector_call') at parser.lkt:331:39>
 --  END <_Extract (root of 'selector_call') at parser.lkt:331:39>
-if Row_Pos167 = No_Token_Index then
-   Defer_Res214 := No_Bare_Lkt_Node;
-   Row_Pos167 := Row_Pos166;
-      Parser.Last_Diag := Diag_Mark86;
+if Row_Pos170 = No_Token_Index then
+   Defer_Res218 := No_Bare_Lkt_Node;
+   Row_Pos170 := Row_Pos169;
+      Parser.Last_Diag := Diag_Mark88;
 end if;
 --  END <Opt (root of 'selector_call') at parser.lkt:331:38>
-if Row_Pos167 /= No_Token_Index then
-   Row_Pos166 := Row_Pos167;
+if Row_Pos170 /= No_Token_Index then
+   Row_Pos169 := Row_Pos170;
 else
-   Row_Pos166 := No_Token_Index;
-   goto Exit_Row166_0;
+   Row_Pos169 := No_Token_Index;
+   goto Exit_Row169_0;
 end if;
 --  BEGIN <Defer (for 'basic_expr') at parser.lkt:331:52>
---  pos=Defer_Pos215, res=Defer_Res215, nobt=None
-Defer_Res215 :=
-   Basic_Expr_Or_Parse0 (Parser, Row_Pos166);
-Defer_Pos215 := Parser.Current_Pos;
+--  pos=Defer_Pos219, res=Defer_Res219, nobt=None
+Defer_Res219 :=
+   Basic_Expr_Or_Parse0 (Parser, Row_Pos169);
+Defer_Pos219 := Parser.Current_Pos;
 --  END <Defer (for 'basic_expr') at parser.lkt:331:52>
-if Defer_Pos215 /= No_Token_Index then
-   Row_Pos166 := Defer_Pos215;
+if Defer_Pos219 /= No_Token_Index then
+   Row_Pos169 := Defer_Pos219;
 else
-   Row_Pos166 := No_Token_Index;
-   goto Exit_Row166_0;
+   Row_Pos169 := No_Token_Index;
+   goto Exit_Row169_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row166_0>>
+<<Exit_Row169_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'selector_call') at parser.lkt:331:22>
-if Row_Pos166 /= No_Token_Index then
-   Transform_Res130 := Allocate_Selector_Call (Parser.Mem_Pool);
+if Row_Pos169 /= No_Token_Index then
+   Transform_Res131 := Allocate_Selector_Call (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res130,
+     (Self => Transform_Res131,
       Kind => Lkt_Selector_Call,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos166 = Pos
+      Token_End_Index   => (if Row_Pos169 = Pos
                             then No_Token_Index
-                            else Row_Pos166 - 1));
+                            else Row_Pos169 - 1));
       Initialize_Fields_For_Selector_Call
-        (Self => Transform_Res130,
-         Selector_Call_F_Quantifier => Defer_Res213,
-         Selector_Call_F_Binding => Defer_Res214,
-         Selector_Call_F_Selector_Call => Defer_Res215);
-         if Defer_Res213 /= null and then Is_Incomplete (Defer_Res213) then
-            Transform_Res130.Last_Attempted_Child := 0;
-         elsif Defer_Res213 /= null and then not Is_Ghost (Defer_Res213) then
-            Transform_Res130.Last_Attempted_Child := -1;
+        (Self => Transform_Res131,
+         Selector_Call_F_Quantifier => Defer_Res217,
+         Selector_Call_F_Binding => Defer_Res218,
+         Selector_Call_F_Selector_Call => Defer_Res219);
+         if Defer_Res217 /= null and then Is_Incomplete (Defer_Res217) then
+            Transform_Res131.Last_Attempted_Child := 0;
+         elsif Defer_Res217 /= null and then not Is_Ghost (Defer_Res217) then
+            Transform_Res131.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res214 /= null and then Is_Incomplete (Defer_Res214) then
-            Transform_Res130.Last_Attempted_Child := 0;
-         elsif Defer_Res214 /= null and then not Is_Ghost (Defer_Res214) then
-            Transform_Res130.Last_Attempted_Child := -1;
+         if Defer_Res218 /= null and then Is_Incomplete (Defer_Res218) then
+            Transform_Res131.Last_Attempted_Child := 0;
+         elsif Defer_Res218 /= null and then not Is_Ghost (Defer_Res218) then
+            Transform_Res131.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res215 /= null and then Is_Incomplete (Defer_Res215) then
-            Transform_Res130.Last_Attempted_Child := 0;
-         elsif Defer_Res215 /= null and then not Is_Ghost (Defer_Res215) then
-            Transform_Res130.Last_Attempted_Child := -1;
+         if Defer_Res219 /= null and then Is_Incomplete (Defer_Res219) then
+            Transform_Res131.Last_Attempted_Child := 0;
+         elsif Defer_Res219 /= null and then not Is_Ghost (Defer_Res219) then
+            Transform_Res131.Last_Attempted_Child := -1;
          end if;
 end if;
 --  END <Transform(<ASTNodeType SelectorCall>) (root of 'selector_call') at parser.lkt:331:22>
@@ -32175,38 +32542,38 @@ end if;
    -------------------------------
    Set
      (PP.Selector_Call_Transform_Parse0_Memo,
-      Row_Pos166 /= No_Token_Index,
-      Transform_Res130,
+      Row_Pos169 /= No_Token_Index,
+      Transform_Res131,
       Parser.Last_Diag,
       Pos,
-      Row_Pos166);
+      Row_Pos169);
    declare
       Top : constant Diagnostic_Mark := Parser.Last_Diag;
    begin
       Parser.Last_Diag := Mark_On_Entry;
       Append_Group (Parser.Pool, Parser.Last_Diag, Top);
    end;
-   Parser.Current_Pos := Row_Pos166;
-   return Transform_Res130;
+   Parser.Current_Pos := Row_Pos169;
+   return Transform_Res131;
 end Selector_Call_Transform_Parse0;
    function String_Lit_Or_Parse0
   (Parser : in out Parser_Type;
    Pos    : Token_Index) return Bare_String_Lit
 is
    use Bare_String_Lit_Memos;
-      Row_Pos168 : Token_Index := No_Token_Index;
-      Token_Pos237 : Token_Index := No_Token_Index;
-      Token_Res237 : Token_Index := No_Token_Index;
-      Transform_Res131 : Bare_Single_Line_String_Lit := No_Bare_Lkt_Node;
-      Row_Pos169 : Token_Index := No_Token_Index;
-      Token_Pos238 : Token_Index := No_Token_Index;
-      Token_Res238 : Token_Index := No_Token_Index;
-      Transform_Res132 : Bare_Pattern_Single_Line_String_Lit := No_Bare_Lkt_Node;
-      Defer_Pos216 : Token_Index := No_Token_Index;
-      Defer_Res216 : Bare_Block_String_Lit := No_Bare_Lkt_Node;
+      Row_Pos171 : Token_Index := No_Token_Index;
+      Token_Pos241 : Token_Index := No_Token_Index;
+      Token_Res241 : Token_Index := No_Token_Index;
+      Transform_Res132 : Bare_Single_Line_String_Lit := No_Bare_Lkt_Node;
+      Row_Pos172 : Token_Index := No_Token_Index;
+      Token_Pos242 : Token_Index := No_Token_Index;
+      Token_Res242 : Token_Index := No_Token_Index;
+      Transform_Res133 : Bare_Pattern_Single_Line_String_Lit := No_Bare_Lkt_Node;
+      Defer_Pos220 : Token_Index := No_Token_Index;
+      Defer_Res220 : Bare_Block_String_Lit := No_Bare_Lkt_Node;
       Or_Pos34 : Token_Index := No_Token_Index;
       Or_Res34 : Bare_String_Lit := No_Bare_Lkt_Node;
-      Diag_Mark87 : Diagnostic_Mark;
+      Diag_Mark89 : Diagnostic_Mark;
       Last_Fail34 : Fail_Info;
       Branch_Diag_Mark34 : Diagnostic_Mark;
       Branch_Last_Fail34 : Fail_Info;
@@ -32231,131 +32598,67 @@ begin
 --  pos=Or_Pos34, res=Or_Res34, nobt=None
 Or_Pos34 := No_Token_Index;
 Or_Res34 := No_Bare_Lkt_Node;
-Diag_Mark87 := Parser.Last_Diag;
+Diag_Mark89 := Parser.Last_Diag;
 Last_Fail34 := Parser.Last_Fail;
 Branch_Diag_Mark34 := Parser.Last_Diag;
 Branch_Last_Fail34 := Parser.Last_Fail;
-    Parser.Last_Diag := Diag_Mark87;
+    Parser.Last_Diag := Diag_Mark89;
     Parser.Last_Fail := Last_Fail34;
 --  BEGIN <Transform(<ASTNodeType SingleLineStringLit>) (root of 'string_lit') at parser.lkt:402:11>
---  pos=Row_Pos168, res=Transform_Res131, nobt=None
+--  pos=Row_Pos171, res=Transform_Res132, nobt=None
 --  BEGIN <_Row (root of 'string_lit') at parser.lkt:402:11>
---  pos=Row_Pos168, res=None, nobt=None
-Row_Pos168 := Pos;
+--  pos=Row_Pos171, res=None, nobt=None
+Row_Pos171 := Pos;
 --  BEGIN <Token(<WithText String>, ) (root of 'string_lit') at parser.lkt:402:31>
---  pos=Token_Pos237, res=Token_Res237, nobt=None
-Token_Res237 := Row_Pos168;
+--  pos=Token_Pos241, res=Token_Res241, nobt=None
+Token_Res241 := Row_Pos171;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res237));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res241));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_String)
    then
-       Token_Pos237 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos168 then
+       Token_Pos241 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos171 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos168,
+            (Pos  => Row_Pos171,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_String,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos237 := Row_Pos168 + 1;
+          Token_Pos241 := Row_Pos171 + 1;
    end if;
 end;
 --  END <Token(<WithText String>, ) (root of 'string_lit') at parser.lkt:402:31>
-if Token_Pos237 /= No_Token_Index then
-   Row_Pos168 := Token_Pos237;
+if Token_Pos241 /= No_Token_Index then
+   Row_Pos171 := Token_Pos241;
 else
-   Row_Pos168 := No_Token_Index;
-   goto Exit_Row168_0;
+   Row_Pos171 := No_Token_Index;
+   goto Exit_Row171_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row168_0>>
+<<Exit_Row171_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'string_lit') at parser.lkt:402:11>
-if Row_Pos168 /= No_Token_Index then
-   Transform_Res131 := Allocate_Single_Line_String_Lit (Parser.Mem_Pool);
+if Row_Pos171 /= No_Token_Index then
+   Transform_Res132 := Allocate_Single_Line_String_Lit (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res131,
+     (Self => Transform_Res132,
       Kind => Lkt_Single_Line_String_Lit,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos168 = Pos
+      Token_End_Index   => (if Row_Pos171 = Pos
                             then No_Token_Index
-                            else Row_Pos168 - 1));
+                            else Row_Pos171 - 1));
       Initialize_Fields_For_Single_Line_String_Lit
-        (Self => Transform_Res131);
-end if;
---  END <Transform(<ASTNodeType SingleLineStringLit>) (root of 'string_lit') at parser.lkt:402:11>
-    if Row_Pos168 /= No_Token_Index then
-        Or_Pos34 := Row_Pos168;
-        Or_Res34 := Transform_Res131;
-        goto Exit_Or38;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail34.Pos then
-       Branch_Diag_Mark34 := Parser.Last_Diag;
-       Branch_Last_Fail34 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark87;
-    Parser.Last_Fail := Last_Fail34;
---  BEGIN <Transform(<ASTNodeType PatternSingleLineStringLit>) (root of 'string_lit') at parser.lkt:403:11>
---  pos=Row_Pos169, res=Transform_Res132, nobt=None
---  BEGIN <_Row (root of 'string_lit') at parser.lkt:403:11>
---  pos=Row_Pos169, res=None, nobt=None
-Row_Pos169 := Pos;
---  BEGIN <Token(<WithText PString>, ) (root of 'string_lit') at parser.lkt:403:38>
---  pos=Token_Pos238, res=Token_Res238, nobt=None
-Token_Res238 := Row_Pos169;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res238));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_P_String)
-   then
-       Token_Pos238 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos169 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos169,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_P_String,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos238 := Row_Pos169 + 1;
-   end if;
-end;
---  END <Token(<WithText PString>, ) (root of 'string_lit') at parser.lkt:403:38>
-if Token_Pos238 /= No_Token_Index then
-   Row_Pos169 := Token_Pos238;
-else
-   Row_Pos169 := No_Token_Index;
-   goto Exit_Row169_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row169_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'string_lit') at parser.lkt:403:11>
-if Row_Pos169 /= No_Token_Index then
-   Transform_Res132 := Allocate_Pattern_Single_Line_String_Lit (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res132,
-      Kind => Lkt_Pattern_Single_Line_String_Lit,
-      Unit => Parser.Unit,
-      Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos169 = Pos
-                            then No_Token_Index
-                            else Row_Pos169 - 1));
-      Initialize_Fields_For_Pattern_Single_Line_String_Lit
         (Self => Transform_Res132);
 end if;
---  END <Transform(<ASTNodeType PatternSingleLineStringLit>) (root of 'string_lit') at parser.lkt:403:11>
-    if Row_Pos169 /= No_Token_Index then
-        Or_Pos34 := Row_Pos169;
+--  END <Transform(<ASTNodeType SingleLineStringLit>) (root of 'string_lit') at parser.lkt:402:11>
+    if Row_Pos171 /= No_Token_Index then
+        Or_Pos34 := Row_Pos171;
         Or_Res34 := Transform_Res132;
         goto Exit_Or38;
     end if;
@@ -32363,17 +32666,81 @@ end if;
        Branch_Diag_Mark34 := Parser.Last_Diag;
        Branch_Last_Fail34 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark87;
+    Parser.Last_Diag := Diag_Mark89;
+    Parser.Last_Fail := Last_Fail34;
+--  BEGIN <Transform(<ASTNodeType PatternSingleLineStringLit>) (root of 'string_lit') at parser.lkt:403:11>
+--  pos=Row_Pos172, res=Transform_Res133, nobt=None
+--  BEGIN <_Row (root of 'string_lit') at parser.lkt:403:11>
+--  pos=Row_Pos172, res=None, nobt=None
+Row_Pos172 := Pos;
+--  BEGIN <Token(<WithText PString>, ) (root of 'string_lit') at parser.lkt:403:38>
+--  pos=Token_Pos242, res=Token_Res242, nobt=None
+Token_Res242 := Row_Pos172;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res242));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_P_String)
+   then
+       Token_Pos242 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos172 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos172,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_P_String,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos242 := Row_Pos172 + 1;
+   end if;
+end;
+--  END <Token(<WithText PString>, ) (root of 'string_lit') at parser.lkt:403:38>
+if Token_Pos242 /= No_Token_Index then
+   Row_Pos172 := Token_Pos242;
+else
+   Row_Pos172 := No_Token_Index;
+   goto Exit_Row172_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row172_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'string_lit') at parser.lkt:403:11>
+if Row_Pos172 /= No_Token_Index then
+   Transform_Res133 := Allocate_Pattern_Single_Line_String_Lit (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res133,
+      Kind => Lkt_Pattern_Single_Line_String_Lit,
+      Unit => Parser.Unit,
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos172 = Pos
+                            then No_Token_Index
+                            else Row_Pos172 - 1));
+      Initialize_Fields_For_Pattern_Single_Line_String_Lit
+        (Self => Transform_Res133);
+end if;
+--  END <Transform(<ASTNodeType PatternSingleLineStringLit>) (root of 'string_lit') at parser.lkt:403:11>
+    if Row_Pos172 /= No_Token_Index then
+        Or_Pos34 := Row_Pos172;
+        Or_Res34 := Transform_Res133;
+        goto Exit_Or38;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail34.Pos then
+       Branch_Diag_Mark34 := Parser.Last_Diag;
+       Branch_Last_Fail34 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark89;
     Parser.Last_Fail := Last_Fail34;
 --  BEGIN <Defer (for 'block_string_lit') at parser.lkt:404:11>
---  pos=Defer_Pos216, res=Defer_Res216, nobt=None
-Defer_Res216 :=
+--  pos=Defer_Pos220, res=Defer_Res220, nobt=None
+Defer_Res220 :=
    Block_String_Lit_Transform_Parse1 (Parser, Pos);
-Defer_Pos216 := Parser.Current_Pos;
+Defer_Pos220 := Parser.Current_Pos;
 --  END <Defer (for 'block_string_lit') at parser.lkt:404:11>
-    if Defer_Pos216 /= No_Token_Index then
-        Or_Pos34 := Defer_Pos216;
-        Or_Res34 := Defer_Res216;
+    if Defer_Pos220 /= No_Token_Index then
+        Or_Pos34 := Defer_Pos220;
+        Or_Res34 := Defer_Res220;
         goto Exit_Or38;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail34.Pos then
@@ -32409,37 +32776,39 @@ end String_Lit_Or_Parse0;
 is
    use Bare_Expr_Memos;
       Nobt44 : Boolean := False;
-      Row_Pos170 : Token_Index := No_Token_Index;
-      Token_Pos239 : Token_Index := No_Token_Index;
-      Token_Res239 : Token_Index := No_Token_Index;
-      Defer_Pos217 : Token_Index := No_Token_Index;
-      Defer_Res217 : Bare_Expr := No_Bare_Lkt_Node;
-      Token_Pos240 : Token_Index := No_Token_Index;
-      Token_Res240 : Token_Index := No_Token_Index;
-      Row_Progress42 : Integer := 0;
-      Transform_Res133 : Bare_Paren_Expr := No_Bare_Lkt_Node;
-      Transform_Has_Failed42 : Boolean := False;
-      Defer_Pos218 : Token_Index := No_Token_Index;
-      Defer_Res218 : Bare_Match_Expr := No_Bare_Lkt_Node;
-      Defer_Pos219 : Token_Index := No_Token_Index;
-      Defer_Res219 : Bare_Null_Lit := No_Bare_Lkt_Node;
-      Defer_Pos220 : Token_Index := No_Token_Index;
-      Defer_Res220 : Bare_Ref_Id := No_Bare_Lkt_Node;
+      Row_Pos173 : Token_Index := No_Token_Index;
+      Token_Pos243 : Token_Index := No_Token_Index;
+      Token_Res243 : Token_Index := No_Token_Index;
       Defer_Pos221 : Token_Index := No_Token_Index;
-      Defer_Res221 : Bare_Block_Expr := No_Bare_Lkt_Node;
+      Defer_Res221 : Bare_Expr := No_Bare_Lkt_Node;
+      Token_Pos244 : Token_Index := No_Token_Index;
+      Token_Res244 : Token_Index := No_Token_Index;
+      Row_Progress42 : Integer := 0;
+      Transform_Res134 : Bare_Paren_Expr := No_Bare_Lkt_Node;
+      Transform_Has_Failed42 : Boolean := False;
       Defer_Pos222 : Token_Index := No_Token_Index;
-      Defer_Res222 : Bare_Num_Lit := No_Bare_Lkt_Node;
+      Defer_Res222 : Bare_Match_Expr := No_Bare_Lkt_Node;
       Defer_Pos223 : Token_Index := No_Token_Index;
-      Defer_Res223 : Bare_Big_Num_Lit := No_Bare_Lkt_Node;
+      Defer_Res223 : Bare_Null_Lit := No_Bare_Lkt_Node;
       Defer_Pos224 : Token_Index := No_Token_Index;
-      Defer_Res224 : Bare_String_Lit := No_Bare_Lkt_Node;
+      Defer_Res224 : Bare_Ref_Id := No_Bare_Lkt_Node;
       Defer_Pos225 : Token_Index := No_Token_Index;
-      Defer_Res225 : Bare_Char_Lit := No_Bare_Lkt_Node;
+      Defer_Res225 : Bare_Block_Expr := No_Bare_Lkt_Node;
       Defer_Pos226 : Token_Index := No_Token_Index;
-      Defer_Res226 : Bare_Array_Literal := No_Bare_Lkt_Node;
+      Defer_Res226 : Bare_Num_Lit := No_Bare_Lkt_Node;
+      Defer_Pos227 : Token_Index := No_Token_Index;
+      Defer_Res227 : Bare_Big_Num_Lit := No_Bare_Lkt_Node;
+      Defer_Pos228 : Token_Index := No_Token_Index;
+      Defer_Res228 : Bare_String_Lit := No_Bare_Lkt_Node;
+      Defer_Pos229 : Token_Index := No_Token_Index;
+      Defer_Res229 : Bare_Char_Lit := No_Bare_Lkt_Node;
+      Defer_Pos230 : Token_Index := No_Token_Index;
+      Defer_Res230 : Bare_Query := No_Bare_Lkt_Node;
+      Defer_Pos231 : Token_Index := No_Token_Index;
+      Defer_Res231 : Bare_Array_Literal := No_Bare_Lkt_Node;
       Or_Pos35 : Token_Index := No_Token_Index;
       Or_Res35 : Bare_Expr := No_Bare_Lkt_Node;
-      Diag_Mark88 : Diagnostic_Mark;
+      Diag_Mark90 : Diagnostic_Mark;
       Last_Fail35 : Fail_Info;
       Branch_Diag_Mark35 : Diagnostic_Mark;
       Branch_Last_Fail35 : Fail_Info;
@@ -32464,222 +32833,154 @@ begin
 --  pos=Or_Pos35, res=Or_Res35, nobt=None
 Or_Pos35 := No_Token_Index;
 Or_Res35 := No_Bare_Lkt_Node;
-Diag_Mark88 := Parser.Last_Diag;
+Diag_Mark90 := Parser.Last_Diag;
 Last_Fail35 := Parser.Last_Fail;
 Branch_Diag_Mark35 := Parser.Last_Diag;
 Branch_Last_Fail35 := Parser.Last_Fail;
-    Parser.Last_Diag := Diag_Mark88;
+    Parser.Last_Diag := Diag_Mark90;
     Parser.Last_Fail := Last_Fail35;
 --  BEGIN <Transform(<ASTNodeType ParenExpr>) (root of 'term') at parser.lkt:455:11>
---  pos=Row_Pos170, res=Transform_Res133, nobt=Nobt44
+--  pos=Row_Pos173, res=Transform_Res134, nobt=Nobt44
 --  BEGIN <_Row (root of 'term') at parser.lkt:455:11>
---  pos=Row_Pos170, res=None, nobt=Nobt44
-Row_Pos170 := Pos;
+--  pos=Row_Pos173, res=None, nobt=Nobt44
+Row_Pos173 := Pos;
 --  BEGIN <Token(<WithText LPar>, ) (root of 'term') at parser.lkt:455:21>
---  pos=Token_Pos239, res=Token_Res239, nobt=None
-Token_Res239 := Row_Pos170;
+--  pos=Token_Pos243, res=Token_Res243, nobt=None
+Token_Res243 := Row_Pos173;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res239));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res243));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_L_Par)
    then
-       Token_Pos239 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos170 then
+       Token_Pos243 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos173 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos170,
+            (Pos  => Row_Pos173,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_L_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos239 := Row_Pos170 + 1;
+          Token_Pos243 := Row_Pos173 + 1;
    end if;
 end;
 --  END <Token(<WithText LPar>, ) (root of 'term') at parser.lkt:455:21>
 Row_Progress42 := 1;
-if Token_Pos239 /= No_Token_Index then
-   Row_Pos170 := Token_Pos239;
+if Token_Pos243 /= No_Token_Index then
+   Row_Pos173 := Token_Pos243;
 else
-   Row_Pos170 := No_Token_Index;
-   goto Exit_Row170_0;
+   Row_Pos173 := No_Token_Index;
+   goto Exit_Row173_0;
 end if;
 --  BEGIN <Cut (root of 'term') at parser.lkt:455:25>
---  pos=Row_Pos170, res=None, nobt=Nobt44
+--  pos=Row_Pos173, res=None, nobt=Nobt44
 Nobt44 := True;
 --  END <Cut (root of 'term') at parser.lkt:455:25>
 Row_Progress42 := 2;
-if Row_Pos170 /= No_Token_Index then
-   Row_Pos170 := Row_Pos170;
+if Row_Pos173 /= No_Token_Index then
+   Row_Pos173 := Row_Pos173;
 else
-   Row_Pos170 := No_Token_Index;
-   goto Exit_Row170_0;
+   Row_Pos173 := No_Token_Index;
+   goto Exit_Row173_0;
 end if;
 --  BEGIN <Defer (for 'expr') at parser.lkt:455:27>
---  pos=Defer_Pos217, res=Defer_Res217, nobt=None
-Defer_Res217 :=
-   Expr_Or_Parse1 (Parser, Row_Pos170);
-Defer_Pos217 := Parser.Current_Pos;
+--  pos=Defer_Pos221, res=Defer_Res221, nobt=None
+Defer_Res221 :=
+   Expr_Or_Parse1 (Parser, Row_Pos173);
+Defer_Pos221 := Parser.Current_Pos;
 --  END <Defer (for 'expr') at parser.lkt:455:27>
 Row_Progress42 := 3;
-if Defer_Pos217 /= No_Token_Index then
-   Row_Pos170 := Defer_Pos217;
+if Defer_Pos221 /= No_Token_Index then
+   Row_Pos173 := Defer_Pos221;
 else
-   Row_Pos170 := No_Token_Index;
-   goto Exit_Row170_0;
+   Row_Pos173 := No_Token_Index;
+   goto Exit_Row173_0;
 end if;
 --  BEGIN <Token(<WithText RPar>, ) (root of 'term') at parser.lkt:455:32>
---  pos=Token_Pos240, res=Token_Res240, nobt=None
-Token_Res240 := Row_Pos170;
+--  pos=Token_Pos244, res=Token_Res244, nobt=None
+Token_Res244 := Row_Pos173;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res240));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res244));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_R_Par)
    then
-       Token_Pos240 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos170 then
+       Token_Pos244 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos173 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos170,
+            (Pos  => Row_Pos173,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos240 := Row_Pos170 + 1;
+          Token_Pos244 := Row_Pos173 + 1;
    end if;
 end;
 --  END <Token(<WithText RPar>, ) (root of 'term') at parser.lkt:455:32>
 Row_Progress42 := 4;
-if Token_Pos240 /= No_Token_Index then
-   Row_Pos170 := Token_Pos240;
+if Token_Pos244 /= No_Token_Index then
+   Row_Pos173 := Token_Pos244;
 else
-   Row_Pos170 := No_Token_Index;
-   goto Exit_Row170_0;
+   Row_Pos173 := No_Token_Index;
+   goto Exit_Row173_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row170_0>>
+<<Exit_Row173_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'term') at parser.lkt:455:11>
-if Row_Pos170 = No_Token_Index and then Nobt44 then
-   Row_Pos170 := Parser.Last_Fail.Pos;
+if Row_Pos173 = No_Token_Index and then Nobt44 then
+   Row_Pos173 := Parser.Last_Fail.Pos;
    Transform_Has_Failed42 := True;
 end if;
-if Row_Pos170 /= No_Token_Index then
-   Transform_Res133 := Allocate_Paren_Expr (Parser.Mem_Pool);
+if Row_Pos173 /= No_Token_Index then
+   Transform_Res134 := Allocate_Paren_Expr (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res133,
+     (Self => Transform_Res134,
       Kind => Lkt_Paren_Expr,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos170 = Pos
+      Token_End_Index   => (if Row_Pos173 = Pos
                             then No_Token_Index
-                            else Row_Pos170 - 1));
+                            else Row_Pos173 - 1));
       Initialize_Fields_For_Paren_Expr
-        (Self => Transform_Res133,
-         Paren_Expr_F_Expr => Defer_Res217);
-         if Defer_Res217 /= null and then Is_Incomplete (Defer_Res217) then
-            Transform_Res133.Last_Attempted_Child := 0;
-         elsif Defer_Res217 /= null and then not Is_Ghost (Defer_Res217) then
-            Transform_Res133.Last_Attempted_Child := -1;
+        (Self => Transform_Res134,
+         Paren_Expr_F_Expr => Defer_Res221);
+         if Defer_Res221 /= null and then Is_Incomplete (Defer_Res221) then
+            Transform_Res134.Last_Attempted_Child := 0;
+         elsif Defer_Res221 /= null and then not Is_Ghost (Defer_Res221) then
+            Transform_Res134.Last_Attempted_Child := -1;
          end if;
    if Transform_Has_Failed42 then
-      Transform_Res133.Last_Attempted_Child :=
+      Transform_Res134.Last_Attempted_Child :=
          Row_Progress42;
       Append (Parser, Pos, "Cannot parse <term>");
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 end if;
 --  END <Transform(<ASTNodeType ParenExpr>) (root of 'term') at parser.lkt:455:11>
-    if Row_Pos170 /= No_Token_Index then
-        Or_Pos35 := Row_Pos170;
-        Or_Res35 := Transform_Res133;
+    if Row_Pos173 /= No_Token_Index then
+        Or_Pos35 := Row_Pos173;
+        Or_Res35 := Transform_Res134;
         goto Exit_Or39;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
        Branch_Diag_Mark35 := Parser.Last_Diag;
        Branch_Last_Fail35 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark88;
+    Parser.Last_Diag := Diag_Mark90;
     Parser.Last_Fail := Last_Fail35;
 --  BEGIN <Defer (for 'match_expr') at parser.lkt:456:11>
---  pos=Defer_Pos218, res=Defer_Res218, nobt=None
-Defer_Res218 :=
-   Match_Expr_Transform_Parse3 (Parser, Pos);
-Defer_Pos218 := Parser.Current_Pos;
---  END <Defer (for 'match_expr') at parser.lkt:456:11>
-    if Defer_Pos218 /= No_Token_Index then
-        Or_Pos35 := Defer_Pos218;
-        Or_Res35 := Defer_Res218;
-        goto Exit_Or39;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
-       Branch_Diag_Mark35 := Parser.Last_Diag;
-       Branch_Last_Fail35 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark88;
-    Parser.Last_Fail := Last_Fail35;
---  BEGIN <Defer (for 'null_lit') at parser.lkt:457:11>
---  pos=Defer_Pos219, res=Defer_Res219, nobt=None
-Defer_Res219 :=
-   Null_Lit_Transform_Parse0 (Parser, Pos);
-Defer_Pos219 := Parser.Current_Pos;
---  END <Defer (for 'null_lit') at parser.lkt:457:11>
-    if Defer_Pos219 /= No_Token_Index then
-        Or_Pos35 := Defer_Pos219;
-        Or_Res35 := Defer_Res219;
-        goto Exit_Or39;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
-       Branch_Diag_Mark35 := Parser.Last_Diag;
-       Branch_Last_Fail35 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark88;
-    Parser.Last_Fail := Last_Fail35;
---  BEGIN <Defer (for 'ref_id') at parser.lkt:458:11>
---  pos=Defer_Pos220, res=Defer_Res220, nobt=None
-Defer_Res220 :=
-   Ref_Id_Transform_Parse0 (Parser, Pos);
-Defer_Pos220 := Parser.Current_Pos;
---  END <Defer (for 'ref_id') at parser.lkt:458:11>
-    if Defer_Pos220 /= No_Token_Index then
-        Or_Pos35 := Defer_Pos220;
-        Or_Res35 := Defer_Res220;
-        goto Exit_Or39;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
-       Branch_Diag_Mark35 := Parser.Last_Diag;
-       Branch_Last_Fail35 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark88;
-    Parser.Last_Fail := Last_Fail35;
---  BEGIN <Defer (for 'block') at parser.lkt:459:11>
---  pos=Defer_Pos221, res=Defer_Res221, nobt=None
-Defer_Res221 :=
-   Block_Transform_Parse2 (Parser, Pos);
-Defer_Pos221 := Parser.Current_Pos;
---  END <Defer (for 'block') at parser.lkt:459:11>
-    if Defer_Pos221 /= No_Token_Index then
-        Or_Pos35 := Defer_Pos221;
-        Or_Res35 := Defer_Res221;
-        goto Exit_Or39;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
-       Branch_Diag_Mark35 := Parser.Last_Diag;
-       Branch_Last_Fail35 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark88;
-    Parser.Last_Fail := Last_Fail35;
---  BEGIN <Defer (for 'num_lit') at parser.lkt:460:11>
 --  pos=Defer_Pos222, res=Defer_Res222, nobt=None
 Defer_Res222 :=
-   Num_Lit_Transform_Parse0 (Parser, Pos);
+   Match_Expr_Transform_Parse3 (Parser, Pos);
 Defer_Pos222 := Parser.Current_Pos;
---  END <Defer (for 'num_lit') at parser.lkt:460:11>
+--  END <Defer (for 'match_expr') at parser.lkt:456:11>
     if Defer_Pos222 /= No_Token_Index then
         Or_Pos35 := Defer_Pos222;
         Or_Res35 := Defer_Res222;
@@ -32689,14 +32990,14 @@ Defer_Pos222 := Parser.Current_Pos;
        Branch_Diag_Mark35 := Parser.Last_Diag;
        Branch_Last_Fail35 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark88;
+    Parser.Last_Diag := Diag_Mark90;
     Parser.Last_Fail := Last_Fail35;
---  BEGIN <Defer (for 'big_num_lit') at parser.lkt:461:11>
+--  BEGIN <Defer (for 'null_lit') at parser.lkt:457:11>
 --  pos=Defer_Pos223, res=Defer_Res223, nobt=None
 Defer_Res223 :=
-   Big_Num_Lit_Transform_Parse0 (Parser, Pos);
+   Null_Lit_Transform_Parse0 (Parser, Pos);
 Defer_Pos223 := Parser.Current_Pos;
---  END <Defer (for 'big_num_lit') at parser.lkt:461:11>
+--  END <Defer (for 'null_lit') at parser.lkt:457:11>
     if Defer_Pos223 /= No_Token_Index then
         Or_Pos35 := Defer_Pos223;
         Or_Res35 := Defer_Res223;
@@ -32706,14 +33007,14 @@ Defer_Pos223 := Parser.Current_Pos;
        Branch_Diag_Mark35 := Parser.Last_Diag;
        Branch_Last_Fail35 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark88;
+    Parser.Last_Diag := Diag_Mark90;
     Parser.Last_Fail := Last_Fail35;
---  BEGIN <Defer (for 'string_lit') at parser.lkt:462:11>
+--  BEGIN <Defer (for 'ref_id') at parser.lkt:458:11>
 --  pos=Defer_Pos224, res=Defer_Res224, nobt=None
 Defer_Res224 :=
-   String_Lit_Or_Parse0 (Parser, Pos);
+   Ref_Id_Transform_Parse0 (Parser, Pos);
 Defer_Pos224 := Parser.Current_Pos;
---  END <Defer (for 'string_lit') at parser.lkt:462:11>
+--  END <Defer (for 'ref_id') at parser.lkt:458:11>
     if Defer_Pos224 /= No_Token_Index then
         Or_Pos35 := Defer_Pos224;
         Or_Res35 := Defer_Res224;
@@ -32723,14 +33024,14 @@ Defer_Pos224 := Parser.Current_Pos;
        Branch_Diag_Mark35 := Parser.Last_Diag;
        Branch_Last_Fail35 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark88;
+    Parser.Last_Diag := Diag_Mark90;
     Parser.Last_Fail := Last_Fail35;
---  BEGIN <Defer (for 'char_lit') at parser.lkt:463:11>
+--  BEGIN <Defer (for 'block') at parser.lkt:459:11>
 --  pos=Defer_Pos225, res=Defer_Res225, nobt=None
 Defer_Res225 :=
-   Char_Lit_Transform_Parse0 (Parser, Pos);
+   Block_Transform_Parse2 (Parser, Pos);
 Defer_Pos225 := Parser.Current_Pos;
---  END <Defer (for 'char_lit') at parser.lkt:463:11>
+--  END <Defer (for 'block') at parser.lkt:459:11>
     if Defer_Pos225 /= No_Token_Index then
         Or_Pos35 := Defer_Pos225;
         Or_Res35 := Defer_Res225;
@@ -32740,17 +33041,102 @@ Defer_Pos225 := Parser.Current_Pos;
        Branch_Diag_Mark35 := Parser.Last_Diag;
        Branch_Last_Fail35 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark88;
+    Parser.Last_Diag := Diag_Mark90;
     Parser.Last_Fail := Last_Fail35;
---  BEGIN <Defer (for 'array_literal') at parser.lkt:464:11>
+--  BEGIN <Defer (for 'num_lit') at parser.lkt:460:11>
 --  pos=Defer_Pos226, res=Defer_Res226, nobt=None
 Defer_Res226 :=
-   Array_Literal_Transform_Parse0 (Parser, Pos);
+   Num_Lit_Transform_Parse0 (Parser, Pos);
 Defer_Pos226 := Parser.Current_Pos;
---  END <Defer (for 'array_literal') at parser.lkt:464:11>
+--  END <Defer (for 'num_lit') at parser.lkt:460:11>
     if Defer_Pos226 /= No_Token_Index then
         Or_Pos35 := Defer_Pos226;
         Or_Res35 := Defer_Res226;
+        goto Exit_Or39;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
+       Branch_Diag_Mark35 := Parser.Last_Diag;
+       Branch_Last_Fail35 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark90;
+    Parser.Last_Fail := Last_Fail35;
+--  BEGIN <Defer (for 'big_num_lit') at parser.lkt:461:11>
+--  pos=Defer_Pos227, res=Defer_Res227, nobt=None
+Defer_Res227 :=
+   Big_Num_Lit_Transform_Parse0 (Parser, Pos);
+Defer_Pos227 := Parser.Current_Pos;
+--  END <Defer (for 'big_num_lit') at parser.lkt:461:11>
+    if Defer_Pos227 /= No_Token_Index then
+        Or_Pos35 := Defer_Pos227;
+        Or_Res35 := Defer_Res227;
+        goto Exit_Or39;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
+       Branch_Diag_Mark35 := Parser.Last_Diag;
+       Branch_Last_Fail35 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark90;
+    Parser.Last_Fail := Last_Fail35;
+--  BEGIN <Defer (for 'string_lit') at parser.lkt:462:11>
+--  pos=Defer_Pos228, res=Defer_Res228, nobt=None
+Defer_Res228 :=
+   String_Lit_Or_Parse0 (Parser, Pos);
+Defer_Pos228 := Parser.Current_Pos;
+--  END <Defer (for 'string_lit') at parser.lkt:462:11>
+    if Defer_Pos228 /= No_Token_Index then
+        Or_Pos35 := Defer_Pos228;
+        Or_Res35 := Defer_Res228;
+        goto Exit_Or39;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
+       Branch_Diag_Mark35 := Parser.Last_Diag;
+       Branch_Last_Fail35 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark90;
+    Parser.Last_Fail := Last_Fail35;
+--  BEGIN <Defer (for 'char_lit') at parser.lkt:463:11>
+--  pos=Defer_Pos229, res=Defer_Res229, nobt=None
+Defer_Res229 :=
+   Char_Lit_Transform_Parse0 (Parser, Pos);
+Defer_Pos229 := Parser.Current_Pos;
+--  END <Defer (for 'char_lit') at parser.lkt:463:11>
+    if Defer_Pos229 /= No_Token_Index then
+        Or_Pos35 := Defer_Pos229;
+        Or_Res35 := Defer_Res229;
+        goto Exit_Or39;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
+       Branch_Diag_Mark35 := Parser.Last_Diag;
+       Branch_Last_Fail35 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark90;
+    Parser.Last_Fail := Last_Fail35;
+--  BEGIN <Defer (for 'query_comprehension') at parser.lkt:464:11>
+--  pos=Defer_Pos230, res=Defer_Res230, nobt=None
+Defer_Res230 :=
+   Query_Comprehension_Transform_Parse0 (Parser, Pos);
+Defer_Pos230 := Parser.Current_Pos;
+--  END <Defer (for 'query_comprehension') at parser.lkt:464:11>
+    if Defer_Pos230 /= No_Token_Index then
+        Or_Pos35 := Defer_Pos230;
+        Or_Res35 := Defer_Res230;
+        goto Exit_Or39;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
+       Branch_Diag_Mark35 := Parser.Last_Diag;
+       Branch_Last_Fail35 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark90;
+    Parser.Last_Fail := Last_Fail35;
+--  BEGIN <Defer (for 'array_literal') at parser.lkt:465:11>
+--  pos=Defer_Pos231, res=Defer_Res231, nobt=None
+Defer_Res231 :=
+   Array_Literal_Transform_Parse0 (Parser, Pos);
+Defer_Pos231 := Parser.Current_Pos;
+--  END <Defer (for 'array_literal') at parser.lkt:465:11>
+    if Defer_Pos231 /= No_Token_Index then
+        Or_Pos35 := Defer_Pos231;
+        Or_Res35 := Defer_Res231;
         goto Exit_Or39;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail35.Pos then
@@ -32785,117 +33171,13 @@ end Term_Or_Parse0;
    Pos    : Token_Index) return Bare_Token_Lit
 is
    use Bare_Token_Lit_Memos;
-      Row_Pos171 : Token_Index := No_Token_Index;
-      Token_Pos241 : Token_Index := No_Token_Index;
-      Token_Res241 : Token_Index := No_Token_Index;
-      Transform_Res134 : Bare_Token_Lit := No_Bare_Lkt_Node;
+      Row_Pos174 : Token_Index := No_Token_Index;
+      Token_Pos245 : Token_Index := No_Token_Index;
+      Token_Res245 : Token_Index := No_Token_Index;
+      Transform_Res135 : Bare_Token_Lit := No_Bare_Lkt_Node;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
    M  : Memo_Entry := Get (PP.Token_Literal_Transform_Parse0_Memo, Pos);
-begin
-   if M.State = Success then
-      Parser.Current_Pos := M.Final_Pos;
-      Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
-      Transform_Res134 := M.Instance;
-      return Transform_Res134;
-   elsif M.State = Failure then
-      Parser.Current_Pos := No_Token_Index;
-      return Transform_Res134;
-   end if;
-   Parser.Last_Diag := No_Diagnostic;
-   ---------------------------
-   -- MAIN COMBINATORS CODE --
-   ---------------------------
---  BEGIN <Transform(<ASTNodeType TokenLit>) (root of 'token_literal') at parser.lkt:97:22>
---  pos=Row_Pos171, res=Transform_Res134, nobt=None
---  BEGIN <_Row (root of 'token_literal') at parser.lkt:97:22>
---  pos=Row_Pos171, res=None, nobt=None
-Row_Pos171 := Pos;
---  BEGIN <Token(<WithText String>, ) (root of 'token_literal') at parser.lkt:97:31>
---  pos=Token_Pos241, res=Token_Res241, nobt=None
-Token_Res241 := Row_Pos171;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res241));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_String)
-   then
-       Token_Pos241 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos171 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos171,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_String,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos241 := Row_Pos171 + 1;
-   end if;
-end;
---  END <Token(<WithText String>, ) (root of 'token_literal') at parser.lkt:97:31>
-if Token_Pos241 /= No_Token_Index then
-   Row_Pos171 := Token_Pos241;
-else
-   Row_Pos171 := No_Token_Index;
-   goto Exit_Row171_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row171_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'token_literal') at parser.lkt:97:22>
-if Row_Pos171 /= No_Token_Index then
-   Transform_Res134 := Allocate_Token_Lit (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res134,
-      Kind => Lkt_Token_Lit,
-      Unit => Parser.Unit,
-      Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos171 = Pos
-                            then No_Token_Index
-                            else Row_Pos171 - 1));
-      Initialize_Fields_For_Token_Lit
-        (Self => Transform_Res134);
-end if;
---  END <Transform(<ASTNodeType TokenLit>) (root of 'token_literal') at parser.lkt:97:22>
-   -------------------------------
-   -- END MAIN COMBINATORS CODE --
-   -------------------------------
-   Set
-     (PP.Token_Literal_Transform_Parse0_Memo,
-      Row_Pos171 /= No_Token_Index,
-      Transform_Res134,
-      Parser.Last_Diag,
-      Pos,
-      Row_Pos171);
-   declare
-      Top : constant Diagnostic_Mark := Parser.Last_Diag;
-   begin
-      Parser.Last_Diag := Mark_On_Entry;
-      Append_Group (Parser.Pool, Parser.Last_Diag, Top);
-   end;
-   Parser.Current_Pos := Row_Pos171;
-   return Transform_Res134;
-end Token_Literal_Transform_Parse0;
-   function Token_No_Case_Literal_Transform_Parse0
-  (Parser : in out Parser_Type;
-   Pos    : Token_Index) return Bare_Token_No_Case_Lit
-is
-   use Bare_Token_No_Case_Lit_Memos;
-      Row_Pos172 : Token_Index := No_Token_Index;
-      Token_Pos242 : Token_Index := No_Token_Index;
-      Token_Res242 : Token_Index := No_Token_Index;
-      Token_Pos243 : Token_Index := No_Token_Index;
-      Token_Res243 : Token_Index := No_Token_Index;
-      Defer_Pos227 : Token_Index := No_Token_Index;
-      Defer_Res227 : Bare_Token_Lit := No_Bare_Lkt_Node;
-      Token_Pos244 : Token_Index := No_Token_Index;
-      Token_Res244 : Token_Index := No_Token_Index;
-      Transform_Res135 : Bare_Token_No_Case_Lit := No_Bare_Lkt_Node;
-   Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
-   PP : constant Parser_Private_Part := +Parser.Private_Part;
-   M  : Memo_Entry := Get (PP.Token_No_Case_Literal_Transform_Parse0_Memo, Pos);
 begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
@@ -32910,17 +33192,121 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType TokenNoCaseLit>) (root of 'token_no_case_literal') at parser.lkt:98:30>
---  pos=Row_Pos172, res=Transform_Res135, nobt=None
---  BEGIN <_Row (root of 'token_no_case_literal') at parser.lkt:98:30>
---  pos=Row_Pos172, res=None, nobt=None
-Row_Pos172 := Pos;
---  BEGIN <Token(<WithSymbol Identifier>, no_case) (root of 'token_no_case_literal') at parser.lkt:99:9>
---  pos=Token_Pos242, res=Token_Res242, nobt=None
-Token_Res242 := Row_Pos172;
+--  BEGIN <Transform(<ASTNodeType TokenLit>) (root of 'token_literal') at parser.lkt:97:22>
+--  pos=Row_Pos174, res=Transform_Res135, nobt=None
+--  BEGIN <_Row (root of 'token_literal') at parser.lkt:97:22>
+--  pos=Row_Pos174, res=None, nobt=None
+Row_Pos174 := Pos;
+--  BEGIN <Token(<WithText String>, ) (root of 'token_literal') at parser.lkt:97:31>
+--  pos=Token_Pos245, res=Token_Res245, nobt=None
+Token_Res245 := Row_Pos174;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res242));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res245));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_String)
+   then
+       Token_Pos245 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos174 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos174,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_String,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos245 := Row_Pos174 + 1;
+   end if;
+end;
+--  END <Token(<WithText String>, ) (root of 'token_literal') at parser.lkt:97:31>
+if Token_Pos245 /= No_Token_Index then
+   Row_Pos174 := Token_Pos245;
+else
+   Row_Pos174 := No_Token_Index;
+   goto Exit_Row174_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row174_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'token_literal') at parser.lkt:97:22>
+if Row_Pos174 /= No_Token_Index then
+   Transform_Res135 := Allocate_Token_Lit (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res135,
+      Kind => Lkt_Token_Lit,
+      Unit => Parser.Unit,
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos174 = Pos
+                            then No_Token_Index
+                            else Row_Pos174 - 1));
+      Initialize_Fields_For_Token_Lit
+        (Self => Transform_Res135);
+end if;
+--  END <Transform(<ASTNodeType TokenLit>) (root of 'token_literal') at parser.lkt:97:22>
+   -------------------------------
+   -- END MAIN COMBINATORS CODE --
+   -------------------------------
+   Set
+     (PP.Token_Literal_Transform_Parse0_Memo,
+      Row_Pos174 /= No_Token_Index,
+      Transform_Res135,
+      Parser.Last_Diag,
+      Pos,
+      Row_Pos174);
+   declare
+      Top : constant Diagnostic_Mark := Parser.Last_Diag;
+   begin
+      Parser.Last_Diag := Mark_On_Entry;
+      Append_Group (Parser.Pool, Parser.Last_Diag, Top);
+   end;
+   Parser.Current_Pos := Row_Pos174;
+   return Transform_Res135;
+end Token_Literal_Transform_Parse0;
+   function Token_No_Case_Literal_Transform_Parse0
+  (Parser : in out Parser_Type;
+   Pos    : Token_Index) return Bare_Token_No_Case_Lit
+is
+   use Bare_Token_No_Case_Lit_Memos;
+      Row_Pos175 : Token_Index := No_Token_Index;
+      Token_Pos246 : Token_Index := No_Token_Index;
+      Token_Res246 : Token_Index := No_Token_Index;
+      Token_Pos247 : Token_Index := No_Token_Index;
+      Token_Res247 : Token_Index := No_Token_Index;
+      Defer_Pos232 : Token_Index := No_Token_Index;
+      Defer_Res232 : Bare_Token_Lit := No_Bare_Lkt_Node;
+      Token_Pos248 : Token_Index := No_Token_Index;
+      Token_Res248 : Token_Index := No_Token_Index;
+      Transform_Res136 : Bare_Token_No_Case_Lit := No_Bare_Lkt_Node;
+   Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
+   PP : constant Parser_Private_Part := +Parser.Private_Part;
+   M  : Memo_Entry := Get (PP.Token_No_Case_Literal_Transform_Parse0_Memo, Pos);
+begin
+   if M.State = Success then
+      Parser.Current_Pos := M.Final_Pos;
+      Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
+      Transform_Res136 := M.Instance;
+      return Transform_Res136;
+   elsif M.State = Failure then
+      Parser.Current_Pos := No_Token_Index;
+      return Transform_Res136;
+   end if;
+   Parser.Last_Diag := No_Diagnostic;
+   ---------------------------
+   -- MAIN COMBINATORS CODE --
+   ---------------------------
+--  BEGIN <Transform(<ASTNodeType TokenNoCaseLit>) (root of 'token_no_case_literal') at parser.lkt:98:30>
+--  pos=Row_Pos175, res=Transform_Res136, nobt=None
+--  BEGIN <_Row (root of 'token_no_case_literal') at parser.lkt:98:30>
+--  pos=Row_Pos175, res=None, nobt=None
+Row_Pos175 := Pos;
+--  BEGIN <Token(<WithSymbol Identifier>, no_case) (root of 'token_no_case_literal') at parser.lkt:99:9>
+--  pos=Token_Pos246, res=Token_Res246, nobt=None
+Token_Res246 := Row_Pos175;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res246));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Identifier)
@@ -32928,119 +33314,119 @@ begin
         (Precomputed_Symbol_Table (Parser.TDH.Symbols),
          Precomputed_Sym_No_Case)
    then
-       Token_Pos242 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos172 then
+       Token_Pos246 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos175 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos172,
+            (Pos  => Row_Pos175,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Identifier,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos242 := Row_Pos172 + 1;
+          Token_Pos246 := Row_Pos175 + 1;
    end if;
 end;
 --  END <Token(<WithSymbol Identifier>, no_case) (root of 'token_no_case_literal') at parser.lkt:99:9>
-if Token_Pos242 /= No_Token_Index then
-   Row_Pos172 := Token_Pos242;
+if Token_Pos246 /= No_Token_Index then
+   Row_Pos175 := Token_Pos246;
 else
-   Row_Pos172 := No_Token_Index;
-   goto Exit_Row172_0;
+   Row_Pos175 := No_Token_Index;
+   goto Exit_Row175_0;
 end if;
 --  BEGIN <Token(<WithText LPar>, ) (root of 'token_no_case_literal') at parser.lkt:99:32>
---  pos=Token_Pos243, res=Token_Res243, nobt=None
-Token_Res243 := Row_Pos172;
+--  pos=Token_Pos247, res=Token_Res247, nobt=None
+Token_Res247 := Row_Pos175;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res243));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res247));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_L_Par)
    then
-       Token_Pos243 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos172 then
+       Token_Pos247 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos175 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos172,
+            (Pos  => Row_Pos175,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_L_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos243 := Row_Pos172 + 1;
+          Token_Pos247 := Row_Pos175 + 1;
    end if;
 end;
 --  END <Token(<WithText LPar>, ) (root of 'token_no_case_literal') at parser.lkt:99:32>
-if Token_Pos243 /= No_Token_Index then
-   Row_Pos172 := Token_Pos243;
+if Token_Pos247 /= No_Token_Index then
+   Row_Pos175 := Token_Pos247;
 else
-   Row_Pos172 := No_Token_Index;
-   goto Exit_Row172_0;
+   Row_Pos175 := No_Token_Index;
+   goto Exit_Row175_0;
 end if;
 --  BEGIN <Defer (for 'token_literal') at parser.lkt:99:36>
---  pos=Defer_Pos227, res=Defer_Res227, nobt=None
-Defer_Res227 :=
-   Token_Literal_Transform_Parse0 (Parser, Row_Pos172);
-Defer_Pos227 := Parser.Current_Pos;
+--  pos=Defer_Pos232, res=Defer_Res232, nobt=None
+Defer_Res232 :=
+   Token_Literal_Transform_Parse0 (Parser, Row_Pos175);
+Defer_Pos232 := Parser.Current_Pos;
 --  END <Defer (for 'token_literal') at parser.lkt:99:36>
-if Defer_Pos227 /= No_Token_Index then
-   Row_Pos172 := Defer_Pos227;
+if Defer_Pos232 /= No_Token_Index then
+   Row_Pos175 := Defer_Pos232;
 else
-   Row_Pos172 := No_Token_Index;
-   goto Exit_Row172_0;
+   Row_Pos175 := No_Token_Index;
+   goto Exit_Row175_0;
 end if;
 --  BEGIN <Token(<WithText RPar>, ) (root of 'token_no_case_literal') at parser.lkt:99:50>
---  pos=Token_Pos244, res=Token_Res244, nobt=None
-Token_Res244 := Row_Pos172;
+--  pos=Token_Pos248, res=Token_Res248, nobt=None
+Token_Res248 := Row_Pos175;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res244));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res248));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_R_Par)
    then
-       Token_Pos244 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos172 then
+       Token_Pos248 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos175 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos172,
+            (Pos  => Row_Pos175,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos244 := Row_Pos172 + 1;
+          Token_Pos248 := Row_Pos175 + 1;
    end if;
 end;
 --  END <Token(<WithText RPar>, ) (root of 'token_no_case_literal') at parser.lkt:99:50>
-if Token_Pos244 /= No_Token_Index then
-   Row_Pos172 := Token_Pos244;
+if Token_Pos248 /= No_Token_Index then
+   Row_Pos175 := Token_Pos248;
 else
-   Row_Pos172 := No_Token_Index;
-   goto Exit_Row172_0;
+   Row_Pos175 := No_Token_Index;
+   goto Exit_Row175_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row172_0>>
+<<Exit_Row175_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'token_no_case_literal') at parser.lkt:98:30>
-if Row_Pos172 /= No_Token_Index then
-   Transform_Res135 := Allocate_Token_No_Case_Lit (Parser.Mem_Pool);
+if Row_Pos175 /= No_Token_Index then
+   Transform_Res136 := Allocate_Token_No_Case_Lit (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res135,
+     (Self => Transform_Res136,
       Kind => Lkt_Token_No_Case_Lit,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos172 = Pos
+      Token_End_Index   => (if Row_Pos175 = Pos
                             then No_Token_Index
-                            else Row_Pos172 - 1));
+                            else Row_Pos175 - 1));
       Initialize_Fields_For_Token_No_Case_Lit
-        (Self => Transform_Res135,
-         Token_No_Case_Lit_F_Lit => Defer_Res227);
-         if Defer_Res227 /= null and then Is_Incomplete (Defer_Res227) then
-            Transform_Res135.Last_Attempted_Child := 0;
-         elsif Defer_Res227 /= null and then not Is_Ghost (Defer_Res227) then
-            Transform_Res135.Last_Attempted_Child := -1;
+        (Self => Transform_Res136,
+         Token_No_Case_Lit_F_Lit => Defer_Res232);
+         if Defer_Res232 /= null and then Is_Incomplete (Defer_Res232) then
+            Transform_Res136.Last_Attempted_Child := 0;
+         elsif Defer_Res232 /= null and then not Is_Ghost (Defer_Res232) then
+            Transform_Res136.Last_Attempted_Child := -1;
          end if;
 end if;
 --  END <Transform(<ASTNodeType TokenNoCaseLit>) (root of 'token_no_case_literal') at parser.lkt:98:30>
@@ -33049,38 +33435,38 @@ end if;
    -------------------------------
    Set
      (PP.Token_No_Case_Literal_Transform_Parse0_Memo,
-      Row_Pos172 /= No_Token_Index,
-      Transform_Res135,
+      Row_Pos175 /= No_Token_Index,
+      Transform_Res136,
       Parser.Last_Diag,
       Pos,
-      Row_Pos172);
+      Row_Pos175);
    declare
       Top : constant Diagnostic_Mark := Parser.Last_Diag;
    begin
       Parser.Last_Diag := Mark_On_Entry;
       Append_Group (Parser.Pool, Parser.Last_Diag, Top);
    end;
-   Parser.Current_Pos := Row_Pos172;
-   return Transform_Res135;
+   Parser.Current_Pos := Row_Pos175;
+   return Transform_Res136;
 end Token_No_Case_Literal_Transform_Parse0;
    function Token_Pattern_Or_Parse0
   (Parser : in out Parser_Type;
    Pos    : Token_Index) return Bare_Grammar_Expr
 is
    use Bare_Grammar_Expr_Memos;
-      Row_Pos173 : Token_Index := No_Token_Index;
-      Defer_Pos228 : Token_Index := No_Token_Index;
-      Defer_Res228 : Bare_Grammar_Expr := No_Bare_Lkt_Node;
-      Token_Pos245 : Token_Index := No_Token_Index;
-      Token_Res245 : Token_Index := No_Token_Index;
-      Defer_Pos229 : Token_Index := No_Token_Index;
-      Defer_Res229 : Bare_Token_Pattern_Lit := No_Bare_Lkt_Node;
-      Transform_Res136 : Bare_Token_Pattern_Concat := No_Bare_Lkt_Node;
-      Defer_Pos230 : Token_Index := No_Token_Index;
-      Defer_Res230 : Bare_Token_Pattern_Lit := No_Bare_Lkt_Node;
+      Row_Pos176 : Token_Index := No_Token_Index;
+      Defer_Pos233 : Token_Index := No_Token_Index;
+      Defer_Res233 : Bare_Grammar_Expr := No_Bare_Lkt_Node;
+      Token_Pos249 : Token_Index := No_Token_Index;
+      Token_Res249 : Token_Index := No_Token_Index;
+      Defer_Pos234 : Token_Index := No_Token_Index;
+      Defer_Res234 : Bare_Token_Pattern_Lit := No_Bare_Lkt_Node;
+      Transform_Res137 : Bare_Token_Pattern_Concat := No_Bare_Lkt_Node;
+      Defer_Pos235 : Token_Index := No_Token_Index;
+      Defer_Res235 : Bare_Token_Pattern_Lit := No_Bare_Lkt_Node;
       Or_Pos36 : Token_Index := No_Token_Index;
       Or_Res36 : Bare_Grammar_Expr := No_Bare_Lkt_Node;
-      Diag_Mark89 : Diagnostic_Mark;
+      Diag_Mark91 : Diagnostic_Mark;
       Last_Fail36 : Fail_Info;
       Branch_Diag_Mark36 : Diagnostic_Mark;
       Branch_Last_Fail36 : Fail_Info;
@@ -33117,121 +33503,121 @@ begin
 --  pos=Or_Pos36, res=Or_Res36, nobt=None
 Or_Pos36 := No_Token_Index;
 Or_Res36 := No_Bare_Lkt_Node;
-Diag_Mark89 := Parser.Last_Diag;
+Diag_Mark91 := Parser.Last_Diag;
 Last_Fail36 := Parser.Last_Fail;
 Branch_Diag_Mark36 := Parser.Last_Diag;
 Branch_Last_Fail36 := Parser.Last_Fail;
-    Parser.Last_Diag := Diag_Mark89;
+    Parser.Last_Diag := Diag_Mark91;
     Parser.Last_Fail := Last_Fail36;
 --  BEGIN <Transform(<ASTNodeType TokenPatternConcat>) (root of 'token_pattern') at parser.lkt:102:11>
---  pos=Row_Pos173, res=Transform_Res136, nobt=None
+--  pos=Row_Pos176, res=Transform_Res137, nobt=None
 --  BEGIN <_Row (root of 'token_pattern') at parser.lkt:102:11>
---  pos=Row_Pos173, res=None, nobt=None
-Row_Pos173 := Pos;
+--  pos=Row_Pos176, res=None, nobt=None
+Row_Pos176 := Pos;
 --  BEGIN <Defer (for 'token_pattern') at parser.lkt:102:30>
---  pos=Defer_Pos228, res=Defer_Res228, nobt=None
-Defer_Res228 :=
-   Token_Pattern_Or_Parse0 (Parser, Row_Pos173);
-Defer_Pos228 := Parser.Current_Pos;
+--  pos=Defer_Pos233, res=Defer_Res233, nobt=None
+Defer_Res233 :=
+   Token_Pattern_Or_Parse0 (Parser, Row_Pos176);
+Defer_Pos233 := Parser.Current_Pos;
 --  END <Defer (for 'token_pattern') at parser.lkt:102:30>
-if Defer_Pos228 /= No_Token_Index then
-   Row_Pos173 := Defer_Pos228;
+if Defer_Pos233 /= No_Token_Index then
+   Row_Pos176 := Defer_Pos233;
 else
-   Row_Pos173 := No_Token_Index;
-   goto Exit_Row173_0;
+   Row_Pos176 := No_Token_Index;
+   goto Exit_Row176_0;
 end if;
 --  BEGIN <Token(<WithText Amp>, ) (root of 'token_pattern') at parser.lkt:102:44>
---  pos=Token_Pos245, res=Token_Res245, nobt=None
-Token_Res245 := Row_Pos173;
+--  pos=Token_Pos249, res=Token_Res249, nobt=None
+Token_Res249 := Row_Pos176;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res245));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res249));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Amp)
    then
-       Token_Pos245 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos173 then
+       Token_Pos249 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos176 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos173,
+            (Pos  => Row_Pos176,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Amp,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos245 := Row_Pos173 + 1;
+          Token_Pos249 := Row_Pos176 + 1;
    end if;
 end;
 --  END <Token(<WithText Amp>, ) (root of 'token_pattern') at parser.lkt:102:44>
-if Token_Pos245 /= No_Token_Index then
-   Row_Pos173 := Token_Pos245;
+if Token_Pos249 /= No_Token_Index then
+   Row_Pos176 := Token_Pos249;
 else
-   Row_Pos173 := No_Token_Index;
-   goto Exit_Row173_0;
+   Row_Pos176 := No_Token_Index;
+   goto Exit_Row176_0;
 end if;
 --  BEGIN <Defer (for 'token_pattern_literal') at parser.lkt:102:48>
---  pos=Defer_Pos229, res=Defer_Res229, nobt=None
-Defer_Res229 :=
-   Token_Pattern_Literal_Transform_Parse0 (Parser, Row_Pos173);
-Defer_Pos229 := Parser.Current_Pos;
+--  pos=Defer_Pos234, res=Defer_Res234, nobt=None
+Defer_Res234 :=
+   Token_Pattern_Literal_Transform_Parse0 (Parser, Row_Pos176);
+Defer_Pos234 := Parser.Current_Pos;
 --  END <Defer (for 'token_pattern_literal') at parser.lkt:102:48>
-if Defer_Pos229 /= No_Token_Index then
-   Row_Pos173 := Defer_Pos229;
+if Defer_Pos234 /= No_Token_Index then
+   Row_Pos176 := Defer_Pos234;
 else
-   Row_Pos173 := No_Token_Index;
-   goto Exit_Row173_0;
+   Row_Pos176 := No_Token_Index;
+   goto Exit_Row176_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row173_0>>
+<<Exit_Row176_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'token_pattern') at parser.lkt:102:11>
-if Row_Pos173 /= No_Token_Index then
-   Transform_Res136 := Allocate_Token_Pattern_Concat (Parser.Mem_Pool);
+if Row_Pos176 /= No_Token_Index then
+   Transform_Res137 := Allocate_Token_Pattern_Concat (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res136,
+     (Self => Transform_Res137,
       Kind => Lkt_Token_Pattern_Concat,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos173 = Pos
+      Token_End_Index   => (if Row_Pos176 = Pos
                             then No_Token_Index
-                            else Row_Pos173 - 1));
+                            else Row_Pos176 - 1));
       Initialize_Fields_For_Token_Pattern_Concat
-        (Self => Transform_Res136,
-         Token_Pattern_Concat_F_Left => Defer_Res228,
-         Token_Pattern_Concat_F_Right => Defer_Res229);
-         if Defer_Res228 /= null and then Is_Incomplete (Defer_Res228) then
-            Transform_Res136.Last_Attempted_Child := 0;
-         elsif Defer_Res228 /= null and then not Is_Ghost (Defer_Res228) then
-            Transform_Res136.Last_Attempted_Child := -1;
+        (Self => Transform_Res137,
+         Token_Pattern_Concat_F_Left => Defer_Res233,
+         Token_Pattern_Concat_F_Right => Defer_Res234);
+         if Defer_Res233 /= null and then Is_Incomplete (Defer_Res233) then
+            Transform_Res137.Last_Attempted_Child := 0;
+         elsif Defer_Res233 /= null and then not Is_Ghost (Defer_Res233) then
+            Transform_Res137.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res229 /= null and then Is_Incomplete (Defer_Res229) then
-            Transform_Res136.Last_Attempted_Child := 0;
-         elsif Defer_Res229 /= null and then not Is_Ghost (Defer_Res229) then
-            Transform_Res136.Last_Attempted_Child := -1;
+         if Defer_Res234 /= null and then Is_Incomplete (Defer_Res234) then
+            Transform_Res137.Last_Attempted_Child := 0;
+         elsif Defer_Res234 /= null and then not Is_Ghost (Defer_Res234) then
+            Transform_Res137.Last_Attempted_Child := -1;
          end if;
 end if;
 --  END <Transform(<ASTNodeType TokenPatternConcat>) (root of 'token_pattern') at parser.lkt:102:11>
-    if Row_Pos173 /= No_Token_Index then
-        Or_Pos36 := Row_Pos173;
-        Or_Res36 := Transform_Res136;
+    if Row_Pos176 /= No_Token_Index then
+        Or_Pos36 := Row_Pos176;
+        Or_Res36 := Transform_Res137;
         goto Exit_Or40;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail36.Pos then
        Branch_Diag_Mark36 := Parser.Last_Diag;
        Branch_Last_Fail36 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark89;
+    Parser.Last_Diag := Diag_Mark91;
     Parser.Last_Fail := Last_Fail36;
 --  BEGIN <Defer (for 'token_pattern_literal') at parser.lkt:103:11>
---  pos=Defer_Pos230, res=Defer_Res230, nobt=None
-Defer_Res230 :=
+--  pos=Defer_Pos235, res=Defer_Res235, nobt=None
+Defer_Res235 :=
    Token_Pattern_Literal_Transform_Parse0 (Parser, Pos);
-Defer_Pos230 := Parser.Current_Pos;
+Defer_Pos235 := Parser.Current_Pos;
 --  END <Defer (for 'token_pattern_literal') at parser.lkt:103:11>
-    if Defer_Pos230 /= No_Token_Index then
-        Or_Pos36 := Defer_Pos230;
-        Or_Res36 := Defer_Res230;
+    if Defer_Pos235 /= No_Token_Index then
+        Or_Pos36 := Defer_Pos235;
+        Or_Res36 := Defer_Res235;
         goto Exit_Or40;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail36.Pos then
@@ -33285,123 +33671,13 @@ end Token_Pattern_Or_Parse0;
    Pos    : Token_Index) return Bare_Token_Pattern_Lit
 is
    use Bare_Token_Pattern_Lit_Memos;
-      Row_Pos174 : Token_Index := No_Token_Index;
-      Token_Pos246 : Token_Index := No_Token_Index;
-      Token_Res246 : Token_Index := No_Token_Index;
-      Transform_Res137 : Bare_Token_Pattern_Lit := No_Bare_Lkt_Node;
+      Row_Pos177 : Token_Index := No_Token_Index;
+      Token_Pos250 : Token_Index := No_Token_Index;
+      Token_Res250 : Token_Index := No_Token_Index;
+      Transform_Res138 : Bare_Token_Pattern_Lit := No_Bare_Lkt_Node;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
    M  : Memo_Entry := Get (PP.Token_Pattern_Literal_Transform_Parse0_Memo, Pos);
-begin
-   if M.State = Success then
-      Parser.Current_Pos := M.Final_Pos;
-      Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
-      Transform_Res137 := M.Instance;
-      return Transform_Res137;
-   elsif M.State = Failure then
-      Parser.Current_Pos := No_Token_Index;
-      return Transform_Res137;
-   end if;
-   Parser.Last_Diag := No_Diagnostic;
-   ---------------------------
-   -- MAIN COMBINATORS CODE --
-   ---------------------------
---  BEGIN <Transform(<ASTNodeType TokenPatternLit>) (root of 'token_pattern_literal') at parser.lkt:105:30>
---  pos=Row_Pos174, res=Transform_Res137, nobt=None
---  BEGIN <_Row (root of 'token_pattern_literal') at parser.lkt:105:30>
---  pos=Row_Pos174, res=None, nobt=None
-Row_Pos174 := Pos;
---  BEGIN <Token(<WithText PString>, ) (root of 'token_pattern_literal') at parser.lkt:105:46>
---  pos=Token_Pos246, res=Token_Res246, nobt=None
-Token_Res246 := Row_Pos174;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res246));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_P_String)
-   then
-       Token_Pos246 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos174 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos174,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_P_String,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos246 := Row_Pos174 + 1;
-   end if;
-end;
---  END <Token(<WithText PString>, ) (root of 'token_pattern_literal') at parser.lkt:105:46>
-if Token_Pos246 /= No_Token_Index then
-   Row_Pos174 := Token_Pos246;
-else
-   Row_Pos174 := No_Token_Index;
-   goto Exit_Row174_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row174_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'token_pattern_literal') at parser.lkt:105:30>
-if Row_Pos174 /= No_Token_Index then
-   Transform_Res137 := Allocate_Token_Pattern_Lit (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res137,
-      Kind => Lkt_Token_Pattern_Lit,
-      Unit => Parser.Unit,
-      Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos174 = Pos
-                            then No_Token_Index
-                            else Row_Pos174 - 1));
-      Initialize_Fields_For_Token_Pattern_Lit
-        (Self => Transform_Res137);
-end if;
---  END <Transform(<ASTNodeType TokenPatternLit>) (root of 'token_pattern_literal') at parser.lkt:105:30>
-   -------------------------------
-   -- END MAIN COMBINATORS CODE --
-   -------------------------------
-   Set
-     (PP.Token_Pattern_Literal_Transform_Parse0_Memo,
-      Row_Pos174 /= No_Token_Index,
-      Transform_Res137,
-      Parser.Last_Diag,
-      Pos,
-      Row_Pos174);
-   declare
-      Top : constant Diagnostic_Mark := Parser.Last_Diag;
-   begin
-      Parser.Last_Diag := Mark_On_Entry;
-      Append_Group (Parser.Pool, Parser.Last_Diag, Top);
-   end;
-   Parser.Current_Pos := Row_Pos174;
-   return Transform_Res137;
-end Token_Pattern_Literal_Transform_Parse0;
-   function Try_Expr_Transform_Parse0
-  (Parser : in out Parser_Type;
-   Pos    : Token_Index) return Bare_Try_Expr
-is
-   use Bare_Try_Expr_Memos;
-      Nobt45 : Boolean := False;
-      Nobt46 : Boolean := False;
-      Row_Pos175 : Token_Index := No_Token_Index;
-      Token_Pos247 : Token_Index := No_Token_Index;
-      Token_Res247 : Token_Index := No_Token_Index;
-      Defer_Pos231 : Token_Index := No_Token_Index;
-      Defer_Res231 : Bare_Expr := No_Bare_Lkt_Node;
-      Row_Pos176 : Token_Index := No_Token_Index;
-      Token_Pos248 : Token_Index := No_Token_Index;
-      Token_Res248 : Token_Index := No_Token_Index;
-      Defer_Pos232 : Token_Index := No_Token_Index;
-      Defer_Res232 : Bare_Expr := No_Bare_Lkt_Node;
-      Diag_Mark90 : Diagnostic_Mark;
-      Row_Progress43 : Integer := 0;
-      Transform_Res138 : Bare_Try_Expr := No_Bare_Lkt_Node;
-      Transform_Has_Failed43 : Boolean := False;
-   Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
-   PP : constant Parser_Private_Part := +Parser.Private_Part;
-   M  : Memo_Entry := Get (PP.Try_Expr_Transform_Parse0_Memo, Pos);
 begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
@@ -33416,236 +33692,102 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType TryExpr>) (root of 'try_expr') at parser.lkt:421:17>
---  pos=Row_Pos175, res=Transform_Res138, nobt=Nobt45
---  BEGIN <_Row (root of 'try_expr') at parser.lkt:421:17>
---  pos=Row_Pos175, res=None, nobt=Nobt45
-Row_Pos175 := Pos;
---  BEGIN <Token(<WithText TryKw>, ) (root of 'try_expr') at parser.lkt:421:25>
---  pos=Token_Pos247, res=Token_Res247, nobt=None
-Token_Res247 := Row_Pos175;
+--  BEGIN <Transform(<ASTNodeType TokenPatternLit>) (root of 'token_pattern_literal') at parser.lkt:105:30>
+--  pos=Row_Pos177, res=Transform_Res138, nobt=None
+--  BEGIN <_Row (root of 'token_pattern_literal') at parser.lkt:105:30>
+--  pos=Row_Pos177, res=None, nobt=None
+Row_Pos177 := Pos;
+--  BEGIN <Token(<WithText PString>, ) (root of 'token_pattern_literal') at parser.lkt:105:46>
+--  pos=Token_Pos250, res=Token_Res250, nobt=None
+Token_Res250 := Row_Pos177;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res247));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res250));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_Try_Kw)
+      T.Kind /= From_Token_Kind (Lkt_P_String)
    then
-       Token_Pos247 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos175 then
+       Token_Pos250 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos177 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos175,
+            (Pos  => Row_Pos177,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Try_Kw,
+                Expected_Token_Id => Lkt_P_String,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos247 := Row_Pos175 + 1;
+          Token_Pos250 := Row_Pos177 + 1;
    end if;
 end;
---  END <Token(<WithText TryKw>, ) (root of 'try_expr') at parser.lkt:421:25>
-Row_Progress43 := 1;
-if Token_Pos247 /= No_Token_Index then
-   Row_Pos175 := Token_Pos247;
+--  END <Token(<WithText PString>, ) (root of 'token_pattern_literal') at parser.lkt:105:46>
+if Token_Pos250 /= No_Token_Index then
+   Row_Pos177 := Token_Pos250;
 else
-   Row_Pos175 := No_Token_Index;
-   goto Exit_Row175_0;
-end if;
---  BEGIN <Cut (root of 'try_expr') at parser.lkt:421:31>
---  pos=Row_Pos175, res=None, nobt=Nobt45
-Nobt45 := True;
---  END <Cut (root of 'try_expr') at parser.lkt:421:31>
-Row_Progress43 := 2;
-if Row_Pos175 /= No_Token_Index then
-   Row_Pos175 := Row_Pos175;
-else
-   Row_Pos175 := No_Token_Index;
-   goto Exit_Row175_0;
-end if;
---  BEGIN <Defer (for 'expr') at parser.lkt:421:33>
---  pos=Defer_Pos231, res=Defer_Res231, nobt=None
-Defer_Res231 :=
-   Expr_Or_Parse1 (Parser, Row_Pos175);
-Defer_Pos231 := Parser.Current_Pos;
---  END <Defer (for 'expr') at parser.lkt:421:33>
-Row_Progress43 := 3;
-if Defer_Pos231 /= No_Token_Index then
-   Row_Pos175 := Defer_Pos231;
-else
-   Row_Pos175 := No_Token_Index;
-   goto Exit_Row175_0;
-end if;
---  BEGIN <Opt (root of 'try_expr') at parser.lkt:421:38>
---  pos=Row_Pos176, res=Defer_Res232, nobt=Nobt46
-Diag_Mark90 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'try_expr') at parser.lkt:421:39>
---  pos=Row_Pos176, res=Defer_Res232, nobt=Nobt46
---  BEGIN <_Row (root of 'try_expr') at parser.lkt:421:39>
---  pos=Row_Pos176, res=None, nobt=Nobt46
-Row_Pos176 := Row_Pos175;
---  BEGIN <Token(<WithText ElseKw>, ) (root of 'try_expr') at parser.lkt:421:44>
---  pos=Token_Pos248, res=Token_Res248, nobt=None
-Token_Res248 := Row_Pos176;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res248));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_Else_Kw)
-   then
-       Token_Pos248 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos176 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos176,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Else_Kw,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos248 := Row_Pos176 + 1;
-   end if;
-end;
---  END <Token(<WithText ElseKw>, ) (root of 'try_expr') at parser.lkt:421:44>
-if Token_Pos248 /= No_Token_Index then
-   Row_Pos176 := Token_Pos248;
-else
-   Row_Pos176 := No_Token_Index;
-   goto Exit_Row176_0;
-end if;
---  BEGIN <Cut (root of 'try_expr') at parser.lkt:421:51>
---  pos=Row_Pos176, res=None, nobt=Nobt46
-Nobt46 := True;
---  END <Cut (root of 'try_expr') at parser.lkt:421:51>
-if Row_Pos176 /= No_Token_Index then
-   Row_Pos176 := Row_Pos176;
-else
-   Row_Pos176 := No_Token_Index;
-   goto Exit_Row176_0;
-end if;
---  BEGIN <Defer (for 'expr') at parser.lkt:421:53>
---  pos=Defer_Pos232, res=Defer_Res232, nobt=None
-Defer_Res232 :=
-   Expr_Or_Parse1 (Parser, Row_Pos176);
-Defer_Pos232 := Parser.Current_Pos;
---  END <Defer (for 'expr') at parser.lkt:421:53>
-if Defer_Pos232 /= No_Token_Index then
-   Row_Pos176 := Defer_Pos232;
-else
-   Row_Pos176 := No_Token_Index;
-   goto Exit_Row176_0;
+   Row_Pos177 := No_Token_Index;
+   goto Exit_Row177_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row176_0>>
+<<Exit_Row177_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'try_expr') at parser.lkt:421:39>
---  END <_Extract (root of 'try_expr') at parser.lkt:421:39>
-if Row_Pos176 = No_Token_Index then
-   if Nobt46 then
-      Row_Pos176 := Parser.Last_Fail.Pos;
-      Append (Parser, Row_Pos176, "Cannot parse <try_expr>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
-         if not Nobt46 then
-   Defer_Res232 := No_Bare_Lkt_Node;
-         end if;
-       if not Nobt46 then
-   Row_Pos176 := Row_Pos175;
-      Parser.Last_Diag := Diag_Mark90;
-       end if;
-end if;
---  END <Opt (root of 'try_expr') at parser.lkt:421:38>
-   Nobt45 := Nobt46;
-Row_Progress43 := 4;
-if Row_Pos176 /= No_Token_Index then
-   Row_Pos175 := Row_Pos176;
-else
-   Row_Pos175 := No_Token_Index;
-   goto Exit_Row175_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row175_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'try_expr') at parser.lkt:421:17>
-if Row_Pos175 = No_Token_Index and then Nobt45 then
-   Row_Pos175 := Parser.Last_Fail.Pos;
-   Transform_Has_Failed43 := True;
-end if;
-if Row_Pos175 /= No_Token_Index then
-   Transform_Res138 := Allocate_Try_Expr (Parser.Mem_Pool);
+--  END <_Row (root of 'token_pattern_literal') at parser.lkt:105:30>
+if Row_Pos177 /= No_Token_Index then
+   Transform_Res138 := Allocate_Token_Pattern_Lit (Parser.Mem_Pool);
    Initialize
      (Self => Transform_Res138,
-      Kind => Lkt_Try_Expr,
+      Kind => Lkt_Token_Pattern_Lit,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos175 = Pos
+      Token_End_Index   => (if Row_Pos177 = Pos
                             then No_Token_Index
-                            else Row_Pos175 - 1));
-      Initialize_Fields_For_Try_Expr
-        (Self => Transform_Res138,
-         Try_Expr_F_Try_Expr => Defer_Res231,
-         Try_Expr_F_Or_Expr => Defer_Res232);
-         if Defer_Res231 /= null and then Is_Incomplete (Defer_Res231) then
-            Transform_Res138.Last_Attempted_Child := 0;
-         elsif Defer_Res231 /= null and then not Is_Ghost (Defer_Res231) then
-            Transform_Res138.Last_Attempted_Child := -1;
-         end if;
-         if Defer_Res232 /= null and then Is_Incomplete (Defer_Res232) then
-            Transform_Res138.Last_Attempted_Child := 0;
-         elsif Defer_Res232 /= null and then not Is_Ghost (Defer_Res232) then
-            Transform_Res138.Last_Attempted_Child := -1;
-         end if;
-   if Transform_Has_Failed43 then
-      Transform_Res138.Last_Attempted_Child :=
-         Row_Progress43;
-      Append (Parser, Pos, "Cannot parse <try_expr>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
+                            else Row_Pos177 - 1));
+      Initialize_Fields_For_Token_Pattern_Lit
+        (Self => Transform_Res138);
 end if;
---  END <Transform(<ASTNodeType TryExpr>) (root of 'try_expr') at parser.lkt:421:17>
+--  END <Transform(<ASTNodeType TokenPatternLit>) (root of 'token_pattern_literal') at parser.lkt:105:30>
    -------------------------------
    -- END MAIN COMBINATORS CODE --
    -------------------------------
    Set
-     (PP.Try_Expr_Transform_Parse0_Memo,
-      Row_Pos175 /= No_Token_Index,
+     (PP.Token_Pattern_Literal_Transform_Parse0_Memo,
+      Row_Pos177 /= No_Token_Index,
       Transform_Res138,
       Parser.Last_Diag,
       Pos,
-      Row_Pos175);
+      Row_Pos177);
    declare
       Top : constant Diagnostic_Mark := Parser.Last_Diag;
    begin
       Parser.Last_Diag := Mark_On_Entry;
       Append_Group (Parser.Pool, Parser.Last_Diag, Top);
    end;
-   Parser.Current_Pos := Row_Pos175;
+   Parser.Current_Pos := Row_Pos177;
    return Transform_Res138;
-end Try_Expr_Transform_Parse0;
-   function Tuple_Pattern_Transform_Parse0
+end Token_Pattern_Literal_Transform_Parse0;
+   function Try_Expr_Transform_Parse0
   (Parser : in out Parser_Type;
-   Pos    : Token_Index) return Bare_Tuple_Pattern
+   Pos    : Token_Index) return Bare_Try_Expr
 is
-   use Bare_Tuple_Pattern_Memos;
-      Row_Pos177 : Token_Index := No_Token_Index;
-      Token_Pos249 : Token_Index := No_Token_Index;
-      Token_Res249 : Token_Index := No_Token_Index;
-      Lst_Cpos29 : Token_Index := No_Token_Index;
-      Tmp_List29 : Free_Parse_List;
-      Defer_Pos233 : Token_Index := No_Token_Index;
-      Defer_Res233 : Bare_Pattern := No_Bare_Lkt_Node;
-      Token_Pos250 : Token_Index := No_Token_Index;
-      Token_Res250 : Token_Index := No_Token_Index;
-      List_Pos29 : Token_Index := No_Token_Index;
-      List_Res29 : Bare_Pattern_List := No_Bare_Lkt_Node;
-      Diag_Mark91 : Diagnostic_Mark;
+   use Bare_Try_Expr_Memos;
+      Nobt45 : Boolean := False;
+      Nobt46 : Boolean := False;
+      Row_Pos178 : Token_Index := No_Token_Index;
       Token_Pos251 : Token_Index := No_Token_Index;
       Token_Res251 : Token_Index := No_Token_Index;
-      Transform_Res139 : Bare_Tuple_Pattern := No_Bare_Lkt_Node;
+      Defer_Pos236 : Token_Index := No_Token_Index;
+      Defer_Res236 : Bare_Expr := No_Bare_Lkt_Node;
+      Row_Pos179 : Token_Index := No_Token_Index;
+      Token_Pos252 : Token_Index := No_Token_Index;
+      Token_Res252 : Token_Index := No_Token_Index;
+      Defer_Pos237 : Token_Index := No_Token_Index;
+      Defer_Res237 : Bare_Expr := No_Bare_Lkt_Node;
+      Diag_Mark92 : Diagnostic_Mark;
+      Row_Progress43 : Integer := 0;
+      Transform_Res139 : Bare_Try_Expr := No_Bare_Lkt_Node;
+      Transform_Has_Failed43 : Boolean := False;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
-   M  : Memo_Entry := Get (PP.Tuple_Pattern_Transform_Parse0_Memo, Pos);
+   M  : Memo_Entry := Get (PP.Try_Expr_Transform_Parse0_Memo, Pos);
 begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
@@ -33660,70 +33802,314 @@ begin
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
---  BEGIN <Transform(<ASTNodeType TuplePattern>) (root of 'tuple_pattern') at parser.lkt:323:22>
---  pos=Row_Pos177, res=Transform_Res139, nobt=None
---  BEGIN <_Row (root of 'tuple_pattern') at parser.lkt:323:22>
---  pos=Row_Pos177, res=None, nobt=None
-Row_Pos177 := Pos;
---  BEGIN <Token(<WithText LPar>, ) (root of 'tuple_pattern') at parser.lkt:323:35>
---  pos=Token_Pos249, res=Token_Res249, nobt=None
-Token_Res249 := Row_Pos177;
+--  BEGIN <Transform(<ASTNodeType TryExpr>) (root of 'try_expr') at parser.lkt:421:17>
+--  pos=Row_Pos178, res=Transform_Res139, nobt=Nobt45
+--  BEGIN <_Row (root of 'try_expr') at parser.lkt:421:17>
+--  pos=Row_Pos178, res=None, nobt=Nobt45
+Row_Pos178 := Pos;
+--  BEGIN <Token(<WithText TryKw>, ) (root of 'try_expr') at parser.lkt:421:25>
+--  pos=Token_Pos251, res=Token_Res251, nobt=None
+Token_Res251 := Row_Pos178;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res249));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res251));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Try_Kw)
+   then
+       Token_Pos251 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos178 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos178,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Try_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos251 := Row_Pos178 + 1;
+   end if;
+end;
+--  END <Token(<WithText TryKw>, ) (root of 'try_expr') at parser.lkt:421:25>
+Row_Progress43 := 1;
+if Token_Pos251 /= No_Token_Index then
+   Row_Pos178 := Token_Pos251;
+else
+   Row_Pos178 := No_Token_Index;
+   goto Exit_Row178_0;
+end if;
+--  BEGIN <Cut (root of 'try_expr') at parser.lkt:421:31>
+--  pos=Row_Pos178, res=None, nobt=Nobt45
+Nobt45 := True;
+--  END <Cut (root of 'try_expr') at parser.lkt:421:31>
+Row_Progress43 := 2;
+if Row_Pos178 /= No_Token_Index then
+   Row_Pos178 := Row_Pos178;
+else
+   Row_Pos178 := No_Token_Index;
+   goto Exit_Row178_0;
+end if;
+--  BEGIN <Defer (for 'expr') at parser.lkt:421:33>
+--  pos=Defer_Pos236, res=Defer_Res236, nobt=None
+Defer_Res236 :=
+   Expr_Or_Parse1 (Parser, Row_Pos178);
+Defer_Pos236 := Parser.Current_Pos;
+--  END <Defer (for 'expr') at parser.lkt:421:33>
+Row_Progress43 := 3;
+if Defer_Pos236 /= No_Token_Index then
+   Row_Pos178 := Defer_Pos236;
+else
+   Row_Pos178 := No_Token_Index;
+   goto Exit_Row178_0;
+end if;
+--  BEGIN <Opt (root of 'try_expr') at parser.lkt:421:38>
+--  pos=Row_Pos179, res=Defer_Res237, nobt=Nobt46
+Diag_Mark92 := Parser.Last_Diag;
+--  BEGIN <_Extract (root of 'try_expr') at parser.lkt:421:39>
+--  pos=Row_Pos179, res=Defer_Res237, nobt=Nobt46
+--  BEGIN <_Row (root of 'try_expr') at parser.lkt:421:39>
+--  pos=Row_Pos179, res=None, nobt=Nobt46
+Row_Pos179 := Row_Pos178;
+--  BEGIN <Token(<WithText ElseKw>, ) (root of 'try_expr') at parser.lkt:421:44>
+--  pos=Token_Pos252, res=Token_Res252, nobt=None
+Token_Res252 := Row_Pos179;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res252));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Else_Kw)
+   then
+       Token_Pos252 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos179 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos179,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Else_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos252 := Row_Pos179 + 1;
+   end if;
+end;
+--  END <Token(<WithText ElseKw>, ) (root of 'try_expr') at parser.lkt:421:44>
+if Token_Pos252 /= No_Token_Index then
+   Row_Pos179 := Token_Pos252;
+else
+   Row_Pos179 := No_Token_Index;
+   goto Exit_Row179_0;
+end if;
+--  BEGIN <Cut (root of 'try_expr') at parser.lkt:421:51>
+--  pos=Row_Pos179, res=None, nobt=Nobt46
+Nobt46 := True;
+--  END <Cut (root of 'try_expr') at parser.lkt:421:51>
+if Row_Pos179 /= No_Token_Index then
+   Row_Pos179 := Row_Pos179;
+else
+   Row_Pos179 := No_Token_Index;
+   goto Exit_Row179_0;
+end if;
+--  BEGIN <Defer (for 'expr') at parser.lkt:421:53>
+--  pos=Defer_Pos237, res=Defer_Res237, nobt=None
+Defer_Res237 :=
+   Expr_Or_Parse1 (Parser, Row_Pos179);
+Defer_Pos237 := Parser.Current_Pos;
+--  END <Defer (for 'expr') at parser.lkt:421:53>
+if Defer_Pos237 /= No_Token_Index then
+   Row_Pos179 := Defer_Pos237;
+else
+   Row_Pos179 := No_Token_Index;
+   goto Exit_Row179_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row179_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'try_expr') at parser.lkt:421:39>
+--  END <_Extract (root of 'try_expr') at parser.lkt:421:39>
+if Row_Pos179 = No_Token_Index then
+   if Nobt46 then
+      Row_Pos179 := Parser.Last_Fail.Pos;
+      Append (Parser, Row_Pos179, "Cannot parse <try_expr>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
+         if not Nobt46 then
+   Defer_Res237 := No_Bare_Lkt_Node;
+         end if;
+       if not Nobt46 then
+   Row_Pos179 := Row_Pos178;
+      Parser.Last_Diag := Diag_Mark92;
+       end if;
+end if;
+--  END <Opt (root of 'try_expr') at parser.lkt:421:38>
+   Nobt45 := Nobt46;
+Row_Progress43 := 4;
+if Row_Pos179 /= No_Token_Index then
+   Row_Pos178 := Row_Pos179;
+else
+   Row_Pos178 := No_Token_Index;
+   goto Exit_Row178_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row178_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'try_expr') at parser.lkt:421:17>
+if Row_Pos178 = No_Token_Index and then Nobt45 then
+   Row_Pos178 := Parser.Last_Fail.Pos;
+   Transform_Has_Failed43 := True;
+end if;
+if Row_Pos178 /= No_Token_Index then
+   Transform_Res139 := Allocate_Try_Expr (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res139,
+      Kind => Lkt_Try_Expr,
+      Unit => Parser.Unit,
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos178 = Pos
+                            then No_Token_Index
+                            else Row_Pos178 - 1));
+      Initialize_Fields_For_Try_Expr
+        (Self => Transform_Res139,
+         Try_Expr_F_Try_Expr => Defer_Res236,
+         Try_Expr_F_Or_Expr => Defer_Res237);
+         if Defer_Res236 /= null and then Is_Incomplete (Defer_Res236) then
+            Transform_Res139.Last_Attempted_Child := 0;
+         elsif Defer_Res236 /= null and then not Is_Ghost (Defer_Res236) then
+            Transform_Res139.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res237 /= null and then Is_Incomplete (Defer_Res237) then
+            Transform_Res139.Last_Attempted_Child := 0;
+         elsif Defer_Res237 /= null and then not Is_Ghost (Defer_Res237) then
+            Transform_Res139.Last_Attempted_Child := -1;
+         end if;
+   if Transform_Has_Failed43 then
+      Transform_Res139.Last_Attempted_Child :=
+         Row_Progress43;
+      Append (Parser, Pos, "Cannot parse <try_expr>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
+end if;
+--  END <Transform(<ASTNodeType TryExpr>) (root of 'try_expr') at parser.lkt:421:17>
+   -------------------------------
+   -- END MAIN COMBINATORS CODE --
+   -------------------------------
+   Set
+     (PP.Try_Expr_Transform_Parse0_Memo,
+      Row_Pos178 /= No_Token_Index,
+      Transform_Res139,
+      Parser.Last_Diag,
+      Pos,
+      Row_Pos178);
+   declare
+      Top : constant Diagnostic_Mark := Parser.Last_Diag;
+   begin
+      Parser.Last_Diag := Mark_On_Entry;
+      Append_Group (Parser.Pool, Parser.Last_Diag, Top);
+   end;
+   Parser.Current_Pos := Row_Pos178;
+   return Transform_Res139;
+end Try_Expr_Transform_Parse0;
+   function Tuple_Pattern_Transform_Parse0
+  (Parser : in out Parser_Type;
+   Pos    : Token_Index) return Bare_Tuple_Pattern
+is
+   use Bare_Tuple_Pattern_Memos;
+      Row_Pos180 : Token_Index := No_Token_Index;
+      Token_Pos253 : Token_Index := No_Token_Index;
+      Token_Res253 : Token_Index := No_Token_Index;
+      Lst_Cpos29 : Token_Index := No_Token_Index;
+      Tmp_List29 : Free_Parse_List;
+      Defer_Pos238 : Token_Index := No_Token_Index;
+      Defer_Res238 : Bare_Pattern := No_Bare_Lkt_Node;
+      Token_Pos254 : Token_Index := No_Token_Index;
+      Token_Res254 : Token_Index := No_Token_Index;
+      List_Pos29 : Token_Index := No_Token_Index;
+      List_Res29 : Bare_Pattern_List := No_Bare_Lkt_Node;
+      Diag_Mark93 : Diagnostic_Mark;
+      Token_Pos255 : Token_Index := No_Token_Index;
+      Token_Res255 : Token_Index := No_Token_Index;
+      Transform_Res140 : Bare_Tuple_Pattern := No_Bare_Lkt_Node;
+   Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
+   PP : constant Parser_Private_Part := +Parser.Private_Part;
+   M  : Memo_Entry := Get (PP.Tuple_Pattern_Transform_Parse0_Memo, Pos);
+begin
+   if M.State = Success then
+      Parser.Current_Pos := M.Final_Pos;
+      Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
+      Transform_Res140 := M.Instance;
+      return Transform_Res140;
+   elsif M.State = Failure then
+      Parser.Current_Pos := No_Token_Index;
+      return Transform_Res140;
+   end if;
+   Parser.Last_Diag := No_Diagnostic;
+   ---------------------------
+   -- MAIN COMBINATORS CODE --
+   ---------------------------
+--  BEGIN <Transform(<ASTNodeType TuplePattern>) (root of 'tuple_pattern') at parser.lkt:323:22>
+--  pos=Row_Pos180, res=Transform_Res140, nobt=None
+--  BEGIN <_Row (root of 'tuple_pattern') at parser.lkt:323:22>
+--  pos=Row_Pos180, res=None, nobt=None
+Row_Pos180 := Pos;
+--  BEGIN <Token(<WithText LPar>, ) (root of 'tuple_pattern') at parser.lkt:323:35>
+--  pos=Token_Pos253, res=Token_Res253, nobt=None
+Token_Res253 := Row_Pos180;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res253));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_L_Par)
    then
-       Token_Pos249 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos177 then
+       Token_Pos253 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos180 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos177,
+            (Pos  => Row_Pos180,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_L_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos249 := Row_Pos177 + 1;
+          Token_Pos253 := Row_Pos180 + 1;
    end if;
 end;
 --  END <Token(<WithText LPar>, ) (root of 'tuple_pattern') at parser.lkt:323:35>
-if Token_Pos249 /= No_Token_Index then
-   Row_Pos177 := Token_Pos249;
+if Token_Pos253 /= No_Token_Index then
+   Row_Pos180 := Token_Pos253;
 else
-   Row_Pos177 := No_Token_Index;
-   goto Exit_Row177_0;
+   Row_Pos180 := No_Token_Index;
+   goto Exit_Row180_0;
 end if;
 --  BEGIN <List (root of 'tuple_pattern') at parser.lkt:323:39>
 --  pos=List_Pos29, res=List_Res29, nobt=None
     List_Pos29 := No_Token_Index;
-Lst_Cpos29 := Row_Pos177;
+Lst_Cpos29 := Row_Pos180;
 Tmp_List29 := Get_Parse_List (Parser);
-Diag_Mark91 := Parser.Last_Diag;
+Diag_Mark93 := Parser.Last_Diag;
 loop
 --  BEGIN <Defer (for 'value_pattern') at parser.lkt:323:45>
---  pos=Defer_Pos233, res=Defer_Res233, nobt=None
-Defer_Res233 :=
+--  pos=Defer_Pos238, res=Defer_Res238, nobt=None
+Defer_Res238 :=
    Value_Pattern_Or_Parse1 (Parser, Lst_Cpos29);
-Defer_Pos233 := Parser.Current_Pos;
+Defer_Pos238 := Parser.Current_Pos;
 --  END <Defer (for 'value_pattern') at parser.lkt:323:45>
-   exit when Defer_Pos233 = No_Token_Index;
-   List_Pos29 := Defer_Pos233;
+   exit when Defer_Pos238 = No_Token_Index;
+   List_Pos29 := Defer_Pos238;
    Lst_Cpos29 := List_Pos29;
-   Diag_Mark91 := Parser.Last_Diag;
-   Tmp_List29.Nodes.Append (Defer_Res233);
+   Diag_Mark93 := Parser.Last_Diag;
+   Tmp_List29.Nodes.Append (Defer_Res238);
 --  BEGIN <Token(<WithText Comma>, ) (root of 'tuple_pattern') at parser.lkt:323:60>
---  pos=Token_Pos250, res=Token_Res250, nobt=None
-Token_Res250 := Lst_Cpos29;
+--  pos=Token_Pos254, res=Token_Res254, nobt=None
+Token_Res254 := Lst_Cpos29;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res250));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res254));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Comma)
    then
-       Token_Pos250 := No_Token_Index;
+       Token_Pos254 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Lst_Cpos29 then
           Parser.Last_Fail :=
             (Pos  => Lst_Cpos29,
@@ -33733,26 +34119,26 @@ begin
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos250 := Lst_Cpos29 + 1;
+          Token_Pos254 := Lst_Cpos29 + 1;
    end if;
 end;
 --  END <Token(<WithText Comma>, ) (root of 'tuple_pattern') at parser.lkt:323:60>
-      exit when Token_Pos250 = No_Token_Index;
-      Lst_Cpos29 := Token_Pos250;
+      exit when Token_Pos254 = No_Token_Index;
+      Lst_Cpos29 := Token_Pos254;
 end loop;
-Parser.Last_Diag := Diag_Mark91;
+Parser.Last_Diag := Diag_Mark93;
 declare
    Token_Start, Token_End : Token_Index;
    Count                  : constant Natural := Tmp_List29.Nodes.Length;
 begin
    List_Res29 := Allocate_Pattern_List (Parser.Mem_Pool);
    if Count > 0 then
-      Token_Start := Row_Pos177;
-      Token_End := (if Lst_Cpos29 = Row_Pos177
-                    then Row_Pos177
+      Token_Start := Row_Pos180;
+      Token_End := (if Lst_Cpos29 = Row_Pos180
+                    then Row_Pos180
                     else List_Pos29 - 1);
    else
-      Token_Start := Token_Index'Max (Row_Pos177, 1);
+      Token_Start := Token_Index'Max (Row_Pos180, 1);
       Token_End := No_Token_Index;
    end if;
    Initialize
@@ -33780,62 +34166,62 @@ end;
 Release_Parse_List (Parser, Tmp_List29);
 --  END <List (root of 'tuple_pattern') at parser.lkt:323:39>
 if List_Pos29 /= No_Token_Index then
-   Row_Pos177 := List_Pos29;
+   Row_Pos180 := List_Pos29;
 else
-   Row_Pos177 := No_Token_Index;
-   goto Exit_Row177_0;
+   Row_Pos180 := No_Token_Index;
+   goto Exit_Row180_0;
 end if;
 --  BEGIN <Token(<WithText RPar>, ) (root of 'tuple_pattern') at parser.lkt:323:65>
---  pos=Token_Pos251, res=Token_Res251, nobt=None
-Token_Res251 := Row_Pos177;
+--  pos=Token_Pos255, res=Token_Res255, nobt=None
+Token_Res255 := Row_Pos180;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res251));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res255));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_R_Par)
    then
-       Token_Pos251 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos177 then
+       Token_Pos255 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos180 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos177,
+            (Pos  => Row_Pos180,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos251 := Row_Pos177 + 1;
+          Token_Pos255 := Row_Pos180 + 1;
    end if;
 end;
 --  END <Token(<WithText RPar>, ) (root of 'tuple_pattern') at parser.lkt:323:65>
-if Token_Pos251 /= No_Token_Index then
-   Row_Pos177 := Token_Pos251;
+if Token_Pos255 /= No_Token_Index then
+   Row_Pos180 := Token_Pos255;
 else
-   Row_Pos177 := No_Token_Index;
-   goto Exit_Row177_0;
+   Row_Pos180 := No_Token_Index;
+   goto Exit_Row180_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row177_0>>
+<<Exit_Row180_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'tuple_pattern') at parser.lkt:323:22>
-if Row_Pos177 /= No_Token_Index then
-   Transform_Res139 := Allocate_Tuple_Pattern (Parser.Mem_Pool);
+if Row_Pos180 /= No_Token_Index then
+   Transform_Res140 := Allocate_Tuple_Pattern (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res139,
+     (Self => Transform_Res140,
       Kind => Lkt_Tuple_Pattern,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos177 = Pos
+      Token_End_Index   => (if Row_Pos180 = Pos
                             then No_Token_Index
-                            else Row_Pos177 - 1));
+                            else Row_Pos180 - 1));
       Initialize_Fields_For_Tuple_Pattern
-        (Self => Transform_Res139,
+        (Self => Transform_Res140,
          Tuple_Pattern_F_Sub_Patterns => List_Res29);
          if List_Res29 /= null and then Is_Incomplete (List_Res29) then
-            Transform_Res139.Last_Attempted_Child := 0;
+            Transform_Res140.Last_Attempted_Child := 0;
          elsif List_Res29 /= null and then not Is_Ghost (List_Res29) then
-            Transform_Res139.Last_Attempted_Child := -1;
+            Transform_Res140.Last_Attempted_Child := -1;
          end if;
 end if;
 --  END <Transform(<ASTNodeType TuplePattern>) (root of 'tuple_pattern') at parser.lkt:323:22>
@@ -33844,19 +34230,19 @@ end if;
    -------------------------------
    Set
      (PP.Tuple_Pattern_Transform_Parse0_Memo,
-      Row_Pos177 /= No_Token_Index,
-      Transform_Res139,
+      Row_Pos180 /= No_Token_Index,
+      Transform_Res140,
       Parser.Last_Diag,
       Pos,
-      Row_Pos177);
+      Row_Pos180);
    declare
       Top : constant Diagnostic_Mark := Parser.Last_Diag;
    begin
       Parser.Last_Diag := Mark_On_Entry;
       Append_Group (Parser.Pool, Parser.Last_Diag, Top);
    end;
-   Parser.Current_Pos := Row_Pos177;
-   return Transform_Res139;
+   Parser.Current_Pos := Row_Pos180;
+   return Transform_Res140;
 end Tuple_Pattern_Transform_Parse0;
    function Type_Decl_Or_Parse0
   (Parser : in out Parser_Type;
@@ -33871,150 +34257,150 @@ is
       Nobt52 : Boolean := False;
       Nobt53 : Boolean := False;
       Nobt54 : Boolean := False;
-      Row_Pos178 : Token_Index := No_Token_Index;
-      Token_Pos252 : Token_Index := No_Token_Index;
-      Token_Res252 : Token_Index := No_Token_Index;
-      Defer_Pos234 : Token_Index := No_Token_Index;
-      Defer_Res234 : Bare_Def_Id := No_Bare_Lkt_Node;
-      Row_Pos179 : Token_Index := No_Token_Index;
-      Token_Pos253 : Token_Index := No_Token_Index;
-      Token_Res253 : Token_Index := No_Token_Index;
-      Defer_Pos235 : Token_Index := No_Token_Index;
-      Defer_Res235 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
-      Diag_Mark92 : Diagnostic_Mark;
-      Token_Pos254 : Token_Index := No_Token_Index;
-      Token_Res254 : Token_Index := No_Token_Index;
-      Defer_Pos236 : Token_Index := No_Token_Index;
-      Defer_Res236 : Bare_Decl_Block := No_Bare_Lkt_Node;
-      Token_Pos255 : Token_Index := No_Token_Index;
-      Token_Res255 : Token_Index := No_Token_Index;
-      Row_Progress44 : Integer := 0;
-      Transform_Res140 : Bare_Struct_Decl := No_Bare_Lkt_Node;
-      Transform_Has_Failed44 : Boolean := False;
-      Row_Pos180 : Token_Index := No_Token_Index;
+      Row_Pos181 : Token_Index := No_Token_Index;
       Token_Pos256 : Token_Index := No_Token_Index;
       Token_Res256 : Token_Index := No_Token_Index;
+      Defer_Pos239 : Token_Index := No_Token_Index;
+      Defer_Res239 : Bare_Def_Id := No_Bare_Lkt_Node;
+      Row_Pos182 : Token_Index := No_Token_Index;
       Token_Pos257 : Token_Index := No_Token_Index;
       Token_Res257 : Token_Index := No_Token_Index;
-      Defer_Pos237 : Token_Index := No_Token_Index;
-      Defer_Res237 : Bare_Def_Id := No_Bare_Lkt_Node;
-      Row_Pos181 : Token_Index := No_Token_Index;
+      Defer_Pos240 : Token_Index := No_Token_Index;
+      Defer_Res240 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
+      Diag_Mark94 : Diagnostic_Mark;
       Token_Pos258 : Token_Index := No_Token_Index;
       Token_Res258 : Token_Index := No_Token_Index;
-      Defer_Pos238 : Token_Index := No_Token_Index;
-      Defer_Res238 : Bare_Type_Ref := No_Bare_Lkt_Node;
-      Diag_Mark93 : Diagnostic_Mark;
-      Row_Pos182 : Token_Index := No_Token_Index;
-      Token_Pos259 : Token_Index := No_Token_Index;
-      Token_Res259 : Token_Index := No_Token_Index;
-      Defer_Pos239 : Token_Index := No_Token_Index;
-      Defer_Res239 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
-      Diag_Mark94 : Diagnostic_Mark;
-      Token_Pos260 : Token_Index := No_Token_Index;
-      Token_Res260 : Token_Index := No_Token_Index;
-      Lst_Cpos30 : Token_Index := No_Token_Index;
-      Tmp_List30 : Free_Parse_List;
-      Row_Pos183 : Token_Index := No_Token_Index;
-      Token_Pos261 : Token_Index := No_Token_Index;
-      Token_Res261 : Token_Index := No_Token_Index;
-      Lst_Cpos31 : Token_Index := No_Token_Index;
-      Tmp_List31 : Free_Parse_List;
-      Row_Pos184 : Token_Index := No_Token_Index;
-      Defer_Pos240 : Token_Index := No_Token_Index;
-      Defer_Res240 : Bare_Def_Id := No_Bare_Lkt_Node;
-      Null_Res21 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
-      Transform_Res141 : Bare_Enum_Class_Alt_Decl := No_Bare_Lkt_Node;
-      Token_Pos262 : Token_Index := No_Token_Index;
-      Token_Res262 : Token_Index := No_Token_Index;
-      List_Pos30 : Token_Index := No_Token_Index;
-      List_Res30 : Bare_Enum_Class_Alt_Decl_List := No_Bare_Lkt_Node;
-      Diag_Mark95 : Diagnostic_Mark;
-      Transform_Res142 : Bare_Enum_Class_Case := No_Bare_Lkt_Node;
-      List_Pos31 : Token_Index := No_Token_Index;
-      List_Res31 : Bare_Enum_Class_Case_List := No_Bare_Lkt_Node;
-      Diag_Mark96 : Diagnostic_Mark;
       Defer_Pos241 : Token_Index := No_Token_Index;
       Defer_Res241 : Bare_Decl_Block := No_Bare_Lkt_Node;
-      Token_Pos263 : Token_Index := No_Token_Index;
-      Token_Res263 : Token_Index := No_Token_Index;
-      Row_Progress45 : Integer := 0;
-      Transform_Res143 : Bare_Enum_Class_Decl := No_Bare_Lkt_Node;
-      Transform_Has_Failed45 : Boolean := False;
-      Row_Pos185 : Token_Index := No_Token_Index;
-      Token_Pos264 : Token_Index := No_Token_Index;
-      Token_Res264 : Token_Index := No_Token_Index;
+      Token_Pos259 : Token_Index := No_Token_Index;
+      Token_Res259 : Token_Index := No_Token_Index;
+      Row_Progress44 : Integer := 0;
+      Transform_Res141 : Bare_Struct_Decl := No_Bare_Lkt_Node;
+      Transform_Has_Failed44 : Boolean := False;
+      Row_Pos183 : Token_Index := No_Token_Index;
+      Token_Pos260 : Token_Index := No_Token_Index;
+      Token_Res260 : Token_Index := No_Token_Index;
+      Token_Pos261 : Token_Index := No_Token_Index;
+      Token_Res261 : Token_Index := No_Token_Index;
       Defer_Pos242 : Token_Index := No_Token_Index;
       Defer_Res242 : Bare_Def_Id := No_Bare_Lkt_Node;
+      Row_Pos184 : Token_Index := No_Token_Index;
+      Token_Pos262 : Token_Index := No_Token_Index;
+      Token_Res262 : Token_Index := No_Token_Index;
+      Defer_Pos243 : Token_Index := No_Token_Index;
+      Defer_Res243 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Diag_Mark95 : Diagnostic_Mark;
+      Row_Pos185 : Token_Index := No_Token_Index;
+      Token_Pos263 : Token_Index := No_Token_Index;
+      Token_Res263 : Token_Index := No_Token_Index;
+      Defer_Pos244 : Token_Index := No_Token_Index;
+      Defer_Res244 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
+      Diag_Mark96 : Diagnostic_Mark;
+      Token_Pos264 : Token_Index := No_Token_Index;
+      Token_Res264 : Token_Index := No_Token_Index;
+      Lst_Cpos30 : Token_Index := No_Token_Index;
+      Tmp_List30 : Free_Parse_List;
       Row_Pos186 : Token_Index := No_Token_Index;
       Token_Pos265 : Token_Index := No_Token_Index;
       Token_Res265 : Token_Index := No_Token_Index;
-      Defer_Pos243 : Token_Index := No_Token_Index;
-      Defer_Res243 : Bare_Type_Ref := No_Bare_Lkt_Node;
-      Diag_Mark97 : Diagnostic_Mark;
+      Lst_Cpos31 : Token_Index := No_Token_Index;
+      Tmp_List31 : Free_Parse_List;
       Row_Pos187 : Token_Index := No_Token_Index;
+      Defer_Pos245 : Token_Index := No_Token_Index;
+      Defer_Res245 : Bare_Def_Id := No_Bare_Lkt_Node;
+      Null_Res21 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
+      Transform_Res142 : Bare_Enum_Class_Alt_Decl := No_Bare_Lkt_Node;
       Token_Pos266 : Token_Index := No_Token_Index;
       Token_Res266 : Token_Index := No_Token_Index;
-      Defer_Pos244 : Token_Index := No_Token_Index;
-      Defer_Res244 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
+      List_Pos30 : Token_Index := No_Token_Index;
+      List_Res30 : Bare_Enum_Class_Alt_Decl_List := No_Bare_Lkt_Node;
+      Diag_Mark97 : Diagnostic_Mark;
+      Transform_Res143 : Bare_Enum_Class_Case := No_Bare_Lkt_Node;
+      List_Pos31 : Token_Index := No_Token_Index;
+      List_Res31 : Bare_Enum_Class_Case_List := No_Bare_Lkt_Node;
       Diag_Mark98 : Diagnostic_Mark;
+      Defer_Pos246 : Token_Index := No_Token_Index;
+      Defer_Res246 : Bare_Decl_Block := No_Bare_Lkt_Node;
       Token_Pos267 : Token_Index := No_Token_Index;
       Token_Res267 : Token_Index := No_Token_Index;
-      Defer_Pos245 : Token_Index := No_Token_Index;
-      Defer_Res245 : Bare_Decl_Block := No_Bare_Lkt_Node;
+      Row_Progress45 : Integer := 0;
+      Transform_Res144 : Bare_Enum_Class_Decl := No_Bare_Lkt_Node;
+      Transform_Has_Failed45 : Boolean := False;
+      Row_Pos188 : Token_Index := No_Token_Index;
       Token_Pos268 : Token_Index := No_Token_Index;
       Token_Res268 : Token_Index := No_Token_Index;
-      Row_Progress46 : Integer := 0;
-      Transform_Res144 : Bare_Class_Decl := No_Bare_Lkt_Node;
-      Transform_Has_Failed46 : Boolean := False;
-      Row_Pos188 : Token_Index := No_Token_Index;
+      Defer_Pos247 : Token_Index := No_Token_Index;
+      Defer_Res247 : Bare_Def_Id := No_Bare_Lkt_Node;
+      Row_Pos189 : Token_Index := No_Token_Index;
       Token_Pos269 : Token_Index := No_Token_Index;
       Token_Res269 : Token_Index := No_Token_Index;
-      Defer_Pos246 : Token_Index := No_Token_Index;
-      Defer_Res246 : Bare_Def_Id := No_Bare_Lkt_Node;
-      Row_Pos189 : Token_Index := No_Token_Index;
+      Defer_Pos248 : Token_Index := No_Token_Index;
+      Defer_Res248 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Diag_Mark99 : Diagnostic_Mark;
+      Row_Pos190 : Token_Index := No_Token_Index;
       Token_Pos270 : Token_Index := No_Token_Index;
       Token_Res270 : Token_Index := No_Token_Index;
-      Defer_Pos247 : Token_Index := No_Token_Index;
-      Defer_Res247 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
-      Diag_Mark99 : Diagnostic_Mark;
+      Defer_Pos249 : Token_Index := No_Token_Index;
+      Defer_Res249 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
+      Diag_Mark100 : Diagnostic_Mark;
       Token_Pos271 : Token_Index := No_Token_Index;
       Token_Res271 : Token_Index := No_Token_Index;
+      Defer_Pos250 : Token_Index := No_Token_Index;
+      Defer_Res250 : Bare_Decl_Block := No_Bare_Lkt_Node;
       Token_Pos272 : Token_Index := No_Token_Index;
       Token_Res272 : Token_Index := No_Token_Index;
-      Lst_Cpos32 : Token_Index := No_Token_Index;
-      Tmp_List32 : Free_Parse_List;
-      Defer_Pos248 : Token_Index := No_Token_Index;
-      Defer_Res248 : Bare_Enum_Lit_Decl := No_Bare_Lkt_Node;
+      Row_Progress46 : Integer := 0;
+      Transform_Res145 : Bare_Class_Decl := No_Bare_Lkt_Node;
+      Transform_Has_Failed46 : Boolean := False;
+      Row_Pos191 : Token_Index := No_Token_Index;
       Token_Pos273 : Token_Index := No_Token_Index;
       Token_Res273 : Token_Index := No_Token_Index;
-      List_Pos32 : Token_Index := No_Token_Index;
-      List_Res32 : Bare_Enum_Lit_Decl_List := No_Bare_Lkt_Node;
-      Diag_Mark100 : Diagnostic_Mark;
-      Defer_Pos249 : Token_Index := No_Token_Index;
-      Defer_Res249 : Bare_Decl_Block := No_Bare_Lkt_Node;
+      Defer_Pos251 : Token_Index := No_Token_Index;
+      Defer_Res251 : Bare_Def_Id := No_Bare_Lkt_Node;
+      Row_Pos192 : Token_Index := No_Token_Index;
       Token_Pos274 : Token_Index := No_Token_Index;
       Token_Res274 : Token_Index := No_Token_Index;
-      Row_Progress47 : Integer := 0;
-      Transform_Res145 : Bare_Enum_Type_Decl := No_Bare_Lkt_Node;
-      Transform_Has_Failed47 : Boolean := False;
-      Row_Pos190 : Token_Index := No_Token_Index;
+      Defer_Pos252 : Token_Index := No_Token_Index;
+      Defer_Res252 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
+      Diag_Mark101 : Diagnostic_Mark;
       Token_Pos275 : Token_Index := No_Token_Index;
       Token_Res275 : Token_Index := No_Token_Index;
-      Defer_Pos250 : Token_Index := No_Token_Index;
-      Defer_Res250 : Bare_Def_Id := No_Bare_Lkt_Node;
-      Null_Res22 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
       Token_Pos276 : Token_Index := No_Token_Index;
       Token_Res276 : Token_Index := No_Token_Index;
-      Defer_Pos251 : Token_Index := No_Token_Index;
-      Defer_Res251 : Bare_Decl_Block := No_Bare_Lkt_Node;
+      Lst_Cpos32 : Token_Index := No_Token_Index;
+      Tmp_List32 : Free_Parse_List;
+      Defer_Pos253 : Token_Index := No_Token_Index;
+      Defer_Res253 : Bare_Enum_Lit_Decl := No_Bare_Lkt_Node;
       Token_Pos277 : Token_Index := No_Token_Index;
       Token_Res277 : Token_Index := No_Token_Index;
+      List_Pos32 : Token_Index := No_Token_Index;
+      List_Res32 : Bare_Enum_Lit_Decl_List := No_Bare_Lkt_Node;
+      Diag_Mark102 : Diagnostic_Mark;
+      Defer_Pos254 : Token_Index := No_Token_Index;
+      Defer_Res254 : Bare_Decl_Block := No_Bare_Lkt_Node;
+      Token_Pos278 : Token_Index := No_Token_Index;
+      Token_Res278 : Token_Index := No_Token_Index;
+      Row_Progress47 : Integer := 0;
+      Transform_Res146 : Bare_Enum_Type_Decl := No_Bare_Lkt_Node;
+      Transform_Has_Failed47 : Boolean := False;
+      Row_Pos193 : Token_Index := No_Token_Index;
+      Token_Pos279 : Token_Index := No_Token_Index;
+      Token_Res279 : Token_Index := No_Token_Index;
+      Defer_Pos255 : Token_Index := No_Token_Index;
+      Defer_Res255 : Bare_Def_Id := No_Bare_Lkt_Node;
+      Null_Res22 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
+      Token_Pos280 : Token_Index := No_Token_Index;
+      Token_Res280 : Token_Index := No_Token_Index;
+      Defer_Pos256 : Token_Index := No_Token_Index;
+      Defer_Res256 : Bare_Decl_Block := No_Bare_Lkt_Node;
+      Token_Pos281 : Token_Index := No_Token_Index;
+      Token_Res281 : Token_Index := No_Token_Index;
       Row_Progress48 : Integer := 0;
-      Transform_Res146 : Bare_Trait_Decl := No_Bare_Lkt_Node;
+      Transform_Res147 : Bare_Trait_Decl := No_Bare_Lkt_Node;
       Transform_Has_Failed48 : Boolean := False;
       Or_Pos37 : Token_Index := No_Token_Index;
       Or_Res37 : Bare_Named_Type_Decl := No_Bare_Lkt_Node;
-      Diag_Mark101 : Diagnostic_Mark;
+      Diag_Mark103 : Diagnostic_Mark;
       Last_Fail37 : Fail_Info;
       Branch_Diag_Mark37 : Diagnostic_Mark;
       Branch_Last_Fail37 : Fail_Info;
@@ -34039,486 +34425,91 @@ begin
 --  pos=Or_Pos37, res=Or_Res37, nobt=None
 Or_Pos37 := No_Token_Index;
 Or_Res37 := No_Bare_Lkt_Node;
-Diag_Mark101 := Parser.Last_Diag;
+Diag_Mark103 := Parser.Last_Diag;
 Last_Fail37 := Parser.Last_Fail;
 Branch_Diag_Mark37 := Parser.Last_Diag;
 Branch_Last_Fail37 := Parser.Last_Fail;
-    Parser.Last_Diag := Diag_Mark101;
+    Parser.Last_Diag := Diag_Mark103;
     Parser.Last_Fail := Last_Fail37;
 --  BEGIN <Transform(<ASTNodeType StructDecl>) (root of 'type_decl') at parser.lkt:134:11>
---  pos=Row_Pos178, res=Transform_Res140, nobt=Nobt47
+--  pos=Row_Pos181, res=Transform_Res141, nobt=Nobt47
 --  BEGIN <_Row (root of 'type_decl') at parser.lkt:134:11>
---  pos=Row_Pos178, res=None, nobt=Nobt47
-Row_Pos178 := Pos;
+--  pos=Row_Pos181, res=None, nobt=Nobt47
+Row_Pos181 := Pos;
 --  BEGIN <Token(<WithText StructKw>, ) (root of 'type_decl') at parser.lkt:135:13>
---  pos=Token_Pos252, res=Token_Res252, nobt=None
-Token_Res252 := Row_Pos178;
+--  pos=Token_Pos256, res=Token_Res256, nobt=None
+Token_Res256 := Row_Pos181;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res252));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res256));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Struct_Kw)
    then
-       Token_Pos252 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos178 then
+       Token_Pos256 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos181 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos178,
+            (Pos  => Row_Pos181,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Struct_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos252 := Row_Pos178 + 1;
+          Token_Pos256 := Row_Pos181 + 1;
    end if;
 end;
 --  END <Token(<WithText StructKw>, ) (root of 'type_decl') at parser.lkt:135:13>
 Row_Progress44 := 1;
-if Token_Pos252 /= No_Token_Index then
-   Row_Pos178 := Token_Pos252;
+if Token_Pos256 /= No_Token_Index then
+   Row_Pos181 := Token_Pos256;
 else
-   Row_Pos178 := No_Token_Index;
-   goto Exit_Row178_0;
+   Row_Pos181 := No_Token_Index;
+   goto Exit_Row181_0;
 end if;
 --  BEGIN <Cut (root of 'type_decl') at parser.lkt:136:13>
---  pos=Row_Pos178, res=None, nobt=Nobt47
+--  pos=Row_Pos181, res=None, nobt=Nobt47
 Nobt47 := True;
 --  END <Cut (root of 'type_decl') at parser.lkt:136:13>
 Row_Progress44 := 2;
-if Row_Pos178 /= No_Token_Index then
-   Row_Pos178 := Row_Pos178;
+if Row_Pos181 /= No_Token_Index then
+   Row_Pos181 := Row_Pos181;
 else
-   Row_Pos178 := No_Token_Index;
-   goto Exit_Row178_0;
+   Row_Pos181 := No_Token_Index;
+   goto Exit_Row181_0;
 end if;
 --  BEGIN <Defer (for 'def_id') at parser.lkt:137:13>
---  pos=Defer_Pos234, res=Defer_Res234, nobt=None
-Defer_Res234 :=
-   Def_Id_Transform_Parse0 (Parser, Row_Pos178);
-Defer_Pos234 := Parser.Current_Pos;
+--  pos=Defer_Pos239, res=Defer_Res239, nobt=None
+Defer_Res239 :=
+   Def_Id_Transform_Parse0 (Parser, Row_Pos181);
+Defer_Pos239 := Parser.Current_Pos;
 --  END <Defer (for 'def_id') at parser.lkt:137:13>
 Row_Progress44 := 3;
-if Defer_Pos234 /= No_Token_Index then
-   Row_Pos178 := Defer_Pos234;
+if Defer_Pos239 /= No_Token_Index then
+   Row_Pos181 := Defer_Pos239;
 else
-   Row_Pos178 := No_Token_Index;
-   goto Exit_Row178_0;
+   Row_Pos181 := No_Token_Index;
+   goto Exit_Row181_0;
 end if;
 --  BEGIN <Opt (root of 'type_decl') at parser.lkt:138:13>
---  pos=Row_Pos179, res=Defer_Res235, nobt=Nobt48
-Diag_Mark92 := Parser.Last_Diag;
+--  pos=Row_Pos182, res=Defer_Res240, nobt=Nobt48
+Diag_Mark94 := Parser.Last_Diag;
 --  BEGIN <_Extract (root of 'type_decl') at parser.lkt:138:14>
---  pos=Row_Pos179, res=Defer_Res235, nobt=Nobt48
+--  pos=Row_Pos182, res=Defer_Res240, nobt=Nobt48
 --  BEGIN <_Row (root of 'type_decl') at parser.lkt:138:14>
---  pos=Row_Pos179, res=None, nobt=Nobt48
-Row_Pos179 := Row_Pos178;
+--  pos=Row_Pos182, res=None, nobt=Nobt48
+Row_Pos182 := Row_Pos181;
 --  BEGIN <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:138:19>
---  pos=Token_Pos253, res=Token_Res253, nobt=None
-Token_Res253 := Row_Pos179;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res253));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_Implements_Kw)
-   then
-       Token_Pos253 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos179 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos179,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Implements_Kw,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos253 := Row_Pos179 + 1;
-   end if;
-end;
---  END <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:138:19>
-if Token_Pos253 /= No_Token_Index then
-   Row_Pos179 := Token_Pos253;
-else
-   Row_Pos179 := No_Token_Index;
-   goto Exit_Row179_0;
-end if;
---  BEGIN <Cut (root of 'type_decl') at parser.lkt:138:32>
---  pos=Row_Pos179, res=None, nobt=Nobt48
-Nobt48 := True;
---  END <Cut (root of 'type_decl') at parser.lkt:138:32>
-if Row_Pos179 /= No_Token_Index then
-   Row_Pos179 := Row_Pos179;
-else
-   Row_Pos179 := No_Token_Index;
-   goto Exit_Row179_0;
-end if;
---  BEGIN <Defer (for 'type_list') at parser.lkt:138:34>
---  pos=Defer_Pos235, res=Defer_Res235, nobt=None
-Defer_Res235 :=
-   Type_List_List_Parse0 (Parser, Row_Pos179);
-Defer_Pos235 := Parser.Current_Pos;
---  END <Defer (for 'type_list') at parser.lkt:138:34>
-if Defer_Pos235 /= No_Token_Index then
-   Row_Pos179 := Defer_Pos235;
-else
-   Row_Pos179 := No_Token_Index;
-   goto Exit_Row179_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row179_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:138:14>
---  END <_Extract (root of 'type_decl') at parser.lkt:138:14>
-if Row_Pos179 = No_Token_Index then
-   if Nobt48 then
-      Row_Pos179 := Parser.Last_Fail.Pos;
-      Append (Parser, Row_Pos179, "Cannot parse <type_decl>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
-         if Defer_Res235 = No_Bare_Lkt_Node then
-   Defer_Res235 :=
-     Allocate_Type_Ref_List (Parser.Mem_Pool);
-   Initialize
-     (Self              => Defer_Res235,
-      Kind              => Lkt_Type_Ref_List,
-      Unit              => Parser.Unit,
-      Token_Start_Index => Row_Pos178,
-      Token_End_Index   => No_Token_Index);
-   Initialize_List
-     (Self   => Defer_Res235,
-      Parser => Parser,
-      Count  => 0);
-         end if;
-       if not Nobt48 then
-   Row_Pos179 := Row_Pos178;
-      Parser.Last_Diag := Diag_Mark92;
-       end if;
-end if;
---  END <Opt (root of 'type_decl') at parser.lkt:138:13>
-   Nobt47 := Nobt48;
-Row_Progress44 := 4;
-if Row_Pos179 /= No_Token_Index then
-   Row_Pos178 := Row_Pos179;
-else
-   Row_Pos178 := No_Token_Index;
-   goto Exit_Row178_0;
-end if;
---  BEGIN <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:139:13>
---  pos=Token_Pos254, res=Token_Res254, nobt=None
-Token_Res254 := Row_Pos178;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res254));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_L_Brace)
-   then
-       Token_Pos254 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos178 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos178,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_L_Brace,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos254 := Row_Pos178 + 1;
-   end if;
-end;
---  END <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:139:13>
-Row_Progress44 := 5;
-if Token_Pos254 /= No_Token_Index then
-   Row_Pos178 := Token_Pos254;
-else
-   Row_Pos178 := No_Token_Index;
-   goto Exit_Row178_0;
-end if;
---  BEGIN <DontSkip (root of 'type_decl') at parser.lkt:140:13>
---  pos=Defer_Pos236, res=Defer_Res236, nobt=None
-        PP.Dont_Skip.Append (Dontskip_Type_Decl0_Extract_Parse0'Access);
---  BEGIN <Defer (for 'decl_block') at parser.lkt:140:13>
---  pos=Defer_Pos236, res=Defer_Res236, nobt=None
-Defer_Res236 :=
-   Decl_Block_List_Parse0 (Parser, Row_Pos178);
-Defer_Pos236 := Parser.Current_Pos;
---  END <Defer (for 'decl_block') at parser.lkt:140:13>
-        PP.Dont_Skip.Delete_Last;
---  END <DontSkip (root of 'type_decl') at parser.lkt:140:13>
-Row_Progress44 := 6;
-if Defer_Pos236 /= No_Token_Index then
-   Row_Pos178 := Defer_Pos236;
-else
-   Row_Pos178 := No_Token_Index;
-   goto Exit_Row178_0;
-end if;
---  BEGIN <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:141:13>
---  pos=Token_Pos255, res=Token_Res255, nobt=None
-Token_Res255 := Row_Pos178;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res255));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_R_Brace)
-   then
-       Token_Pos255 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos178 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos178,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_R_Brace,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos255 := Row_Pos178 + 1;
-   end if;
-end;
---  END <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:141:13>
-Row_Progress44 := 7;
-if Token_Pos255 /= No_Token_Index then
-   Row_Pos178 := Token_Pos255;
-else
-   Row_Pos178 := No_Token_Index;
-   goto Exit_Row178_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row178_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:134:11>
-if Row_Pos178 = No_Token_Index and then Nobt47 then
-   Row_Pos178 := Parser.Last_Fail.Pos;
-   Transform_Has_Failed44 := True;
-end if;
-if Row_Pos178 /= No_Token_Index then
-   Transform_Res140 := Allocate_Struct_Decl (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res140,
-      Kind => Lkt_Struct_Decl,
-      Unit => Parser.Unit,
-      Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos178 = Pos
-                            then No_Token_Index
-                            else Row_Pos178 - 1));
-      Initialize_Fields_For_Struct_Decl
-        (Self => Transform_Res140,
-         Struct_Decl_F_Syn_Name => Defer_Res234,
-         Struct_Decl_F_Traits => Defer_Res235,
-         Struct_Decl_F_Decls => Defer_Res236);
-         if Defer_Res234 /= null and then Is_Incomplete (Defer_Res234) then
-            Transform_Res140.Last_Attempted_Child := 0;
-         elsif Defer_Res234 /= null and then not Is_Ghost (Defer_Res234) then
-            Transform_Res140.Last_Attempted_Child := -1;
-         end if;
-         if Defer_Res235 /= null and then Is_Incomplete (Defer_Res235) then
-            Transform_Res140.Last_Attempted_Child := 0;
-         elsif Defer_Res235 /= null and then not Is_Ghost (Defer_Res235) then
-            Transform_Res140.Last_Attempted_Child := -1;
-         end if;
-         if Defer_Res236 /= null and then Is_Incomplete (Defer_Res236) then
-            Transform_Res140.Last_Attempted_Child := 0;
-         elsif Defer_Res236 /= null and then not Is_Ghost (Defer_Res236) then
-            Transform_Res140.Last_Attempted_Child := -1;
-         end if;
-   if Transform_Has_Failed44 then
-      Transform_Res140.Last_Attempted_Child :=
-         Row_Progress44;
-      Append (Parser, Pos, "Cannot parse <type_decl>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
-end if;
---  END <Transform(<ASTNodeType StructDecl>) (root of 'type_decl') at parser.lkt:134:11>
-    if Row_Pos178 /= No_Token_Index then
-        Or_Pos37 := Row_Pos178;
-        Or_Res37 := Transform_Res140;
-        goto Exit_Or41;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail37.Pos then
-       Branch_Diag_Mark37 := Parser.Last_Diag;
-       Branch_Last_Fail37 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark101;
-    Parser.Last_Fail := Last_Fail37;
---  BEGIN <Transform(<ASTNodeType EnumClassDecl>) (root of 'type_decl') at parser.lkt:143:11>
---  pos=Row_Pos180, res=Transform_Res143, nobt=Nobt49
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:143:11>
---  pos=Row_Pos180, res=None, nobt=Nobt49
-Row_Pos180 := Pos;
---  BEGIN <Token(<WithText EnumKw>, ) (root of 'type_decl') at parser.lkt:144:13>
---  pos=Token_Pos256, res=Token_Res256, nobt=None
-Token_Res256 := Row_Pos180;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res256));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_Enum_Kw)
-   then
-       Token_Pos256 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos180 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos180,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Enum_Kw,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos256 := Row_Pos180 + 1;
-   end if;
-end;
---  END <Token(<WithText EnumKw>, ) (root of 'type_decl') at parser.lkt:144:13>
-Row_Progress45 := 1;
-if Token_Pos256 /= No_Token_Index then
-   Row_Pos180 := Token_Pos256;
-else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
-end if;
---  BEGIN <Token(<WithText ClassKw>, ) (root of 'type_decl') at parser.lkt:145:13>
 --  pos=Token_Pos257, res=Token_Res257, nobt=None
-Token_Res257 := Row_Pos180;
+Token_Res257 := Row_Pos182;
 declare
    T : constant Stored_Token_Data :=
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res257));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_Class_Kw)
-   then
-       Token_Pos257 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos180 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos180,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Class_Kw,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos257 := Row_Pos180 + 1;
-   end if;
-end;
---  END <Token(<WithText ClassKw>, ) (root of 'type_decl') at parser.lkt:145:13>
-Row_Progress45 := 2;
-if Token_Pos257 /= No_Token_Index then
-   Row_Pos180 := Token_Pos257;
-else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
-end if;
---  BEGIN <Cut (root of 'type_decl') at parser.lkt:146:13>
---  pos=Row_Pos180, res=None, nobt=Nobt49
-Nobt49 := True;
---  END <Cut (root of 'type_decl') at parser.lkt:146:13>
-Row_Progress45 := 3;
-if Row_Pos180 /= No_Token_Index then
-   Row_Pos180 := Row_Pos180;
-else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
-end if;
---  BEGIN <Defer (for 'def_id') at parser.lkt:147:13>
---  pos=Defer_Pos237, res=Defer_Res237, nobt=None
-Defer_Res237 :=
-   Def_Id_Transform_Parse0 (Parser, Row_Pos180);
-Defer_Pos237 := Parser.Current_Pos;
---  END <Defer (for 'def_id') at parser.lkt:147:13>
-Row_Progress45 := 4;
-if Defer_Pos237 /= No_Token_Index then
-   Row_Pos180 := Defer_Pos237;
-else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
-end if;
---  BEGIN <Opt (root of 'type_decl') at parser.lkt:148:13>
---  pos=Row_Pos181, res=Defer_Res238, nobt=None
-Diag_Mark93 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'type_decl') at parser.lkt:148:14>
---  pos=Row_Pos181, res=Defer_Res238, nobt=None
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:148:14>
---  pos=Row_Pos181, res=None, nobt=None
-Row_Pos181 := Row_Pos180;
---  BEGIN <Token(<WithText Colon>, ) (root of 'type_decl') at parser.lkt:148:19>
---  pos=Token_Pos258, res=Token_Res258, nobt=None
-Token_Res258 := Row_Pos181;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res258));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_Colon)
-   then
-       Token_Pos258 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos181 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos181,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Colon,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos258 := Row_Pos181 + 1;
-   end if;
-end;
---  END <Token(<WithText Colon>, ) (root of 'type_decl') at parser.lkt:148:19>
-if Token_Pos258 /= No_Token_Index then
-   Row_Pos181 := Token_Pos258;
-else
-   Row_Pos181 := No_Token_Index;
-   goto Exit_Row181_0;
-end if;
---  BEGIN <Defer (for 'type_ref') at parser.lkt:148:23>
---  pos=Defer_Pos238, res=Defer_Res238, nobt=None
-Defer_Res238 :=
-   Type_Ref_Or_Parse0 (Parser, Row_Pos181);
-Defer_Pos238 := Parser.Current_Pos;
---  END <Defer (for 'type_ref') at parser.lkt:148:23>
-if Defer_Pos238 /= No_Token_Index then
-   Row_Pos181 := Defer_Pos238;
-else
-   Row_Pos181 := No_Token_Index;
-   goto Exit_Row181_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row181_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:148:14>
---  END <_Extract (root of 'type_decl') at parser.lkt:148:14>
-if Row_Pos181 = No_Token_Index then
-   Defer_Res238 := No_Bare_Lkt_Node;
-   Row_Pos181 := Row_Pos180;
-      Parser.Last_Diag := Diag_Mark93;
-end if;
---  END <Opt (root of 'type_decl') at parser.lkt:148:13>
-Row_Progress45 := 5;
-if Row_Pos181 /= No_Token_Index then
-   Row_Pos180 := Row_Pos181;
-else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
-end if;
---  BEGIN <Opt (root of 'type_decl') at parser.lkt:149:13>
---  pos=Row_Pos182, res=Defer_Res239, nobt=None
-Diag_Mark94 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'type_decl') at parser.lkt:149:14>
---  pos=Row_Pos182, res=Defer_Res239, nobt=None
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:149:14>
---  pos=Row_Pos182, res=None, nobt=None
-Row_Pos182 := Row_Pos180;
---  BEGIN <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:149:19>
---  pos=Token_Pos259, res=Token_Res259, nobt=None
-Token_Res259 := Row_Pos182;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res259));
-begin
-   if
       T.Kind /= From_Token_Kind (Lkt_Implements_Kw)
    then
-       Token_Pos259 := No_Token_Index;
+       Token_Pos257 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Row_Pos182 then
           Parser.Last_Fail :=
             (Pos  => Row_Pos182,
@@ -34528,24 +34519,34 @@ begin
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos259 := Row_Pos182 + 1;
+          Token_Pos257 := Row_Pos182 + 1;
    end if;
 end;
---  END <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:149:19>
-if Token_Pos259 /= No_Token_Index then
-   Row_Pos182 := Token_Pos259;
+--  END <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:138:19>
+if Token_Pos257 /= No_Token_Index then
+   Row_Pos182 := Token_Pos257;
 else
    Row_Pos182 := No_Token_Index;
    goto Exit_Row182_0;
 end if;
---  BEGIN <Defer (for 'type_list') at parser.lkt:149:32>
---  pos=Defer_Pos239, res=Defer_Res239, nobt=None
-Defer_Res239 :=
+--  BEGIN <Cut (root of 'type_decl') at parser.lkt:138:32>
+--  pos=Row_Pos182, res=None, nobt=Nobt48
+Nobt48 := True;
+--  END <Cut (root of 'type_decl') at parser.lkt:138:32>
+if Row_Pos182 /= No_Token_Index then
+   Row_Pos182 := Row_Pos182;
+else
+   Row_Pos182 := No_Token_Index;
+   goto Exit_Row182_0;
+end if;
+--  BEGIN <Defer (for 'type_list') at parser.lkt:138:34>
+--  pos=Defer_Pos240, res=Defer_Res240, nobt=None
+Defer_Res240 :=
    Type_List_List_Parse0 (Parser, Row_Pos182);
-Defer_Pos239 := Parser.Current_Pos;
---  END <Defer (for 'type_list') at parser.lkt:149:32>
-if Defer_Pos239 /= No_Token_Index then
-   Row_Pos182 := Defer_Pos239;
+Defer_Pos240 := Parser.Current_Pos;
+--  END <Defer (for 'type_list') at parser.lkt:138:34>
+if Defer_Pos240 /= No_Token_Index then
+   Row_Pos182 := Defer_Pos240;
 else
    Row_Pos182 := No_Token_Index;
    goto Exit_Row182_0;
@@ -34553,76 +34554,216 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row182_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:149:14>
---  END <_Extract (root of 'type_decl') at parser.lkt:149:14>
+--  END <_Row (root of 'type_decl') at parser.lkt:138:14>
+--  END <_Extract (root of 'type_decl') at parser.lkt:138:14>
 if Row_Pos182 = No_Token_Index then
-   Defer_Res239 :=
+   if Nobt48 then
+      Row_Pos182 := Parser.Last_Fail.Pos;
+      Append (Parser, Row_Pos182, "Cannot parse <type_decl>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
+         if Defer_Res240 = No_Bare_Lkt_Node then
+   Defer_Res240 :=
      Allocate_Type_Ref_List (Parser.Mem_Pool);
    Initialize
-     (Self              => Defer_Res239,
+     (Self              => Defer_Res240,
       Kind              => Lkt_Type_Ref_List,
       Unit              => Parser.Unit,
-      Token_Start_Index => Row_Pos180,
+      Token_Start_Index => Row_Pos181,
       Token_End_Index   => No_Token_Index);
    Initialize_List
-     (Self   => Defer_Res239,
+     (Self   => Defer_Res240,
       Parser => Parser,
       Count  => 0);
-   Row_Pos182 := Row_Pos180;
+         end if;
+       if not Nobt48 then
+   Row_Pos182 := Row_Pos181;
       Parser.Last_Diag := Diag_Mark94;
+       end if;
 end if;
---  END <Opt (root of 'type_decl') at parser.lkt:149:13>
-Row_Progress45 := 6;
+--  END <Opt (root of 'type_decl') at parser.lkt:138:13>
+   Nobt47 := Nobt48;
+Row_Progress44 := 4;
 if Row_Pos182 /= No_Token_Index then
-   Row_Pos180 := Row_Pos182;
+   Row_Pos181 := Row_Pos182;
 else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
+   Row_Pos181 := No_Token_Index;
+   goto Exit_Row181_0;
 end if;
---  BEGIN <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:150:13>
---  pos=Token_Pos260, res=Token_Res260, nobt=None
-Token_Res260 := Row_Pos180;
+--  BEGIN <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:139:13>
+--  pos=Token_Pos258, res=Token_Res258, nobt=None
+Token_Res258 := Row_Pos181;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res260));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res258));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_L_Brace)
    then
-       Token_Pos260 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos180 then
+       Token_Pos258 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos181 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos180,
+            (Pos  => Row_Pos181,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_L_Brace,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos260 := Row_Pos180 + 1;
+          Token_Pos258 := Row_Pos181 + 1;
    end if;
 end;
---  END <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:150:13>
-Row_Progress45 := 7;
-if Token_Pos260 /= No_Token_Index then
-   Row_Pos180 := Token_Pos260;
+--  END <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:139:13>
+Row_Progress44 := 5;
+if Token_Pos258 /= No_Token_Index then
+   Row_Pos181 := Token_Pos258;
 else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
+   Row_Pos181 := No_Token_Index;
+   goto Exit_Row181_0;
 end if;
---  BEGIN <List (root of 'type_decl') at parser.lkt:151:13>
---  pos=List_Pos31, res=List_Res31, nobt=None
-    List_Pos31 := Row_Pos180;
-Lst_Cpos30 := Row_Pos180;
-Tmp_List30 := Get_Parse_List (Parser);
-Diag_Mark96 := Parser.Last_Diag;
-loop
---  BEGIN <Transform(<ASTNodeType EnumClassCase>) (root of 'type_decl') at parser.lkt:152:17>
---  pos=Row_Pos183, res=Transform_Res142, nobt=None
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:152:17>
---  pos=Row_Pos183, res=None, nobt=None
-Row_Pos183 := Lst_Cpos30;
---  BEGIN <Token(<WithText CaseKw>, ) (root of 'type_decl') at parser.lkt:153:21>
+--  BEGIN <DontSkip (root of 'type_decl') at parser.lkt:140:13>
+--  pos=Defer_Pos241, res=Defer_Res241, nobt=None
+        PP.Dont_Skip.Append (Dontskip_Type_Decl0_Extract_Parse0'Access);
+--  BEGIN <Defer (for 'decl_block') at parser.lkt:140:13>
+--  pos=Defer_Pos241, res=Defer_Res241, nobt=None
+Defer_Res241 :=
+   Decl_Block_List_Parse0 (Parser, Row_Pos181);
+Defer_Pos241 := Parser.Current_Pos;
+--  END <Defer (for 'decl_block') at parser.lkt:140:13>
+        PP.Dont_Skip.Delete_Last;
+--  END <DontSkip (root of 'type_decl') at parser.lkt:140:13>
+Row_Progress44 := 6;
+if Defer_Pos241 /= No_Token_Index then
+   Row_Pos181 := Defer_Pos241;
+else
+   Row_Pos181 := No_Token_Index;
+   goto Exit_Row181_0;
+end if;
+--  BEGIN <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:141:13>
+--  pos=Token_Pos259, res=Token_Res259, nobt=None
+Token_Res259 := Row_Pos181;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res259));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_R_Brace)
+   then
+       Token_Pos259 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos181 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos181,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_R_Brace,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos259 := Row_Pos181 + 1;
+   end if;
+end;
+--  END <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:141:13>
+Row_Progress44 := 7;
+if Token_Pos259 /= No_Token_Index then
+   Row_Pos181 := Token_Pos259;
+else
+   Row_Pos181 := No_Token_Index;
+   goto Exit_Row181_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row181_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'type_decl') at parser.lkt:134:11>
+if Row_Pos181 = No_Token_Index and then Nobt47 then
+   Row_Pos181 := Parser.Last_Fail.Pos;
+   Transform_Has_Failed44 := True;
+end if;
+if Row_Pos181 /= No_Token_Index then
+   Transform_Res141 := Allocate_Struct_Decl (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res141,
+      Kind => Lkt_Struct_Decl,
+      Unit => Parser.Unit,
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos181 = Pos
+                            then No_Token_Index
+                            else Row_Pos181 - 1));
+      Initialize_Fields_For_Struct_Decl
+        (Self => Transform_Res141,
+         Struct_Decl_F_Syn_Name => Defer_Res239,
+         Struct_Decl_F_Traits => Defer_Res240,
+         Struct_Decl_F_Decls => Defer_Res241);
+         if Defer_Res239 /= null and then Is_Incomplete (Defer_Res239) then
+            Transform_Res141.Last_Attempted_Child := 0;
+         elsif Defer_Res239 /= null and then not Is_Ghost (Defer_Res239) then
+            Transform_Res141.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res240 /= null and then Is_Incomplete (Defer_Res240) then
+            Transform_Res141.Last_Attempted_Child := 0;
+         elsif Defer_Res240 /= null and then not Is_Ghost (Defer_Res240) then
+            Transform_Res141.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res241 /= null and then Is_Incomplete (Defer_Res241) then
+            Transform_Res141.Last_Attempted_Child := 0;
+         elsif Defer_Res241 /= null and then not Is_Ghost (Defer_Res241) then
+            Transform_Res141.Last_Attempted_Child := -1;
+         end if;
+   if Transform_Has_Failed44 then
+      Transform_Res141.Last_Attempted_Child :=
+         Row_Progress44;
+      Append (Parser, Pos, "Cannot parse <type_decl>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
+end if;
+--  END <Transform(<ASTNodeType StructDecl>) (root of 'type_decl') at parser.lkt:134:11>
+    if Row_Pos181 /= No_Token_Index then
+        Or_Pos37 := Row_Pos181;
+        Or_Res37 := Transform_Res141;
+        goto Exit_Or41;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail37.Pos then
+       Branch_Diag_Mark37 := Parser.Last_Diag;
+       Branch_Last_Fail37 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark103;
+    Parser.Last_Fail := Last_Fail37;
+--  BEGIN <Transform(<ASTNodeType EnumClassDecl>) (root of 'type_decl') at parser.lkt:143:11>
+--  pos=Row_Pos183, res=Transform_Res144, nobt=Nobt49
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:143:11>
+--  pos=Row_Pos183, res=None, nobt=Nobt49
+Row_Pos183 := Pos;
+--  BEGIN <Token(<WithText EnumKw>, ) (root of 'type_decl') at parser.lkt:144:13>
+--  pos=Token_Pos260, res=Token_Res260, nobt=None
+Token_Res260 := Row_Pos183;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res260));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Enum_Kw)
+   then
+       Token_Pos260 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos183 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos183,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Enum_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos260 := Row_Pos183 + 1;
+   end if;
+end;
+--  END <Token(<WithText EnumKw>, ) (root of 'type_decl') at parser.lkt:144:13>
+Row_Progress45 := 1;
+if Token_Pos260 /= No_Token_Index then
+   Row_Pos183 := Token_Pos260;
+else
+   Row_Pos183 := No_Token_Index;
+   goto Exit_Row183_0;
+end if;
+--  BEGIN <Token(<WithText ClassKw>, ) (root of 'type_decl') at parser.lkt:145:13>
 --  pos=Token_Pos261, res=Token_Res261, nobt=None
 Token_Res261 := Row_Pos183;
 declare
@@ -34630,7 +34771,7 @@ declare
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res261));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_Case_Kw)
+      T.Kind /= From_Token_Kind (Lkt_Class_Kw)
    then
        Token_Pos261 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Row_Pos183 then
@@ -34638,60 +34779,91 @@ begin
             (Pos  => Row_Pos183,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Case_Kw,
+                Expected_Token_Id => Lkt_Class_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
           Token_Pos261 := Row_Pos183 + 1;
    end if;
 end;
---  END <Token(<WithText CaseKw>, ) (root of 'type_decl') at parser.lkt:153:21>
+--  END <Token(<WithText ClassKw>, ) (root of 'type_decl') at parser.lkt:145:13>
+Row_Progress45 := 2;
 if Token_Pos261 /= No_Token_Index then
    Row_Pos183 := Token_Pos261;
 else
    Row_Pos183 := No_Token_Index;
    goto Exit_Row183_0;
 end if;
---  BEGIN <List (root of 'type_decl') at parser.lkt:154:21>
---  pos=List_Pos30, res=List_Res30, nobt=None
-    List_Pos30 := No_Token_Index;
-Lst_Cpos31 := Row_Pos183;
-Tmp_List31 := Get_Parse_List (Parser);
+--  BEGIN <Cut (root of 'type_decl') at parser.lkt:146:13>
+--  pos=Row_Pos183, res=None, nobt=Nobt49
+Nobt49 := True;
+--  END <Cut (root of 'type_decl') at parser.lkt:146:13>
+Row_Progress45 := 3;
+if Row_Pos183 /= No_Token_Index then
+   Row_Pos183 := Row_Pos183;
+else
+   Row_Pos183 := No_Token_Index;
+   goto Exit_Row183_0;
+end if;
+--  BEGIN <Defer (for 'def_id') at parser.lkt:147:13>
+--  pos=Defer_Pos242, res=Defer_Res242, nobt=None
+Defer_Res242 :=
+   Def_Id_Transform_Parse0 (Parser, Row_Pos183);
+Defer_Pos242 := Parser.Current_Pos;
+--  END <Defer (for 'def_id') at parser.lkt:147:13>
+Row_Progress45 := 4;
+if Defer_Pos242 /= No_Token_Index then
+   Row_Pos183 := Defer_Pos242;
+else
+   Row_Pos183 := No_Token_Index;
+   goto Exit_Row183_0;
+end if;
+--  BEGIN <Opt (root of 'type_decl') at parser.lkt:148:13>
+--  pos=Row_Pos184, res=Defer_Res243, nobt=None
 Diag_Mark95 := Parser.Last_Diag;
-loop
---  BEGIN <Transform(<ASTNodeType EnumClassAltDecl>) (root of 'type_decl') at parser.lkt:154:27>
---  pos=Row_Pos184, res=Transform_Res141, nobt=None
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:154:27>
+--  BEGIN <_Extract (root of 'type_decl') at parser.lkt:148:14>
+--  pos=Row_Pos184, res=Defer_Res243, nobt=None
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:148:14>
 --  pos=Row_Pos184, res=None, nobt=None
-Row_Pos184 := Lst_Cpos31;
---  BEGIN <Defer (for 'def_id') at parser.lkt:154:44>
---  pos=Defer_Pos240, res=Defer_Res240, nobt=None
-Defer_Res240 :=
-   Def_Id_Transform_Parse0 (Parser, Row_Pos184);
-Defer_Pos240 := Parser.Current_Pos;
---  END <Defer (for 'def_id') at parser.lkt:154:44>
-if Defer_Pos240 /= No_Token_Index then
-   Row_Pos184 := Defer_Pos240;
+Row_Pos184 := Row_Pos183;
+--  BEGIN <Token(<WithText Colon>, ) (root of 'type_decl') at parser.lkt:148:19>
+--  pos=Token_Pos262, res=Token_Res262, nobt=None
+Token_Res262 := Row_Pos184;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res262));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Colon)
+   then
+       Token_Pos262 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos184 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos184,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Colon,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos262 := Row_Pos184 + 1;
+   end if;
+end;
+--  END <Token(<WithText Colon>, ) (root of 'type_decl') at parser.lkt:148:19>
+if Token_Pos262 /= No_Token_Index then
+   Row_Pos184 := Token_Pos262;
 else
    Row_Pos184 := No_Token_Index;
    goto Exit_Row184_0;
 end if;
---  BEGIN <Null (root of 'type_decl') at parser.lkt:154:51>
---  pos=Row_Pos184, res=Null_Res21, nobt=None
-   Null_Res21 := Allocate_Type_Ref_List (Parser.Mem_Pool);
-   Initialize
-     (Self              => Null_Res21,
-      Kind              => Lkt_Type_Ref_List,
-      Unit              => Parser.Unit,
-      Token_Start_Index => Token_Index'Max (Row_Pos184, 1),
-      Token_End_Index   => No_Token_Index);
-   Initialize_List
-     (Self   => Null_Res21,
-      Parser => Parser,
-      Count  => 0);
---  END <Null (root of 'type_decl') at parser.lkt:154:51>
-if Row_Pos184 /= No_Token_Index then
-   Row_Pos184 := Row_Pos184;
+--  BEGIN <Defer (for 'type_ref') at parser.lkt:148:23>
+--  pos=Defer_Pos243, res=Defer_Res243, nobt=None
+Defer_Res243 :=
+   Type_Ref_Or_Parse0 (Parser, Row_Pos184);
+Defer_Pos243 := Parser.Current_Pos;
+--  END <Defer (for 'type_ref') at parser.lkt:148:23>
+if Defer_Pos243 /= No_Token_Index then
+   Row_Pos184 := Defer_Pos243;
 else
    Row_Pos184 := No_Token_Index;
    goto Exit_Row184_0;
@@ -34699,49 +34871,263 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row184_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:154:27>
+--  END <_Row (root of 'type_decl') at parser.lkt:148:14>
+--  END <_Extract (root of 'type_decl') at parser.lkt:148:14>
+if Row_Pos184 = No_Token_Index then
+   Defer_Res243 := No_Bare_Lkt_Node;
+   Row_Pos184 := Row_Pos183;
+      Parser.Last_Diag := Diag_Mark95;
+end if;
+--  END <Opt (root of 'type_decl') at parser.lkt:148:13>
+Row_Progress45 := 5;
 if Row_Pos184 /= No_Token_Index then
-   Transform_Res141 := Allocate_Enum_Class_Alt_Decl (Parser.Mem_Pool);
+   Row_Pos183 := Row_Pos184;
+else
+   Row_Pos183 := No_Token_Index;
+   goto Exit_Row183_0;
+end if;
+--  BEGIN <Opt (root of 'type_decl') at parser.lkt:149:13>
+--  pos=Row_Pos185, res=Defer_Res244, nobt=None
+Diag_Mark96 := Parser.Last_Diag;
+--  BEGIN <_Extract (root of 'type_decl') at parser.lkt:149:14>
+--  pos=Row_Pos185, res=Defer_Res244, nobt=None
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:149:14>
+--  pos=Row_Pos185, res=None, nobt=None
+Row_Pos185 := Row_Pos183;
+--  BEGIN <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:149:19>
+--  pos=Token_Pos263, res=Token_Res263, nobt=None
+Token_Res263 := Row_Pos185;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res263));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Implements_Kw)
+   then
+       Token_Pos263 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos185 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos185,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Implements_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos263 := Row_Pos185 + 1;
+   end if;
+end;
+--  END <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:149:19>
+if Token_Pos263 /= No_Token_Index then
+   Row_Pos185 := Token_Pos263;
+else
+   Row_Pos185 := No_Token_Index;
+   goto Exit_Row185_0;
+end if;
+--  BEGIN <Defer (for 'type_list') at parser.lkt:149:32>
+--  pos=Defer_Pos244, res=Defer_Res244, nobt=None
+Defer_Res244 :=
+   Type_List_List_Parse0 (Parser, Row_Pos185);
+Defer_Pos244 := Parser.Current_Pos;
+--  END <Defer (for 'type_list') at parser.lkt:149:32>
+if Defer_Pos244 /= No_Token_Index then
+   Row_Pos185 := Defer_Pos244;
+else
+   Row_Pos185 := No_Token_Index;
+   goto Exit_Row185_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row185_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'type_decl') at parser.lkt:149:14>
+--  END <_Extract (root of 'type_decl') at parser.lkt:149:14>
+if Row_Pos185 = No_Token_Index then
+   Defer_Res244 :=
+     Allocate_Type_Ref_List (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res141,
+     (Self              => Defer_Res244,
+      Kind              => Lkt_Type_Ref_List,
+      Unit              => Parser.Unit,
+      Token_Start_Index => Row_Pos183,
+      Token_End_Index   => No_Token_Index);
+   Initialize_List
+     (Self   => Defer_Res244,
+      Parser => Parser,
+      Count  => 0);
+   Row_Pos185 := Row_Pos183;
+      Parser.Last_Diag := Diag_Mark96;
+end if;
+--  END <Opt (root of 'type_decl') at parser.lkt:149:13>
+Row_Progress45 := 6;
+if Row_Pos185 /= No_Token_Index then
+   Row_Pos183 := Row_Pos185;
+else
+   Row_Pos183 := No_Token_Index;
+   goto Exit_Row183_0;
+end if;
+--  BEGIN <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:150:13>
+--  pos=Token_Pos264, res=Token_Res264, nobt=None
+Token_Res264 := Row_Pos183;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res264));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_L_Brace)
+   then
+       Token_Pos264 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos183 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos183,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_L_Brace,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos264 := Row_Pos183 + 1;
+   end if;
+end;
+--  END <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:150:13>
+Row_Progress45 := 7;
+if Token_Pos264 /= No_Token_Index then
+   Row_Pos183 := Token_Pos264;
+else
+   Row_Pos183 := No_Token_Index;
+   goto Exit_Row183_0;
+end if;
+--  BEGIN <List (root of 'type_decl') at parser.lkt:151:13>
+--  pos=List_Pos31, res=List_Res31, nobt=None
+    List_Pos31 := Row_Pos183;
+Lst_Cpos30 := Row_Pos183;
+Tmp_List30 := Get_Parse_List (Parser);
+Diag_Mark98 := Parser.Last_Diag;
+loop
+--  BEGIN <Transform(<ASTNodeType EnumClassCase>) (root of 'type_decl') at parser.lkt:152:17>
+--  pos=Row_Pos186, res=Transform_Res143, nobt=None
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:152:17>
+--  pos=Row_Pos186, res=None, nobt=None
+Row_Pos186 := Lst_Cpos30;
+--  BEGIN <Token(<WithText CaseKw>, ) (root of 'type_decl') at parser.lkt:153:21>
+--  pos=Token_Pos265, res=Token_Res265, nobt=None
+Token_Res265 := Row_Pos186;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res265));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Case_Kw)
+   then
+       Token_Pos265 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos186 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos186,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Case_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos265 := Row_Pos186 + 1;
+   end if;
+end;
+--  END <Token(<WithText CaseKw>, ) (root of 'type_decl') at parser.lkt:153:21>
+if Token_Pos265 /= No_Token_Index then
+   Row_Pos186 := Token_Pos265;
+else
+   Row_Pos186 := No_Token_Index;
+   goto Exit_Row186_0;
+end if;
+--  BEGIN <List (root of 'type_decl') at parser.lkt:154:21>
+--  pos=List_Pos30, res=List_Res30, nobt=None
+    List_Pos30 := No_Token_Index;
+Lst_Cpos31 := Row_Pos186;
+Tmp_List31 := Get_Parse_List (Parser);
+Diag_Mark97 := Parser.Last_Diag;
+loop
+--  BEGIN <Transform(<ASTNodeType EnumClassAltDecl>) (root of 'type_decl') at parser.lkt:154:27>
+--  pos=Row_Pos187, res=Transform_Res142, nobt=None
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:154:27>
+--  pos=Row_Pos187, res=None, nobt=None
+Row_Pos187 := Lst_Cpos31;
+--  BEGIN <Defer (for 'def_id') at parser.lkt:154:44>
+--  pos=Defer_Pos245, res=Defer_Res245, nobt=None
+Defer_Res245 :=
+   Def_Id_Transform_Parse0 (Parser, Row_Pos187);
+Defer_Pos245 := Parser.Current_Pos;
+--  END <Defer (for 'def_id') at parser.lkt:154:44>
+if Defer_Pos245 /= No_Token_Index then
+   Row_Pos187 := Defer_Pos245;
+else
+   Row_Pos187 := No_Token_Index;
+   goto Exit_Row187_0;
+end if;
+--  BEGIN <Null (root of 'type_decl') at parser.lkt:154:51>
+--  pos=Row_Pos187, res=Null_Res21, nobt=None
+   Null_Res21 := Allocate_Type_Ref_List (Parser.Mem_Pool);
+   Initialize
+     (Self              => Null_Res21,
+      Kind              => Lkt_Type_Ref_List,
+      Unit              => Parser.Unit,
+      Token_Start_Index => Token_Index'Max (Row_Pos187, 1),
+      Token_End_Index   => No_Token_Index);
+   Initialize_List
+     (Self   => Null_Res21,
+      Parser => Parser,
+      Count  => 0);
+--  END <Null (root of 'type_decl') at parser.lkt:154:51>
+if Row_Pos187 /= No_Token_Index then
+   Row_Pos187 := Row_Pos187;
+else
+   Row_Pos187 := No_Token_Index;
+   goto Exit_Row187_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row187_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'type_decl') at parser.lkt:154:27>
+if Row_Pos187 /= No_Token_Index then
+   Transform_Res142 := Allocate_Enum_Class_Alt_Decl (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res142,
       Kind => Lkt_Enum_Class_Alt_Decl,
       Unit => Parser.Unit,
       Token_Start_Index => Lst_Cpos31,
-      Token_End_Index   => (if Row_Pos184 = Lst_Cpos31
+      Token_End_Index   => (if Row_Pos187 = Lst_Cpos31
                             then No_Token_Index
-                            else Row_Pos184 - 1));
+                            else Row_Pos187 - 1));
       Initialize_Fields_For_Enum_Class_Alt_Decl
-        (Self => Transform_Res141,
-         Enum_Class_Alt_Decl_F_Syn_Name => Defer_Res240,
+        (Self => Transform_Res142,
+         Enum_Class_Alt_Decl_F_Syn_Name => Defer_Res245,
          Enum_Class_Alt_Decl_F_Traits => Null_Res21);
-         if Defer_Res240 /= null and then Is_Incomplete (Defer_Res240) then
-            Transform_Res141.Last_Attempted_Child := 0;
-         elsif Defer_Res240 /= null and then not Is_Ghost (Defer_Res240) then
-            Transform_Res141.Last_Attempted_Child := -1;
+         if Defer_Res245 /= null and then Is_Incomplete (Defer_Res245) then
+            Transform_Res142.Last_Attempted_Child := 0;
+         elsif Defer_Res245 /= null and then not Is_Ghost (Defer_Res245) then
+            Transform_Res142.Last_Attempted_Child := -1;
          end if;
          if Null_Res21 /= null and then Is_Incomplete (Null_Res21) then
-            Transform_Res141.Last_Attempted_Child := 0;
+            Transform_Res142.Last_Attempted_Child := 0;
          elsif Null_Res21 /= null and then not Is_Ghost (Null_Res21) then
-            Transform_Res141.Last_Attempted_Child := -1;
+            Transform_Res142.Last_Attempted_Child := -1;
          end if;
 end if;
 --  END <Transform(<ASTNodeType EnumClassAltDecl>) (root of 'type_decl') at parser.lkt:154:27>
-   exit when Row_Pos184 = No_Token_Index;
-   List_Pos30 := Row_Pos184;
+   exit when Row_Pos187 = No_Token_Index;
+   List_Pos30 := Row_Pos187;
    Lst_Cpos31 := List_Pos30;
-   Diag_Mark95 := Parser.Last_Diag;
-   Tmp_List31.Nodes.Append (Transform_Res141);
+   Diag_Mark97 := Parser.Last_Diag;
+   Tmp_List31.Nodes.Append (Transform_Res142);
 --  BEGIN <Token(<WithText Comma>, ) (root of 'type_decl') at parser.lkt:154:76>
---  pos=Token_Pos262, res=Token_Res262, nobt=None
-Token_Res262 := Lst_Cpos31;
+--  pos=Token_Pos266, res=Token_Res266, nobt=None
+Token_Res266 := Lst_Cpos31;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res262));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res266));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Comma)
    then
-       Token_Pos262 := No_Token_Index;
+       Token_Pos266 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Lst_Cpos31 then
           Parser.Last_Fail :=
             (Pos  => Lst_Cpos31,
@@ -34751,26 +35137,26 @@ begin
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos262 := Lst_Cpos31 + 1;
+          Token_Pos266 := Lst_Cpos31 + 1;
    end if;
 end;
 --  END <Token(<WithText Comma>, ) (root of 'type_decl') at parser.lkt:154:76>
-      exit when Token_Pos262 = No_Token_Index;
-      Lst_Cpos31 := Token_Pos262;
+      exit when Token_Pos266 = No_Token_Index;
+      Lst_Cpos31 := Token_Pos266;
 end loop;
-Parser.Last_Diag := Diag_Mark95;
+Parser.Last_Diag := Diag_Mark97;
 declare
    Token_Start, Token_End : Token_Index;
    Count                  : constant Natural := Tmp_List31.Nodes.Length;
 begin
    List_Res30 := Allocate_Enum_Class_Alt_Decl_List (Parser.Mem_Pool);
    if Count > 0 then
-      Token_Start := Row_Pos183;
-      Token_End := (if Lst_Cpos31 = Row_Pos183
-                    then Row_Pos183
+      Token_Start := Row_Pos186;
+      Token_End := (if Lst_Cpos31 = Row_Pos186
+                    then Row_Pos186
                     else List_Pos30 - 1);
    else
-      Token_Start := Token_Index'Max (Row_Pos183, 1);
+      Token_Start := Token_Index'Max (Row_Pos186, 1);
       Token_End := No_Token_Index;
    end if;
    Initialize
@@ -34798,54 +35184,54 @@ end;
 Release_Parse_List (Parser, Tmp_List31);
 --  END <List (root of 'type_decl') at parser.lkt:154:21>
 if List_Pos30 /= No_Token_Index then
-   Row_Pos183 := List_Pos30;
+   Row_Pos186 := List_Pos30;
 else
-   Row_Pos183 := No_Token_Index;
-   goto Exit_Row183_0;
+   Row_Pos186 := No_Token_Index;
+   goto Exit_Row186_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row183_0>>
+<<Exit_Row186_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'type_decl') at parser.lkt:152:17>
-if Row_Pos183 /= No_Token_Index then
-   Transform_Res142 := Allocate_Enum_Class_Case (Parser.Mem_Pool);
+if Row_Pos186 /= No_Token_Index then
+   Transform_Res143 := Allocate_Enum_Class_Case (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res142,
+     (Self => Transform_Res143,
       Kind => Lkt_Enum_Class_Case,
       Unit => Parser.Unit,
       Token_Start_Index => Lst_Cpos30,
-      Token_End_Index   => (if Row_Pos183 = Lst_Cpos30
+      Token_End_Index   => (if Row_Pos186 = Lst_Cpos30
                             then No_Token_Index
-                            else Row_Pos183 - 1));
+                            else Row_Pos186 - 1));
       Initialize_Fields_For_Enum_Class_Case
-        (Self => Transform_Res142,
+        (Self => Transform_Res143,
          Enum_Class_Case_F_Decls => List_Res30);
          if List_Res30 /= null and then Is_Incomplete (List_Res30) then
-            Transform_Res142.Last_Attempted_Child := 0;
+            Transform_Res143.Last_Attempted_Child := 0;
          elsif List_Res30 /= null and then not Is_Ghost (List_Res30) then
-            Transform_Res142.Last_Attempted_Child := -1;
+            Transform_Res143.Last_Attempted_Child := -1;
          end if;
 end if;
 --  END <Transform(<ASTNodeType EnumClassCase>) (root of 'type_decl') at parser.lkt:152:17>
-   exit when Row_Pos183 = No_Token_Index;
-   List_Pos31 := Row_Pos183;
+   exit when Row_Pos186 = No_Token_Index;
+   List_Pos31 := Row_Pos186;
    Lst_Cpos30 := List_Pos31;
-   Diag_Mark96 := Parser.Last_Diag;
-   Tmp_List30.Nodes.Append (Transform_Res142);
+   Diag_Mark98 := Parser.Last_Diag;
+   Tmp_List30.Nodes.Append (Transform_Res143);
 end loop;
-Parser.Last_Diag := Diag_Mark96;
+Parser.Last_Diag := Diag_Mark98;
 declare
    Token_Start, Token_End : Token_Index;
    Count                  : constant Natural := Tmp_List30.Nodes.Length;
 begin
    List_Res31 := Allocate_Enum_Class_Case_List (Parser.Mem_Pool);
    if Count > 0 then
-      Token_Start := Row_Pos180;
-      Token_End := (if Lst_Cpos30 = Row_Pos180
-                    then Row_Pos180
+      Token_Start := Row_Pos183;
+      Token_End := (if Lst_Cpos30 = Row_Pos183
+                    then Row_Pos183
                     else List_Pos31 - 1);
    else
-      Token_Start := Token_Index'Max (Row_Pos180, 1);
+      Token_Start := Token_Index'Max (Row_Pos183, 1);
       Token_End := No_Token_Index;
    end if;
    Initialize
@@ -34874,480 +35260,85 @@ Release_Parse_List (Parser, Tmp_List30);
 --  END <List (root of 'type_decl') at parser.lkt:151:13>
 Row_Progress45 := 8;
 if List_Pos31 /= No_Token_Index then
-   Row_Pos180 := List_Pos31;
+   Row_Pos183 := List_Pos31;
 else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
+   Row_Pos183 := No_Token_Index;
+   goto Exit_Row183_0;
 end if;
 --  BEGIN <DontSkip (root of 'type_decl') at parser.lkt:157:13>
---  pos=Defer_Pos241, res=Defer_Res241, nobt=None
+--  pos=Defer_Pos246, res=Defer_Res246, nobt=None
         PP.Dont_Skip.Append (Dontskip_Type_Decl1_Extract_Parse0'Access);
 --  BEGIN <Defer (for 'decl_block') at parser.lkt:157:13>
---  pos=Defer_Pos241, res=Defer_Res241, nobt=None
-Defer_Res241 :=
-   Decl_Block_List_Parse0 (Parser, Row_Pos180);
-Defer_Pos241 := Parser.Current_Pos;
+--  pos=Defer_Pos246, res=Defer_Res246, nobt=None
+Defer_Res246 :=
+   Decl_Block_List_Parse0 (Parser, Row_Pos183);
+Defer_Pos246 := Parser.Current_Pos;
 --  END <Defer (for 'decl_block') at parser.lkt:157:13>
         PP.Dont_Skip.Delete_Last;
 --  END <DontSkip (root of 'type_decl') at parser.lkt:157:13>
 Row_Progress45 := 9;
-if Defer_Pos241 /= No_Token_Index then
-   Row_Pos180 := Defer_Pos241;
+if Defer_Pos246 /= No_Token_Index then
+   Row_Pos183 := Defer_Pos246;
 else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
+   Row_Pos183 := No_Token_Index;
+   goto Exit_Row183_0;
 end if;
 --  BEGIN <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:158:13>
---  pos=Token_Pos263, res=Token_Res263, nobt=None
-Token_Res263 := Row_Pos180;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res263));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_R_Brace)
-   then
-       Token_Pos263 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos180 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos180,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_R_Brace,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos263 := Row_Pos180 + 1;
-   end if;
-end;
---  END <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:158:13>
-Row_Progress45 := 10;
-if Token_Pos263 /= No_Token_Index then
-   Row_Pos180 := Token_Pos263;
-else
-   Row_Pos180 := No_Token_Index;
-   goto Exit_Row180_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row180_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:143:11>
-if Row_Pos180 = No_Token_Index and then Nobt49 then
-   Row_Pos180 := Parser.Last_Fail.Pos;
-   Transform_Has_Failed45 := True;
-end if;
-if Row_Pos180 /= No_Token_Index then
-   Transform_Res143 := Allocate_Enum_Class_Decl (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res143,
-      Kind => Lkt_Enum_Class_Decl,
-      Unit => Parser.Unit,
-      Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos180 = Pos
-                            then No_Token_Index
-                            else Row_Pos180 - 1));
-      Initialize_Fields_For_Enum_Class_Decl
-        (Self => Transform_Res143,
-         Basic_Class_Decl_F_Syn_Name => Defer_Res237,
-         Basic_Class_Decl_F_Syn_Base_Type => Defer_Res238,
-         Basic_Class_Decl_F_Traits => Defer_Res239,
-         Enum_Class_Decl_F_Branches => List_Res31,
-         Enum_Class_Decl_F_Decls => Defer_Res241);
-         if Defer_Res237 /= null and then Is_Incomplete (Defer_Res237) then
-            Transform_Res143.Last_Attempted_Child := 0;
-         elsif Defer_Res237 /= null and then not Is_Ghost (Defer_Res237) then
-            Transform_Res143.Last_Attempted_Child := -1;
-         end if;
-         if Defer_Res238 /= null and then Is_Incomplete (Defer_Res238) then
-            Transform_Res143.Last_Attempted_Child := 0;
-         elsif Defer_Res238 /= null and then not Is_Ghost (Defer_Res238) then
-            Transform_Res143.Last_Attempted_Child := -1;
-         end if;
-         if Defer_Res239 /= null and then Is_Incomplete (Defer_Res239) then
-            Transform_Res143.Last_Attempted_Child := 0;
-         elsif Defer_Res239 /= null and then not Is_Ghost (Defer_Res239) then
-            Transform_Res143.Last_Attempted_Child := -1;
-         end if;
-         if List_Res31 /= null and then Is_Incomplete (List_Res31) then
-            Transform_Res143.Last_Attempted_Child := 0;
-         elsif List_Res31 /= null and then not Is_Ghost (List_Res31) then
-            Transform_Res143.Last_Attempted_Child := -1;
-         end if;
-         if Defer_Res241 /= null and then Is_Incomplete (Defer_Res241) then
-            Transform_Res143.Last_Attempted_Child := 0;
-         elsif Defer_Res241 /= null and then not Is_Ghost (Defer_Res241) then
-            Transform_Res143.Last_Attempted_Child := -1;
-         end if;
-   if Transform_Has_Failed45 then
-      Transform_Res143.Last_Attempted_Child :=
-         Row_Progress45;
-      Append (Parser, Pos, "Cannot parse <type_decl>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
-end if;
---  END <Transform(<ASTNodeType EnumClassDecl>) (root of 'type_decl') at parser.lkt:143:11>
-    if Row_Pos180 /= No_Token_Index then
-        Or_Pos37 := Row_Pos180;
-        Or_Res37 := Transform_Res143;
-        goto Exit_Or41;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail37.Pos then
-       Branch_Diag_Mark37 := Parser.Last_Diag;
-       Branch_Last_Fail37 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark101;
-    Parser.Last_Fail := Last_Fail37;
---  BEGIN <Transform(<ASTNodeType ClassDecl>) (root of 'type_decl') at parser.lkt:160:11>
---  pos=Row_Pos185, res=Transform_Res144, nobt=Nobt50
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:160:11>
---  pos=Row_Pos185, res=None, nobt=Nobt50
-Row_Pos185 := Pos;
---  BEGIN <Token(<WithText ClassKw>, ) (root of 'type_decl') at parser.lkt:161:13>
---  pos=Token_Pos264, res=Token_Res264, nobt=None
-Token_Res264 := Row_Pos185;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res264));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_Class_Kw)
-   then
-       Token_Pos264 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos185 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos185,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Class_Kw,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos264 := Row_Pos185 + 1;
-   end if;
-end;
---  END <Token(<WithText ClassKw>, ) (root of 'type_decl') at parser.lkt:161:13>
-Row_Progress46 := 1;
-if Token_Pos264 /= No_Token_Index then
-   Row_Pos185 := Token_Pos264;
-else
-   Row_Pos185 := No_Token_Index;
-   goto Exit_Row185_0;
-end if;
---  BEGIN <Cut (root of 'type_decl') at parser.lkt:162:13>
---  pos=Row_Pos185, res=None, nobt=Nobt50
-Nobt50 := True;
---  END <Cut (root of 'type_decl') at parser.lkt:162:13>
-Row_Progress46 := 2;
-if Row_Pos185 /= No_Token_Index then
-   Row_Pos185 := Row_Pos185;
-else
-   Row_Pos185 := No_Token_Index;
-   goto Exit_Row185_0;
-end if;
---  BEGIN <Defer (for 'def_id') at parser.lkt:163:13>
---  pos=Defer_Pos242, res=Defer_Res242, nobt=None
-Defer_Res242 :=
-   Def_Id_Transform_Parse0 (Parser, Row_Pos185);
-Defer_Pos242 := Parser.Current_Pos;
---  END <Defer (for 'def_id') at parser.lkt:163:13>
-Row_Progress46 := 3;
-if Defer_Pos242 /= No_Token_Index then
-   Row_Pos185 := Defer_Pos242;
-else
-   Row_Pos185 := No_Token_Index;
-   goto Exit_Row185_0;
-end if;
---  BEGIN <Opt (root of 'type_decl') at parser.lkt:164:13>
---  pos=Row_Pos186, res=Defer_Res243, nobt=Nobt51
-Diag_Mark97 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'type_decl') at parser.lkt:164:14>
---  pos=Row_Pos186, res=Defer_Res243, nobt=Nobt51
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:164:14>
---  pos=Row_Pos186, res=None, nobt=Nobt51
-Row_Pos186 := Row_Pos185;
---  BEGIN <Token(<WithText Colon>, ) (root of 'type_decl') at parser.lkt:164:19>
---  pos=Token_Pos265, res=Token_Res265, nobt=None
-Token_Res265 := Row_Pos186;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res265));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_Colon)
-   then
-       Token_Pos265 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos186 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos186,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Colon,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos265 := Row_Pos186 + 1;
-   end if;
-end;
---  END <Token(<WithText Colon>, ) (root of 'type_decl') at parser.lkt:164:19>
-if Token_Pos265 /= No_Token_Index then
-   Row_Pos186 := Token_Pos265;
-else
-   Row_Pos186 := No_Token_Index;
-   goto Exit_Row186_0;
-end if;
---  BEGIN <Cut (root of 'type_decl') at parser.lkt:164:23>
---  pos=Row_Pos186, res=None, nobt=Nobt51
-Nobt51 := True;
---  END <Cut (root of 'type_decl') at parser.lkt:164:23>
-if Row_Pos186 /= No_Token_Index then
-   Row_Pos186 := Row_Pos186;
-else
-   Row_Pos186 := No_Token_Index;
-   goto Exit_Row186_0;
-end if;
---  BEGIN <Defer (for 'type_ref') at parser.lkt:164:25>
---  pos=Defer_Pos243, res=Defer_Res243, nobt=None
-Defer_Res243 :=
-   Type_Ref_Or_Parse0 (Parser, Row_Pos186);
-Defer_Pos243 := Parser.Current_Pos;
---  END <Defer (for 'type_ref') at parser.lkt:164:25>
-if Defer_Pos243 /= No_Token_Index then
-   Row_Pos186 := Defer_Pos243;
-else
-   Row_Pos186 := No_Token_Index;
-   goto Exit_Row186_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row186_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:164:14>
---  END <_Extract (root of 'type_decl') at parser.lkt:164:14>
-if Row_Pos186 = No_Token_Index then
-   if Nobt51 then
-      Row_Pos186 := Parser.Last_Fail.Pos;
-      Append (Parser, Row_Pos186, "Cannot parse <type_decl>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
-         if not Nobt51 then
-   Defer_Res243 := No_Bare_Lkt_Node;
-         end if;
-       if not Nobt51 then
-   Row_Pos186 := Row_Pos185;
-      Parser.Last_Diag := Diag_Mark97;
-       end if;
-end if;
---  END <Opt (root of 'type_decl') at parser.lkt:164:13>
-   Nobt50 := Nobt51;
-Row_Progress46 := 4;
-if Row_Pos186 /= No_Token_Index then
-   Row_Pos185 := Row_Pos186;
-else
-   Row_Pos185 := No_Token_Index;
-   goto Exit_Row185_0;
-end if;
---  BEGIN <Opt (root of 'type_decl') at parser.lkt:165:13>
---  pos=Row_Pos187, res=Defer_Res244, nobt=Nobt52
-Diag_Mark98 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'type_decl') at parser.lkt:165:14>
---  pos=Row_Pos187, res=Defer_Res244, nobt=Nobt52
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:165:14>
---  pos=Row_Pos187, res=None, nobt=Nobt52
-Row_Pos187 := Row_Pos185;
---  BEGIN <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:165:19>
---  pos=Token_Pos266, res=Token_Res266, nobt=None
-Token_Res266 := Row_Pos187;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res266));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_Implements_Kw)
-   then
-       Token_Pos266 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos187 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos187,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Implements_Kw,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos266 := Row_Pos187 + 1;
-   end if;
-end;
---  END <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:165:19>
-if Token_Pos266 /= No_Token_Index then
-   Row_Pos187 := Token_Pos266;
-else
-   Row_Pos187 := No_Token_Index;
-   goto Exit_Row187_0;
-end if;
---  BEGIN <Cut (root of 'type_decl') at parser.lkt:165:32>
---  pos=Row_Pos187, res=None, nobt=Nobt52
-Nobt52 := True;
---  END <Cut (root of 'type_decl') at parser.lkt:165:32>
-if Row_Pos187 /= No_Token_Index then
-   Row_Pos187 := Row_Pos187;
-else
-   Row_Pos187 := No_Token_Index;
-   goto Exit_Row187_0;
-end if;
---  BEGIN <Defer (for 'type_list') at parser.lkt:165:34>
---  pos=Defer_Pos244, res=Defer_Res244, nobt=None
-Defer_Res244 :=
-   Type_List_List_Parse0 (Parser, Row_Pos187);
-Defer_Pos244 := Parser.Current_Pos;
---  END <Defer (for 'type_list') at parser.lkt:165:34>
-if Defer_Pos244 /= No_Token_Index then
-   Row_Pos187 := Defer_Pos244;
-else
-   Row_Pos187 := No_Token_Index;
-   goto Exit_Row187_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row187_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:165:14>
---  END <_Extract (root of 'type_decl') at parser.lkt:165:14>
-if Row_Pos187 = No_Token_Index then
-   if Nobt52 then
-      Row_Pos187 := Parser.Last_Fail.Pos;
-      Append (Parser, Row_Pos187, "Cannot parse <type_decl>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
-         if Defer_Res244 = No_Bare_Lkt_Node then
-   Defer_Res244 :=
-     Allocate_Type_Ref_List (Parser.Mem_Pool);
-   Initialize
-     (Self              => Defer_Res244,
-      Kind              => Lkt_Type_Ref_List,
-      Unit              => Parser.Unit,
-      Token_Start_Index => Row_Pos185,
-      Token_End_Index   => No_Token_Index);
-   Initialize_List
-     (Self   => Defer_Res244,
-      Parser => Parser,
-      Count  => 0);
-         end if;
-       if not Nobt52 then
-   Row_Pos187 := Row_Pos185;
-      Parser.Last_Diag := Diag_Mark98;
-       end if;
-end if;
---  END <Opt (root of 'type_decl') at parser.lkt:165:13>
-   Nobt50 := Nobt52;
-Row_Progress46 := 5;
-if Row_Pos187 /= No_Token_Index then
-   Row_Pos185 := Row_Pos187;
-else
-   Row_Pos185 := No_Token_Index;
-   goto Exit_Row185_0;
-end if;
---  BEGIN <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:166:13>
 --  pos=Token_Pos267, res=Token_Res267, nobt=None
-Token_Res267 := Row_Pos185;
+Token_Res267 := Row_Pos183;
 declare
    T : constant Stored_Token_Data :=
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res267));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_L_Brace)
-   then
-       Token_Pos267 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos185 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos185,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_L_Brace,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos267 := Row_Pos185 + 1;
-   end if;
-end;
---  END <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:166:13>
-Row_Progress46 := 6;
-if Token_Pos267 /= No_Token_Index then
-   Row_Pos185 := Token_Pos267;
-else
-   Row_Pos185 := No_Token_Index;
-   goto Exit_Row185_0;
-end if;
---  BEGIN <DontSkip (root of 'type_decl') at parser.lkt:167:13>
---  pos=Defer_Pos245, res=Defer_Res245, nobt=None
-        PP.Dont_Skip.Append (Dontskip_Type_Decl2_Extract_Parse0'Access);
---  BEGIN <Defer (for 'decl_block') at parser.lkt:167:13>
---  pos=Defer_Pos245, res=Defer_Res245, nobt=None
-Defer_Res245 :=
-   Decl_Block_List_Parse0 (Parser, Row_Pos185);
-Defer_Pos245 := Parser.Current_Pos;
---  END <Defer (for 'decl_block') at parser.lkt:167:13>
-        PP.Dont_Skip.Delete_Last;
---  END <DontSkip (root of 'type_decl') at parser.lkt:167:13>
-Row_Progress46 := 7;
-if Defer_Pos245 /= No_Token_Index then
-   Row_Pos185 := Defer_Pos245;
-else
-   Row_Pos185 := No_Token_Index;
-   goto Exit_Row185_0;
-end if;
---  BEGIN <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:168:13>
---  pos=Token_Pos268, res=Token_Res268, nobt=None
-Token_Res268 := Row_Pos185;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res268));
-begin
-   if
       T.Kind /= From_Token_Kind (Lkt_R_Brace)
    then
-       Token_Pos268 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos185 then
+       Token_Pos267 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos183 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos185,
+            (Pos  => Row_Pos183,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Brace,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos268 := Row_Pos185 + 1;
+          Token_Pos267 := Row_Pos183 + 1;
    end if;
 end;
---  END <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:168:13>
-Row_Progress46 := 8;
-if Token_Pos268 /= No_Token_Index then
-   Row_Pos185 := Token_Pos268;
+--  END <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:158:13>
+Row_Progress45 := 10;
+if Token_Pos267 /= No_Token_Index then
+   Row_Pos183 := Token_Pos267;
 else
-   Row_Pos185 := No_Token_Index;
-   goto Exit_Row185_0;
+   Row_Pos183 := No_Token_Index;
+   goto Exit_Row183_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row185_0>>
+<<Exit_Row183_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:160:11>
-if Row_Pos185 = No_Token_Index and then Nobt50 then
-   Row_Pos185 := Parser.Last_Fail.Pos;
-   Transform_Has_Failed46 := True;
+--  END <_Row (root of 'type_decl') at parser.lkt:143:11>
+if Row_Pos183 = No_Token_Index and then Nobt49 then
+   Row_Pos183 := Parser.Last_Fail.Pos;
+   Transform_Has_Failed45 := True;
 end if;
-if Row_Pos185 /= No_Token_Index then
-   Transform_Res144 := Allocate_Class_Decl (Parser.Mem_Pool);
+if Row_Pos183 /= No_Token_Index then
+   Transform_Res144 := Allocate_Enum_Class_Decl (Parser.Mem_Pool);
    Initialize
      (Self => Transform_Res144,
-      Kind => Lkt_Class_Decl,
+      Kind => Lkt_Enum_Class_Decl,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos185 = Pos
+      Token_End_Index   => (if Row_Pos183 = Pos
                             then No_Token_Index
-                            else Row_Pos185 - 1));
-      Initialize_Fields_For_Class_Decl
+                            else Row_Pos183 - 1));
+      Initialize_Fields_For_Enum_Class_Decl
         (Self => Transform_Res144,
          Basic_Class_Decl_F_Syn_Name => Defer_Res242,
          Basic_Class_Decl_F_Syn_Base_Type => Defer_Res243,
          Basic_Class_Decl_F_Traits => Defer_Res244,
-         Class_Decl_F_Decls => Defer_Res245);
+         Enum_Class_Decl_F_Branches => List_Res31,
+         Enum_Class_Decl_F_Decls => Defer_Res246);
          if Defer_Res242 /= null and then Is_Incomplete (Defer_Res242) then
             Transform_Res144.Last_Attempted_Child := 0;
          elsif Defer_Res242 /= null and then not Is_Ghost (Defer_Res242) then
@@ -35363,21 +35354,26 @@ if Row_Pos185 /= No_Token_Index then
          elsif Defer_Res244 /= null and then not Is_Ghost (Defer_Res244) then
             Transform_Res144.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res245 /= null and then Is_Incomplete (Defer_Res245) then
+         if List_Res31 /= null and then Is_Incomplete (List_Res31) then
             Transform_Res144.Last_Attempted_Child := 0;
-         elsif Defer_Res245 /= null and then not Is_Ghost (Defer_Res245) then
+         elsif List_Res31 /= null and then not Is_Ghost (List_Res31) then
             Transform_Res144.Last_Attempted_Child := -1;
          end if;
-   if Transform_Has_Failed46 then
+         if Defer_Res246 /= null and then Is_Incomplete (Defer_Res246) then
+            Transform_Res144.Last_Attempted_Child := 0;
+         elsif Defer_Res246 /= null and then not Is_Ghost (Defer_Res246) then
+            Transform_Res144.Last_Attempted_Child := -1;
+         end if;
+   if Transform_Has_Failed45 then
       Transform_Res144.Last_Attempted_Child :=
-         Row_Progress46;
+         Row_Progress45;
       Append (Parser, Pos, "Cannot parse <type_decl>");
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 end if;
---  END <Transform(<ASTNodeType ClassDecl>) (root of 'type_decl') at parser.lkt:160:11>
-    if Row_Pos185 /= No_Token_Index then
-        Or_Pos37 := Row_Pos185;
+--  END <Transform(<ASTNodeType EnumClassDecl>) (root of 'type_decl') at parser.lkt:143:11>
+    if Row_Pos183 /= No_Token_Index then
+        Or_Pos37 := Row_Pos183;
         Or_Res37 := Transform_Res144;
         goto Exit_Or41;
     end if;
@@ -35385,79 +35381,167 @@ end if;
        Branch_Diag_Mark37 := Parser.Last_Diag;
        Branch_Last_Fail37 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark101;
+    Parser.Last_Diag := Diag_Mark103;
     Parser.Last_Fail := Last_Fail37;
---  BEGIN <Transform(<ASTNodeType EnumTypeDecl>) (root of 'type_decl') at parser.lkt:170:11>
---  pos=Row_Pos188, res=Transform_Res145, nobt=Nobt53
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:170:11>
---  pos=Row_Pos188, res=None, nobt=Nobt53
+--  BEGIN <Transform(<ASTNodeType ClassDecl>) (root of 'type_decl') at parser.lkt:160:11>
+--  pos=Row_Pos188, res=Transform_Res145, nobt=Nobt50
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:160:11>
+--  pos=Row_Pos188, res=None, nobt=Nobt50
 Row_Pos188 := Pos;
---  BEGIN <Token(<WithText EnumKw>, ) (root of 'type_decl') at parser.lkt:171:13>
---  pos=Token_Pos269, res=Token_Res269, nobt=None
-Token_Res269 := Row_Pos188;
+--  BEGIN <Token(<WithText ClassKw>, ) (root of 'type_decl') at parser.lkt:161:13>
+--  pos=Token_Pos268, res=Token_Res268, nobt=None
+Token_Res268 := Row_Pos188;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res269));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res268));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_Enum_Kw)
+      T.Kind /= From_Token_Kind (Lkt_Class_Kw)
    then
-       Token_Pos269 := No_Token_Index;
+       Token_Pos268 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Row_Pos188 then
           Parser.Last_Fail :=
             (Pos  => Row_Pos188,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Enum_Kw,
+                Expected_Token_Id => Lkt_Class_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos269 := Row_Pos188 + 1;
+          Token_Pos268 := Row_Pos188 + 1;
    end if;
 end;
---  END <Token(<WithText EnumKw>, ) (root of 'type_decl') at parser.lkt:171:13>
-Row_Progress47 := 1;
-if Token_Pos269 /= No_Token_Index then
-   Row_Pos188 := Token_Pos269;
+--  END <Token(<WithText ClassKw>, ) (root of 'type_decl') at parser.lkt:161:13>
+Row_Progress46 := 1;
+if Token_Pos268 /= No_Token_Index then
+   Row_Pos188 := Token_Pos268;
 else
    Row_Pos188 := No_Token_Index;
    goto Exit_Row188_0;
 end if;
---  BEGIN <Cut (root of 'type_decl') at parser.lkt:172:13>
---  pos=Row_Pos188, res=None, nobt=Nobt53
-Nobt53 := True;
---  END <Cut (root of 'type_decl') at parser.lkt:172:13>
-Row_Progress47 := 2;
+--  BEGIN <Cut (root of 'type_decl') at parser.lkt:162:13>
+--  pos=Row_Pos188, res=None, nobt=Nobt50
+Nobt50 := True;
+--  END <Cut (root of 'type_decl') at parser.lkt:162:13>
+Row_Progress46 := 2;
 if Row_Pos188 /= No_Token_Index then
    Row_Pos188 := Row_Pos188;
 else
    Row_Pos188 := No_Token_Index;
    goto Exit_Row188_0;
 end if;
---  BEGIN <Defer (for 'def_id') at parser.lkt:173:13>
---  pos=Defer_Pos246, res=Defer_Res246, nobt=None
-Defer_Res246 :=
+--  BEGIN <Defer (for 'def_id') at parser.lkt:163:13>
+--  pos=Defer_Pos247, res=Defer_Res247, nobt=None
+Defer_Res247 :=
    Def_Id_Transform_Parse0 (Parser, Row_Pos188);
-Defer_Pos246 := Parser.Current_Pos;
---  END <Defer (for 'def_id') at parser.lkt:173:13>
-Row_Progress47 := 3;
-if Defer_Pos246 /= No_Token_Index then
-   Row_Pos188 := Defer_Pos246;
+Defer_Pos247 := Parser.Current_Pos;
+--  END <Defer (for 'def_id') at parser.lkt:163:13>
+Row_Progress46 := 3;
+if Defer_Pos247 /= No_Token_Index then
+   Row_Pos188 := Defer_Pos247;
 else
    Row_Pos188 := No_Token_Index;
    goto Exit_Row188_0;
 end if;
---  BEGIN <Opt (root of 'type_decl') at parser.lkt:174:13>
---  pos=Row_Pos189, res=Defer_Res247, nobt=None
+--  BEGIN <Opt (root of 'type_decl') at parser.lkt:164:13>
+--  pos=Row_Pos189, res=Defer_Res248, nobt=Nobt51
 Diag_Mark99 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'type_decl') at parser.lkt:174:14>
---  pos=Row_Pos189, res=Defer_Res247, nobt=None
---  BEGIN <_Row (root of 'type_decl') at parser.lkt:174:14>
---  pos=Row_Pos189, res=None, nobt=None
+--  BEGIN <_Extract (root of 'type_decl') at parser.lkt:164:14>
+--  pos=Row_Pos189, res=Defer_Res248, nobt=Nobt51
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:164:14>
+--  pos=Row_Pos189, res=None, nobt=Nobt51
 Row_Pos189 := Row_Pos188;
---  BEGIN <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:174:19>
+--  BEGIN <Token(<WithText Colon>, ) (root of 'type_decl') at parser.lkt:164:19>
+--  pos=Token_Pos269, res=Token_Res269, nobt=None
+Token_Res269 := Row_Pos189;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res269));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Colon)
+   then
+       Token_Pos269 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos189 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos189,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Colon,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos269 := Row_Pos189 + 1;
+   end if;
+end;
+--  END <Token(<WithText Colon>, ) (root of 'type_decl') at parser.lkt:164:19>
+if Token_Pos269 /= No_Token_Index then
+   Row_Pos189 := Token_Pos269;
+else
+   Row_Pos189 := No_Token_Index;
+   goto Exit_Row189_0;
+end if;
+--  BEGIN <Cut (root of 'type_decl') at parser.lkt:164:23>
+--  pos=Row_Pos189, res=None, nobt=Nobt51
+Nobt51 := True;
+--  END <Cut (root of 'type_decl') at parser.lkt:164:23>
+if Row_Pos189 /= No_Token_Index then
+   Row_Pos189 := Row_Pos189;
+else
+   Row_Pos189 := No_Token_Index;
+   goto Exit_Row189_0;
+end if;
+--  BEGIN <Defer (for 'type_ref') at parser.lkt:164:25>
+--  pos=Defer_Pos248, res=Defer_Res248, nobt=None
+Defer_Res248 :=
+   Type_Ref_Or_Parse0 (Parser, Row_Pos189);
+Defer_Pos248 := Parser.Current_Pos;
+--  END <Defer (for 'type_ref') at parser.lkt:164:25>
+if Defer_Pos248 /= No_Token_Index then
+   Row_Pos189 := Defer_Pos248;
+else
+   Row_Pos189 := No_Token_Index;
+   goto Exit_Row189_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row189_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'type_decl') at parser.lkt:164:14>
+--  END <_Extract (root of 'type_decl') at parser.lkt:164:14>
+if Row_Pos189 = No_Token_Index then
+   if Nobt51 then
+      Row_Pos189 := Parser.Last_Fail.Pos;
+      Append (Parser, Row_Pos189, "Cannot parse <type_decl>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
+         if not Nobt51 then
+   Defer_Res248 := No_Bare_Lkt_Node;
+         end if;
+       if not Nobt51 then
+   Row_Pos189 := Row_Pos188;
+      Parser.Last_Diag := Diag_Mark99;
+       end if;
+end if;
+--  END <Opt (root of 'type_decl') at parser.lkt:164:13>
+   Nobt50 := Nobt51;
+Row_Progress46 := 4;
+if Row_Pos189 /= No_Token_Index then
+   Row_Pos188 := Row_Pos189;
+else
+   Row_Pos188 := No_Token_Index;
+   goto Exit_Row188_0;
+end if;
+--  BEGIN <Opt (root of 'type_decl') at parser.lkt:165:13>
+--  pos=Row_Pos190, res=Defer_Res249, nobt=Nobt52
+Diag_Mark100 := Parser.Last_Diag;
+--  BEGIN <_Extract (root of 'type_decl') at parser.lkt:165:14>
+--  pos=Row_Pos190, res=Defer_Res249, nobt=Nobt52
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:165:14>
+--  pos=Row_Pos190, res=None, nobt=Nobt52
+Row_Pos190 := Row_Pos188;
+--  BEGIN <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:165:19>
 --  pos=Token_Pos270, res=Token_Res270, nobt=None
-Token_Res270 := Row_Pos189;
+Token_Res270 := Row_Pos190;
 declare
    T : constant Stored_Token_Data :=
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res270));
@@ -35466,67 +35550,87 @@ begin
       T.Kind /= From_Token_Kind (Lkt_Implements_Kw)
    then
        Token_Pos270 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos189 then
+       if Parser.Last_Fail.Pos <= Row_Pos190 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos189,
+            (Pos  => Row_Pos190,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Implements_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos270 := Row_Pos189 + 1;
+          Token_Pos270 := Row_Pos190 + 1;
    end if;
 end;
---  END <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:174:19>
+--  END <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:165:19>
 if Token_Pos270 /= No_Token_Index then
-   Row_Pos189 := Token_Pos270;
+   Row_Pos190 := Token_Pos270;
 else
-   Row_Pos189 := No_Token_Index;
-   goto Exit_Row189_0;
+   Row_Pos190 := No_Token_Index;
+   goto Exit_Row190_0;
 end if;
---  BEGIN <Defer (for 'type_list') at parser.lkt:174:32>
---  pos=Defer_Pos247, res=Defer_Res247, nobt=None
-Defer_Res247 :=
-   Type_List_List_Parse0 (Parser, Row_Pos189);
-Defer_Pos247 := Parser.Current_Pos;
---  END <Defer (for 'type_list') at parser.lkt:174:32>
-if Defer_Pos247 /= No_Token_Index then
-   Row_Pos189 := Defer_Pos247;
+--  BEGIN <Cut (root of 'type_decl') at parser.lkt:165:32>
+--  pos=Row_Pos190, res=None, nobt=Nobt52
+Nobt52 := True;
+--  END <Cut (root of 'type_decl') at parser.lkt:165:32>
+if Row_Pos190 /= No_Token_Index then
+   Row_Pos190 := Row_Pos190;
 else
-   Row_Pos189 := No_Token_Index;
-   goto Exit_Row189_0;
+   Row_Pos190 := No_Token_Index;
+   goto Exit_Row190_0;
+end if;
+--  BEGIN <Defer (for 'type_list') at parser.lkt:165:34>
+--  pos=Defer_Pos249, res=Defer_Res249, nobt=None
+Defer_Res249 :=
+   Type_List_List_Parse0 (Parser, Row_Pos190);
+Defer_Pos249 := Parser.Current_Pos;
+--  END <Defer (for 'type_list') at parser.lkt:165:34>
+if Defer_Pos249 /= No_Token_Index then
+   Row_Pos190 := Defer_Pos249;
+else
+   Row_Pos190 := No_Token_Index;
+   goto Exit_Row190_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row189_0>>
+<<Exit_Row190_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_decl') at parser.lkt:174:14>
---  END <_Extract (root of 'type_decl') at parser.lkt:174:14>
-if Row_Pos189 = No_Token_Index then
-   Defer_Res247 :=
+--  END <_Row (root of 'type_decl') at parser.lkt:165:14>
+--  END <_Extract (root of 'type_decl') at parser.lkt:165:14>
+if Row_Pos190 = No_Token_Index then
+   if Nobt52 then
+      Row_Pos190 := Parser.Last_Fail.Pos;
+      Append (Parser, Row_Pos190, "Cannot parse <type_decl>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
+         if Defer_Res249 = No_Bare_Lkt_Node then
+   Defer_Res249 :=
      Allocate_Type_Ref_List (Parser.Mem_Pool);
    Initialize
-     (Self              => Defer_Res247,
+     (Self              => Defer_Res249,
       Kind              => Lkt_Type_Ref_List,
       Unit              => Parser.Unit,
       Token_Start_Index => Row_Pos188,
       Token_End_Index   => No_Token_Index);
    Initialize_List
-     (Self   => Defer_Res247,
+     (Self   => Defer_Res249,
       Parser => Parser,
       Count  => 0);
-   Row_Pos189 := Row_Pos188;
-      Parser.Last_Diag := Diag_Mark99;
+         end if;
+       if not Nobt52 then
+   Row_Pos190 := Row_Pos188;
+      Parser.Last_Diag := Diag_Mark100;
+       end if;
 end if;
---  END <Opt (root of 'type_decl') at parser.lkt:174:13>
-Row_Progress47 := 4;
-if Row_Pos189 /= No_Token_Index then
-   Row_Pos188 := Row_Pos189;
+--  END <Opt (root of 'type_decl') at parser.lkt:165:13>
+   Nobt50 := Nobt52;
+Row_Progress46 := 5;
+if Row_Pos190 /= No_Token_Index then
+   Row_Pos188 := Row_Pos190;
 else
    Row_Pos188 := No_Token_Index;
    goto Exit_Row188_0;
 end if;
---  BEGIN <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:175:13>
+--  BEGIN <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:166:13>
 --  pos=Token_Pos271, res=Token_Res271, nobt=None
 Token_Res271 := Row_Pos188;
 declare
@@ -35549,15 +35653,33 @@ begin
           Token_Pos271 := Row_Pos188 + 1;
    end if;
 end;
---  END <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:175:13>
-Row_Progress47 := 5;
+--  END <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:166:13>
+Row_Progress46 := 6;
 if Token_Pos271 /= No_Token_Index then
    Row_Pos188 := Token_Pos271;
 else
    Row_Pos188 := No_Token_Index;
    goto Exit_Row188_0;
 end if;
---  BEGIN <Token(<WithText CaseKw>, ) (root of 'type_decl') at parser.lkt:176:13>
+--  BEGIN <DontSkip (root of 'type_decl') at parser.lkt:167:13>
+--  pos=Defer_Pos250, res=Defer_Res250, nobt=None
+        PP.Dont_Skip.Append (Dontskip_Type_Decl2_Extract_Parse0'Access);
+--  BEGIN <Defer (for 'decl_block') at parser.lkt:167:13>
+--  pos=Defer_Pos250, res=Defer_Res250, nobt=None
+Defer_Res250 :=
+   Decl_Block_List_Parse0 (Parser, Row_Pos188);
+Defer_Pos250 := Parser.Current_Pos;
+--  END <Defer (for 'decl_block') at parser.lkt:167:13>
+        PP.Dont_Skip.Delete_Last;
+--  END <DontSkip (root of 'type_decl') at parser.lkt:167:13>
+Row_Progress46 := 7;
+if Defer_Pos250 /= No_Token_Index then
+   Row_Pos188 := Defer_Pos250;
+else
+   Row_Pos188 := No_Token_Index;
+   goto Exit_Row188_0;
+end if;
+--  BEGIN <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:168:13>
 --  pos=Token_Pos272, res=Token_Res272, nobt=None
 Token_Res272 := Row_Pos188;
 declare
@@ -35565,7 +35687,7 @@ declare
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res272));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_Case_Kw)
+      T.Kind /= From_Token_Kind (Lkt_R_Brace)
    then
        Token_Pos272 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Row_Pos188 then
@@ -35573,50 +35695,314 @@ begin
             (Pos  => Row_Pos188,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Case_Kw,
+                Expected_Token_Id => Lkt_R_Brace,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
           Token_Pos272 := Row_Pos188 + 1;
    end if;
 end;
---  END <Token(<WithText CaseKw>, ) (root of 'type_decl') at parser.lkt:176:13>
-Row_Progress47 := 6;
+--  END <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:168:13>
+Row_Progress46 := 8;
 if Token_Pos272 /= No_Token_Index then
    Row_Pos188 := Token_Pos272;
 else
    Row_Pos188 := No_Token_Index;
    goto Exit_Row188_0;
 end if;
---  BEGIN <List (root of 'type_decl') at parser.lkt:177:13>
---  pos=List_Pos32, res=List_Res32, nobt=None
-    List_Pos32 := No_Token_Index;
-Lst_Cpos32 := Row_Pos188;
-Tmp_List32 := Get_Parse_List (Parser);
-Diag_Mark100 := Parser.Last_Diag;
-loop
---  BEGIN <Defer (for 'enum_lit_decl') at parser.lkt:177:19>
---  pos=Defer_Pos248, res=Defer_Res248, nobt=None
-Defer_Res248 :=
-   Enum_Lit_Decl_Transform_Parse0 (Parser, Lst_Cpos32);
-Defer_Pos248 := Parser.Current_Pos;
---  END <Defer (for 'enum_lit_decl') at parser.lkt:177:19>
-   exit when Defer_Pos248 = No_Token_Index;
-   List_Pos32 := Defer_Pos248;
-   Lst_Cpos32 := List_Pos32;
-   Diag_Mark100 := Parser.Last_Diag;
-   Tmp_List32.Nodes.Append (Defer_Res248);
---  BEGIN <Token(<WithText Comma>, ) (root of 'type_decl') at parser.lkt:177:34>
+pragma Warnings (Off, "referenced");
+<<Exit_Row188_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'type_decl') at parser.lkt:160:11>
+if Row_Pos188 = No_Token_Index and then Nobt50 then
+   Row_Pos188 := Parser.Last_Fail.Pos;
+   Transform_Has_Failed46 := True;
+end if;
+if Row_Pos188 /= No_Token_Index then
+   Transform_Res145 := Allocate_Class_Decl (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res145,
+      Kind => Lkt_Class_Decl,
+      Unit => Parser.Unit,
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos188 = Pos
+                            then No_Token_Index
+                            else Row_Pos188 - 1));
+      Initialize_Fields_For_Class_Decl
+        (Self => Transform_Res145,
+         Basic_Class_Decl_F_Syn_Name => Defer_Res247,
+         Basic_Class_Decl_F_Syn_Base_Type => Defer_Res248,
+         Basic_Class_Decl_F_Traits => Defer_Res249,
+         Class_Decl_F_Decls => Defer_Res250);
+         if Defer_Res247 /= null and then Is_Incomplete (Defer_Res247) then
+            Transform_Res145.Last_Attempted_Child := 0;
+         elsif Defer_Res247 /= null and then not Is_Ghost (Defer_Res247) then
+            Transform_Res145.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res248 /= null and then Is_Incomplete (Defer_Res248) then
+            Transform_Res145.Last_Attempted_Child := 0;
+         elsif Defer_Res248 /= null and then not Is_Ghost (Defer_Res248) then
+            Transform_Res145.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res249 /= null and then Is_Incomplete (Defer_Res249) then
+            Transform_Res145.Last_Attempted_Child := 0;
+         elsif Defer_Res249 /= null and then not Is_Ghost (Defer_Res249) then
+            Transform_Res145.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res250 /= null and then Is_Incomplete (Defer_Res250) then
+            Transform_Res145.Last_Attempted_Child := 0;
+         elsif Defer_Res250 /= null and then not Is_Ghost (Defer_Res250) then
+            Transform_Res145.Last_Attempted_Child := -1;
+         end if;
+   if Transform_Has_Failed46 then
+      Transform_Res145.Last_Attempted_Child :=
+         Row_Progress46;
+      Append (Parser, Pos, "Cannot parse <type_decl>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
+end if;
+--  END <Transform(<ASTNodeType ClassDecl>) (root of 'type_decl') at parser.lkt:160:11>
+    if Row_Pos188 /= No_Token_Index then
+        Or_Pos37 := Row_Pos188;
+        Or_Res37 := Transform_Res145;
+        goto Exit_Or41;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail37.Pos then
+       Branch_Diag_Mark37 := Parser.Last_Diag;
+       Branch_Last_Fail37 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark103;
+    Parser.Last_Fail := Last_Fail37;
+--  BEGIN <Transform(<ASTNodeType EnumTypeDecl>) (root of 'type_decl') at parser.lkt:170:11>
+--  pos=Row_Pos191, res=Transform_Res146, nobt=Nobt53
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:170:11>
+--  pos=Row_Pos191, res=None, nobt=Nobt53
+Row_Pos191 := Pos;
+--  BEGIN <Token(<WithText EnumKw>, ) (root of 'type_decl') at parser.lkt:171:13>
 --  pos=Token_Pos273, res=Token_Res273, nobt=None
-Token_Res273 := Lst_Cpos32;
+Token_Res273 := Row_Pos191;
 declare
    T : constant Stored_Token_Data :=
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res273));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_Comma)
+      T.Kind /= From_Token_Kind (Lkt_Enum_Kw)
    then
        Token_Pos273 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos191 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos191,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Enum_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos273 := Row_Pos191 + 1;
+   end if;
+end;
+--  END <Token(<WithText EnumKw>, ) (root of 'type_decl') at parser.lkt:171:13>
+Row_Progress47 := 1;
+if Token_Pos273 /= No_Token_Index then
+   Row_Pos191 := Token_Pos273;
+else
+   Row_Pos191 := No_Token_Index;
+   goto Exit_Row191_0;
+end if;
+--  BEGIN <Cut (root of 'type_decl') at parser.lkt:172:13>
+--  pos=Row_Pos191, res=None, nobt=Nobt53
+Nobt53 := True;
+--  END <Cut (root of 'type_decl') at parser.lkt:172:13>
+Row_Progress47 := 2;
+if Row_Pos191 /= No_Token_Index then
+   Row_Pos191 := Row_Pos191;
+else
+   Row_Pos191 := No_Token_Index;
+   goto Exit_Row191_0;
+end if;
+--  BEGIN <Defer (for 'def_id') at parser.lkt:173:13>
+--  pos=Defer_Pos251, res=Defer_Res251, nobt=None
+Defer_Res251 :=
+   Def_Id_Transform_Parse0 (Parser, Row_Pos191);
+Defer_Pos251 := Parser.Current_Pos;
+--  END <Defer (for 'def_id') at parser.lkt:173:13>
+Row_Progress47 := 3;
+if Defer_Pos251 /= No_Token_Index then
+   Row_Pos191 := Defer_Pos251;
+else
+   Row_Pos191 := No_Token_Index;
+   goto Exit_Row191_0;
+end if;
+--  BEGIN <Opt (root of 'type_decl') at parser.lkt:174:13>
+--  pos=Row_Pos192, res=Defer_Res252, nobt=None
+Diag_Mark101 := Parser.Last_Diag;
+--  BEGIN <_Extract (root of 'type_decl') at parser.lkt:174:14>
+--  pos=Row_Pos192, res=Defer_Res252, nobt=None
+--  BEGIN <_Row (root of 'type_decl') at parser.lkt:174:14>
+--  pos=Row_Pos192, res=None, nobt=None
+Row_Pos192 := Row_Pos191;
+--  BEGIN <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:174:19>
+--  pos=Token_Pos274, res=Token_Res274, nobt=None
+Token_Res274 := Row_Pos192;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res274));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Implements_Kw)
+   then
+       Token_Pos274 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos192 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos192,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Implements_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos274 := Row_Pos192 + 1;
+   end if;
+end;
+--  END <Token(<WithText ImplementsKw>, ) (root of 'type_decl') at parser.lkt:174:19>
+if Token_Pos274 /= No_Token_Index then
+   Row_Pos192 := Token_Pos274;
+else
+   Row_Pos192 := No_Token_Index;
+   goto Exit_Row192_0;
+end if;
+--  BEGIN <Defer (for 'type_list') at parser.lkt:174:32>
+--  pos=Defer_Pos252, res=Defer_Res252, nobt=None
+Defer_Res252 :=
+   Type_List_List_Parse0 (Parser, Row_Pos192);
+Defer_Pos252 := Parser.Current_Pos;
+--  END <Defer (for 'type_list') at parser.lkt:174:32>
+if Defer_Pos252 /= No_Token_Index then
+   Row_Pos192 := Defer_Pos252;
+else
+   Row_Pos192 := No_Token_Index;
+   goto Exit_Row192_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row192_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'type_decl') at parser.lkt:174:14>
+--  END <_Extract (root of 'type_decl') at parser.lkt:174:14>
+if Row_Pos192 = No_Token_Index then
+   Defer_Res252 :=
+     Allocate_Type_Ref_List (Parser.Mem_Pool);
+   Initialize
+     (Self              => Defer_Res252,
+      Kind              => Lkt_Type_Ref_List,
+      Unit              => Parser.Unit,
+      Token_Start_Index => Row_Pos191,
+      Token_End_Index   => No_Token_Index);
+   Initialize_List
+     (Self   => Defer_Res252,
+      Parser => Parser,
+      Count  => 0);
+   Row_Pos192 := Row_Pos191;
+      Parser.Last_Diag := Diag_Mark101;
+end if;
+--  END <Opt (root of 'type_decl') at parser.lkt:174:13>
+Row_Progress47 := 4;
+if Row_Pos192 /= No_Token_Index then
+   Row_Pos191 := Row_Pos192;
+else
+   Row_Pos191 := No_Token_Index;
+   goto Exit_Row191_0;
+end if;
+--  BEGIN <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:175:13>
+--  pos=Token_Pos275, res=Token_Res275, nobt=None
+Token_Res275 := Row_Pos191;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res275));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_L_Brace)
+   then
+       Token_Pos275 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos191 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos191,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_L_Brace,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos275 := Row_Pos191 + 1;
+   end if;
+end;
+--  END <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:175:13>
+Row_Progress47 := 5;
+if Token_Pos275 /= No_Token_Index then
+   Row_Pos191 := Token_Pos275;
+else
+   Row_Pos191 := No_Token_Index;
+   goto Exit_Row191_0;
+end if;
+--  BEGIN <Token(<WithText CaseKw>, ) (root of 'type_decl') at parser.lkt:176:13>
+--  pos=Token_Pos276, res=Token_Res276, nobt=None
+Token_Res276 := Row_Pos191;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res276));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Case_Kw)
+   then
+       Token_Pos276 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos191 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos191,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Case_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos276 := Row_Pos191 + 1;
+   end if;
+end;
+--  END <Token(<WithText CaseKw>, ) (root of 'type_decl') at parser.lkt:176:13>
+Row_Progress47 := 6;
+if Token_Pos276 /= No_Token_Index then
+   Row_Pos191 := Token_Pos276;
+else
+   Row_Pos191 := No_Token_Index;
+   goto Exit_Row191_0;
+end if;
+--  BEGIN <List (root of 'type_decl') at parser.lkt:177:13>
+--  pos=List_Pos32, res=List_Res32, nobt=None
+    List_Pos32 := No_Token_Index;
+Lst_Cpos32 := Row_Pos191;
+Tmp_List32 := Get_Parse_List (Parser);
+Diag_Mark102 := Parser.Last_Diag;
+loop
+--  BEGIN <Defer (for 'enum_lit_decl') at parser.lkt:177:19>
+--  pos=Defer_Pos253, res=Defer_Res253, nobt=None
+Defer_Res253 :=
+   Enum_Lit_Decl_Transform_Parse0 (Parser, Lst_Cpos32);
+Defer_Pos253 := Parser.Current_Pos;
+--  END <Defer (for 'enum_lit_decl') at parser.lkt:177:19>
+   exit when Defer_Pos253 = No_Token_Index;
+   List_Pos32 := Defer_Pos253;
+   Lst_Cpos32 := List_Pos32;
+   Diag_Mark102 := Parser.Last_Diag;
+   Tmp_List32.Nodes.Append (Defer_Res253);
+--  BEGIN <Token(<WithText Comma>, ) (root of 'type_decl') at parser.lkt:177:34>
+--  pos=Token_Pos277, res=Token_Res277, nobt=None
+Token_Res277 := Lst_Cpos32;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res277));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Comma)
+   then
+       Token_Pos277 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Lst_Cpos32 then
           Parser.Last_Fail :=
             (Pos  => Lst_Cpos32,
@@ -35626,26 +36012,26 @@ begin
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos273 := Lst_Cpos32 + 1;
+          Token_Pos277 := Lst_Cpos32 + 1;
    end if;
 end;
 --  END <Token(<WithText Comma>, ) (root of 'type_decl') at parser.lkt:177:34>
-      exit when Token_Pos273 = No_Token_Index;
-      Lst_Cpos32 := Token_Pos273;
+      exit when Token_Pos277 = No_Token_Index;
+      Lst_Cpos32 := Token_Pos277;
 end loop;
-Parser.Last_Diag := Diag_Mark100;
+Parser.Last_Diag := Diag_Mark102;
 declare
    Token_Start, Token_End : Token_Index;
    Count                  : constant Natural := Tmp_List32.Nodes.Length;
 begin
    List_Res32 := Allocate_Enum_Lit_Decl_List (Parser.Mem_Pool);
    if Count > 0 then
-      Token_Start := Row_Pos188;
-      Token_End := (if Lst_Cpos32 = Row_Pos188
-                    then Row_Pos188
+      Token_Start := Row_Pos191;
+      Token_End := (if Lst_Cpos32 = Row_Pos191
+                    then Row_Pos191
                     else List_Pos32 - 1);
    else
-      Token_Start := Token_Index'Max (Row_Pos188, 1);
+      Token_Start := Token_Index'Max (Row_Pos191, 1);
       Token_End := No_Token_Index;
    end if;
    Initialize
@@ -35674,191 +36060,191 @@ Release_Parse_List (Parser, Tmp_List32);
 --  END <List (root of 'type_decl') at parser.lkt:177:13>
 Row_Progress47 := 7;
 if List_Pos32 /= No_Token_Index then
-   Row_Pos188 := List_Pos32;
+   Row_Pos191 := List_Pos32;
 else
-   Row_Pos188 := No_Token_Index;
-   goto Exit_Row188_0;
+   Row_Pos191 := No_Token_Index;
+   goto Exit_Row191_0;
 end if;
 --  BEGIN <DontSkip (root of 'type_decl') at parser.lkt:178:13>
---  pos=Defer_Pos249, res=Defer_Res249, nobt=None
+--  pos=Defer_Pos254, res=Defer_Res254, nobt=None
         PP.Dont_Skip.Append (Dontskip_Type_Decl3_Extract_Parse0'Access);
 --  BEGIN <Defer (for 'decl_block') at parser.lkt:178:13>
---  pos=Defer_Pos249, res=Defer_Res249, nobt=None
-Defer_Res249 :=
-   Decl_Block_List_Parse0 (Parser, Row_Pos188);
-Defer_Pos249 := Parser.Current_Pos;
+--  pos=Defer_Pos254, res=Defer_Res254, nobt=None
+Defer_Res254 :=
+   Decl_Block_List_Parse0 (Parser, Row_Pos191);
+Defer_Pos254 := Parser.Current_Pos;
 --  END <Defer (for 'decl_block') at parser.lkt:178:13>
         PP.Dont_Skip.Delete_Last;
 --  END <DontSkip (root of 'type_decl') at parser.lkt:178:13>
 Row_Progress47 := 8;
-if Defer_Pos249 /= No_Token_Index then
-   Row_Pos188 := Defer_Pos249;
+if Defer_Pos254 /= No_Token_Index then
+   Row_Pos191 := Defer_Pos254;
 else
-   Row_Pos188 := No_Token_Index;
-   goto Exit_Row188_0;
+   Row_Pos191 := No_Token_Index;
+   goto Exit_Row191_0;
 end if;
 --  BEGIN <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:179:13>
---  pos=Token_Pos274, res=Token_Res274, nobt=None
-Token_Res274 := Row_Pos188;
+--  pos=Token_Pos278, res=Token_Res278, nobt=None
+Token_Res278 := Row_Pos191;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res274));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res278));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_R_Brace)
    then
-       Token_Pos274 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos188 then
+       Token_Pos278 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos191 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos188,
+            (Pos  => Row_Pos191,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Brace,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos274 := Row_Pos188 + 1;
+          Token_Pos278 := Row_Pos191 + 1;
    end if;
 end;
 --  END <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:179:13>
 Row_Progress47 := 9;
-if Token_Pos274 /= No_Token_Index then
-   Row_Pos188 := Token_Pos274;
+if Token_Pos278 /= No_Token_Index then
+   Row_Pos191 := Token_Pos278;
 else
-   Row_Pos188 := No_Token_Index;
-   goto Exit_Row188_0;
+   Row_Pos191 := No_Token_Index;
+   goto Exit_Row191_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row188_0>>
+<<Exit_Row191_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'type_decl') at parser.lkt:170:11>
-if Row_Pos188 = No_Token_Index and then Nobt53 then
-   Row_Pos188 := Parser.Last_Fail.Pos;
+if Row_Pos191 = No_Token_Index and then Nobt53 then
+   Row_Pos191 := Parser.Last_Fail.Pos;
    Transform_Has_Failed47 := True;
 end if;
-if Row_Pos188 /= No_Token_Index then
-   Transform_Res145 := Allocate_Enum_Type_Decl (Parser.Mem_Pool);
+if Row_Pos191 /= No_Token_Index then
+   Transform_Res146 := Allocate_Enum_Type_Decl (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res145,
+     (Self => Transform_Res146,
       Kind => Lkt_Enum_Type_Decl,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos188 = Pos
+      Token_End_Index   => (if Row_Pos191 = Pos
                             then No_Token_Index
-                            else Row_Pos188 - 1));
+                            else Row_Pos191 - 1));
       Initialize_Fields_For_Enum_Type_Decl
-        (Self => Transform_Res145,
-         Enum_Type_Decl_F_Syn_Name => Defer_Res246,
-         Enum_Type_Decl_F_Traits => Defer_Res247,
+        (Self => Transform_Res146,
+         Enum_Type_Decl_F_Syn_Name => Defer_Res251,
+         Enum_Type_Decl_F_Traits => Defer_Res252,
          Enum_Type_Decl_F_Literals => List_Res32,
-         Enum_Type_Decl_F_Decls => Defer_Res249);
-         if Defer_Res246 /= null and then Is_Incomplete (Defer_Res246) then
-            Transform_Res145.Last_Attempted_Child := 0;
-         elsif Defer_Res246 /= null and then not Is_Ghost (Defer_Res246) then
-            Transform_Res145.Last_Attempted_Child := -1;
+         Enum_Type_Decl_F_Decls => Defer_Res254);
+         if Defer_Res251 /= null and then Is_Incomplete (Defer_Res251) then
+            Transform_Res146.Last_Attempted_Child := 0;
+         elsif Defer_Res251 /= null and then not Is_Ghost (Defer_Res251) then
+            Transform_Res146.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res247 /= null and then Is_Incomplete (Defer_Res247) then
-            Transform_Res145.Last_Attempted_Child := 0;
-         elsif Defer_Res247 /= null and then not Is_Ghost (Defer_Res247) then
-            Transform_Res145.Last_Attempted_Child := -1;
+         if Defer_Res252 /= null and then Is_Incomplete (Defer_Res252) then
+            Transform_Res146.Last_Attempted_Child := 0;
+         elsif Defer_Res252 /= null and then not Is_Ghost (Defer_Res252) then
+            Transform_Res146.Last_Attempted_Child := -1;
          end if;
          if List_Res32 /= null and then Is_Incomplete (List_Res32) then
-            Transform_Res145.Last_Attempted_Child := 0;
+            Transform_Res146.Last_Attempted_Child := 0;
          elsif List_Res32 /= null and then not Is_Ghost (List_Res32) then
-            Transform_Res145.Last_Attempted_Child := -1;
+            Transform_Res146.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res249 /= null and then Is_Incomplete (Defer_Res249) then
-            Transform_Res145.Last_Attempted_Child := 0;
-         elsif Defer_Res249 /= null and then not Is_Ghost (Defer_Res249) then
-            Transform_Res145.Last_Attempted_Child := -1;
+         if Defer_Res254 /= null and then Is_Incomplete (Defer_Res254) then
+            Transform_Res146.Last_Attempted_Child := 0;
+         elsif Defer_Res254 /= null and then not Is_Ghost (Defer_Res254) then
+            Transform_Res146.Last_Attempted_Child := -1;
          end if;
    if Transform_Has_Failed47 then
-      Transform_Res145.Last_Attempted_Child :=
+      Transform_Res146.Last_Attempted_Child :=
          Row_Progress47;
       Append (Parser, Pos, "Cannot parse <type_decl>");
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 end if;
 --  END <Transform(<ASTNodeType EnumTypeDecl>) (root of 'type_decl') at parser.lkt:170:11>
-    if Row_Pos188 /= No_Token_Index then
-        Or_Pos37 := Row_Pos188;
-        Or_Res37 := Transform_Res145;
+    if Row_Pos191 /= No_Token_Index then
+        Or_Pos37 := Row_Pos191;
+        Or_Res37 := Transform_Res146;
         goto Exit_Or41;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail37.Pos then
        Branch_Diag_Mark37 := Parser.Last_Diag;
        Branch_Last_Fail37 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark101;
+    Parser.Last_Diag := Diag_Mark103;
     Parser.Last_Fail := Last_Fail37;
 --  BEGIN <Transform(<ASTNodeType TraitDecl>) (root of 'type_decl') at parser.lkt:181:11>
---  pos=Row_Pos190, res=Transform_Res146, nobt=Nobt54
+--  pos=Row_Pos193, res=Transform_Res147, nobt=Nobt54
 --  BEGIN <_Row (root of 'type_decl') at parser.lkt:181:11>
---  pos=Row_Pos190, res=None, nobt=Nobt54
-Row_Pos190 := Pos;
+--  pos=Row_Pos193, res=None, nobt=Nobt54
+Row_Pos193 := Pos;
 --  BEGIN <Token(<WithText TraitKw>, ) (root of 'type_decl') at parser.lkt:182:13>
---  pos=Token_Pos275, res=Token_Res275, nobt=None
-Token_Res275 := Row_Pos190;
+--  pos=Token_Pos279, res=Token_Res279, nobt=None
+Token_Res279 := Row_Pos193;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res275));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res279));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Trait_Kw)
    then
-       Token_Pos275 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos190 then
+       Token_Pos279 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos193 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos190,
+            (Pos  => Row_Pos193,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Trait_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos275 := Row_Pos190 + 1;
+          Token_Pos279 := Row_Pos193 + 1;
    end if;
 end;
 --  END <Token(<WithText TraitKw>, ) (root of 'type_decl') at parser.lkt:182:13>
 Row_Progress48 := 1;
-if Token_Pos275 /= No_Token_Index then
-   Row_Pos190 := Token_Pos275;
+if Token_Pos279 /= No_Token_Index then
+   Row_Pos193 := Token_Pos279;
 else
-   Row_Pos190 := No_Token_Index;
-   goto Exit_Row190_0;
+   Row_Pos193 := No_Token_Index;
+   goto Exit_Row193_0;
 end if;
 --  BEGIN <Cut (root of 'type_decl') at parser.lkt:183:13>
---  pos=Row_Pos190, res=None, nobt=Nobt54
+--  pos=Row_Pos193, res=None, nobt=Nobt54
 Nobt54 := True;
 --  END <Cut (root of 'type_decl') at parser.lkt:183:13>
 Row_Progress48 := 2;
-if Row_Pos190 /= No_Token_Index then
-   Row_Pos190 := Row_Pos190;
+if Row_Pos193 /= No_Token_Index then
+   Row_Pos193 := Row_Pos193;
 else
-   Row_Pos190 := No_Token_Index;
-   goto Exit_Row190_0;
+   Row_Pos193 := No_Token_Index;
+   goto Exit_Row193_0;
 end if;
 --  BEGIN <Defer (for 'def_id') at parser.lkt:184:13>
---  pos=Defer_Pos250, res=Defer_Res250, nobt=None
-Defer_Res250 :=
-   Def_Id_Transform_Parse0 (Parser, Row_Pos190);
-Defer_Pos250 := Parser.Current_Pos;
+--  pos=Defer_Pos255, res=Defer_Res255, nobt=None
+Defer_Res255 :=
+   Def_Id_Transform_Parse0 (Parser, Row_Pos193);
+Defer_Pos255 := Parser.Current_Pos;
 --  END <Defer (for 'def_id') at parser.lkt:184:13>
 Row_Progress48 := 3;
-if Defer_Pos250 /= No_Token_Index then
-   Row_Pos190 := Defer_Pos250;
+if Defer_Pos255 /= No_Token_Index then
+   Row_Pos193 := Defer_Pos255;
 else
-   Row_Pos190 := No_Token_Index;
-   goto Exit_Row190_0;
+   Row_Pos193 := No_Token_Index;
+   goto Exit_Row193_0;
 end if;
 --  BEGIN <Null (root of 'type_decl') at parser.lkt:185:13>
---  pos=Row_Pos190, res=Null_Res22, nobt=None
+--  pos=Row_Pos193, res=Null_Res22, nobt=None
    Null_Res22 := Allocate_Type_Ref_List (Parser.Mem_Pool);
    Initialize
      (Self              => Null_Res22,
       Kind              => Lkt_Type_Ref_List,
       Unit              => Parser.Unit,
-      Token_Start_Index => Token_Index'Max (Row_Pos190, 1),
+      Token_Start_Index => Token_Index'Max (Row_Pos193, 1),
       Token_End_Index   => No_Token_Index);
    Initialize_List
      (Self   => Null_Res22,
@@ -35866,141 +36252,141 @@ end if;
       Count  => 0);
 --  END <Null (root of 'type_decl') at parser.lkt:185:13>
 Row_Progress48 := 4;
-if Row_Pos190 /= No_Token_Index then
-   Row_Pos190 := Row_Pos190;
+if Row_Pos193 /= No_Token_Index then
+   Row_Pos193 := Row_Pos193;
 else
-   Row_Pos190 := No_Token_Index;
-   goto Exit_Row190_0;
+   Row_Pos193 := No_Token_Index;
+   goto Exit_Row193_0;
 end if;
 --  BEGIN <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:186:13>
---  pos=Token_Pos276, res=Token_Res276, nobt=None
-Token_Res276 := Row_Pos190;
+--  pos=Token_Pos280, res=Token_Res280, nobt=None
+Token_Res280 := Row_Pos193;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res276));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res280));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_L_Brace)
    then
-       Token_Pos276 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos190 then
+       Token_Pos280 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos193 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos190,
+            (Pos  => Row_Pos193,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_L_Brace,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos276 := Row_Pos190 + 1;
+          Token_Pos280 := Row_Pos193 + 1;
    end if;
 end;
 --  END <Token(<WithText LBrace>, ) (root of 'type_decl') at parser.lkt:186:13>
 Row_Progress48 := 5;
-if Token_Pos276 /= No_Token_Index then
-   Row_Pos190 := Token_Pos276;
+if Token_Pos280 /= No_Token_Index then
+   Row_Pos193 := Token_Pos280;
 else
-   Row_Pos190 := No_Token_Index;
-   goto Exit_Row190_0;
+   Row_Pos193 := No_Token_Index;
+   goto Exit_Row193_0;
 end if;
 --  BEGIN <DontSkip (root of 'type_decl') at parser.lkt:187:13>
---  pos=Defer_Pos251, res=Defer_Res251, nobt=None
+--  pos=Defer_Pos256, res=Defer_Res256, nobt=None
         PP.Dont_Skip.Append (Dontskip_Type_Decl4_Extract_Parse0'Access);
 --  BEGIN <Defer (for 'decl_block') at parser.lkt:187:13>
---  pos=Defer_Pos251, res=Defer_Res251, nobt=None
-Defer_Res251 :=
-   Decl_Block_List_Parse0 (Parser, Row_Pos190);
-Defer_Pos251 := Parser.Current_Pos;
+--  pos=Defer_Pos256, res=Defer_Res256, nobt=None
+Defer_Res256 :=
+   Decl_Block_List_Parse0 (Parser, Row_Pos193);
+Defer_Pos256 := Parser.Current_Pos;
 --  END <Defer (for 'decl_block') at parser.lkt:187:13>
         PP.Dont_Skip.Delete_Last;
 --  END <DontSkip (root of 'type_decl') at parser.lkt:187:13>
 Row_Progress48 := 6;
-if Defer_Pos251 /= No_Token_Index then
-   Row_Pos190 := Defer_Pos251;
+if Defer_Pos256 /= No_Token_Index then
+   Row_Pos193 := Defer_Pos256;
 else
-   Row_Pos190 := No_Token_Index;
-   goto Exit_Row190_0;
+   Row_Pos193 := No_Token_Index;
+   goto Exit_Row193_0;
 end if;
 --  BEGIN <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:188:13>
---  pos=Token_Pos277, res=Token_Res277, nobt=None
-Token_Res277 := Row_Pos190;
+--  pos=Token_Pos281, res=Token_Res281, nobt=None
+Token_Res281 := Row_Pos193;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res277));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res281));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_R_Brace)
    then
-       Token_Pos277 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos190 then
+       Token_Pos281 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos193 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos190,
+            (Pos  => Row_Pos193,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Brace,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos277 := Row_Pos190 + 1;
+          Token_Pos281 := Row_Pos193 + 1;
    end if;
 end;
 --  END <Token(<WithText RBrace>, ) (root of 'type_decl') at parser.lkt:188:13>
 Row_Progress48 := 7;
-if Token_Pos277 /= No_Token_Index then
-   Row_Pos190 := Token_Pos277;
+if Token_Pos281 /= No_Token_Index then
+   Row_Pos193 := Token_Pos281;
 else
-   Row_Pos190 := No_Token_Index;
-   goto Exit_Row190_0;
+   Row_Pos193 := No_Token_Index;
+   goto Exit_Row193_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row190_0>>
+<<Exit_Row193_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'type_decl') at parser.lkt:181:11>
-if Row_Pos190 = No_Token_Index and then Nobt54 then
-   Row_Pos190 := Parser.Last_Fail.Pos;
+if Row_Pos193 = No_Token_Index and then Nobt54 then
+   Row_Pos193 := Parser.Last_Fail.Pos;
    Transform_Has_Failed48 := True;
 end if;
-if Row_Pos190 /= No_Token_Index then
-   Transform_Res146 := Allocate_Trait_Decl (Parser.Mem_Pool);
+if Row_Pos193 /= No_Token_Index then
+   Transform_Res147 := Allocate_Trait_Decl (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res146,
+     (Self => Transform_Res147,
       Kind => Lkt_Trait_Decl,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos190 = Pos
+      Token_End_Index   => (if Row_Pos193 = Pos
                             then No_Token_Index
-                            else Row_Pos190 - 1));
+                            else Row_Pos193 - 1));
       Initialize_Fields_For_Trait_Decl
-        (Self => Transform_Res146,
-         Trait_Decl_F_Syn_Name => Defer_Res250,
+        (Self => Transform_Res147,
+         Trait_Decl_F_Syn_Name => Defer_Res255,
          Trait_Decl_F_Traits => Null_Res22,
-         Trait_Decl_F_Decls => Defer_Res251);
-         if Defer_Res250 /= null and then Is_Incomplete (Defer_Res250) then
-            Transform_Res146.Last_Attempted_Child := 0;
-         elsif Defer_Res250 /= null and then not Is_Ghost (Defer_Res250) then
-            Transform_Res146.Last_Attempted_Child := -1;
+         Trait_Decl_F_Decls => Defer_Res256);
+         if Defer_Res255 /= null and then Is_Incomplete (Defer_Res255) then
+            Transform_Res147.Last_Attempted_Child := 0;
+         elsif Defer_Res255 /= null and then not Is_Ghost (Defer_Res255) then
+            Transform_Res147.Last_Attempted_Child := -1;
          end if;
          if Null_Res22 /= null and then Is_Incomplete (Null_Res22) then
-            Transform_Res146.Last_Attempted_Child := 0;
+            Transform_Res147.Last_Attempted_Child := 0;
          elsif Null_Res22 /= null and then not Is_Ghost (Null_Res22) then
-            Transform_Res146.Last_Attempted_Child := -1;
+            Transform_Res147.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res251 /= null and then Is_Incomplete (Defer_Res251) then
-            Transform_Res146.Last_Attempted_Child := 0;
-         elsif Defer_Res251 /= null and then not Is_Ghost (Defer_Res251) then
-            Transform_Res146.Last_Attempted_Child := -1;
+         if Defer_Res256 /= null and then Is_Incomplete (Defer_Res256) then
+            Transform_Res147.Last_Attempted_Child := 0;
+         elsif Defer_Res256 /= null and then not Is_Ghost (Defer_Res256) then
+            Transform_Res147.Last_Attempted_Child := -1;
          end if;
    if Transform_Has_Failed48 then
-      Transform_Res146.Last_Attempted_Child :=
+      Transform_Res147.Last_Attempted_Child :=
          Row_Progress48;
       Append (Parser, Pos, "Cannot parse <type_decl>");
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 end if;
 --  END <Transform(<ASTNodeType TraitDecl>) (root of 'type_decl') at parser.lkt:181:11>
-    if Row_Pos190 /= No_Token_Index then
-        Or_Pos37 := Row_Pos190;
-        Or_Res37 := Transform_Res146;
+    if Row_Pos193 /= No_Token_Index then
+        Or_Pos37 := Row_Pos193;
+        Or_Res37 := Transform_Res147;
         goto Exit_Or41;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail37.Pos then
@@ -36036,22 +36422,22 @@ end Type_Decl_Or_Parse0;
 is
    use Bare_Expr_Memos;
       Nobt55 : Boolean := False;
-      Row_Pos191 : Token_Index := No_Token_Index;
-      Defer_Pos252 : Token_Index := No_Token_Index;
-      Defer_Res252 : Bare_Expr := No_Bare_Lkt_Node;
+      Row_Pos194 : Token_Index := No_Token_Index;
+      Defer_Pos257 : Token_Index := No_Token_Index;
+      Defer_Res257 : Bare_Expr := No_Bare_Lkt_Node;
       Null_Res23 : Bare_Null_Cond_Qualifier := No_Bare_Lkt_Node;
-      Token_Pos278 : Token_Index := No_Token_Index;
-      Token_Res278 : Token_Index := No_Token_Index;
-      Defer_Pos253 : Token_Index := No_Token_Index;
-      Defer_Res253 : Bare_Ref_Id := No_Bare_Lkt_Node;
+      Token_Pos282 : Token_Index := No_Token_Index;
+      Token_Res282 : Token_Index := No_Token_Index;
+      Defer_Pos258 : Token_Index := No_Token_Index;
+      Defer_Res258 : Bare_Ref_Id := No_Bare_Lkt_Node;
       Row_Progress49 : Integer := 0;
-      Transform_Res147 : Bare_Dot_Expr := No_Bare_Lkt_Node;
+      Transform_Res148 : Bare_Dot_Expr := No_Bare_Lkt_Node;
       Transform_Has_Failed49 : Boolean := False;
-      Defer_Pos254 : Token_Index := No_Token_Index;
-      Defer_Res254 : Bare_Ref_Id := No_Bare_Lkt_Node;
+      Defer_Pos259 : Token_Index := No_Token_Index;
+      Defer_Res259 : Bare_Ref_Id := No_Bare_Lkt_Node;
       Or_Pos38 : Token_Index := No_Token_Index;
       Or_Res38 : Bare_Expr := No_Bare_Lkt_Node;
-      Diag_Mark102 : Diagnostic_Mark;
+      Diag_Mark104 : Diagnostic_Mark;
       Last_Fail38 : Fail_Info;
       Branch_Diag_Mark38 : Diagnostic_Mark;
       Branch_Last_Fail38 : Fail_Info;
@@ -36089,168 +36475,168 @@ begin
 --  pos=Or_Pos38, res=Or_Res38, nobt=None
 Or_Pos38 := No_Token_Index;
 Or_Res38 := No_Bare_Lkt_Node;
-Diag_Mark102 := Parser.Last_Diag;
+Diag_Mark104 := Parser.Last_Diag;
 Last_Fail38 := Parser.Last_Fail;
 Branch_Diag_Mark38 := Parser.Last_Diag;
 Branch_Last_Fail38 := Parser.Last_Fail;
-    Parser.Last_Diag := Diag_Mark102;
+    Parser.Last_Diag := Diag_Mark104;
     Parser.Last_Fail := Last_Fail38;
 --  BEGIN <Transform(<ASTNodeType DotExpr>) (root of 'type_expr') at parser.lkt:254:11>
---  pos=Row_Pos191, res=Transform_Res147, nobt=Nobt55
+--  pos=Row_Pos194, res=Transform_Res148, nobt=Nobt55
 --  BEGIN <_Row (root of 'type_expr') at parser.lkt:254:11>
---  pos=Row_Pos191, res=None, nobt=Nobt55
-Row_Pos191 := Pos;
+--  pos=Row_Pos194, res=None, nobt=Nobt55
+Row_Pos194 := Pos;
 --  BEGIN <Defer (for 'type_expr') at parser.lkt:254:19>
---  pos=Defer_Pos252, res=Defer_Res252, nobt=None
-Defer_Res252 :=
-   Type_Expr_Or_Parse0 (Parser, Row_Pos191);
-Defer_Pos252 := Parser.Current_Pos;
+--  pos=Defer_Pos257, res=Defer_Res257, nobt=None
+Defer_Res257 :=
+   Type_Expr_Or_Parse0 (Parser, Row_Pos194);
+Defer_Pos257 := Parser.Current_Pos;
 --  END <Defer (for 'type_expr') at parser.lkt:254:19>
 Row_Progress49 := 1;
-if Defer_Pos252 /= No_Token_Index then
-   Row_Pos191 := Defer_Pos252;
+if Defer_Pos257 /= No_Token_Index then
+   Row_Pos194 := Defer_Pos257;
 else
-   Row_Pos191 := No_Token_Index;
-   goto Exit_Row191_0;
+   Row_Pos194 := No_Token_Index;
+   goto Exit_Row194_0;
 end if;
 --  BEGIN <Null (root of 'type_expr') at parser.lkt:254:29>
---  pos=Row_Pos191, res=Null_Res23, nobt=None
+--  pos=Row_Pos194, res=Null_Res23, nobt=None
    Null_Res23 := Allocate_Null_Cond_Qualifier_Absent (Parser.Mem_Pool);
    Initialize
      (Self              => Null_Res23,
       Kind              => Lkt_Null_Cond_Qualifier_Absent,
       Unit              => Parser.Unit,
-      Token_Start_Index => Row_Pos191,
+      Token_Start_Index => Row_Pos194,
       Token_End_Index   => No_Token_Index);
 --  END <Null (root of 'type_expr') at parser.lkt:254:29>
 Row_Progress49 := 2;
-if Row_Pos191 /= No_Token_Index then
-   Row_Pos191 := Row_Pos191;
+if Row_Pos194 /= No_Token_Index then
+   Row_Pos194 := Row_Pos194;
 else
-   Row_Pos191 := No_Token_Index;
-   goto Exit_Row191_0;
+   Row_Pos194 := No_Token_Index;
+   goto Exit_Row194_0;
 end if;
 --  BEGIN <Token(<WithText Dot>, ) (root of 'type_expr') at parser.lkt:254:52>
---  pos=Token_Pos278, res=Token_Res278, nobt=None
-Token_Res278 := Row_Pos191;
+--  pos=Token_Pos282, res=Token_Res282, nobt=None
+Token_Res282 := Row_Pos194;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res278));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res282));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Dot)
    then
-       Token_Pos278 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos191 then
+       Token_Pos282 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos194 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos191,
+            (Pos  => Row_Pos194,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Dot,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos278 := Row_Pos191 + 1;
+          Token_Pos282 := Row_Pos194 + 1;
    end if;
 end;
 --  END <Token(<WithText Dot>, ) (root of 'type_expr') at parser.lkt:254:52>
 Row_Progress49 := 3;
-if Token_Pos278 /= No_Token_Index then
-   Row_Pos191 := Token_Pos278;
+if Token_Pos282 /= No_Token_Index then
+   Row_Pos194 := Token_Pos282;
 else
-   Row_Pos191 := No_Token_Index;
-   goto Exit_Row191_0;
+   Row_Pos194 := No_Token_Index;
+   goto Exit_Row194_0;
 end if;
 --  BEGIN <Cut (root of 'type_expr') at parser.lkt:254:56>
---  pos=Row_Pos191, res=None, nobt=Nobt55
+--  pos=Row_Pos194, res=None, nobt=Nobt55
 Nobt55 := True;
 --  END <Cut (root of 'type_expr') at parser.lkt:254:56>
 Row_Progress49 := 4;
-if Row_Pos191 /= No_Token_Index then
-   Row_Pos191 := Row_Pos191;
+if Row_Pos194 /= No_Token_Index then
+   Row_Pos194 := Row_Pos194;
 else
-   Row_Pos191 := No_Token_Index;
-   goto Exit_Row191_0;
+   Row_Pos194 := No_Token_Index;
+   goto Exit_Row194_0;
 end if;
 --  BEGIN <Defer (for 'type_ref_id') at parser.lkt:254:58>
---  pos=Defer_Pos253, res=Defer_Res253, nobt=None
-Defer_Res253 :=
-   Type_Ref_Id_Predicate_Parse0 (Parser, Row_Pos191);
-Defer_Pos253 := Parser.Current_Pos;
+--  pos=Defer_Pos258, res=Defer_Res258, nobt=None
+Defer_Res258 :=
+   Type_Ref_Id_Predicate_Parse0 (Parser, Row_Pos194);
+Defer_Pos258 := Parser.Current_Pos;
 --  END <Defer (for 'type_ref_id') at parser.lkt:254:58>
 Row_Progress49 := 5;
-if Defer_Pos253 /= No_Token_Index then
-   Row_Pos191 := Defer_Pos253;
+if Defer_Pos258 /= No_Token_Index then
+   Row_Pos194 := Defer_Pos258;
 else
-   Row_Pos191 := No_Token_Index;
-   goto Exit_Row191_0;
+   Row_Pos194 := No_Token_Index;
+   goto Exit_Row194_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row191_0>>
+<<Exit_Row194_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'type_expr') at parser.lkt:254:11>
-if Row_Pos191 = No_Token_Index and then Nobt55 then
-   Row_Pos191 := Parser.Last_Fail.Pos;
+if Row_Pos194 = No_Token_Index and then Nobt55 then
+   Row_Pos194 := Parser.Last_Fail.Pos;
    Transform_Has_Failed49 := True;
 end if;
-if Row_Pos191 /= No_Token_Index then
-   Transform_Res147 := Allocate_Dot_Expr (Parser.Mem_Pool);
+if Row_Pos194 /= No_Token_Index then
+   Transform_Res148 := Allocate_Dot_Expr (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res147,
+     (Self => Transform_Res148,
       Kind => Lkt_Dot_Expr,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos191 = Pos
+      Token_End_Index   => (if Row_Pos194 = Pos
                             then No_Token_Index
-                            else Row_Pos191 - 1));
+                            else Row_Pos194 - 1));
       Initialize_Fields_For_Dot_Expr
-        (Self => Transform_Res147,
-         Dot_Expr_F_Prefix => Defer_Res252,
+        (Self => Transform_Res148,
+         Dot_Expr_F_Prefix => Defer_Res257,
          Dot_Expr_F_Null_Cond => Null_Res23,
-         Dot_Expr_F_Suffix => Defer_Res253);
-         if Defer_Res252 /= null and then Is_Incomplete (Defer_Res252) then
-            Transform_Res147.Last_Attempted_Child := 0;
-         elsif Defer_Res252 /= null and then not Is_Ghost (Defer_Res252) then
-            Transform_Res147.Last_Attempted_Child := -1;
+         Dot_Expr_F_Suffix => Defer_Res258);
+         if Defer_Res257 /= null and then Is_Incomplete (Defer_Res257) then
+            Transform_Res148.Last_Attempted_Child := 0;
+         elsif Defer_Res257 /= null and then not Is_Ghost (Defer_Res257) then
+            Transform_Res148.Last_Attempted_Child := -1;
          end if;
          if Null_Res23 /= null and then Is_Incomplete (Null_Res23) then
-            Transform_Res147.Last_Attempted_Child := 0;
+            Transform_Res148.Last_Attempted_Child := 0;
          elsif Null_Res23 /= null and then not Is_Ghost (Null_Res23) then
-            Transform_Res147.Last_Attempted_Child := -1;
+            Transform_Res148.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res253 /= null and then Is_Incomplete (Defer_Res253) then
-            Transform_Res147.Last_Attempted_Child := 0;
-         elsif Defer_Res253 /= null and then not Is_Ghost (Defer_Res253) then
-            Transform_Res147.Last_Attempted_Child := -1;
+         if Defer_Res258 /= null and then Is_Incomplete (Defer_Res258) then
+            Transform_Res148.Last_Attempted_Child := 0;
+         elsif Defer_Res258 /= null and then not Is_Ghost (Defer_Res258) then
+            Transform_Res148.Last_Attempted_Child := -1;
          end if;
    if Transform_Has_Failed49 then
-      Transform_Res147.Last_Attempted_Child :=
+      Transform_Res148.Last_Attempted_Child :=
          Row_Progress49;
       Append (Parser, Pos, "Cannot parse <type_expr>");
       Add_Last_Fail_Diagnostic (Parser);
    end if;
 end if;
 --  END <Transform(<ASTNodeType DotExpr>) (root of 'type_expr') at parser.lkt:254:11>
-    if Row_Pos191 /= No_Token_Index then
-        Or_Pos38 := Row_Pos191;
-        Or_Res38 := Transform_Res147;
+    if Row_Pos194 /= No_Token_Index then
+        Or_Pos38 := Row_Pos194;
+        Or_Res38 := Transform_Res148;
         goto Exit_Or42;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail38.Pos then
        Branch_Diag_Mark38 := Parser.Last_Diag;
        Branch_Last_Fail38 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark102;
+    Parser.Last_Diag := Diag_Mark104;
     Parser.Last_Fail := Last_Fail38;
 --  BEGIN <Defer (for 'type_ref_id') at parser.lkt:255:11>
---  pos=Defer_Pos254, res=Defer_Res254, nobt=None
-Defer_Res254 :=
+--  pos=Defer_Pos259, res=Defer_Res259, nobt=None
+Defer_Res259 :=
    Type_Ref_Id_Predicate_Parse0 (Parser, Pos);
-Defer_Pos254 := Parser.Current_Pos;
+Defer_Pos259 := Parser.Current_Pos;
 --  END <Defer (for 'type_ref_id') at parser.lkt:255:11>
-    if Defer_Pos254 /= No_Token_Index then
-        Or_Pos38 := Defer_Pos254;
-        Or_Res38 := Defer_Res254;
+    if Defer_Pos259 /= No_Token_Index then
+        Or_Pos38 := Defer_Pos259;
+        Or_Res38 := Defer_Res259;
         goto Exit_Or42;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail38.Pos then
@@ -36306,13 +36692,13 @@ is
    use Bare_Type_Ref_List_Memos;
       Lst_Cpos33 : Token_Index := No_Token_Index;
       Tmp_List33 : Free_Parse_List;
-      Defer_Pos255 : Token_Index := No_Token_Index;
-      Defer_Res255 : Bare_Type_Ref := No_Bare_Lkt_Node;
-      Token_Pos279 : Token_Index := No_Token_Index;
-      Token_Res279 : Token_Index := No_Token_Index;
+      Defer_Pos260 : Token_Index := No_Token_Index;
+      Defer_Res260 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Token_Pos283 : Token_Index := No_Token_Index;
+      Token_Res283 : Token_Index := No_Token_Index;
       List_Pos33 : Token_Index := No_Token_Index;
       List_Res33 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
-      Diag_Mark103 : Diagnostic_Mark;
+      Diag_Mark105 : Diagnostic_Mark;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
    M  : Memo_Entry := Get (PP.Type_List_List_Parse0_Memo, Pos);
@@ -36335,30 +36721,30 @@ begin
     List_Pos33 := No_Token_Index;
 Lst_Cpos33 := Pos;
 Tmp_List33 := Get_Parse_List (Parser);
-Diag_Mark103 := Parser.Last_Diag;
+Diag_Mark105 := Parser.Last_Diag;
 loop
 --  BEGIN <Defer (for 'type_ref') at parser.lkt:262:24>
---  pos=Defer_Pos255, res=Defer_Res255, nobt=None
-Defer_Res255 :=
+--  pos=Defer_Pos260, res=Defer_Res260, nobt=None
+Defer_Res260 :=
    Type_Ref_Or_Parse0 (Parser, Lst_Cpos33);
-Defer_Pos255 := Parser.Current_Pos;
+Defer_Pos260 := Parser.Current_Pos;
 --  END <Defer (for 'type_ref') at parser.lkt:262:24>
-   exit when Defer_Pos255 = No_Token_Index;
-   List_Pos33 := Defer_Pos255;
+   exit when Defer_Pos260 = No_Token_Index;
+   List_Pos33 := Defer_Pos260;
    Lst_Cpos33 := List_Pos33;
-   Diag_Mark103 := Parser.Last_Diag;
-   Tmp_List33.Nodes.Append (Defer_Res255);
+   Diag_Mark105 := Parser.Last_Diag;
+   Tmp_List33.Nodes.Append (Defer_Res260);
 --  BEGIN <Token(<WithText Comma>, ) (root of 'type_list') at parser.lkt:262:34>
---  pos=Token_Pos279, res=Token_Res279, nobt=None
-Token_Res279 := Lst_Cpos33;
+--  pos=Token_Pos283, res=Token_Res283, nobt=None
+Token_Res283 := Lst_Cpos33;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res279));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res283));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Comma)
    then
-       Token_Pos279 := No_Token_Index;
+       Token_Pos283 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Lst_Cpos33 then
           Parser.Last_Fail :=
             (Pos  => Lst_Cpos33,
@@ -36368,14 +36754,14 @@ begin
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos279 := Lst_Cpos33 + 1;
+          Token_Pos283 := Lst_Cpos33 + 1;
    end if;
 end;
 --  END <Token(<WithText Comma>, ) (root of 'type_list') at parser.lkt:262:34>
-      exit when Token_Pos279 = No_Token_Index;
-      Lst_Cpos33 := Token_Pos279;
+      exit when Token_Pos283 = No_Token_Index;
+      Lst_Cpos33 := Token_Pos283;
 end loop;
-Parser.Last_Diag := Diag_Mark103;
+Parser.Last_Diag := Diag_Mark105;
 declare
    Token_Start, Token_End : Token_Index;
    Count                  : constant Natural := Tmp_List33.Nodes.Length;
@@ -36439,16 +36825,16 @@ end Type_List_List_Parse0;
 is
    use Bare_Dot_Expr_Memos;
       Nobt56 : Boolean := False;
-      Row_Pos192 : Token_Index := No_Token_Index;
-      Defer_Pos256 : Token_Index := No_Token_Index;
-      Defer_Res256 : Bare_Ref_Id := No_Bare_Lkt_Node;
+      Row_Pos195 : Token_Index := No_Token_Index;
+      Defer_Pos261 : Token_Index := No_Token_Index;
+      Defer_Res261 : Bare_Ref_Id := No_Bare_Lkt_Node;
       Null_Res24 : Bare_Null_Cond_Qualifier := No_Bare_Lkt_Node;
-      Token_Pos280 : Token_Index := No_Token_Index;
-      Token_Res280 : Token_Index := No_Token_Index;
-      Defer_Pos257 : Token_Index := No_Token_Index;
-      Defer_Res257 : Bare_Ref_Id := No_Bare_Lkt_Node;
+      Token_Pos284 : Token_Index := No_Token_Index;
+      Token_Res284 : Token_Index := No_Token_Index;
+      Defer_Pos262 : Token_Index := No_Token_Index;
+      Defer_Res262 : Bare_Ref_Id := No_Bare_Lkt_Node;
       Row_Progress50 : Integer := 0;
-      Transform_Res148 : Bare_Dot_Expr := No_Bare_Lkt_Node;
+      Transform_Res149 : Bare_Dot_Expr := No_Bare_Lkt_Node;
       Transform_Has_Failed50 : Boolean := False;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
@@ -36457,146 +36843,146 @@ begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
       Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
-      Transform_Res148 := M.Instance;
-      return Transform_Res148;
+      Transform_Res149 := M.Instance;
+      return Transform_Res149;
    elsif M.State = Failure then
       Parser.Current_Pos := No_Token_Index;
-      return Transform_Res148;
+      return Transform_Res149;
    end if;
    Parser.Last_Diag := No_Diagnostic;
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
 --  BEGIN <Transform(<ASTNodeType DotExpr>) (root of 'type_member_ref') at parser.lkt:252:24>
---  pos=Row_Pos192, res=Transform_Res148, nobt=Nobt56
+--  pos=Row_Pos195, res=Transform_Res149, nobt=Nobt56
 --  BEGIN <_Row (root of 'type_member_ref') at parser.lkt:252:24>
---  pos=Row_Pos192, res=None, nobt=Nobt56
-Row_Pos192 := Pos;
+--  pos=Row_Pos195, res=None, nobt=Nobt56
+Row_Pos195 := Pos;
 --  BEGIN <Defer (for 'type_ref_id') at parser.lkt:252:32>
---  pos=Defer_Pos256, res=Defer_Res256, nobt=None
-Defer_Res256 :=
-   Type_Ref_Id_Predicate_Parse0 (Parser, Row_Pos192);
-Defer_Pos256 := Parser.Current_Pos;
+--  pos=Defer_Pos261, res=Defer_Res261, nobt=None
+Defer_Res261 :=
+   Type_Ref_Id_Predicate_Parse0 (Parser, Row_Pos195);
+Defer_Pos261 := Parser.Current_Pos;
 --  END <Defer (for 'type_ref_id') at parser.lkt:252:32>
 Row_Progress50 := 1;
-if Defer_Pos256 /= No_Token_Index then
-   Row_Pos192 := Defer_Pos256;
+if Defer_Pos261 /= No_Token_Index then
+   Row_Pos195 := Defer_Pos261;
 else
-   Row_Pos192 := No_Token_Index;
-   goto Exit_Row192_0;
+   Row_Pos195 := No_Token_Index;
+   goto Exit_Row195_0;
 end if;
 --  BEGIN <Null (root of 'type_member_ref') at parser.lkt:252:44>
---  pos=Row_Pos192, res=Null_Res24, nobt=None
+--  pos=Row_Pos195, res=Null_Res24, nobt=None
    Null_Res24 := Allocate_Null_Cond_Qualifier_Absent (Parser.Mem_Pool);
    Initialize
      (Self              => Null_Res24,
       Kind              => Lkt_Null_Cond_Qualifier_Absent,
       Unit              => Parser.Unit,
-      Token_Start_Index => Row_Pos192,
+      Token_Start_Index => Row_Pos195,
       Token_End_Index   => No_Token_Index);
 --  END <Null (root of 'type_member_ref') at parser.lkt:252:44>
 Row_Progress50 := 2;
-if Row_Pos192 /= No_Token_Index then
-   Row_Pos192 := Row_Pos192;
+if Row_Pos195 /= No_Token_Index then
+   Row_Pos195 := Row_Pos195;
 else
-   Row_Pos192 := No_Token_Index;
-   goto Exit_Row192_0;
+   Row_Pos195 := No_Token_Index;
+   goto Exit_Row195_0;
 end if;
 --  BEGIN <Token(<WithText Dot>, ) (root of 'type_member_ref') at parser.lkt:252:67>
---  pos=Token_Pos280, res=Token_Res280, nobt=None
-Token_Res280 := Row_Pos192;
+--  pos=Token_Pos284, res=Token_Res284, nobt=None
+Token_Res284 := Row_Pos195;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res280));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res284));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Dot)
    then
-       Token_Pos280 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos192 then
+       Token_Pos284 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos195 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos192,
+            (Pos  => Row_Pos195,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Dot,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos280 := Row_Pos192 + 1;
+          Token_Pos284 := Row_Pos195 + 1;
    end if;
 end;
 --  END <Token(<WithText Dot>, ) (root of 'type_member_ref') at parser.lkt:252:67>
 Row_Progress50 := 3;
-if Token_Pos280 /= No_Token_Index then
-   Row_Pos192 := Token_Pos280;
+if Token_Pos284 /= No_Token_Index then
+   Row_Pos195 := Token_Pos284;
 else
-   Row_Pos192 := No_Token_Index;
-   goto Exit_Row192_0;
+   Row_Pos195 := No_Token_Index;
+   goto Exit_Row195_0;
 end if;
 --  BEGIN <Cut (root of 'type_member_ref') at parser.lkt:252:71>
---  pos=Row_Pos192, res=None, nobt=Nobt56
+--  pos=Row_Pos195, res=None, nobt=Nobt56
 Nobt56 := True;
 --  END <Cut (root of 'type_member_ref') at parser.lkt:252:71>
 Row_Progress50 := 4;
-if Row_Pos192 /= No_Token_Index then
-   Row_Pos192 := Row_Pos192;
+if Row_Pos195 /= No_Token_Index then
+   Row_Pos195 := Row_Pos195;
 else
-   Row_Pos192 := No_Token_Index;
-   goto Exit_Row192_0;
+   Row_Pos195 := No_Token_Index;
+   goto Exit_Row195_0;
 end if;
 --  BEGIN <Defer (for 'ref_id') at parser.lkt:252:73>
---  pos=Defer_Pos257, res=Defer_Res257, nobt=None
-Defer_Res257 :=
-   Ref_Id_Transform_Parse0 (Parser, Row_Pos192);
-Defer_Pos257 := Parser.Current_Pos;
+--  pos=Defer_Pos262, res=Defer_Res262, nobt=None
+Defer_Res262 :=
+   Ref_Id_Transform_Parse0 (Parser, Row_Pos195);
+Defer_Pos262 := Parser.Current_Pos;
 --  END <Defer (for 'ref_id') at parser.lkt:252:73>
 Row_Progress50 := 5;
-if Defer_Pos257 /= No_Token_Index then
-   Row_Pos192 := Defer_Pos257;
+if Defer_Pos262 /= No_Token_Index then
+   Row_Pos195 := Defer_Pos262;
 else
-   Row_Pos192 := No_Token_Index;
-   goto Exit_Row192_0;
+   Row_Pos195 := No_Token_Index;
+   goto Exit_Row195_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row192_0>>
+<<Exit_Row195_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'type_member_ref') at parser.lkt:252:24>
-if Row_Pos192 = No_Token_Index and then Nobt56 then
-   Row_Pos192 := Parser.Last_Fail.Pos;
+if Row_Pos195 = No_Token_Index and then Nobt56 then
+   Row_Pos195 := Parser.Last_Fail.Pos;
    Transform_Has_Failed50 := True;
 end if;
-if Row_Pos192 /= No_Token_Index then
-   Transform_Res148 := Allocate_Dot_Expr (Parser.Mem_Pool);
+if Row_Pos195 /= No_Token_Index then
+   Transform_Res149 := Allocate_Dot_Expr (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res148,
+     (Self => Transform_Res149,
       Kind => Lkt_Dot_Expr,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos192 = Pos
+      Token_End_Index   => (if Row_Pos195 = Pos
                             then No_Token_Index
-                            else Row_Pos192 - 1));
+                            else Row_Pos195 - 1));
       Initialize_Fields_For_Dot_Expr
-        (Self => Transform_Res148,
-         Dot_Expr_F_Prefix => Defer_Res256,
+        (Self => Transform_Res149,
+         Dot_Expr_F_Prefix => Defer_Res261,
          Dot_Expr_F_Null_Cond => Null_Res24,
-         Dot_Expr_F_Suffix => Defer_Res257);
-         if Defer_Res256 /= null and then Is_Incomplete (Defer_Res256) then
-            Transform_Res148.Last_Attempted_Child := 0;
-         elsif Defer_Res256 /= null and then not Is_Ghost (Defer_Res256) then
-            Transform_Res148.Last_Attempted_Child := -1;
+         Dot_Expr_F_Suffix => Defer_Res262);
+         if Defer_Res261 /= null and then Is_Incomplete (Defer_Res261) then
+            Transform_Res149.Last_Attempted_Child := 0;
+         elsif Defer_Res261 /= null and then not Is_Ghost (Defer_Res261) then
+            Transform_Res149.Last_Attempted_Child := -1;
          end if;
          if Null_Res24 /= null and then Is_Incomplete (Null_Res24) then
-            Transform_Res148.Last_Attempted_Child := 0;
+            Transform_Res149.Last_Attempted_Child := 0;
          elsif Null_Res24 /= null and then not Is_Ghost (Null_Res24) then
-            Transform_Res148.Last_Attempted_Child := -1;
+            Transform_Res149.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res257 /= null and then Is_Incomplete (Defer_Res257) then
-            Transform_Res148.Last_Attempted_Child := 0;
-         elsif Defer_Res257 /= null and then not Is_Ghost (Defer_Res257) then
-            Transform_Res148.Last_Attempted_Child := -1;
+         if Defer_Res262 /= null and then Is_Incomplete (Defer_Res262) then
+            Transform_Res149.Last_Attempted_Child := 0;
+         elsif Defer_Res262 /= null and then not Is_Ghost (Defer_Res262) then
+            Transform_Res149.Last_Attempted_Child := -1;
          end if;
    if Transform_Has_Failed50 then
-      Transform_Res148.Last_Attempted_Child :=
+      Transform_Res149.Last_Attempted_Child :=
          Row_Progress50;
       Append (Parser, Pos, "Cannot parse <type_member_ref>");
       Add_Last_Fail_Diagnostic (Parser);
@@ -36608,61 +36994,61 @@ end if;
    -------------------------------
    Set
      (PP.Type_Member_Ref_Transform_Parse0_Memo,
-      Row_Pos192 /= No_Token_Index,
-      Transform_Res148,
+      Row_Pos195 /= No_Token_Index,
+      Transform_Res149,
       Parser.Last_Diag,
       Pos,
-      Row_Pos192);
+      Row_Pos195);
    declare
       Top : constant Diagnostic_Mark := Parser.Last_Diag;
    begin
       Parser.Last_Diag := Mark_On_Entry;
       Append_Group (Parser.Pool, Parser.Last_Diag, Top);
    end;
-   Parser.Current_Pos := Row_Pos192;
-   return Transform_Res148;
+   Parser.Current_Pos := Row_Pos195;
+   return Transform_Res149;
 end Type_Member_Ref_Transform_Parse0;
    function Type_Ref_Or_Parse0
   (Parser : in out Parser_Type;
    Pos    : Token_Index) return Bare_Type_Ref
 is
    use Bare_Type_Ref_Memos;
-      Row_Pos193 : Token_Index := No_Token_Index;
-      Defer_Pos258 : Token_Index := No_Token_Index;
-      Defer_Res258 : Bare_Expr := No_Bare_Lkt_Node;
-      Token_Pos281 : Token_Index := No_Token_Index;
-      Token_Res281 : Token_Index := No_Token_Index;
-      Defer_Pos259 : Token_Index := No_Token_Index;
-      Defer_Res259 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
-      Token_Pos282 : Token_Index := No_Token_Index;
-      Token_Res282 : Token_Index := No_Token_Index;
-      Transform_Res149 : Bare_Generic_Type_Ref := No_Bare_Lkt_Node;
-      Row_Pos194 : Token_Index := No_Token_Index;
-      Defer_Pos260 : Token_Index := No_Token_Index;
-      Defer_Res260 : Bare_Expr := No_Bare_Lkt_Node;
-      Transform_Res150 : Bare_Simple_Type_Ref := No_Bare_Lkt_Node;
-      Row_Pos195 : Token_Index := No_Token_Index;
-      Token_Pos283 : Token_Index := No_Token_Index;
-      Token_Res283 : Token_Index := No_Token_Index;
-      Lst_Cpos34 : Token_Index := No_Token_Index;
-      Tmp_List34 : Free_Parse_List;
-      Defer_Pos261 : Token_Index := No_Token_Index;
-      Defer_Res261 : Bare_Type_Ref := No_Bare_Lkt_Node;
-      Token_Pos284 : Token_Index := No_Token_Index;
-      Token_Res284 : Token_Index := No_Token_Index;
-      List_Pos34 : Token_Index := No_Token_Index;
-      List_Res34 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
-      Diag_Mark104 : Diagnostic_Mark;
+      Row_Pos196 : Token_Index := No_Token_Index;
+      Defer_Pos263 : Token_Index := No_Token_Index;
+      Defer_Res263 : Bare_Expr := No_Bare_Lkt_Node;
       Token_Pos285 : Token_Index := No_Token_Index;
       Token_Res285 : Token_Index := No_Token_Index;
+      Defer_Pos264 : Token_Index := No_Token_Index;
+      Defer_Res264 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
       Token_Pos286 : Token_Index := No_Token_Index;
       Token_Res286 : Token_Index := No_Token_Index;
-      Defer_Pos262 : Token_Index := No_Token_Index;
-      Defer_Res262 : Bare_Type_Ref := No_Bare_Lkt_Node;
-      Transform_Res151 : Bare_Function_Type_Ref := No_Bare_Lkt_Node;
+      Transform_Res150 : Bare_Generic_Type_Ref := No_Bare_Lkt_Node;
+      Row_Pos197 : Token_Index := No_Token_Index;
+      Defer_Pos265 : Token_Index := No_Token_Index;
+      Defer_Res265 : Bare_Expr := No_Bare_Lkt_Node;
+      Transform_Res151 : Bare_Simple_Type_Ref := No_Bare_Lkt_Node;
+      Row_Pos198 : Token_Index := No_Token_Index;
+      Token_Pos287 : Token_Index := No_Token_Index;
+      Token_Res287 : Token_Index := No_Token_Index;
+      Lst_Cpos34 : Token_Index := No_Token_Index;
+      Tmp_List34 : Free_Parse_List;
+      Defer_Pos266 : Token_Index := No_Token_Index;
+      Defer_Res266 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Token_Pos288 : Token_Index := No_Token_Index;
+      Token_Res288 : Token_Index := No_Token_Index;
+      List_Pos34 : Token_Index := No_Token_Index;
+      List_Res34 : Bare_Type_Ref_List := No_Bare_Lkt_Node;
+      Diag_Mark106 : Diagnostic_Mark;
+      Token_Pos289 : Token_Index := No_Token_Index;
+      Token_Res289 : Token_Index := No_Token_Index;
+      Token_Pos290 : Token_Index := No_Token_Index;
+      Token_Res290 : Token_Index := No_Token_Index;
+      Defer_Pos267 : Token_Index := No_Token_Index;
+      Defer_Res267 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Transform_Res152 : Bare_Function_Type_Ref := No_Bare_Lkt_Node;
       Or_Pos39 : Token_Index := No_Token_Index;
       Or_Res39 : Bare_Type_Ref := No_Bare_Lkt_Node;
-      Diag_Mark105 : Diagnostic_Mark;
+      Diag_Mark107 : Diagnostic_Mark;
       Last_Fail39 : Fail_Info;
       Branch_Diag_Mark39 : Diagnostic_Mark;
       Branch_Last_Fail39 : Fail_Info;
@@ -36687,185 +37073,133 @@ begin
 --  pos=Or_Pos39, res=Or_Res39, nobt=None
 Or_Pos39 := No_Token_Index;
 Or_Res39 := No_Bare_Lkt_Node;
-Diag_Mark105 := Parser.Last_Diag;
+Diag_Mark107 := Parser.Last_Diag;
 Last_Fail39 := Parser.Last_Fail;
 Branch_Diag_Mark39 := Parser.Last_Diag;
 Branch_Last_Fail39 := Parser.Last_Fail;
-    Parser.Last_Diag := Diag_Mark105;
+    Parser.Last_Diag := Diag_Mark107;
     Parser.Last_Fail := Last_Fail39;
 --  BEGIN <Transform(<ASTNodeType GenericTypeRef>) (root of 'type_ref') at parser.lkt:258:11>
---  pos=Row_Pos193, res=Transform_Res149, nobt=None
+--  pos=Row_Pos196, res=Transform_Res150, nobt=None
 --  BEGIN <_Row (root of 'type_ref') at parser.lkt:258:11>
---  pos=Row_Pos193, res=None, nobt=None
-Row_Pos193 := Pos;
+--  pos=Row_Pos196, res=None, nobt=None
+Row_Pos196 := Pos;
 --  BEGIN <Defer (for 'type_expr') at parser.lkt:258:26>
---  pos=Defer_Pos258, res=Defer_Res258, nobt=None
-Defer_Res258 :=
-   Type_Expr_Or_Parse0 (Parser, Row_Pos193);
-Defer_Pos258 := Parser.Current_Pos;
+--  pos=Defer_Pos263, res=Defer_Res263, nobt=None
+Defer_Res263 :=
+   Type_Expr_Or_Parse0 (Parser, Row_Pos196);
+Defer_Pos263 := Parser.Current_Pos;
 --  END <Defer (for 'type_expr') at parser.lkt:258:26>
-if Defer_Pos258 /= No_Token_Index then
-   Row_Pos193 := Defer_Pos258;
+if Defer_Pos263 /= No_Token_Index then
+   Row_Pos196 := Defer_Pos263;
 else
-   Row_Pos193 := No_Token_Index;
-   goto Exit_Row193_0;
+   Row_Pos196 := No_Token_Index;
+   goto Exit_Row196_0;
 end if;
 --  BEGIN <Token(<WithText LBrack>, ) (root of 'type_ref') at parser.lkt:258:36>
---  pos=Token_Pos281, res=Token_Res281, nobt=None
-Token_Res281 := Row_Pos193;
+--  pos=Token_Pos285, res=Token_Res285, nobt=None
+Token_Res285 := Row_Pos196;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res281));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res285));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_L_Brack)
    then
-       Token_Pos281 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos193 then
+       Token_Pos285 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos196 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos193,
+            (Pos  => Row_Pos196,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_L_Brack,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos281 := Row_Pos193 + 1;
+          Token_Pos285 := Row_Pos196 + 1;
    end if;
 end;
 --  END <Token(<WithText LBrack>, ) (root of 'type_ref') at parser.lkt:258:36>
-if Token_Pos281 /= No_Token_Index then
-   Row_Pos193 := Token_Pos281;
+if Token_Pos285 /= No_Token_Index then
+   Row_Pos196 := Token_Pos285;
 else
-   Row_Pos193 := No_Token_Index;
-   goto Exit_Row193_0;
+   Row_Pos196 := No_Token_Index;
+   goto Exit_Row196_0;
 end if;
 --  BEGIN <Defer (for 'type_list') at parser.lkt:258:40>
---  pos=Defer_Pos259, res=Defer_Res259, nobt=None
-Defer_Res259 :=
-   Type_List_List_Parse0 (Parser, Row_Pos193);
-Defer_Pos259 := Parser.Current_Pos;
+--  pos=Defer_Pos264, res=Defer_Res264, nobt=None
+Defer_Res264 :=
+   Type_List_List_Parse0 (Parser, Row_Pos196);
+Defer_Pos264 := Parser.Current_Pos;
 --  END <Defer (for 'type_list') at parser.lkt:258:40>
-if Defer_Pos259 /= No_Token_Index then
-   Row_Pos193 := Defer_Pos259;
+if Defer_Pos264 /= No_Token_Index then
+   Row_Pos196 := Defer_Pos264;
 else
-   Row_Pos193 := No_Token_Index;
-   goto Exit_Row193_0;
+   Row_Pos196 := No_Token_Index;
+   goto Exit_Row196_0;
 end if;
 --  BEGIN <Token(<WithText RBrack>, ) (root of 'type_ref') at parser.lkt:258:50>
---  pos=Token_Pos282, res=Token_Res282, nobt=None
-Token_Res282 := Row_Pos193;
+--  pos=Token_Pos286, res=Token_Res286, nobt=None
+Token_Res286 := Row_Pos196;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res282));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res286));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_R_Brack)
    then
-       Token_Pos282 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos193 then
+       Token_Pos286 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos196 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos193,
+            (Pos  => Row_Pos196,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Brack,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos282 := Row_Pos193 + 1;
+          Token_Pos286 := Row_Pos196 + 1;
    end if;
 end;
 --  END <Token(<WithText RBrack>, ) (root of 'type_ref') at parser.lkt:258:50>
-if Token_Pos282 /= No_Token_Index then
-   Row_Pos193 := Token_Pos282;
+if Token_Pos286 /= No_Token_Index then
+   Row_Pos196 := Token_Pos286;
 else
-   Row_Pos193 := No_Token_Index;
-   goto Exit_Row193_0;
+   Row_Pos196 := No_Token_Index;
+   goto Exit_Row196_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row193_0>>
+<<Exit_Row196_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'type_ref') at parser.lkt:258:11>
-if Row_Pos193 /= No_Token_Index then
-   Transform_Res149 := Allocate_Generic_Type_Ref (Parser.Mem_Pool);
+if Row_Pos196 /= No_Token_Index then
+   Transform_Res150 := Allocate_Generic_Type_Ref (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res149,
+     (Self => Transform_Res150,
       Kind => Lkt_Generic_Type_Ref,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos193 = Pos
+      Token_End_Index   => (if Row_Pos196 = Pos
                             then No_Token_Index
-                            else Row_Pos193 - 1));
+                            else Row_Pos196 - 1));
       Initialize_Fields_For_Generic_Type_Ref
-        (Self => Transform_Res149,
-         Generic_Type_Ref_F_Type_Name => Defer_Res258,
-         Generic_Type_Ref_F_Args => Defer_Res259);
-         if Defer_Res258 /= null and then Is_Incomplete (Defer_Res258) then
-            Transform_Res149.Last_Attempted_Child := 0;
-         elsif Defer_Res258 /= null and then not Is_Ghost (Defer_Res258) then
-            Transform_Res149.Last_Attempted_Child := -1;
-         end if;
-         if Defer_Res259 /= null and then Is_Incomplete (Defer_Res259) then
-            Transform_Res149.Last_Attempted_Child := 0;
-         elsif Defer_Res259 /= null and then not Is_Ghost (Defer_Res259) then
-            Transform_Res149.Last_Attempted_Child := -1;
-         end if;
-end if;
---  END <Transform(<ASTNodeType GenericTypeRef>) (root of 'type_ref') at parser.lkt:258:11>
-    if Row_Pos193 /= No_Token_Index then
-        Or_Pos39 := Row_Pos193;
-        Or_Res39 := Transform_Res149;
-        goto Exit_Or43;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail39.Pos then
-       Branch_Diag_Mark39 := Parser.Last_Diag;
-       Branch_Last_Fail39 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark105;
-    Parser.Last_Fail := Last_Fail39;
---  BEGIN <Transform(<ASTNodeType SimpleTypeRef>) (root of 'type_ref') at parser.lkt:259:11>
---  pos=Row_Pos194, res=Transform_Res150, nobt=None
---  BEGIN <_Row (root of 'type_ref') at parser.lkt:259:11>
---  pos=Row_Pos194, res=None, nobt=None
-Row_Pos194 := Pos;
---  BEGIN <Defer (for 'type_expr') at parser.lkt:259:25>
---  pos=Defer_Pos260, res=Defer_Res260, nobt=None
-Defer_Res260 :=
-   Type_Expr_Or_Parse0 (Parser, Row_Pos194);
-Defer_Pos260 := Parser.Current_Pos;
---  END <Defer (for 'type_expr') at parser.lkt:259:25>
-if Defer_Pos260 /= No_Token_Index then
-   Row_Pos194 := Defer_Pos260;
-else
-   Row_Pos194 := No_Token_Index;
-   goto Exit_Row194_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row194_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'type_ref') at parser.lkt:259:11>
-if Row_Pos194 /= No_Token_Index then
-   Transform_Res150 := Allocate_Simple_Type_Ref (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res150,
-      Kind => Lkt_Simple_Type_Ref,
-      Unit => Parser.Unit,
-      Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos194 = Pos
-                            then No_Token_Index
-                            else Row_Pos194 - 1));
-      Initialize_Fields_For_Simple_Type_Ref
         (Self => Transform_Res150,
-         Simple_Type_Ref_F_Type_Name => Defer_Res260);
-         if Defer_Res260 /= null and then Is_Incomplete (Defer_Res260) then
+         Generic_Type_Ref_F_Type_Name => Defer_Res263,
+         Generic_Type_Ref_F_Args => Defer_Res264);
+         if Defer_Res263 /= null and then Is_Incomplete (Defer_Res263) then
             Transform_Res150.Last_Attempted_Child := 0;
-         elsif Defer_Res260 /= null and then not Is_Ghost (Defer_Res260) then
+         elsif Defer_Res263 /= null and then not Is_Ghost (Defer_Res263) then
+            Transform_Res150.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res264 /= null and then Is_Incomplete (Defer_Res264) then
+            Transform_Res150.Last_Attempted_Child := 0;
+         elsif Defer_Res264 /= null and then not Is_Ghost (Defer_Res264) then
             Transform_Res150.Last_Attempted_Child := -1;
          end if;
 end if;
---  END <Transform(<ASTNodeType SimpleTypeRef>) (root of 'type_ref') at parser.lkt:259:11>
-    if Row_Pos194 /= No_Token_Index then
-        Or_Pos39 := Row_Pos194;
+--  END <Transform(<ASTNodeType GenericTypeRef>) (root of 'type_ref') at parser.lkt:258:11>
+    if Row_Pos196 /= No_Token_Index then
+        Or_Pos39 := Row_Pos196;
         Or_Res39 := Transform_Res150;
         goto Exit_Or43;
     end if;
@@ -36873,72 +37207,124 @@ end if;
        Branch_Diag_Mark39 := Parser.Last_Diag;
        Branch_Last_Fail39 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark105;
+    Parser.Last_Diag := Diag_Mark107;
+    Parser.Last_Fail := Last_Fail39;
+--  BEGIN <Transform(<ASTNodeType SimpleTypeRef>) (root of 'type_ref') at parser.lkt:259:11>
+--  pos=Row_Pos197, res=Transform_Res151, nobt=None
+--  BEGIN <_Row (root of 'type_ref') at parser.lkt:259:11>
+--  pos=Row_Pos197, res=None, nobt=None
+Row_Pos197 := Pos;
+--  BEGIN <Defer (for 'type_expr') at parser.lkt:259:25>
+--  pos=Defer_Pos265, res=Defer_Res265, nobt=None
+Defer_Res265 :=
+   Type_Expr_Or_Parse0 (Parser, Row_Pos197);
+Defer_Pos265 := Parser.Current_Pos;
+--  END <Defer (for 'type_expr') at parser.lkt:259:25>
+if Defer_Pos265 /= No_Token_Index then
+   Row_Pos197 := Defer_Pos265;
+else
+   Row_Pos197 := No_Token_Index;
+   goto Exit_Row197_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row197_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'type_ref') at parser.lkt:259:11>
+if Row_Pos197 /= No_Token_Index then
+   Transform_Res151 := Allocate_Simple_Type_Ref (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res151,
+      Kind => Lkt_Simple_Type_Ref,
+      Unit => Parser.Unit,
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos197 = Pos
+                            then No_Token_Index
+                            else Row_Pos197 - 1));
+      Initialize_Fields_For_Simple_Type_Ref
+        (Self => Transform_Res151,
+         Simple_Type_Ref_F_Type_Name => Defer_Res265);
+         if Defer_Res265 /= null and then Is_Incomplete (Defer_Res265) then
+            Transform_Res151.Last_Attempted_Child := 0;
+         elsif Defer_Res265 /= null and then not Is_Ghost (Defer_Res265) then
+            Transform_Res151.Last_Attempted_Child := -1;
+         end if;
+end if;
+--  END <Transform(<ASTNodeType SimpleTypeRef>) (root of 'type_ref') at parser.lkt:259:11>
+    if Row_Pos197 /= No_Token_Index then
+        Or_Pos39 := Row_Pos197;
+        Or_Res39 := Transform_Res151;
+        goto Exit_Or43;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail39.Pos then
+       Branch_Diag_Mark39 := Parser.Last_Diag;
+       Branch_Last_Fail39 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark107;
     Parser.Last_Fail := Last_Fail39;
 --  BEGIN <Transform(<ASTNodeType FunctionTypeRef>) (root of 'type_ref') at parser.lkt:260:11>
---  pos=Row_Pos195, res=Transform_Res151, nobt=None
+--  pos=Row_Pos198, res=Transform_Res152, nobt=None
 --  BEGIN <_Row (root of 'type_ref') at parser.lkt:260:11>
---  pos=Row_Pos195, res=None, nobt=None
-Row_Pos195 := Pos;
+--  pos=Row_Pos198, res=None, nobt=None
+Row_Pos198 := Pos;
 --  BEGIN <Token(<WithText LPar>, ) (root of 'type_ref') at parser.lkt:260:27>
---  pos=Token_Pos283, res=Token_Res283, nobt=None
-Token_Res283 := Row_Pos195;
+--  pos=Token_Pos287, res=Token_Res287, nobt=None
+Token_Res287 := Row_Pos198;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res283));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res287));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_L_Par)
    then
-       Token_Pos283 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos195 then
+       Token_Pos287 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos198 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos195,
+            (Pos  => Row_Pos198,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_L_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos283 := Row_Pos195 + 1;
+          Token_Pos287 := Row_Pos198 + 1;
    end if;
 end;
 --  END <Token(<WithText LPar>, ) (root of 'type_ref') at parser.lkt:260:27>
-if Token_Pos283 /= No_Token_Index then
-   Row_Pos195 := Token_Pos283;
+if Token_Pos287 /= No_Token_Index then
+   Row_Pos198 := Token_Pos287;
 else
-   Row_Pos195 := No_Token_Index;
-   goto Exit_Row195_0;
+   Row_Pos198 := No_Token_Index;
+   goto Exit_Row198_0;
 end if;
 --  BEGIN <List (root of 'type_ref') at parser.lkt:260:31>
 --  pos=List_Pos34, res=List_Res34, nobt=None
-    List_Pos34 := Row_Pos195;
-Lst_Cpos34 := Row_Pos195;
+    List_Pos34 := Row_Pos198;
+Lst_Cpos34 := Row_Pos198;
 Tmp_List34 := Get_Parse_List (Parser);
-Diag_Mark104 := Parser.Last_Diag;
+Diag_Mark106 := Parser.Last_Diag;
 loop
 --  BEGIN <Defer (for 'type_ref') at parser.lkt:260:37>
---  pos=Defer_Pos261, res=Defer_Res261, nobt=None
-Defer_Res261 :=
+--  pos=Defer_Pos266, res=Defer_Res266, nobt=None
+Defer_Res266 :=
    Type_Ref_Or_Parse0 (Parser, Lst_Cpos34);
-Defer_Pos261 := Parser.Current_Pos;
+Defer_Pos266 := Parser.Current_Pos;
 --  END <Defer (for 'type_ref') at parser.lkt:260:37>
-   exit when Defer_Pos261 = No_Token_Index;
-   List_Pos34 := Defer_Pos261;
+   exit when Defer_Pos266 = No_Token_Index;
+   List_Pos34 := Defer_Pos266;
    Lst_Cpos34 := List_Pos34;
-   Diag_Mark104 := Parser.Last_Diag;
-   Tmp_List34.Nodes.Append (Defer_Res261);
+   Diag_Mark106 := Parser.Last_Diag;
+   Tmp_List34.Nodes.Append (Defer_Res266);
 --  BEGIN <Token(<WithText Comma>, ) (root of 'type_ref') at parser.lkt:260:47>
---  pos=Token_Pos284, res=Token_Res284, nobt=None
-Token_Res284 := Lst_Cpos34;
+--  pos=Token_Pos288, res=Token_Res288, nobt=None
+Token_Res288 := Lst_Cpos34;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res284));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res288));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Comma)
    then
-       Token_Pos284 := No_Token_Index;
+       Token_Pos288 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Lst_Cpos34 then
           Parser.Last_Fail :=
             (Pos  => Lst_Cpos34,
@@ -36948,26 +37334,26 @@ begin
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos284 := Lst_Cpos34 + 1;
+          Token_Pos288 := Lst_Cpos34 + 1;
    end if;
 end;
 --  END <Token(<WithText Comma>, ) (root of 'type_ref') at parser.lkt:260:47>
-      exit when Token_Pos284 = No_Token_Index;
-      Lst_Cpos34 := Token_Pos284;
+      exit when Token_Pos288 = No_Token_Index;
+      Lst_Cpos34 := Token_Pos288;
 end loop;
-Parser.Last_Diag := Diag_Mark104;
+Parser.Last_Diag := Diag_Mark106;
 declare
    Token_Start, Token_End : Token_Index;
    Count                  : constant Natural := Tmp_List34.Nodes.Length;
 begin
    List_Res34 := Allocate_Type_Ref_List (Parser.Mem_Pool);
    if Count > 0 then
-      Token_Start := Row_Pos195;
-      Token_End := (if Lst_Cpos34 = Row_Pos195
-                    then Row_Pos195
+      Token_Start := Row_Pos198;
+      Token_End := (if Lst_Cpos34 = Row_Pos198
+                    then Row_Pos198
                     else List_Pos34 - 1);
    else
-      Token_Start := Token_Index'Max (Row_Pos195, 1);
+      Token_Start := Token_Index'Max (Row_Pos198, 1);
       Token_End := No_Token_Index;
    end if;
    Initialize
@@ -36995,116 +37381,116 @@ end;
 Release_Parse_List (Parser, Tmp_List34);
 --  END <List (root of 'type_ref') at parser.lkt:260:31>
 if List_Pos34 /= No_Token_Index then
-   Row_Pos195 := List_Pos34;
+   Row_Pos198 := List_Pos34;
 else
-   Row_Pos195 := No_Token_Index;
-   goto Exit_Row195_0;
+   Row_Pos198 := No_Token_Index;
+   goto Exit_Row198_0;
 end if;
 --  BEGIN <Token(<WithText RPar>, ) (root of 'type_ref') at parser.lkt:260:52>
---  pos=Token_Pos285, res=Token_Res285, nobt=None
-Token_Res285 := Row_Pos195;
+--  pos=Token_Pos289, res=Token_Res289, nobt=None
+Token_Res289 := Row_Pos198;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res285));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res289));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_R_Par)
    then
-       Token_Pos285 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos195 then
+       Token_Pos289 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos198 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos195,
+            (Pos  => Row_Pos198,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos285 := Row_Pos195 + 1;
+          Token_Pos289 := Row_Pos198 + 1;
    end if;
 end;
 --  END <Token(<WithText RPar>, ) (root of 'type_ref') at parser.lkt:260:52>
-if Token_Pos285 /= No_Token_Index then
-   Row_Pos195 := Token_Pos285;
+if Token_Pos289 /= No_Token_Index then
+   Row_Pos198 := Token_Pos289;
 else
-   Row_Pos195 := No_Token_Index;
-   goto Exit_Row195_0;
+   Row_Pos198 := No_Token_Index;
+   goto Exit_Row198_0;
 end if;
 --  BEGIN <Token(<WithText RightArrow>, ) (root of 'type_ref') at parser.lkt:260:56>
---  pos=Token_Pos286, res=Token_Res286, nobt=None
-Token_Res286 := Row_Pos195;
+--  pos=Token_Pos290, res=Token_Res290, nobt=None
+Token_Res290 := Row_Pos198;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res286));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res290));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Right_Arrow)
    then
-       Token_Pos286 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos195 then
+       Token_Pos290 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos198 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos195,
+            (Pos  => Row_Pos198,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Right_Arrow,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos286 := Row_Pos195 + 1;
+          Token_Pos290 := Row_Pos198 + 1;
    end if;
 end;
 --  END <Token(<WithText RightArrow>, ) (root of 'type_ref') at parser.lkt:260:56>
-if Token_Pos286 /= No_Token_Index then
-   Row_Pos195 := Token_Pos286;
+if Token_Pos290 /= No_Token_Index then
+   Row_Pos198 := Token_Pos290;
 else
-   Row_Pos195 := No_Token_Index;
-   goto Exit_Row195_0;
+   Row_Pos198 := No_Token_Index;
+   goto Exit_Row198_0;
 end if;
 --  BEGIN <Defer (for 'type_ref') at parser.lkt:260:61>
---  pos=Defer_Pos262, res=Defer_Res262, nobt=None
-Defer_Res262 :=
-   Type_Ref_Or_Parse0 (Parser, Row_Pos195);
-Defer_Pos262 := Parser.Current_Pos;
+--  pos=Defer_Pos267, res=Defer_Res267, nobt=None
+Defer_Res267 :=
+   Type_Ref_Or_Parse0 (Parser, Row_Pos198);
+Defer_Pos267 := Parser.Current_Pos;
 --  END <Defer (for 'type_ref') at parser.lkt:260:61>
-if Defer_Pos262 /= No_Token_Index then
-   Row_Pos195 := Defer_Pos262;
+if Defer_Pos267 /= No_Token_Index then
+   Row_Pos198 := Defer_Pos267;
 else
-   Row_Pos195 := No_Token_Index;
-   goto Exit_Row195_0;
+   Row_Pos198 := No_Token_Index;
+   goto Exit_Row198_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row195_0>>
+<<Exit_Row198_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'type_ref') at parser.lkt:260:11>
-if Row_Pos195 /= No_Token_Index then
-   Transform_Res151 := Allocate_Function_Type_Ref (Parser.Mem_Pool);
+if Row_Pos198 /= No_Token_Index then
+   Transform_Res152 := Allocate_Function_Type_Ref (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res151,
+     (Self => Transform_Res152,
       Kind => Lkt_Function_Type_Ref,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos195 = Pos
+      Token_End_Index   => (if Row_Pos198 = Pos
                             then No_Token_Index
-                            else Row_Pos195 - 1));
+                            else Row_Pos198 - 1));
       Initialize_Fields_For_Function_Type_Ref
-        (Self => Transform_Res151,
+        (Self => Transform_Res152,
          Function_Type_Ref_F_Param_Types => List_Res34,
-         Function_Type_Ref_F_Return_Type => Defer_Res262);
+         Function_Type_Ref_F_Return_Type => Defer_Res267);
          if List_Res34 /= null and then Is_Incomplete (List_Res34) then
-            Transform_Res151.Last_Attempted_Child := 0;
+            Transform_Res152.Last_Attempted_Child := 0;
          elsif List_Res34 /= null and then not Is_Ghost (List_Res34) then
-            Transform_Res151.Last_Attempted_Child := -1;
+            Transform_Res152.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res262 /= null and then Is_Incomplete (Defer_Res262) then
-            Transform_Res151.Last_Attempted_Child := 0;
-         elsif Defer_Res262 /= null and then not Is_Ghost (Defer_Res262) then
-            Transform_Res151.Last_Attempted_Child := -1;
+         if Defer_Res267 /= null and then Is_Incomplete (Defer_Res267) then
+            Transform_Res152.Last_Attempted_Child := 0;
+         elsif Defer_Res267 /= null and then not Is_Ghost (Defer_Res267) then
+            Transform_Res152.Last_Attempted_Child := -1;
          end if;
 end if;
 --  END <Transform(<ASTNodeType FunctionTypeRef>) (root of 'type_ref') at parser.lkt:260:11>
-    if Row_Pos195 /= No_Token_Index then
-        Or_Pos39 := Row_Pos195;
-        Or_Res39 := Transform_Res151;
+    if Row_Pos198 /= No_Token_Index then
+        Or_Pos39 := Row_Pos198;
+        Or_Res39 := Transform_Res152;
         goto Exit_Or43;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail39.Pos then
@@ -37139,8 +37525,8 @@ end Type_Ref_Or_Parse0;
    Pos    : Token_Index) return Bare_Ref_Id
 is
    use Bare_Ref_Id_Memos;
-      Defer_Pos263 : Token_Index := No_Token_Index;
-      Defer_Res263 : Bare_Ref_Id := No_Bare_Lkt_Node;
+      Defer_Pos268 : Token_Index := No_Token_Index;
+      Defer_Res268 : Bare_Ref_Id := No_Bare_Lkt_Node;
       Predicate_Pos1 : Token_Index := No_Token_Index;
       Predicate_Res1 : Bare_Ref_Id := No_Bare_Lkt_Node;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
@@ -37163,16 +37549,16 @@ begin
 --  BEGIN <Predicate (root of 'type_ref_id') at parser.lkt:8:20>
 --  pos=Predicate_Pos1, res=Predicate_Res1, nobt=None
 --  BEGIN <Defer (for 'ref_id') at parser.lkt:8:20>
---  pos=Defer_Pos263, res=Defer_Res263, nobt=None
-Defer_Res263 :=
+--  pos=Defer_Pos268, res=Defer_Res268, nobt=None
+Defer_Res268 :=
    Ref_Id_Transform_Parse0 (Parser, Pos);
-Defer_Pos263 := Parser.Current_Pos;
+Defer_Pos268 := Parser.Current_Pos;
 --  END <Defer (for 'ref_id') at parser.lkt:8:20>
-if Defer_Res263 /= null
-   and then Liblktlang.Implementation.Extensions.Id_P_Is_Type_Name (Defer_Res263)
+if Defer_Res268 /= null
+   and then Liblktlang.Implementation.Extensions.Id_P_Is_Type_Name (Defer_Res268)
 then
-    Predicate_Res1 := Defer_Res263;
-    Predicate_Pos1 := Defer_Pos263;
+    Predicate_Res1 := Defer_Res268;
+    Predicate_Pos1 := Defer_Pos268;
 else
     Predicate_Pos1 := No_Token_Index;
     Predicate_Res1 := null;
@@ -37207,23 +37593,23 @@ end Type_Ref_Id_Predicate_Parse0;
 is
    use Bare_Val_Decl_Memos;
       Nobt57 : Boolean := False;
-      Row_Pos196 : Token_Index := No_Token_Index;
-      Token_Pos287 : Token_Index := No_Token_Index;
-      Token_Res287 : Token_Index := No_Token_Index;
-      Defer_Pos264 : Token_Index := No_Token_Index;
-      Defer_Res264 : Bare_Def_Id := No_Bare_Lkt_Node;
-      Row_Pos197 : Token_Index := No_Token_Index;
-      Token_Pos288 : Token_Index := No_Token_Index;
-      Token_Res288 : Token_Index := No_Token_Index;
-      Defer_Pos265 : Token_Index := No_Token_Index;
-      Defer_Res265 : Bare_Type_Ref := No_Bare_Lkt_Node;
-      Diag_Mark106 : Diagnostic_Mark;
-      Token_Pos289 : Token_Index := No_Token_Index;
-      Token_Res289 : Token_Index := No_Token_Index;
-      Defer_Pos266 : Token_Index := No_Token_Index;
-      Defer_Res266 : Bare_Expr := No_Bare_Lkt_Node;
+      Row_Pos199 : Token_Index := No_Token_Index;
+      Token_Pos291 : Token_Index := No_Token_Index;
+      Token_Res291 : Token_Index := No_Token_Index;
+      Defer_Pos269 : Token_Index := No_Token_Index;
+      Defer_Res269 : Bare_Def_Id := No_Bare_Lkt_Node;
+      Row_Pos200 : Token_Index := No_Token_Index;
+      Token_Pos292 : Token_Index := No_Token_Index;
+      Token_Res292 : Token_Index := No_Token_Index;
+      Defer_Pos270 : Token_Index := No_Token_Index;
+      Defer_Res270 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Diag_Mark108 : Diagnostic_Mark;
+      Token_Pos293 : Token_Index := No_Token_Index;
+      Token_Res293 : Token_Index := No_Token_Index;
+      Defer_Pos271 : Token_Index := No_Token_Index;
+      Defer_Res271 : Bare_Expr := No_Bare_Lkt_Node;
       Row_Progress51 : Integer := 0;
-      Transform_Res152 : Bare_Val_Decl := No_Bare_Lkt_Node;
+      Transform_Res153 : Bare_Val_Decl := No_Bare_Lkt_Node;
       Transform_Has_Failed51 : Boolean := False;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
@@ -37232,228 +37618,228 @@ begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
       Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
-      Transform_Res152 := M.Instance;
-      return Transform_Res152;
+      Transform_Res153 := M.Instance;
+      return Transform_Res153;
    elsif M.State = Failure then
       Parser.Current_Pos := No_Token_Index;
-      return Transform_Res152;
+      return Transform_Res153;
    end if;
    Parser.Last_Diag := No_Diagnostic;
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
 --  BEGIN <Transform(<ASTNodeType ValDecl>) (root of 'val_decl') at parser.lkt:265:17>
---  pos=Row_Pos196, res=Transform_Res152, nobt=Nobt57
+--  pos=Row_Pos199, res=Transform_Res153, nobt=Nobt57
 --  BEGIN <_Row (root of 'val_decl') at parser.lkt:265:17>
---  pos=Row_Pos196, res=None, nobt=Nobt57
-Row_Pos196 := Pos;
+--  pos=Row_Pos199, res=None, nobt=Nobt57
+Row_Pos199 := Pos;
 --  BEGIN <Token(<WithText ValKw>, ) (root of 'val_decl') at parser.lkt:265:25>
---  pos=Token_Pos287, res=Token_Res287, nobt=None
-Token_Res287 := Row_Pos196;
+--  pos=Token_Pos291, res=Token_Res291, nobt=None
+Token_Res291 := Row_Pos199;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res287));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res291));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Val_Kw)
    then
-       Token_Pos287 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos196 then
+       Token_Pos291 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos199 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos196,
+            (Pos  => Row_Pos199,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Val_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos287 := Row_Pos196 + 1;
+          Token_Pos291 := Row_Pos199 + 1;
    end if;
 end;
 --  END <Token(<WithText ValKw>, ) (root of 'val_decl') at parser.lkt:265:25>
 Row_Progress51 := 1;
-if Token_Pos287 /= No_Token_Index then
-   Row_Pos196 := Token_Pos287;
+if Token_Pos291 /= No_Token_Index then
+   Row_Pos199 := Token_Pos291;
 else
-   Row_Pos196 := No_Token_Index;
-   goto Exit_Row196_0;
+   Row_Pos199 := No_Token_Index;
+   goto Exit_Row199_0;
 end if;
 --  BEGIN <Cut (root of 'val_decl') at parser.lkt:265:31>
---  pos=Row_Pos196, res=None, nobt=Nobt57
+--  pos=Row_Pos199, res=None, nobt=Nobt57
 Nobt57 := True;
 --  END <Cut (root of 'val_decl') at parser.lkt:265:31>
 Row_Progress51 := 2;
-if Row_Pos196 /= No_Token_Index then
-   Row_Pos196 := Row_Pos196;
+if Row_Pos199 /= No_Token_Index then
+   Row_Pos199 := Row_Pos199;
 else
-   Row_Pos196 := No_Token_Index;
-   goto Exit_Row196_0;
+   Row_Pos199 := No_Token_Index;
+   goto Exit_Row199_0;
 end if;
 --  BEGIN <Defer (for 'def_id') at parser.lkt:265:33>
---  pos=Defer_Pos264, res=Defer_Res264, nobt=None
-Defer_Res264 :=
-   Def_Id_Transform_Parse0 (Parser, Row_Pos196);
-Defer_Pos264 := Parser.Current_Pos;
+--  pos=Defer_Pos269, res=Defer_Res269, nobt=None
+Defer_Res269 :=
+   Def_Id_Transform_Parse0 (Parser, Row_Pos199);
+Defer_Pos269 := Parser.Current_Pos;
 --  END <Defer (for 'def_id') at parser.lkt:265:33>
 Row_Progress51 := 3;
-if Defer_Pos264 /= No_Token_Index then
-   Row_Pos196 := Defer_Pos264;
+if Defer_Pos269 /= No_Token_Index then
+   Row_Pos199 := Defer_Pos269;
 else
-   Row_Pos196 := No_Token_Index;
-   goto Exit_Row196_0;
+   Row_Pos199 := No_Token_Index;
+   goto Exit_Row199_0;
 end if;
 --  BEGIN <Opt (root of 'val_decl') at parser.lkt:265:40>
---  pos=Row_Pos197, res=Defer_Res265, nobt=None
-Diag_Mark106 := Parser.Last_Diag;
+--  pos=Row_Pos200, res=Defer_Res270, nobt=None
+Diag_Mark108 := Parser.Last_Diag;
 --  BEGIN <_Extract (root of 'val_decl') at parser.lkt:265:41>
---  pos=Row_Pos197, res=Defer_Res265, nobt=None
+--  pos=Row_Pos200, res=Defer_Res270, nobt=None
 --  BEGIN <_Row (root of 'val_decl') at parser.lkt:265:41>
---  pos=Row_Pos197, res=None, nobt=None
-Row_Pos197 := Row_Pos196;
+--  pos=Row_Pos200, res=None, nobt=None
+Row_Pos200 := Row_Pos199;
 --  BEGIN <Token(<WithText Colon>, ) (root of 'val_decl') at parser.lkt:265:46>
---  pos=Token_Pos288, res=Token_Res288, nobt=None
-Token_Res288 := Row_Pos197;
+--  pos=Token_Pos292, res=Token_Res292, nobt=None
+Token_Res292 := Row_Pos200;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res288));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res292));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Colon)
    then
-       Token_Pos288 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos197 then
+       Token_Pos292 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos200 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos197,
+            (Pos  => Row_Pos200,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Colon,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos288 := Row_Pos197 + 1;
+          Token_Pos292 := Row_Pos200 + 1;
    end if;
 end;
 --  END <Token(<WithText Colon>, ) (root of 'val_decl') at parser.lkt:265:46>
-if Token_Pos288 /= No_Token_Index then
-   Row_Pos197 := Token_Pos288;
+if Token_Pos292 /= No_Token_Index then
+   Row_Pos200 := Token_Pos292;
 else
-   Row_Pos197 := No_Token_Index;
-   goto Exit_Row197_0;
+   Row_Pos200 := No_Token_Index;
+   goto Exit_Row200_0;
 end if;
 --  BEGIN <Defer (for 'type_ref') at parser.lkt:265:50>
---  pos=Defer_Pos265, res=Defer_Res265, nobt=None
-Defer_Res265 :=
-   Type_Ref_Or_Parse0 (Parser, Row_Pos197);
-Defer_Pos265 := Parser.Current_Pos;
+--  pos=Defer_Pos270, res=Defer_Res270, nobt=None
+Defer_Res270 :=
+   Type_Ref_Or_Parse0 (Parser, Row_Pos200);
+Defer_Pos270 := Parser.Current_Pos;
 --  END <Defer (for 'type_ref') at parser.lkt:265:50>
-if Defer_Pos265 /= No_Token_Index then
-   Row_Pos197 := Defer_Pos265;
+if Defer_Pos270 /= No_Token_Index then
+   Row_Pos200 := Defer_Pos270;
 else
-   Row_Pos197 := No_Token_Index;
-   goto Exit_Row197_0;
+   Row_Pos200 := No_Token_Index;
+   goto Exit_Row200_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row197_0>>
+<<Exit_Row200_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'val_decl') at parser.lkt:265:41>
 --  END <_Extract (root of 'val_decl') at parser.lkt:265:41>
-if Row_Pos197 = No_Token_Index then
-   Defer_Res265 := No_Bare_Lkt_Node;
-   Row_Pos197 := Row_Pos196;
-      Parser.Last_Diag := Diag_Mark106;
+if Row_Pos200 = No_Token_Index then
+   Defer_Res270 := No_Bare_Lkt_Node;
+   Row_Pos200 := Row_Pos199;
+      Parser.Last_Diag := Diag_Mark108;
 end if;
 --  END <Opt (root of 'val_decl') at parser.lkt:265:40>
 Row_Progress51 := 4;
-if Row_Pos197 /= No_Token_Index then
-   Row_Pos196 := Row_Pos197;
+if Row_Pos200 /= No_Token_Index then
+   Row_Pos199 := Row_Pos200;
 else
-   Row_Pos196 := No_Token_Index;
-   goto Exit_Row196_0;
+   Row_Pos199 := No_Token_Index;
+   goto Exit_Row199_0;
 end if;
 --  BEGIN <Token(<WithText Equal>, ) (root of 'val_decl') at parser.lkt:265:60>
---  pos=Token_Pos289, res=Token_Res289, nobt=None
-Token_Res289 := Row_Pos196;
+--  pos=Token_Pos293, res=Token_Res293, nobt=None
+Token_Res293 := Row_Pos199;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res289));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res293));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Equal)
    then
-       Token_Pos289 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos196 then
+       Token_Pos293 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos199 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos196,
+            (Pos  => Row_Pos199,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Equal,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos289 := Row_Pos196 + 1;
+          Token_Pos293 := Row_Pos199 + 1;
    end if;
 end;
 --  END <Token(<WithText Equal>, ) (root of 'val_decl') at parser.lkt:265:60>
 Row_Progress51 := 5;
-if Token_Pos289 /= No_Token_Index then
-   Row_Pos196 := Token_Pos289;
+if Token_Pos293 /= No_Token_Index then
+   Row_Pos199 := Token_Pos293;
 else
-   Row_Pos196 := No_Token_Index;
-   goto Exit_Row196_0;
+   Row_Pos199 := No_Token_Index;
+   goto Exit_Row199_0;
 end if;
 --  BEGIN <Defer (for 'expr') at parser.lkt:265:64>
---  pos=Defer_Pos266, res=Defer_Res266, nobt=None
-Defer_Res266 :=
-   Expr_Or_Parse1 (Parser, Row_Pos196);
-Defer_Pos266 := Parser.Current_Pos;
+--  pos=Defer_Pos271, res=Defer_Res271, nobt=None
+Defer_Res271 :=
+   Expr_Or_Parse1 (Parser, Row_Pos199);
+Defer_Pos271 := Parser.Current_Pos;
 --  END <Defer (for 'expr') at parser.lkt:265:64>
 Row_Progress51 := 6;
-if Defer_Pos266 /= No_Token_Index then
-   Row_Pos196 := Defer_Pos266;
+if Defer_Pos271 /= No_Token_Index then
+   Row_Pos199 := Defer_Pos271;
 else
-   Row_Pos196 := No_Token_Index;
-   goto Exit_Row196_0;
+   Row_Pos199 := No_Token_Index;
+   goto Exit_Row199_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row196_0>>
+<<Exit_Row199_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'val_decl') at parser.lkt:265:17>
-if Row_Pos196 = No_Token_Index and then Nobt57 then
-   Row_Pos196 := Parser.Last_Fail.Pos;
+if Row_Pos199 = No_Token_Index and then Nobt57 then
+   Row_Pos199 := Parser.Last_Fail.Pos;
    Transform_Has_Failed51 := True;
 end if;
-if Row_Pos196 /= No_Token_Index then
-   Transform_Res152 := Allocate_Val_Decl (Parser.Mem_Pool);
+if Row_Pos199 /= No_Token_Index then
+   Transform_Res153 := Allocate_Val_Decl (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res152,
+     (Self => Transform_Res153,
       Kind => Lkt_Val_Decl,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos196 = Pos
+      Token_End_Index   => (if Row_Pos199 = Pos
                             then No_Token_Index
-                            else Row_Pos196 - 1));
+                            else Row_Pos199 - 1));
       Initialize_Fields_For_Val_Decl
-        (Self => Transform_Res152,
-         Val_Decl_F_Syn_Name => Defer_Res264,
-         Val_Decl_F_Decl_Type => Defer_Res265,
-         Val_Decl_F_Expr => Defer_Res266);
-         if Defer_Res264 /= null and then Is_Incomplete (Defer_Res264) then
-            Transform_Res152.Last_Attempted_Child := 0;
-         elsif Defer_Res264 /= null and then not Is_Ghost (Defer_Res264) then
-            Transform_Res152.Last_Attempted_Child := -1;
+        (Self => Transform_Res153,
+         Val_Decl_F_Syn_Name => Defer_Res269,
+         Val_Decl_F_Decl_Type => Defer_Res270,
+         Val_Decl_F_Expr => Defer_Res271);
+         if Defer_Res269 /= null and then Is_Incomplete (Defer_Res269) then
+            Transform_Res153.Last_Attempted_Child := 0;
+         elsif Defer_Res269 /= null and then not Is_Ghost (Defer_Res269) then
+            Transform_Res153.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res265 /= null and then Is_Incomplete (Defer_Res265) then
-            Transform_Res152.Last_Attempted_Child := 0;
-         elsif Defer_Res265 /= null and then not Is_Ghost (Defer_Res265) then
-            Transform_Res152.Last_Attempted_Child := -1;
+         if Defer_Res270 /= null and then Is_Incomplete (Defer_Res270) then
+            Transform_Res153.Last_Attempted_Child := 0;
+         elsif Defer_Res270 /= null and then not Is_Ghost (Defer_Res270) then
+            Transform_Res153.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res266 /= null and then Is_Incomplete (Defer_Res266) then
-            Transform_Res152.Last_Attempted_Child := 0;
-         elsif Defer_Res266 /= null and then not Is_Ghost (Defer_Res266) then
-            Transform_Res152.Last_Attempted_Child := -1;
+         if Defer_Res271 /= null and then Is_Incomplete (Defer_Res271) then
+            Transform_Res153.Last_Attempted_Child := 0;
+         elsif Defer_Res271 /= null and then not Is_Ghost (Defer_Res271) then
+            Transform_Res153.Last_Attempted_Child := -1;
          end if;
    if Transform_Has_Failed51 then
-      Transform_Res152.Last_Attempted_Child :=
+      Transform_Res153.Last_Attempted_Child :=
          Row_Progress51;
       Append (Parser, Pos, "Cannot parse <val_decl>");
       Add_Last_Fail_Diagnostic (Parser);
@@ -37465,19 +37851,19 @@ end if;
    -------------------------------
    Set
      (PP.Val_Decl_Transform_Parse0_Memo,
-      Row_Pos196 /= No_Token_Index,
-      Transform_Res152,
+      Row_Pos199 /= No_Token_Index,
+      Transform_Res153,
       Parser.Last_Diag,
       Pos,
-      Row_Pos196);
+      Row_Pos199);
    declare
       Top : constant Diagnostic_Mark := Parser.Last_Diag;
    begin
       Parser.Last_Diag := Mark_On_Entry;
       Append_Group (Parser.Pool, Parser.Last_Diag, Top);
    end;
-   Parser.Current_Pos := Row_Pos196;
-   return Transform_Res152;
+   Parser.Current_Pos := Row_Pos199;
+   return Transform_Res153;
 end Val_Decl_Transform_Parse0;
    function Value_Pattern_Or_Parse1
   (Parser : in out Parser_Type;
@@ -37485,93 +37871,93 @@ end Val_Decl_Transform_Parse0;
 is
    use Bare_Pattern_Memos;
       Nobt58 : Boolean := False;
-      Row_Pos198 : Token_Index := No_Token_Index;
-      Row_Pos199 : Token_Index := No_Token_Index;
-      Token_Pos290 : Token_Index := No_Token_Index;
-      Token_Res290 : Token_Index := No_Token_Index;
-      Transform_Res153 : Bare_Any_Type_Pattern := No_Bare_Lkt_Node;
-      Row_Pos200 : Token_Index := No_Token_Index;
-      Defer_Pos267 : Token_Index := No_Token_Index;
-      Defer_Res267 : Bare_Type_Ref := No_Bare_Lkt_Node;
-      Transform_Res154 : Bare_Type_Pattern := No_Bare_Lkt_Node;
       Row_Pos201 : Token_Index := No_Token_Index;
-      Token_Pos291 : Token_Index := No_Token_Index;
-      Token_Res291 : Token_Index := No_Token_Index;
-      Defer_Pos268 : Token_Index := No_Token_Index;
-      Defer_Res268 : Bare_Pattern := No_Bare_Lkt_Node;
-      Token_Pos292 : Token_Index := No_Token_Index;
-      Token_Res292 : Token_Index := No_Token_Index;
-      Transform_Res155 : Bare_Paren_Pattern := No_Bare_Lkt_Node;
+      Row_Pos202 : Token_Index := No_Token_Index;
+      Token_Pos294 : Token_Index := No_Token_Index;
+      Token_Res294 : Token_Index := No_Token_Index;
+      Transform_Res154 : Bare_Any_Type_Pattern := No_Bare_Lkt_Node;
+      Row_Pos203 : Token_Index := No_Token_Index;
+      Defer_Pos272 : Token_Index := No_Token_Index;
+      Defer_Res272 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Transform_Res155 : Bare_Type_Pattern := No_Bare_Lkt_Node;
+      Row_Pos204 : Token_Index := No_Token_Index;
+      Token_Pos295 : Token_Index := No_Token_Index;
+      Token_Res295 : Token_Index := No_Token_Index;
+      Defer_Pos273 : Token_Index := No_Token_Index;
+      Defer_Res273 : Bare_Pattern := No_Bare_Lkt_Node;
+      Token_Pos296 : Token_Index := No_Token_Index;
+      Token_Res296 : Token_Index := No_Token_Index;
+      Transform_Res156 : Bare_Paren_Pattern := No_Bare_Lkt_Node;
       Or_Pos40 : Token_Index := No_Token_Index;
       Or_Res40 : Bare_Pattern := No_Bare_Lkt_Node;
-      Diag_Mark107 : Diagnostic_Mark;
+      Diag_Mark109 : Diagnostic_Mark;
       Last_Fail40 : Fail_Info;
       Branch_Diag_Mark40 : Diagnostic_Mark;
       Branch_Last_Fail40 : Fail_Info;
-      Row_Pos202 : Token_Index := No_Token_Index;
-      Token_Pos293 : Token_Index := No_Token_Index;
-      Token_Res293 : Token_Index := No_Token_Index;
-      Lst_Cpos35 : Token_Index := No_Token_Index;
-      Tmp_List35 : Free_Parse_List;
-      Defer_Pos269 : Token_Index := No_Token_Index;
-      Defer_Res269 : Bare_Pattern_Detail := No_Bare_Lkt_Node;
-      Token_Pos294 : Token_Index := No_Token_Index;
-      Token_Res294 : Token_Index := No_Token_Index;
-      List_Pos35 : Token_Index := No_Token_Index;
-      List_Res35 : Bare_Pattern_Detail_List := No_Bare_Lkt_Node;
-      Diag_Mark108 : Diagnostic_Mark;
-      Token_Pos295 : Token_Index := No_Token_Index;
-      Token_Res295 : Token_Index := No_Token_Index;
-      Row_Progress52 : Integer := 0;
-      Transform_Res156 : Bare_Extended_Pattern := No_Bare_Lkt_Node;
-      Transform_Has_Failed52 : Boolean := False;
-      Row_Pos203 : Token_Index := No_Token_Index;
-      Defer_Pos270 : Token_Index := No_Token_Index;
-      Defer_Res270 : Bare_Type_Ref := No_Bare_Lkt_Node;
-      Transform_Res157 : Bare_Type_Pattern := No_Bare_Lkt_Node;
-      Row_Pos204 : Token_Index := No_Token_Index;
-      Token_Pos296 : Token_Index := No_Token_Index;
-      Token_Res296 : Token_Index := No_Token_Index;
-      Transform_Res158 : Bare_Null_Pattern := No_Bare_Lkt_Node;
-      Defer_Pos271 : Token_Index := No_Token_Index;
-      Defer_Res271 : Bare_Regex_Pattern := No_Bare_Lkt_Node;
       Row_Pos205 : Token_Index := No_Token_Index;
       Token_Pos297 : Token_Index := No_Token_Index;
       Token_Res297 : Token_Index := No_Token_Index;
-      Defer_Pos272 : Token_Index := No_Token_Index;
-      Defer_Res272 : Bare_Pattern := No_Bare_Lkt_Node;
-      Transform_Res159 : Bare_Not_Pattern := No_Bare_Lkt_Node;
-      Defer_Pos273 : Token_Index := No_Token_Index;
-      Defer_Res273 : Bare_Bool_Pattern := No_Bare_Lkt_Node;
+      Lst_Cpos35 : Token_Index := No_Token_Index;
+      Tmp_List35 : Free_Parse_List;
       Defer_Pos274 : Token_Index := No_Token_Index;
-      Defer_Res274 : Bare_Integer_Pattern := No_Bare_Lkt_Node;
-      Defer_Pos275 : Token_Index := No_Token_Index;
-      Defer_Res275 : Bare_List_Pattern := No_Bare_Lkt_Node;
-      Row_Pos206 : Token_Index := No_Token_Index;
-      Row_Pos207 : Token_Index := No_Token_Index;
-      Defer_Pos276 : Token_Index := No_Token_Index;
-      Defer_Res276 : Bare_Def_Id := No_Bare_Lkt_Node;
-      Transform_Res160 : Bare_Binding_Val_Decl := No_Bare_Lkt_Node;
-      Row_Pos208 : Token_Index := No_Token_Index;
+      Defer_Res274 : Bare_Pattern_Detail := No_Bare_Lkt_Node;
       Token_Pos298 : Token_Index := No_Token_Index;
       Token_Res298 : Token_Index := No_Token_Index;
-      Defer_Pos277 : Token_Index := No_Token_Index;
-      Defer_Res277 : Bare_Pattern := No_Bare_Lkt_Node;
-      Diag_Mark109 : Diagnostic_Mark;
-      Transform_Res161 : Bare_Binding_Pattern := No_Bare_Lkt_Node;
-      Row_Pos209 : Token_Index := No_Token_Index;
+      List_Pos35 : Token_Index := No_Token_Index;
+      List_Res35 : Bare_Pattern_Detail_List := No_Bare_Lkt_Node;
+      Diag_Mark110 : Diagnostic_Mark;
       Token_Pos299 : Token_Index := No_Token_Index;
       Token_Res299 : Token_Index := No_Token_Index;
-      Defer_Pos278 : Token_Index := No_Token_Index;
-      Defer_Res278 : Bare_Pattern := No_Bare_Lkt_Node;
+      Row_Progress52 : Integer := 0;
+      Transform_Res157 : Bare_Extended_Pattern := No_Bare_Lkt_Node;
+      Transform_Has_Failed52 : Boolean := False;
+      Row_Pos206 : Token_Index := No_Token_Index;
+      Defer_Pos275 : Token_Index := No_Token_Index;
+      Defer_Res275 : Bare_Type_Ref := No_Bare_Lkt_Node;
+      Transform_Res158 : Bare_Type_Pattern := No_Bare_Lkt_Node;
+      Row_Pos207 : Token_Index := No_Token_Index;
       Token_Pos300 : Token_Index := No_Token_Index;
       Token_Res300 : Token_Index := No_Token_Index;
-      Transform_Res162 : Bare_Paren_Pattern := No_Bare_Lkt_Node;
+      Transform_Res159 : Bare_Null_Pattern := No_Bare_Lkt_Node;
+      Defer_Pos276 : Token_Index := No_Token_Index;
+      Defer_Res276 : Bare_Regex_Pattern := No_Bare_Lkt_Node;
+      Row_Pos208 : Token_Index := No_Token_Index;
+      Token_Pos301 : Token_Index := No_Token_Index;
+      Token_Res301 : Token_Index := No_Token_Index;
+      Defer_Pos277 : Token_Index := No_Token_Index;
+      Defer_Res277 : Bare_Pattern := No_Bare_Lkt_Node;
+      Transform_Res160 : Bare_Not_Pattern := No_Bare_Lkt_Node;
+      Defer_Pos278 : Token_Index := No_Token_Index;
+      Defer_Res278 : Bare_Bool_Pattern := No_Bare_Lkt_Node;
       Defer_Pos279 : Token_Index := No_Token_Index;
-      Defer_Res279 : Bare_Tuple_Pattern := No_Bare_Lkt_Node;
+      Defer_Res279 : Bare_Integer_Pattern := No_Bare_Lkt_Node;
+      Defer_Pos280 : Token_Index := No_Token_Index;
+      Defer_Res280 : Bare_List_Pattern := No_Bare_Lkt_Node;
+      Row_Pos209 : Token_Index := No_Token_Index;
+      Row_Pos210 : Token_Index := No_Token_Index;
+      Defer_Pos281 : Token_Index := No_Token_Index;
+      Defer_Res281 : Bare_Def_Id := No_Bare_Lkt_Node;
+      Transform_Res161 : Bare_Binding_Val_Decl := No_Bare_Lkt_Node;
+      Row_Pos211 : Token_Index := No_Token_Index;
+      Token_Pos302 : Token_Index := No_Token_Index;
+      Token_Res302 : Token_Index := No_Token_Index;
+      Defer_Pos282 : Token_Index := No_Token_Index;
+      Defer_Res282 : Bare_Pattern := No_Bare_Lkt_Node;
+      Diag_Mark111 : Diagnostic_Mark;
+      Transform_Res162 : Bare_Binding_Pattern := No_Bare_Lkt_Node;
+      Row_Pos212 : Token_Index := No_Token_Index;
+      Token_Pos303 : Token_Index := No_Token_Index;
+      Token_Res303 : Token_Index := No_Token_Index;
+      Defer_Pos283 : Token_Index := No_Token_Index;
+      Defer_Res283 : Bare_Pattern := No_Bare_Lkt_Node;
+      Token_Pos304 : Token_Index := No_Token_Index;
+      Token_Res304 : Token_Index := No_Token_Index;
+      Transform_Res163 : Bare_Paren_Pattern := No_Bare_Lkt_Node;
+      Defer_Pos284 : Token_Index := No_Token_Index;
+      Defer_Res284 : Bare_Tuple_Pattern := No_Bare_Lkt_Node;
       Or_Pos41 : Token_Index := No_Token_Index;
       Or_Res41 : Bare_Pattern := No_Bare_Lkt_Node;
-      Diag_Mark110 : Diagnostic_Mark;
+      Diag_Mark112 : Diagnostic_Mark;
       Last_Fail41 : Fail_Info;
       Branch_Diag_Mark41 : Diagnostic_Mark;
       Branch_Last_Fail41 : Fail_Info;
@@ -37596,132 +37982,80 @@ begin
 --  pos=Or_Pos41, res=Or_Res41, nobt=None
 Or_Pos41 := No_Token_Index;
 Or_Res41 := No_Bare_Lkt_Node;
-Diag_Mark110 := Parser.Last_Diag;
+Diag_Mark112 := Parser.Last_Diag;
 Last_Fail41 := Parser.Last_Fail;
 Branch_Diag_Mark41 := Parser.Last_Diag;
 Branch_Last_Fail41 := Parser.Last_Fail;
-    Parser.Last_Diag := Diag_Mark110;
+    Parser.Last_Diag := Diag_Mark112;
     Parser.Last_Fail := Last_Fail41;
 --  BEGIN <Transform(<ASTNodeType ExtendedPattern>) (root of 'value_pattern') at parser.lkt:290:11>
---  pos=Row_Pos198, res=Transform_Res156, nobt=Nobt58
+--  pos=Row_Pos201, res=Transform_Res157, nobt=Nobt58
 --  BEGIN <_Row (root of 'value_pattern') at parser.lkt:290:11>
---  pos=Row_Pos198, res=None, nobt=Nobt58
-Row_Pos198 := Pos;
+--  pos=Row_Pos201, res=None, nobt=Nobt58
+Row_Pos201 := Pos;
 --  BEGIN <Or (root of 'value_pattern') at parser.lkt:291:13>
 --  pos=Or_Pos40, res=Or_Res40, nobt=None
 Or_Pos40 := No_Token_Index;
 Or_Res40 := No_Bare_Lkt_Node;
-Diag_Mark107 := Parser.Last_Diag;
+Diag_Mark109 := Parser.Last_Diag;
 Last_Fail40 := Parser.Last_Fail;
 Branch_Diag_Mark40 := Parser.Last_Diag;
 Branch_Last_Fail40 := Parser.Last_Fail;
-    Parser.Last_Diag := Diag_Mark107;
+    Parser.Last_Diag := Diag_Mark109;
     Parser.Last_Fail := Last_Fail40;
 --  BEGIN <Transform(<ASTNodeType AnyTypePattern>) (root of 'value_pattern') at parser.lkt:292:19>
---  pos=Row_Pos199, res=Transform_Res153, nobt=None
+--  pos=Row_Pos202, res=Transform_Res154, nobt=None
 --  BEGIN <_Row (root of 'value_pattern') at parser.lkt:292:19>
---  pos=Row_Pos199, res=None, nobt=None
-Row_Pos199 := Row_Pos198;
+--  pos=Row_Pos202, res=None, nobt=None
+Row_Pos202 := Row_Pos201;
 --  BEGIN <Token(<WithText Times>, ) (root of 'value_pattern') at parser.lkt:292:34>
---  pos=Token_Pos290, res=Token_Res290, nobt=None
-Token_Res290 := Row_Pos199;
+--  pos=Token_Pos294, res=Token_Res294, nobt=None
+Token_Res294 := Row_Pos202;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res290));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res294));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Times)
    then
-       Token_Pos290 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos199 then
+       Token_Pos294 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos202 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos199,
+            (Pos  => Row_Pos202,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Times,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos290 := Row_Pos199 + 1;
+          Token_Pos294 := Row_Pos202 + 1;
    end if;
 end;
 --  END <Token(<WithText Times>, ) (root of 'value_pattern') at parser.lkt:292:34>
-if Token_Pos290 /= No_Token_Index then
-   Row_Pos199 := Token_Pos290;
+if Token_Pos294 /= No_Token_Index then
+   Row_Pos202 := Token_Pos294;
 else
-   Row_Pos199 := No_Token_Index;
-   goto Exit_Row199_0;
+   Row_Pos202 := No_Token_Index;
+   goto Exit_Row202_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row199_0>>
+<<Exit_Row202_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'value_pattern') at parser.lkt:292:19>
-if Row_Pos199 /= No_Token_Index then
-   Transform_Res153 := Allocate_Any_Type_Pattern (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res153,
-      Kind => Lkt_Any_Type_Pattern,
-      Unit => Parser.Unit,
-      Token_Start_Index => Row_Pos198,
-      Token_End_Index   => (if Row_Pos199 = Row_Pos198
-                            then No_Token_Index
-                            else Row_Pos199 - 1));
-end if;
---  END <Transform(<ASTNodeType AnyTypePattern>) (root of 'value_pattern') at parser.lkt:292:19>
-    if Row_Pos199 /= No_Token_Index then
-        Or_Pos40 := Row_Pos199;
-        Or_Res40 := Transform_Res153;
-        goto Exit_Or45;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail40.Pos then
-       Branch_Diag_Mark40 := Parser.Last_Diag;
-       Branch_Last_Fail40 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark107;
-    Parser.Last_Fail := Last_Fail40;
---  BEGIN <Transform(<ASTNodeType TypePattern>) (root of 'value_pattern') at parser.lkt:293:19>
---  pos=Row_Pos200, res=Transform_Res154, nobt=None
---  BEGIN <_Row (root of 'value_pattern') at parser.lkt:293:19>
---  pos=Row_Pos200, res=None, nobt=None
-Row_Pos200 := Row_Pos198;
---  BEGIN <Defer (for 'type_ref') at parser.lkt:293:31>
---  pos=Defer_Pos267, res=Defer_Res267, nobt=None
-Defer_Res267 :=
-   Type_Ref_Or_Parse0 (Parser, Row_Pos200);
-Defer_Pos267 := Parser.Current_Pos;
---  END <Defer (for 'type_ref') at parser.lkt:293:31>
-if Defer_Pos267 /= No_Token_Index then
-   Row_Pos200 := Defer_Pos267;
-else
-   Row_Pos200 := No_Token_Index;
-   goto Exit_Row200_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row200_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:293:19>
-if Row_Pos200 /= No_Token_Index then
-   Transform_Res154 := Allocate_Type_Pattern (Parser.Mem_Pool);
+if Row_Pos202 /= No_Token_Index then
+   Transform_Res154 := Allocate_Any_Type_Pattern (Parser.Mem_Pool);
    Initialize
      (Self => Transform_Res154,
-      Kind => Lkt_Type_Pattern,
+      Kind => Lkt_Any_Type_Pattern,
       Unit => Parser.Unit,
-      Token_Start_Index => Row_Pos198,
-      Token_End_Index   => (if Row_Pos200 = Row_Pos198
+      Token_Start_Index => Row_Pos201,
+      Token_End_Index   => (if Row_Pos202 = Row_Pos201
                             then No_Token_Index
-                            else Row_Pos200 - 1));
-      Initialize_Fields_For_Type_Pattern
-        (Self => Transform_Res154,
-         Type_Pattern_F_Type_Name => Defer_Res267);
-         if Defer_Res267 /= null and then Is_Incomplete (Defer_Res267) then
-            Transform_Res154.Last_Attempted_Child := 0;
-         elsif Defer_Res267 /= null and then not Is_Ghost (Defer_Res267) then
-            Transform_Res154.Last_Attempted_Child := -1;
-         end if;
+                            else Row_Pos202 - 1));
 end if;
---  END <Transform(<ASTNodeType TypePattern>) (root of 'value_pattern') at parser.lkt:293:19>
-    if Row_Pos200 /= No_Token_Index then
-        Or_Pos40 := Row_Pos200;
+--  END <Transform(<ASTNodeType AnyTypePattern>) (root of 'value_pattern') at parser.lkt:292:19>
+    if Row_Pos202 /= No_Token_Index then
+        Or_Pos40 := Row_Pos202;
         Or_Res40 := Transform_Res154;
         goto Exit_Or45;
     end if;
@@ -37729,112 +38063,164 @@ end if;
        Branch_Diag_Mark40 := Parser.Last_Diag;
        Branch_Last_Fail40 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark107;
+    Parser.Last_Diag := Diag_Mark109;
+    Parser.Last_Fail := Last_Fail40;
+--  BEGIN <Transform(<ASTNodeType TypePattern>) (root of 'value_pattern') at parser.lkt:293:19>
+--  pos=Row_Pos203, res=Transform_Res155, nobt=None
+--  BEGIN <_Row (root of 'value_pattern') at parser.lkt:293:19>
+--  pos=Row_Pos203, res=None, nobt=None
+Row_Pos203 := Row_Pos201;
+--  BEGIN <Defer (for 'type_ref') at parser.lkt:293:31>
+--  pos=Defer_Pos272, res=Defer_Res272, nobt=None
+Defer_Res272 :=
+   Type_Ref_Or_Parse0 (Parser, Row_Pos203);
+Defer_Pos272 := Parser.Current_Pos;
+--  END <Defer (for 'type_ref') at parser.lkt:293:31>
+if Defer_Pos272 /= No_Token_Index then
+   Row_Pos203 := Defer_Pos272;
+else
+   Row_Pos203 := No_Token_Index;
+   goto Exit_Row203_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row203_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'value_pattern') at parser.lkt:293:19>
+if Row_Pos203 /= No_Token_Index then
+   Transform_Res155 := Allocate_Type_Pattern (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res155,
+      Kind => Lkt_Type_Pattern,
+      Unit => Parser.Unit,
+      Token_Start_Index => Row_Pos201,
+      Token_End_Index   => (if Row_Pos203 = Row_Pos201
+                            then No_Token_Index
+                            else Row_Pos203 - 1));
+      Initialize_Fields_For_Type_Pattern
+        (Self => Transform_Res155,
+         Type_Pattern_F_Type_Name => Defer_Res272);
+         if Defer_Res272 /= null and then Is_Incomplete (Defer_Res272) then
+            Transform_Res155.Last_Attempted_Child := 0;
+         elsif Defer_Res272 /= null and then not Is_Ghost (Defer_Res272) then
+            Transform_Res155.Last_Attempted_Child := -1;
+         end if;
+end if;
+--  END <Transform(<ASTNodeType TypePattern>) (root of 'value_pattern') at parser.lkt:293:19>
+    if Row_Pos203 /= No_Token_Index then
+        Or_Pos40 := Row_Pos203;
+        Or_Res40 := Transform_Res155;
+        goto Exit_Or45;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail40.Pos then
+       Branch_Diag_Mark40 := Parser.Last_Diag;
+       Branch_Last_Fail40 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark109;
     Parser.Last_Fail := Last_Fail40;
 --  BEGIN <Transform(<ASTNodeType ParenPattern>) (root of 'value_pattern') at parser.lkt:294:19>
---  pos=Row_Pos201, res=Transform_Res155, nobt=None
+--  pos=Row_Pos204, res=Transform_Res156, nobt=None
 --  BEGIN <_Row (root of 'value_pattern') at parser.lkt:294:19>
---  pos=Row_Pos201, res=None, nobt=None
-Row_Pos201 := Row_Pos198;
+--  pos=Row_Pos204, res=None, nobt=None
+Row_Pos204 := Row_Pos201;
 --  BEGIN <Token(<WithText LPar>, ) (root of 'value_pattern') at parser.lkt:294:32>
---  pos=Token_Pos291, res=Token_Res291, nobt=None
-Token_Res291 := Row_Pos201;
+--  pos=Token_Pos295, res=Token_Res295, nobt=None
+Token_Res295 := Row_Pos204;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res291));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res295));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_L_Par)
    then
-       Token_Pos291 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos201 then
+       Token_Pos295 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos204 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos201,
+            (Pos  => Row_Pos204,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_L_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos291 := Row_Pos201 + 1;
+          Token_Pos295 := Row_Pos204 + 1;
    end if;
 end;
 --  END <Token(<WithText LPar>, ) (root of 'value_pattern') at parser.lkt:294:32>
-if Token_Pos291 /= No_Token_Index then
-   Row_Pos201 := Token_Pos291;
+if Token_Pos295 /= No_Token_Index then
+   Row_Pos204 := Token_Pos295;
 else
-   Row_Pos201 := No_Token_Index;
-   goto Exit_Row201_0;
+   Row_Pos204 := No_Token_Index;
+   goto Exit_Row204_0;
 end if;
 --  BEGIN <Defer (for 'pattern') at parser.lkt:294:36>
---  pos=Defer_Pos268, res=Defer_Res268, nobt=None
-Defer_Res268 :=
-   Pattern_Or_Parse0 (Parser, Row_Pos201);
-Defer_Pos268 := Parser.Current_Pos;
+--  pos=Defer_Pos273, res=Defer_Res273, nobt=None
+Defer_Res273 :=
+   Pattern_Or_Parse0 (Parser, Row_Pos204);
+Defer_Pos273 := Parser.Current_Pos;
 --  END <Defer (for 'pattern') at parser.lkt:294:36>
-if Defer_Pos268 /= No_Token_Index then
-   Row_Pos201 := Defer_Pos268;
+if Defer_Pos273 /= No_Token_Index then
+   Row_Pos204 := Defer_Pos273;
 else
-   Row_Pos201 := No_Token_Index;
-   goto Exit_Row201_0;
+   Row_Pos204 := No_Token_Index;
+   goto Exit_Row204_0;
 end if;
 --  BEGIN <Token(<WithText RPar>, ) (root of 'value_pattern') at parser.lkt:294:44>
---  pos=Token_Pos292, res=Token_Res292, nobt=None
-Token_Res292 := Row_Pos201;
+--  pos=Token_Pos296, res=Token_Res296, nobt=None
+Token_Res296 := Row_Pos204;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res292));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res296));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_R_Par)
    then
-       Token_Pos292 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos201 then
+       Token_Pos296 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos204 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos201,
+            (Pos  => Row_Pos204,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos292 := Row_Pos201 + 1;
+          Token_Pos296 := Row_Pos204 + 1;
    end if;
 end;
 --  END <Token(<WithText RPar>, ) (root of 'value_pattern') at parser.lkt:294:44>
-if Token_Pos292 /= No_Token_Index then
-   Row_Pos201 := Token_Pos292;
+if Token_Pos296 /= No_Token_Index then
+   Row_Pos204 := Token_Pos296;
 else
-   Row_Pos201 := No_Token_Index;
-   goto Exit_Row201_0;
+   Row_Pos204 := No_Token_Index;
+   goto Exit_Row204_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row201_0>>
+<<Exit_Row204_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'value_pattern') at parser.lkt:294:19>
-if Row_Pos201 /= No_Token_Index then
-   Transform_Res155 := Allocate_Paren_Pattern (Parser.Mem_Pool);
+if Row_Pos204 /= No_Token_Index then
+   Transform_Res156 := Allocate_Paren_Pattern (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res155,
+     (Self => Transform_Res156,
       Kind => Lkt_Paren_Pattern,
       Unit => Parser.Unit,
-      Token_Start_Index => Row_Pos198,
-      Token_End_Index   => (if Row_Pos201 = Row_Pos198
+      Token_Start_Index => Row_Pos201,
+      Token_End_Index   => (if Row_Pos204 = Row_Pos201
                             then No_Token_Index
-                            else Row_Pos201 - 1));
+                            else Row_Pos204 - 1));
       Initialize_Fields_For_Paren_Pattern
-        (Self => Transform_Res155,
-         Paren_Pattern_F_Sub_Pattern => Defer_Res268);
-         if Defer_Res268 /= null and then Is_Incomplete (Defer_Res268) then
-            Transform_Res155.Last_Attempted_Child := 0;
-         elsif Defer_Res268 /= null and then not Is_Ghost (Defer_Res268) then
-            Transform_Res155.Last_Attempted_Child := -1;
+        (Self => Transform_Res156,
+         Paren_Pattern_F_Sub_Pattern => Defer_Res273);
+         if Defer_Res273 /= null and then Is_Incomplete (Defer_Res273) then
+            Transform_Res156.Last_Attempted_Child := 0;
+         elsif Defer_Res273 /= null and then not Is_Ghost (Defer_Res273) then
+            Transform_Res156.Last_Attempted_Child := -1;
          end if;
 end if;
 --  END <Transform(<ASTNodeType ParenPattern>) (root of 'value_pattern') at parser.lkt:294:19>
-    if Row_Pos201 /= No_Token_Index then
-        Or_Pos40 := Row_Pos201;
-        Or_Res40 := Transform_Res155;
+    if Row_Pos204 /= No_Token_Index then
+        Or_Pos40 := Row_Pos204;
+        Or_Res40 := Transform_Res156;
         goto Exit_Or45;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail40.Pos then
@@ -37847,85 +38233,85 @@ Parser.Last_Fail := Branch_Last_Fail40;
 --  END <Or (root of 'value_pattern') at parser.lkt:291:13>
 Row_Progress52 := 1;
 if Or_Pos40 /= No_Token_Index then
-   Row_Pos198 := Or_Pos40;
+   Row_Pos201 := Or_Pos40;
 else
-   Row_Pos198 := No_Token_Index;
-   goto Exit_Row198_0;
+   Row_Pos201 := No_Token_Index;
+   goto Exit_Row201_0;
 end if;
 --  BEGIN <_Extract (root of 'value_pattern') at parser.lkt:296:13>
---  pos=Row_Pos202, res=List_Res35, nobt=Nobt58
+--  pos=Row_Pos205, res=List_Res35, nobt=Nobt58
 --  BEGIN <_Row (root of 'value_pattern') at parser.lkt:296:13>
---  pos=Row_Pos202, res=None, nobt=Nobt58
-Row_Pos202 := Row_Pos198;
+--  pos=Row_Pos205, res=None, nobt=Nobt58
+Row_Pos205 := Row_Pos201;
 --  BEGIN <Token(<WithText LPar>, ) (root of 'value_pattern') at parser.lkt:296:18>
---  pos=Token_Pos293, res=Token_Res293, nobt=None
-Token_Res293 := Row_Pos202;
+--  pos=Token_Pos297, res=Token_Res297, nobt=None
+Token_Res297 := Row_Pos205;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res293));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res297));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_L_Par)
    then
-       Token_Pos293 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos202 then
+       Token_Pos297 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos205 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos202,
+            (Pos  => Row_Pos205,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_L_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos293 := Row_Pos202 + 1;
+          Token_Pos297 := Row_Pos205 + 1;
    end if;
 end;
 --  END <Token(<WithText LPar>, ) (root of 'value_pattern') at parser.lkt:296:18>
-if Token_Pos293 /= No_Token_Index then
-   Row_Pos202 := Token_Pos293;
+if Token_Pos297 /= No_Token_Index then
+   Row_Pos205 := Token_Pos297;
 else
-   Row_Pos202 := No_Token_Index;
-   goto Exit_Row202_0;
+   Row_Pos205 := No_Token_Index;
+   goto Exit_Row205_0;
 end if;
 --  BEGIN <Cut (root of 'value_pattern') at parser.lkt:296:22>
---  pos=Row_Pos202, res=None, nobt=Nobt58
+--  pos=Row_Pos205, res=None, nobt=Nobt58
 Nobt58 := True;
 --  END <Cut (root of 'value_pattern') at parser.lkt:296:22>
-if Row_Pos202 /= No_Token_Index then
-   Row_Pos202 := Row_Pos202;
+if Row_Pos205 /= No_Token_Index then
+   Row_Pos205 := Row_Pos205;
 else
-   Row_Pos202 := No_Token_Index;
-   goto Exit_Row202_0;
+   Row_Pos205 := No_Token_Index;
+   goto Exit_Row205_0;
 end if;
 --  BEGIN <List (root of 'value_pattern') at parser.lkt:296:24>
 --  pos=List_Pos35, res=List_Res35, nobt=None
     List_Pos35 := No_Token_Index;
-Lst_Cpos35 := Row_Pos202;
+Lst_Cpos35 := Row_Pos205;
 Tmp_List35 := Get_Parse_List (Parser);
-Diag_Mark108 := Parser.Last_Diag;
+Diag_Mark110 := Parser.Last_Diag;
 loop
 --  BEGIN <Defer (for 'pattern_arg') at parser.lkt:296:30>
---  pos=Defer_Pos269, res=Defer_Res269, nobt=None
-Defer_Res269 :=
+--  pos=Defer_Pos274, res=Defer_Res274, nobt=None
+Defer_Res274 :=
    Pattern_Arg_Or_Parse0 (Parser, Lst_Cpos35);
-Defer_Pos269 := Parser.Current_Pos;
+Defer_Pos274 := Parser.Current_Pos;
 --  END <Defer (for 'pattern_arg') at parser.lkt:296:30>
-   exit when Defer_Pos269 = No_Token_Index;
-   List_Pos35 := Defer_Pos269;
+   exit when Defer_Pos274 = No_Token_Index;
+   List_Pos35 := Defer_Pos274;
    Lst_Cpos35 := List_Pos35;
-   Diag_Mark108 := Parser.Last_Diag;
-   Tmp_List35.Nodes.Append (Defer_Res269);
+   Diag_Mark110 := Parser.Last_Diag;
+   Tmp_List35.Nodes.Append (Defer_Res274);
 --  BEGIN <Token(<WithText Comma>, ) (root of 'value_pattern') at parser.lkt:296:43>
---  pos=Token_Pos294, res=Token_Res294, nobt=None
-Token_Res294 := Lst_Cpos35;
+--  pos=Token_Pos298, res=Token_Res298, nobt=None
+Token_Res298 := Lst_Cpos35;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res294));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res298));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Comma)
    then
-       Token_Pos294 := No_Token_Index;
+       Token_Pos298 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Lst_Cpos35 then
           Parser.Last_Fail :=
             (Pos  => Lst_Cpos35,
@@ -37935,26 +38321,26 @@ begin
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos294 := Lst_Cpos35 + 1;
+          Token_Pos298 := Lst_Cpos35 + 1;
    end if;
 end;
 --  END <Token(<WithText Comma>, ) (root of 'value_pattern') at parser.lkt:296:43>
-      exit when Token_Pos294 = No_Token_Index;
-      Lst_Cpos35 := Token_Pos294;
+      exit when Token_Pos298 = No_Token_Index;
+      Lst_Cpos35 := Token_Pos298;
 end loop;
-Parser.Last_Diag := Diag_Mark108;
+Parser.Last_Diag := Diag_Mark110;
 declare
    Token_Start, Token_End : Token_Index;
    Count                  : constant Natural := Tmp_List35.Nodes.Length;
 begin
    List_Res35 := Allocate_Pattern_Detail_List (Parser.Mem_Pool);
    if Count > 0 then
-      Token_Start := Row_Pos202;
-      Token_End := (if Lst_Cpos35 = Row_Pos202
-                    then Row_Pos202
+      Token_Start := Row_Pos205;
+      Token_End := (if Lst_Cpos35 = Row_Pos205
+                    then Row_Pos205
                     else List_Pos35 - 1);
    else
-      Token_Start := Token_Index'Max (Row_Pos202, 1);
+      Token_Start := Token_Index'Max (Row_Pos205, 1);
       Token_End := No_Token_Index;
    end if;
    Initialize
@@ -37982,278 +38368,37 @@ end;
 Release_Parse_List (Parser, Tmp_List35);
 --  END <List (root of 'value_pattern') at parser.lkt:296:24>
 if List_Pos35 /= No_Token_Index then
-   Row_Pos202 := List_Pos35;
+   Row_Pos205 := List_Pos35;
 else
-   Row_Pos202 := No_Token_Index;
-   goto Exit_Row202_0;
+   Row_Pos205 := No_Token_Index;
+   goto Exit_Row205_0;
 end if;
 --  BEGIN <Token(<WithText RPar>, ) (root of 'value_pattern') at parser.lkt:296:48>
---  pos=Token_Pos295, res=Token_Res295, nobt=None
-Token_Res295 := Row_Pos202;
+--  pos=Token_Pos299, res=Token_Res299, nobt=None
+Token_Res299 := Row_Pos205;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res295));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res299));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_R_Par)
    then
-       Token_Pos295 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos202 then
+       Token_Pos299 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos205 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos202,
+            (Pos  => Row_Pos205,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_R_Par,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos295 := Row_Pos202 + 1;
+          Token_Pos299 := Row_Pos205 + 1;
    end if;
 end;
 --  END <Token(<WithText RPar>, ) (root of 'value_pattern') at parser.lkt:296:48>
-if Token_Pos295 /= No_Token_Index then
-   Row_Pos202 := Token_Pos295;
-else
-   Row_Pos202 := No_Token_Index;
-   goto Exit_Row202_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row202_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:296:13>
---  END <_Extract (root of 'value_pattern') at parser.lkt:296:13>
-Row_Progress52 := 2;
-if Row_Pos202 /= No_Token_Index then
-   Row_Pos198 := Row_Pos202;
-else
-   Row_Pos198 := No_Token_Index;
-   goto Exit_Row198_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row198_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:290:11>
-if Row_Pos198 = No_Token_Index and then Nobt58 then
-   Row_Pos198 := Parser.Last_Fail.Pos;
-   Transform_Has_Failed52 := True;
-end if;
-if Row_Pos198 /= No_Token_Index then
-   Transform_Res156 := Allocate_Extended_Pattern (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res156,
-      Kind => Lkt_Extended_Pattern,
-      Unit => Parser.Unit,
-      Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos198 = Pos
-                            then No_Token_Index
-                            else Row_Pos198 - 1));
-      Initialize_Fields_For_Extended_Pattern
-        (Self => Transform_Res156,
-         Extended_Pattern_F_Sub_Pattern => Or_Res40,
-         Extended_Pattern_F_Details => List_Res35);
-         if Or_Res40 /= null and then Is_Incomplete (Or_Res40) then
-            Transform_Res156.Last_Attempted_Child := 0;
-         elsif Or_Res40 /= null and then not Is_Ghost (Or_Res40) then
-            Transform_Res156.Last_Attempted_Child := -1;
-         end if;
-         if List_Res35 /= null and then Is_Incomplete (List_Res35) then
-            Transform_Res156.Last_Attempted_Child := 0;
-         elsif List_Res35 /= null and then not Is_Ghost (List_Res35) then
-            Transform_Res156.Last_Attempted_Child := -1;
-         end if;
-   if Transform_Has_Failed52 then
-      Transform_Res156.Last_Attempted_Child :=
-         Row_Progress52;
-      Append (Parser, Pos, "Cannot parse <value_pattern>");
-      Add_Last_Fail_Diagnostic (Parser);
-   end if;
-end if;
---  END <Transform(<ASTNodeType ExtendedPattern>) (root of 'value_pattern') at parser.lkt:290:11>
-    if Row_Pos198 /= No_Token_Index then
-        Or_Pos41 := Row_Pos198;
-        Or_Res41 := Transform_Res156;
-        goto Exit_Or44;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
-       Branch_Diag_Mark41 := Parser.Last_Diag;
-       Branch_Last_Fail41 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark110;
-    Parser.Last_Fail := Last_Fail41;
---  BEGIN <Transform(<ASTNodeType TypePattern>) (root of 'value_pattern') at parser.lkt:298:11>
---  pos=Row_Pos203, res=Transform_Res157, nobt=None
---  BEGIN <_Row (root of 'value_pattern') at parser.lkt:298:11>
---  pos=Row_Pos203, res=None, nobt=None
-Row_Pos203 := Pos;
---  BEGIN <Defer (for 'type_ref') at parser.lkt:298:23>
---  pos=Defer_Pos270, res=Defer_Res270, nobt=None
-Defer_Res270 :=
-   Type_Ref_Or_Parse0 (Parser, Row_Pos203);
-Defer_Pos270 := Parser.Current_Pos;
---  END <Defer (for 'type_ref') at parser.lkt:298:23>
-if Defer_Pos270 /= No_Token_Index then
-   Row_Pos203 := Defer_Pos270;
-else
-   Row_Pos203 := No_Token_Index;
-   goto Exit_Row203_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row203_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:298:11>
-if Row_Pos203 /= No_Token_Index then
-   Transform_Res157 := Allocate_Type_Pattern (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res157,
-      Kind => Lkt_Type_Pattern,
-      Unit => Parser.Unit,
-      Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos203 = Pos
-                            then No_Token_Index
-                            else Row_Pos203 - 1));
-      Initialize_Fields_For_Type_Pattern
-        (Self => Transform_Res157,
-         Type_Pattern_F_Type_Name => Defer_Res270);
-         if Defer_Res270 /= null and then Is_Incomplete (Defer_Res270) then
-            Transform_Res157.Last_Attempted_Child := 0;
-         elsif Defer_Res270 /= null and then not Is_Ghost (Defer_Res270) then
-            Transform_Res157.Last_Attempted_Child := -1;
-         end if;
-end if;
---  END <Transform(<ASTNodeType TypePattern>) (root of 'value_pattern') at parser.lkt:298:11>
-    if Row_Pos203 /= No_Token_Index then
-        Or_Pos41 := Row_Pos203;
-        Or_Res41 := Transform_Res157;
-        goto Exit_Or44;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
-       Branch_Diag_Mark41 := Parser.Last_Diag;
-       Branch_Last_Fail41 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark110;
-    Parser.Last_Fail := Last_Fail41;
---  BEGIN <Transform(<ASTNodeType NullPattern>) (root of 'value_pattern') at parser.lkt:299:11>
---  pos=Row_Pos204, res=Transform_Res158, nobt=None
---  BEGIN <_Row (root of 'value_pattern') at parser.lkt:299:11>
---  pos=Row_Pos204, res=None, nobt=None
-Row_Pos204 := Pos;
---  BEGIN <Token(<WithText NullKw>, ) (root of 'value_pattern') at parser.lkt:299:23>
---  pos=Token_Pos296, res=Token_Res296, nobt=None
-Token_Res296 := Row_Pos204;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res296));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_Null_Kw)
-   then
-       Token_Pos296 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos204 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos204,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Null_Kw,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos296 := Row_Pos204 + 1;
-   end if;
-end;
---  END <Token(<WithText NullKw>, ) (root of 'value_pattern') at parser.lkt:299:23>
-if Token_Pos296 /= No_Token_Index then
-   Row_Pos204 := Token_Pos296;
-else
-   Row_Pos204 := No_Token_Index;
-   goto Exit_Row204_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row204_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:299:11>
-if Row_Pos204 /= No_Token_Index then
-   Transform_Res158 := Allocate_Null_Pattern (Parser.Mem_Pool);
-   Initialize
-     (Self => Transform_Res158,
-      Kind => Lkt_Null_Pattern,
-      Unit => Parser.Unit,
-      Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos204 = Pos
-                            then No_Token_Index
-                            else Row_Pos204 - 1));
-end if;
---  END <Transform(<ASTNodeType NullPattern>) (root of 'value_pattern') at parser.lkt:299:11>
-    if Row_Pos204 /= No_Token_Index then
-        Or_Pos41 := Row_Pos204;
-        Or_Res41 := Transform_Res158;
-        goto Exit_Or44;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
-       Branch_Diag_Mark41 := Parser.Last_Diag;
-       Branch_Last_Fail41 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark110;
-    Parser.Last_Fail := Last_Fail41;
---  BEGIN <Defer (for 'regex_pattern') at parser.lkt:300:11>
---  pos=Defer_Pos271, res=Defer_Res271, nobt=None
-Defer_Res271 :=
-   Regex_Pattern_Transform_Parse0 (Parser, Pos);
-Defer_Pos271 := Parser.Current_Pos;
---  END <Defer (for 'regex_pattern') at parser.lkt:300:11>
-    if Defer_Pos271 /= No_Token_Index then
-        Or_Pos41 := Defer_Pos271;
-        Or_Res41 := Defer_Res271;
-        goto Exit_Or44;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
-       Branch_Diag_Mark41 := Parser.Last_Diag;
-       Branch_Last_Fail41 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark110;
-    Parser.Last_Fail := Last_Fail41;
---  BEGIN <Transform(<ASTNodeType NotPattern>) (root of 'value_pattern') at parser.lkt:301:11>
---  pos=Row_Pos205, res=Transform_Res159, nobt=None
---  BEGIN <_Row (root of 'value_pattern') at parser.lkt:301:11>
---  pos=Row_Pos205, res=None, nobt=None
-Row_Pos205 := Pos;
---  BEGIN <Token(<WithText NotKw>, ) (root of 'value_pattern') at parser.lkt:301:22>
---  pos=Token_Pos297, res=Token_Res297, nobt=None
-Token_Res297 := Row_Pos205;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res297));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_Not_Kw)
-   then
-       Token_Pos297 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos205 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos205,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_Not_Kw,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos297 := Row_Pos205 + 1;
-   end if;
-end;
---  END <Token(<WithText NotKw>, ) (root of 'value_pattern') at parser.lkt:301:22>
-if Token_Pos297 /= No_Token_Index then
-   Row_Pos205 := Token_Pos297;
-else
-   Row_Pos205 := No_Token_Index;
-   goto Exit_Row205_0;
-end if;
---  BEGIN <Defer (for 'value_pattern') at parser.lkt:301:28>
---  pos=Defer_Pos272, res=Defer_Res272, nobt=None
-Defer_Res272 :=
-   Value_Pattern_Or_Parse1 (Parser, Row_Pos205);
-Defer_Pos272 := Parser.Current_Pos;
---  END <Defer (for 'value_pattern') at parser.lkt:301:28>
-if Defer_Pos272 /= No_Token_Index then
-   Row_Pos205 := Defer_Pos272;
+if Token_Pos299 /= No_Token_Index then
+   Row_Pos205 := Token_Pos299;
 else
    Row_Pos205 := No_Token_Index;
    goto Exit_Row205_0;
@@ -38261,107 +38406,149 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row205_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:301:11>
+--  END <_Row (root of 'value_pattern') at parser.lkt:296:13>
+--  END <_Extract (root of 'value_pattern') at parser.lkt:296:13>
+Row_Progress52 := 2;
 if Row_Pos205 /= No_Token_Index then
-   Transform_Res159 := Allocate_Not_Pattern (Parser.Mem_Pool);
+   Row_Pos201 := Row_Pos205;
+else
+   Row_Pos201 := No_Token_Index;
+   goto Exit_Row201_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row201_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'value_pattern') at parser.lkt:290:11>
+if Row_Pos201 = No_Token_Index and then Nobt58 then
+   Row_Pos201 := Parser.Last_Fail.Pos;
+   Transform_Has_Failed52 := True;
+end if;
+if Row_Pos201 /= No_Token_Index then
+   Transform_Res157 := Allocate_Extended_Pattern (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res159,
-      Kind => Lkt_Not_Pattern,
+     (Self => Transform_Res157,
+      Kind => Lkt_Extended_Pattern,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos205 = Pos
+      Token_End_Index   => (if Row_Pos201 = Pos
                             then No_Token_Index
-                            else Row_Pos205 - 1));
-      Initialize_Fields_For_Not_Pattern
-        (Self => Transform_Res159,
-         Not_Pattern_F_Sub_Pattern => Defer_Res272);
-         if Defer_Res272 /= null and then Is_Incomplete (Defer_Res272) then
-            Transform_Res159.Last_Attempted_Child := 0;
-         elsif Defer_Res272 /= null and then not Is_Ghost (Defer_Res272) then
-            Transform_Res159.Last_Attempted_Child := -1;
+                            else Row_Pos201 - 1));
+      Initialize_Fields_For_Extended_Pattern
+        (Self => Transform_Res157,
+         Extended_Pattern_F_Sub_Pattern => Or_Res40,
+         Extended_Pattern_F_Details => List_Res35);
+         if Or_Res40 /= null and then Is_Incomplete (Or_Res40) then
+            Transform_Res157.Last_Attempted_Child := 0;
+         elsif Or_Res40 /= null and then not Is_Ghost (Or_Res40) then
+            Transform_Res157.Last_Attempted_Child := -1;
          end if;
+         if List_Res35 /= null and then Is_Incomplete (List_Res35) then
+            Transform_Res157.Last_Attempted_Child := 0;
+         elsif List_Res35 /= null and then not Is_Ghost (List_Res35) then
+            Transform_Res157.Last_Attempted_Child := -1;
+         end if;
+   if Transform_Has_Failed52 then
+      Transform_Res157.Last_Attempted_Child :=
+         Row_Progress52;
+      Append (Parser, Pos, "Cannot parse <value_pattern>");
+      Add_Last_Fail_Diagnostic (Parser);
+   end if;
 end if;
---  END <Transform(<ASTNodeType NotPattern>) (root of 'value_pattern') at parser.lkt:301:11>
-    if Row_Pos205 /= No_Token_Index then
-        Or_Pos41 := Row_Pos205;
-        Or_Res41 := Transform_Res159;
+--  END <Transform(<ASTNodeType ExtendedPattern>) (root of 'value_pattern') at parser.lkt:290:11>
+    if Row_Pos201 /= No_Token_Index then
+        Or_Pos41 := Row_Pos201;
+        Or_Res41 := Transform_Res157;
         goto Exit_Or44;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
        Branch_Diag_Mark41 := Parser.Last_Diag;
        Branch_Last_Fail41 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark110;
+    Parser.Last_Diag := Diag_Mark112;
     Parser.Last_Fail := Last_Fail41;
---  BEGIN <Defer (for 'bool_pattern') at parser.lkt:302:11>
---  pos=Defer_Pos273, res=Defer_Res273, nobt=None
-Defer_Res273 :=
-   Bool_Pattern_Or_Parse0 (Parser, Pos);
-Defer_Pos273 := Parser.Current_Pos;
---  END <Defer (for 'bool_pattern') at parser.lkt:302:11>
-    if Defer_Pos273 /= No_Token_Index then
-        Or_Pos41 := Defer_Pos273;
-        Or_Res41 := Defer_Res273;
-        goto Exit_Or44;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
-       Branch_Diag_Mark41 := Parser.Last_Diag;
-       Branch_Last_Fail41 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark110;
-    Parser.Last_Fail := Last_Fail41;
---  BEGIN <Defer (for 'integer_pattern') at parser.lkt:303:11>
---  pos=Defer_Pos274, res=Defer_Res274, nobt=None
-Defer_Res274 :=
-   Integer_Pattern_Transform_Parse0 (Parser, Pos);
-Defer_Pos274 := Parser.Current_Pos;
---  END <Defer (for 'integer_pattern') at parser.lkt:303:11>
-    if Defer_Pos274 /= No_Token_Index then
-        Or_Pos41 := Defer_Pos274;
-        Or_Res41 := Defer_Res274;
-        goto Exit_Or44;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
-       Branch_Diag_Mark41 := Parser.Last_Diag;
-       Branch_Last_Fail41 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark110;
-    Parser.Last_Fail := Last_Fail41;
---  BEGIN <Defer (for 'list_pattern') at parser.lkt:304:11>
---  pos=Defer_Pos275, res=Defer_Res275, nobt=None
-Defer_Res275 :=
-   List_Pattern_Transform_Parse0 (Parser, Pos);
-Defer_Pos275 := Parser.Current_Pos;
---  END <Defer (for 'list_pattern') at parser.lkt:304:11>
-    if Defer_Pos275 /= No_Token_Index then
-        Or_Pos41 := Defer_Pos275;
-        Or_Res41 := Defer_Res275;
-        goto Exit_Or44;
-    end if;
-    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
-       Branch_Diag_Mark41 := Parser.Last_Diag;
-       Branch_Last_Fail41 := Parser.Last_Fail;
-    end if;
-    Parser.Last_Diag := Diag_Mark110;
-    Parser.Last_Fail := Last_Fail41;
---  BEGIN <Transform(<ASTNodeType BindingPattern>) (root of 'value_pattern') at parser.lkt:305:11>
---  pos=Row_Pos206, res=Transform_Res161, nobt=None
---  BEGIN <_Row (root of 'value_pattern') at parser.lkt:305:11>
+--  BEGIN <Transform(<ASTNodeType TypePattern>) (root of 'value_pattern') at parser.lkt:298:11>
+--  pos=Row_Pos206, res=Transform_Res158, nobt=None
+--  BEGIN <_Row (root of 'value_pattern') at parser.lkt:298:11>
 --  pos=Row_Pos206, res=None, nobt=None
 Row_Pos206 := Pos;
---  BEGIN <Transform(<ASTNodeType BindingValDecl>) (root of 'value_pattern') at parser.lkt:305:26>
---  pos=Row_Pos207, res=Transform_Res160, nobt=None
---  BEGIN <_Row (root of 'value_pattern') at parser.lkt:305:26>
+--  BEGIN <Defer (for 'type_ref') at parser.lkt:298:23>
+--  pos=Defer_Pos275, res=Defer_Res275, nobt=None
+Defer_Res275 :=
+   Type_Ref_Or_Parse0 (Parser, Row_Pos206);
+Defer_Pos275 := Parser.Current_Pos;
+--  END <Defer (for 'type_ref') at parser.lkt:298:23>
+if Defer_Pos275 /= No_Token_Index then
+   Row_Pos206 := Defer_Pos275;
+else
+   Row_Pos206 := No_Token_Index;
+   goto Exit_Row206_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row206_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'value_pattern') at parser.lkt:298:11>
+if Row_Pos206 /= No_Token_Index then
+   Transform_Res158 := Allocate_Type_Pattern (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res158,
+      Kind => Lkt_Type_Pattern,
+      Unit => Parser.Unit,
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos206 = Pos
+                            then No_Token_Index
+                            else Row_Pos206 - 1));
+      Initialize_Fields_For_Type_Pattern
+        (Self => Transform_Res158,
+         Type_Pattern_F_Type_Name => Defer_Res275);
+         if Defer_Res275 /= null and then Is_Incomplete (Defer_Res275) then
+            Transform_Res158.Last_Attempted_Child := 0;
+         elsif Defer_Res275 /= null and then not Is_Ghost (Defer_Res275) then
+            Transform_Res158.Last_Attempted_Child := -1;
+         end if;
+end if;
+--  END <Transform(<ASTNodeType TypePattern>) (root of 'value_pattern') at parser.lkt:298:11>
+    if Row_Pos206 /= No_Token_Index then
+        Or_Pos41 := Row_Pos206;
+        Or_Res41 := Transform_Res158;
+        goto Exit_Or44;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
+       Branch_Diag_Mark41 := Parser.Last_Diag;
+       Branch_Last_Fail41 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark112;
+    Parser.Last_Fail := Last_Fail41;
+--  BEGIN <Transform(<ASTNodeType NullPattern>) (root of 'value_pattern') at parser.lkt:299:11>
+--  pos=Row_Pos207, res=Transform_Res159, nobt=None
+--  BEGIN <_Row (root of 'value_pattern') at parser.lkt:299:11>
 --  pos=Row_Pos207, res=None, nobt=None
-Row_Pos207 := Row_Pos206;
---  BEGIN <Defer (for 'def_id') at parser.lkt:305:41>
---  pos=Defer_Pos276, res=Defer_Res276, nobt=None
-Defer_Res276 :=
-   Def_Id_Transform_Parse0 (Parser, Row_Pos207);
-Defer_Pos276 := Parser.Current_Pos;
---  END <Defer (for 'def_id') at parser.lkt:305:41>
-if Defer_Pos276 /= No_Token_Index then
-   Row_Pos207 := Defer_Pos276;
+Row_Pos207 := Pos;
+--  BEGIN <Token(<WithText NullKw>, ) (root of 'value_pattern') at parser.lkt:299:23>
+--  pos=Token_Pos300, res=Token_Res300, nobt=None
+Token_Res300 := Row_Pos207;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res300));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_Null_Kw)
+   then
+       Token_Pos300 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos207 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos207,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_Null_Kw,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos300 := Row_Pos207 + 1;
+   end if;
+end;
+--  END <Token(<WithText NullKw>, ) (root of 'value_pattern') at parser.lkt:299:23>
+if Token_Pos300 /= No_Token_Index then
+   Row_Pos207 := Token_Pos300;
 else
    Row_Pos207 := No_Token_Index;
    goto Exit_Row207_0;
@@ -38369,77 +38556,88 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row207_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:305:26>
+--  END <_Row (root of 'value_pattern') at parser.lkt:299:11>
 if Row_Pos207 /= No_Token_Index then
-   Transform_Res160 := Allocate_Binding_Val_Decl (Parser.Mem_Pool);
+   Transform_Res159 := Allocate_Null_Pattern (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res160,
-      Kind => Lkt_Binding_Val_Decl,
+     (Self => Transform_Res159,
+      Kind => Lkt_Null_Pattern,
       Unit => Parser.Unit,
-      Token_Start_Index => Row_Pos206,
-      Token_End_Index   => (if Row_Pos207 = Row_Pos206
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos207 = Pos
                             then No_Token_Index
                             else Row_Pos207 - 1));
-      Initialize_Fields_For_Binding_Val_Decl
-        (Self => Transform_Res160,
-         Binding_Val_Decl_F_Syn_Name => Defer_Res276);
-         if Defer_Res276 /= null and then Is_Incomplete (Defer_Res276) then
-            Transform_Res160.Last_Attempted_Child := 0;
-         elsif Defer_Res276 /= null and then not Is_Ghost (Defer_Res276) then
-            Transform_Res160.Last_Attempted_Child := -1;
-         end if;
 end if;
---  END <Transform(<ASTNodeType BindingValDecl>) (root of 'value_pattern') at parser.lkt:305:26>
-if Row_Pos207 /= No_Token_Index then
-   Row_Pos206 := Row_Pos207;
-else
-   Row_Pos206 := No_Token_Index;
-   goto Exit_Row206_0;
-end if;
---  BEGIN <Opt (root of 'value_pattern') at parser.lkt:305:49>
---  pos=Row_Pos208, res=Defer_Res277, nobt=None
-Diag_Mark109 := Parser.Last_Diag;
---  BEGIN <_Extract (root of 'value_pattern') at parser.lkt:305:50>
---  pos=Row_Pos208, res=Defer_Res277, nobt=None
---  BEGIN <_Row (root of 'value_pattern') at parser.lkt:305:50>
+--  END <Transform(<ASTNodeType NullPattern>) (root of 'value_pattern') at parser.lkt:299:11>
+    if Row_Pos207 /= No_Token_Index then
+        Or_Pos41 := Row_Pos207;
+        Or_Res41 := Transform_Res159;
+        goto Exit_Or44;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
+       Branch_Diag_Mark41 := Parser.Last_Diag;
+       Branch_Last_Fail41 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark112;
+    Parser.Last_Fail := Last_Fail41;
+--  BEGIN <Defer (for 'regex_pattern') at parser.lkt:300:11>
+--  pos=Defer_Pos276, res=Defer_Res276, nobt=None
+Defer_Res276 :=
+   Regex_Pattern_Transform_Parse0 (Parser, Pos);
+Defer_Pos276 := Parser.Current_Pos;
+--  END <Defer (for 'regex_pattern') at parser.lkt:300:11>
+    if Defer_Pos276 /= No_Token_Index then
+        Or_Pos41 := Defer_Pos276;
+        Or_Res41 := Defer_Res276;
+        goto Exit_Or44;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
+       Branch_Diag_Mark41 := Parser.Last_Diag;
+       Branch_Last_Fail41 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark112;
+    Parser.Last_Fail := Last_Fail41;
+--  BEGIN <Transform(<ASTNodeType NotPattern>) (root of 'value_pattern') at parser.lkt:301:11>
+--  pos=Row_Pos208, res=Transform_Res160, nobt=None
+--  BEGIN <_Row (root of 'value_pattern') at parser.lkt:301:11>
 --  pos=Row_Pos208, res=None, nobt=None
-Row_Pos208 := Row_Pos206;
---  BEGIN <Token(<WithText At>, ) (root of 'value_pattern') at parser.lkt:305:55>
---  pos=Token_Pos298, res=Token_Res298, nobt=None
-Token_Res298 := Row_Pos208;
+Row_Pos208 := Pos;
+--  BEGIN <Token(<WithText NotKw>, ) (root of 'value_pattern') at parser.lkt:301:22>
+--  pos=Token_Pos301, res=Token_Res301, nobt=None
+Token_Res301 := Row_Pos208;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res298));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res301));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_At)
+      T.Kind /= From_Token_Kind (Lkt_Not_Kw)
    then
-       Token_Pos298 := No_Token_Index;
+       Token_Pos301 := No_Token_Index;
        if Parser.Last_Fail.Pos <= Row_Pos208 then
           Parser.Last_Fail :=
             (Pos  => Row_Pos208,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_At,
+                Expected_Token_Id => Lkt_Not_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos298 := Row_Pos208 + 1;
+          Token_Pos301 := Row_Pos208 + 1;
    end if;
 end;
---  END <Token(<WithText At>, ) (root of 'value_pattern') at parser.lkt:305:55>
-if Token_Pos298 /= No_Token_Index then
-   Row_Pos208 := Token_Pos298;
+--  END <Token(<WithText NotKw>, ) (root of 'value_pattern') at parser.lkt:301:22>
+if Token_Pos301 /= No_Token_Index then
+   Row_Pos208 := Token_Pos301;
 else
    Row_Pos208 := No_Token_Index;
    goto Exit_Row208_0;
 end if;
---  BEGIN <Defer (for 'value_pattern') at parser.lkt:305:59>
+--  BEGIN <Defer (for 'value_pattern') at parser.lkt:301:28>
 --  pos=Defer_Pos277, res=Defer_Res277, nobt=None
 Defer_Res277 :=
    Value_Pattern_Or_Parse1 (Parser, Row_Pos208);
 Defer_Pos277 := Parser.Current_Pos;
---  END <Defer (for 'value_pattern') at parser.lkt:305:59>
+--  END <Defer (for 'value_pattern') at parser.lkt:301:28>
 if Defer_Pos277 /= No_Token_Index then
    Row_Pos208 := Defer_Pos277;
 else
@@ -38449,134 +38647,204 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row208_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:305:50>
---  END <_Extract (root of 'value_pattern') at parser.lkt:305:50>
-if Row_Pos208 = No_Token_Index then
-   Defer_Res277 := No_Bare_Lkt_Node;
-   Row_Pos208 := Row_Pos206;
-      Parser.Last_Diag := Diag_Mark109;
-end if;
---  END <Opt (root of 'value_pattern') at parser.lkt:305:49>
+--  END <_Row (root of 'value_pattern') at parser.lkt:301:11>
 if Row_Pos208 /= No_Token_Index then
-   Row_Pos206 := Row_Pos208;
-else
-   Row_Pos206 := No_Token_Index;
-   goto Exit_Row206_0;
-end if;
-pragma Warnings (Off, "referenced");
-<<Exit_Row206_0>>
-pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:305:11>
-if Row_Pos206 /= No_Token_Index then
-   Transform_Res161 := Allocate_Binding_Pattern (Parser.Mem_Pool);
+   Transform_Res160 := Allocate_Not_Pattern (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res161,
-      Kind => Lkt_Binding_Pattern,
+     (Self => Transform_Res160,
+      Kind => Lkt_Not_Pattern,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos206 = Pos
+      Token_End_Index   => (if Row_Pos208 = Pos
                             then No_Token_Index
-                            else Row_Pos206 - 1));
-      Initialize_Fields_For_Binding_Pattern
-        (Self => Transform_Res161,
-         Binding_Pattern_F_Decl => Transform_Res160,
-         Binding_Pattern_F_Sub_Pattern => Defer_Res277);
-         if Transform_Res160 /= null and then Is_Incomplete (Transform_Res160) then
-            Transform_Res161.Last_Attempted_Child := 0;
-         elsif Transform_Res160 /= null and then not Is_Ghost (Transform_Res160) then
-            Transform_Res161.Last_Attempted_Child := -1;
-         end if;
+                            else Row_Pos208 - 1));
+      Initialize_Fields_For_Not_Pattern
+        (Self => Transform_Res160,
+         Not_Pattern_F_Sub_Pattern => Defer_Res277);
          if Defer_Res277 /= null and then Is_Incomplete (Defer_Res277) then
-            Transform_Res161.Last_Attempted_Child := 0;
+            Transform_Res160.Last_Attempted_Child := 0;
          elsif Defer_Res277 /= null and then not Is_Ghost (Defer_Res277) then
-            Transform_Res161.Last_Attempted_Child := -1;
+            Transform_Res160.Last_Attempted_Child := -1;
          end if;
 end if;
---  END <Transform(<ASTNodeType BindingPattern>) (root of 'value_pattern') at parser.lkt:305:11>
-    if Row_Pos206 /= No_Token_Index then
-        Or_Pos41 := Row_Pos206;
-        Or_Res41 := Transform_Res161;
+--  END <Transform(<ASTNodeType NotPattern>) (root of 'value_pattern') at parser.lkt:301:11>
+    if Row_Pos208 /= No_Token_Index then
+        Or_Pos41 := Row_Pos208;
+        Or_Res41 := Transform_Res160;
         goto Exit_Or44;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
        Branch_Diag_Mark41 := Parser.Last_Diag;
        Branch_Last_Fail41 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark110;
+    Parser.Last_Diag := Diag_Mark112;
     Parser.Last_Fail := Last_Fail41;
---  BEGIN <Transform(<ASTNodeType ParenPattern>) (root of 'value_pattern') at parser.lkt:306:11>
---  pos=Row_Pos209, res=Transform_Res162, nobt=None
---  BEGIN <_Row (root of 'value_pattern') at parser.lkt:306:11>
---  pos=Row_Pos209, res=None, nobt=None
-Row_Pos209 := Pos;
---  BEGIN <Token(<WithText LPar>, ) (root of 'value_pattern') at parser.lkt:306:24>
---  pos=Token_Pos299, res=Token_Res299, nobt=None
-Token_Res299 := Row_Pos209;
-declare
-   T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res299));
-begin
-   if
-      T.Kind /= From_Token_Kind (Lkt_L_Par)
-   then
-       Token_Pos299 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos209 then
-          Parser.Last_Fail :=
-            (Pos  => Row_Pos209,
-             Data =>
-               (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_L_Par,
-                Found_Token_Id    => To_Token_Kind (T.Kind)));
-       end if;
-   else
-          Token_Pos299 := Row_Pos209 + 1;
-   end if;
-end;
---  END <Token(<WithText LPar>, ) (root of 'value_pattern') at parser.lkt:306:24>
-if Token_Pos299 /= No_Token_Index then
-   Row_Pos209 := Token_Pos299;
-else
-   Row_Pos209 := No_Token_Index;
-   goto Exit_Row209_0;
-end if;
---  BEGIN <Defer (for 'pattern') at parser.lkt:306:28>
+--  BEGIN <Defer (for 'bool_pattern') at parser.lkt:302:11>
 --  pos=Defer_Pos278, res=Defer_Res278, nobt=None
 Defer_Res278 :=
-   Pattern_Or_Parse0 (Parser, Row_Pos209);
+   Bool_Pattern_Or_Parse0 (Parser, Pos);
 Defer_Pos278 := Parser.Current_Pos;
---  END <Defer (for 'pattern') at parser.lkt:306:28>
-if Defer_Pos278 /= No_Token_Index then
-   Row_Pos209 := Defer_Pos278;
+--  END <Defer (for 'bool_pattern') at parser.lkt:302:11>
+    if Defer_Pos278 /= No_Token_Index then
+        Or_Pos41 := Defer_Pos278;
+        Or_Res41 := Defer_Res278;
+        goto Exit_Or44;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
+       Branch_Diag_Mark41 := Parser.Last_Diag;
+       Branch_Last_Fail41 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark112;
+    Parser.Last_Fail := Last_Fail41;
+--  BEGIN <Defer (for 'integer_pattern') at parser.lkt:303:11>
+--  pos=Defer_Pos279, res=Defer_Res279, nobt=None
+Defer_Res279 :=
+   Integer_Pattern_Transform_Parse0 (Parser, Pos);
+Defer_Pos279 := Parser.Current_Pos;
+--  END <Defer (for 'integer_pattern') at parser.lkt:303:11>
+    if Defer_Pos279 /= No_Token_Index then
+        Or_Pos41 := Defer_Pos279;
+        Or_Res41 := Defer_Res279;
+        goto Exit_Or44;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
+       Branch_Diag_Mark41 := Parser.Last_Diag;
+       Branch_Last_Fail41 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark112;
+    Parser.Last_Fail := Last_Fail41;
+--  BEGIN <Defer (for 'list_pattern') at parser.lkt:304:11>
+--  pos=Defer_Pos280, res=Defer_Res280, nobt=None
+Defer_Res280 :=
+   List_Pattern_Transform_Parse0 (Parser, Pos);
+Defer_Pos280 := Parser.Current_Pos;
+--  END <Defer (for 'list_pattern') at parser.lkt:304:11>
+    if Defer_Pos280 /= No_Token_Index then
+        Or_Pos41 := Defer_Pos280;
+        Or_Res41 := Defer_Res280;
+        goto Exit_Or44;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
+       Branch_Diag_Mark41 := Parser.Last_Diag;
+       Branch_Last_Fail41 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark112;
+    Parser.Last_Fail := Last_Fail41;
+--  BEGIN <Transform(<ASTNodeType BindingPattern>) (root of 'value_pattern') at parser.lkt:305:11>
+--  pos=Row_Pos209, res=Transform_Res162, nobt=None
+--  BEGIN <_Row (root of 'value_pattern') at parser.lkt:305:11>
+--  pos=Row_Pos209, res=None, nobt=None
+Row_Pos209 := Pos;
+--  BEGIN <Transform(<ASTNodeType BindingValDecl>) (root of 'value_pattern') at parser.lkt:305:26>
+--  pos=Row_Pos210, res=Transform_Res161, nobt=None
+--  BEGIN <_Row (root of 'value_pattern') at parser.lkt:305:26>
+--  pos=Row_Pos210, res=None, nobt=None
+Row_Pos210 := Row_Pos209;
+--  BEGIN <Defer (for 'def_id') at parser.lkt:305:41>
+--  pos=Defer_Pos281, res=Defer_Res281, nobt=None
+Defer_Res281 :=
+   Def_Id_Transform_Parse0 (Parser, Row_Pos210);
+Defer_Pos281 := Parser.Current_Pos;
+--  END <Defer (for 'def_id') at parser.lkt:305:41>
+if Defer_Pos281 /= No_Token_Index then
+   Row_Pos210 := Defer_Pos281;
+else
+   Row_Pos210 := No_Token_Index;
+   goto Exit_Row210_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row210_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'value_pattern') at parser.lkt:305:26>
+if Row_Pos210 /= No_Token_Index then
+   Transform_Res161 := Allocate_Binding_Val_Decl (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res161,
+      Kind => Lkt_Binding_Val_Decl,
+      Unit => Parser.Unit,
+      Token_Start_Index => Row_Pos209,
+      Token_End_Index   => (if Row_Pos210 = Row_Pos209
+                            then No_Token_Index
+                            else Row_Pos210 - 1));
+      Initialize_Fields_For_Binding_Val_Decl
+        (Self => Transform_Res161,
+         Binding_Val_Decl_F_Syn_Name => Defer_Res281);
+         if Defer_Res281 /= null and then Is_Incomplete (Defer_Res281) then
+            Transform_Res161.Last_Attempted_Child := 0;
+         elsif Defer_Res281 /= null and then not Is_Ghost (Defer_Res281) then
+            Transform_Res161.Last_Attempted_Child := -1;
+         end if;
+end if;
+--  END <Transform(<ASTNodeType BindingValDecl>) (root of 'value_pattern') at parser.lkt:305:26>
+if Row_Pos210 /= No_Token_Index then
+   Row_Pos209 := Row_Pos210;
 else
    Row_Pos209 := No_Token_Index;
    goto Exit_Row209_0;
 end if;
---  BEGIN <Token(<WithText RPar>, ) (root of 'value_pattern') at parser.lkt:306:36>
---  pos=Token_Pos300, res=Token_Res300, nobt=None
-Token_Res300 := Row_Pos209;
+--  BEGIN <Opt (root of 'value_pattern') at parser.lkt:305:49>
+--  pos=Row_Pos211, res=Defer_Res282, nobt=None
+Diag_Mark111 := Parser.Last_Diag;
+--  BEGIN <_Extract (root of 'value_pattern') at parser.lkt:305:50>
+--  pos=Row_Pos211, res=Defer_Res282, nobt=None
+--  BEGIN <_Row (root of 'value_pattern') at parser.lkt:305:50>
+--  pos=Row_Pos211, res=None, nobt=None
+Row_Pos211 := Row_Pos209;
+--  BEGIN <Token(<WithText At>, ) (root of 'value_pattern') at parser.lkt:305:55>
+--  pos=Token_Pos302, res=Token_Res302, nobt=None
+Token_Res302 := Row_Pos211;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res300));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res302));
 begin
    if
-      T.Kind /= From_Token_Kind (Lkt_R_Par)
+      T.Kind /= From_Token_Kind (Lkt_At)
    then
-       Token_Pos300 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos209 then
+       Token_Pos302 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos211 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos209,
+            (Pos  => Row_Pos211,
              Data =>
                (Kind              => Token_Fail,
-                Expected_Token_Id => Lkt_R_Par,
+                Expected_Token_Id => Lkt_At,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos300 := Row_Pos209 + 1;
+          Token_Pos302 := Row_Pos211 + 1;
    end if;
 end;
---  END <Token(<WithText RPar>, ) (root of 'value_pattern') at parser.lkt:306:36>
-if Token_Pos300 /= No_Token_Index then
-   Row_Pos209 := Token_Pos300;
+--  END <Token(<WithText At>, ) (root of 'value_pattern') at parser.lkt:305:55>
+if Token_Pos302 /= No_Token_Index then
+   Row_Pos211 := Token_Pos302;
+else
+   Row_Pos211 := No_Token_Index;
+   goto Exit_Row211_0;
+end if;
+--  BEGIN <Defer (for 'value_pattern') at parser.lkt:305:59>
+--  pos=Defer_Pos282, res=Defer_Res282, nobt=None
+Defer_Res282 :=
+   Value_Pattern_Or_Parse1 (Parser, Row_Pos211);
+Defer_Pos282 := Parser.Current_Pos;
+--  END <Defer (for 'value_pattern') at parser.lkt:305:59>
+if Defer_Pos282 /= No_Token_Index then
+   Row_Pos211 := Defer_Pos282;
+else
+   Row_Pos211 := No_Token_Index;
+   goto Exit_Row211_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row211_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'value_pattern') at parser.lkt:305:50>
+--  END <_Extract (root of 'value_pattern') at parser.lkt:305:50>
+if Row_Pos211 = No_Token_Index then
+   Defer_Res282 := No_Bare_Lkt_Node;
+   Row_Pos211 := Row_Pos209;
+      Parser.Last_Diag := Diag_Mark111;
+end if;
+--  END <Opt (root of 'value_pattern') at parser.lkt:305:49>
+if Row_Pos211 /= No_Token_Index then
+   Row_Pos209 := Row_Pos211;
 else
    Row_Pos209 := No_Token_Index;
    goto Exit_Row209_0;
@@ -38584,27 +38852,33 @@ end if;
 pragma Warnings (Off, "referenced");
 <<Exit_Row209_0>>
 pragma Warnings (On, "referenced");
---  END <_Row (root of 'value_pattern') at parser.lkt:306:11>
+--  END <_Row (root of 'value_pattern') at parser.lkt:305:11>
 if Row_Pos209 /= No_Token_Index then
-   Transform_Res162 := Allocate_Paren_Pattern (Parser.Mem_Pool);
+   Transform_Res162 := Allocate_Binding_Pattern (Parser.Mem_Pool);
    Initialize
      (Self => Transform_Res162,
-      Kind => Lkt_Paren_Pattern,
+      Kind => Lkt_Binding_Pattern,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
       Token_End_Index   => (if Row_Pos209 = Pos
                             then No_Token_Index
                             else Row_Pos209 - 1));
-      Initialize_Fields_For_Paren_Pattern
+      Initialize_Fields_For_Binding_Pattern
         (Self => Transform_Res162,
-         Paren_Pattern_F_Sub_Pattern => Defer_Res278);
-         if Defer_Res278 /= null and then Is_Incomplete (Defer_Res278) then
+         Binding_Pattern_F_Decl => Transform_Res161,
+         Binding_Pattern_F_Sub_Pattern => Defer_Res282);
+         if Transform_Res161 /= null and then Is_Incomplete (Transform_Res161) then
             Transform_Res162.Last_Attempted_Child := 0;
-         elsif Defer_Res278 /= null and then not Is_Ghost (Defer_Res278) then
+         elsif Transform_Res161 /= null and then not Is_Ghost (Transform_Res161) then
+            Transform_Res162.Last_Attempted_Child := -1;
+         end if;
+         if Defer_Res282 /= null and then Is_Incomplete (Defer_Res282) then
+            Transform_Res162.Last_Attempted_Child := 0;
+         elsif Defer_Res282 /= null and then not Is_Ghost (Defer_Res282) then
             Transform_Res162.Last_Attempted_Child := -1;
          end if;
 end if;
---  END <Transform(<ASTNodeType ParenPattern>) (root of 'value_pattern') at parser.lkt:306:11>
+--  END <Transform(<ASTNodeType BindingPattern>) (root of 'value_pattern') at parser.lkt:305:11>
     if Row_Pos209 /= No_Token_Index then
         Or_Pos41 := Row_Pos209;
         Or_Res41 := Transform_Res162;
@@ -38614,17 +38888,129 @@ end if;
        Branch_Diag_Mark41 := Parser.Last_Diag;
        Branch_Last_Fail41 := Parser.Last_Fail;
     end if;
-    Parser.Last_Diag := Diag_Mark110;
+    Parser.Last_Diag := Diag_Mark112;
+    Parser.Last_Fail := Last_Fail41;
+--  BEGIN <Transform(<ASTNodeType ParenPattern>) (root of 'value_pattern') at parser.lkt:306:11>
+--  pos=Row_Pos212, res=Transform_Res163, nobt=None
+--  BEGIN <_Row (root of 'value_pattern') at parser.lkt:306:11>
+--  pos=Row_Pos212, res=None, nobt=None
+Row_Pos212 := Pos;
+--  BEGIN <Token(<WithText LPar>, ) (root of 'value_pattern') at parser.lkt:306:24>
+--  pos=Token_Pos303, res=Token_Res303, nobt=None
+Token_Res303 := Row_Pos212;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res303));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_L_Par)
+   then
+       Token_Pos303 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos212 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos212,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_L_Par,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos303 := Row_Pos212 + 1;
+   end if;
+end;
+--  END <Token(<WithText LPar>, ) (root of 'value_pattern') at parser.lkt:306:24>
+if Token_Pos303 /= No_Token_Index then
+   Row_Pos212 := Token_Pos303;
+else
+   Row_Pos212 := No_Token_Index;
+   goto Exit_Row212_0;
+end if;
+--  BEGIN <Defer (for 'pattern') at parser.lkt:306:28>
+--  pos=Defer_Pos283, res=Defer_Res283, nobt=None
+Defer_Res283 :=
+   Pattern_Or_Parse0 (Parser, Row_Pos212);
+Defer_Pos283 := Parser.Current_Pos;
+--  END <Defer (for 'pattern') at parser.lkt:306:28>
+if Defer_Pos283 /= No_Token_Index then
+   Row_Pos212 := Defer_Pos283;
+else
+   Row_Pos212 := No_Token_Index;
+   goto Exit_Row212_0;
+end if;
+--  BEGIN <Token(<WithText RPar>, ) (root of 'value_pattern') at parser.lkt:306:36>
+--  pos=Token_Pos304, res=Token_Res304, nobt=None
+Token_Res304 := Row_Pos212;
+declare
+   T : constant Stored_Token_Data :=
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res304));
+begin
+   if
+      T.Kind /= From_Token_Kind (Lkt_R_Par)
+   then
+       Token_Pos304 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos212 then
+          Parser.Last_Fail :=
+            (Pos  => Row_Pos212,
+             Data =>
+               (Kind              => Token_Fail,
+                Expected_Token_Id => Lkt_R_Par,
+                Found_Token_Id    => To_Token_Kind (T.Kind)));
+       end if;
+   else
+          Token_Pos304 := Row_Pos212 + 1;
+   end if;
+end;
+--  END <Token(<WithText RPar>, ) (root of 'value_pattern') at parser.lkt:306:36>
+if Token_Pos304 /= No_Token_Index then
+   Row_Pos212 := Token_Pos304;
+else
+   Row_Pos212 := No_Token_Index;
+   goto Exit_Row212_0;
+end if;
+pragma Warnings (Off, "referenced");
+<<Exit_Row212_0>>
+pragma Warnings (On, "referenced");
+--  END <_Row (root of 'value_pattern') at parser.lkt:306:11>
+if Row_Pos212 /= No_Token_Index then
+   Transform_Res163 := Allocate_Paren_Pattern (Parser.Mem_Pool);
+   Initialize
+     (Self => Transform_Res163,
+      Kind => Lkt_Paren_Pattern,
+      Unit => Parser.Unit,
+      Token_Start_Index => Pos,
+      Token_End_Index   => (if Row_Pos212 = Pos
+                            then No_Token_Index
+                            else Row_Pos212 - 1));
+      Initialize_Fields_For_Paren_Pattern
+        (Self => Transform_Res163,
+         Paren_Pattern_F_Sub_Pattern => Defer_Res283);
+         if Defer_Res283 /= null and then Is_Incomplete (Defer_Res283) then
+            Transform_Res163.Last_Attempted_Child := 0;
+         elsif Defer_Res283 /= null and then not Is_Ghost (Defer_Res283) then
+            Transform_Res163.Last_Attempted_Child := -1;
+         end if;
+end if;
+--  END <Transform(<ASTNodeType ParenPattern>) (root of 'value_pattern') at parser.lkt:306:11>
+    if Row_Pos212 /= No_Token_Index then
+        Or_Pos41 := Row_Pos212;
+        Or_Res41 := Transform_Res163;
+        goto Exit_Or44;
+    end if;
+    if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
+       Branch_Diag_Mark41 := Parser.Last_Diag;
+       Branch_Last_Fail41 := Parser.Last_Fail;
+    end if;
+    Parser.Last_Diag := Diag_Mark112;
     Parser.Last_Fail := Last_Fail41;
 --  BEGIN <Defer (for 'tuple_pattern') at parser.lkt:307:11>
---  pos=Defer_Pos279, res=Defer_Res279, nobt=None
-Defer_Res279 :=
+--  pos=Defer_Pos284, res=Defer_Res284, nobt=None
+Defer_Res284 :=
    Tuple_Pattern_Transform_Parse0 (Parser, Pos);
-Defer_Pos279 := Parser.Current_Pos;
+Defer_Pos284 := Parser.Current_Pos;
 --  END <Defer (for 'tuple_pattern') at parser.lkt:307:11>
-    if Defer_Pos279 /= No_Token_Index then
-        Or_Pos41 := Defer_Pos279;
-        Or_Res41 := Defer_Res279;
+    if Defer_Pos284 /= No_Token_Index then
+        Or_Pos41 := Defer_Pos284;
+        Or_Res41 := Defer_Res284;
         goto Exit_Or44;
     end if;
     if Parser.Last_Fail.Pos >= Branch_Last_Fail41.Pos then
@@ -38660,17 +39046,17 @@ end Value_Pattern_Or_Parse1;
 is
    use Bare_Var_Bind_Memos;
       Nobt59 : Boolean := False;
-      Row_Pos210 : Token_Index := No_Token_Index;
-      Token_Pos301 : Token_Index := No_Token_Index;
-      Token_Res301 : Token_Index := No_Token_Index;
-      Defer_Pos280 : Token_Index := No_Token_Index;
-      Defer_Res280 : Bare_Ref_Id := No_Bare_Lkt_Node;
-      Token_Pos302 : Token_Index := No_Token_Index;
-      Token_Res302 : Token_Index := No_Token_Index;
-      Defer_Pos281 : Token_Index := No_Token_Index;
-      Defer_Res281 : Bare_Expr := No_Bare_Lkt_Node;
+      Row_Pos213 : Token_Index := No_Token_Index;
+      Token_Pos305 : Token_Index := No_Token_Index;
+      Token_Res305 : Token_Index := No_Token_Index;
+      Defer_Pos285 : Token_Index := No_Token_Index;
+      Defer_Res285 : Bare_Ref_Id := No_Bare_Lkt_Node;
+      Token_Pos306 : Token_Index := No_Token_Index;
+      Token_Res306 : Token_Index := No_Token_Index;
+      Defer_Pos286 : Token_Index := No_Token_Index;
+      Defer_Res286 : Bare_Expr := No_Bare_Lkt_Node;
       Row_Progress53 : Integer := 0;
-      Transform_Res163 : Bare_Var_Bind := No_Bare_Lkt_Node;
+      Transform_Res164 : Bare_Var_Bind := No_Bare_Lkt_Node;
       Transform_Has_Failed53 : Boolean := False;
    Mark_On_Entry : constant Diagnostic_Mark := Parser.Last_Diag;
    PP : constant Parser_Private_Part := +Parser.Private_Part;
@@ -38679,154 +39065,154 @@ begin
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
       Append_Group (Parser.Pool, Parser.Last_Diag, M.Mark);
-      Transform_Res163 := M.Instance;
-      return Transform_Res163;
+      Transform_Res164 := M.Instance;
+      return Transform_Res164;
    elsif M.State = Failure then
       Parser.Current_Pos := No_Token_Index;
-      return Transform_Res163;
+      return Transform_Res164;
    end if;
    Parser.Last_Diag := No_Diagnostic;
    ---------------------------
    -- MAIN COMBINATORS CODE --
    ---------------------------
 --  BEGIN <Transform(<ASTNodeType VarBind>) (root of 'var_bind') at parser.lkt:267:17>
---  pos=Row_Pos210, res=Transform_Res163, nobt=Nobt59
+--  pos=Row_Pos213, res=Transform_Res164, nobt=Nobt59
 --  BEGIN <_Row (root of 'var_bind') at parser.lkt:267:17>
---  pos=Row_Pos210, res=None, nobt=Nobt59
-Row_Pos210 := Pos;
+--  pos=Row_Pos213, res=None, nobt=Nobt59
+Row_Pos213 := Pos;
 --  BEGIN <Token(<WithText BindKw>, ) (root of 'var_bind') at parser.lkt:267:25>
---  pos=Token_Pos301, res=Token_Res301, nobt=None
-Token_Res301 := Row_Pos210;
+--  pos=Token_Pos305, res=Token_Res305, nobt=None
+Token_Res305 := Row_Pos213;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res301));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res305));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Bind_Kw)
    then
-       Token_Pos301 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos210 then
+       Token_Pos305 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos213 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos210,
+            (Pos  => Row_Pos213,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Bind_Kw,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos301 := Row_Pos210 + 1;
+          Token_Pos305 := Row_Pos213 + 1;
    end if;
 end;
 --  END <Token(<WithText BindKw>, ) (root of 'var_bind') at parser.lkt:267:25>
 Row_Progress53 := 1;
-if Token_Pos301 /= No_Token_Index then
-   Row_Pos210 := Token_Pos301;
+if Token_Pos305 /= No_Token_Index then
+   Row_Pos213 := Token_Pos305;
 else
-   Row_Pos210 := No_Token_Index;
-   goto Exit_Row210_0;
+   Row_Pos213 := No_Token_Index;
+   goto Exit_Row213_0;
 end if;
 --  BEGIN <Cut (root of 'var_bind') at parser.lkt:267:32>
---  pos=Row_Pos210, res=None, nobt=Nobt59
+--  pos=Row_Pos213, res=None, nobt=Nobt59
 Nobt59 := True;
 --  END <Cut (root of 'var_bind') at parser.lkt:267:32>
 Row_Progress53 := 2;
-if Row_Pos210 /= No_Token_Index then
-   Row_Pos210 := Row_Pos210;
+if Row_Pos213 /= No_Token_Index then
+   Row_Pos213 := Row_Pos213;
 else
-   Row_Pos210 := No_Token_Index;
-   goto Exit_Row210_0;
+   Row_Pos213 := No_Token_Index;
+   goto Exit_Row213_0;
 end if;
 --  BEGIN <Defer (for 'ref_id') at parser.lkt:267:34>
---  pos=Defer_Pos280, res=Defer_Res280, nobt=None
-Defer_Res280 :=
-   Ref_Id_Transform_Parse0 (Parser, Row_Pos210);
-Defer_Pos280 := Parser.Current_Pos;
+--  pos=Defer_Pos285, res=Defer_Res285, nobt=None
+Defer_Res285 :=
+   Ref_Id_Transform_Parse0 (Parser, Row_Pos213);
+Defer_Pos285 := Parser.Current_Pos;
 --  END <Defer (for 'ref_id') at parser.lkt:267:34>
 Row_Progress53 := 3;
-if Defer_Pos280 /= No_Token_Index then
-   Row_Pos210 := Defer_Pos280;
+if Defer_Pos285 /= No_Token_Index then
+   Row_Pos213 := Defer_Pos285;
 else
-   Row_Pos210 := No_Token_Index;
-   goto Exit_Row210_0;
+   Row_Pos213 := No_Token_Index;
+   goto Exit_Row213_0;
 end if;
 --  BEGIN <Token(<WithText Equal>, ) (root of 'var_bind') at parser.lkt:267:41>
---  pos=Token_Pos302, res=Token_Res302, nobt=None
-Token_Res302 := Row_Pos210;
+--  pos=Token_Pos306, res=Token_Res306, nobt=None
+Token_Res306 := Row_Pos213;
 declare
    T : constant Stored_Token_Data :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res302));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (Token_Res306));
 begin
    if
       T.Kind /= From_Token_Kind (Lkt_Equal)
    then
-       Token_Pos302 := No_Token_Index;
-       if Parser.Last_Fail.Pos <= Row_Pos210 then
+       Token_Pos306 := No_Token_Index;
+       if Parser.Last_Fail.Pos <= Row_Pos213 then
           Parser.Last_Fail :=
-            (Pos  => Row_Pos210,
+            (Pos  => Row_Pos213,
              Data =>
                (Kind              => Token_Fail,
                 Expected_Token_Id => Lkt_Equal,
                 Found_Token_Id    => To_Token_Kind (T.Kind)));
        end if;
    else
-          Token_Pos302 := Row_Pos210 + 1;
+          Token_Pos306 := Row_Pos213 + 1;
    end if;
 end;
 --  END <Token(<WithText Equal>, ) (root of 'var_bind') at parser.lkt:267:41>
 Row_Progress53 := 4;
-if Token_Pos302 /= No_Token_Index then
-   Row_Pos210 := Token_Pos302;
+if Token_Pos306 /= No_Token_Index then
+   Row_Pos213 := Token_Pos306;
 else
-   Row_Pos210 := No_Token_Index;
-   goto Exit_Row210_0;
+   Row_Pos213 := No_Token_Index;
+   goto Exit_Row213_0;
 end if;
 --  BEGIN <Defer (for 'expr') at parser.lkt:267:45>
---  pos=Defer_Pos281, res=Defer_Res281, nobt=None
-Defer_Res281 :=
-   Expr_Or_Parse1 (Parser, Row_Pos210);
-Defer_Pos281 := Parser.Current_Pos;
+--  pos=Defer_Pos286, res=Defer_Res286, nobt=None
+Defer_Res286 :=
+   Expr_Or_Parse1 (Parser, Row_Pos213);
+Defer_Pos286 := Parser.Current_Pos;
 --  END <Defer (for 'expr') at parser.lkt:267:45>
 Row_Progress53 := 5;
-if Defer_Pos281 /= No_Token_Index then
-   Row_Pos210 := Defer_Pos281;
+if Defer_Pos286 /= No_Token_Index then
+   Row_Pos213 := Defer_Pos286;
 else
-   Row_Pos210 := No_Token_Index;
-   goto Exit_Row210_0;
+   Row_Pos213 := No_Token_Index;
+   goto Exit_Row213_0;
 end if;
 pragma Warnings (Off, "referenced");
-<<Exit_Row210_0>>
+<<Exit_Row213_0>>
 pragma Warnings (On, "referenced");
 --  END <_Row (root of 'var_bind') at parser.lkt:267:17>
-if Row_Pos210 = No_Token_Index and then Nobt59 then
-   Row_Pos210 := Parser.Last_Fail.Pos;
+if Row_Pos213 = No_Token_Index and then Nobt59 then
+   Row_Pos213 := Parser.Last_Fail.Pos;
    Transform_Has_Failed53 := True;
 end if;
-if Row_Pos210 /= No_Token_Index then
-   Transform_Res163 := Allocate_Var_Bind (Parser.Mem_Pool);
+if Row_Pos213 /= No_Token_Index then
+   Transform_Res164 := Allocate_Var_Bind (Parser.Mem_Pool);
    Initialize
-     (Self => Transform_Res163,
+     (Self => Transform_Res164,
       Kind => Lkt_Var_Bind,
       Unit => Parser.Unit,
       Token_Start_Index => Pos,
-      Token_End_Index   => (if Row_Pos210 = Pos
+      Token_End_Index   => (if Row_Pos213 = Pos
                             then No_Token_Index
-                            else Row_Pos210 - 1));
+                            else Row_Pos213 - 1));
       Initialize_Fields_For_Var_Bind
-        (Self => Transform_Res163,
-         Var_Bind_F_Name => Defer_Res280,
-         Var_Bind_F_Expr => Defer_Res281);
-         if Defer_Res280 /= null and then Is_Incomplete (Defer_Res280) then
-            Transform_Res163.Last_Attempted_Child := 0;
-         elsif Defer_Res280 /= null and then not Is_Ghost (Defer_Res280) then
-            Transform_Res163.Last_Attempted_Child := -1;
+        (Self => Transform_Res164,
+         Var_Bind_F_Name => Defer_Res285,
+         Var_Bind_F_Expr => Defer_Res286);
+         if Defer_Res285 /= null and then Is_Incomplete (Defer_Res285) then
+            Transform_Res164.Last_Attempted_Child := 0;
+         elsif Defer_Res285 /= null and then not Is_Ghost (Defer_Res285) then
+            Transform_Res164.Last_Attempted_Child := -1;
          end if;
-         if Defer_Res281 /= null and then Is_Incomplete (Defer_Res281) then
-            Transform_Res163.Last_Attempted_Child := 0;
-         elsif Defer_Res281 /= null and then not Is_Ghost (Defer_Res281) then
-            Transform_Res163.Last_Attempted_Child := -1;
+         if Defer_Res286 /= null and then Is_Incomplete (Defer_Res286) then
+            Transform_Res164.Last_Attempted_Child := 0;
+         elsif Defer_Res286 /= null and then not Is_Ghost (Defer_Res286) then
+            Transform_Res164.Last_Attempted_Child := -1;
          end if;
    if Transform_Has_Failed53 then
-      Transform_Res163.Last_Attempted_Child :=
+      Transform_Res164.Last_Attempted_Child :=
          Row_Progress53;
       Append (Parser, Pos, "Cannot parse <var_bind>");
       Add_Last_Fail_Diagnostic (Parser);
@@ -38838,19 +39224,19 @@ end if;
    -------------------------------
    Set
      (PP.Var_Bind_Transform_Parse0_Memo,
-      Row_Pos210 /= No_Token_Index,
-      Transform_Res163,
+      Row_Pos213 /= No_Token_Index,
+      Transform_Res164,
       Parser.Last_Diag,
       Pos,
-      Row_Pos210);
+      Row_Pos213);
    declare
       Top : constant Diagnostic_Mark := Parser.Last_Diag;
    begin
       Parser.Last_Diag := Mark_On_Entry;
       Append_Group (Parser.Pool, Parser.Last_Diag, Top);
    end;
-   Parser.Current_Pos := Row_Pos210;
-   return Transform_Res163;
+   Parser.Current_Pos := Row_Pos213;
+   return Transform_Res164;
 end Var_Bind_Transform_Parse0;
 
    -----------
@@ -38970,6 +39356,7 @@ end Var_Bind_Transform_Parse0;
          Bare_Pattern_Detail_Memos.Clear (PP.Pattern_Arg_Or_Parse0_Memo);
          Bare_Pattern_Memos.Clear (PP.Pattern_Or_Parse0_Memo);
          Bare_Expr_Memos.Clear (PP.Primary_Or_Parse0_Memo);
+         Bare_Query_Memos.Clear (PP.Query_Comprehension_Transform_Parse0_Memo);
          Bare_Raise_Expr_Memos.Clear (PP.Raise_Expr_Transform_Parse0_Memo);
          Bare_Ref_Id_Memos.Clear (PP.Ref_Id_Transform_Parse0_Memo);
          Bare_Regex_Pattern_Memos.Clear (PP.Regex_Pattern_Transform_Parse0_Memo);
@@ -39170,6 +39557,7 @@ end Var_Bind_Transform_Parse0;
          Pattern_Arg_Or_Parse0,
          Pattern_Or_Parse0,
          Primary_Or_Parse0,
+         Query_Comprehension_Transform_Parse0,
          Raise_Expr_Transform_Parse0,
          Ref_Id_Transform_Parse0,
          Regex_Pattern_Transform_Parse0,
@@ -41197,6 +41585,26 @@ end Var_Bind_Transform_Parse0;
             end Process;
          begin
             Memo_Pkg.Iterate (PP.Primary_Or_Parse0_Memo, Process'Access);
+         end;
+         declare
+            package Memo_Pkg renames Bare_Query_Memos;
+
+            procedure Process (E : Memo_Pkg.Memo_Entry);
+
+            -------------
+            -- Process --
+            -------------
+
+            procedure Process (E : Memo_Pkg.Memo_Entry) is
+               K : constant Memo_Entry_Key :=
+                 (E.Offset, Query_Comprehension_Transform_Parse0);
+               V : constant Memo_Entry :=
+                 (E.State, E.Instance, E.Mark, E.Final_Pos);
+            begin
+               Memo_Entries.Insert (K, V);
+            end Process;
+         begin
+            Memo_Pkg.Iterate (PP.Query_Comprehension_Transform_Parse0_Memo, Process'Access);
          end;
          declare
             package Memo_Pkg renames Bare_Raise_Expr_Memos;

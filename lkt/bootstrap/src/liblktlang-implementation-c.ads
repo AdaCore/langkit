@@ -2213,8 +2213,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -2293,8 +2293,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -2711,8 +2711,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
 
@@ -2774,8 +2774,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -2858,8 +2858,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
 
@@ -2878,8 +2878,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_fun_decl_p_is_dynamic_combiner";
-   --  When this property is used as a a combinder inside an NPropagate
-   --  equation, return whether it expects a dynamic number of arguments.
+   --  When this property is called by a LogicCallExpr, return whether it
+   --  expects a dynamic number of arguments. In other words, it expects an
+   --  array of entities as its first argument.
 
            
    
@@ -3242,8 +3243,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3271,8 +3272,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3404,8 +3405,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3430,8 +3432,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
    --  :ada:ref:`If_Expr`, :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`,
    --  :ada:ref:`Lit`, :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3459,8 +3462,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Raise_Expr`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`,
+   --  :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3505,8 +3509,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3551,8 +3555,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3597,8 +3601,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3627,8 +3631,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Raise_Expr`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`,
+   --  :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3652,8 +3657,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3732,8 +3737,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3791,8 +3796,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -3816,8 +3821,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4503,8 +4508,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4532,8 +4537,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4578,8 +4583,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4604,8 +4609,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4654,8 +4660,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4759,8 +4765,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4912,8 +4918,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4938,8 +4944,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4986,8 +4993,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5031,8 +5038,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5057,8 +5064,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`,
    --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5086,8 +5094,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5131,9 +5139,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Raise_Expr`,
-   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`,
-   --  :ada:ref:`Un_Op`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5161,10 +5169,122 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_query_f_source
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_query_f_source";
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_query_f_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_query_f_pattern";
+   --  This field can contain one of the following nodes:
+   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
+   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
+   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
+   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
+   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
+   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_query_f_mapping
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_query_f_mapping";
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  This field may be null even when there are no parsing errors.
+
+           
+   
+
+   
+   
+
+   function lkt_query_f_guard
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_query_f_guard";
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Bin_Op`, :ada:ref:`Block_Expr`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`,
+   --  :ada:ref:`Error_On_Null`, :ada:ref:`Generic_Instantiation`,
+   --  :ada:ref:`If_Expr`, :ada:ref:`Isa`, :ada:ref:`Keep_Expr`,
+   --  :ada:ref:`Lambda_Expr`, :ada:ref:`Lit`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  This field may be null even when there are no parsing errors.
 
            
    
@@ -5211,8 +5331,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5236,8 +5356,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5282,8 +5402,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5311,8 +5431,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5340,8 +5460,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
 
@@ -5388,8 +5508,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Assign`, :ada:ref:`Logic_Expr`,
    --  :ada:ref:`Logic_Predicate`, :ada:ref:`Logic_Propagate`,
    --  :ada:ref:`Logic_Unify`, :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5836,8 +5956,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6074,8 +6194,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6200,8 +6320,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Cast_Expr`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`, :ada:ref:`Lit`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6366,8 +6486,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
    --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
    --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Paren_Expr`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --  :ada:ref:`Query`, :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6480,6 +6600,10 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            (Internal_Entity_Fun_Decl_Array_Access, Internal_Entity_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Array_Access, Internal_Entity_Fun_Decl_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Fun_Param_Decl_Array_Access, Internal_Entity_Array_Access);
+         function Convert is new Ada.Unchecked_Conversion
+           (Internal_Entity_Array_Access, Internal_Entity_Fun_Param_Decl_Array_Access);
          function Convert is new Ada.Unchecked_Conversion
            (Internal_Entity_Generic_Param_Type_Decl_Array_Access, Internal_Entity_Array_Access);
          function Convert is new Ada.Unchecked_Conversion

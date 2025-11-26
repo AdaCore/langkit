@@ -2956,9 +2956,6 @@ enum class ExcludesNull: LktNode {
 
 |" Root node class for patterns.
 |"
-|" This is a mostly LKQL specific node for the moment, as are every node
-|" derived from it.
-|"
 |" The only patterns that are currently used and implemented in Lkt's IsA are
 |" ``OrPattern`` and ``TypePattern``.
 @abstract
@@ -5372,7 +5369,7 @@ class MatchBranch: BaseMatchBranch {
 }
 
 |" Branch inside a match expression.
-|" LKQL pattern based syntax ``case <pattern> => <expr>``.
+|" ``case <pattern> => <expr>``.
 class PatternMatchBranch: BaseMatchBranch {
     @parse_field
     pattern: Pattern
@@ -5381,6 +5378,24 @@ class PatternMatchBranch: BaseMatchBranch {
     expr: Expr
 
     fun match_part() : Entity[LktNode] = self.pattern
+}
+
+|" Query comprehension.
+|" ``from <expr> match <pattern> [if <expr>]``
+class Query: Expr {
+    @parse_field
+    source: Expr
+
+    @parse_field
+    pattern: Pattern
+
+    @nullable
+    @parse_field
+    mapping: Expr
+
+    @nullable
+    @parse_field
+    guard: Expr
 }
 
 |" Operator in a binary operator expression.
