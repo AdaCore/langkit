@@ -7,6 +7,7 @@ grammar foo_grammar {
         | pick(@Identifier("or_all_fail") or_all_fail_rule)
         | pick(@Identifier("opt") opt_rule)
         | pick(@Identifier("list") list_rule)
+        | pick(@Identifier("last_fail_packrat") last_fail_packrat)
     ))
 
     or_rule <- or(
@@ -43,6 +44,36 @@ grammar foo_grammar {
         @Identifier("item")
         @Identifier("end")
     )
+
+    # We used not to keep track of failure info in packrat tables. As a result,
+    # error recovery mechanism could rely on wrong token indexes, i.e. resume
+    # parsing at the wrong token index. With the following input::
+    #
+    #    def var ;
+    #
+    # The parsing rule below used to trigger an infinite loop because of this:
+    #
+    # * First iteration (starting at token "def"):
+    #   * or() alternative #1 fails on ";", so the failure is
+    #     memorized in the packrat table for the "id" rule for token ";".
+    #   * Alternative #2 reaches the cut parser, then fails on the "id" parser
+    #     (because of the "var" token). This returns the first list item and
+    #     sets the "last failure" parser info to refer to token "var".
+    # * Second iteration (starting at token "var"):
+    #   * or() alternative #1 fails on "var" ("def" expected).
+    #   * Alternative #2 also fails this way.
+    #   * Alternative #3 reaches the cut parser, then fails on the "id" rule
+    #     for token ";" (result extracted from packrat tables). Because the
+    #     "last failure" info was not kept in packrat tables, this used to
+    #     leave the "last failure" info to refer to token "var". This still
+    #     returns the second list item and proceed to the next iteration.
+    # * Third iteration: same as second, rince and repeat, and so we have an
+    #   infinite loop.
+    last_fail_packrat <- list*(or(
+        | IdEqual("def" "var" discard(id) ";")
+        | IdEqual("def" / discard(id) ";")
+        | IdEqual("var" / discard(id) "=" discard(id))
+    ))
 
     id <- Id(@Identifier)
     id_equal <- IdEqual(@Identifier / "=")

@@ -29,4 +29,17 @@ FooNodeList[1:1-1:24]
 |  |  IdEqualList[1:6-1:15]
 |  |  |  IdEqual[1:11-1:14]
 
+== last_fail_packrat ==
+
+buffer:1:19: Cannot parse <last_fail_packrat>
+buffer:1:23: Expected Identifier, got 'var'
+buffer:1:23: Cannot parse <last_fail_packrat>
+buffer:1:27: Expected Identifier, got ';'
+buffer:1:27: End of input expected, got "Semicolon"
+
+FooNodeList[1:1-1:27] <<INCOMPLETE>>
+|  IdEqualList[1:19-1:27] <<INCOMPLETE>>
+|  |  IdEqual[1:19-1:23] <<INCOMPLETE>>
+|  |  IdEqual[1:23-1:27] <<INCOMPLETE>>
+
 Done

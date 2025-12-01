@@ -124,24 +124,50 @@ package body Langkit_Support.Packrat is
          end if;
       end Get;
 
-      ---------
-      -- Set --
-      ---------
+      -----------------
+      -- Set_Success --
+      -----------------
 
-      procedure Set (Memo              : in out Memo_Type;
-                     Is_Success        : Boolean;
-                     Instance          : T;
-                     Mark              : Diagnostic_Mark;
-                     Offset, Final_Pos : Token_Index)
+      procedure Set_Success
+        (Memo      : in out Memo_Type;
+         Offset    : Token_Index;
+         Instance  : T;
+         Mark      : Diagnostic_Mark;
+         Final_Pos : Token_Index)
       is
          E : Memo_Entry renames Memo (Entry_Index (Offset));
       begin
-         E := (State     => (if Is_Success then Success else Failure),
-               Instance  => Instance,
-               Mark      => Mark,
-               Offset    => Offset,
-               Final_Pos => Final_Pos);
-      end Set;
+         E.State := Success;
+         E.Instance := Instance;
+         E.Mark := Mark;
+         E.Offset := Offset;
+         E.Final_Pos := Final_Pos;
+      end Set_Success;
+
+      -----------------
+      -- Set_Failure --
+      -----------------
+
+      procedure Set_Failure
+        (Memo              : in out Memo_Type;
+         Offset            : Token_Index;
+         Mark              : Diagnostic_Mark;
+         Fail_Kind         : Fail_Info_Kind;
+         Final_Pos         : Token_Index;
+         Expected_Token_Id : Token_Kind;
+         Found_Token_Id    : Token_Kind)
+      is
+         E : Memo_Entry renames Memo (Entry_Index (Offset));
+      begin
+         E.State := Failure;
+         E.Fail_Kind := Fail_Kind;
+         E.Instance := No_Instance;
+         E.Mark := Mark;
+         E.Offset := Offset;
+         E.Final_Pos := Final_Pos;
+         E.Expected_Token_Id := Expected_Token_Id;
+         E.Found_Token_Id := Found_Token_Id;
+      end Set_Failure;
 
       -------------
       -- Iterate --

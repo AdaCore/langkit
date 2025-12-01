@@ -41,19 +41,18 @@ begin
       return ${parser.res_var};
    elsif M.State = Failure then
       Parser.Current_Pos := No_Token_Index;
+      Set_Last_Fail (Parser, M);
       return ${parser.res_var};
    end if;
 
    Parser.Last_Diag := No_Diagnostic;
 
    % if parser.is_left_recursive():
-       Memos.Set
+       Set_Failure
          (${memo},
-          False,
-          ${parser.res_var},
-          Parser.Last_Diag,
           Pos,
-          Mem_Pos);
+          Parser.Last_Fail,
+          Parser.Last_Diag);
 
        <<Try_Again>>
        Parser.Last_Diag := No_Diagnostic;
@@ -82,13 +81,16 @@ begin
          Mem_Pos := ${parser.pos_var};
          Mem_Res := ${parser.res_var};
          Mem_Mark := Parser.Last_Diag;
-         Memos.Set
-           (${memo},
-            ${parser.pos_var} /= No_Token_Index,
-            ${parser.res_var},
-            Mem_Mark,
-            Pos,
-            ${parser.pos_var});
+         if ${parser.pos_var} = No_Token_Index then
+            Set_Failure (${memo}, Pos, Parser.Last_Fail, Mem_Mark);
+         else
+            Memos.Set_Success
+              (${memo},
+               Pos,
+               ${parser.res_var},
+               Mem_Mark,
+               ${parser.pos_var});
+         end if;
          goto Try_Again;
 
       elsif Mem_Pos > Pos then
@@ -99,13 +101,13 @@ begin
       end if;
    % endif
 
-   Memos.Set
-     (${memo},
-      ${parser.pos_var} /= No_Token_Index,
-      ${parser.res_var},
-      Parser.Last_Diag,
-      Pos,
-      ${parser.pos_var});
+   if ${parser.pos_var} = No_Token_Index then
+      Set_Failure
+        (${memo}, Pos, Parser.Last_Fail, Parser.Last_Diag);
+   else
+      Memos.Set_Success
+        (${memo}, Pos, ${parser.res_var}, Parser.Last_Diag, ${parser.pos_var});
+   end if;
 
    % if parser.is_left_recursive():
        <<No_Memo>>

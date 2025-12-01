@@ -47,7 +47,7 @@ package body ${ada_lib_name}.Parsers_Impl is
 
    pragma Warnings (Off, "is not referenced");
    package Memos is new Langkit_Support.Packrat.Tables
-     (${T.root_node.name});
+     (${T.root_node.name}, null, Token_Kind);
 
    % for cls in ctx.node_types:
       % if not cls.abstract:
@@ -82,7 +82,19 @@ package body ${ada_lib_name}.Parsers_Impl is
 
       % endif
    % endfor
+
    pragma Warnings (On, "is not referenced");
+
+   procedure Set_Failure
+     (Memo     : in out Memos.Memo_Type;
+      Pos      : Token_Index;
+      Info     : Fail_Info;
+      Mark     : Diagnostic_Mark);
+   --  Convenience wrapper for ``Memos.Set_Failure``
+
+   procedure Set_Last_Fail
+     (Parser : in out Parser_Type; M : Memos.Memo_Entry);
+   --  Set ``Parser.Last_Fail`` from a failing memo entry
 
    type Dontskip_Parser_Function is access function
      (Parser : in out Parser_Type;
@@ -167,6 +179,51 @@ package body ${ada_lib_name}.Parsers_Impl is
    --  allocated list node.
 
    pragma Warnings (On, "is not referenced");
+
+   -----------------
+   -- Set_Failure --
+   -----------------
+
+   procedure Set_Failure
+     (Memo     : in out Memos.Memo_Type;
+      Pos      : Token_Index;
+      Info     : Fail_Info;
+      Mark     : Diagnostic_Mark)
+   is
+      Expected_Token_Id : Token_Kind := Token_Kind'First;
+      Found_Token_Id    : Token_Kind := Token_Kind'First;
+   begin
+      if Info.Data.Kind = Token_Fail then
+         Expected_Token_Id := Info.Data.Expected_Token_Id;
+         Found_Token_Id := Info.Data.Found_Token_Id;
+      end if;
+
+      Memos.Set_Failure
+        (Memo,
+         Pos,
+         Mark,
+         Info.Data.Kind,
+         Info.Pos,
+         Expected_Token_Id,
+         Found_Token_Id);
+   end Set_Failure;
+
+   -------------------
+   -- Set_Last_Fail --
+   -------------------
+
+   procedure Set_Last_Fail (Parser : in out Parser_Type; M : Memos.Memo_Entry)
+   is
+   begin
+      Parser.Last_Fail.Pos := M.Final_Pos;
+      case M.Fail_Kind is
+         when Token_Fail =>
+            Parser.Last_Fail.Data :=
+              (Token_Fail, M.Expected_Token_Id, M.Found_Token_Id);
+         when Predicate_Fail =>
+            Parser.Last_Fail.Data := (Kind => Predicate_Fail);
+      end case;
+   end Set_Last_Fail;
 
    ---------------------
    -- Initialize_List --

@@ -35,4 +35,5 @@ begin
    Check ("or_all_fail_rule", "or_all_fail alt = 0");
    Check ("opt_rule", "opt id;");
    Check ("list_rule", "list item id=; item end");
+   Check ("last_fail_packrat", "last_fail_packrat def var ;");
 end Main;
