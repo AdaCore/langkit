@@ -46,10 +46,10 @@ package body ${ada_lib_name}.Parsers_Impl is
    --  we need them only for non-abstract AST nodes.
 
    pragma Warnings (Off, "is not referenced");
-   % for cls in ctx.node_types:
-      package ${cls.name}_Memos is new Langkit_Support.Packrat.Tables
-        (${cls.name});
+   package Memos is new Langkit_Support.Packrat.Tables
+     (${T.root_node.name});
 
+   % for cls in ctx.node_types:
       % if not cls.abstract:
          <%
             subtype = 'Subtype_For_{}'.format(cls.kwless_raw_name)
@@ -105,7 +105,7 @@ package body ${ada_lib_name}.Parsers_Impl is
 
       % for parser in sorted_fns:
       <% ret_type = parser.type.storage_type_name %>
-      ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
+      ${parser.gen_fn_name}_Memo : Memos.Memo_Type;
       % endfor
 
       Dont_Skip : Dont_Skip_Fn_Vectors.Vector;
@@ -368,7 +368,7 @@ package body ${ada_lib_name}.Parsers_Impl is
       --  Reset the memo tables in the private part
       PP := +Parser.Private_Part;
       % for fn in sorted_fns:
-         ${fn.type.storage_type_name}_Memos.Clear (PP.${fn.gen_fn_name}_Memo);
+         Memos.Clear (PP.${fn.gen_fn_name}_Memo);
       % endfor
    end Reset;
 
@@ -521,15 +521,13 @@ package body ${ada_lib_name}.Parsers_Impl is
 
       % for parser in sorted_fns:
          declare
-            package Memo_Pkg renames ${parser.type.storage_type_name}_Memos;
-
-            procedure Process (E : Memo_Pkg.Memo_Entry);
+            procedure Process (E : Memos.Memo_Entry);
 
             -------------
             -- Process --
             -------------
 
-            procedure Process (E : Memo_Pkg.Memo_Entry) is
+            procedure Process (E : Memos.Memo_Entry) is
                K : constant Memo_Entry_Key :=
                  (E.Offset, ${parser.gen_fn_name});
                V : constant Memo_Entry :=
@@ -538,7 +536,7 @@ package body ${ada_lib_name}.Parsers_Impl is
                Memo_Entries.Insert (K, V);
             end Process;
          begin
-            Memo_Pkg.Iterate (PP.${parser.gen_fn_name}_Memo, Process'Access);
+            Memos.Iterate (PP.${parser.gen_fn_name}_Memo, Process'Access);
          end;
       % endfor
 

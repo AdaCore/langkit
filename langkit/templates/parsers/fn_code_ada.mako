@@ -9,8 +9,6 @@ function ${parser.gen_fn_name}
   (Parser : in out Parser_Type;
    Pos    : Token_Index) return ${ret_type}
 is
-   use ${ret_type}_Memos;
-
    % for name, typ in var_context:
       <%
          default_expr_suffix = ""
@@ -33,7 +31,7 @@ is
    % endif
 
    PP : constant Parser_Private_Part := +Parser.Private_Part;
-   M  : Memo_Entry := Get (${memo}, Pos);
+   M  : Memos.Memo_Entry := Memos.Get (${memo}, Pos);
 
 begin
    if M.State = Success then
@@ -49,7 +47,7 @@ begin
    Parser.Last_Diag := No_Diagnostic;
 
    % if parser.is_left_recursive():
-       Set
+       Memos.Set
          (${memo},
           False,
           ${parser.res_var},
@@ -84,7 +82,7 @@ begin
          Mem_Pos := ${parser.pos_var};
          Mem_Res := ${parser.res_var};
          Mem_Mark := Parser.Last_Diag;
-         Set
+         Memos.Set
            (${memo},
             ${parser.pos_var} /= No_Token_Index,
             ${parser.res_var},
@@ -101,7 +99,7 @@ begin
       end if;
    % endif
 
-   Set
+   Memos.Set
      (${memo},
       ${parser.pos_var} /= No_Token_Index,
       ${parser.res_var},
