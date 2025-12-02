@@ -4272,7 +4272,7 @@ class DefId: Id implements TokenNode, DefiningNameInterface {
         ).map((r) => RefResult(ref=r))
 }
 
-|" Id referencing a langkit module.
+|" Id referencing a Lkt module.
 class ModuleRefId: Id implements TokenNode {
     # TODO: Being able to cross-reference modules seems like a good ability,
     # but for the moment they don't fit in the framework, because they're not
