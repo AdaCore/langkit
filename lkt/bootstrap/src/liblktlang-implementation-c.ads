@@ -2227,6 +2227,58 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
+   function lkt_base_import_f_module_name
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_base_import_f_module_name";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_base_import_p_referenced_unit
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_analysis_unit) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_base_import_p_referenced_unit";
+   --  Return the unit that contains the module this import clause designates.
+   --  Load it if needed.
+
+           
+   
+
+   
+   
+
+   function lkt_import_from_f_imported_names
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_import_from_f_imported_names";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
    function lkt_lexer_case_rule_cond_alt_f_cond_exprs
      (Node : lkt_node_Ptr;
 
@@ -3778,9 +3830,10 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Char_Lit`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
    --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`,
    --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Null_Lit`, :ada:ref:`Num_Lit`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Module_Id`, :ada:ref:`Null_Lit`,
+   --  :ada:ref:`Num_Lit`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Ref_Id`, :ada:ref:`Single_Line_String_Lit`,
+   --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5750,41 +5803,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_grammar_list_sep_f_extra";
    --  This field may be null even when there are no parsing errors.
-
-           
-   
-
-   
-   
-
-   function lkt_import_f_name
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_import_f_name";
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_import_p_referenced_unit
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_analysis_unit) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_import_p_referenced_unit";
-   --  Return the unit that this import statements designates. Load it if
-   --  needed.
 
            
    

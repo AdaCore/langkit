@@ -511,6 +511,44 @@ package body Liblktlang.Rewriting is
          end;
 
 
+         function Create_Import
+           (Handle : Rewriting_Handle
+               ; F_Module_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Import,
+                 (1 => F_Module_Name));
+         end;
+
+
+         function Create_Import_All_From
+           (Handle : Rewriting_Handle
+               ; F_Module_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Import_All_From,
+                 (1 => F_Module_Name));
+         end;
+
+
+         function Create_Import_From
+           (Handle : Rewriting_Handle
+               ; F_Module_Name : Node_Rewriting_Handle
+               ; F_Imported_Names : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Import_From,
+                 (1 => F_Module_Name,
+                  2 => F_Imported_Names));
+         end;
+
+
          function Create_Lexer_Case_Rule_Cond_Alt
            (Handle : Rewriting_Handle
                ; F_Cond_Exprs : Node_Rewriting_Handle
@@ -1786,18 +1824,6 @@ package body Liblktlang.Rewriting is
                Lkt_Grammar_List_Sep,
                  (1 => F_Token,
                   2 => F_Extra));
-         end;
-
-
-         function Create_Import
-           (Handle : Rewriting_Handle
-               ; F_Name : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Import,
-                 (1 => F_Name));
          end;
 
 

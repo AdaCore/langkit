@@ -201,6 +201,12 @@ package body Liblktlang.Generic_API is
          case To_Index (Kind) is
                   when Type_Index_For_Argument =>
                      return Lkt_Argument;
+                  when Type_Index_For_Import =>
+                     return Lkt_Import;
+                  when Type_Index_For_Import_All_From =>
+                     return Lkt_Import_All_From;
+                  when Type_Index_For_Import_From =>
+                     return Lkt_Import_From;
                   when Type_Index_For_Error_Lexer_Case_Rule_Alt =>
                      return Lkt_Error_Lexer_Case_Rule_Alt;
                   when Type_Index_For_Lexer_Case_Rule_Cond_Alt =>
@@ -365,8 +371,10 @@ package body Liblktlang.Generic_API is
                      return Lkt_Id;
                   when Type_Index_For_Def_Id =>
                      return Lkt_Def_Id;
-                  when Type_Index_For_Module_Ref_Id =>
-                     return Lkt_Module_Ref_Id;
+                  when Type_Index_For_Imported_Id =>
+                     return Lkt_Imported_Id;
+                  when Type_Index_For_Module_Id =>
+                     return Lkt_Module_Id;
                   when Type_Index_For_Ref_Id =>
                      return Lkt_Ref_Id;
                   when Type_Index_For_If_Expr =>
@@ -421,8 +429,6 @@ package body Liblktlang.Generic_API is
                      return Lkt_Full_Decl;
                   when Type_Index_For_Grammar_List_Sep =>
                      return Lkt_Grammar_List_Sep;
-                  when Type_Index_For_Import =>
-                     return Lkt_Import;
                   when Type_Index_For_Langkit_Root =>
                      return Lkt_Langkit_Root;
                   when Type_Index_For_Lexer_Case_Rule =>
@@ -435,6 +441,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_List_Kind_Zero;
                   when Type_Index_For_Argument_List =>
                      return Lkt_Argument_List;
+                  when Type_Index_For_Base_Import_List =>
+                     return Lkt_Base_Import_List;
                   when Type_Index_For_Base_Lexer_Case_Rule_Alt_List =>
                      return Lkt_Base_Lexer_Case_Rule_Alt_List;
                   when Type_Index_For_Base_Match_Branch_List =>
@@ -469,8 +477,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Grammar_Expr_List;
                   when Type_Index_For_Grammar_Expr_List_List =>
                      return Lkt_Grammar_Expr_List_List;
-                  when Type_Index_For_Import_List =>
-                     return Lkt_Import_List;
+                  when Type_Index_For_Imported_Id_List =>
+                     return Lkt_Imported_Id_List;
                   when Type_Index_For_Lambda_Param_Decl_List =>
                      return Lkt_Lambda_Param_Decl_List;
                   when Type_Index_For_Lkt_Node_List =>

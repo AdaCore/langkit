@@ -534,6 +534,9 @@ package body Liblktlang.Implementation.C is
 
    Node_Kind_Names : constant array (Lkt_Node_Kind_Type) of Text_Access :=
      (Lkt_Argument => new Text_Type'(To_Text ("Argument")),
+      Lkt_Import => new Text_Type'(To_Text ("Import")),
+      Lkt_Import_All_From => new Text_Type'(To_Text ("ImportAllFrom")),
+      Lkt_Import_From => new Text_Type'(To_Text ("ImportFrom")),
       Lkt_Error_Lexer_Case_Rule_Alt => new Text_Type'(To_Text ("ErrorLexerCaseRuleAlt")),
       Lkt_Lexer_Case_Rule_Cond_Alt => new Text_Type'(To_Text ("LexerCaseRuleCondAlt")),
       Lkt_Lexer_Case_Rule_Default_Alt => new Text_Type'(To_Text ("LexerCaseRuleDefaultAlt")),
@@ -616,7 +619,8 @@ package body Liblktlang.Implementation.C is
       Lkt_Token_Ref => new Text_Type'(To_Text ("TokenRef")),
       Lkt_Id => new Text_Type'(To_Text ("Id")),
       Lkt_Def_Id => new Text_Type'(To_Text ("DefId")),
-      Lkt_Module_Ref_Id => new Text_Type'(To_Text ("ModuleRefId")),
+      Lkt_Imported_Id => new Text_Type'(To_Text ("ImportedId")),
+      Lkt_Module_Id => new Text_Type'(To_Text ("ModuleId")),
       Lkt_Ref_Id => new Text_Type'(To_Text ("RefId")),
       Lkt_If_Expr => new Text_Type'(To_Text ("IfExpr")),
       Lkt_Isa => new Text_Type'(To_Text ("Isa")),
@@ -644,13 +648,13 @@ package body Liblktlang.Implementation.C is
       Lkt_Un_Op => new Text_Type'(To_Text ("UnOp")),
       Lkt_Full_Decl => new Text_Type'(To_Text ("FullDecl")),
       Lkt_Grammar_List_Sep => new Text_Type'(To_Text ("GrammarListSep")),
-      Lkt_Import => new Text_Type'(To_Text ("Import")),
       Lkt_Langkit_Root => new Text_Type'(To_Text ("LangkitRoot")),
       Lkt_Lexer_Case_Rule => new Text_Type'(To_Text ("LexerCaseRule")),
       Lkt_Lexer_Case_Rule_Send => new Text_Type'(To_Text ("LexerCaseRuleSend")),
       Lkt_List_Kind_One => new Text_Type'(To_Text ("ListKindOne")),
       Lkt_List_Kind_Zero => new Text_Type'(To_Text ("ListKindZero")),
       Lkt_Argument_List => new Text_Type'(To_Text ("ArgumentList")),
+      Lkt_Base_Import_List => new Text_Type'(To_Text ("BaseImportList")),
       Lkt_Base_Lexer_Case_Rule_Alt_List => new Text_Type'(To_Text ("BaseLexerCaseRuleAltList")),
       Lkt_Base_Match_Branch_List => new Text_Type'(To_Text ("BaseMatchBranchList")),
       Lkt_Block_String_Line_List => new Text_Type'(To_Text ("BlockStringLineList")),
@@ -668,7 +672,7 @@ package body Liblktlang.Implementation.C is
       Lkt_Fun_Param_Decl_List => new Text_Type'(To_Text ("FunParamDeclList")),
       Lkt_Grammar_Expr_List => new Text_Type'(To_Text ("GrammarExprList")),
       Lkt_Grammar_Expr_List_List => new Text_Type'(To_Text ("GrammarExprListList")),
-      Lkt_Import_List => new Text_Type'(To_Text ("ImportList")),
+      Lkt_Imported_Id_List => new Text_Type'(To_Text ("ImportedIdList")),
       Lkt_Lambda_Param_Decl_List => new Text_Type'(To_Text ("LambdaParamDeclList")),
       Lkt_Lkt_Node_List => new Text_Type'(To_Text ("LktNodeList")),
       Lkt_Module_Doc_String_Line_List => new Text_Type'(To_Text ("ModuleDocStringLineList")),
@@ -4416,6 +4420,159 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_argument_f_value;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_base_import_f_module_name
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Base_Import then
+
+         declare
+            
+
+            Result : Bare_Module_Id;
+         begin
+            Result := Base_Import_F_Module_Name
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_base_import_f_module_name;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_base_import_p_referenced_unit
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_analysis_unit) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Base_Import then
+
+         declare
+            
+
+            Result : Internal_Unit;
+         begin
+            Result := Liblktlang.Implementation.Base_Import_P_Referenced_Unit
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   Result
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_base_import_p_referenced_unit;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_import_from_f_imported_names
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Import_From_Range then
+
+         declare
+            
+
+            Result : Bare_Imported_Id_List;
+         begin
+            Result := Import_From_F_Imported_Names
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_import_from_f_imported_names;
 
 
            
@@ -13034,108 +13191,6 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_import_f_name
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Import_Range then
-
-         declare
-            
-
-            Result : Bare_Module_Ref_Id;
-         begin
-            Result := Import_F_Name
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_import_f_name;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_import_p_referenced_unit
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_analysis_unit) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Import_Range then
-
-         declare
-            
-
-            Result : Internal_Unit;
-         begin
-            Result := Liblktlang.Implementation.Import_P_Referenced_Unit
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   Result
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_import_p_referenced_unit;
-
-
-           
-
-   
-
-   
-   
-
    function lkt_langkit_root_f_doc
      (Node : lkt_node_Ptr;
 
@@ -13204,7 +13259,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Import_List;
+            Result : Bare_Base_Import_List;
          begin
             Result := Langkit_Root_F_Imports
               (Unwrapped_Node);

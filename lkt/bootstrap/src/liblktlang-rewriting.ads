@@ -356,6 +356,25 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
+         function Create_Import
+           (Handle : Rewriting_Handle
+               ; F_Module_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Import_All_From
+           (Handle : Rewriting_Handle
+               ; F_Module_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Import_From
+           (Handle : Rewriting_Handle
+               ; F_Module_Name : Node_Rewriting_Handle
+               ; F_Imported_Names : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Lexer_Case_Rule_Cond_Alt
            (Handle : Rewriting_Handle
                ; F_Cond_Exprs : Node_Rewriting_Handle
@@ -992,12 +1011,6 @@ package Liblktlang.Rewriting is
            (Handle : Rewriting_Handle
                ; F_Token : Node_Rewriting_Handle
                ; F_Extra : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Import
-           (Handle : Rewriting_Handle
-               ; F_Name : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
