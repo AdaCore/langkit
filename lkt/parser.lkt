@@ -2,12 +2,15 @@
 @with_unparsers
 grammar lkt_grammar {
     @main_rule
-    main_rule <- LangkitRoot(/ imports decls @Termination)
+    main_rule <- LangkitRoot(/ module_doc imports decls @Termination)
     id <- Id(@Identifier)
     ref_id <- RefId(@Identifier)
     type_ref_id <- ref_id |> when(Id.is_type_name)
     def_id <- DefId(@Identifier)
     doc <- ?string_lit
+    module_doc <- ?ModuleDocStringLit(
+        list+(ModuleDocStringLine(@ModuleDocStringLine))
+    )
     import_stmt <- Import("import" / ModuleRefId(@Identifier))
     imports <- list*(import_stmt)
     lexer_decl <- LexerDecl(

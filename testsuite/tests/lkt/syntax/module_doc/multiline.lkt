@@ -1,0 +1,6 @@
+|"" Module-level documentation.
+|""
+|"" It spans
+|"" multiple
+|"" lines.
+fun f(): Int = 1

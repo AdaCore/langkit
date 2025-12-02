@@ -1168,6 +1168,9 @@
         "f_decl_type": ["whitespace", "recurse"]
       }
     },
+    "ModuleDocStringLine": {},
+    "ModuleDocStringLineList": {},
+    "ModuleDocStringLit": {},
     "ModuleRefId": {},
     "NotExpr": {
       "fields": {

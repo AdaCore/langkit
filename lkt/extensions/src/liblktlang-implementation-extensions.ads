@@ -46,6 +46,10 @@ package Liblktlang.Implementation.Extensions is
      (Node : Bare_Block_String_Lit) return Internal_Decoded_String_Value;
    --  Return the content of the given block string literal node
 
+   function Module_Doc_String_Lit_P_Denoted_Value
+     (Node : Bare_Module_Doc_String_Lit) return Internal_Decoded_String_Value;
+   --  Return the content of the given module doc string literal node
+
    function Single_Line_String_Lit_P_Denoted_Value
      (Node : Bare_Single_Line_String_Lit) return Internal_Decoded_String_Value;
    --  Return the content of the given single line string literal node

@@ -382,6 +382,10 @@ class LexerCaseRuleDefaultAlt: BaseLexerCaseRuleAlt {
 class BlockStringLine: LktNode implements TokenNode {
 }
 
+|" A single line in a module docstring.
+class ModuleDocStringLine: LktNode implements TokenNode {
+}
+
 |" Whether this generic parameter type must be a class.
 @qualifier
 enum class ClassQualifier: LktNode {
@@ -4825,6 +4829,20 @@ class SingleLineStringLit: StringLit implements TokenNode {
     fun prefix(): Char
 }
 
+|" Module documentation made from multiple line strings. Unlike for other
+|" docstrings, this uses the ``|""`` prefix.
+class ModuleDocStringLit: StringLit {
+    @parse_field
+    lines: ASTList[ModuleDocStringLine]
+
+    @external()
+    fun denoted_value(): DecodedStringValue
+
+    fun is_prefixed_string(): Bool = false
+
+    fun prefix(): Char = '\x00'
+}
+
 |" Pattern single line string literal expression.
 class PatternSingleLineStringLit: SingleLineStringLit implements TokenNode {
 }
@@ -5256,6 +5274,9 @@ class Import: LktNode {
 
 |" For the moment, root node of a lkt compilation unit.
 class LangkitRoot: LktNode {
+    @nullable
+    @parse_field
+    doc: ModuleDocStringLit
     @parse_field
     imports: ASTList[Import]
     @parse_field
