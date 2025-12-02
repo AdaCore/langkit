@@ -772,13 +772,14 @@ class PythonLang(LanguageChecker):
                     elif (
                         isinstance(node, ast.stmt)
                         and isinstance(node, ast.Expr)
-                        and isinstance(node.value, ast.Str)
+                        and isinstance(node.value, ast.Constant)
+                        and isinstance(node.value.value, str)
                     ):
                         # Sometimes we use docstrings on local variables, and
                         # ast.get_docstring does not allow us to catch that.
                         # Instead, process all string literals that appear at
                         # the root of a statement.
-                        raw_docstring = node.value.s
+                        raw_docstring = node.value.value
                         docstring, lineno_offset = preprocess_docstring(
                             raw_docstring
                         )
