@@ -109,8 +109,16 @@ package Langkit_Support.Packrat is
    type Memo_State is (No_Result, Failure, Success);
    --  State of a memo entry: whether we have a result or not
 
+   type Fail_Info_Kind is (Token_Fail, Predicate_Fail);
+   --  Kind of parsing failure:
+   --
+   --  * ``Token_Fail``: actual/expected token kind mismatch.
+   --  * ``Predicate_Fail``: miscellaneous failure.
+
    generic
       type T is private;
+      No_Instance : T;
+      type Token_Kind is (<>);
       Memo_Size : Positive := 16;
    package Tables is
 
@@ -127,7 +135,11 @@ package Langkit_Support.Packrat is
          State : Memo_State := No_Result;
          --  State of the memo entry
 
-         Instance : T;
+         Fail_Kind : Fail_Info_Kind := Token_Fail;
+         --  If ``State`` is ``Failure``, specifies the kind of parsing failure
+         --  involved. Unused otherwise.
+
+         Instance : T := No_Instance;
          --  Parsed object
 
          Mark : Diagnostic_Mark := No_Diagnostic;
@@ -137,9 +149,15 @@ package Langkit_Support.Packrat is
          --  to the queried offset.
 
          Final_Pos : Token_Index := No_Token_Index;
-         --  Last token position for the given parsed object. Used to tell the
-         --  parser where to start back parsing after getting the memoized
-         --  object.
+         --  If ``State`` is ``Success``, This is used to tell the parser where
+         --  to start back parsing after getting the memoized object.
+         --
+         --  If ``State`` is ``Failure``, index for the first token on which
+         --  parsing failed.
+
+         Expected_Token_Id, Found_Token_Id : Token_Kind := Token_Kind'First;
+         --  If ``Fail_Kind`` is ``Token_Fail``, token kinds for
+         --  expected/actual tokens.
       end record;
 
       type Memo_Type is private;
@@ -152,13 +170,26 @@ package Langkit_Support.Packrat is
         with Inline;
       --  Get the element at given offset in the memo table, if it exists
 
-      procedure Set (Memo              : in out Memo_Type;
-                     Is_Success        : Boolean;
-                     Instance          : T;
-                     Mark              : Diagnostic_Mark;
-                     Offset, Final_Pos : Token_Index)
+      procedure Set_Success
+        (Memo      : in out Memo_Type;
+         Offset    : Token_Index;
+         Instance  : T;
+         Mark      : Diagnostic_Mark;
+         Final_Pos : Token_Index)
         with Inline;
-      --  Set the memo entry at given offset
+      --  Associate a successful parsing result to the token index at
+      --  ``Offset``.
+
+      procedure Set_Failure
+        (Memo              : in out Memo_Type;
+         Offset            : Token_Index;
+         Mark              : Diagnostic_Mark;
+         Fail_Kind         : Fail_Info_Kind;
+         Final_Pos         : Token_Index;
+         Expected_Token_Id : Token_Kind;
+         Found_Token_Id    : Token_Kind)
+        with Inline;
+      --  Associate a failed parsing result to the token index at ``Offset``
 
       procedure Iterate
         (Memo : Memo_Type; Process : access procedure (E : Memo_Entry));
