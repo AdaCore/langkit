@@ -24,6 +24,7 @@ syn keyword langkitKeyword elif
 syn keyword langkitKeyword else
 syn keyword langkitKeyword end
 syn keyword langkitKeyword field
+syn keyword langkitKeyword from
 syn keyword langkitKeyword generic
 syn keyword langkitKeyword if
 syn keyword langkitKeyword implements
