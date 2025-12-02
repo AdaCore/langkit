@@ -1381,8 +1381,23 @@ package body ${ada_lib_name}.Implementation is
       Root_Env : constant Lexical_Env := Unit.Context.Root_Scope;
       State    : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
 
+      procedure Dump_One_Lexical_Env (Env, Parent : Lexical_Env);
+      --  Wrapper around the library-level Dump_One_Lexical_Env procedure, to
+      --  automatically compute ids for Env and Parent.
+
       function Get_Parent (Env : Lexical_Env) return Lexical_Env
       is (Unwrap (Env).Parent);
+
+      --------------------------
+      -- Dump_One_Lexical_Env --
+      --------------------------
+
+      procedure Dump_One_Lexical_Env (Env, Parent : Lexical_Env) is
+         Env_Id    : constant String := Get_Env_Id (Env, State);
+         Parent_Id : constant String := Get_Env_Id (Parent, State);
+      begin
+         Dump_One_Lexical_Env (Env, Env_Id, Parent_Id);
+      end Dump_One_Lexical_Env;
 
       --------------------------
       -- Explore_Parent_Chain --
@@ -1393,8 +1408,7 @@ package body ${ada_lib_name}.Implementation is
       begin
          if Env /= Null_Lexical_Env then
             P := Get_Parent (Env);
-            Dump_One_Lexical_Env
-              (Env, Get_Env_Id (Env, State), Get_Env_Id (P, State));
+            Dump_One_Lexical_Env (Env, P);
             Explore_Parent_Chain (P);
          end if;
       end Explore_Parent_Chain;
@@ -1419,9 +1433,7 @@ package body ${ada_lib_name}.Implementation is
             Env := Current.Self_Env;
             Parent := Get_Parent (Env);
             Explore_Parent := not State.Env_Ids.Contains (Parent);
-
-            Dump_One_Lexical_Env
-              (Env, Get_Env_Id (Env, State), Get_Env_Id (Parent, State));
+            Dump_One_Lexical_Env (Env, Parent);
 
             if Explore_Parent then
                Explore_Parent_Chain (Parent);
