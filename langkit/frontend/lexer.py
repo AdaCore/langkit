@@ -183,12 +183,14 @@ def create_lexer(resolver: Resolver) -> Lexer:
     full_lexer = resolver.find_toplevel_decl(L.LexerDecl, "lexer")
     assert isinstance(full_lexer.f_decl, L.LexerDecl)
 
+    # Scope in which the lexer is declared. This scope is used to resolve node
+    # references in the lexer.
+    scope = resolver.root_scope
+
     # Ensure the lexer name has proper casing
     _ = name_from_lower("lexer", full_lexer.f_decl.f_syn_name)
 
-    lexer_annot = parse_annotations(
-        ctx, LexerAnnotations, full_lexer, resolver.root_scope
-    )
+    lexer_annot = parse_annotations(ctx, LexerAnnotations, full_lexer, scope)
 
     patterns: dict[names.Name, tuple[str, Location]] = {}
     """
@@ -260,7 +262,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
             ctx,
             TokenFamilyAnnotations,
             cast(L.FullDecl, f.parent),
-            resolver.root_scope,
+            scope,
         )
 
         for spacing in family_annotations.unparsing_spacing:
@@ -282,7 +284,7 @@ def create_lexer(resolver: Resolver) -> Lexer:
             otherwise.
         """
         rule_annot: TokenAnnotations = parse_annotations(
-            ctx, TokenAnnotations, r, resolver.root_scope
+            ctx, TokenAnnotations, r, scope
         )
 
         # Gather token action info from the annotations. If absent, fallback to
