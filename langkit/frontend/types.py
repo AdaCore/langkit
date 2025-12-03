@@ -492,12 +492,11 @@ class LktTypesLoader:
 
         self.generics = resolver.builtins.generics
 
-        self.named_types: dict[str, L.TypeDecl] = {}
         self.compiled_types: dict[L.Decl, CompiledType | None] = {}
         self.internal_property_counter = iter(itertools.count(0))
         self.error_nodes: list[ASTNodeType] = []
 
-        type_decls: list[L.TypeDecl] = []
+        type_decls: list[tuple[L.TypeDecl, Scope.UserType]] = []
         dyn_vars: list[L.DynVarDecl] = []
         root_node_decl: L.BasicClassDecl | None = None
         self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
@@ -525,8 +524,9 @@ class LktTypesLoader:
                 elif isinstance(decl, L.TraitDecl):
                     self.process_user_trait(decl)
                 elif isinstance(decl, L.TypeDecl):
-                    self.named_types[name] = decl
-                    type_decls.append(decl)
+                    entity = Scope.UserType(name, decl, None)
+                    self.root_scope.add(entity)
+                    type_decls.append((decl, entity))
 
                     # Keep track of anyhing that looks like the root node
                     if (
@@ -568,8 +568,8 @@ class LktTypesLoader:
         self.properties_to_lower: list[LktTypesLoader.PropertyToLower] = []
         self.env_specs_to_lower: list[tuple[ASTNodeType, L.EnvSpecDecl]] = []
         self.fields_to_lower: list[LktTypesLoader.FieldToLower] = []
-        for type_decl in type_decls:
-            self.lower_type_decl(type_decl)
+        for type_decl, entity in type_decls:
+            self.lower_type_decl(type_decl, entity)
 
         # If user code does not define one, create a default Metadata struct
         # and make it visible in the root scope. Otherwise, validate it.
@@ -765,15 +765,16 @@ class LktTypesLoader:
 
         self.ctx.deferred.property_expressions.resolve()
 
-    def resolve_base_node(self, name: L.TypeRef) -> ASTNodeType:
+    def resolve_base_node(self, name: L.TypeRef, scope: Scope) -> ASTNodeType:
         """
         Resolve a type reference and lower it, checking that it is a node type.
 
+        :param name: Type reference to resolve.
+        :param scope: Scope in which to look for the type.
+
         Note: This method is meant to be used instead of ``resolve_node``
-        during the TYPES_LOWERING pass since scopes are not populated yet at
-        this stage, and yet to handle inheritance correctly, we need to
-        resolve reference to base classes. This is done using the
-        ``named_types`` map.
+        during the TYPES_LOWERING pass since scopes are not populated yet with
+        ``CompiledType`` instances at this stage.
         """
         diag_ctx = DiagnosticContext(name)
 
@@ -782,14 +783,17 @@ class LktTypesLoader:
         # instantiation (GenericTypeRef). Reject everything else.
         if isinstance(name, L.SimpleTypeRef):
             # We have a direct node class reference: first fetch the Lkt
-            # declaration for it.
-            try:
-                base_type_decl = self.named_types[name.text]
-            except KeyError:
-                diag_ctx.error(f"no such node type: '{name.text}'")
+            # declaration for it. Lower it if needed.
+            entity = self.resolver.resolve_type_entity(name.f_type_name, scope)
+            if entity.t_or_none is None:
+                assert isinstance(entity.diagnostic_node, L.TypeDecl)
+                base_type = self.lower_type_decl(
+                    entity.diagnostic_node, entity
+                )
+            else:
+                base_type = entity.t_or_none
 
-            # Then, force its lowering
-            base_type = self.lower_type_decl(base_type_decl)
+            # Only nodes can be used as base types
             if not isinstance(base_type, ASTNodeType):
                 diag_ctx.error("node type expected")
             return base_type
@@ -805,7 +809,7 @@ class LktTypesLoader:
                 )
 
             # Lower type arguments
-            type_args = [self.resolve_base_node(t) for t in name.f_args]
+            type_args = [self.resolve_base_node(t, scope) for t in name.f_args]
             diag_ctx.check_source_language(
                 len(type_args) == 1,
                 f"{astlist_name} expects type argument: the list element type",
@@ -815,13 +819,25 @@ class LktTypesLoader:
         else:
             diag_ctx.error("invalid node type reference")
 
-    def lower_type_decl(self, decl: L.TypeDecl) -> CompiledType:
+    def lower_type_decl(
+        self,
+        decl: L.TypeDecl,
+        entity: Scope.UserType,
+    ) -> CompiledType:
         """
         Create the CompiledType instance corresponding to the given Lkt type
         declaration. Do nothing if it has been already lowered, and stop with
         an error if the lowering for this type is already running (case of
         invalid circular type dependency).
+
+        :param decl: Type decaration to lower.
+        :param entity: Corresponding scope entity. Scopes initialization
+            already created this entity: if this type was not yet lowered,
+            lowering must associate the ``CompiledType`` instance to the
+            entity.
         """
+        assert entity.diagnostic_node == decl
+
         # Sentinel for the dict lookup below, as compiled_type can contain None
         # entries.
         try:
@@ -851,6 +867,7 @@ class LktTypesLoader:
             result = self.create_node(
                 decl,
                 parse_annotations(self.ctx, specs, full_decl, self.root_scope),
+                self.root_scope,
             )
 
         elif isinstance(decl, L.EnumTypeDecl):
@@ -880,7 +897,7 @@ class LktTypesLoader:
             )
 
         self.compiled_types[decl] = result
-        self.root_scope.add(Scope.UserType(decl.f_syn_name.text, decl, result))
+        entity.t_or_none = result
         return result
 
     def lower_base_field(
@@ -1772,13 +1789,18 @@ class LktTypesLoader:
         self.ctx.deferred.type_members.add(owner, fields_cb)
 
     def create_node(
-        self, decl: L.BasicClassDecl, annotations: BaseNodeAnnotations
+        self,
+        decl: L.BasicClassDecl,
+        annotations: BaseNodeAnnotations,
+        scope: Scope,
     ) -> ASTNodeType:
         """
         Create an ASTNodeType instance.
 
         :param decl: Corresponding declaration node.
         :param annotations: Annotations for this declaration.
+        :param scope: Scope used to resolve references in this type
+            declaration.
         """
         is_enum_node = isinstance(annotations, EnumNodeAnnotations)
         loc = Location.from_lkt_node(decl)
@@ -1874,7 +1896,7 @@ class LktTypesLoader:
             base_type = None
             is_token_node = is_error_node = False
         else:
-            base_type = self.resolve_base_node(base_type_node)
+            base_type = self.resolve_base_node(base_type_node, scope)
 
             check_source_language(
                 annotations.generic_list_type is None,
@@ -2179,11 +2201,7 @@ class LktTypesLoader:
             decl.parent.f_doc
         )
         if annotations.metadata:
-            check_source_language(
-                not self.ctx.has_env_metadata,
-                "Only one struct can be the env metadata",
-                location=decl,
-            )
+            assert not self.ctx.has_env_metadata
             check_source_language(
                 result.lkt_name == "Metadata",
                 "The environment metadata struct type must be called"

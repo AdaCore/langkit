@@ -410,19 +410,30 @@ class Resolver:
         else:
             error("node expected", location=name)
 
+    def resolve_type_entity(
+        self,
+        name: L.Expr,
+        scope: Scope,
+    ) -> Scope.BuiltinType | Scope.UserType:
+        """
+        Like ``resolve_entity``, but emit a language spec error if the
+        designated entity is not a type.
+        """
+        result = self.resolve_entity(name, scope)
+        if isinstance(result, (Scope.BuiltinType, Scope.UserType)):
+            return result
+        else:
+            error(
+                f"type expected, got {result.diagnostic_name}",
+                location=name,
+            )
+
     def resolve_type_expr(self, name: L.Expr, scope: Scope) -> CompiledType:
         """
         Like ``resolve_type``, but working on a type expression directly.
         """
         if isinstance(name, L.RefId):
-            entity = self.resolve_entity(name, scope)
-            if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
-                return entity.t
-            else:
-                error(
-                    f"type expected, got {entity.diagnostic_name}",
-                    location=name,
-                )
+            return self.resolve_type_entity(name, scope).t
 
         elif isinstance(name, L.DotExpr):
             # This must be a reference to an enum node:
