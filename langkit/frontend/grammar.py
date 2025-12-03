@@ -340,7 +340,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                 context=ctx,
                 location=loc,
                 parser=lower(rule.f_expr),
-                property_ref=resolver.resolve_property(rule.f_prop_ref),
+                property_ref=resolver.resolve_property(rule.f_prop_ref, scope),
             )
 
         else:

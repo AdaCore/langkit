@@ -439,6 +439,11 @@ class LktTypesLoader:
         Declaration node for this property.
         """
 
+        scope: Scope
+        """
+        Scope to resolve references in this property.
+        """
+
         prop: PropertyDef
         """
         The property whose expression must be lowered.
@@ -462,7 +467,7 @@ class LktTypesLoader:
         Root expression to lower.
         """
 
-        scope: Scope
+        body_scope: Scope
         """
         Scope to use during lowering. The property arguments must be available
         in it.
@@ -478,6 +483,11 @@ class LktTypesLoader:
         default_value: L.Expr
         """
         Expression to lower for this fields' default value.
+        """
+
+        scope: Scope
+        """
+        Scope to resolve references in this field declaration.
         """
 
     def __init__(self, resolver: Resolver):
@@ -496,7 +506,7 @@ class LktTypesLoader:
         self.internal_property_counter = iter(itertools.count(0))
         self.error_nodes: list[ASTNodeType] = []
 
-        type_decls: list[tuple[L.TypeDecl, Scope.UserType]] = []
+        type_decls: list[Scope.UserType] = []
         dyn_vars: list[L.DynVarDecl] = []
         root_node_decl: L.BasicClassDecl | None = None
         self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
@@ -522,11 +532,11 @@ class LktTypesLoader:
                 elif isinstance(decl, L.GrammarDecl):
                     self.root_scope.add(Scope.Grammar(name, decl))
                 elif isinstance(decl, L.TraitDecl):
-                    self.process_user_trait(decl)
+                    self.process_user_trait(decl, self.root_scope)
                 elif isinstance(decl, L.TypeDecl):
                     entity = Scope.UserType(name, decl, None)
                     self.root_scope.add(entity)
-                    type_decls.append((decl, entity))
+                    type_decls.append(entity)
 
                     # Keep track of anything that looks like the root node
                     if (
@@ -566,10 +576,12 @@ class LktTypesLoader:
         # handle node derivation, this recurses on bases first and reject
         # inheritance loops.
         self.properties_to_lower: list[LktTypesLoader.PropertyToLower] = []
-        self.env_specs_to_lower: list[tuple[ASTNodeType, L.EnvSpecDecl]] = []
+        self.env_specs_to_lower: list[
+            tuple[ASTNodeType, L.EnvSpecDecl, Scope]
+        ] = []
         self.fields_to_lower: list[LktTypesLoader.FieldToLower] = []
-        for type_decl, entity in type_decls:
-            self.lower_type_decl(type_decl, entity)
+        for entity in type_decls:
+            self.lower_type_decl(entity, self.root_scope)
 
         # If user code does not define one, create a default Metadata struct
         # and make it visible in the root scope. Otherwise, validate it.
@@ -644,7 +656,9 @@ class LktTypesLoader:
 
         # Lower generic interface members
         for gen_iface, gen_iface_decl in self.gen_iface_decls:
-            self.lower_generic_interface_members(gen_iface, gen_iface_decl)
+            self.lower_generic_interface_members(
+                gen_iface, gen_iface_decl, self.root_scope
+            )
 
         # Now that all generic interface members are known, evaluate the
         # deferred references to them.
@@ -654,8 +668,8 @@ class LktTypesLoader:
         # ENV_SPECS_LOWERING
         #
 
-        for node, env_spec_decl in self.env_specs_to_lower:
-            env_spec = self.lower_env_spec(node, env_spec_decl)
+        for node, env_spec_decl, scope in self.env_specs_to_lower:
+            env_spec = self.lower_env_spec(node, env_spec_decl, scope)
             node.env_spec = env_spec
             env_spec.register_categories(self.ctx)
 
@@ -672,7 +686,7 @@ class LktTypesLoader:
             ):
                 if arg_decl.f_default_val is not None:
                     arg.default_value = self.lower_static_expr(
-                        arg_decl.f_default_val, arg.type
+                        arg_decl.f_default_val, arg.type, p_to_lower.scope
                     )
 
             if p_to_lower.dynamic_vars is not None:
@@ -687,6 +701,7 @@ class LktTypesLoader:
                                 else self.lower_static_expr(
                                     v.default_value,
                                     v.dynvar.variable.type,
+                                    p_to_lower.scope,
                                 )
                             ),
                         )
@@ -697,7 +712,9 @@ class LktTypesLoader:
         # Finally, lower default values for fields
         for f_to_lower in self.fields_to_lower:
             f_to_lower.field.default_value = self.lower_static_expr(
-                f_to_lower.default_value, f_to_lower.field.type
+                f_to_lower.default_value,
+                f_to_lower.field.type,
+                f_to_lower.scope,
             )
 
     def lower_expressions(self) -> None:
@@ -742,7 +759,7 @@ class LktTypesLoader:
                         if p_to_lower.dynamic_vars
                         else p_to_lower.decl
                     )
-                    p_to_lower.scope.add(
+                    p_to_lower.body_scope.add(
                         Scope.BoundDynVar(
                             name,
                             decl_node,
@@ -751,7 +768,7 @@ class LktTypesLoader:
                         )
                     )
                     if force_look_up:
-                        p_to_lower.scope.looked_up.add(name)
+                        p_to_lower.body_scope.looked_up.add(name)
 
             # Now that all types and properties ("declarations") are available,
             # lower the property expressions themselves.
@@ -759,9 +776,11 @@ class LktTypesLoader:
                 self.reset_names_counter()
                 prop.set_expr(
                     p_to_lower.body,
-                    self.lower_expr(p_to_lower.body, p_to_lower.scope, prop),
+                    self.lower_expr(
+                        p_to_lower.body, p_to_lower.body_scope, prop
+                    ),
                 )
-                p_to_lower.scope.report_unused()
+                p_to_lower.body_scope.report_unused()
 
         self.ctx.deferred.property_expressions.resolve()
 
@@ -787,9 +806,7 @@ class LktTypesLoader:
             entity = self.resolver.resolve_type_entity(name.f_type_name, scope)
             if entity.t_or_none is None:
                 assert isinstance(entity.diagnostic_node, L.TypeDecl)
-                base_type = self.lower_type_decl(
-                    entity.diagnostic_node, entity
-                )
+                base_type = self.lower_type_decl(entity, scope)
             else:
                 base_type = entity.t_or_none
 
@@ -821,8 +838,8 @@ class LktTypesLoader:
 
     def lower_type_decl(
         self,
-        decl: L.TypeDecl,
         entity: Scope.UserType,
+        scope: Scope,
     ) -> CompiledType:
         """
         Create the CompiledType instance corresponding to the given Lkt type
@@ -830,13 +847,15 @@ class LktTypesLoader:
         an error if the lowering for this type is already running (case of
         invalid circular type dependency).
 
-        :param decl: Type decaration to lower.
-        :param entity: Corresponding scope entity. Scopes initialization
-            already created this entity: if this type was not yet lowered,
-            lowering must associate the ``CompiledType`` instance to the
-            entity.
+        :param entity: Scope entity for the type to lower. Scopes
+            initialization already created this entity: if this type was not
+            yet lowered, lowering must associate the ``CompiledType`` instance
+            to the entity.
+        :param scope: Scope used to resolve references in this type
+            declaration.
         """
-        assert entity.diagnostic_node == decl
+        decl = entity.diagnostic_node
+        assert isinstance(decl, L.TypeDecl)
 
         # Sentinel for the dict lookup below, as compiled_type can contain None
         # entries.
@@ -866,8 +885,8 @@ class LktTypesLoader:
             )
             result = self.create_node(
                 decl,
-                parse_annotations(self.ctx, specs, full_decl, self.root_scope),
-                self.root_scope,
+                parse_annotations(self.ctx, specs, full_decl, scope),
+                scope,
             )
 
         elif isinstance(decl, L.EnumTypeDecl):
@@ -878,17 +897,16 @@ class LktTypesLoader:
             )
             result = self.create_enum(
                 decl,
-                parse_annotations(
-                    self.ctx, EnumAnnotations, full_decl, self.root_scope
-                ),
+                parse_annotations(self.ctx, EnumAnnotations, full_decl, scope),
             )
 
         elif isinstance(decl, L.StructDecl):
             result = self.create_struct(
                 decl,
                 parse_annotations(
-                    self.ctx, StructAnnotations, full_decl, self.root_scope
+                    self.ctx, StructAnnotations, full_decl, scope
                 ),
+                scope,
             )
 
         else:
@@ -905,12 +923,15 @@ class LktTypesLoader:
         owner: CompiledType,
         full_decl: L.FullDecl,
         allowed_field_kinds: FieldKinds,
+        scope: Scope,
     ) -> AbstractNodeData:
         """
         Lower the field described in ``decl``.
 
         :param allowed_field_kinds: Set of field kinds allowed for the fields
             to load.
+        :param scope: Scope used to resolve references in this field
+            declaration.
         """
         decl = full_decl.f_decl
         assert isinstance(decl, L.FieldDecl)
@@ -919,11 +940,9 @@ class LktTypesLoader:
         name = name_from_lower("field", decl.f_syn_name)
 
         annotations = parse_annotations(
-            self.ctx, FieldAnnotations, full_decl, self.root_scope
+            self.ctx, FieldAnnotations, full_decl, scope
         )
-        field_type = self.resolver.resolve_type(
-            decl.f_decl_type, self.root_scope
-        )
+        field_type = self.resolver.resolve_type(decl.f_decl_type, scope)
         doc = lkt_doc(decl)
 
         cls: Type[AbstractNodeData]
@@ -1061,27 +1080,28 @@ class LktTypesLoader:
 
         if decl.f_trait_ref is not None:
             assert isinstance(result, (PropertyDef, BaseField))
-            self.set_implemented_method(result, decl.f_trait_ref)
+            self.set_implemented_method(result, decl.f_trait_ref, scope)
 
         # If this field has an initialization expression implemented as
         # property, plan to lower it later.
         if isinstance(result, PropertyDef):
             assert body is not None
-            arguments, scope = self.lower_property_arguments(
+            arguments, body_scope = self.lower_property_arguments(
                 prop=result,
                 arg_decl_list=None,
                 label=f"initializer for lazy field {result.qualname}",
+                scope=scope,
             )
             self.properties_to_lower.append(
                 self.PropertyAndExprToLower(
-                    decl, result, arguments, None, body, scope
+                    decl, scope, result, arguments, None, body, body_scope
                 )
             )
 
         if isinstance(result, UserField):
             if decl.f_default_val is not None:
                 self.fields_to_lower.append(
-                    self.FieldToLower(result, decl.f_default_val)
+                    self.FieldToLower(result, decl.f_default_val, scope)
                 )
             elif isinstance(owner, ASTNodeType):
                 check_source_language(
@@ -1109,17 +1129,20 @@ class LktTypesLoader:
         self,
         expr: L.Expr,
         t: CompiledType,
+        scope: Scope,
     ) -> E.BindableLiteralExpr:
         """
         Lower the given expression, checking that it is a valid compile time
         known value of the given type.
+
+        :param scope: Scope used to resolve references in this expression.
         """
         # We lower an expression out of a property (prop=None), so the
         # expression compiler checks that the expression is static. Only
         # BindableLiteralExpr expressions are static, so the assertion must
         # hold.
         result = ExpressionCompiler(self.resolver, prop=None).lower_expr(
-            expr, self.root_scope
+            expr, scope
         )
         assert isinstance(result, E.BindableLiteralExpr)
         if result.type != t:
@@ -1136,6 +1159,7 @@ class LktTypesLoader:
         rtype: CompiledType,
         lower_expr: Callable[[PropertyDef, Scope], E.Expr],
         location: Location,
+        scope: Scope,
     ) -> PropertyDef:
         """
         Create an internal property.
@@ -1155,10 +1179,10 @@ class LktTypesLoader:
         )
         result.location = location
 
-        scope = self.root_scope.create_child(
+        expr_scope = scope.create_child(
             f"scope for {node.lkt_name}'s env spec"
         )
-        self.add_auto_property_arguments(result, scope)
+        self.add_auto_property_arguments(result, expr_scope)
 
         # Property attributes are not computed yet, so it is too early to lower
         # the property body expression: defer it.
@@ -1166,8 +1190,8 @@ class LktTypesLoader:
         def create_expr() -> E.Expr:
             self.reset_names_counter()
             with result.bind():
-                expr = lower_expr(result, scope)
-            scope.report_unused()
+                expr = lower_expr(result, expr_scope)
+            expr_scope.report_unused()
             return expr
 
         self.ctx.deferred.property_expressions.add(result, create_expr)
@@ -1190,6 +1214,7 @@ class LktTypesLoader:
         name: str,
         rtype: CompiledType,
         expr: L.Expr | E.Expr,
+        scope: Scope,
     ) -> PropertyDef: ...
 
     @overload
@@ -1199,6 +1224,7 @@ class LktTypesLoader:
         name: str,
         rtype: CompiledType,
         expr: None,
+        scope: Scope,
     ) -> None: ...
 
     def lower_expr_to_internal_property(
@@ -1207,6 +1233,7 @@ class LktTypesLoader:
         name: str,
         rtype: CompiledType,
         expr: L.Expr | E.Expr | None,
+        scope: Scope,
     ) -> PropertyDef | None:
         """
         Create an internal property to lower an expression.
@@ -1218,6 +1245,7 @@ class LktTypesLoader:
         :param name: Name prefix, used to generate the actual property name.
         :param expr: Body for this proprety.
         :param rtype: Return type for this property.
+        :param scope: Scope used to resolve references in this expression.
         """
         if expr is None:
             return None
@@ -1244,6 +1272,7 @@ class LktTypesLoader:
                 if isinstance(expr, L.Expr)
                 else Location.builtin
             ),
+            scope=scope,
         )
 
     @staticmethod
@@ -1266,13 +1295,16 @@ class LktTypesLoader:
         prop: PropertyDef,
         arg_decl_list: L.FunParamDeclList | None,
         label: str,
+        scope: Scope,
     ) -> tuple[list[L.FunParamDecl], Scope]:
         """
         Lower a property's arguments and create the root scope used to lower
         the property's root expression.
+
+        :param scope: Scope used to resolve references in this property.
         """
         arguments: list[L.FunParamDecl] = []
-        scope = self.root_scope.create_child(f"scope for {label}")
+        scope = scope.create_child(f"scope for {label}")
         self.add_auto_property_arguments(prop, scope)
 
         # Lower arguments and register them both in the property's argument
@@ -1284,7 +1316,7 @@ class LktTypesLoader:
                 self.ctx,
                 FunArgAnnotations,
                 a.f_decl_annotations,
-                self.root_scope,
+                scope,
             )
 
             name = a.f_syn_name
@@ -1313,23 +1345,21 @@ class LktTypesLoader:
         self,
         owner: CompiledType,
         full_decl: L.FullDecl,
+        scope: Scope,
     ) -> PropertyDef:
         """
         Lower the property described in ``decl``.
+
+        :param scope: Scope used to resolve references in this property.
         """
         from langkit.expressions.logic import PredicateErrorDiagnosticTemplate
 
         decl = full_decl.f_decl
         assert isinstance(decl, L.FunDecl)
         annotations = parse_annotations(
-            self.ctx,
-            FunAnnotations,
-            full_decl,
-            self.root_scope,
+            self.ctx, FunAnnotations, full_decl, scope
         )
-        return_type = self.resolver.resolve_type(
-            decl.f_return_type, self.root_scope
-        )
+        return_type = self.resolver.resolve_type(decl.f_return_type, scope)
 
         external = False
         uses_entity_info: bool | None = None
@@ -1384,11 +1414,11 @@ class LktTypesLoader:
         # If this property implements a generic interface method, keep track of
         # it: generic interface methods declarations are not lowered yet.
         if decl.f_trait_ref is not None:
-            self.set_implemented_method(result, decl.f_trait_ref)
+            self.set_implemented_method(result, decl.f_trait_ref, scope)
 
         # Lower its arguments
-        arguments, scope = self.lower_property_arguments(
-            result, decl.f_params, f"property {result.qualname}"
+        arguments, body_scope = self.lower_property_arguments(
+            result, decl.f_params, f"property {result.qualname}", scope
         )
         if annotations.property and arguments:
             error(
@@ -1406,16 +1436,17 @@ class LktTypesLoader:
         # Plan to lower its expressions later
         self.properties_to_lower.append(
             self.PropertyToLower(
-                decl, result, arguments, annotations.with_dynvars
+                decl, scope, result, arguments, annotations.with_dynvars
             )
             if decl.f_body is None
             else self.PropertyAndExprToLower(
                 decl,
+                scope,
                 result,
                 arguments,
                 annotations.with_dynvars,
                 decl.f_body,
-                scope,
+                body_scope,
             )
         )
 
@@ -1425,12 +1456,14 @@ class LktTypesLoader:
         self,
         node: ASTNodeType,
         env_spec: L.EnvSpecDecl,
+        scope: Scope,
     ) -> EnvSpec:
         """
         Lower an env spec for a node.
 
         :param node: Node for which we want to lower the env spec.
         :param env_spec: Env spec to lower.
+        :param scope: Scope used to resolve references in this env spec.
         """
         actions = []
 
@@ -1454,12 +1487,14 @@ class LktTypesLoader:
                         "env_trans_parent",
                         T.Bool,
                         args.get("transitive_parent"),
+                        scope,
                     ),
                     names=self.lower_expr_to_internal_property(
                         node,
                         "env_names",
                         T.Symbol.array,
                         args.get("names"),
+                        scope,
                     ),
                 )
 
@@ -1546,9 +1581,10 @@ class LktTypesLoader:
                             metadata=args.get("metadata"),
                         ),
                         location=Location.from_lkt_node(syn_action),
+                        scope=scope,
                     ),
                     resolver=self.resolver.resolve_property(
-                        args.get("resolver")
+                        args.get("resolver"), scope
                     ),
                 )
 
@@ -1565,9 +1601,10 @@ class LktTypesLoader:
                         name="env_mappings",
                         rtype=T.EnvAssoc,
                         expr=args["mapping"],
+                        scope=scope,
                     ),
                     resolver=self.resolver.resolve_property(
-                        args.get("resolver")
+                        args.get("resolver"), scope
                     ),
                 )
 
@@ -1584,9 +1621,10 @@ class LktTypesLoader:
                         name="env_mappings",
                         rtype=T.EnvAssoc.array,
                         expr=args["mappings"],
+                        scope=scope,
                     ),
                     resolver=self.resolver.resolve_property(
-                        args.get("resolver")
+                        args.get("resolver"), scope
                     ),
                 )
 
@@ -1603,6 +1641,7 @@ class LktTypesLoader:
                         name="env_do",
                         rtype=T.NoCompiledType,
                         expr=args["expr"],
+                        scope=scope,
                     ),
                 )
 
@@ -1640,12 +1679,15 @@ class LktTypesLoader:
                 action = RefEnvs(
                     context=self.ctx,
                     location=location,
-                    resolver=self.resolver.resolve_property(args["resolver"]),
+                    resolver=self.resolver.resolve_property(
+                        args["resolver"], scope
+                    ),
                     nodes_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="ref_env_nodes",
                         rtype=T.root_node.array,
                         expr=args["nodes"],
+                        scope=scope,
                     ),
                     kind=kind,
                     dest_env=self.lower_expr_to_internal_property(
@@ -1653,12 +1695,14 @@ class LktTypesLoader:
                         name="env_dest",
                         rtype=T.LexicalEnv,
                         expr=args.get("dest_env"),
+                        scope=scope,
                     ),
                     cond=self.lower_expr_to_internal_property(
                         node=node,
                         name="ref_cond",
                         rtype=T.Bool,
                         expr=args.get("cond"),
+                        scope=scope,
                     ),
                     category=category,
                     shed_rebindings=shed_rebindings,
@@ -1676,6 +1720,7 @@ class LktTypesLoader:
                         name="env_init",
                         rtype=T.DesignatedEnv,
                         expr=args["env"],
+                        scope=scope,
                     ),
                 )
 
@@ -1693,6 +1738,7 @@ class LktTypesLoader:
         base_type_ref: L.TypeRef | None,
         decls: L.DeclBlock,
         allowed_field_kinds: FieldKinds,
+        scope: Scope,
     ) -> None:
         """
         Create deferred type members lowering for members found in the given
@@ -1704,6 +1750,7 @@ class LktTypesLoader:
         :param decls: Declarations to process.
         :param allowed_field_kinds: Set of field kinds allowed for the fields
             to load.
+        :param scope: Scope used to resolve references in these members.
         """
         # Declaration nodes for fields and properties found in ``decls``
         member_decls: list[L.FullDecl] = []
@@ -1727,7 +1774,7 @@ class LktTypesLoader:
                     "only one env_spec block allowed per type",
                 )
                 has_env_spec = True
-                self.env_specs_to_lower.append((owner, decl))
+                self.env_specs_to_lower.append((owner, decl, scope))
                 continue
 
             # Otherwise, this is a field or a property
@@ -1766,13 +1813,14 @@ class LktTypesLoader:
 
             for full_decl in member_decls:
                 if isinstance(full_decl.f_decl, L.FunDecl):
-                    result.append(self.lower_property(owner, full_decl))
+                    result.append(self.lower_property(owner, full_decl, scope))
                 else:
                     result.append(
                         self.lower_base_field(
                             owner,
                             full_decl,
                             allowed_field_kinds,
+                            scope,
                         )
                     )
 
@@ -1825,7 +1873,7 @@ class LktTypesLoader:
                 else:
                     generic_interfaces.append(
                         self.resolver.resolve_generic_interface(
-                            trait_ref.f_type_name, self.root_scope
+                            trait_ref.f_type_name, scope
                         )
                     )
 
@@ -2010,6 +2058,7 @@ class LktTypesLoader:
                     user_fields=True,
                 )
             ),
+            scope=scope,
         )
 
         # Register the generic interfaces that this type implements
@@ -2168,13 +2217,18 @@ class LktTypesLoader:
         return result
 
     def create_struct(
-        self, decl: L.StructDecl, annotations: StructAnnotations
+        self,
+        decl: L.StructDecl,
+        annotations: StructAnnotations,
+        scope: Scope,
     ) -> StructType:
         """
         Create a StructType instance.
 
         :param decl: Corresponding declaration node.
         :param annotations: Annotations for this declaration.
+        :param scope: Scope used to resolve references in this struct
+            declaration.
         """
         # Check the set of traits that this node implements
         generic_interfaces: list[GenericInterface] = []
@@ -2182,7 +2236,7 @@ class LktTypesLoader:
             if isinstance(trait_ref, L.SimpleTypeRef):
                 generic_interfaces.append(
                     self.resolver.resolve_generic_interface(
-                        trait_ref.f_type_name, self.root_scope
+                        trait_ref.f_type_name, scope
                     )
                 )
             else:
@@ -2221,6 +2275,7 @@ class LktTypesLoader:
                 if annotations.metadata
                 else FieldKinds(user_fields=True)
             ),
+            scope=scope,
         )
 
         # Register the generic interfaces that this type implements
@@ -2257,18 +2312,24 @@ class LktTypesLoader:
         if annotations.generic_interface is None:
             return
 
-        self.register_generic_interface(decl, annotations.generic_interface)
+        self.register_generic_interface(
+            decl, annotations.generic_interface, self.root_scope
+        )
 
-    def process_user_trait(self, decl: L.TraitDecl) -> None:
+    def process_user_trait(self, decl: L.TraitDecl, scope: Scope) -> None:
         """
         Process a trait declared in user code.
+
+        :param decl: Trait declaration to process.
+        :param scope: Scope used to resolve references in this trait
+            declaration.
         """
         full_decl = decl.parent
         assert isinstance(full_decl, L.FullDecl)
 
         # The only traits that are supported there are generic interfaces
         annotations = parse_annotations(
-            self.ctx, TraitAnnotations, full_decl, self.root_scope
+            self.ctx, TraitAnnotations, full_decl, scope
         )
         if annotations.generic_interface is None:
             error(
@@ -2276,12 +2337,15 @@ class LktTypesLoader:
                 location=decl,
             )
 
-        self.register_generic_interface(decl, annotations.generic_interface)
+        self.register_generic_interface(
+            decl, annotations.generic_interface, scope
+        )
 
     def register_generic_interface(
         self,
         decl: L.TraitDecl,
         annotations: GenericInterfaceAnnotationSpec.Value,
+        scope: Scope,
     ) -> None:
         """
         Create a generic interface and schedule the lowering of their members
@@ -2289,6 +2353,8 @@ class LktTypesLoader:
 
         :param decl: Trait declaration for this generic interface.
         :param annotations: Annotations for this generic interface.
+        :param scope: Scope used to resolve references in this trait
+            declaration.
         """
         # Create the GenericInterface instance itself
         name = name_from_camel("generic_interface", decl.f_syn_name).camel
@@ -2300,7 +2366,7 @@ class LktTypesLoader:
         )
 
         # Register it in the root scope
-        self.root_scope.add(
+        scope.add(
             Scope.GenericInterface(
                 name=name,
                 diagnostic_node=decl,
@@ -2317,6 +2383,7 @@ class LktTypesLoader:
         self,
         gen_iface: GenericInterface,
         decl: L.TraitDecl,
+        scope: Scope,
     ) -> None:
         """
         Lower all the members of the given generic interface.
@@ -2324,6 +2391,8 @@ class LktTypesLoader:
         :param gen_iface: Generic interface whose members must be lowered.
         :param decl: Lkt parse node for the generic interface itself. The
             members to lower are searched from there.
+        :param scope: Scope used to resolve references in this member
+            declaration.
         """
         for full_member_decl in decl.f_decls:
             # The only legal declarations inside a generic interface are
@@ -2348,7 +2417,7 @@ class LktTypesLoader:
             ).lower
             method_doc = lkt_doc(member_decl)
             return_type = self.resolver.resolve_type_or_gen_iface(
-                member_decl.f_return_type, self.root_scope
+                member_decl.f_return_type, scope
             )
             args: list[GenericArgument] = []
             for a in member_decl.f_params:
@@ -2363,7 +2432,7 @@ class LktTypesLoader:
                     GenericArgument(
                         name=name_from_lower("argument", a.f_syn_name).lower,
                         type=self.resolver.resolve_type_or_gen_iface(
-                            a.f_decl_type, self.root_scope
+                            a.f_decl_type, scope
                         ),
                     )
                 )
@@ -2375,15 +2444,19 @@ class LktTypesLoader:
         self,
         member: AbstractNodeData,
         method_name: L.DotExpr,
+        scope: Scope,
     ) -> None:
         """
         Mark the generic interface designated by ``method_name`` as implemented
         by ``member``.
+
+        :param scope: Scope used to resolve the reference to the generic
+            interface method.
         """
         self.ctx.deferred.implemented_methods.add(
             member,
             lambda: self.resolver.resolve_generic_interface_method(
-                method_name, self.root_scope
+                method_name, scope
             ),
         )
 

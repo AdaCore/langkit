@@ -475,12 +475,20 @@ class Resolver:
             error("node expected", location=name)
 
     @overload
-    def resolve_property(self, name: L.Expr) -> E.PropertyDef: ...
+    def resolve_property(
+        self,
+        name: L.Expr,
+        scope: Scope,
+    ) -> E.PropertyDef: ...
 
     @overload
-    def resolve_property(self, name: None) -> None: ...
+    def resolve_property(self, name: None, scope: Scope) -> None: ...
 
-    def resolve_property(self, name: L.Expr | None) -> E.PropertyDef | None:
+    def resolve_property(
+        self,
+        name: L.Expr | None,
+        scope: Scope,
+    ) -> E.PropertyDef | None:
         """
         Like ``resolve_entity``, but for properties specifically.
         """
@@ -494,7 +502,7 @@ class Resolver:
                 location=name,
             )
 
-        prefix = self.resolve_node_type_expr(name.f_prefix, self.root_scope)
+        prefix = self.resolve_node_type_expr(name.f_prefix, scope)
         suffix_node = name.f_suffix
 
         member = prefix.get_abstract_node_data_dict().get(
