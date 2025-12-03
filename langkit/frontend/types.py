@@ -528,7 +528,7 @@ class LktTypesLoader:
                     self.root_scope.add(entity)
                     type_decls.append((decl, entity))
 
-                    # Keep track of anyhing that looks like the root node
+                    # Keep track of anything that looks like the root node
                     if (
                         isinstance(decl, L.BasicClassDecl)
                         and decl.p_base_type is None
