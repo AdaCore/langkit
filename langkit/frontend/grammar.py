@@ -86,12 +86,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
     """
     Create a grammar from a set of Lktlang units.
 
-    Note that this only initializes a grammar and fetches relevant declarations
-    in the Lktlang unit. The actual lowering on grammar rules happens in a
-    separate pass: see lower_all_lkt_rules.
-
-    :param lkt_units: Non-empty list of analysis units where to look for the
-        grammar.
+    :param resolver: Helper to find Lkt declarations.
     """
     ctx = resolver.context
 
