@@ -1,7 +1,0 @@
-== test.lkt ==
-test.lkt:12:1: error: Type inheritance loop detected
-12 | class AbstractA: AbstractB {
-   | ^
-
-
-lkt_compile: Done

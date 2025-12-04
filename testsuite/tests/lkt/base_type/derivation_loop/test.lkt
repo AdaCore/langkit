@@ -1,3 +1,6 @@
+# Check that cycling derivations (AbstractA derives AbstractB, which derives
+# AbstractA) are correctly rejected.
+#
 import lexer_example
 
 @with_lexer(foo_lexer)

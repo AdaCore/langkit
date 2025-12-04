@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:15:1: error: Type inheritance loop detected
+15 | class AbstractA: AbstractB {
+   | ^
+
+
+lkt_compile: Done

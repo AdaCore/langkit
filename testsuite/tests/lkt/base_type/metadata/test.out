@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:14:17: error: node type expected
+14 | class SomeNode: Metadata {
+   |                 ^^^^^^^^
+
+
+lkt_compile: Done

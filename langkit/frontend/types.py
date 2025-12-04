@@ -505,11 +505,12 @@ class LktTypesLoader:
         self.compiled_types: dict[L.Decl, CompiledType | None] = {}
         self.internal_property_counter = iter(itertools.count(0))
         self.error_nodes: list[ASTNodeType] = []
+        self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
 
         type_decls: list[Scope.UserType] = []
         dyn_vars: list[L.DynVarDecl] = []
         root_node_decl: L.BasicClassDecl | None = None
-        self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
+        metadata_found = False
 
         # Look for generic interfaces defined in the prelude
         assert isinstance(resolver.lkt_units[0].root, L.LangkitRoot)
@@ -538,12 +539,15 @@ class LktTypesLoader:
                     self.root_scope.add(entity)
                     type_decls.append(entity)
 
-                    # Keep track of anything that looks like the root node
+                    # Keep track of anything that looks like the root node, or
+                    # the Metadata struct.
                     if (
                         isinstance(decl, L.BasicClassDecl)
                         and decl.p_base_type is None
                     ):
                         root_node_decl = decl
+                    elif name == "Metadata":
+                        metadata_found = True
 
                 elif isinstance(decl, L.DynVarDecl):
                     dyn_vars.append(decl)
@@ -562,6 +566,21 @@ class LktTypesLoader:
                 "no node type declaration found",
                 location=resolver.root_lkt_source_loc,
             )
+
+        # If user code does not define one, create a default Metadata struct
+        # and make it visible in the root scope.
+        if not metadata_found:
+            self.ctx.env_metadata = StructType(
+                context=self.ctx,
+                name=names.Name("Metadata"),
+                location=Location.builtin,
+                doc="",
+                fields=None,
+            )
+            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
+                "Metadata", self.ctx.env_metadata
+            )
+            self.has_env_metadata = True
 
         # At this stage, all generic interfaces are lowered, so we can process
         # all deferred references.
@@ -582,21 +601,6 @@ class LktTypesLoader:
         self.fields_to_lower: list[LktTypesLoader.FieldToLower] = []
         for entity in type_decls:
             self.lower_type_decl(entity, self.root_scope)
-
-        # If user code does not define one, create a default Metadata struct
-        # and make it visible in the root scope. Otherwise, validate it.
-        if not self.ctx.has_env_metadata:
-            self.ctx.env_metadata = StructType(
-                context=self.ctx,
-                name=names.Name("Metadata"),
-                location=Location.builtin,
-                doc="",
-                fields=None,
-            )
-            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
-                "Metadata", self.ctx.env_metadata
-            )
-            self.has_env_metadata = True
 
         #
         # DYNVAR_LOWERING
