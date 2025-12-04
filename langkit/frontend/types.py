@@ -537,17 +537,25 @@ class LktTypesLoader:
                 elif isinstance(decl, L.TypeDecl):
                     entity = Scope.UserType(name, decl, None)
                     self.root_scope.add(entity)
-                    type_decls.append(entity)
 
                     # Keep track of anything that looks like the root node, or
                     # the Metadata struct.
+                    insert_first = False
                     if (
                         isinstance(decl, L.BasicClassDecl)
                         and decl.p_base_type is None
                     ):
                         root_node_decl = decl
+                        insert_first = True
                     elif name == "Metadata":
                         metadata_found = True
+
+                    # Plan to lower the root node first, so that the generic
+                    # list type is registered in scopes before we need to
+                    # lookup types.
+                    type_decls.insert(
+                        0 if insert_first else len(type_decls) + 1, entity
+                    )
 
                 elif isinstance(decl, L.DynVarDecl):
                     dyn_vars.append(decl)
@@ -1955,6 +1963,11 @@ class LktTypesLoader:
                 "Only the root AST node can hold the name of the generic list"
                 " type",
                 location=annotations.syn_annotations["generic_list_type"],
+            )
+            check_source_language(
+                not base_type.is_generic_list_type,
+                "Only root list types can derive from the generic list type",
+                location=base_type_node,
             )
 
             check_trait(

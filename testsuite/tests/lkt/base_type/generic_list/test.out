@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:14:16: error: Only root list types can derive from the generic list type
+14 | class Example: FooNodeBaseList {
+   |                ^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

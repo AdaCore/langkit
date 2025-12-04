@@ -1,7 +1,7 @@
 == test.lkt ==
-test.lkt:14:1: error: There can be only one root node (FooNode)
-14 | class OtherNode implements Node[OtherNode] {
-   | ^
+test.lkt:8:1: error: There can be only one root node (OtherNode)
+8 | class FooNode implements Node[FooNode] {
+  | ^
 
 
 lkt_compile: Done
