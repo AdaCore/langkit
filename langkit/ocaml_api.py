@@ -244,7 +244,7 @@ class OCamlAPISettings(AbstractAPISettings):
         :param t: Type we want to get the module name.
         """
         match t:
-            case T.BigInt | T.Token | T.SourceLocation | T.Symbol:
+            case T.BigInt | T.SourceLocation | T.Symbol:
                 return self.module_name(t)
             case ct.EnumType():
                 return self.module_name(t)
@@ -254,6 +254,8 @@ class OCamlAPISettings(AbstractAPISettings):
                 return "EntityStruct"
             case T.AnalysisUnit:
                 return "{}Struct".format(t.api_name.camel)
+            case T.Token:
+                return "TokenStruct"
             case ct.ArrayType():
                 return "{}Struct".format(self.array_wrapper(t))
             case ct.IteratorType():
@@ -323,7 +325,6 @@ class OCamlAPISettings(AbstractAPISettings):
             case (
                 ct.EnumType()
                 | ct.ASTNodeType()
-                | T.Token
                 | T.SourceLocation
                 | T.Symbol
                 | T.Bool
@@ -334,7 +335,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 | T.EnvRebindings
             ):
                 return False
-            case T.AnalysisUnit | ct.EntityType():
+            case T.AnalysisUnit | ct.EntityType() | T.Token:
                 return True
             case ct.ArrayType():
                 return self.wrap_requires_context(t.element_type)
@@ -663,7 +664,6 @@ class OCamlAPISettings(AbstractAPISettings):
             case (
                 T.Char
                 | T.String
-                | T.Token
                 | T.SourceLocation
                 | T.Symbol
                 | ct.EnumType()
@@ -673,6 +673,7 @@ class OCamlAPISettings(AbstractAPISettings):
             case (
                 ct.EntityType()
                 | T.AnalysisUnit
+                | T.Token
                 | ct.ArrayType()
                 | ct.IteratorType()
                 | ct.StructType()
@@ -710,11 +711,11 @@ class OCamlAPISettings(AbstractAPISettings):
                 return self.type_public_name(t)
             case ct.ASTNodeType():
                 return "BareNode.t"
-            case T.Token | T.SourceLocation | T.Symbol:
+            case T.SourceLocation | T.Symbol:
                 return "{}.t structure".format(self.module_name(t))
             case T.AnalysisUnit:
                 return "{}.t".format(self.struct_name(t))
-            case ct.StructType():
+            case T.Token | ct.StructType():
                 return "{}.t structure".format(self.struct_name(t))
             case ct.ArrayType() | ct.IteratorType():
                 return "{}.t structure ptr".format(self.struct_name(t))

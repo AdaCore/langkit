@@ -171,7 +171,28 @@ let test_token () =
     |> List.filter (fun l -> List.length l > 1)
   in
   Format.printf "@[<v>%a@ @]" (Format.pp_print_list pp_tok_list) equiv_tokens ;
-  Format.printf "@[<v>================================@ @ @]"
+  Format.printf "@[<v>================================@ @ @]" ;
+  Format.printf "@[<v>========TOKEN LOST CONTEXT========@ @]" ;
+  (* This checks if when we lose the libadaling context it is still possible,
+     to use the associated token. In other words, tokens should keep a
+     reference to the enclosing analysis context *)
+  let first_token () =
+    let ctx = AnalysisContext.create () in
+    let u = AnalysisContext.get_from_file ~reparse:true ctx "foo.txt" in
+    AnalysisUnit.first_token u |> value_exn
+  in
+  let start = first_token () in (* At this point we completely lost the context *)
+  Gc.compact () ; (* Call the gc to ensure that the libadalang context is freed if start doesn't keep a reference *)
+  let rec aux token =
+    Format.printf "@[<v>  %S@ @]" token.Token.text ;
+    match Token.next token with
+    | Some token ->
+        aux token
+    | None ->
+        ()
+  in
+  aux start ;
+  Format.printf "@[<v>==================================@ @ @]"
 
 let test_node () =
   Format.printf "@[<v>=======NODE ITERATORS=======@ @]" ;

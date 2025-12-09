@@ -263,6 +263,36 @@ Equivalent tokens: identifier identifier
 Equivalent tokens: example example
 ================================
 
+========TOKEN LOST CONTEXT========
+  "null"
+  " "
+  "example"
+  " "
+  "var"
+  " "
+  "("
+  "null"
+  " "
+  "example"
+  " "
+  "null"
+  ")"
+  " "
+  "example"
+  " "
+  "null"
+  " "
+  "def"
+  " "
+  "("
+  " "
+  "x"
+  " "
+  ")"
+  "\n"
+  ""
+==================================
+
 =======NODE ITERATORS=======
 Children:
   <NullNode foo.txt:1:1-1:5>
