@@ -32,7 +32,7 @@ package body Liblktlang_Support.Prettier_Utils is
    function Lookup
      (Source_Name : Unbounded_String;
       Symbols     : Symbol_Table;
-      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      Symbol_Map  : aliased in out Symbol_Parsing_Maps.Map)
       return Symbol_Parsing_Maps.Reference_Type;
    --  Return a reference to the entry in ``Symbol_Map`` corresponding to the
    --  ```Source_Name`` symbol (converted to a ``Symbol_Type`` using
@@ -535,7 +535,7 @@ package body Liblktlang_Support.Prettier_Utils is
    function Lookup
      (Source_Name : Unbounded_String;
       Symbols     : Symbol_Table;
-      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      Symbol_Map  : aliased in out Symbol_Parsing_Maps.Map)
       return Symbol_Parsing_Maps.Reference_Type
    is
       Symbol   : constant Symbol_Type :=
