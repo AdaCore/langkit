@@ -92,6 +92,13 @@ True
 {'a': 1, 'b': {'a': 'bar', 'b': 42}}
     DCNesting(a=1, b=DCSimple(a='bar', b=42))
 
+# Enum
+
+'RED'
+    EColor.RED
+'GRAY'
+    DeserializationError: <input>: no member 'GRAY' in enum 'EColor'
+
 # Invalid types
 
 None
@@ -99,6 +106,8 @@ None
 {1: 10}
     TypeError: invalid deserialization type for dict key: <class 'int'>
 [1]
-    TypeError: Deserializer callback needed for the non-dataclass type <class 'object'>
+    TypeError: Deserializer callback needed for type <class 'object'>
+[1]
+    DeserializationError: <input>: str expected, got a list
 
 Done

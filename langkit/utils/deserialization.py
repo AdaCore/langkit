@@ -18,6 +18,19 @@ handled automatically (dict keys must be strings)::
     # <DeserializationError: <in-memory string>[1]: string expected, got a int>
     d.deserialize("<in-memory string>", list[str], ["a", 1])
 
+Custom enum types are also supported::
+
+    class Color(Enum):
+        RED = 1
+        GREEN = 2
+        BLUE = 3
+
+    # Returns Color.RED
+    d.deserialize("<in-memory string>", Color, "RED")
+
+    # <DeserializationError: <in-memory string>: no member 'GRAY' in 'Color'>
+    d.deserialize("<in-memory string>", Color, "GRAY")
+
 Dataclasses are where this module has added value::
 
     @dataclass
@@ -75,6 +88,7 @@ registered with the deserialization callback with the ``add_type`` method::
 from __future__ import annotations
 
 import dataclasses
+import enum
 import functools
 import inspect
 import types
@@ -252,12 +266,14 @@ class Deserializer:
         this type.
         """
         if deserializer is None:
-            if not dataclasses.is_dataclass(t):
-                raise TypeError(
-                    "Deserializer callback needed for the non-dataclass type"
-                    f" {t}"
+            if dataclasses.is_dataclass(t):
+                deserializer = functools.partial(
+                    self._deserialize_dataclass, t
                 )
-            deserializer = functools.partial(self._deserialize_dataclass, t)
+            elif isinstance(t, enum.EnumType):
+                deserializer = functools.partial(self._deserialize_enum, t)
+            else:
+                raise TypeError(f"Deserializer callback needed for type {t}")
         assert deserializer is not None
 
         name = t.__name__
@@ -404,6 +420,30 @@ class Deserializer:
             )
 
         return rtype(**field_values)
+
+    @staticmethod
+    def _deserialize_enum(
+        rtype: Type[enum.Enum],
+        deserializer: Deserializer,
+        context: str,
+        obj: object,
+    ) -> enum.Enum:
+        """
+        Deserialize a JSON-like object into the given enum type.
+
+        See ``TypeDeserializer`` for the semantics of the ``deserializer``,
+        ``context`` and ``obj`` parameters.
+        """
+        if not isinstance(obj, str):
+            deserializer.type_error(context, obj, "str")
+
+        try:
+            return rtype[obj]
+        except KeyError:
+            deserializer.error(
+                context,
+                f"no member '{obj}' in enum '{rtype.__name__}'",
+            )
 
     def deserialize(
         self,
