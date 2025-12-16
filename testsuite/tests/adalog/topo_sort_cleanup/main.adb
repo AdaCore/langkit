@@ -1,7 +1,7 @@
 --  Check that topo sort properly cleans up its re-used data structures between
 --  two runs. It used not to, which could trigger a crash.
 
-with Langkit_Support.Adalog; use Langkit_Support.Adalog;
+with Langkit_Support.Adalog;
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
