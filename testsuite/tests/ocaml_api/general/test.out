@@ -10,24 +10,24 @@ Unit corresponding to file foo.txt
 =======TOKEN FUNCTIONS=======
 With trivia:
   root text=
-    "null example var (null example null) example null"
+    "null example var (null example null) example null def ( x )"
   first_token = "null"
   first_token_kind_name = "Null"
   last_token = ""
   token_start = "null"
-  token_end = "null"
-  token_count = 11
-  trivia_count = 8
+  token_end = ")"
+  token_count = 15
+  trivia_count = 12
 
 Without trivia:
   root text=
-    "null example var (null example null) example null"
+    "null example var (null example null) example null def ( x )"
   first_token = "null"
   first_token_kind_name = "Null"
   last_token = ""
   token_start = "null"
-  token_end = "null"
-  token_count = 11
+  token_end = ")"
+  token_count = 15
   trivia_count = 0
 Null token: None
 =============================
@@ -51,6 +51,14 @@ Unit fold tokens:
   "example"
   " "
   "null"
+  " "
+  "def"
+  " "
+  "("
+  " "
+  "x"
+  " "
+  ")"
   "\n"
   ""
 
@@ -72,6 +80,14 @@ Unit iter tokens:
   "example"
   " "
   "null"
+  " "
+  "def"
+  " "
+  "("
+  " "
+  "x"
+  " "
+  ")"
   "\n"
   ""
   
@@ -93,6 +109,14 @@ Unit map tokens:
   "example"
   " "
   "null"
+  " "
+  "def"
+  " "
+  "("
+  " "
+  "x"
+  " "
+  ")"
   "\n"
   ""
 
@@ -114,6 +138,14 @@ Unit token list:
   "example"
   " "
   "null"
+  " "
+  "def"
+  " "
+  "("
+  " "
+  "x"
+  " "
+  ")"
   "\n"
   ""
 
@@ -135,6 +167,14 @@ Root node fold tokens:
   "example"
   " "
   "null"
+  " "
+  "def"
+  " "
+  "("
+  " "
+  "x"
+  " "
+  ")"
 
 Root node iter tokens:
   "null"
@@ -154,6 +194,14 @@ Root node iter tokens:
   "example"
   " "
   "null"
+  " "
+  "def"
+  " "
+  "("
+  " "
+  "x"
+  " "
+  ")"
   
 Root node map tokens:
   "null"
@@ -173,6 +221,14 @@ Root node map tokens:
   "example"
   " "
   "null"
+  " "
+  "def"
+  " "
+  "("
+  " "
+  "x"
+  " "
+  ")"
 
 Root node token list:
   "null"
@@ -192,6 +248,14 @@ Root node token list:
   "example"
   " "
   "null"
+  " "
+  "def"
+  " "
+  "("
+  " "
+  "x"
+  " "
+  ")"
 =============================
 
 ========TOKEN EQUIVALENT========
@@ -206,6 +270,7 @@ Children:
   <Var foo.txt:1:14-1:37>
   <Example foo.txt:1:38-1:45>
   <NullNode foo.txt:1:46-1:50>
+  <Def foo.txt:1:51-1:60>
 
 Fold fields: 
   <NullNode foo.txt:1:1-1:5>
@@ -213,6 +278,7 @@ Fold fields:
   <Var foo.txt:1:14-1:37>
   <Example foo.txt:1:38-1:45>
   <NullNode foo.txt:1:46-1:50>
+  <Def foo.txt:1:51-1:60>
 
 Iter fields:
   <NullNode foo.txt:1:1-1:5>
@@ -220,11 +286,12 @@ Iter fields:
   <Var foo.txt:1:14-1:37>
   <Example foo.txt:1:38-1:45>
   <NullNode foo.txt:1:46-1:50>
+  <Def foo.txt:1:51-1:60>
   
 proposition (for all fields f1 of root. exists fields f2 of root. f1 = f2) is true
 
 fields_with_names:
-root: <Sequence foo.txt:1:1-1:50>
+root: <Sequence foo.txt:1:1-1:60>
   item_0: <NullNode foo.txt:1:1-1:5>
     
   item_1: <Example foo.txt:1:6-1:13>
@@ -241,8 +308,12 @@ root: <Sequence foo.txt:1:1-1:50>
     
   item_4: <NullNode foo.txt:1:46-1:50>
     
+  item_5: <Def foo.txt:1:51-1:60>
+    ident: <Ident foo.txt:1:57-1:58>
+      
+    default: None
 pp_tree:
-Sequence foo.txt:1:1-1:50
+Sequence foo.txt:1:1-1:60
   item_0:
   | NullNode foo.txt:1:1-1:5
   item_1:
@@ -261,9 +332,14 @@ Sequence foo.txt:1:1-1:50
   | Example foo.txt:1:38-1:45
   item_4:
   | NullNode foo.txt:1:46-1:50
+  item_5:
+  | Def foo.txt:1:51-1:60
+  |   ident:
+  |   | Ident foo.txt:1:57-1:58: x
+  |   default: None
 
 Fold: 
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
   <NullNode foo.txt:1:1-1:5>
   <Example foo.txt:1:6-1:13>
   <Var foo.txt:1:14-1:37>
@@ -273,9 +349,11 @@ Fold:
   <NullNode foo.txt:1:32-1:36>
   <Example foo.txt:1:38-1:45>
   <NullNode foo.txt:1:46-1:50>
+  <Def foo.txt:1:51-1:60>
+  <Ident foo.txt:1:57-1:58>
 
 Iter:
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
   <NullNode foo.txt:1:1-1:5>
   <Example foo.txt:1:6-1:13>
   <Var foo.txt:1:14-1:37>
@@ -285,6 +363,8 @@ Iter:
   <NullNode foo.txt:1:32-1:36>
   <Example foo.txt:1:38-1:45>
   <NullNode foo.txt:1:46-1:50>
+  <Def foo.txt:1:51-1:60>
+  <Ident foo.txt:1:57-1:58>
   
 proposition (for all node n1. exists node n2. n1 = n2) is true
 ============================
@@ -295,51 +375,60 @@ Lookup at loc 2:25 and kind `Sequence` returned None.
 ============================
 
 =======PARENT(S)=======
-<Sequence foo.txt:1:1-1:50> parents:
-  <Sequence foo.txt:1:1-1:50>
+<Sequence foo.txt:1:1-1:60> parents:
+  <Sequence foo.txt:1:1-1:60>
 
 <NullNode foo.txt:1:1-1:5> parents:
   <NullNode foo.txt:1:1-1:5>
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
 
 <Example foo.txt:1:6-1:13> parents:
   <Example foo.txt:1:6-1:13>
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
 
 <Var foo.txt:1:14-1:37> parents:
   <Var foo.txt:1:14-1:37>
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
 
 <Sequence foo.txt:1:19-1:36> parents:
   <Sequence foo.txt:1:19-1:36>
   <Var foo.txt:1:14-1:37>
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
 
 <NullNode foo.txt:1:19-1:23> parents:
   <NullNode foo.txt:1:19-1:23>
   <Sequence foo.txt:1:19-1:36>
   <Var foo.txt:1:14-1:37>
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
 
 <Example foo.txt:1:24-1:31> parents:
   <Example foo.txt:1:24-1:31>
   <Sequence foo.txt:1:19-1:36>
   <Var foo.txt:1:14-1:37>
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
 
 <NullNode foo.txt:1:32-1:36> parents:
   <NullNode foo.txt:1:32-1:36>
   <Sequence foo.txt:1:19-1:36>
   <Var foo.txt:1:14-1:37>
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
 
 <Example foo.txt:1:38-1:45> parents:
   <Example foo.txt:1:38-1:45>
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
 
 <NullNode foo.txt:1:46-1:50> parents:
   <NullNode foo.txt:1:46-1:50>
-  <Sequence foo.txt:1:1-1:50>
+  <Sequence foo.txt:1:1-1:60>
+
+<Def foo.txt:1:51-1:60> parents:
+  <Def foo.txt:1:51-1:60>
+  <Sequence foo.txt:1:1-1:60>
+
+<Ident foo.txt:1:57-1:58> parents:
+  <Ident foo.txt:1:57-1:58>
+  <Def foo.txt:1:51-1:60>
+  <Sequence foo.txt:1:1-1:60>
 
 proposition (for all node n. for fields fields f of n. parent f = n) is true
 =======================
@@ -350,6 +439,7 @@ proposition (for all node n. for fields fields f of n. parent f = n) is true
 <Var foo.txt:1:14-1:37> previous sibling is <Example foo.txt:1:6-1:13>
 <Example foo.txt:1:38-1:45> previous sibling is <Var foo.txt:1:14-1:37>
 <NullNode foo.txt:1:46-1:50> previous sibling is <Example foo.txt:1:38-1:45>
+<Def foo.txt:1:51-1:60> previous sibling is <NullNode foo.txt:1:46-1:50>
 ======================
 
 =======ARRAY=======
@@ -404,12 +494,12 @@ int_double 10**100: 200000000000000000000000000000000000000000000000000000000000
 
 =======STRUCT=======
 me(false): None
-me(true): <Sequence foo.txt:1:1-1:50>
+me(true): <Sequence foo.txt:1:1-1:60>
 get_node(false_node_struct): None
-get_node(true_node_struct): <Sequence foo.txt:1:1-1:50>
+get_node(true_node_struct): <Sequence foo.txt:1:1-1:60>
 ====================
 
 =======ARRAY OF ARRAY=======
-node: <Sequence foo.txt:1:1-1:50>
+node: <Sequence foo.txt:1:1-1:60>
 ============================
 Done

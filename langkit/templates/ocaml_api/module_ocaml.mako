@@ -1125,43 +1125,22 @@ let ${ocaml_api.field_name(field)}
     ${ocaml_api.wrap_value('!@ result_ptr', root_entity, '(context node)',
          check_for_null=True)}
 
-  let children_opt node =
-    let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
-    let context = context node in
-    let c_value_ptr = allocate_n ${ocaml_api.c_type(T.entity.array)} ~count:1 in
-    let _ : int =
-      CFunctions.${c_api.get_name('node_children')}
-        (addr node_c_value)
-        (c_value_ptr)
-    in
-    let c_value = !@(!@(c_value_ptr)) in
-    let length = getf c_value ${ocaml_api.struct_name(T.entity.array)}.n in
-    let items = c_value @. ${ocaml_api.struct_name(T.entity.array)}.items in
-    let f i =
-      let fresh = allocate EntityStruct.c_type !@(items +@ i) in
-      ${ocaml_api.wrap_value('!@ fresh', root_entity, 'context',
-         check_for_null=True)}
-    in
-    let result = List.init length f in
-    ${ocaml_api.struct_name(T.entity.array)}.dec_ref (!@ c_value_ptr);
-    result
-
   ## TODO: check if it is better to implement this forcing the ocaml fields
   let iter_fields f node =
-    children_opt (node :> ${root_entity_type})
-    |> List.iter (function None -> () | Some node -> f node)
+    children (node :> ${root_entity_type})
+    |> List.iter f
 
   let fold_fields f acc node =
-    children_opt (node :> ${root_entity_type})
-    |> List.fold_left (fun x -> function None -> x | Some node -> f x node) acc
+    children (node :> ${root_entity_type})
+    |> List.fold_left f acc
 
   let exists_fields p node =
-    children_opt (node :> ${root_entity_type})
-    |> List.exists (function | None -> false | Some node -> p node)
+    children (node :> ${root_entity_type})
+    |> List.exists p
 
   let for_all_fields p node =
-    children_opt (node :> ${root_entity_type})
-    |> List.for_all (function | None -> true | Some node -> p node)
+    children (node :> ${root_entity_type})
+    |> List.for_all p
 
   let fold f acc node =
     (* Use an auxiliary function here to have a better type for the function *)
@@ -1254,14 +1233,14 @@ let ${ocaml_api.field_name(field)}
 
   let fields_with_names node =
     let aux i x =
-      (Format.sprintf "item_%d" i), x
+      (Format.sprintf "item_%d" i), Some x
     in
     match (node :> ${root_entity_type}) with
       % for astnode in reversed(ctx.node_types):
          % if not astnode.abstract:
     | ${ocaml_api.polymorphic_variant_name(astnode)} value ->
             % if astnode.is_list:
-        List.mapi aux (children_opt node)
+        List.mapi aux (children node)
             % else:
         [
                % for field in ocaml_api.get_parse_fields(astnode):

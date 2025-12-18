@@ -5,10 +5,11 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Sequence+(node)
-    node <- or(example | null_node | var | ident | string)
+    node <- or(example | null_node | var | def | ident | string )
     example <- Example("example")
     null_node <- Null("null")
     var <- Var("var" "(" main_rule ")")
+    def <- Def("def" "(" ident ?pick("=" node) ")")
     ident <- Ident(@Identifier)
     string <- StringLiteral(@String)
 }
@@ -92,6 +93,11 @@ class StringLiteral: FooNode {
 
 class Var: FooNode {
     @parse_field arg: Sequence
+}
+
+class Def: FooNode {
+   @parse_field ident: Ident
+   @nullable @parse_field default: FooNode
 }
 
 struct FooNodeStruct {
