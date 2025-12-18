@@ -59,25 +59,40 @@ end
     let c_value = !@ c_value_ptr in
     let length = getf c_value ${ocaml_api.struct_name(cls)}.n in
     let items = c_value @. ${ocaml_api.struct_name(cls)}.items in
-    let f i =
+    let[@tail_mod_cons] rec f i =
+      if i >= length then
+         []
+      else
+         let elt_opt =
       % if cls.element_type.is_ada_record:
-      (* we want to allocate a fresh value for a record, otherwize, the c value
-       * will still point to the memory at array location *)
-      let fresh =
-        allocate ${ocaml_api.c_type(cls.element_type)} (!@ (items +@ i))
-      in
-      (* Do not dec_ref the item here since this is the responsability of
-         the array *)
-      ${ocaml_api.wrap_value('!@ fresh', cls.element_type, "context",
-                             dec_ref="false")}
+            (* we want to allocate a fresh value for a record, otherwize, the c
+               value will still point to the memory at array location *)
+            let fresh =
+              allocate ${ocaml_api.c_type(cls.element_type)} (!@ (items +@ i))
+            in
+            (* Do not dec_ref the item here since this is the responsability of
+               the array *)
+         % if cls.element_type.is_entity_type:
+            (${ocaml_api.wrap_value('!@ fresh', cls.element_type,
+                                    "context", dec_ref="false",
+                                    check_for_null="True")})
+         % else:
+            Some (${ocaml_api.wrap_value('!@ fresh', cls.element_type,
+                                         "context", dec_ref="false")})
+         % endif
+
       % else:
-      (* Do not dec_ref the item here since this is the responsability of
-         the array *)
-      ${ocaml_api.wrap_value('!@ (items +@ i)', cls.element_type, "context",
-                             dec_ref="false")}
+            Some (${ocaml_api.wrap_value('!@ (items +@ i)', cls.element_type,
+                                         "context", dec_ref="false")})
       % endif
+         in
+         match elt_opt with
+         | Some elt ->
+             elt :: f (i + 1)
+         | None ->
+             f (i + 1)
     in
-    let result = List.init length f in
+    let result = f 0 in
     if dec_ref then ${ocaml_api.struct_name(cls)}.dec_ref c_value_ptr;
     result
 

@@ -312,13 +312,6 @@ module ${ocaml_api.node_name(astnode)} : sig
 
   ${token_iterator.sig('[< {}]'.format(root_entity_type))}
 
-  val children_opt : [< ${root_entity_type} ] -> ${root_entity_type} option list
-  (**
-   * Return an optional list of nodes which are the children of the given node.
-   * Each child is optional because it can either be because of a syntax error,
-   * or an optional field evaluated to null.
-   *)
-
   val fold_fields :
     ('a -> ${root_entity_type} -> 'a) -> 'a -> [< ${root_entity_type} ] -> 'a
   (**

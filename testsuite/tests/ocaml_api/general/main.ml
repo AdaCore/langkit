@@ -182,10 +182,10 @@ let test_node () =
   let root = root_exn u in
   (* Test iterators on fields *)
 
-  (* children_opt *)
+  (* children *)
   Format.printf "@[<v>@[<v 2>Children:@ %a@]@ @ @]"
-    (Format.pp_print_list pp_image_opt)
-    (FooNode.children_opt root) ;
+    (Format.pp_print_list pp_image)
+    (FooNode.children root) ;
   (* fold *)
   let aux acc node = acc ^ "\n  " ^ FooNode.image node in
   Format.printf "Fold fields: %s\n\n%!" (FooNode.fold_fields aux "" root) ;
@@ -322,8 +322,8 @@ let test_siblings () =
     | None ->
         ()
   in
-  ( match FooNode.children_opt root with
-  | Some h :: _ ->
+  ( match FooNode.children root with
+  | h :: _ ->
       aux None h
   | _ ->
       Format.printf "ERROR\n%!" ; exit 1 ) ;
