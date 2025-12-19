@@ -638,7 +638,7 @@ begin
    end;
    New_Line;
 
-   Put_Line ("Testing ordering predicate for various cases:");
+   Put_Line ("Testing comparison operators for various cases:");
    declare
       FT : constant Lk_Token := U.First_Token;
       LT : constant Lk_Token := U.Last_Token;
@@ -675,6 +675,36 @@ begin
       Check ("First_Token < Stale", U.First_Token, LT);
       Check ("Stale < Last_Token", FT, U.Last_Token);
       Reparse_Original;
+   end;
+   New_Line;
+
+   Put_Line ("Testing consistency of all comparison operators:");
+   declare
+      type Results_Array is array (1 .. 4) of Boolean;
+      procedure Check (Label : String; L, R : Lk_Token);
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check (Label : String; L, R : Lk_Token) is
+      begin
+         Put (Label);
+         for B of Results_Array'(L < R, L <= R, L > R, L >= R) loop
+            Put (" |  ");
+            Put (if B then 'T' else 'F');
+         end loop;
+         New_Line;
+      end Check;
+
+      T1 : constant Lk_Token := U.First_Token;
+      T2 : constant Lk_Token := U.Last_Token;
+   begin
+      Put_Line ("         | <  | <= | >  | >=");
+      Check ("T1 OP T1", T1, T1);
+      Check ("T1 OP T2", T1, T2);
+      Check ("T2 OP T1", T2, T1);
+      Check ("T2 OP T2", T2, T2);
    end;
    New_Line;
 

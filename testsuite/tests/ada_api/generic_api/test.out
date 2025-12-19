@@ -369,13 +369,20 @@ Lookup_Token ((1, 1)).Image -> <Token Kind=Example Text="example">
 Lookup_Token ((2, 1)).Image -> <Token Kind=Var Text="var">
 No_Lk_Unit.Lookup_Token ((1, 1)) -> Got a Precondition_Failure exception: null unit
 
-Testing ordering predicate for various cases:
+Testing comparison operators for various cases:
 First_Token < Last_Token: -> TRUE
 First_Token < No_Lk_Token: -> Got a Precondition_Failure exception: tokens from different units
 No_Lk_Token < Last_Token: -> Got a Precondition_Failure exception: tokens from different units
 First_Token < Other_Unit -> Got a Precondition_Failure exception: tokens from different units
 First_Token < Stale -> Got a Stale_Reference_Error exception: unit was reparsed
 Stale < Last_Token -> Got a Stale_Reference_Error exception: unit was reparsed
+
+Testing consistency of all comparison operators:
+         | <  | <= | >  | >=
+T1 OP T1 |  F |  T |  F |  T
+T1 OP T2 |  T |  T |  F |  F
+T2 OP T1 |  F |  F |  T |  T
+T2 OP T2 |  F |  T |  F |  T
 
 Testing text range for various cases:
 First_Token .. Last_Token: -> "example foo\x0avar a = 0;\x0avar b = 1 + a;\x0a# Comment\x0a"

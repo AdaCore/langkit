@@ -203,6 +203,15 @@ package ${ada_lib_name}.Common is
    --  Assuming ``Left`` and ``Right`` belong to the same analysis unit, return
    --  whether ``Left`` came before ``Right`` in the source file.
 
+   function "<=" (Left, Right : Token_Reference) return Boolean
+   is (Left = Right or else Left < Right);
+
+   function ">=" (Left, Right : Token_Reference) return Boolean
+   is (not (Left < Right));
+
+   function ">" (Left, Right : Token_Reference) return Boolean
+   is (Left /= Right and then not (Left < Right));
+
    function Next
      (Token          : Token_Reference;
       Exclude_Trivia : Boolean := False) return Token_Reference;
