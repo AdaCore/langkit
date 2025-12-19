@@ -24,6 +24,9 @@ procedure Introspection_Types is
    procedure Put_Exc (Exc : Exception_Occurrence);
    --  Print info about the given exception occurrence
 
+   procedure Put_Doc (Doc : Unbounded_Text_Type);
+   --  Print documentation (if non empty)
+
    package Node_Type_Maps is new Langkit_Support.Names.Maps (Type_Ref);
    Node_Types : Node_Type_Maps.Map (Camel);
    --  Mapping from node type names to node type indexes
@@ -60,6 +63,37 @@ procedure Introspection_Types is
    begin
       Put_Line (Exception_Name (Exc) & ": " & Exception_Message (Exc));
    end Put_Exc;
+
+   -------------
+   -- Put_Doc --
+   -------------
+
+   procedure Put_Doc (Doc : Unbounded_Text_Type) is
+      D          : constant Text_Type := To_Text (Doc);
+      Line_Start : Boolean := True;
+   begin
+      if D = "" then
+         return;
+      end if;
+
+      Put_Line ("  Documentation:");
+      for C of D loop
+         if Line_Start then
+            Put ("  |");
+         end if;
+         if C = Chars.LF then
+            New_Line;
+            Line_Start := True;
+         else
+            Put (Image ((1 => C)));
+            Line_Start := False;
+         end if;
+      end loop;
+      if not Line_Start then
+         New_Line;
+         Put_Line ("  <missing newline>");
+      end if;
+   end Put_Doc;
 
    ------------
    -- Assert --
@@ -126,6 +160,10 @@ begin
 
       elsif Is_Node_Type (T) then
          Put_Line ("  is a node");
+      end if;
+
+      if Debug_Name (T) in "Point" | "FooNode" | "BaseExample" | "Example" then
+         Put_Doc (Documentation (T));
       end if;
    end loop;
    New_Line;
@@ -760,6 +798,15 @@ begin
                end if;
             end;
          end loop;
+      end if;
+      if Debug_Name (M) in
+          "Example.p_id_int"
+        | "Example.p_id_bigint"
+        | "Def.f_name"
+        | "Def.f_args"
+        | "Def.f_expr"
+      then
+         Put_Doc (Documentation (M));
       end if;
       New_Line;
    end loop;

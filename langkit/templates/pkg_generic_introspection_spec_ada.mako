@@ -101,6 +101,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       <%
          desc_const = f"Desc_For_{t.name}"
          debug_name_const = f"Debug_Name_For_{t.name}"
+         doc_const = f"Type_Doc_For_{t.name}"
          type_descs.append(f"{desc_const}'Access")
 
          # Do not include ".entity" for entity types, as we do not expose bare
@@ -149,9 +150,11 @@ private package ${ada_lib_name}.Generic_Introspection is
       %>
       ${debug_name_const} : aliased constant String :=
         ${ascii_repr(debug_name(t))};
-      ${desc_const} : aliased constant Type_Descriptor :=
-        (Category   => ${category(t)},
-         Debug_Name => ${debug_name_const}'Access);
+      ${doc_const}        : aliased constant Text_Type := ${text_repr(t.doc)};
+      ${desc_const}       : aliased constant Type_Descriptor :=
+        (Category      => ${category(t)},
+         Debug_Name    => ${debug_name_const}'Access,
+         Documentation => ${doc_const}'Access);
    % endfor
 
    Types : aliased constant Type_Descriptor_Array := (
@@ -340,6 +343,7 @@ private package ${ada_lib_name}.Generic_Introspection is
          name = G.member_name(m)
          desc_name = f"Member_Desc_For_{name}"
          name_const = f"Member_Name_For_{name}"
+         doc_const = f"Member_Doc_For_{name}"
          member_descs.append(f"{G.member_index(m)} => {desc_name}'Access")
          args = []
       %>
@@ -486,9 +490,11 @@ private package ${ada_lib_name}.Generic_Introspection is
 
       ${name_const} : aliased constant Text_Type :=
         ${text_repr(m.api_name.camel_with_underscores)};
-      ${desc_name} : aliased constant Struct_Member_Descriptor :=
+      ${doc_const}  : aliased constant Text_Type := ${text_repr(m.doc)};
+      ${desc_name}  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => ${len(args)},
          Name          => ${name_const}'Access,
+         Documentation => ${doc_const}'Access,
          Owner         => ${G.type_index(m.owner)},
          Member_Type   => ${G.type_index(m.type)},
          Null_For      => ${(
