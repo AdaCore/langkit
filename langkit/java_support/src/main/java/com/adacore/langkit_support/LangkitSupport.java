@@ -556,6 +556,8 @@ public class LangkitSupport {
 
         /** This class represents a parameter description. */
         public abstract static class Param {
+            /** Get the name of the parameter. */
+            public abstract String getName();
             /** The type of the parameter */
             public abstract Class<?> getType();
             /** The optional default value of the parameter */

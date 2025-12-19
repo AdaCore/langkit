@@ -722,6 +722,11 @@ public final class ${ctx.lib_name.camel} {
 
             // ----- Getters -----
 
+            /** Get the name of the parameter. */
+            public String getName() {
+                return this.name;
+            }
+
             /** The type of the parameter */
             public Class<?> getType() {
                 return this.type;
