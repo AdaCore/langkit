@@ -86,12 +86,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
     """
     Create a grammar from a set of Lktlang units.
 
-    Note that this only initializes a grammar and fetches relevant declarations
-    in the Lktlang unit. The actual lowering on grammar rules happens in a
-    separate pass: see lower_all_lkt_rules.
-
-    :param lkt_units: Non-empty list of analysis units where to look for the
-        grammar.
+    :param resolver: Helper to find Lkt declarations.
     """
     ctx = resolver.context
 
@@ -105,11 +100,15 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
     full_grammar = resolver.find_toplevel_decl(L.GrammarDecl, "grammar")
     assert isinstance(full_grammar.f_decl, L.GrammarDecl)
 
+    # Scope in which the grammar is declared. This scope is used to resolve
+    # node references in the grammar.
+    scope = resolver.root_scope
+
     # Ensure the grammar name has proper casing
     _ = name_from_lower("grammar", full_grammar.f_decl.f_syn_name)
 
     annotations = parse_annotations(
-        ctx, GrammarAnnotations, full_grammar, resolver.root_scope
+        ctx, GrammarAnnotations, full_grammar, scope
     )
 
     # Collect the list of grammar rules. This is where we check that we only
@@ -142,9 +141,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
 
         # Register this rule as a main rule or an entry point if the
         # corresponding annotations are present.
-        anns = parse_annotations(
-            ctx, GrammarRuleAnnotations, full_rule, resolver.root_scope
-        )
+        anns = parse_annotations(ctx, GrammarRuleAnnotations, full_rule, scope)
         if anns.main_rule:
             check_source_language(
                 main_rule_name is None,
@@ -183,7 +180,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
         Helper to resolve a node reference to the corresponding ``ASTNodeType``
         instance.
         """
-        return resolver.resolve_node(ref, resolver.root_scope)
+        return resolver.resolve_node(ref, scope)
 
     def lower(rule: L.GrammarExpr | L.GrammarExprList) -> P.Parser:
         """
@@ -343,7 +340,7 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                 context=ctx,
                 location=loc,
                 parser=lower(rule.f_expr),
-                property_ref=resolver.resolve_property(rule.f_prop_ref),
+                property_ref=resolver.resolve_property(rule.f_prop_ref, scope),
             )
 
         else:

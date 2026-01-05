@@ -2251,7 +2251,7 @@ class ExpressionCompiler:
 
                 assocs_getter_ref = args["assocs"]
                 assocs_getter = self.resolver.resolve_property(
-                    assocs_getter_ref
+                    assocs_getter_ref, env
                 ).root
                 assocs_getter.require_untyped_wrapper()
 
@@ -2274,7 +2274,7 @@ class ExpressionCompiler:
                 assoc_resolver: PropertyDef | None = None
                 if assoc_resolver_ref:
                     assoc_resolver = self.resolver.resolve_property(
-                        assoc_resolver_ref
+                        assoc_resolver_ref, env
                     ).root
                     assoc_resolver.require_untyped_wrapper()
 
@@ -3319,7 +3319,7 @@ class ExpressionCompiler:
         dynvar_resolver = DynVarResolver(env)
 
         # Check the property return type
-        prop = self.resolver.resolve_property(expr.f_name)
+        prop = self.resolver.resolve_property(expr.f_name, env)
         check_source_language(
             prop.type.matches(T.Bool),
             "Predicate property must return a boolean, got"
@@ -3392,7 +3392,7 @@ class ExpressionCompiler:
         env: Scope,
     ) -> E.Expr:
         dest_var_expr = self.lower_logic_var_ref(expr.f_dest_var, env)
-        comb_prop = self.resolver.resolve_property(expr.f_call.f_name)
+        comb_prop = self.resolver.resolve_property(expr.f_call.f_name, env)
         dynvar_resolver = DynVarResolver(env)
         logic_ctx = construct_logic_ctx(dynvar_resolver)
 

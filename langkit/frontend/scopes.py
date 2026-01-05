@@ -62,6 +62,14 @@ class Scope:
         """
 
         @property
+        def t_or_none(self) -> CompiledType:
+            """
+            Convenience property so that both ``BuiltinType`` and ``UserType``
+            have a ``t_or_none`` attribute/property.
+            """
+            return self.t
+
+        @property
         def diagnostic_name(self) -> str:
             return f"the builtin type {self.name}"
 
@@ -184,12 +192,21 @@ class Scope:
         Type declaration.
         """
 
-        t: CompiledType
+        t_or_none: CompiledType | None = None
         """
-        Reference to the corresponding compiled type.
+        Reference to the corresponding compiled type (if available). None
+        before type lowering has processed this type.
         """
 
         kind_name = "type"
+
+        @property
+        def t(self) -> CompiledType:
+            """
+            Reference to the corresponding type.
+            """
+            assert self.t_or_none is not None
+            return self.t_or_none
 
     @dataclasses.dataclass
     class UserValue(UserEntity):

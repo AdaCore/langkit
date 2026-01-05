@@ -410,19 +410,30 @@ class Resolver:
         else:
             error("node expected", location=name)
 
+    def resolve_type_entity(
+        self,
+        name: L.Expr,
+        scope: Scope,
+    ) -> Scope.BuiltinType | Scope.UserType:
+        """
+        Like ``resolve_entity``, but emit a language spec error if the
+        designated entity is not a type.
+        """
+        result = self.resolve_entity(name, scope)
+        if isinstance(result, (Scope.BuiltinType, Scope.UserType)):
+            return result
+        else:
+            error(
+                f"type expected, got {result.diagnostic_name}",
+                location=name,
+            )
+
     def resolve_type_expr(self, name: L.Expr, scope: Scope) -> CompiledType:
         """
         Like ``resolve_type``, but working on a type expression directly.
         """
         if isinstance(name, L.RefId):
-            entity = self.resolve_entity(name, scope)
-            if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
-                return entity.t
-            else:
-                error(
-                    f"type expected, got {entity.diagnostic_name}",
-                    location=name,
-                )
+            return self.resolve_type_entity(name, scope).t
 
         elif isinstance(name, L.DotExpr):
             # This must be a reference to an enum node:
@@ -464,12 +475,20 @@ class Resolver:
             error("node expected", location=name)
 
     @overload
-    def resolve_property(self, name: L.Expr) -> E.PropertyDef: ...
+    def resolve_property(
+        self,
+        name: L.Expr,
+        scope: Scope,
+    ) -> E.PropertyDef: ...
 
     @overload
-    def resolve_property(self, name: None) -> None: ...
+    def resolve_property(self, name: None, scope: Scope) -> None: ...
 
-    def resolve_property(self, name: L.Expr | None) -> E.PropertyDef | None:
+    def resolve_property(
+        self,
+        name: L.Expr | None,
+        scope: Scope,
+    ) -> E.PropertyDef | None:
         """
         Like ``resolve_entity``, but for properties specifically.
         """
@@ -483,7 +502,7 @@ class Resolver:
                 location=name,
             )
 
-        prefix = self.resolve_node_type_expr(name.f_prefix, self.root_scope)
+        prefix = self.resolve_node_type_expr(name.f_prefix, scope)
         suffix_node = name.f_suffix
 
         member = prefix.get_abstract_node_data_dict().get(
