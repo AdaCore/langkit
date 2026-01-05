@@ -77,5 +77,14 @@ Decl[1:1-1:2]
 |  DeclErrorAbsent[1:2-1:2]
 
 
+Testing Token comparison operators
+==================================
+
+         | <  | <= | >  | >=
+T1 OP T1 |  F |  T |  F |  T
+T1 OP T2 |  T |  T |  F |  F
+T2 OP T1 |  F |  F |  T |  T
+T2 OP T2 |  F |  T |  F |  T
+
 main.adb: Done.
 Done

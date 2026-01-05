@@ -56,5 +56,38 @@ begin
    New_Line;
    New_Line;
 
+   Put_Line ("Testing Token comparison operators");
+   Put_Line ("==================================");
+   New_Line;
+
+   declare
+      type Results_Array is array (1 .. 4) of Boolean;
+      procedure Check (Label : String; L, R : Token_Reference);
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check (Label : String; L, R : Token_Reference) is
+      begin
+         Put (Label);
+         for B of Results_Array'(L < R, L <= R, L > R, L >= R) loop
+            Put (" |  ");
+            Put (if B then 'T' else 'F');
+         end loop;
+         New_Line;
+      end Check;
+
+      T1 : constant Token_Reference := U.First_Token;
+      T2 : constant Token_Reference := U.Last_Token;
+   begin
+      Put_Line ("         | <  | <= | >  | >=");
+      Check ("T1 OP T1", T1, T1);
+      Check ("T1 OP T2", T1, T2);
+      Check ("T2 OP T1", T2, T1);
+      Check ("T2 OP T2", T2, T2);
+   end;
+   New_Line;
+
    Put_Line ("main.adb: Done.");
 end Main;
