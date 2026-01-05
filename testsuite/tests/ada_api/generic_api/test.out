@@ -517,6 +517,18 @@ All types
 * Point
   STRUCT_CATEGORY
   is a struct
+  Documentation:
+  |Documentation for the Point struct.
+  |
+  |* ``label`` provides a human readable description of the point.
+  |* ``x`` provides its coordinate along the X axis.
+  |* ``y`` provides its coordinate along the Y axis.
+  |
+  |For example:
+  |
+  |.. code-block:: text
+  |
+  |   Point("origin", 0, 0)
 * FooNode
   STRUCT_CATEGORY
   is a node
@@ -1297,16 +1309,31 @@ F_Name (Def.f_name: 8)
   owner: Def
   type: Name
   no argument
+  Documentation:
+  |Name for this function definition.
+  |
+  |When there are no parsing errors, this field is never null.
+  <missing newline>
 
 F_Args (Def.f_args: 9)
   owner: Def
   type: ASTList[Name]
   no argument
+  Documentation:
+  |list of Arguments for this function.
+  |
+  |When there are no parsing errors, this field is never null.
+  <missing newline>
 
 F_Expr (Def.f_expr: 10)
   owner: Def
   type: Expr
   no argument
+  Documentation:
+  |Expression body for this function.
+  |
+  |When there are no parsing errors, this field is never null.
+  <missing newline>
 
 F_Lhs (Addition.f_lhs: 11)
   owner: Addition
@@ -1461,6 +1488,8 @@ P_Id_Int (Example.p_id_int: 36)
   type: Int
   arguments:
     Id: Int
+  Documentation:
+  |Identity function for integers.
 
 P_Id_Bigint (Example.p_id_bigint: 37)
   owner: Example
@@ -1468,6 +1497,8 @@ P_Id_Bigint (Example.p_id_bigint: 37)
   type: BigInt
   arguments:
     Id: BigInt
+  Documentation:
+  |Identity function for big integers.
 
 P_Id_Char (Example.p_id_char: 38)
   owner: Example

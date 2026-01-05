@@ -31,6 +31,17 @@ struct Metadata {
     md2: Bool
 }
 
+|" Documentation for the Point struct.
+|"
+|" * ``label`` provides a human readable description of the point.
+|" * ``x`` provides its coordinate along the X axis.
+|" * ``y`` provides its coordinate along the Y axis.
+|"
+|" For example:
+|"
+|" .. code-block:: text
+|"
+|"    Point("origin", 0, 0)
 struct Point {
     label: String
     x: BigInt
@@ -50,10 +61,12 @@ struct PrivatePoint {
     y: BigInt
 }
 
+|" This is the root node!
 @abstract
 class FooNode implements Node[FooNode] {
 }
 
+|" Just some intermediate abstract node.
 @abstract
 class BaseExample: FooNode {
     # Check for proper member inheritance handling: the introspection API
@@ -67,6 +80,7 @@ class BaseExample: FooNode {
     fun id_bool(id: Bool): Bool
 }
 
+|" This is the main node type.
 class Example: BaseExample {
     @parse_field @null_field fld_2: FooNode
     @parse_field fld_1: Name
@@ -88,9 +102,11 @@ class Example: BaseExample {
 
     fun id_bool(id: Bool): Bool = id
 
+    |" Identity function for integers.
     @exported
     fun id_int(id: Int): Int = id
 
+    |" Identity function for big integers.
     @exported
     fun id_bigint(id: BigInt): BigInt = id
 
@@ -173,8 +189,13 @@ class Example: BaseExample {
 }
 
 class Def: FooNode {
+    |" Name for this function definition.
     @parse_field name: Name
+
+    |" list of Arguments for this function.
     @parse_field args: ASTList[Name]
+
+    |" Expression body for this function.
     @parse_field expr: Expr
 }
 
