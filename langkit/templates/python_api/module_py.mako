@@ -526,37 +526,18 @@ class _EventHandlerWrapper:
     event handler value and hold its callbacks.
     """
 
-    __slots__ = (
-        "event_handler",
-        "c_value",
-        "destroy_callback",
-        "unit_requested_callback",
-        "unit_parsed_callback",
-    )
+    __slots__ = ("event_handler", "c_value")
 
     def __init__(self, event_handler: EventHandler):
         self.event_handler = event_handler
-
-        # Create the C callbacks (wrappers around the _EventHandlerWrapper
-        # static method) and keep references to them in "self" so that they
-        # survive at least as long as "self".
-        self.destroy_callback = _event_handler_destroy_func(
-            _EventHandlerWrapper.destroy_func
-        )
-        self.unit_requested_callback = _event_handler_unit_requested_func(
-            _EventHandlerWrapper.unit_requested_func
-        )
-        self.unit_parsed_callback = _event_handler_unit_parsed_func(
-            _EventHandlerWrapper.unit_parsed_func
-        )
 
         # Create the C-level event handler, which keeps a reference to "self"
         # and uses _EventHandlerWrapper's static methods as callbacks.
         self.c_value = _create_event_handler(
             ctypes.py_object(self),
-            self.destroy_callback,
-            self.unit_requested_callback,
-            self.unit_parsed_callback,
+            _event_handler_cb_destroy,
+            _event_handler_cb_unit_requested,
+            _event_handler_cb_unit_parsed,
         )
 
     def __del__(self) -> None:
@@ -2250,6 +2231,18 @@ _create_event_handler = _import_func(
 )
 _dec_ref_event_handler = _import_func(
     '${capi.get_name("dec_ref_event_handler")}', [_event_handler], None
+)
+
+# C callbacks for _EventHandlerWrapper
+
+_event_handler_cb_destroy = _event_handler_destroy_func(
+    _EventHandlerWrapper.destroy_func
+)
+_event_handler_cb_unit_requested = _event_handler_unit_requested_func(
+    _EventHandlerWrapper.unit_requested_func
+)
+_event_handler_cb_unit_parsed = _event_handler_unit_parsed_func(
+    _EventHandlerWrapper.unit_parsed_func
 )
 
 # Unit providers
