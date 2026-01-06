@@ -1540,6 +1540,10 @@ class ManageScript(abc.ABC):
         add_path(
             "CLASSPATH", P("java", "target", f"{self.lib_name.lower()}.jar")
         )
+        add_path(
+            "CLASSPATH", P("java", "target", "lib", "langkit_support.jar")
+        )
+        add_path("CLASSPATH", P("java", "target", "lib", "truffle-api.jar"))
         add_path("LD_LIBRARY_PATH", P("java", "jni"))
         add_path("PATH", P("java", "jni"))
 
