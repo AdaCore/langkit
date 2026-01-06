@@ -24,6 +24,8 @@ with Langkit_Support.Generic_API.Unparsing;
 use Langkit_Support.Generic_API.Unparsing;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
+with Prettier_Ada.Documents;
+
 package Langkit_Support.Rewriting.Types is
 
    type Rewriting_Handle_Record;
@@ -76,6 +78,9 @@ package Langkit_Support.Rewriting.Types is
 
       Config : Unparsing_Configuration;
       --  Unparsing configuration used to format rewritten parts of the tree
+
+      Options : Prettier_Ada.Documents.Format_Options_Type;
+      --  The options to use when formatting rewritten parts of the tree
 
       Units : Unit_Maps.Map;
       --  Keep track of rewriting handles we create for the units that Context

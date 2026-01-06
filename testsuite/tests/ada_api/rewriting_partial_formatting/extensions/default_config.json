@@ -1,0 +1,45 @@
+{
+  "node_configs": {
+    "CallArgList": {
+      "sep": ["recurse", "line"]
+    },
+    "DeclList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "FunDecl": {
+      "fields": {
+        "f_return_type": ["whitespace", "recurse", "hardline"],
+        "f_body": {
+          "kind": "ifEmpty",
+          "then": ["recurse", "hardline"],
+          "else": [
+            {
+              "kind": "indent",
+              "contents": ["hardline", "recurse"]
+            },
+            "hardline"
+          ]
+        }
+      }
+    },
+    "Call": {
+      "fields": {
+        "f_args": {
+          "kind": "group",
+          "document": {
+            "kind": "ifBreak",
+            "breakContents": [
+              {"kind": "indent", "contents": ["line", "recurse"]},
+              "line"
+            ],
+            "flatContents": "recurse"
+          }
+        }
+      }
+    },
+    "StmtList": {
+      "sep": ["hardline", "recurse"]
+    }
+  }
+}
+

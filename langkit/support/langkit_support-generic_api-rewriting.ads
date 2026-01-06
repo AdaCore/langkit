@@ -63,8 +63,8 @@
 --  procedure call must be done before attempting to call
 --  :ada:ref:`Start_Rewriting` again.
 --
---  Comments/formatting preservation
---  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--  Comments/formatting preservation and reformatting
+--  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --
 --  The rewriting engine keeps track of the original node
 --  (:ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Node`) for
@@ -77,6 +77,16 @@
 --  (comments and whitespaces) are recovered from the original node on a best
 --  effort basis. Comments and trivias that follow a removed/replaced node are
 --  lost.
+--
+--  When unparsing a node rewriting handle that does *not* have an original
+--  node, this node and its children are formatted according to the unparsing
+--  configuration and format options specified by the
+--  :ada:ref:`Rewriting_Options` object given to :ada:ref:`Start_Rewriting`.
+--  Note that in practice, such a node will not be reformatted by itself, but
+--  together with the whole source section which encloses it, up to the closest
+--  parent list that sets the ``independent_lines`` to True in the unparsing
+--  configuration. This allows ensuring that new nodes are formatted in a
+--  consistent way with their sibilings.
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Generic_API.Analysis;
@@ -88,6 +98,8 @@ use Langkit_Support.Generic_API.Unparsing;
 private with Langkit_Support.Internal.Analysis;
 private with Langkit_Support.Rewriting.Types;
 private with Langkit_Support.Types;
+
+with Prettier_Ada.Documents;
 
 package Langkit_Support.Generic_API.Rewriting is
 
@@ -113,6 +125,34 @@ package Langkit_Support.Generic_API.Rewriting is
       array (Positive range <>) of Node_Rewriting_Handle;
 
    -----------------------
+   -- Rewriting options --
+   -----------------------
+
+   subtype Format_Options_Type is Prettier_Ada.Documents.Format_Options_Type;
+
+   type Rewriting_Options (<>) is private;
+   --  Datatype used to dictate how rewritten parts of the tree should be
+   --  unparsed and formatted.
+
+   No_Rewriting_Options : constant Rewriting_Options;
+   --  No specific unparsing configuration nor formatting options: the original
+   --  formatting is preserved as much as possible, and nodes with no source
+   --  correspondance are not formatted at all.
+
+   function Default_Rewriting_Options
+     (Lang_Id : Language_Id) return Rewriting_Options;
+   --  Create a :ada:ref:`Rewriting_Options` value that uses the default
+   --  unparsing configuration and the default formatting options defined for
+   --  the language (if any) when formatting rewritten parts of the tree.
+
+   function Custom_Rewriting_Options
+     (Config  : Unparsing_Configuration;
+      Options : Format_Options_Type) return Rewriting_Options;
+   --  Create a :ada:ref:`Rewriting_Options` value that uses the given
+   --  unparsing configuration and the given formatting options when
+   --  formatting rewritten parts of the tree.
+
+   -----------------------
    -- Context rewriting --
    -----------------------
 
@@ -129,7 +169,7 @@ package Langkit_Support.Generic_API.Rewriting is
 
    function Start_Rewriting
      (Context : Lk_Context;
-      Config  : Unparsing_Configuration := No_Unparsing_Configuration)
+      Options : Rewriting_Options := No_Rewriting_Options)
       return Rewriting_Handle;
    --  Start a rewriting session for ``Context``.
    --
@@ -465,5 +505,19 @@ private
      (Ref => null, Safety_Net => No_Rewriting_Safety_Net);
    No_Node_Rewriting_Handle : constant Node_Rewriting_Handle :=
      (Ref => null, Safety_Net => No_Rewriting_Safety_Net);
+
+   type Rewriting_Options (Has_Format_Options : Boolean) is record
+      Unparsing_Config : Unparsing_Configuration;
+      case Has_Format_Options is
+         when True =>
+            Format_Options : Format_Options_Type;
+         when False =>
+            null;
+      end case;
+   end record;
+
+   No_Rewriting_Options : constant Rewriting_Options :=
+     (Has_Format_Options => False,
+      Unparsing_Config   => No_Unparsing_Configuration);
 
 end Langkit_Support.Generic_API.Rewriting;

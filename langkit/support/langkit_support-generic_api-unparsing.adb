@@ -2651,6 +2651,15 @@ package body Langkit_Support.Generic_API.Unparsing is
       end;
    end Unparse_To_Prettier;
 
+   ----------------------------
+   -- Default_Format_Options --
+   ----------------------------
+
+   function Default_Format_Options
+     (Language : Language_Id)
+      return Prettier_Ada.Documents.Format_Options_Type
+   is (Language.Unparsers.Format_Options.all);
+
    -----------------------
    -- Pretty_Print_Main --
    -----------------------

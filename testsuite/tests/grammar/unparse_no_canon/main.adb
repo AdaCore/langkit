@@ -36,7 +36,7 @@ begin
       Doc       : constant Document_Type :=
         Unparse_To_Prettier (U.Root, Config);
       Formatted : constant Unbounded_String :=
-        Format (Doc, Default_Format_Options);
+        Format (Doc, Prettier_Ada.Documents.Default_Format_Options);
    begin
       Put_Line (Formatted);
    end;

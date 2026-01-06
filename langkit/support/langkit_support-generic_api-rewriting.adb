@@ -33,6 +33,8 @@ use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;            use Langkit_Support.Types;
 with Langkit_Support.Unparsing_Config; use Langkit_Support.Unparsing_Config;
 
+with Prettier_Ada.Documents; use Prettier_Ada.Documents;
+
 package body Langkit_Support.Generic_API.Rewriting is
 
    use Langkit_Support.Errors.Rewriting;
@@ -663,13 +665,33 @@ package body Langkit_Support.Generic_API.Rewriting is
       return Handle.Ref.Context;
    end Context;
 
+   -------------------------------
+   -- Default_Rewriting_Options --
+   -------------------------------
+
+   function Default_Rewriting_Options
+     (Lang_Id : Language_Id) return Rewriting_Options
+   is ((Has_Format_Options => False,
+        Unparsing_Config   => Default_Unparsing_Configuration (Lang_Id)));
+
+   ------------------------------
+   -- Custom_Rewriting_Options --
+   ------------------------------
+
+   function Custom_Rewriting_Options
+     (Config  : Unparsing_Configuration;
+      Options : Format_Options_Type) return Rewriting_Options
+   is ((Has_Format_Options => True,
+        Unparsing_Config   => Config,
+        Format_Options     => Options));
+
    ---------------------
    -- Start_Rewriting --
    ---------------------
 
    function Start_Rewriting
      (Context : Lk_Context;
-      Config  : Unparsing_Configuration := No_Unparsing_Configuration)
+      Options : Rewriting_Options := No_Rewriting_Options)
       return Rewriting_Handle
    is
       use type System.Address;
@@ -680,6 +702,12 @@ package body Langkit_Support.Generic_API.Rewriting is
       Pre_Check_Ctx ("Context", Context);
 
       declare
+         Format_Options : constant Format_Options_Type :=
+           (if Options.Has_Format_Options
+            then Options.Format_Options
+            else Unparsing.Default_Format_Options
+                   (Context.Language));
+
          C      : constant Internal_Context := Unwrap_Context (Context);
          Result : Rewriting_Handle_Access;
       begin
@@ -690,7 +718,8 @@ package body Langkit_Support.Generic_API.Rewriting is
          Result := new Rewriting_Handle_Record'
            (Language  => Context.Language,
             Context   => Context,
-            Config    => Config,
+            Config    => Options.Unparsing_Config,
+            Options   => Format_Options,
             Units     => <>,
             Pool      => Create,
             New_Nodes => <>,
@@ -779,8 +808,9 @@ package body Langkit_Support.Generic_API.Rewriting is
                Bytes := Unparse
                  (New_Root,
                   PU.Unit,
-                  Unparsing_Config    => Unparsing_Config,
-                  As_Unit             => True);
+                  Formatted_Node   => No_Lk_Node,
+                  Unparsing_Config => null,
+                  As_Unit          => True);
             exception
                when Exc : Malformed_Tree_Error =>
                   Result := Error_Result;
@@ -790,12 +820,12 @@ package body Langkit_Support.Generic_API.Rewriting is
                      To_Text (Exception_Message (Exc)));
                   exit;
             end;
+
             Input.Charset := To_Unbounded_String (Unit_Handle.Unit.Charset);
             Input.Bytes := Bytes.all'Address;
             Input.Bytes_Count := Bytes.all'Length;
             Desc.Unit_Do_Parsing.all
               (Unwrap_Unit (Unit_Handle.Unit), Input, PU.New_Data);
-            Free (Bytes);
 
             --  If there is a parsing error or if the reparsed tree does not
             --  have the same shape as the rewriting handle tree, abort the
@@ -810,8 +840,75 @@ package body Langkit_Support.Generic_API.Rewriting is
                Result := Error_Result;
                Result.Diagnostics.Move (PU.New_Data.Diagnostics);
                Destroy (PU.New_Data);
+               Free (Bytes);
                exit;
             end if;
+
+            --  Reparse (i.e. unparse and then parse) this rewritten unit.
+            --  When unparsing, make sure to use the given configuration to
+            --  format rewritten parts of the tree.
+            --
+            --  To do that, we first do a complete reformatting of the
+            --  rewritten unit, which will serve as reference when doing the
+            --  second and final unparsing of the rewritten unit to extract
+            --  the formatting of only the rewritten parts.
+            --
+            --  Note that this is only valid if the rewritten unit and the
+            --  reparsed unit have the same tree structure, but this has been
+            --  checked above.
+            --
+            --  Note this sequence of parsing/unparsing is not optimal, because
+            --  the rewritten unit is parsed several times. At some point we
+            --  could try to investigate whether it's possible to reuse the
+            --  internal tree inside ``PU.New_Data`` for the operations below.
+
+            if Unparsing_Config /= null then
+               declare
+                  Reparse_Ctx : constant Lk_Context := Create_Context
+                    (H.Context.Language, Unit_Handle.Unit.Charset);
+                  --  Reparse_Ctx will be used to hold the unparsed rewritten
+                  --  unit (the unformatted and then the reformatted units).
+
+                  Rewritten_Unit : constant Lk_Unit :=
+                    Reparse_Ctx.Get_From_Buffer ("rewritten", Bytes.all);
+                  --  Parse the rewritten source in a new unit to use as basis
+                  --  for the reformatting.
+
+                  Formatted_Text : constant Unbounded_String := Format
+                    (Unparse_To_Prettier (Rewritten_Unit.Root, H.Config),
+                     H.Options);
+                  --  Format the rewritten source according to the the
+                  --  specified unparsing configuration and format options.
+
+                  Formatted_Unit : constant Lk_Unit :=
+                    Reparse_Ctx.Get_From_Buffer
+                      ("rewritten_formatted", To_String (Formatted_Text));
+                  --  Parse the formatted text into a an actual analysis unit
+               begin
+                  Free (Bytes);
+
+                  --  Use the formatted analysis unit as reference when
+                  --  unparsing the rewriting diff a second time, to apply
+                  --  formatting in modified sections of the tree.
+
+                  Bytes := Unparse
+                    (New_Root,
+                     PU.Unit,
+                     Formatted_Node   => Formatted_Unit.Root,
+                     Unparsing_Config => Unparsing_Config,
+                     As_Unit          => True);
+
+                  Input.Bytes := Bytes.all'Address;
+                  Input.Bytes_Count := Bytes.all'Length;
+                  Desc.Unit_Do_Parsing.all
+                    (Unwrap_Unit (Unit_Handle.Unit), Input, PU.New_Data);
+
+                  --  We don't check diagnostics the second time as we're
+                  --  parsing the tree structure as the first time.
+               end;
+            end if;
+
+            Free (Bytes);
          end;
       end loop;
 
@@ -953,8 +1050,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       return Unparse
         (Node             => Abstract_Node_From_Rewriting (Handle.Ref.Root),
          Unit             => Handle.Ref.Unit,
-         Unparsing_Config => Unwrap_Unparsing_Configuration
-                               (Handle.Ref.Context_Handle.Config),
+         Formatted_Node   => No_Lk_Node,
+         Unparsing_Config => null,
          As_Unit          => True);
    end Unparse;
 
@@ -1035,8 +1132,8 @@ package body Langkit_Support.Generic_API.Rewriting is
       Result := Unparse
         (Node             => Abstract_Node_From_Rewriting (Handle.Ref),
          Unit             => No_Lk_Unit,
-         Unparsing_Config => Unwrap_Unparsing_Configuration
-                               (Handle.Ref.Context_Handle.Config),
+         Formatted_Node   => No_Lk_Node,
+         Unparsing_Config => null,
          As_Unit          => False);
       return To_Text (Result);
    end Unparse;

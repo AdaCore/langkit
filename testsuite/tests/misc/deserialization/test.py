@@ -5,6 +5,8 @@ Unit tests for Langkit's JSON-like deserialization helper.
 import dataclasses
 import itertools
 
+from enum import Enum
+
 from langkit.utils.deserialization import (
     DataclassFieldMetadata,
     DeserializationError,
@@ -80,6 +82,12 @@ class DCNesting:
     b: "DCSimple"
 
 
+class EColor(Enum):
+    RED = 1
+    GREEN = 2
+    BLUE = 3
+
+
 print("# bool")
 print()
 test(bool, True)
@@ -144,11 +152,18 @@ test(DCWithDefaultFactory, {"a": 30})
 test(DCNesting, {"a": 1, "b": {"a": "bar", "b": 42}})
 print()
 
+print("# Enum")
+print()
+test(EColor, "RED")
+test(EColor, "GRAY")
+print()
+
 print("# Invalid types")
 print()
 test(int | None, None)
 test(dict[int, int], {1: 10})
 test(list[object], [1])
+test(EColor, [1])
 print()
 
 print("Done")

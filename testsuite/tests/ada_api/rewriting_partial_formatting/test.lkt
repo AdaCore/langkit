@@ -1,0 +1,127 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    @main_rule main_rule <- list*(or(var_decl | fun_decl))
+    name <- Name(@Identifier)
+    type_ref <- name
+    null_qual <- NullQual("null")
+    var_decl <- VarDecl(
+        null_qual "var" name ":" type_ref "=" expr ";"
+    )
+    param_spec <- ParamSpec(name ":" type_ref ?pick("=" expr))
+    fun_decl <- FunDecl(
+        "def"
+        name
+        pick("("
+        list*(param_spec, ",", allow_trailing)
+        ")") ":" type_ref null_qual "{" stmts "}"
+    )
+    stmts <- Stmts(list*(stmt))
+    stmt <- or(
+        | ExprStmt(expr ";")
+        | AssignStmt(
+            list+(name, ",", allow_leading) "=" expr ";"
+        )
+    )
+    expr <- or(
+        | Addition(expr "+" expr_1)
+        | expr_1
+    )
+    expr_1 <- or(
+        | DottedName(expr_1 "." name)
+        | call
+        | atom
+    )
+    atom <- or(number | ref)
+    number <- Number(@Number)
+    ref <- Ref(name)
+    call_arg <- CallArg(expr)
+    call <- Call(name "(" list*(call_arg, ",") ")")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class CallArg: FooNode {
+    @parse_field expr: Expr
+}
+
+@abstract
+class Decl: FooNode {
+    @abstract @parse_field name: Name
+}
+
+class FunDecl: Decl {
+    @parse_field name: Name
+    @parse_field args: ASTList[ParamSpec]
+    @parse_field return_type: Name
+    @parse_field is_null: NullQual
+    @parse_field body: Stmts
+}
+
+class VarDecl: Decl {
+    @parse_field is_null: NullQual
+    @parse_field name: Name
+    @parse_field type_expr: Name
+    @parse_field value: Expr
+}
+
+@abstract
+class Expr: FooNode {
+}
+
+class Addition: Expr {
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
+}
+
+class Call: Expr {
+    @parse_field callee: Name
+    @parse_field args: ASTList[CallArg]
+}
+
+class DottedName: Expr {
+    @parse_field prefix: Expr
+    @parse_field suffix: Name
+}
+
+class Number: Expr implements TokenNode {
+}
+
+class Ref: Expr {
+    @parse_field name: Name
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+@qualifier
+enum class NullQual: FooNode {
+}
+
+class ParamSpec: FooNode {
+    @parse_field name: Name
+    @parse_field type_expr: Name
+    @parse_field @nullable default_expr: Expr
+}
+
+@abstract
+class Stmt: FooNode {
+}
+
+class AssignStmt: Stmt {
+    @parse_field names: ASTList[Name]
+    @parse_field expr: Expr
+}
+
+class ExprStmt: Stmt {
+    @parse_field expr: Expr
+}
+
+class Stmts: FooNode {
+    @parse_field stmts: ASTList[Stmt]
+}
+

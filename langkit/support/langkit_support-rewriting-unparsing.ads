@@ -112,23 +112,30 @@ package Langkit_Support.Rewriting.Unparsing is
    procedure Unparse
      (Node             : Abstract_Node;
       Unit             : Lk_Unit;
+      Formatted_Node   : Lk_Node;
       Unparsing_Config : Unparsing_Configuration_Access;
       As_Unit          : Boolean;
       Result           : out Unparsing_Buffer);
    --  Turn the Node tree into a buffer that can be re-parsed to yield the same
    --  tree (source locations excepted).
    --
-   --  If Unparsing_Config is not-null, use token/trivia information when
-   --  available to preserve original source code formatting, and the unparsing
-   --  configuration to format rewritten parts of the tree.
+   --  If Formatted_Node is not-null, Unparsing_Config is expected to be
+   --  non-null as well, and the two will be used to format rewritten parts of
+   --  the tree, as well as original parts for which we determine that
+   --  reformatting is required (for example because it wouldn't match the
+   --  formatting of surrounding rewritten parts).
+   --  See ``Compute_Rewriting_Tiles`` for more information.
+   --
+   --  Note that in any case, original token/trivia information is used as much
+   --  as possible to preserve the original formatting.
    --
    --  If As_Unit is true, consider that Node is the root of Unit in order to
-   --  preserve the formatting of leading/trailing tokens/trivia. Note that
-   --  this has no effect unless Preserve_Formatting itself is true.
+   --  preserve the formatting of leading/trailing tokens/trivia.
 
    function Unparse
      (Node             : Abstract_Node;
       Unit             : Lk_Unit;
+      Formatted_Node   : Lk_Node;
       Unparsing_Config : Unparsing_Configuration_Access;
       As_Unit          : Boolean) return String;
    --  Likewise, but directly return a string. The encoding used is the same as
@@ -137,6 +144,7 @@ package Langkit_Support.Rewriting.Unparsing is
    function Unparse
      (Node             : Abstract_Node;
       Unit             : Lk_Unit;
+      Formatted_Node   : Lk_Node;
       Unparsing_Config : Unparsing_Configuration_Access;
       As_Unit          : Boolean) return String_Access;
    --  Likewise, but return a string access. Callers must deallocate the result
@@ -145,6 +153,7 @@ package Langkit_Support.Rewriting.Unparsing is
    function Unparse
      (Node             : Abstract_Node;
       Unit             : Lk_Unit;
+      Formatted_Node   : Lk_Node;
       Unparsing_Config : Unparsing_Configuration_Access;
       As_Unit          : Boolean) return Unbounded_Text_Type;
    --  Likewise, but return an unbounded text value
