@@ -885,6 +885,11 @@ package body Langkit_Support.Generic_API.Rewriting is
                       ("rewritten_formatted", To_String (Formatted_Text));
                   --  Parse the formatted text into a an actual analysis unit
                begin
+                  --  We are going to do another round of unparsing (new dat
+                  --  for PU and Bytes), so free resources created by the
+                  --  previous round.
+
+                  Destroy (PU.New_Data);
                   Free (Bytes);
 
                   --  Use the formatted analysis unit as reference when
