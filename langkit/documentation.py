@@ -1014,7 +1014,7 @@ base_langkit_docs = {
         space.
     """,
     #
-    # Misc
+    # Rewriting
     #
     "langkit.rewriting.rewriting_handle_type": """
         Handle for an analysis context rewriting session
