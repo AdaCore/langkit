@@ -650,6 +650,12 @@ base_langkit_docs = {
         Decode a UTF-8 buffer (``bytes``, of size ``length``) to a string
         buffer.
     """,
+    "langkit.copy_bytes": """
+        Return a copy of the given bytes string.
+
+        This is a helper to allocate memory from dynamic languages that the C
+        bindings will then be able to free.
+    """,
     "langkit.free": """
         Free dynamically allocated memory.
 
@@ -866,6 +872,20 @@ base_langkit_docs = {
         See the documentation of each unit provider for the exact semantics of
         the unit name/kind information.
     """,
+    "langkit.create_unit_provider": """
+        Create a unit provider. When done with it, the result must be passed
+        to ``${capi.get_name('dec_ref_unit_provider')}``.
+
+        Pass as ``data`` a pointer to hold your private data: it will be passed
+        to all callbacks below.
+
+        ``destroy`` is a callback that is called by
+        ``${capi.get_name('dec_ref_unit_provider')}`` to leave a chance to
+        free resources that ``data`` may hold.
+
+        ``get_unit_location`` is a callback that will be called in order to
+        resolve a reference to a unit.
+    """,
     "langkit.unit_provider_get_unit_filename": """
         Return the filename corresponding to the given unit name/unit kind.
         % if lang == 'ada':
@@ -883,6 +903,17 @@ base_langkit_docs = {
         Return ``${null}``
         % endif
         if the given unit name is not valid.
+    """,
+    "langkit.unit_provider_get_unit_location_type": """
+        Callback that will be called to resolve a reference to a unit.
+
+        Upon return, the resolved unit filename must be assigned to
+        ``*filename``, and its PLE root index (0-based) of the reference must
+        be assigned to ``*ple_root_index``.
+    """,
+    "langkit.unit_provider_destroy_type": """
+        Callback type for functions that are called when destroying a unit
+        provider.
     """,
     "langkit.unit_provider_inc_ref": """
         Create an ownership share for this unit provider.

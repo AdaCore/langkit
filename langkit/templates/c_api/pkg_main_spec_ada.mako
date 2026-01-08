@@ -144,12 +144,18 @@ package ${ada_lib_name}.Implementation.C is
       subtype ${enum_type.c_type(capi).name} is ${enum_type.name};
    % endfor
 
+   function Copy_Bytes
+     (Address : System.Address; Length : size_t) return System.Address
+     with Export        => True,
+          Convention    => C,
+          External_Name => "${capi.get_name('copy_bytes')}";
+   ${ada_c_doc('langkit.copy_bytes', 3)}
+
    procedure Free (Address : System.Address)
      with Export        => True,
           Convention    => C,
           External_Name => "${capi.get_name('free')}";
    ${ada_c_doc('langkit.free', 3)}
-   --  Helper to free objects in dynamic languages
 
    procedure ${capi.get_name('destroy_text')} (T : access ${text_type})
      with Export        => True,
@@ -256,6 +262,20 @@ package ${ada_lib_name}.Implementation.C is
 
    type ${unit_provider_type} is new System.Address;
    ${ada_c_doc('langkit.unit_provider_type', 3)}
+
+   type ${unit_provider_get_unit_location_type} is access procedure
+     (Data           : System.Address;
+      Name           : access constant ${text_type};
+      Kind           : Analysis_Unit_Kind;
+      Filename       : access chars_ptr;
+      PLE_Root_Index : access int)
+      with Convention => C;
+   ${ada_c_doc('langkit.unit_provider_get_unit_location_type', 3)}
+
+   type ${unit_provider_destroy_type} is access procedure
+     (Data : System.Address)
+      with Convention => C;
+   ${ada_c_doc('langkit.unit_provider_destroy_type', 3)}
 
    -------------------------
    -- Analysis primitives --
@@ -689,6 +709,16 @@ package ${ada_lib_name}.Implementation.C is
    --------------------
    -- Unit providers --
    --------------------
+
+   function ${capi.get_name('create_unit_provider')}
+     (Data                   : System.Address;
+      Destroy_Func           : ${unit_provider_destroy_type};
+      Get_Unit_Location_Func : ${unit_provider_get_unit_location_type})
+      return ${unit_provider_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('create_unit_provider')}";
+   ${ada_c_doc('langkit.create_unit_provider', 3)}
 
    procedure ${capi.get_name('dec_ref_unit_provider')}
      (Provider : ${unit_provider_type})
