@@ -1308,11 +1308,11 @@ base_langkit_docs = {
     "langkit.python.Token.to_data": """
         Return a dict representation of this Token.
     """,
-    "langkit.python.FileReader.__init__": """
-        This constructor is an implementation detail, and is not meant to be
-        used directly.
+    "langkit.python.UnitProvider.unit_location": """
+        Resolve the unit that ``name``/``kind`` designate and return the
+        corresponding filename and index of the PLE root (0-based).
     """,
-    "langkit.python.UnitProvider.__init__": """
+    "langkit.python.FileReader.__init__": """
         This constructor is an implementation detail, and is not meant to be
         used directly.
     """,

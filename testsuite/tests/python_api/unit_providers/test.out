@@ -1,0 +1,117 @@
+main.py: Running...
+# {'m': ('m0.txt', 0)}
+
+!!! CustomUnitProvider.unit_location
+    name='m'
+    kind=unit_specification
+  ref m.a: <Def m0.txt:1:3-1:4>
+  ref m.b: <Def m0.txt:1:5-1:6>
+  ref m.c: <Def m0.txt:1:7-1:8>
+
+# {'m': ('m1.txt', 0)}
+
+!!! CustomUnitProvider.unit_location
+    name='m'
+    kind=unit_specification
+  ref m.a: <Def m1.txt:1:3-1:4>
+  ref m.b: <Def m1.txt:1:5-1:6>
+  ref m.c: <Def m1.txt:1:7-1:8>
+
+# {'m': ('m1.txt', 1)}
+
+!!! CustomUnitProvider.unit_location
+    name='m'
+    kind=unit_specification
+  ref m.a: <Def m1.txt:2:3-2:4>
+  ref m.b: <Def m1.txt:2:5-2:6>
+  ref m.c: <Def m1.txt:2:7-2:8>
+
+# {'m': ('m0.txt', 1)}
+
+!!! CustomUnitProvider.unit_location
+    name='m'
+    kind=unit_specification
+  ref m.a: <PropertyError>
+  ref m.b: <PropertyError>
+  ref m.c: <PropertyError>
+
+# {}
+
+Uncaught exception in UnitProvider.unit_location:
+Traceback (most recent call last):
+  File ".../__init__.py", line XXX, in get_unit_location
+     <source code>
+  File "<string>", line XXX, in unit_location
+KeyError: 'm'
+Uncaught exception in UnitProvider.unit_location:
+Traceback (most recent call last):
+  File ".../__init__.py", line XXX, in get_unit_location
+     <source code>
+  File "<string>", line XXX, in unit_location
+KeyError: 'm'
+!!! CustomUnitProvider.unit_location
+    name='m'
+    kind=unit_specification
+  ref m.a: <PropertyError>
+  ref m.b: <PropertyError>
+  ref m.c: <PropertyError>
+
+# {'m': ('m0.txt', 'foo')}
+
+Uncaught exception in UnitProvider.unit_location:
+Traceback (most recent call last):
+  File ".../__init__.py", line XXX, in get_unit_location
+     <source code>
+AssertionError
+Uncaught exception in UnitProvider.unit_location:
+Traceback (most recent call last):
+  File ".../__init__.py", line XXX, in get_unit_location
+     <source code>
+AssertionError
+!!! CustomUnitProvider.unit_location
+    name='m'
+    kind=unit_specification
+  ref m.a: <PropertyError>
+  ref m.b: <PropertyError>
+  ref m.c: <PropertyError>
+
+# {'m': (3.14, 1)}
+
+Uncaught exception in UnitProvider.unit_location:
+Traceback (most recent call last):
+  File ".../__init__.py", line XXX, in get_unit_location
+     <source code>
+AssertionError
+Uncaught exception in UnitProvider.unit_location:
+Traceback (most recent call last):
+  File ".../__init__.py", line XXX, in get_unit_location
+     <source code>
+AssertionError
+!!! CustomUnitProvider.unit_location
+    name='m'
+    kind=unit_specification
+  ref m.a: <PropertyError>
+  ref m.b: <PropertyError>
+  ref m.c: <PropertyError>
+
+# {'m': 'nonsense'}
+
+Uncaught exception in UnitProvider.unit_location:
+Traceback (most recent call last):
+  File ".../__init__.py", line XXX, in get_unit_location
+     <source code>
+ValueError: too many values to unpack (expected 2)
+Uncaught exception in UnitProvider.unit_location:
+Traceback (most recent call last):
+  File ".../__init__.py", line XXX, in get_unit_location
+     <source code>
+ValueError: too many values to unpack (expected 2)
+!!! CustomUnitProvider.unit_location
+    name='m'
+    kind=unit_specification
+  ref m.a: <PropertyError>
+  ref m.b: <PropertyError>
+  ref m.c: <PropertyError>
+
+main.py: Done.
+Done
