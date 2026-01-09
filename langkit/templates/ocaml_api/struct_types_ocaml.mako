@@ -159,9 +159,9 @@ module AnalysisUnitStruct : sig
   val unit_reparse_from_buffer :
     t -> string -> string -> Unsigned.size_t -> int
 
-  val unit_first_token : t -> Token.t structure ptr -> unit
+  val unit_first_token : t -> TokenStruct.t structure ptr -> unit
 
-  val unit_last_token : t -> Token.t structure ptr -> unit
+  val unit_last_token : t -> TokenStruct.t structure ptr -> unit
 
   val unit_token_count : t -> int
 
@@ -204,13 +204,13 @@ end = struct
   let unit_first_token = foreign ~from:c_lib
     "${capi.get_name('unit_first_token')}"
     (c_type
-     @-> ptr Token.c_type
+     @-> ptr TokenStruct.c_type
      @-> raisable void)
 
   let unit_last_token = foreign ~from:c_lib
     "${capi.get_name('unit_last_token')}"
     (c_type
-     @-> ptr Token.c_type
+     @-> ptr TokenStruct.c_type
      @-> raisable void)
 
   let unit_token_count = foreign ~from:c_lib
@@ -278,6 +278,8 @@ module AnalysisContextStruct : sig
   type t
 
   val c_type : t typ
+
+  val unwrap : t -> unit ptr
 
   val allocate_analysis_context : ?keep:'a -> unit -> t
   val initialize_analysis_context :

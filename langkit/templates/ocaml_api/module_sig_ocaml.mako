@@ -68,51 +68,6 @@ module TokenData : sig
   type t
 end
 
-module Token : sig
-  ${ocaml_doc('langkit.token_reference_type', 1)}
-
-  type dummy_context
-
-  type t = {
-    context : dummy_context;
-    token_data : TokenData.t;
-    token_index : int;
-    trivia_index : int;
-    kind : int;
-    text : string;
-    sloc_range : SlocRange.t;
-  }
-
-  val kind_name : t -> string
-  ${ocaml_doc('langkit.token_kind_name', 1)}
-
-  val text_range : t -> t -> string
-  ${ocaml_doc('langkit.token_range_text', 1)}
-
-  val is_trivia : t -> bool
-  ${ocaml_doc('langkit.token_is_trivia', 1)}
-
-  val index : t -> int
-  ${ocaml_doc('langkit.token_index', 1)}
-
-  val next : t -> t option
-  ${ocaml_doc('langkit.unit_first_token', 1)}
-
-  val previous : t -> t option
-  ${ocaml_doc('langkit.unit_last_token', 1)}
-
-  val compare : t -> t -> int
-
-  val equal : t -> t -> bool
-
-  val hash : t -> int
-
-  val is_equivalent : t -> t -> bool
-  ${ocaml_doc('langkit.token_is_equivalent', 1)}
-
-  val pp : Format.formatter -> t -> unit
-end
-
 module BigInteger : sig
   type t = Z.t
 end
@@ -153,6 +108,16 @@ end
 
 type analysis_context
 
+and token = {
+  context : analysis_context;
+  token_data : TokenData.t;
+  token_index : int;
+  trivia_index : int;
+  kind : int;
+  text : string;
+  sloc_range : SlocRange.t;
+}
+
 and ${ocaml_api.type_public_name(T.AnalysisUnit)}
 
 and entity
@@ -164,6 +129,50 @@ ${struct_types.ocaml_fields(T.env_md, rec=True)}
 % for astnode in ctx.node_types:
   ${astnode_types.sig(astnode)}
 % endfor
+
+module Token : sig
+  ${ocaml_doc('langkit.token_reference_type', 1)}
+
+  type t = token = {
+     context : analysis_context;
+     token_data : TokenData.t;
+     token_index : int;
+     trivia_index : int;
+     kind : int;
+     text : string;
+     sloc_range : SlocRange.t;
+   }
+
+  val kind_name : t -> string
+  ${ocaml_doc('langkit.token_kind_name', 1)}
+
+  val text_range : t -> t -> string
+  ${ocaml_doc('langkit.token_range_text', 1)}
+
+  val is_trivia : t -> bool
+  ${ocaml_doc('langkit.token_is_trivia', 1)}
+
+  val index : t -> int
+  ${ocaml_doc('langkit.token_index', 1)}
+
+  val next : t -> t option
+  ${ocaml_doc('langkit.unit_first_token', 1)}
+
+  val previous : t -> t option
+  ${ocaml_doc('langkit.unit_last_token', 1)}
+
+  val compare : t -> t -> int
+
+  val equal : t -> t -> bool
+
+  val hash : t -> int
+
+  val is_equivalent : t -> t -> bool
+  ${ocaml_doc('langkit.token_is_equivalent', 1)}
+
+  val pp : Format.formatter -> t -> unit
+end
+
 
 module Entity : sig
   type t = entity

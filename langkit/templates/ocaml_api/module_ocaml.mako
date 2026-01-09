@@ -409,21 +409,26 @@ module TokenData = struct
   type t = unit ptr
 end
 
-module Token = struct
-  (* We don't have access to AnalysisContextStruct at this point. We don't need
-     to do anything with the context value except pass it around, so map it as
-     an opaque pointer instead. *)
-  type dummy_context = unit ptr
+module TokenStruct : sig
+  type t
 
-  type t = {
-    context : dummy_context;
-    token_data : TokenData.t;
-    token_index : int;
-    trivia_index : int;
-    kind : int;
-    text : string;
-    sloc_range : SlocRange.t;
-  }
+  val context : (unit ptr, t structure) field
+  val token_data : (unit ptr, t structure) field
+  val token_index : (int, t structure) field
+  val trivia_index : (int, t structure) field
+  val _token_get_kind : t structure ptr -> int
+  val _token_kind_name : int -> char ptr
+  val _token_sloc_range : t structure ptr -> SlocRange.t ptr -> unit
+
+  val _token_range_text :
+    t structure ptr -> t structure ptr -> Text.t structure ptr -> int
+
+  val _token_next : t structure ptr -> t structure ptr -> unit
+  val _token_previous : t structure ptr -> t structure ptr -> unit
+  val _token_is_equivalent : t structure ptr -> t structure ptr -> bool
+  val c_type : t structure typ
+end = struct
+  type t
 
   let c_type : t structure typ = structure "token"
   let context = field c_type "context" (ptr void)
@@ -432,144 +437,33 @@ module Token = struct
   let trivia_index = field c_type "trivia_index" int
   let () = seal c_type
 
-  let _token_get_kind = foreign ~from:c_lib
-    "${capi.get_name('token_get_kind')}"
-    (ptr c_type @-> raisable int)
+  let _token_get_kind =
+    foreign ~from:c_lib "${capi.get_name('token_get_kind')}"
+      (ptr c_type @-> raisable int)
 
-  let _token_kind_name = foreign ~from:c_lib
-    "${capi.get_name('token_kind_name')}"
-    (int @-> raisable (ptr char))
+  let _token_kind_name =
+    foreign ~from:c_lib "${capi.get_name('token_kind_name')}"
+      (int @-> raisable (ptr char))
 
-  let _token_sloc_range = foreign ~from:c_lib
-    "${capi.get_name('token_sloc_range')}"
-    (ptr c_type @-> ptr SlocRange.c_type @-> raisable void)
+  let _token_sloc_range =
+    foreign ~from:c_lib "${capi.get_name('token_sloc_range')}"
+      (ptr c_type @-> ptr SlocRange.c_type @-> raisable void)
 
-  let token_kind_name kind =
-    unwrap_str (_token_kind_name kind)
+  let _token_range_text =
+    foreign ~from:c_lib "${capi.get_name('token_range_text')}"
+      (ptr c_type @-> ptr c_type @-> ptr Text.c_type @-> raisable int)
 
-  let token_range_text = foreign ~from:c_lib
-    "${capi.get_name('token_range_text')}"
-    (ptr c_type @-> ptr c_type @-> ptr Text.c_type @-> raisable int)
+  let _token_next =
+    foreign ~from:c_lib "${capi.get_name('token_next')}"
+      (ptr c_type @-> ptr c_type @-> raisable void)
 
-  let wrap (c_value : t structure) : t option =
-  let token_data = getf c_value token_data in
-  if is_null token_data then
-    None
-  else
-    Some {
-      context = getf c_value context;
-      token_data;
-      token_index = getf c_value token_index;
-      trivia_index = getf c_value trivia_index;
-      kind = _token_get_kind (addr c_value);
-      text =
-        (let c_result_ptr = allocate_n Text.c_type ~count:1 in
-         let _ = token_range_text (addr c_value) (addr c_value) c_result_ptr in
-         Text.wrap (!@ c_result_ptr));
-      sloc_range =
-        (let c_result_ptr = allocate_n SlocRange.c_type ~count:1 in
-         let _ = _token_sloc_range (addr c_value) c_result_ptr in
-         !@ c_result_ptr);
-    }
+  let _token_previous =
+    foreign ~from:c_lib "${capi.get_name('token_previous')}"
+      (ptr c_type @-> ptr c_type @-> raisable void)
 
-  let unwrap (value : t) : t structure =
-    let c_value = make c_type in
-    setf c_value context value.context;
-    setf c_value token_data value.token_data;
-    setf c_value token_index value.token_index;
-    setf c_value trivia_index value.trivia_index;
-    c_value
-
-  let kind_name token = token_kind_name (_token_get_kind (addr (unwrap token)))
-
-  let sloc_range token =
-    let c_result_ptr = allocate_n SlocRange.c_type ~count:1 in
-    let _ = _token_sloc_range (addr (unwrap token)) c_result_ptr in
-    !@ c_result_ptr
-
-  let token_next = foreign ~from:c_lib
-    "${capi.get_name('token_next')}"
-    (ptr c_type @-> ptr c_type @-> raisable void)
-
-  let token_previous = foreign ~from:c_lib
-    "${capi.get_name('token_previous')}"
-    (ptr c_type @-> ptr c_type @-> raisable void)
-
-  let is_equivalent = foreign ~from:c_lib
-    "${capi.get_name('token_is_equivalent')}"
-    (ptr c_type @-> ptr c_type @-> raisable bool)
-
-  let pp fmt token =
-    let pp_text fmt = function
-      | "" -> Format.pp_print_string fmt ""
-      | _ as text -> Format.fprintf fmt " %S" text
-    in
-    Format.fprintf fmt "<Token %s%a at %a>"
-      (kind_name token)
-      pp_text token.text
-      SlocRange.pp token.sloc_range
-
-  let text_range token_first token_last =
-    let c_result_ptr = allocate_n Text.c_type ~count:1 in
-    let res =
-      token_range_text
-        (addr (unwrap token_first))
-        (addr (unwrap token_last))
-        c_result_ptr
-    in
-    if res = 0 then
-      raise (Invalid_argument
-        (Format.asprintf "%a and %a come from different units"
-          pp token_first
-          pp token_last));
-    Text.wrap (!@ c_result_ptr)
-
-  let text token = text_range token token
-
-  let next token =
-    let c_next_token_ptr = allocate_n c_type ~count:1 in
-    token_next (addr (unwrap token)) c_next_token_ptr ;
-    wrap (!@ c_next_token_ptr)
-
-  let previous token =
-    let c_next_token_ptr = allocate_n c_type ~count:1 in
-    token_previous (addr (unwrap token)) c_next_token_ptr ;
-    wrap (!@ c_next_token_ptr)
-
-  let is_trivia token =
-    token.trivia_index != 0
-
-  let index token =
-    match token.trivia_index with
-    | 0 ->
-        token.token_index - 1
-    | _ ->
-        token.trivia_index - 1
-
-  let compare one other =
-    let open Stdlib in
-    let compare_token_data = compare one.token_data other.token_data in
-    if compare_token_data = 0 then
-      let compare_token_index = compare one.token_index other.token_index in
-      if compare_token_index = 0 then
-        compare one.trivia_index other.trivia_index
-      else
-        compare_token_index
-    else
-      compare_token_data
-
-  let equal one other =
-    compare one other = 0
-
-  let hash token =
-    Hashtbl.hash
-      (token.token_data
-       , token.token_index
-       , token.trivia_index)
-
-  let is_equivalent one other =
-    is_equivalent (addr (unwrap one)) (addr (unwrap other))
-
+  let _token_is_equivalent =
+    foreign ~from:c_lib "${capi.get_name('token_is_equivalent')}"
+      (ptr c_type @-> ptr c_type @-> raisable bool)
 end
 
 module BareNode = struct
@@ -701,6 +595,16 @@ type analysis_context = {
   unit_provider : UnitProvider.t
 }
 
+and token = {
+  context : analysis_context;
+  token_data : TokenData.t;
+  token_index : int;
+  trivia_index : int;
+  kind : int;
+  text : string;
+  sloc_range : SlocRange.t;
+}
+
 and ${ocaml_api.type_public_name(T.AnalysisUnit)} = {
   c_value : AnalysisUnitStruct.t;
   context : analysis_context
@@ -770,6 +674,119 @@ and ${ocaml_api.wrap_function_name(T.AnalysisUnit)} context c_value
  context=context;
 }
 
+module Token = struct
+  open TokenStruct
+
+  type t = token = {
+     context : analysis_context;
+     token_data : TokenData.t;
+     token_index : int;
+     trivia_index : int;
+     kind : int;
+     text : string;
+     sloc_range : SlocRange.t;
+   }
+
+  let wrap context (c_value : TokenStruct.t structure) : t option =
+    let token_data = getf c_value token_data in
+    if is_null token_data then None
+    else
+      Some
+        {
+          context;
+          token_data;
+          token_index = getf c_value token_index;
+          trivia_index = getf c_value trivia_index;
+          kind = _token_get_kind (addr c_value);
+          text =
+            (let c_result_ptr = allocate_n Text.c_type ~count:1 in
+             let _ =
+               _token_range_text (addr c_value) (addr c_value) c_result_ptr
+             in
+             Text.wrap !@c_result_ptr);
+          sloc_range =
+            (let c_result_ptr = allocate_n SlocRange.c_type ~count:1 in
+             let _ = _token_sloc_range (addr c_value) c_result_ptr in
+             !@c_result_ptr);
+        }
+
+  let unwrap (value : t) : TokenStruct.t structure =
+    let c_value = make c_type in
+    setf c_value context (AnalysisContextStruct.unwrap value.context.c_value);
+    setf c_value token_data value.token_data;
+    setf c_value token_index value.token_index;
+    setf c_value trivia_index value.trivia_index;
+    c_value
+
+  let token_kind_name kind = unwrap_str (_token_kind_name kind)
+  let kind_name token = token_kind_name (_token_get_kind (addr (unwrap token)))
+
+  let sloc_range token =
+    let c_result_ptr = allocate_n SlocRange.c_type ~count:1 in
+    let _ = _token_sloc_range (addr (unwrap token)) c_result_ptr in
+    !@c_result_ptr
+
+  let pp fmt token =
+    let pp_text fmt = function
+      | "" -> Format.pp_print_string fmt ""
+      | _ as text -> Format.fprintf fmt " %S" text
+    in
+    Format.fprintf fmt "<Token %s%a at %a>" (kind_name token) pp_text token.text
+      SlocRange.pp token.sloc_range
+
+  let text_range token_first token_last =
+    let c_result_ptr = allocate_n Text.c_type ~count:1 in
+    let res =
+      _token_range_text
+        (addr (unwrap token_first))
+        (addr (unwrap token_last))
+        c_result_ptr
+    in
+    if res = 0 then
+      raise
+        (Invalid_argument
+           (Format.asprintf "%a and %a come from different units" pp token_first
+              pp token_last));
+    Text.wrap !@c_result_ptr
+
+  let text token = text_range token token
+
+  let next token =
+    let c_next_token_ptr = allocate_n c_type ~count:1 in
+    _token_next (addr (unwrap token)) c_next_token_ptr;
+    wrap token.context !@c_next_token_ptr
+
+  let previous token =
+    let c_next_token_ptr = allocate_n c_type ~count:1 in
+    _token_previous (addr (unwrap token)) c_next_token_ptr;
+    wrap token.context !@c_next_token_ptr
+
+  let is_trivia token = token.trivia_index != 0
+
+  let index token =
+    match token.trivia_index with
+    | 0 -> token.token_index - 1
+    | _ -> token.trivia_index - 1
+
+  let compare one other =
+    let open Stdlib in
+    let compare_token_data = compare one.token_data other.token_data in
+    if compare_token_data = 0 then
+      let compare_token_index = compare one.token_index other.token_index in
+      if compare_token_index = 0 then
+        compare one.trivia_index other.trivia_index
+      else compare_token_index
+    else compare_token_data
+
+  let equal one other = compare one other = 0
+
+  let hash token =
+    Hashtbl.hash (token.token_data, token.token_index, token.trivia_index)
+
+  let is_equivalent one other =
+    _token_is_equivalent (addr (unwrap one)) (addr (unwrap other))
+end
+
 module Entity = struct
   type t = entity
 
@@ -834,15 +851,15 @@ module AnalysisUnit = struct
 
   let first_token (unit : t) =
     let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
-    let result_ptr = allocate_n Token.c_type ~count:1 in
+    let result_ptr = allocate_n TokenStruct.c_type ~count:1 in
     AnalysisUnitStruct.unit_first_token c_unit result_ptr ;
-    Token.wrap (!@ result_ptr)
+    Token.wrap unit.context (!@ result_ptr)
 
   let last_token (unit : t) =
     let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
-    let result_ptr = allocate_n Token.c_type ~count:1 in
+    let result_ptr = allocate_n TokenStruct.c_type ~count:1 in
     AnalysisUnitStruct.unit_last_token c_unit result_ptr ;
-    Token.wrap (!@ result_ptr)
+    Token.wrap unit.context (!@ result_ptr)
 
   let token_count (unit : t) =
     AnalysisUnitStruct.unit_token_count
