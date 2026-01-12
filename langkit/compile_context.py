@@ -1898,6 +1898,10 @@ class CompileCtx:
                 )
             return
 
+        # Make the cache empty if told to disregard the cache
+        if force:
+            self.emitter.cache.reset()
+
         with names.camel_with_underscores, global_context(self):
             self.run_passes(self.all_passes)
             if not self.check_only:

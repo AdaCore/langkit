@@ -21,6 +21,12 @@ class Cache:
         self.cache_file = cache_file
         self._load()
 
+    def reset(self) -> None:
+        """
+        Empty the cache.
+        """
+        self.db = {}
+
     def _load(self) -> None:
         # If for any reason we cannot read the cache, just start from an empty
         # one.
