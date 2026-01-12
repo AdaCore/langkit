@@ -45,9 +45,9 @@
     },
     "BaseImportList": {},
     "Pattern": {},
-    "ExtendedPattern": {
+    "ComplexPattern": {
       "fields": {
-        "f_sub_pattern": {
+        "f_pattern": {
           "kind": "group",
           "document": {
             "kind": "recurse_flatten",
@@ -97,7 +97,6 @@
     "ParenPattern": {},
     "RegexPattern": {},
     "EllipsisPattern": {},
-    "TuplePattern": {},
     "AnyTypePattern": {},
     "PatternList": {},
     "BindingValDecl": {},
@@ -121,16 +120,6 @@
         {"kind": "recurse_field", "field": "f_expected_value"}
       ]
     },
-    "SelectorPatternDetail": {
-      "node": [
-        {"kind": "recurse_field", "field": "f_call"},
-        {"kind": "text", "text": ":"},
-        "whitespace",
-        {"kind": "recurse_field", "field": "f_sub_pattern"}
-      ]
-    },
-
-    "SelectorCall": {},
     "BaseCallExpr": {
       "node": {
         "kind": "group", "document": "recurse"

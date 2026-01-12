@@ -1,15 +1,13 @@
 val a = b is LongPatternName
 (f_field_name: true, f_property_name():
-Bar, any parent: OtherPatternName(f_field
+Bar, f_somefield: OtherPatternName(f_field
 : false, f_very_long_field_name:
-NestedPattern(any parent: true)))
+NestedPattern(f_somefield: true)))
 val _ = a is Foo(pouet: 12)
 | Foo(koin(): 123)
 | Foo(koin(): true)
 | Foo(p_referenced_decl(): d) when d is not null
-| Foo(any children: d@BasicDecl)
 | *(p_referenced_decl(): d)
-| (a, b, c)
 | [a, ..., b]
 | not [a, ...]
 | [...] | [1, 2, 3]

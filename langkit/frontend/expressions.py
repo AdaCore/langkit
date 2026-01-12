@@ -3134,8 +3134,13 @@ class ExpressionCompiler:
             return list(
                 itertools.chain(*map(self.flatten_pattern, ptn.children))
             )
-        elif isinstance(ptn, L.TypePattern):
-            return [ptn.f_type_name]
+        elif (
+            isinstance(ptn, L.ComplexPattern)
+            and isinstance(ptn.f_pattern, L.TypePattern)
+            and not ptn.f_details.children
+            and not ptn.f_predicate
+        ):
+            return [ptn.f_pattern.f_type_name]
         else:
             error(
                 "Only conjunctions of type patterns supported for now",
@@ -3505,8 +3510,8 @@ class ExpressionCompiler:
             # binding pattern, because at the grammar level, this subsumes the
             # case where this happens via a MatchBranch.
             if isinstance(branch, L.PatternMatchBranch):
-                if isinstance(branch.f_pattern, L.BindingPattern) and (
-                    branch.f_pattern.f_sub_pattern is None
+                if isinstance(branch.f_pattern, L.RenamingComplexPattern) and (
+                    branch.f_pattern.f_predicate is None
                 ):
                     syn_type = None
                     syn_name = branch.f_pattern.f_decl.f_syn_name

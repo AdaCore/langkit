@@ -1,11 +1,11 @@
 fun foo(n: AdaNode): Any = match n {
-    case b@BasicDecl(any parent: PackageDecl) => 12
+    case b@BasicDecl(f_somefield: PackageDecl) => 12
 
     case l@LongPatternName(f_field_name
     : true, f_property_name(): Bar,
-    any parent: OtherPatternName
+    f_somefield: OtherPatternName
     (f_field: false, f_very_long_field_name
-    : NestedPattern(any parent: true))) => true
+    : NestedPattern(f_somefield: true))) => true
 
     # We can mix both styles of branches
     case b: BasicDecl => "lol"
