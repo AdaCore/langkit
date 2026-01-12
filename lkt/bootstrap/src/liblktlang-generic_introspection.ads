@@ -171,107 +171,110 @@ private package Liblktlang.Generic_Introspection is
       Type_Index_For_Num_Lit : constant Type_Index := 142;
       Type_Index_For_String_Lit : constant Type_Index := 143;
       Type_Index_For_Block_String_Lit : constant Type_Index := 144;
-      Type_Index_For_Single_Line_String_Lit : constant Type_Index := 145;
-      Type_Index_For_Pattern_Single_Line_String_Lit : constant Type_Index := 146;
-      Type_Index_For_Logic_Assign : constant Type_Index := 147;
-      Type_Index_For_Logic_Expr : constant Type_Index := 148;
-      Type_Index_For_Logic_Propagate : constant Type_Index := 149;
-      Type_Index_For_Logic_Unify : constant Type_Index := 150;
-      Type_Index_For_Match_Expr : constant Type_Index := 151;
-      Type_Index_For_Not_Expr : constant Type_Index := 152;
-      Type_Index_For_Paren_Expr : constant Type_Index := 153;
-      Type_Index_For_Query : constant Type_Index := 154;
-      Type_Index_For_Raise_Expr : constant Type_Index := 155;
-      Type_Index_For_Subscript_Expr : constant Type_Index := 156;
-      Type_Index_For_Try_Expr : constant Type_Index := 157;
-      Type_Index_For_Un_Op : constant Type_Index := 158;
-      Type_Index_For_Full_Decl : constant Type_Index := 159;
-      Type_Index_For_Grammar_List_Sep : constant Type_Index := 160;
-      Type_Index_For_Import : constant Type_Index := 161;
-      Type_Index_For_Langkit_Root : constant Type_Index := 162;
-      Type_Index_For_Lexer_Case_Rule : constant Type_Index := 163;
-      Type_Index_For_Lexer_Case_Rule_Send : constant Type_Index := 164;
-      Type_Index_For_List_Kind : constant Type_Index := 165;
-      Type_Index_For_List_Kind_One : constant Type_Index := 166;
-      Type_Index_For_List_Kind_Zero : constant Type_Index := 167;
-      Type_Index_For_Lkt_Node_Base_List : constant Type_Index := 168;
-      Type_Index_For_Argument_List : constant Type_Index := 169;
-      Type_Index_For_Base_Lexer_Case_Rule_Alt_List : constant Type_Index := 170;
-      Type_Index_For_Base_Match_Branch_List : constant Type_Index := 171;
-      Type_Index_For_Block_String_Line_List : constant Type_Index := 172;
-      Type_Index_For_Call_Expr_List : constant Type_Index := 173;
-      Type_Index_For_Decl_Annotation_List : constant Type_Index := 174;
-      Type_Index_For_Elsif_Branch_List : constant Type_Index := 175;
-      Type_Index_For_Enum_Class_Alt_Decl_List : constant Type_Index := 176;
-      Type_Index_For_Enum_Class_Case_List : constant Type_Index := 177;
-      Type_Index_For_Enum_Lit_Decl_List : constant Type_Index := 178;
-      Type_Index_For_Expr_List : constant Type_Index := 179;
-      Type_Index_For_Any_Of_List : constant Type_Index := 180;
-      Type_Index_For_Full_Decl_List : constant Type_Index := 181;
-      Type_Index_For_Decl_Block : constant Type_Index := 182;
-      Type_Index_For_Generic_Param_Decl_List : constant Type_Index := 183;
-      Type_Index_For_Fun_Param_Decl_List : constant Type_Index := 184;
-      Type_Index_For_Grammar_Expr_List : constant Type_Index := 185;
-      Type_Index_For_Grammar_Expr_List_List : constant Type_Index := 186;
-      Type_Index_For_Import_List : constant Type_Index := 187;
-      Type_Index_For_Lambda_Param_Decl_List : constant Type_Index := 188;
-      Type_Index_For_Lkt_Node_List : constant Type_Index := 189;
-      Type_Index_For_Pattern_Detail_List : constant Type_Index := 190;
-      Type_Index_For_Pattern_List : constant Type_Index := 191;
-      Type_Index_For_Ref_Id_List : constant Type_Index := 192;
-      Type_Index_For_Type_Ref_List : constant Type_Index := 193;
-      Type_Index_For_Synthetic_Type_Ref_List : constant Type_Index := 194;
-      Type_Index_For_Null_Cond_Qualifier : constant Type_Index := 195;
-      Type_Index_For_Null_Cond_Qualifier_Absent : constant Type_Index := 196;
-      Type_Index_For_Null_Cond_Qualifier_Present : constant Type_Index := 197;
-      Type_Index_For_Op : constant Type_Index := 198;
-      Type_Index_For_Op_Amp : constant Type_Index := 199;
-      Type_Index_For_Op_And : constant Type_Index := 200;
-      Type_Index_For_Op_Div : constant Type_Index := 201;
-      Type_Index_For_Op_Eq : constant Type_Index := 202;
-      Type_Index_For_Op_Gt : constant Type_Index := 203;
-      Type_Index_For_Op_Gte : constant Type_Index := 204;
-      Type_Index_For_Op_Logic_And : constant Type_Index := 205;
-      Type_Index_For_Op_Logic_Or : constant Type_Index := 206;
-      Type_Index_For_Op_Lt : constant Type_Index := 207;
-      Type_Index_For_Op_Lte : constant Type_Index := 208;
-      Type_Index_For_Op_Minus : constant Type_Index := 209;
-      Type_Index_For_Op_Mult : constant Type_Index := 210;
-      Type_Index_For_Op_Ne : constant Type_Index := 211;
-      Type_Index_For_Op_Or : constant Type_Index := 212;
-      Type_Index_For_Op_Or_Int : constant Type_Index := 213;
-      Type_Index_For_Op_Plus : constant Type_Index := 214;
-      Type_Index_For_Op_Stream_Concat : constant Type_Index := 215;
-      Type_Index_For_Op_Stream_Cons : constant Type_Index := 216;
-      Type_Index_For_Pattern : constant Type_Index := 217;
-      Type_Index_For_Any_Type_Pattern : constant Type_Index := 218;
-      Type_Index_For_Binding_Pattern : constant Type_Index := 219;
-      Type_Index_For_Bool_Pattern : constant Type_Index := 220;
-      Type_Index_For_Bool_Pattern_False : constant Type_Index := 221;
-      Type_Index_For_Bool_Pattern_True : constant Type_Index := 222;
-      Type_Index_For_Ellipsis_Pattern : constant Type_Index := 223;
-      Type_Index_For_Extended_Pattern : constant Type_Index := 224;
-      Type_Index_For_Filtered_Pattern : constant Type_Index := 225;
-      Type_Index_For_Integer_Pattern : constant Type_Index := 226;
-      Type_Index_For_List_Pattern : constant Type_Index := 227;
-      Type_Index_For_Not_Pattern : constant Type_Index := 228;
-      Type_Index_For_Null_Pattern : constant Type_Index := 229;
-      Type_Index_For_Or_Pattern : constant Type_Index := 230;
-      Type_Index_For_Paren_Pattern : constant Type_Index := 231;
-      Type_Index_For_Regex_Pattern : constant Type_Index := 232;
-      Type_Index_For_Tuple_Pattern : constant Type_Index := 233;
-      Type_Index_For_Type_Pattern : constant Type_Index := 234;
-      Type_Index_For_Pattern_Detail : constant Type_Index := 235;
-      Type_Index_For_Field_Pattern_Detail : constant Type_Index := 236;
-      Type_Index_For_Property_Pattern_Detail : constant Type_Index := 237;
-      Type_Index_For_Selector_Pattern_Detail : constant Type_Index := 238;
-      Type_Index_For_Selector_Call : constant Type_Index := 239;
-      Type_Index_For_Type_Ref : constant Type_Index := 240;
-      Type_Index_For_Default_List_Type_Ref : constant Type_Index := 241;
-      Type_Index_For_Function_Type_Ref : constant Type_Index := 242;
-      Type_Index_For_Generic_Type_Ref : constant Type_Index := 243;
-      Type_Index_For_Simple_Type_Ref : constant Type_Index := 244;
-      Type_Index_For_Var_Bind : constant Type_Index := 245;
+      Type_Index_For_Module_Doc_String_Lit : constant Type_Index := 145;
+      Type_Index_For_Single_Line_String_Lit : constant Type_Index := 146;
+      Type_Index_For_Pattern_Single_Line_String_Lit : constant Type_Index := 147;
+      Type_Index_For_Logic_Assign : constant Type_Index := 148;
+      Type_Index_For_Logic_Expr : constant Type_Index := 149;
+      Type_Index_For_Logic_Propagate : constant Type_Index := 150;
+      Type_Index_For_Logic_Unify : constant Type_Index := 151;
+      Type_Index_For_Match_Expr : constant Type_Index := 152;
+      Type_Index_For_Not_Expr : constant Type_Index := 153;
+      Type_Index_For_Paren_Expr : constant Type_Index := 154;
+      Type_Index_For_Query : constant Type_Index := 155;
+      Type_Index_For_Raise_Expr : constant Type_Index := 156;
+      Type_Index_For_Subscript_Expr : constant Type_Index := 157;
+      Type_Index_For_Try_Expr : constant Type_Index := 158;
+      Type_Index_For_Un_Op : constant Type_Index := 159;
+      Type_Index_For_Full_Decl : constant Type_Index := 160;
+      Type_Index_For_Grammar_List_Sep : constant Type_Index := 161;
+      Type_Index_For_Import : constant Type_Index := 162;
+      Type_Index_For_Langkit_Root : constant Type_Index := 163;
+      Type_Index_For_Lexer_Case_Rule : constant Type_Index := 164;
+      Type_Index_For_Lexer_Case_Rule_Send : constant Type_Index := 165;
+      Type_Index_For_List_Kind : constant Type_Index := 166;
+      Type_Index_For_List_Kind_One : constant Type_Index := 167;
+      Type_Index_For_List_Kind_Zero : constant Type_Index := 168;
+      Type_Index_For_Lkt_Node_Base_List : constant Type_Index := 169;
+      Type_Index_For_Argument_List : constant Type_Index := 170;
+      Type_Index_For_Base_Lexer_Case_Rule_Alt_List : constant Type_Index := 171;
+      Type_Index_For_Base_Match_Branch_List : constant Type_Index := 172;
+      Type_Index_For_Block_String_Line_List : constant Type_Index := 173;
+      Type_Index_For_Call_Expr_List : constant Type_Index := 174;
+      Type_Index_For_Decl_Annotation_List : constant Type_Index := 175;
+      Type_Index_For_Elsif_Branch_List : constant Type_Index := 176;
+      Type_Index_For_Enum_Class_Alt_Decl_List : constant Type_Index := 177;
+      Type_Index_For_Enum_Class_Case_List : constant Type_Index := 178;
+      Type_Index_For_Enum_Lit_Decl_List : constant Type_Index := 179;
+      Type_Index_For_Expr_List : constant Type_Index := 180;
+      Type_Index_For_Any_Of_List : constant Type_Index := 181;
+      Type_Index_For_Full_Decl_List : constant Type_Index := 182;
+      Type_Index_For_Decl_Block : constant Type_Index := 183;
+      Type_Index_For_Generic_Param_Decl_List : constant Type_Index := 184;
+      Type_Index_For_Fun_Param_Decl_List : constant Type_Index := 185;
+      Type_Index_For_Grammar_Expr_List : constant Type_Index := 186;
+      Type_Index_For_Grammar_Expr_List_List : constant Type_Index := 187;
+      Type_Index_For_Import_List : constant Type_Index := 188;
+      Type_Index_For_Lambda_Param_Decl_List : constant Type_Index := 189;
+      Type_Index_For_Lkt_Node_List : constant Type_Index := 190;
+      Type_Index_For_Module_Doc_String_Line_List : constant Type_Index := 191;
+      Type_Index_For_Pattern_Detail_List : constant Type_Index := 192;
+      Type_Index_For_Pattern_List : constant Type_Index := 193;
+      Type_Index_For_Ref_Id_List : constant Type_Index := 194;
+      Type_Index_For_Type_Ref_List : constant Type_Index := 195;
+      Type_Index_For_Synthetic_Type_Ref_List : constant Type_Index := 196;
+      Type_Index_For_Module_Doc_String_Line : constant Type_Index := 197;
+      Type_Index_For_Null_Cond_Qualifier : constant Type_Index := 198;
+      Type_Index_For_Null_Cond_Qualifier_Absent : constant Type_Index := 199;
+      Type_Index_For_Null_Cond_Qualifier_Present : constant Type_Index := 200;
+      Type_Index_For_Op : constant Type_Index := 201;
+      Type_Index_For_Op_Amp : constant Type_Index := 202;
+      Type_Index_For_Op_And : constant Type_Index := 203;
+      Type_Index_For_Op_Div : constant Type_Index := 204;
+      Type_Index_For_Op_Eq : constant Type_Index := 205;
+      Type_Index_For_Op_Gt : constant Type_Index := 206;
+      Type_Index_For_Op_Gte : constant Type_Index := 207;
+      Type_Index_For_Op_Logic_And : constant Type_Index := 208;
+      Type_Index_For_Op_Logic_Or : constant Type_Index := 209;
+      Type_Index_For_Op_Lt : constant Type_Index := 210;
+      Type_Index_For_Op_Lte : constant Type_Index := 211;
+      Type_Index_For_Op_Minus : constant Type_Index := 212;
+      Type_Index_For_Op_Mult : constant Type_Index := 213;
+      Type_Index_For_Op_Ne : constant Type_Index := 214;
+      Type_Index_For_Op_Or : constant Type_Index := 215;
+      Type_Index_For_Op_Or_Int : constant Type_Index := 216;
+      Type_Index_For_Op_Plus : constant Type_Index := 217;
+      Type_Index_For_Op_Stream_Concat : constant Type_Index := 218;
+      Type_Index_For_Op_Stream_Cons : constant Type_Index := 219;
+      Type_Index_For_Pattern : constant Type_Index := 220;
+      Type_Index_For_Any_Type_Pattern : constant Type_Index := 221;
+      Type_Index_For_Binding_Pattern : constant Type_Index := 222;
+      Type_Index_For_Bool_Pattern : constant Type_Index := 223;
+      Type_Index_For_Bool_Pattern_False : constant Type_Index := 224;
+      Type_Index_For_Bool_Pattern_True : constant Type_Index := 225;
+      Type_Index_For_Ellipsis_Pattern : constant Type_Index := 226;
+      Type_Index_For_Extended_Pattern : constant Type_Index := 227;
+      Type_Index_For_Filtered_Pattern : constant Type_Index := 228;
+      Type_Index_For_Integer_Pattern : constant Type_Index := 229;
+      Type_Index_For_List_Pattern : constant Type_Index := 230;
+      Type_Index_For_Not_Pattern : constant Type_Index := 231;
+      Type_Index_For_Null_Pattern : constant Type_Index := 232;
+      Type_Index_For_Or_Pattern : constant Type_Index := 233;
+      Type_Index_For_Paren_Pattern : constant Type_Index := 234;
+      Type_Index_For_Regex_Pattern : constant Type_Index := 235;
+      Type_Index_For_Tuple_Pattern : constant Type_Index := 236;
+      Type_Index_For_Type_Pattern : constant Type_Index := 237;
+      Type_Index_For_Pattern_Detail : constant Type_Index := 238;
+      Type_Index_For_Field_Pattern_Detail : constant Type_Index := 239;
+      Type_Index_For_Property_Pattern_Detail : constant Type_Index := 240;
+      Type_Index_For_Selector_Pattern_Detail : constant Type_Index := 241;
+      Type_Index_For_Selector_Call : constant Type_Index := 242;
+      Type_Index_For_Type_Ref : constant Type_Index := 243;
+      Type_Index_For_Default_List_Type_Ref : constant Type_Index := 244;
+      Type_Index_For_Function_Type_Ref : constant Type_Index := 245;
+      Type_Index_For_Generic_Type_Ref : constant Type_Index := 246;
+      Type_Index_For_Simple_Type_Ref : constant Type_Index := 247;
+      Type_Index_For_Var_Bind : constant Type_Index := 248;
 
    ----------------------------
    -- Member index constants --
@@ -394,165 +397,167 @@ private package Liblktlang.Generic_Introspection is
       Member_Index_For_Lambda_Expr_F_Body : constant Struct_Member_Index := 115;
       Member_Index_For_Null_Lit_F_Dest_Type : constant Struct_Member_Index := 116;
       Member_Index_For_Block_String_Lit_F_Lines : constant Struct_Member_Index := 117;
-      Member_Index_For_Logic_Assign_F_Dest_Var : constant Struct_Member_Index := 118;
-      Member_Index_For_Logic_Assign_F_Value : constant Struct_Member_Index := 119;
-      Member_Index_For_Logic_Expr_F_Expr : constant Struct_Member_Index := 120;
-      Member_Index_For_Logic_Propagate_F_Dest_Var : constant Struct_Member_Index := 121;
-      Member_Index_For_Logic_Propagate_F_Call : constant Struct_Member_Index := 122;
-      Member_Index_For_Logic_Unify_F_Lhs : constant Struct_Member_Index := 123;
-      Member_Index_For_Logic_Unify_F_Rhs : constant Struct_Member_Index := 124;
-      Member_Index_For_Match_Expr_F_Match_Expr : constant Struct_Member_Index := 125;
-      Member_Index_For_Match_Expr_F_Branches : constant Struct_Member_Index := 126;
-      Member_Index_For_Not_Expr_F_Expr : constant Struct_Member_Index := 127;
-      Member_Index_For_Paren_Expr_F_Expr : constant Struct_Member_Index := 128;
-      Member_Index_For_Query_F_Source : constant Struct_Member_Index := 129;
-      Member_Index_For_Query_F_Pattern : constant Struct_Member_Index := 130;
-      Member_Index_For_Query_F_Mapping : constant Struct_Member_Index := 131;
-      Member_Index_For_Query_F_Guard : constant Struct_Member_Index := 132;
-      Member_Index_For_Raise_Expr_F_Dest_Type : constant Struct_Member_Index := 133;
-      Member_Index_For_Raise_Expr_F_Except_Expr : constant Struct_Member_Index := 134;
-      Member_Index_For_Subscript_Expr_F_Prefix : constant Struct_Member_Index := 135;
-      Member_Index_For_Subscript_Expr_F_Null_Cond : constant Struct_Member_Index := 136;
-      Member_Index_For_Subscript_Expr_F_Index : constant Struct_Member_Index := 137;
-      Member_Index_For_Try_Expr_F_Try_Expr : constant Struct_Member_Index := 138;
-      Member_Index_For_Try_Expr_F_Or_Expr : constant Struct_Member_Index := 139;
-      Member_Index_For_Un_Op_F_Op : constant Struct_Member_Index := 140;
-      Member_Index_For_Un_Op_F_Expr : constant Struct_Member_Index := 141;
-      Member_Index_For_Full_Decl_F_Doc : constant Struct_Member_Index := 142;
-      Member_Index_For_Full_Decl_F_Decl_Annotations : constant Struct_Member_Index := 143;
-      Member_Index_For_Full_Decl_F_Decl : constant Struct_Member_Index := 144;
-      Member_Index_For_Grammar_List_Sep_F_Token : constant Struct_Member_Index := 145;
-      Member_Index_For_Grammar_List_Sep_F_Extra : constant Struct_Member_Index := 146;
-      Member_Index_For_Import_F_Name : constant Struct_Member_Index := 147;
-      Member_Index_For_Langkit_Root_F_Imports : constant Struct_Member_Index := 148;
-      Member_Index_For_Langkit_Root_F_Decls : constant Struct_Member_Index := 149;
-      Member_Index_For_Lexer_Case_Rule_F_Expr : constant Struct_Member_Index := 150;
-      Member_Index_For_Lexer_Case_Rule_F_Alts : constant Struct_Member_Index := 151;
-      Member_Index_For_Lexer_Case_Rule_Send_F_Sent : constant Struct_Member_Index := 152;
-      Member_Index_For_Lexer_Case_Rule_Send_F_Match_Size : constant Struct_Member_Index := 153;
-      Member_Index_For_Binding_Pattern_F_Decl : constant Struct_Member_Index := 154;
-      Member_Index_For_Binding_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 155;
-      Member_Index_For_Ellipsis_Pattern_F_Binding : constant Struct_Member_Index := 156;
-      Member_Index_For_Extended_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 157;
-      Member_Index_For_Extended_Pattern_F_Details : constant Struct_Member_Index := 158;
-      Member_Index_For_Filtered_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 159;
-      Member_Index_For_Filtered_Pattern_F_Predicate : constant Struct_Member_Index := 160;
-      Member_Index_For_List_Pattern_F_Sub_Patterns : constant Struct_Member_Index := 161;
-      Member_Index_For_Not_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 162;
-      Member_Index_For_Or_Pattern_F_Left_Sub_Pattern : constant Struct_Member_Index := 163;
-      Member_Index_For_Or_Pattern_F_Right_Sub_Pattern : constant Struct_Member_Index := 164;
-      Member_Index_For_Paren_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 165;
-      Member_Index_For_Tuple_Pattern_F_Sub_Patterns : constant Struct_Member_Index := 166;
-      Member_Index_For_Type_Pattern_F_Type_Name : constant Struct_Member_Index := 167;
-      Member_Index_For_Field_Pattern_Detail_F_Id : constant Struct_Member_Index := 168;
-      Member_Index_For_Field_Pattern_Detail_F_Expected_Value : constant Struct_Member_Index := 169;
-      Member_Index_For_Property_Pattern_Detail_F_Call : constant Struct_Member_Index := 170;
-      Member_Index_For_Property_Pattern_Detail_F_Expected_Value : constant Struct_Member_Index := 171;
-      Member_Index_For_Selector_Pattern_Detail_F_Call : constant Struct_Member_Index := 172;
-      Member_Index_For_Selector_Pattern_Detail_F_Sub_Pattern : constant Struct_Member_Index := 173;
-      Member_Index_For_Selector_Call_F_Quantifier : constant Struct_Member_Index := 174;
-      Member_Index_For_Selector_Call_F_Binding : constant Struct_Member_Index := 175;
-      Member_Index_For_Selector_Call_F_Selector_Call : constant Struct_Member_Index := 176;
-      Member_Index_For_Function_Type_Ref_F_Param_Types : constant Struct_Member_Index := 177;
-      Member_Index_For_Function_Type_Ref_F_Return_Type : constant Struct_Member_Index := 178;
-      Member_Index_For_Generic_Type_Ref_F_Type_Name : constant Struct_Member_Index := 179;
-      Member_Index_For_Generic_Type_Ref_F_Args : constant Struct_Member_Index := 180;
-      Member_Index_For_Simple_Type_Ref_F_Type_Name : constant Struct_Member_Index := 181;
-      Member_Index_For_Var_Bind_F_Name : constant Struct_Member_Index := 182;
-      Member_Index_For_Var_Bind_F_Expr : constant Struct_Member_Index := 183;
-      Member_Index_For_Parent : constant Struct_Member_Index := 184;
-      Member_Index_For_Parents : constant Struct_Member_Index := 185;
-      Member_Index_For_Children : constant Struct_Member_Index := 186;
-      Member_Index_For_Token_Start : constant Struct_Member_Index := 187;
-      Member_Index_For_Token_End : constant Struct_Member_Index := 188;
-      Member_Index_For_Child_Index : constant Struct_Member_Index := 189;
-      Member_Index_For_Previous_Sibling : constant Struct_Member_Index := 190;
-      Member_Index_For_Next_Sibling : constant Struct_Member_Index := 191;
-      Member_Index_For_Unit : constant Struct_Member_Index := 192;
-      Member_Index_For_Is_Ghost : constant Struct_Member_Index := 193;
-      Member_Index_For_Full_Sloc_Image : constant Struct_Member_Index := 194;
-      Member_Index_For_Completion_Item_Kind_To_Int : constant Struct_Member_Index := 195;
-      Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode : constant Struct_Member_Index := 196;
-      Member_Index_For_Lkt_Node_P_Basic_Trait_Gen : constant Struct_Member_Index := 197;
-      Member_Index_For_Lkt_Node_P_Basic_Trait : constant Struct_Member_Index := 198;
-      Member_Index_For_Lkt_Node_P_Node_Gen_Trait : constant Struct_Member_Index := 199;
-      Member_Index_For_Lkt_Node_P_Node_Trait : constant Struct_Member_Index := 200;
-      Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait : constant Struct_Member_Index := 201;
-      Member_Index_For_Lkt_Node_P_Indexable_Trait : constant Struct_Member_Index := 202;
-      Member_Index_For_Lkt_Node_P_Token_Node_Trait : constant Struct_Member_Index := 203;
-      Member_Index_For_Lkt_Node_P_Error_Node_Trait : constant Struct_Member_Index := 204;
-      Member_Index_For_Lkt_Node_P_Char_Type : constant Struct_Member_Index := 205;
-      Member_Index_For_Lkt_Node_P_Int_Type : constant Struct_Member_Index := 206;
-      Member_Index_For_Lkt_Node_P_Bool_Type : constant Struct_Member_Index := 207;
-      Member_Index_For_Lkt_Node_P_Bigint_Type : constant Struct_Member_Index := 208;
-      Member_Index_For_Lkt_Node_P_String_Type : constant Struct_Member_Index := 209;
-      Member_Index_For_Lkt_Node_P_Symbol_Type : constant Struct_Member_Index := 210;
-      Member_Index_For_Lkt_Node_P_Property_Error_Type : constant Struct_Member_Index := 211;
-      Member_Index_For_Lkt_Node_P_Regexp_Type : constant Struct_Member_Index := 212;
-      Member_Index_For_Lkt_Node_P_Entity_Gen_Type : constant Struct_Member_Index := 213;
-      Member_Index_For_Lkt_Node_P_Entity_Type : constant Struct_Member_Index := 214;
-      Member_Index_For_Lkt_Node_P_Logicvar_Type : constant Struct_Member_Index := 215;
-      Member_Index_For_Lkt_Node_P_Equation_Type : constant Struct_Member_Index := 216;
-      Member_Index_For_Lkt_Node_P_Array_Gen_Type : constant Struct_Member_Index := 217;
-      Member_Index_For_Lkt_Node_P_Array_Type : constant Struct_Member_Index := 218;
-      Member_Index_For_Lkt_Node_P_Astlist_Gen_Type : constant Struct_Member_Index := 219;
-      Member_Index_For_Lkt_Node_P_Astlist_Type : constant Struct_Member_Index := 220;
-      Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type : constant Struct_Member_Index := 221;
-      Member_Index_For_Lkt_Node_P_Node_Builder_Type : constant Struct_Member_Index := 222;
-      Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait : constant Struct_Member_Index := 223;
-      Member_Index_For_Lkt_Node_P_Iterator_Trait : constant Struct_Member_Index := 224;
-      Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : constant Struct_Member_Index := 225;
-      Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait : constant Struct_Member_Index := 226;
-      Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl : constant Struct_Member_Index := 227;
-      Member_Index_For_Lkt_Node_P_Nameres_Diagnostics : constant Struct_Member_Index := 228;
-      Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context : constant Struct_Member_Index := 229;
-      Member_Index_For_Lkt_Node_P_Xref_Entry_Point : constant Struct_Member_Index := 230;
-      Member_Index_For_Lkt_Node_P_Complete : constant Struct_Member_Index := 231;
-      Member_Index_For_Base_Match_Branch_P_Match_Part : constant Struct_Member_Index := 232;
-      Member_Index_For_Class_Qualifier_P_As_Bool : constant Struct_Member_Index := 233;
-      Member_Index_For_Decl_P_Custom_Image : constant Struct_Member_Index := 234;
-      Member_Index_For_Decl_P_Decl_Type_Name : constant Struct_Member_Index := 235;
-      Member_Index_For_Decl_P_Def_Ids : constant Struct_Member_Index := 236;
-      Member_Index_For_Decl_P_As_Bare_Decl : constant Struct_Member_Index := 237;
-      Member_Index_For_Decl_P_Get_Type : constant Struct_Member_Index := 238;
-      Member_Index_For_Decl_P_Get_Cast_Type : constant Struct_Member_Index := 239;
-      Member_Index_For_Decl_P_Get_Keep_Type : constant Struct_Member_Index := 240;
-      Member_Index_For_Decl_P_Get_Suffix_Type : constant Struct_Member_Index := 241;
-      Member_Index_For_Decl_P_Is_Generic : constant Struct_Member_Index := 242;
-      Member_Index_For_Decl_P_Return_Type_Is_Instantiated : constant Struct_Member_Index := 243;
-      Member_Index_For_Decl_P_Is_Instantiated : constant Struct_Member_Index := 244;
-      Member_Index_For_Decl_P_Name : constant Struct_Member_Index := 245;
-      Member_Index_For_Decl_P_Full_Name : constant Struct_Member_Index := 246;
-      Member_Index_For_Fun_Decl_P_Is_Dynamic_Combiner : constant Struct_Member_Index := 247;
-      Member_Index_For_Fun_Decl_P_Find_All_Overrides : constant Struct_Member_Index := 248;
-      Member_Index_For_Type_Decl_P_Def_Id : constant Struct_Member_Index := 249;
-      Member_Index_For_Type_Decl_P_Base_Type : constant Struct_Member_Index := 250;
-      Member_Index_For_Type_Decl_P_Base_Type_If_Entity : constant Struct_Member_Index := 251;
-      Member_Index_For_Excludes_Null_P_As_Bool : constant Struct_Member_Index := 252;
-      Member_Index_For_Expr_P_Get_Type : constant Struct_Member_Index := 253;
-      Member_Index_For_Expr_P_Get_Generic_Type : constant Struct_Member_Index := 254;
-      Member_Index_For_Expr_P_Get_Expected_Type : constant Struct_Member_Index := 255;
-      Member_Index_For_Expr_P_Referenced_Decl : constant Struct_Member_Index := 256;
-      Member_Index_For_Token_Lit_P_Denoted_Value : constant Struct_Member_Index := 257;
-      Member_Index_For_Token_Pattern_Lit_P_Denoted_Value : constant Struct_Member_Index := 258;
-      Member_Index_For_Id_P_Custom_Image : constant Struct_Member_Index := 259;
-      Member_Index_For_Def_Id_P_Name : constant Struct_Member_Index := 260;
-      Member_Index_For_Def_Id_P_Get_Implementatinons : constant Struct_Member_Index := 261;
-      Member_Index_For_Def_Id_P_Decl_Detail : constant Struct_Member_Index := 262;
-      Member_Index_For_Def_Id_P_Completion_Item_Kind : constant Struct_Member_Index := 263;
-      Member_Index_For_Def_Id_P_Doc : constant Struct_Member_Index := 264;
-      Member_Index_For_Def_Id_P_Find_All_References : constant Struct_Member_Index := 265;
-      Member_Index_For_Ref_Id_P_Referenced_Defining_Name : constant Struct_Member_Index := 266;
-      Member_Index_For_Char_Lit_P_Denoted_Value : constant Struct_Member_Index := 267;
-      Member_Index_For_String_Lit_P_Denoted_Value : constant Struct_Member_Index := 268;
-      Member_Index_For_String_Lit_P_Is_Prefixed_String : constant Struct_Member_Index := 269;
-      Member_Index_For_String_Lit_P_Prefix : constant Struct_Member_Index := 270;
-      Member_Index_For_String_Lit_P_Is_Regexp_Literal : constant Struct_Member_Index := 271;
-      Member_Index_For_Full_Decl_P_Has_Annotation : constant Struct_Member_Index := 272;
-      Member_Index_For_Import_P_Referenced_Unit : constant Struct_Member_Index := 273;
-      Member_Index_For_Langkit_Root_P_Fetch_Prelude : constant Struct_Member_Index := 274;
-      Member_Index_For_Null_Cond_Qualifier_P_As_Bool : constant Struct_Member_Index := 275;
-      Member_Index_For_Type_Ref_P_Referenced_Decl : constant Struct_Member_Index := 276;
+      Member_Index_For_Module_Doc_String_Lit_F_Lines : constant Struct_Member_Index := 118;
+      Member_Index_For_Logic_Assign_F_Dest_Var : constant Struct_Member_Index := 119;
+      Member_Index_For_Logic_Assign_F_Value : constant Struct_Member_Index := 120;
+      Member_Index_For_Logic_Expr_F_Expr : constant Struct_Member_Index := 121;
+      Member_Index_For_Logic_Propagate_F_Dest_Var : constant Struct_Member_Index := 122;
+      Member_Index_For_Logic_Propagate_F_Call : constant Struct_Member_Index := 123;
+      Member_Index_For_Logic_Unify_F_Lhs : constant Struct_Member_Index := 124;
+      Member_Index_For_Logic_Unify_F_Rhs : constant Struct_Member_Index := 125;
+      Member_Index_For_Match_Expr_F_Match_Expr : constant Struct_Member_Index := 126;
+      Member_Index_For_Match_Expr_F_Branches : constant Struct_Member_Index := 127;
+      Member_Index_For_Not_Expr_F_Expr : constant Struct_Member_Index := 128;
+      Member_Index_For_Paren_Expr_F_Expr : constant Struct_Member_Index := 129;
+      Member_Index_For_Query_F_Source : constant Struct_Member_Index := 130;
+      Member_Index_For_Query_F_Pattern : constant Struct_Member_Index := 131;
+      Member_Index_For_Query_F_Mapping : constant Struct_Member_Index := 132;
+      Member_Index_For_Query_F_Guard : constant Struct_Member_Index := 133;
+      Member_Index_For_Raise_Expr_F_Dest_Type : constant Struct_Member_Index := 134;
+      Member_Index_For_Raise_Expr_F_Except_Expr : constant Struct_Member_Index := 135;
+      Member_Index_For_Subscript_Expr_F_Prefix : constant Struct_Member_Index := 136;
+      Member_Index_For_Subscript_Expr_F_Null_Cond : constant Struct_Member_Index := 137;
+      Member_Index_For_Subscript_Expr_F_Index : constant Struct_Member_Index := 138;
+      Member_Index_For_Try_Expr_F_Try_Expr : constant Struct_Member_Index := 139;
+      Member_Index_For_Try_Expr_F_Or_Expr : constant Struct_Member_Index := 140;
+      Member_Index_For_Un_Op_F_Op : constant Struct_Member_Index := 141;
+      Member_Index_For_Un_Op_F_Expr : constant Struct_Member_Index := 142;
+      Member_Index_For_Full_Decl_F_Doc : constant Struct_Member_Index := 143;
+      Member_Index_For_Full_Decl_F_Decl_Annotations : constant Struct_Member_Index := 144;
+      Member_Index_For_Full_Decl_F_Decl : constant Struct_Member_Index := 145;
+      Member_Index_For_Grammar_List_Sep_F_Token : constant Struct_Member_Index := 146;
+      Member_Index_For_Grammar_List_Sep_F_Extra : constant Struct_Member_Index := 147;
+      Member_Index_For_Import_F_Name : constant Struct_Member_Index := 148;
+      Member_Index_For_Langkit_Root_F_Doc : constant Struct_Member_Index := 149;
+      Member_Index_For_Langkit_Root_F_Imports : constant Struct_Member_Index := 150;
+      Member_Index_For_Langkit_Root_F_Decls : constant Struct_Member_Index := 151;
+      Member_Index_For_Lexer_Case_Rule_F_Expr : constant Struct_Member_Index := 152;
+      Member_Index_For_Lexer_Case_Rule_F_Alts : constant Struct_Member_Index := 153;
+      Member_Index_For_Lexer_Case_Rule_Send_F_Sent : constant Struct_Member_Index := 154;
+      Member_Index_For_Lexer_Case_Rule_Send_F_Match_Size : constant Struct_Member_Index := 155;
+      Member_Index_For_Binding_Pattern_F_Decl : constant Struct_Member_Index := 156;
+      Member_Index_For_Binding_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 157;
+      Member_Index_For_Ellipsis_Pattern_F_Binding : constant Struct_Member_Index := 158;
+      Member_Index_For_Extended_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 159;
+      Member_Index_For_Extended_Pattern_F_Details : constant Struct_Member_Index := 160;
+      Member_Index_For_Filtered_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 161;
+      Member_Index_For_Filtered_Pattern_F_Predicate : constant Struct_Member_Index := 162;
+      Member_Index_For_List_Pattern_F_Sub_Patterns : constant Struct_Member_Index := 163;
+      Member_Index_For_Not_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 164;
+      Member_Index_For_Or_Pattern_F_Left_Sub_Pattern : constant Struct_Member_Index := 165;
+      Member_Index_For_Or_Pattern_F_Right_Sub_Pattern : constant Struct_Member_Index := 166;
+      Member_Index_For_Paren_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 167;
+      Member_Index_For_Tuple_Pattern_F_Sub_Patterns : constant Struct_Member_Index := 168;
+      Member_Index_For_Type_Pattern_F_Type_Name : constant Struct_Member_Index := 169;
+      Member_Index_For_Field_Pattern_Detail_F_Id : constant Struct_Member_Index := 170;
+      Member_Index_For_Field_Pattern_Detail_F_Expected_Value : constant Struct_Member_Index := 171;
+      Member_Index_For_Property_Pattern_Detail_F_Call : constant Struct_Member_Index := 172;
+      Member_Index_For_Property_Pattern_Detail_F_Expected_Value : constant Struct_Member_Index := 173;
+      Member_Index_For_Selector_Pattern_Detail_F_Call : constant Struct_Member_Index := 174;
+      Member_Index_For_Selector_Pattern_Detail_F_Sub_Pattern : constant Struct_Member_Index := 175;
+      Member_Index_For_Selector_Call_F_Quantifier : constant Struct_Member_Index := 176;
+      Member_Index_For_Selector_Call_F_Binding : constant Struct_Member_Index := 177;
+      Member_Index_For_Selector_Call_F_Selector_Call : constant Struct_Member_Index := 178;
+      Member_Index_For_Function_Type_Ref_F_Param_Types : constant Struct_Member_Index := 179;
+      Member_Index_For_Function_Type_Ref_F_Return_Type : constant Struct_Member_Index := 180;
+      Member_Index_For_Generic_Type_Ref_F_Type_Name : constant Struct_Member_Index := 181;
+      Member_Index_For_Generic_Type_Ref_F_Args : constant Struct_Member_Index := 182;
+      Member_Index_For_Simple_Type_Ref_F_Type_Name : constant Struct_Member_Index := 183;
+      Member_Index_For_Var_Bind_F_Name : constant Struct_Member_Index := 184;
+      Member_Index_For_Var_Bind_F_Expr : constant Struct_Member_Index := 185;
+      Member_Index_For_Parent : constant Struct_Member_Index := 186;
+      Member_Index_For_Parents : constant Struct_Member_Index := 187;
+      Member_Index_For_Children : constant Struct_Member_Index := 188;
+      Member_Index_For_Token_Start : constant Struct_Member_Index := 189;
+      Member_Index_For_Token_End : constant Struct_Member_Index := 190;
+      Member_Index_For_Child_Index : constant Struct_Member_Index := 191;
+      Member_Index_For_Previous_Sibling : constant Struct_Member_Index := 192;
+      Member_Index_For_Next_Sibling : constant Struct_Member_Index := 193;
+      Member_Index_For_Unit : constant Struct_Member_Index := 194;
+      Member_Index_For_Is_Ghost : constant Struct_Member_Index := 195;
+      Member_Index_For_Full_Sloc_Image : constant Struct_Member_Index := 196;
+      Member_Index_For_Completion_Item_Kind_To_Int : constant Struct_Member_Index := 197;
+      Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode : constant Struct_Member_Index := 198;
+      Member_Index_For_Lkt_Node_P_Basic_Trait_Gen : constant Struct_Member_Index := 199;
+      Member_Index_For_Lkt_Node_P_Basic_Trait : constant Struct_Member_Index := 200;
+      Member_Index_For_Lkt_Node_P_Node_Gen_Trait : constant Struct_Member_Index := 201;
+      Member_Index_For_Lkt_Node_P_Node_Trait : constant Struct_Member_Index := 202;
+      Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait : constant Struct_Member_Index := 203;
+      Member_Index_For_Lkt_Node_P_Indexable_Trait : constant Struct_Member_Index := 204;
+      Member_Index_For_Lkt_Node_P_Token_Node_Trait : constant Struct_Member_Index := 205;
+      Member_Index_For_Lkt_Node_P_Error_Node_Trait : constant Struct_Member_Index := 206;
+      Member_Index_For_Lkt_Node_P_Char_Type : constant Struct_Member_Index := 207;
+      Member_Index_For_Lkt_Node_P_Int_Type : constant Struct_Member_Index := 208;
+      Member_Index_For_Lkt_Node_P_Bool_Type : constant Struct_Member_Index := 209;
+      Member_Index_For_Lkt_Node_P_Bigint_Type : constant Struct_Member_Index := 210;
+      Member_Index_For_Lkt_Node_P_String_Type : constant Struct_Member_Index := 211;
+      Member_Index_For_Lkt_Node_P_Symbol_Type : constant Struct_Member_Index := 212;
+      Member_Index_For_Lkt_Node_P_Property_Error_Type : constant Struct_Member_Index := 213;
+      Member_Index_For_Lkt_Node_P_Regexp_Type : constant Struct_Member_Index := 214;
+      Member_Index_For_Lkt_Node_P_Entity_Gen_Type : constant Struct_Member_Index := 215;
+      Member_Index_For_Lkt_Node_P_Entity_Type : constant Struct_Member_Index := 216;
+      Member_Index_For_Lkt_Node_P_Logicvar_Type : constant Struct_Member_Index := 217;
+      Member_Index_For_Lkt_Node_P_Equation_Type : constant Struct_Member_Index := 218;
+      Member_Index_For_Lkt_Node_P_Array_Gen_Type : constant Struct_Member_Index := 219;
+      Member_Index_For_Lkt_Node_P_Array_Type : constant Struct_Member_Index := 220;
+      Member_Index_For_Lkt_Node_P_Astlist_Gen_Type : constant Struct_Member_Index := 221;
+      Member_Index_For_Lkt_Node_P_Astlist_Type : constant Struct_Member_Index := 222;
+      Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type : constant Struct_Member_Index := 223;
+      Member_Index_For_Lkt_Node_P_Node_Builder_Type : constant Struct_Member_Index := 224;
+      Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait : constant Struct_Member_Index := 225;
+      Member_Index_For_Lkt_Node_P_Iterator_Trait : constant Struct_Member_Index := 226;
+      Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : constant Struct_Member_Index := 227;
+      Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait : constant Struct_Member_Index := 228;
+      Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl : constant Struct_Member_Index := 229;
+      Member_Index_For_Lkt_Node_P_Nameres_Diagnostics : constant Struct_Member_Index := 230;
+      Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context : constant Struct_Member_Index := 231;
+      Member_Index_For_Lkt_Node_P_Xref_Entry_Point : constant Struct_Member_Index := 232;
+      Member_Index_For_Lkt_Node_P_Complete : constant Struct_Member_Index := 233;
+      Member_Index_For_Base_Match_Branch_P_Match_Part : constant Struct_Member_Index := 234;
+      Member_Index_For_Class_Qualifier_P_As_Bool : constant Struct_Member_Index := 235;
+      Member_Index_For_Decl_P_Custom_Image : constant Struct_Member_Index := 236;
+      Member_Index_For_Decl_P_Decl_Type_Name : constant Struct_Member_Index := 237;
+      Member_Index_For_Decl_P_Def_Ids : constant Struct_Member_Index := 238;
+      Member_Index_For_Decl_P_As_Bare_Decl : constant Struct_Member_Index := 239;
+      Member_Index_For_Decl_P_Get_Type : constant Struct_Member_Index := 240;
+      Member_Index_For_Decl_P_Get_Cast_Type : constant Struct_Member_Index := 241;
+      Member_Index_For_Decl_P_Get_Keep_Type : constant Struct_Member_Index := 242;
+      Member_Index_For_Decl_P_Get_Suffix_Type : constant Struct_Member_Index := 243;
+      Member_Index_For_Decl_P_Is_Generic : constant Struct_Member_Index := 244;
+      Member_Index_For_Decl_P_Return_Type_Is_Instantiated : constant Struct_Member_Index := 245;
+      Member_Index_For_Decl_P_Is_Instantiated : constant Struct_Member_Index := 246;
+      Member_Index_For_Decl_P_Name : constant Struct_Member_Index := 247;
+      Member_Index_For_Decl_P_Full_Name : constant Struct_Member_Index := 248;
+      Member_Index_For_Fun_Decl_P_Is_Dynamic_Combiner : constant Struct_Member_Index := 249;
+      Member_Index_For_Fun_Decl_P_Find_All_Overrides : constant Struct_Member_Index := 250;
+      Member_Index_For_Type_Decl_P_Def_Id : constant Struct_Member_Index := 251;
+      Member_Index_For_Type_Decl_P_Base_Type : constant Struct_Member_Index := 252;
+      Member_Index_For_Type_Decl_P_Base_Type_If_Entity : constant Struct_Member_Index := 253;
+      Member_Index_For_Excludes_Null_P_As_Bool : constant Struct_Member_Index := 254;
+      Member_Index_For_Expr_P_Get_Type : constant Struct_Member_Index := 255;
+      Member_Index_For_Expr_P_Get_Generic_Type : constant Struct_Member_Index := 256;
+      Member_Index_For_Expr_P_Get_Expected_Type : constant Struct_Member_Index := 257;
+      Member_Index_For_Expr_P_Referenced_Decl : constant Struct_Member_Index := 258;
+      Member_Index_For_Token_Lit_P_Denoted_Value : constant Struct_Member_Index := 259;
+      Member_Index_For_Token_Pattern_Lit_P_Denoted_Value : constant Struct_Member_Index := 260;
+      Member_Index_For_Id_P_Custom_Image : constant Struct_Member_Index := 261;
+      Member_Index_For_Def_Id_P_Name : constant Struct_Member_Index := 262;
+      Member_Index_For_Def_Id_P_Get_Implementatinons : constant Struct_Member_Index := 263;
+      Member_Index_For_Def_Id_P_Decl_Detail : constant Struct_Member_Index := 264;
+      Member_Index_For_Def_Id_P_Completion_Item_Kind : constant Struct_Member_Index := 265;
+      Member_Index_For_Def_Id_P_Doc : constant Struct_Member_Index := 266;
+      Member_Index_For_Def_Id_P_Find_All_References : constant Struct_Member_Index := 267;
+      Member_Index_For_Ref_Id_P_Referenced_Defining_Name : constant Struct_Member_Index := 268;
+      Member_Index_For_Char_Lit_P_Denoted_Value : constant Struct_Member_Index := 269;
+      Member_Index_For_String_Lit_P_Denoted_Value : constant Struct_Member_Index := 270;
+      Member_Index_For_String_Lit_P_Is_Prefixed_String : constant Struct_Member_Index := 271;
+      Member_Index_For_String_Lit_P_Prefix : constant Struct_Member_Index := 272;
+      Member_Index_For_String_Lit_P_Is_Regexp_Literal : constant Struct_Member_Index := 273;
+      Member_Index_For_Full_Decl_P_Has_Annotation : constant Struct_Member_Index := 274;
+      Member_Index_For_Import_P_Referenced_Unit : constant Struct_Member_Index := 275;
+      Member_Index_For_Langkit_Root_P_Fetch_Prelude : constant Struct_Member_Index := 276;
+      Member_Index_For_Null_Cond_Qualifier_P_As_Bool : constant Struct_Member_Index := 277;
+      Member_Index_For_Type_Ref_P_Referenced_Decl : constant Struct_Member_Index := 278;
 
    --------------------------------
    -- Token kind index constants --
@@ -607,36 +612,37 @@ private package Liblktlang.Generic_Introspection is
       Token_Index_For_Lkt_Lexing_Failure : constant Token_Kind_Index := 47;
       Token_Index_For_Lkt_Match_Kw : constant Token_Kind_Index := 48;
       Token_Index_For_Lkt_Minus : constant Token_Kind_Index := 49;
-      Token_Index_For_Lkt_N_E : constant Token_Kind_Index := 50;
-      Token_Index_For_Lkt_Not_Kw : constant Token_Kind_Index := 51;
-      Token_Index_For_Lkt_Null_Kw : constant Token_Kind_Index := 52;
-      Token_Index_For_Lkt_Number : constant Token_Kind_Index := 53;
-      Token_Index_For_Lkt_Or_Kw : constant Token_Kind_Index := 54;
-      Token_Index_For_Lkt_P_String : constant Token_Kind_Index := 55;
-      Token_Index_For_Lkt_Percent : constant Token_Kind_Index := 56;
-      Token_Index_For_Lkt_Pipe : constant Token_Kind_Index := 57;
-      Token_Index_For_Lkt_Plus : constant Token_Kind_Index := 58;
-      Token_Index_For_Lkt_Private_Kw : constant Token_Kind_Index := 59;
-      Token_Index_For_Lkt_Public_Kw : constant Token_Kind_Index := 60;
-      Token_Index_For_Lkt_R_Brace : constant Token_Kind_Index := 61;
-      Token_Index_For_Lkt_R_Brack : constant Token_Kind_Index := 62;
-      Token_Index_For_Lkt_R_Par : constant Token_Kind_Index := 63;
-      Token_Index_For_Lkt_Raise_Kw : constant Token_Kind_Index := 64;
-      Token_Index_For_Lkt_Right_Arrow : constant Token_Kind_Index := 65;
-      Token_Index_For_Lkt_Select_Kw : constant Token_Kind_Index := 66;
-      Token_Index_For_Lkt_Semicolon : constant Token_Kind_Index := 67;
-      Token_Index_For_Lkt_String : constant Token_Kind_Index := 68;
-      Token_Index_For_Lkt_Struct_Kw : constant Token_Kind_Index := 69;
-      Token_Index_For_Lkt_Termination : constant Token_Kind_Index := 70;
-      Token_Index_For_Lkt_Then_Kw : constant Token_Kind_Index := 71;
-      Token_Index_For_Lkt_Times : constant Token_Kind_Index := 72;
-      Token_Index_For_Lkt_Trait_Kw : constant Token_Kind_Index := 73;
-      Token_Index_For_Lkt_Triple_Colon : constant Token_Kind_Index := 74;
-      Token_Index_For_Lkt_Try_Kw : constant Token_Kind_Index := 75;
-      Token_Index_For_Lkt_Two_Sided_Arrow : constant Token_Kind_Index := 76;
-      Token_Index_For_Lkt_Val_Kw : constant Token_Kind_Index := 77;
-      Token_Index_For_Lkt_When_Kw : constant Token_Kind_Index := 78;
-      Token_Index_For_Lkt_Whitespace : constant Token_Kind_Index := 79;
+      Token_Index_For_Lkt_Module_Doc_String_Line : constant Token_Kind_Index := 50;
+      Token_Index_For_Lkt_N_E : constant Token_Kind_Index := 51;
+      Token_Index_For_Lkt_Not_Kw : constant Token_Kind_Index := 52;
+      Token_Index_For_Lkt_Null_Kw : constant Token_Kind_Index := 53;
+      Token_Index_For_Lkt_Number : constant Token_Kind_Index := 54;
+      Token_Index_For_Lkt_Or_Kw : constant Token_Kind_Index := 55;
+      Token_Index_For_Lkt_P_String : constant Token_Kind_Index := 56;
+      Token_Index_For_Lkt_Percent : constant Token_Kind_Index := 57;
+      Token_Index_For_Lkt_Pipe : constant Token_Kind_Index := 58;
+      Token_Index_For_Lkt_Plus : constant Token_Kind_Index := 59;
+      Token_Index_For_Lkt_Private_Kw : constant Token_Kind_Index := 60;
+      Token_Index_For_Lkt_Public_Kw : constant Token_Kind_Index := 61;
+      Token_Index_For_Lkt_R_Brace : constant Token_Kind_Index := 62;
+      Token_Index_For_Lkt_R_Brack : constant Token_Kind_Index := 63;
+      Token_Index_For_Lkt_R_Par : constant Token_Kind_Index := 64;
+      Token_Index_For_Lkt_Raise_Kw : constant Token_Kind_Index := 65;
+      Token_Index_For_Lkt_Right_Arrow : constant Token_Kind_Index := 66;
+      Token_Index_For_Lkt_Select_Kw : constant Token_Kind_Index := 67;
+      Token_Index_For_Lkt_Semicolon : constant Token_Kind_Index := 68;
+      Token_Index_For_Lkt_String : constant Token_Kind_Index := 69;
+      Token_Index_For_Lkt_Struct_Kw : constant Token_Kind_Index := 70;
+      Token_Index_For_Lkt_Termination : constant Token_Kind_Index := 71;
+      Token_Index_For_Lkt_Then_Kw : constant Token_Kind_Index := 72;
+      Token_Index_For_Lkt_Times : constant Token_Kind_Index := 73;
+      Token_Index_For_Lkt_Trait_Kw : constant Token_Kind_Index := 74;
+      Token_Index_For_Lkt_Triple_Colon : constant Token_Kind_Index := 75;
+      Token_Index_For_Lkt_Try_Kw : constant Token_Kind_Index := 76;
+      Token_Index_For_Lkt_Two_Sided_Arrow : constant Token_Kind_Index := 77;
+      Token_Index_For_Lkt_Val_Kw : constant Token_Kind_Index := 78;
+      Token_Index_For_Lkt_When_Kw : constant Token_Kind_Index := 79;
+      Token_Index_For_Lkt_Whitespace : constant Token_Kind_Index := 80;
 
    ----------------------------------
    -- Token family index constants --
@@ -712,97 +718,97 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_String_Lit);
       
       Rule_Name_7 : aliased constant Text_Type :=
-        "Import_Stmt";
+        "Module_Doc";
       Rule_Doc_7 : aliased constant Text_Type :=
         "";
       Rule_Desc_7 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_7'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_7'Access,
-         Return_Type => Type_Index_For_Import);
+         Return_Type => Type_Index_For_Module_Doc_String_Lit);
       
       Rule_Name_8 : aliased constant Text_Type :=
-        "Imports";
+        "Import_Stmt";
       Rule_Doc_8 : aliased constant Text_Type :=
         "";
       Rule_Desc_8 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_8'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_8'Access,
-         Return_Type => Type_Index_For_Import_List);
+         Return_Type => Type_Index_For_Import);
       
       Rule_Name_9 : aliased constant Text_Type :=
-        "Lexer_Decl";
+        "Imports";
       Rule_Doc_9 : aliased constant Text_Type :=
         "";
       Rule_Desc_9 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_9'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_9'Access,
-         Return_Type => Type_Index_For_Lexer_Decl);
+         Return_Type => Type_Index_For_Import_List);
       
       Rule_Name_10 : aliased constant Text_Type :=
-        "Grammar_Decl";
+        "Lexer_Decl";
       Rule_Doc_10 : aliased constant Text_Type :=
         "";
       Rule_Desc_10 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_10'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_10'Access,
-         Return_Type => Type_Index_For_Grammar_Decl);
+         Return_Type => Type_Index_For_Lexer_Decl);
       
       Rule_Name_11 : aliased constant Text_Type :=
-        "Grammar_Rule";
+        "Grammar_Decl";
       Rule_Doc_11 : aliased constant Text_Type :=
         "";
       Rule_Desc_11 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_11'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_11'Access,
-         Return_Type => Type_Index_For_Grammar_Rule_Decl);
+         Return_Type => Type_Index_For_Grammar_Decl);
       
       Rule_Name_12 : aliased constant Text_Type :=
-        "Lexer_Case_Rule";
+        "Grammar_Rule";
       Rule_Doc_12 : aliased constant Text_Type :=
         "";
       Rule_Desc_12 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_12'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_12'Access,
-         Return_Type => Type_Index_For_Lexer_Case_Rule);
+         Return_Type => Type_Index_For_Grammar_Rule_Decl);
       
       Rule_Name_13 : aliased constant Text_Type :=
-        "Lexer_Case_Alt";
+        "Lexer_Case_Rule";
       Rule_Doc_13 : aliased constant Text_Type :=
         "";
       Rule_Desc_13 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_13'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_13'Access,
-         Return_Type => Type_Index_For_Base_Lexer_Case_Rule_Alt);
+         Return_Type => Type_Index_For_Lexer_Case_Rule);
       
       Rule_Name_14 : aliased constant Text_Type :=
-        "Lexer_Case_Send";
+        "Lexer_Case_Alt";
       Rule_Doc_14 : aliased constant Text_Type :=
         "";
       Rule_Desc_14 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_14'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_14'Access,
-         Return_Type => Type_Index_For_Lexer_Case_Rule_Send);
+         Return_Type => Type_Index_For_Base_Lexer_Case_Rule_Alt);
       
       Rule_Name_15 : aliased constant Text_Type :=
-        "Grammar_Primary";
+        "Lexer_Case_Send";
       Rule_Doc_15 : aliased constant Text_Type :=
         "";
       Rule_Desc_15 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_15'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_15'Access,
-         Return_Type => Type_Index_For_Grammar_Expr);
+         Return_Type => Type_Index_For_Lexer_Case_Rule_Send);
       
       Rule_Name_16 : aliased constant Text_Type :=
-        "Grammar_Expr";
+        "Grammar_Primary";
       Rule_Doc_16 : aliased constant Text_Type :=
         "";
       Rule_Desc_16 : aliased constant Grammar_Rule_Descriptor :=
@@ -812,37 +818,37 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Grammar_Expr);
       
       Rule_Name_17 : aliased constant Text_Type :=
-        "Grammar_Pick";
+        "Grammar_Expr";
       Rule_Doc_17 : aliased constant Text_Type :=
         "";
       Rule_Desc_17 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_17'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_17'Access,
-         Return_Type => Type_Index_For_Grammar_Pick);
+         Return_Type => Type_Index_For_Grammar_Expr);
       
       Rule_Name_18 : aliased constant Text_Type :=
-        "Grammar_Implicit_Pick";
+        "Grammar_Pick";
       Rule_Doc_18 : aliased constant Text_Type :=
         "";
       Rule_Desc_18 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_18'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_18'Access,
-         Return_Type => Type_Index_For_Grammar_Implicit_Pick);
+         Return_Type => Type_Index_For_Grammar_Pick);
       
       Rule_Name_19 : aliased constant Text_Type :=
-        "Grammar_Opt";
+        "Grammar_Implicit_Pick";
       Rule_Doc_19 : aliased constant Text_Type :=
         "";
       Rule_Desc_19 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_19'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_19'Access,
-         Return_Type => Type_Index_For_Grammar_Expr);
+         Return_Type => Type_Index_For_Grammar_Implicit_Pick);
       
       Rule_Name_20 : aliased constant Text_Type :=
-        "Grammar_Opt_Error";
+        "Grammar_Opt";
       Rule_Doc_20 : aliased constant Text_Type :=
         "";
       Rule_Desc_20 : aliased constant Grammar_Rule_Descriptor :=
@@ -852,417 +858,417 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Grammar_Expr);
       
       Rule_Name_21 : aliased constant Text_Type :=
-        "Grammar_Cut";
+        "Grammar_Opt_Error";
       Rule_Doc_21 : aliased constant Text_Type :=
         "";
       Rule_Desc_21 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_21'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_21'Access,
-         Return_Type => Type_Index_For_Grammar_Cut);
+         Return_Type => Type_Index_For_Grammar_Expr);
       
       Rule_Name_22 : aliased constant Text_Type :=
-        "Grammar_Stopcut";
+        "Grammar_Cut";
       Rule_Doc_22 : aliased constant Text_Type :=
         "";
       Rule_Desc_22 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_22'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_22'Access,
-         Return_Type => Type_Index_For_Grammar_Stop_Cut);
+         Return_Type => Type_Index_For_Grammar_Cut);
       
       Rule_Name_23 : aliased constant Text_Type :=
-        "Grammar_Or_Expr";
+        "Grammar_Stopcut";
       Rule_Doc_23 : aliased constant Text_Type :=
         "";
       Rule_Desc_23 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_23'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_23'Access,
-         Return_Type => Type_Index_For_Grammar_Or_Expr);
+         Return_Type => Type_Index_For_Grammar_Stop_Cut);
       
       Rule_Name_24 : aliased constant Text_Type :=
-        "Grammar_Discard_Expr";
+        "Grammar_Or_Expr";
       Rule_Doc_24 : aliased constant Text_Type :=
         "";
       Rule_Desc_24 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_24'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_24'Access,
-         Return_Type => Type_Index_For_Grammar_Discard);
+         Return_Type => Type_Index_For_Grammar_Or_Expr);
       
       Rule_Name_25 : aliased constant Text_Type :=
-        "Token_Literal";
+        "Grammar_Discard_Expr";
       Rule_Doc_25 : aliased constant Text_Type :=
         "";
       Rule_Desc_25 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_25'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_25'Access,
-         Return_Type => Type_Index_For_Token_Lit);
+         Return_Type => Type_Index_For_Grammar_Discard);
       
       Rule_Name_26 : aliased constant Text_Type :=
-        "Token_No_Case_Literal";
+        "Token_Literal";
       Rule_Doc_26 : aliased constant Text_Type :=
         "";
       Rule_Desc_26 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_26'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_26'Access,
-         Return_Type => Type_Index_For_Token_No_Case_Lit);
+         Return_Type => Type_Index_For_Token_Lit);
       
       Rule_Name_27 : aliased constant Text_Type :=
-        "Token_Pattern";
+        "Token_No_Case_Literal";
       Rule_Doc_27 : aliased constant Text_Type :=
         "";
       Rule_Desc_27 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_27'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_27'Access,
-         Return_Type => Type_Index_For_Grammar_Expr);
+         Return_Type => Type_Index_For_Token_No_Case_Lit);
       
       Rule_Name_28 : aliased constant Text_Type :=
-        "Token_Pattern_Literal";
+        "Token_Pattern";
       Rule_Doc_28 : aliased constant Text_Type :=
         "";
       Rule_Desc_28 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_28'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_28'Access,
-         Return_Type => Type_Index_For_Token_Pattern_Lit);
+         Return_Type => Type_Index_For_Grammar_Expr);
       
       Rule_Name_29 : aliased constant Text_Type :=
-        "Parse_Node_Expr";
+        "Token_Pattern_Literal";
       Rule_Doc_29 : aliased constant Text_Type :=
         "";
       Rule_Desc_29 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_29'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_29'Access,
-         Return_Type => Type_Index_For_Parse_Node_Expr);
+         Return_Type => Type_Index_For_Token_Pattern_Lit);
       
       Rule_Name_30 : aliased constant Text_Type :=
-        "Grammar_Rule_Ref";
+        "Parse_Node_Expr";
       Rule_Doc_30 : aliased constant Text_Type :=
         "";
       Rule_Desc_30 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_30'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_30'Access,
-         Return_Type => Type_Index_For_Grammar_Rule_Ref);
+         Return_Type => Type_Index_For_Parse_Node_Expr);
       
       Rule_Name_31 : aliased constant Text_Type :=
-        "Grammar_List_Expr";
+        "Grammar_Rule_Ref";
       Rule_Doc_31 : aliased constant Text_Type :=
         "";
       Rule_Desc_31 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_31'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_31'Access,
-         Return_Type => Type_Index_For_Grammar_List);
+         Return_Type => Type_Index_For_Grammar_Rule_Ref);
       
       Rule_Name_32 : aliased constant Text_Type :=
-        "Grammar_List_Sep";
+        "Grammar_List_Expr";
       Rule_Doc_32 : aliased constant Text_Type :=
         "";
       Rule_Desc_32 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_32'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_32'Access,
-         Return_Type => Type_Index_For_Grammar_List_Sep);
+         Return_Type => Type_Index_For_Grammar_List);
       
       Rule_Name_33 : aliased constant Text_Type :=
-        "Grammar_Skip";
+        "Grammar_List_Sep";
       Rule_Doc_33 : aliased constant Text_Type :=
         "";
       Rule_Desc_33 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_33'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_33'Access,
-         Return_Type => Type_Index_For_Grammar_Skip);
+         Return_Type => Type_Index_For_Grammar_List_Sep);
       
       Rule_Name_34 : aliased constant Text_Type :=
-        "Grammar_Null";
+        "Grammar_Skip";
       Rule_Doc_34 : aliased constant Text_Type :=
         "";
       Rule_Desc_34 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_34'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_34'Access,
-         Return_Type => Type_Index_For_Grammar_Null);
+         Return_Type => Type_Index_For_Grammar_Skip);
       
       Rule_Name_35 : aliased constant Text_Type :=
-        "Grammar_Token";
+        "Grammar_Null";
       Rule_Doc_35 : aliased constant Text_Type :=
         "";
       Rule_Desc_35 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_35'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_35'Access,
-         Return_Type => Type_Index_For_Token_Ref);
+         Return_Type => Type_Index_For_Grammar_Null);
       
       Rule_Name_36 : aliased constant Text_Type :=
-        "Type_Decl";
+        "Grammar_Token";
       Rule_Doc_36 : aliased constant Text_Type :=
         "";
       Rule_Desc_36 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_36'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_36'Access,
-         Return_Type => Type_Index_For_Named_Type_Decl);
+         Return_Type => Type_Index_For_Token_Ref);
       
       Rule_Name_37 : aliased constant Text_Type :=
-        "Generic_Decl";
+        "Type_Decl";
       Rule_Doc_37 : aliased constant Text_Type :=
         "";
       Rule_Desc_37 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_37'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_37'Access,
-         Return_Type => Type_Index_For_Generic_Decl);
+         Return_Type => Type_Index_For_Named_Type_Decl);
       
       Rule_Name_38 : aliased constant Text_Type :=
-        "Generic_Param_Type";
+        "Generic_Decl";
       Rule_Doc_38 : aliased constant Text_Type :=
         "";
       Rule_Desc_38 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_38'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_38'Access,
-         Return_Type => Type_Index_For_Full_Decl);
+         Return_Type => Type_Index_For_Generic_Decl);
       
       Rule_Name_39 : aliased constant Text_Type :=
-        "Enum_Lit_Decl";
+        "Generic_Param_Type";
       Rule_Doc_39 : aliased constant Text_Type :=
         "";
       Rule_Desc_39 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_39'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_39'Access,
-         Return_Type => Type_Index_For_Enum_Lit_Decl);
+         Return_Type => Type_Index_For_Full_Decl);
       
       Rule_Name_40 : aliased constant Text_Type :=
-        "Fun_Decl";
+        "Enum_Lit_Decl";
       Rule_Doc_40 : aliased constant Text_Type :=
         "";
       Rule_Desc_40 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_40'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_40'Access,
-         Return_Type => Type_Index_For_Fun_Decl);
+         Return_Type => Type_Index_For_Enum_Lit_Decl);
       
       Rule_Name_41 : aliased constant Text_Type :=
-        "Lambda_Param_Decl";
+        "Fun_Decl";
       Rule_Doc_41 : aliased constant Text_Type :=
         "";
       Rule_Desc_41 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_41'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_41'Access,
-         Return_Type => Type_Index_For_Lambda_Param_Decl);
+         Return_Type => Type_Index_For_Fun_Decl);
       
       Rule_Name_42 : aliased constant Text_Type :=
-        "Fun_Param_Decl";
+        "Lambda_Param_Decl";
       Rule_Doc_42 : aliased constant Text_Type :=
         "";
       Rule_Desc_42 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_42'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_42'Access,
-         Return_Type => Type_Index_For_Fun_Param_Decl);
+         Return_Type => Type_Index_For_Lambda_Param_Decl);
       
       Rule_Name_43 : aliased constant Text_Type :=
-        "Fun_Param_List";
+        "Fun_Param_Decl";
       Rule_Doc_43 : aliased constant Text_Type :=
         "";
       Rule_Desc_43 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_43'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_43'Access,
-         Return_Type => Type_Index_For_Fun_Param_Decl_List);
+         Return_Type => Type_Index_For_Fun_Param_Decl);
       
       Rule_Name_44 : aliased constant Text_Type :=
-        "Lambda_Param_List";
+        "Fun_Param_List";
       Rule_Doc_44 : aliased constant Text_Type :=
         "";
       Rule_Desc_44 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_44'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_44'Access,
-         Return_Type => Type_Index_For_Lambda_Param_Decl_List);
+         Return_Type => Type_Index_For_Fun_Param_Decl_List);
       
       Rule_Name_45 : aliased constant Text_Type :=
-        "Field_Decl";
+        "Lambda_Param_List";
       Rule_Doc_45 : aliased constant Text_Type :=
         "";
       Rule_Desc_45 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_45'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_45'Access,
-         Return_Type => Type_Index_For_Field_Decl);
+         Return_Type => Type_Index_For_Lambda_Param_Decl_List);
       
       Rule_Name_46 : aliased constant Text_Type :=
-        "Lexer_Family_Decl";
+        "Field_Decl";
       Rule_Doc_46 : aliased constant Text_Type :=
         "";
       Rule_Desc_46 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_46'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_46'Access,
-         Return_Type => Type_Index_For_Lexer_Family_Decl);
+         Return_Type => Type_Index_For_Field_Decl);
       
       Rule_Name_47 : aliased constant Text_Type :=
-        "Bare_Decl";
+        "Lexer_Family_Decl";
       Rule_Doc_47 : aliased constant Text_Type :=
         "";
       Rule_Desc_47 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_47'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_47'Access,
-         Return_Type => Type_Index_For_Decl);
+         Return_Type => Type_Index_For_Lexer_Family_Decl);
       
       Rule_Name_48 : aliased constant Text_Type :=
-        "Decl";
+        "Bare_Decl";
       Rule_Doc_48 : aliased constant Text_Type :=
         "";
       Rule_Desc_48 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_48'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_48'Access,
-         Return_Type => Type_Index_For_Full_Decl);
+         Return_Type => Type_Index_For_Decl);
       
       Rule_Name_49 : aliased constant Text_Type :=
-        "Type_Member_Ref";
+        "Decl";
       Rule_Doc_49 : aliased constant Text_Type :=
         "";
       Rule_Desc_49 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_49'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_49'Access,
-         Return_Type => Type_Index_For_Dot_Expr);
+         Return_Type => Type_Index_For_Full_Decl);
       
       Rule_Name_50 : aliased constant Text_Type :=
-        "Type_Expr";
+        "Type_Member_Ref";
       Rule_Doc_50 : aliased constant Text_Type :=
         "";
       Rule_Desc_50 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_50'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_50'Access,
-         Return_Type => Type_Index_For_Expr);
+         Return_Type => Type_Index_For_Dot_Expr);
       
       Rule_Name_51 : aliased constant Text_Type :=
-        "Type_Ref";
+        "Type_Expr";
       Rule_Doc_51 : aliased constant Text_Type :=
         "";
       Rule_Desc_51 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_51'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_51'Access,
-         Return_Type => Type_Index_For_Type_Ref);
+         Return_Type => Type_Index_For_Expr);
       
       Rule_Name_52 : aliased constant Text_Type :=
-        "Type_List";
+        "Type_Ref";
       Rule_Doc_52 : aliased constant Text_Type :=
         "";
       Rule_Desc_52 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_52'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_52'Access,
-         Return_Type => Type_Index_For_Type_Ref_List);
+         Return_Type => Type_Index_For_Type_Ref);
       
       Rule_Name_53 : aliased constant Text_Type :=
-        "Decls";
+        "Type_List";
       Rule_Doc_53 : aliased constant Text_Type :=
         "";
       Rule_Desc_53 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_53'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_53'Access,
-         Return_Type => Type_Index_For_Full_Decl_List);
+         Return_Type => Type_Index_For_Type_Ref_List);
       
       Rule_Name_54 : aliased constant Text_Type :=
-        "Decl_Block";
+        "Decls";
       Rule_Doc_54 : aliased constant Text_Type :=
         "";
       Rule_Desc_54 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_54'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_54'Access,
-         Return_Type => Type_Index_For_Decl_Block);
+         Return_Type => Type_Index_For_Full_Decl_List);
       
       Rule_Name_55 : aliased constant Text_Type :=
-        "Val_Decl";
+        "Decl_Block";
       Rule_Doc_55 : aliased constant Text_Type :=
         "";
       Rule_Desc_55 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_55'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_55'Access,
-         Return_Type => Type_Index_For_Val_Decl);
+         Return_Type => Type_Index_For_Decl_Block);
       
       Rule_Name_56 : aliased constant Text_Type :=
-        "Dynvar_Decl";
+        "Val_Decl";
       Rule_Doc_56 : aliased constant Text_Type :=
         "";
       Rule_Desc_56 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_56'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_56'Access,
-         Return_Type => Type_Index_For_Dyn_Var_Decl);
+         Return_Type => Type_Index_For_Val_Decl);
       
       Rule_Name_57 : aliased constant Text_Type :=
-        "Var_Bind";
+        "Dynvar_Decl";
       Rule_Doc_57 : aliased constant Text_Type :=
         "";
       Rule_Desc_57 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_57'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_57'Access,
-         Return_Type => Type_Index_For_Var_Bind);
+         Return_Type => Type_Index_For_Dyn_Var_Decl);
       
       Rule_Name_58 : aliased constant Text_Type :=
-        "Env_Spec_Action";
+        "Var_Bind";
       Rule_Doc_58 : aliased constant Text_Type :=
         "";
       Rule_Desc_58 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_58'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_58'Access,
-         Return_Type => Type_Index_For_Call_Expr);
+         Return_Type => Type_Index_For_Var_Bind);
       
       Rule_Name_59 : aliased constant Text_Type :=
-        "Env_Spec_Decl";
+        "Env_Spec_Action";
       Rule_Doc_59 : aliased constant Text_Type :=
         "";
       Rule_Desc_59 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_59'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_59'Access,
-         Return_Type => Type_Index_For_Env_Spec_Decl);
+         Return_Type => Type_Index_For_Call_Expr);
       
       Rule_Name_60 : aliased constant Text_Type :=
-        "Block";
+        "Env_Spec_Decl";
       Rule_Doc_60 : aliased constant Text_Type :=
         "";
       Rule_Desc_60 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_60'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_60'Access,
-         Return_Type => Type_Index_For_Block_Expr);
+         Return_Type => Type_Index_For_Env_Spec_Decl);
       
       Rule_Name_61 : aliased constant Text_Type :=
-        "Pattern";
+        "Block";
       Rule_Doc_61 : aliased constant Text_Type :=
         "";
       Rule_Desc_61 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_61'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_61'Access,
-         Return_Type => Type_Index_For_Pattern);
+         Return_Type => Type_Index_For_Block_Expr);
       
       Rule_Name_62 : aliased constant Text_Type :=
-        "Fil_Pattern";
+        "Pattern";
       Rule_Doc_62 : aliased constant Text_Type :=
         "";
       Rule_Desc_62 : aliased constant Grammar_Rule_Descriptor :=
@@ -1272,7 +1278,7 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Pattern);
       
       Rule_Name_63 : aliased constant Text_Type :=
-        "Value_Pattern";
+        "Fil_Pattern";
       Rule_Doc_63 : aliased constant Text_Type :=
         "";
       Rule_Desc_63 : aliased constant Grammar_Rule_Descriptor :=
@@ -1282,97 +1288,97 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Pattern);
       
       Rule_Name_64 : aliased constant Text_Type :=
-        "Regex_Pattern";
+        "Value_Pattern";
       Rule_Doc_64 : aliased constant Text_Type :=
         "";
       Rule_Desc_64 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_64'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_64'Access,
-         Return_Type => Type_Index_For_Regex_Pattern);
+         Return_Type => Type_Index_For_Pattern);
       
       Rule_Name_65 : aliased constant Text_Type :=
-        "Bool_Pattern";
+        "Regex_Pattern";
       Rule_Doc_65 : aliased constant Text_Type :=
         "";
       Rule_Desc_65 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_65'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_65'Access,
-         Return_Type => Type_Index_For_Bool_Pattern);
+         Return_Type => Type_Index_For_Regex_Pattern);
       
       Rule_Name_66 : aliased constant Text_Type :=
-        "Ellipsis_Pattern";
+        "Bool_Pattern";
       Rule_Doc_66 : aliased constant Text_Type :=
         "";
       Rule_Desc_66 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_66'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_66'Access,
-         Return_Type => Type_Index_For_Ellipsis_Pattern);
+         Return_Type => Type_Index_For_Bool_Pattern);
       
       Rule_Name_67 : aliased constant Text_Type :=
-        "Integer_Pattern";
+        "Ellipsis_Pattern";
       Rule_Doc_67 : aliased constant Text_Type :=
         "";
       Rule_Desc_67 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_67'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_67'Access,
-         Return_Type => Type_Index_For_Integer_Pattern);
+         Return_Type => Type_Index_For_Ellipsis_Pattern);
       
       Rule_Name_68 : aliased constant Text_Type :=
-        "List_Pattern";
+        "Integer_Pattern";
       Rule_Doc_68 : aliased constant Text_Type :=
         "";
       Rule_Desc_68 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_68'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_68'Access,
-         Return_Type => Type_Index_For_List_Pattern);
+         Return_Type => Type_Index_For_Integer_Pattern);
       
       Rule_Name_69 : aliased constant Text_Type :=
-        "Tuple_Pattern";
+        "List_Pattern";
       Rule_Doc_69 : aliased constant Text_Type :=
         "";
       Rule_Desc_69 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_69'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_69'Access,
-         Return_Type => Type_Index_For_Tuple_Pattern);
+         Return_Type => Type_Index_For_List_Pattern);
       
       Rule_Name_70 : aliased constant Text_Type :=
-        "Pattern_Arg";
+        "Tuple_Pattern";
       Rule_Doc_70 : aliased constant Text_Type :=
         "";
       Rule_Desc_70 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_70'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_70'Access,
-         Return_Type => Type_Index_For_Pattern_Detail);
+         Return_Type => Type_Index_For_Tuple_Pattern);
       
       Rule_Name_71 : aliased constant Text_Type :=
-        "Selector_Call";
+        "Pattern_Arg";
       Rule_Doc_71 : aliased constant Text_Type :=
         "";
       Rule_Desc_71 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_71'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_71'Access,
-         Return_Type => Type_Index_For_Selector_Call);
+         Return_Type => Type_Index_For_Pattern_Detail);
       
       Rule_Name_72 : aliased constant Text_Type :=
-        "Expr";
+        "Selector_Call";
       Rule_Doc_72 : aliased constant Text_Type :=
         "";
       Rule_Desc_72 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_72'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_72'Access,
-         Return_Type => Type_Index_For_Expr);
+         Return_Type => Type_Index_For_Selector_Call);
       
       Rule_Name_73 : aliased constant Text_Type :=
-        "Rel";
+        "Expr";
       Rule_Doc_73 : aliased constant Text_Type :=
         "";
       Rule_Desc_73 : aliased constant Grammar_Rule_Descriptor :=
@@ -1382,7 +1388,7 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Expr);
       
       Rule_Name_74 : aliased constant Text_Type :=
-        "Eq";
+        "Stream_Concat";
       Rule_Doc_74 : aliased constant Text_Type :=
         "";
       Rule_Desc_74 : aliased constant Grammar_Rule_Descriptor :=
@@ -1392,7 +1398,7 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Expr);
       
       Rule_Name_75 : aliased constant Text_Type :=
-        "Arith_1";
+        "Logic";
       Rule_Doc_75 : aliased constant Text_Type :=
         "";
       Rule_Desc_75 : aliased constant Grammar_Rule_Descriptor :=
@@ -1402,7 +1408,7 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Expr);
       
       Rule_Name_76 : aliased constant Text_Type :=
-        "Arith_2";
+        "Rel";
       Rule_Doc_76 : aliased constant Text_Type :=
         "";
       Rule_Desc_76 : aliased constant Grammar_Rule_Descriptor :=
@@ -1412,7 +1418,7 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Expr);
       
       Rule_Name_77 : aliased constant Text_Type :=
-        "Arith_3";
+        "Eq";
       Rule_Doc_77 : aliased constant Text_Type :=
         "";
       Rule_Desc_77 : aliased constant Grammar_Rule_Descriptor :=
@@ -1422,7 +1428,7 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Expr);
       
       Rule_Name_78 : aliased constant Text_Type :=
-        "Isa_Or_Primary";
+        "Arith_1";
       Rule_Doc_78 : aliased constant Text_Type :=
         "";
       Rule_Desc_78 : aliased constant Grammar_Rule_Descriptor :=
@@ -1432,17 +1438,17 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Expr);
       
       Rule_Name_79 : aliased constant Text_Type :=
-        "Logic_Propagate_Call";
+        "Arith_2";
       Rule_Doc_79 : aliased constant Text_Type :=
         "";
       Rule_Desc_79 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_79'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_79'Access,
-         Return_Type => Type_Index_For_Logic_Propagate_Call);
+         Return_Type => Type_Index_For_Expr);
       
       Rule_Name_80 : aliased constant Text_Type :=
-        "Primary";
+        "Arith_3";
       Rule_Doc_80 : aliased constant Text_Type :=
         "";
       Rule_Desc_80 : aliased constant Grammar_Rule_Descriptor :=
@@ -1452,137 +1458,137 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Expr);
       
       Rule_Name_81 : aliased constant Text_Type :=
-        "Match_Expr";
+        "Isa_Or_Primary";
       Rule_Doc_81 : aliased constant Text_Type :=
         "";
       Rule_Desc_81 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_81'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_81'Access,
-         Return_Type => Type_Index_For_Match_Expr);
+         Return_Type => Type_Index_For_Expr);
       
       Rule_Name_82 : aliased constant Text_Type :=
-        "Num_Lit";
+        "Logic_Propagate_Call";
       Rule_Doc_82 : aliased constant Text_Type :=
         "";
       Rule_Desc_82 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_82'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_82'Access,
-         Return_Type => Type_Index_For_Num_Lit);
+         Return_Type => Type_Index_For_Logic_Propagate_Call);
       
       Rule_Name_83 : aliased constant Text_Type :=
-        "Big_Num_Lit";
+        "Primary";
       Rule_Doc_83 : aliased constant Text_Type :=
         "";
       Rule_Desc_83 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_83'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_83'Access,
-         Return_Type => Type_Index_For_Big_Num_Lit);
+         Return_Type => Type_Index_For_Expr);
       
       Rule_Name_84 : aliased constant Text_Type :=
-        "String_Lit";
+        "Match_Expr";
       Rule_Doc_84 : aliased constant Text_Type :=
         "";
       Rule_Desc_84 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_84'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_84'Access,
-         Return_Type => Type_Index_For_String_Lit);
+         Return_Type => Type_Index_For_Match_Expr);
       
       Rule_Name_85 : aliased constant Text_Type :=
-        "Block_String_Lit";
+        "Num_Lit";
       Rule_Doc_85 : aliased constant Text_Type :=
         "";
       Rule_Desc_85 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_85'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_85'Access,
-         Return_Type => Type_Index_For_Block_String_Lit);
+         Return_Type => Type_Index_For_Num_Lit);
       
       Rule_Name_86 : aliased constant Text_Type :=
-        "Char_Lit";
+        "Big_Num_Lit";
       Rule_Doc_86 : aliased constant Text_Type :=
         "";
       Rule_Desc_86 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_86'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_86'Access,
-         Return_Type => Type_Index_For_Char_Lit);
+         Return_Type => Type_Index_For_Big_Num_Lit);
       
       Rule_Name_87 : aliased constant Text_Type :=
-        "If_Expr";
+        "String_Lit";
       Rule_Doc_87 : aliased constant Text_Type :=
         "";
       Rule_Desc_87 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_87'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_87'Access,
-         Return_Type => Type_Index_For_If_Expr);
+         Return_Type => Type_Index_For_String_Lit);
       
       Rule_Name_88 : aliased constant Text_Type :=
-        "Raise_Expr";
+        "Block_String_Lit";
       Rule_Doc_88 : aliased constant Text_Type :=
         "";
       Rule_Desc_88 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_88'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_88'Access,
-         Return_Type => Type_Index_For_Raise_Expr);
+         Return_Type => Type_Index_For_Block_String_Lit);
       
       Rule_Name_89 : aliased constant Text_Type :=
-        "Try_Expr";
+        "Char_Lit";
       Rule_Doc_89 : aliased constant Text_Type :=
         "";
       Rule_Desc_89 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_89'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_89'Access,
-         Return_Type => Type_Index_For_Try_Expr);
+         Return_Type => Type_Index_For_Char_Lit);
       
       Rule_Name_90 : aliased constant Text_Type :=
-        "Array_Literal";
+        "If_Expr";
       Rule_Doc_90 : aliased constant Text_Type :=
         "";
       Rule_Desc_90 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_90'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_90'Access,
-         Return_Type => Type_Index_For_Array_Literal);
+         Return_Type => Type_Index_For_If_Expr);
       
       Rule_Name_91 : aliased constant Text_Type :=
-        "Callable_Ref";
+        "Raise_Expr";
       Rule_Doc_91 : aliased constant Text_Type :=
         "";
       Rule_Desc_91 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_91'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_91'Access,
-         Return_Type => Type_Index_For_Expr);
+         Return_Type => Type_Index_For_Raise_Expr);
       
       Rule_Name_92 : aliased constant Text_Type :=
-        "Null_Cond_Qual";
+        "Try_Expr";
       Rule_Doc_92 : aliased constant Text_Type :=
         "";
       Rule_Desc_92 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_92'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_92'Access,
-         Return_Type => Type_Index_For_Null_Cond_Qualifier);
+         Return_Type => Type_Index_For_Try_Expr);
       
       Rule_Name_93 : aliased constant Text_Type :=
-        "Basic_Expr";
+        "Array_Literal";
       Rule_Doc_93 : aliased constant Text_Type :=
         "";
       Rule_Desc_93 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_93'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_93'Access,
-         Return_Type => Type_Index_For_Expr);
+         Return_Type => Type_Index_For_Array_Literal);
       
       Rule_Name_94 : aliased constant Text_Type :=
-        "Term";
+        "Callable_Ref";
       Rule_Doc_94 : aliased constant Text_Type :=
         "";
       Rule_Desc_94 : aliased constant Grammar_Rule_Descriptor :=
@@ -1592,83 +1598,113 @@ private package Liblktlang.Generic_Introspection is
          Return_Type => Type_Index_For_Expr);
       
       Rule_Name_95 : aliased constant Text_Type :=
-        "Basic_Name";
+        "Null_Cond_Qual";
       Rule_Doc_95 : aliased constant Text_Type :=
         "";
       Rule_Desc_95 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_95'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_95'Access,
-         Return_Type => Type_Index_For_Expr);
+         Return_Type => Type_Index_For_Null_Cond_Qualifier);
       
       Rule_Name_96 : aliased constant Text_Type :=
-        "Lambda_Expr";
+        "Basic_Expr";
       Rule_Doc_96 : aliased constant Text_Type :=
         "";
       Rule_Desc_96 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_96'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_96'Access,
-         Return_Type => Type_Index_For_Lambda_Expr);
+         Return_Type => Type_Index_For_Expr);
       
       Rule_Name_97 : aliased constant Text_Type :=
-        "Null_Lit";
+        "Term";
       Rule_Doc_97 : aliased constant Text_Type :=
         "";
       Rule_Desc_97 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_97'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_97'Access,
-         Return_Type => Type_Index_For_Null_Lit);
+         Return_Type => Type_Index_For_Expr);
       
       Rule_Name_98 : aliased constant Text_Type :=
-        "Argument";
+        "Basic_Name";
       Rule_Doc_98 : aliased constant Text_Type :=
         "";
       Rule_Desc_98 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_98'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_98'Access,
-         Return_Type => Type_Index_For_Argument);
+         Return_Type => Type_Index_For_Expr);
       
       Rule_Name_99 : aliased constant Text_Type :=
-        "Args";
+        "Lambda_Expr";
       Rule_Doc_99 : aliased constant Text_Type :=
         "";
       Rule_Desc_99 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_99'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_99'Access,
-         Return_Type => Type_Index_For_Argument_List);
+         Return_Type => Type_Index_For_Lambda_Expr);
       
       Rule_Name_100 : aliased constant Text_Type :=
-        "Decl_Annotation_Args";
+        "Null_Lit";
       Rule_Doc_100 : aliased constant Text_Type :=
         "";
       Rule_Desc_100 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_100'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_100'Access,
-         Return_Type => Type_Index_For_Decl_Annotation_Args);
+         Return_Type => Type_Index_For_Null_Lit);
       
       Rule_Name_101 : aliased constant Text_Type :=
-        "Decl_Annotation";
+        "Argument";
       Rule_Doc_101 : aliased constant Text_Type :=
         "";
       Rule_Desc_101 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_101'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_101'Access,
-         Return_Type => Type_Index_For_Decl_Annotation);
+         Return_Type => Type_Index_For_Argument);
       
       Rule_Name_102 : aliased constant Text_Type :=
-        "Query_Comprehension";
+        "Args";
       Rule_Doc_102 : aliased constant Text_Type :=
         "";
       Rule_Desc_102 : aliased constant Grammar_Rule_Descriptor :=
         (Name        => Rule_Name_102'Access,
          Is_Public   => False,
          Doc         => Rule_Doc_102'Access,
+         Return_Type => Type_Index_For_Argument_List);
+      
+      Rule_Name_103 : aliased constant Text_Type :=
+        "Decl_Annotation_Args";
+      Rule_Doc_103 : aliased constant Text_Type :=
+        "";
+      Rule_Desc_103 : aliased constant Grammar_Rule_Descriptor :=
+        (Name        => Rule_Name_103'Access,
+         Is_Public   => False,
+         Doc         => Rule_Doc_103'Access,
+         Return_Type => Type_Index_For_Decl_Annotation_Args);
+      
+      Rule_Name_104 : aliased constant Text_Type :=
+        "Decl_Annotation";
+      Rule_Doc_104 : aliased constant Text_Type :=
+        "";
+      Rule_Desc_104 : aliased constant Grammar_Rule_Descriptor :=
+        (Name        => Rule_Name_104'Access,
+         Is_Public   => False,
+         Doc         => Rule_Doc_104'Access,
+         Return_Type => Type_Index_For_Decl_Annotation);
+      
+      Rule_Name_105 : aliased constant Text_Type :=
+        "Query_Comprehension";
+      Rule_Doc_105 : aliased constant Text_Type :=
+        "";
+      Rule_Desc_105 : aliased constant Grammar_Rule_Descriptor :=
+        (Name        => Rule_Name_105'Access,
+         Is_Public   => False,
+         Doc         => Rule_Doc_105'Access,
          Return_Type => Type_Index_For_Query);
 
    Grammar_Rules : aliased constant Grammar_Rule_Descriptor_Array := (
@@ -1773,7 +1809,10 @@ private package Liblktlang.Generic_Introspection is
 99 => Rule_Desc_99'Access,
 100 => Rule_Desc_100'Access,
 101 => Rule_Desc_101'Access,
-102 => Rule_Desc_102'Access
+102 => Rule_Desc_102'Access,
+103 => Rule_Desc_103'Access,
+104 => Rule_Desc_104'Access,
+105 => Rule_Desc_105'Access
    );
 
    ------------------------------------
@@ -1784,1473 +1823,2042 @@ private package Liblktlang.Generic_Introspection is
       
       Debug_Name_For_Internal_Unit : aliased constant String :=
         "AnalysisUnit";
-      Desc_For_Internal_Unit : aliased constant Type_Descriptor :=
-        (Category   => Analysis_Unit_Category,
-         Debug_Name => Debug_Name_For_Internal_Unit'Access);
+      Type_Doc_For_Internal_Unit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Unit       : aliased constant Type_Descriptor :=
+        (Category      => Analysis_Unit_Category,
+         Debug_Name    => Debug_Name_For_Internal_Unit'Access,
+         Documentation => Type_Doc_For_Internal_Unit'Access);
       
       Debug_Name_For_Big_Integer_Type : aliased constant String :=
         "BigInt";
-      Desc_For_Big_Integer_Type : aliased constant Type_Descriptor :=
-        (Category   => Big_Int_Category,
-         Debug_Name => Debug_Name_For_Big_Integer_Type'Access);
+      Type_Doc_For_Big_Integer_Type        : aliased constant Text_Type := "";
+      Desc_For_Big_Integer_Type       : aliased constant Type_Descriptor :=
+        (Category      => Big_Int_Category,
+         Debug_Name    => Debug_Name_For_Big_Integer_Type'Access,
+         Documentation => Type_Doc_For_Big_Integer_Type'Access);
       
       Debug_Name_For_Boolean : aliased constant String :=
         "Bool";
-      Desc_For_Boolean : aliased constant Type_Descriptor :=
-        (Category   => Bool_Category,
-         Debug_Name => Debug_Name_For_Boolean'Access);
+      Type_Doc_For_Boolean        : aliased constant Text_Type := "";
+      Desc_For_Boolean       : aliased constant Type_Descriptor :=
+        (Category      => Bool_Category,
+         Debug_Name    => Debug_Name_For_Boolean'Access,
+         Documentation => Type_Doc_For_Boolean'Access);
       
       Debug_Name_For_Character_Type : aliased constant String :=
         "Char";
-      Desc_For_Character_Type : aliased constant Type_Descriptor :=
-        (Category   => Char_Category,
-         Debug_Name => Debug_Name_For_Character_Type'Access);
+      Type_Doc_For_Character_Type        : aliased constant Text_Type := "";
+      Desc_For_Character_Type       : aliased constant Type_Descriptor :=
+        (Category      => Char_Category,
+         Debug_Name    => Debug_Name_For_Character_Type'Access,
+         Documentation => Type_Doc_For_Character_Type'Access);
       
       Debug_Name_For_Integer : aliased constant String :=
         "Int";
-      Desc_For_Integer : aliased constant Type_Descriptor :=
-        (Category   => Int_Category,
-         Debug_Name => Debug_Name_For_Integer'Access);
+      Type_Doc_For_Integer        : aliased constant Text_Type := "";
+      Desc_For_Integer       : aliased constant Type_Descriptor :=
+        (Category      => Int_Category,
+         Debug_Name    => Debug_Name_For_Integer'Access,
+         Documentation => Type_Doc_For_Integer'Access);
       
       Debug_Name_For_Source_Location : aliased constant String :=
         "SourceLocation";
-      Desc_For_Source_Location : aliased constant Type_Descriptor :=
-        (Category   => Source_Location_Category,
-         Debug_Name => Debug_Name_For_Source_Location'Access);
+      Type_Doc_For_Source_Location        : aliased constant Text_Type := "";
+      Desc_For_Source_Location       : aliased constant Type_Descriptor :=
+        (Category      => Source_Location_Category,
+         Debug_Name    => Debug_Name_For_Source_Location'Access,
+         Documentation => Type_Doc_For_Source_Location'Access);
       
       Debug_Name_For_Source_Location_Range : aliased constant String :=
         "SourceLocationRange";
-      Desc_For_Source_Location_Range : aliased constant Type_Descriptor :=
-        (Category   => Source_Location_Range_Category,
-         Debug_Name => Debug_Name_For_Source_Location_Range'Access);
+      Type_Doc_For_Source_Location_Range        : aliased constant Text_Type := "";
+      Desc_For_Source_Location_Range       : aliased constant Type_Descriptor :=
+        (Category      => Source_Location_Range_Category,
+         Debug_Name    => Debug_Name_For_Source_Location_Range'Access,
+         Documentation => Type_Doc_For_Source_Location_Range'Access);
       
       Debug_Name_For_String_Type : aliased constant String :=
         "String";
-      Desc_For_String_Type : aliased constant Type_Descriptor :=
-        (Category   => String_Category,
-         Debug_Name => Debug_Name_For_String_Type'Access);
+      Type_Doc_For_String_Type        : aliased constant Text_Type := "";
+      Desc_For_String_Type       : aliased constant Type_Descriptor :=
+        (Category      => String_Category,
+         Debug_Name    => Debug_Name_For_String_Type'Access,
+         Documentation => Type_Doc_For_String_Type'Access);
       
       Debug_Name_For_Token_Reference : aliased constant String :=
         "Token";
-      Desc_For_Token_Reference : aliased constant Type_Descriptor :=
-        (Category   => Token_Category,
-         Debug_Name => Debug_Name_For_Token_Reference'Access);
+      Type_Doc_For_Token_Reference        : aliased constant Text_Type := "";
+      Desc_For_Token_Reference       : aliased constant Type_Descriptor :=
+        (Category      => Token_Category,
+         Debug_Name    => Debug_Name_For_Token_Reference'Access,
+         Documentation => Type_Doc_For_Token_Reference'Access);
       
       Debug_Name_For_Symbol_Type : aliased constant String :=
         "Symbol";
-      Desc_For_Symbol_Type : aliased constant Type_Descriptor :=
-        (Category   => Symbol_Category,
-         Debug_Name => Debug_Name_For_Symbol_Type'Access);
+      Type_Doc_For_Symbol_Type        : aliased constant Text_Type := "";
+      Desc_For_Symbol_Type       : aliased constant Type_Descriptor :=
+        (Category      => Symbol_Category,
+         Debug_Name    => Debug_Name_For_Symbol_Type'Access,
+         Documentation => Type_Doc_For_Symbol_Type'Access);
       
       Debug_Name_For_Analysis_Unit_Kind : aliased constant String :=
         "AnalysisUnitKind";
-      Desc_For_Analysis_Unit_Kind : aliased constant Type_Descriptor :=
-        (Category   => Enum_Category,
-         Debug_Name => Debug_Name_For_Analysis_Unit_Kind'Access);
+      Type_Doc_For_Analysis_Unit_Kind        : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "        Specify a kind of analysis unit. Specification units provide an" & Character_Type'Val (10)
+ & "        interface to the outer world while body units provide an" & Character_Type'Val (10)
+ & "        implementation for the corresponding interface." & Character_Type'Val (10)
+ & "        ";
+      Desc_For_Analysis_Unit_Kind       : aliased constant Type_Descriptor :=
+        (Category      => Enum_Category,
+         Debug_Name    => Debug_Name_For_Analysis_Unit_Kind'Access,
+         Documentation => Type_Doc_For_Analysis_Unit_Kind'Access);
       
       Debug_Name_For_Completion_Item_Kind : aliased constant String :=
         "CompletionItemKind";
-      Desc_For_Completion_Item_Kind : aliased constant Type_Descriptor :=
-        (Category   => Enum_Category,
-         Debug_Name => Debug_Name_For_Completion_Item_Kind'Access);
+      Type_Doc_For_Completion_Item_Kind        : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "        Type of completion item. Refer to the official LSP specification." & Character_Type'Val (10)
+ & "        ";
+      Desc_For_Completion_Item_Kind       : aliased constant Type_Descriptor :=
+        (Category      => Enum_Category,
+         Debug_Name    => Debug_Name_For_Completion_Item_Kind'Access,
+         Documentation => Type_Doc_For_Completion_Item_Kind'Access);
       
       Debug_Name_For_Designated_Env_Kind : aliased constant String :=
         "DesignatedEnvKind";
-      Desc_For_Designated_Env_Kind : aliased constant Type_Descriptor :=
-        (Category   => Enum_Category,
-         Debug_Name => Debug_Name_For_Designated_Env_Kind'Access);
+      Type_Doc_For_Designated_Env_Kind        : aliased constant Text_Type := "Discriminant for DesignatedEnv structures.";
+      Desc_For_Designated_Env_Kind       : aliased constant Type_Descriptor :=
+        (Category      => Enum_Category,
+         Debug_Name    => Debug_Name_For_Designated_Env_Kind'Access,
+         Documentation => Type_Doc_For_Designated_Env_Kind'Access);
       
       Debug_Name_For_Grammar_Rule : aliased constant String :=
         "GrammarRule";
-      Desc_For_Grammar_Rule : aliased constant Type_Descriptor :=
-        (Category   => Enum_Category,
-         Debug_Name => Debug_Name_For_Grammar_Rule'Access);
+      Type_Doc_For_Grammar_Rule        : aliased constant Text_Type := "Gramar rule to use for parsing.";
+      Desc_For_Grammar_Rule       : aliased constant Type_Descriptor :=
+        (Category      => Enum_Category,
+         Debug_Name    => Debug_Name_For_Grammar_Rule'Access,
+         Documentation => Type_Doc_For_Grammar_Rule'Access);
       
       Debug_Name_For_Lookup_Kind : aliased constant String :=
         "LookupKind";
-      Desc_For_Lookup_Kind : aliased constant Type_Descriptor :=
-        (Category   => Enum_Category,
-         Debug_Name => Debug_Name_For_Lookup_Kind'Access);
+      Type_Doc_For_Lookup_Kind        : aliased constant Text_Type := "";
+      Desc_For_Lookup_Kind       : aliased constant Type_Descriptor :=
+        (Category      => Enum_Category,
+         Debug_Name    => Debug_Name_For_Lookup_Kind'Access,
+         Documentation => Type_Doc_For_Lookup_Kind'Access);
       
       Debug_Name_For_Internal_Complete_Item_Array_Access : aliased constant String :=
         "CompleteItem.array";
-      Desc_For_Internal_Complete_Item_Array_Access : aliased constant Type_Descriptor :=
-        (Category   => Array_Category,
-         Debug_Name => Debug_Name_For_Internal_Complete_Item_Array_Access'Access);
+      Type_Doc_For_Internal_Complete_Item_Array_Access        : aliased constant Text_Type := "";
+      Desc_For_Internal_Complete_Item_Array_Access       : aliased constant Type_Descriptor :=
+        (Category      => Array_Category,
+         Debug_Name    => Debug_Name_For_Internal_Complete_Item_Array_Access'Access,
+         Documentation => Type_Doc_For_Internal_Complete_Item_Array_Access'Access);
       
       Debug_Name_For_Internal_Entity_Array_Access : aliased constant String :=
         "LktNode.array";
-      Desc_For_Internal_Entity_Array_Access : aliased constant Type_Descriptor :=
-        (Category   => Array_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Array_Access'Access);
+      Type_Doc_For_Internal_Entity_Array_Access        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Array_Access       : aliased constant Type_Descriptor :=
+        (Category      => Array_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Array_Access'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Array_Access'Access);
       
       Debug_Name_For_Internal_Entity_Def_Id_Array_Access : aliased constant String :=
         "DefId.array";
-      Desc_For_Internal_Entity_Def_Id_Array_Access : aliased constant Type_Descriptor :=
-        (Category   => Array_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Def_Id_Array_Access'Access);
+      Type_Doc_For_Internal_Entity_Def_Id_Array_Access        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Def_Id_Array_Access       : aliased constant Type_Descriptor :=
+        (Category      => Array_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Def_Id_Array_Access'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Def_Id_Array_Access'Access);
       
       Debug_Name_For_Internal_Entity_Fun_Decl_Array_Access : aliased constant String :=
         "FunDecl.array";
-      Desc_For_Internal_Entity_Fun_Decl_Array_Access : aliased constant Type_Descriptor :=
-        (Category   => Array_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Fun_Decl_Array_Access'Access);
+      Type_Doc_For_Internal_Entity_Fun_Decl_Array_Access        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Fun_Decl_Array_Access       : aliased constant Type_Descriptor :=
+        (Category      => Array_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Fun_Decl_Array_Access'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Fun_Decl_Array_Access'Access);
       
       Debug_Name_For_Internal_Logic_Context_Array_Access : aliased constant String :=
         "LogicContext.array";
-      Desc_For_Internal_Logic_Context_Array_Access : aliased constant Type_Descriptor :=
-        (Category   => Array_Category,
-         Debug_Name => Debug_Name_For_Internal_Logic_Context_Array_Access'Access);
+      Type_Doc_For_Internal_Logic_Context_Array_Access        : aliased constant Text_Type := "";
+      Desc_For_Internal_Logic_Context_Array_Access       : aliased constant Type_Descriptor :=
+        (Category      => Array_Category,
+         Debug_Name    => Debug_Name_For_Internal_Logic_Context_Array_Access'Access,
+         Documentation => Type_Doc_For_Internal_Logic_Context_Array_Access'Access);
       
       Debug_Name_For_Internal_Ref_Result_Array_Access : aliased constant String :=
         "RefResult.array";
-      Desc_For_Internal_Ref_Result_Array_Access : aliased constant Type_Descriptor :=
-        (Category   => Array_Category,
-         Debug_Name => Debug_Name_For_Internal_Ref_Result_Array_Access'Access);
+      Type_Doc_For_Internal_Ref_Result_Array_Access        : aliased constant Text_Type := "";
+      Desc_For_Internal_Ref_Result_Array_Access       : aliased constant Type_Descriptor :=
+        (Category      => Array_Category,
+         Debug_Name    => Debug_Name_For_Internal_Ref_Result_Array_Access'Access,
+         Documentation => Type_Doc_For_Internal_Ref_Result_Array_Access'Access);
       
       Debug_Name_For_Internal_Solver_Diagnostic_Array_Access : aliased constant String :=
         "SolverDiagnostic.array";
-      Desc_For_Internal_Solver_Diagnostic_Array_Access : aliased constant Type_Descriptor :=
-        (Category   => Array_Category,
-         Debug_Name => Debug_Name_For_Internal_Solver_Diagnostic_Array_Access'Access);
+      Type_Doc_For_Internal_Solver_Diagnostic_Array_Access        : aliased constant Text_Type := "";
+      Desc_For_Internal_Solver_Diagnostic_Array_Access       : aliased constant Type_Descriptor :=
+        (Category      => Array_Category,
+         Debug_Name    => Debug_Name_For_Internal_Solver_Diagnostic_Array_Access'Access,
+         Documentation => Type_Doc_For_Internal_Solver_Diagnostic_Array_Access'Access);
       
       Debug_Name_For_Internal_Unit_Array_Access : aliased constant String :=
         "AnalysisUnit.array";
-      Desc_For_Internal_Unit_Array_Access : aliased constant Type_Descriptor :=
-        (Category   => Array_Category,
-         Debug_Name => Debug_Name_For_Internal_Unit_Array_Access'Access);
+      Type_Doc_For_Internal_Unit_Array_Access        : aliased constant Text_Type := "";
+      Desc_For_Internal_Unit_Array_Access       : aliased constant Type_Descriptor :=
+        (Category      => Array_Category,
+         Debug_Name    => Debug_Name_For_Internal_Unit_Array_Access'Access,
+         Documentation => Type_Doc_For_Internal_Unit_Array_Access'Access);
       
       Debug_Name_For_Internal_Complete_Item : aliased constant String :=
         "CompleteItem";
-      Desc_For_Internal_Complete_Item : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Complete_Item'Access);
+      Type_Doc_For_Internal_Complete_Item        : aliased constant Text_Type := "Completion item for language servers" & Character_Type'Val (10)
+;
+      Desc_For_Internal_Complete_Item       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Complete_Item'Access,
+         Documentation => Type_Doc_For_Internal_Complete_Item'Access);
       
       Debug_Name_For_Internal_Decoded_Char_Value : aliased constant String :=
         "DecodedCharValue";
-      Desc_For_Internal_Decoded_Char_Value : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Decoded_Char_Value'Access);
+      Type_Doc_For_Internal_Decoded_Char_Value        : aliased constant Text_Type := "Result for ``CharLit.p_denoted_value``." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "If that property is successful, set ``has_error`` to false and ``value`` to" & Character_Type'Val (10)
+ & "the decoded character value. Otherwise, set ``has_error`` to true and" & Character_Type'Val (10)
+ & "``error_sloc`` and ``error_message`` to give information about the decoding" & Character_Type'Val (10)
+ & "failure." & Character_Type'Val (10)
+;
+      Desc_For_Internal_Decoded_Char_Value       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Decoded_Char_Value'Access,
+         Documentation => Type_Doc_For_Internal_Decoded_Char_Value'Access);
       
       Debug_Name_For_Internal_Decoded_String_Value : aliased constant String :=
         "DecodedStringValue";
-      Desc_For_Internal_Decoded_String_Value : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Decoded_String_Value'Access);
+      Type_Doc_For_Internal_Decoded_String_Value        : aliased constant Text_Type := "Result for ``StringLit.p_denoted_value``." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "If that property is successful, set ``has_error`` to false and ``value`` to" & Character_Type'Val (10)
+ & "the decoded string value. Otherwise, set ``has_error`` to true and" & Character_Type'Val (10)
+ & "``error_sloc`` and ``error_message`` to give information about the decoding" & Character_Type'Val (10)
+ & "failure." & Character_Type'Val (10)
+;
+      Desc_For_Internal_Decoded_String_Value       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Decoded_String_Value'Access,
+         Documentation => Type_Doc_For_Internal_Decoded_String_Value'Access);
       
       Debug_Name_For_Internal_Logic_Context : aliased constant String :=
         "LogicContext";
-      Desc_For_Internal_Logic_Context : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Logic_Context'Access);
+      Type_Doc_For_Internal_Logic_Context        : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "            Describes an interpretation of a reference. Can be attached" & Character_Type'Val (10)
+ & "            to logic atoms (e.g. Binds) to indicate under which interpretation" & Character_Type'Val (10)
+ & "            this particular atom was produced, which can in turn be used to" & Character_Type'Val (10)
+ & "            produce informative diagnostics for resolution failures." & Character_Type'Val (10)
+ & "        ";
+      Desc_For_Internal_Logic_Context       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Logic_Context'Access,
+         Documentation => Type_Doc_For_Internal_Logic_Context'Access);
       
       Debug_Name_For_Internal_Ref_Result : aliased constant String :=
         "RefResult";
-      Desc_For_Internal_Ref_Result : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Ref_Result'Access);
+      Type_Doc_For_Internal_Ref_Result        : aliased constant Text_Type := "Reference result struct" & Character_Type'Val (10)
+;
+      Desc_For_Internal_Ref_Result       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Ref_Result'Access,
+         Documentation => Type_Doc_For_Internal_Ref_Result'Access);
       
       Debug_Name_For_Internal_Solver_Diagnostic : aliased constant String :=
         "SolverDiagnostic";
-      Desc_For_Internal_Solver_Diagnostic : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Solver_Diagnostic'Access);
+      Type_Doc_For_Internal_Solver_Diagnostic        : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "            A raw diagnostic produced by a solver resolution failure." & Character_Type'Val (10)
+ & "            This contains as much information as possible to allow formatters" & Character_Type'Val (10)
+ & "            down the chain to filter/choose which diagnostics to show among" & Character_Type'Val (10)
+ & "            a set of diagnostics produced for a single equation." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "            * ``Message_Template`` is a string explaining the error, which may" & Character_Type'Val (10)
+ & "              contain holes represented by the ``{}`` characters. Literal" & Character_Type'Val (10)
+ & "              opening braces are encoded as ``{{``." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "            * ``Args`` is an array of nodes, which are to be plugged in the" & Character_Type'Val (10)
+ & "              holes of the template in the same order (i.e. the first argument" & Character_Type'Val (10)
+ & "              goes into the first hole of the template, etc.)." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "            * ``Location`` is a node which indicates the location of the error." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "            * ``Contexts`` is the array of contexts that were deemed relevant" & Character_Type'Val (10)
+ & "              for this error." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "            * ``Round`` is the solver round during which this diagnostic was" & Character_Type'Val (10)
+ & "              emitted." & Character_Type'Val (10)
+ & "        ";
+      Desc_For_Internal_Solver_Diagnostic       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Solver_Diagnostic'Access,
+         Documentation => Type_Doc_For_Internal_Solver_Diagnostic'Access);
       
       Debug_Name_For_Internal_Solver_Result : aliased constant String :=
         "SolverResult";
-      Desc_For_Internal_Solver_Result : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Solver_Result'Access);
+      Type_Doc_For_Internal_Solver_Result        : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "            A pair returned by the ``Solve_With_Diagnostic`` primitive," & Character_Type'Val (10)
+ & "            consisting of:" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "            * A ``Success`` field indicating whether resolution was successful" & Character_Type'Val (10)
+ & "              or not." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "            * A ``Diagnostics`` field containing an array of diagnostics which" & Character_Type'Val (10)
+ & "              may be non-empty if ``Success`` is ``False``." & Character_Type'Val (10)
+ & "        ";
+      Desc_For_Internal_Solver_Result       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Solver_Result'Access,
+         Documentation => Type_Doc_For_Internal_Solver_Result'Access);
       
       Debug_Name_For_Internal_Entity : aliased constant String :=
         "LktNode";
-      Desc_For_Internal_Entity : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity'Access);
+      Type_Doc_For_Internal_Entity        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity'Access,
+         Documentation => Type_Doc_For_Internal_Entity'Access);
       
       Debug_Name_For_Internal_Entity_Argument : aliased constant String :=
         "Argument";
-      Desc_For_Internal_Entity_Argument : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Argument'Access);
+      Type_Doc_For_Internal_Entity_Argument        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Argument       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Argument'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Argument'Access);
       
       Debug_Name_For_Internal_Entity_Base_Lexer_Case_Rule_Alt : aliased constant String :=
         "BaseLexerCaseRuleAlt";
-      Desc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Base_Lexer_Case_Rule_Alt'Access);
+      Type_Doc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Base_Lexer_Case_Rule_Alt'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt'Access);
       
       Debug_Name_For_Internal_Entity_Error_Lexer_Case_Rule_Alt : aliased constant String :=
         "ErrorLexerCaseRuleAlt";
-      Desc_For_Internal_Entity_Error_Lexer_Case_Rule_Alt : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Error_Lexer_Case_Rule_Alt'Access);
+      Type_Doc_For_Internal_Entity_Error_Lexer_Case_Rule_Alt        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Error_Lexer_Case_Rule_Alt       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Error_Lexer_Case_Rule_Alt'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Error_Lexer_Case_Rule_Alt'Access);
       
       Debug_Name_For_Internal_Entity_Lexer_Case_Rule_Cond_Alt : aliased constant String :=
         "LexerCaseRuleCondAlt";
-      Desc_For_Internal_Entity_Lexer_Case_Rule_Cond_Alt : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lexer_Case_Rule_Cond_Alt'Access);
+      Type_Doc_For_Internal_Entity_Lexer_Case_Rule_Cond_Alt        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lexer_Case_Rule_Cond_Alt       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lexer_Case_Rule_Cond_Alt'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lexer_Case_Rule_Cond_Alt'Access);
       
       Debug_Name_For_Internal_Entity_Lexer_Case_Rule_Default_Alt : aliased constant String :=
         "LexerCaseRuleDefaultAlt";
-      Desc_For_Internal_Entity_Lexer_Case_Rule_Default_Alt : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lexer_Case_Rule_Default_Alt'Access);
+      Type_Doc_For_Internal_Entity_Lexer_Case_Rule_Default_Alt        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lexer_Case_Rule_Default_Alt       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lexer_Case_Rule_Default_Alt'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lexer_Case_Rule_Default_Alt'Access);
       
       Debug_Name_For_Internal_Entity_Base_Match_Branch : aliased constant String :=
         "BaseMatchBranch";
-      Desc_For_Internal_Entity_Base_Match_Branch : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Base_Match_Branch'Access);
+      Type_Doc_For_Internal_Entity_Base_Match_Branch        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Base_Match_Branch       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Base_Match_Branch'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Base_Match_Branch'Access);
       
       Debug_Name_For_Internal_Entity_Match_Branch : aliased constant String :=
         "MatchBranch";
-      Desc_For_Internal_Entity_Match_Branch : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Match_Branch'Access);
+      Type_Doc_For_Internal_Entity_Match_Branch        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Match_Branch       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Match_Branch'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Match_Branch'Access);
       
       Debug_Name_For_Internal_Entity_Pattern_Match_Branch : aliased constant String :=
         "PatternMatchBranch";
-      Desc_For_Internal_Entity_Pattern_Match_Branch : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Pattern_Match_Branch'Access);
+      Type_Doc_For_Internal_Entity_Pattern_Match_Branch        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Pattern_Match_Branch       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Pattern_Match_Branch'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Pattern_Match_Branch'Access);
       
       Debug_Name_For_Internal_Entity_Block_Expr_Clause : aliased constant String :=
         "BlockExprClause";
-      Desc_For_Internal_Entity_Block_Expr_Clause : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Block_Expr_Clause'Access);
+      Type_Doc_For_Internal_Entity_Block_Expr_Clause        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Block_Expr_Clause       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Block_Expr_Clause'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Block_Expr_Clause'Access);
       
       Debug_Name_For_Internal_Entity_Block_String_Line : aliased constant String :=
         "BlockStringLine";
-      Desc_For_Internal_Entity_Block_String_Line : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Block_String_Line'Access);
+      Type_Doc_For_Internal_Entity_Block_String_Line        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Block_String_Line       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Block_String_Line'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Block_String_Line'Access);
       
       Debug_Name_For_Internal_Entity_Class_Qualifier : aliased constant String :=
         "ClassQualifier";
-      Desc_For_Internal_Entity_Class_Qualifier : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Class_Qualifier'Access);
+      Type_Doc_For_Internal_Entity_Class_Qualifier        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Class_Qualifier       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Class_Qualifier'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Class_Qualifier'Access);
       
       Debug_Name_For_Internal_Entity_Class_Qualifier_Absent : aliased constant String :=
         "ClassQualifier.Absent";
-      Desc_For_Internal_Entity_Class_Qualifier_Absent : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Class_Qualifier_Absent'Access);
+      Type_Doc_For_Internal_Entity_Class_Qualifier_Absent        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Class_Qualifier_Absent       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Class_Qualifier_Absent'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Class_Qualifier_Absent'Access);
       
       Debug_Name_For_Internal_Entity_Class_Qualifier_Present : aliased constant String :=
         "ClassQualifier.Present";
-      Desc_For_Internal_Entity_Class_Qualifier_Present : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Class_Qualifier_Present'Access);
+      Type_Doc_For_Internal_Entity_Class_Qualifier_Present        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Class_Qualifier_Present       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Class_Qualifier_Present'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Class_Qualifier_Present'Access);
       
       Debug_Name_For_Internal_Entity_Decl : aliased constant String :=
         "Decl";
-      Desc_For_Internal_Entity_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Decl'Access);
+      Type_Doc_For_Internal_Entity_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Base_Grammar_Rule_Decl : aliased constant String :=
         "BaseGrammarRuleDecl";
-      Desc_For_Internal_Entity_Base_Grammar_Rule_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Base_Grammar_Rule_Decl'Access);
+      Type_Doc_For_Internal_Entity_Base_Grammar_Rule_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Base_Grammar_Rule_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Base_Grammar_Rule_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Base_Grammar_Rule_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Rule_Decl : aliased constant String :=
         "GrammarRuleDecl";
-      Desc_For_Internal_Entity_Grammar_Rule_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Rule_Decl'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Rule_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Rule_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Rule_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Rule_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Synthetic_Lexer_Decl : aliased constant String :=
         "SyntheticLexerDecl";
-      Desc_For_Internal_Entity_Synthetic_Lexer_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Synthetic_Lexer_Decl'Access);
+      Type_Doc_For_Internal_Entity_Synthetic_Lexer_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Synthetic_Lexer_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Synthetic_Lexer_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Synthetic_Lexer_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Base_Val_Decl : aliased constant String :=
         "BaseValDecl";
-      Desc_For_Internal_Entity_Base_Val_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Base_Val_Decl'Access);
+      Type_Doc_For_Internal_Entity_Base_Val_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Base_Val_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Base_Val_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Base_Val_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Node_Decl : aliased constant String :=
         "NodeDecl";
-      Desc_For_Internal_Entity_Node_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Node_Decl'Access);
+      Type_Doc_For_Internal_Entity_Node_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Node_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Node_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Node_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Self_Decl : aliased constant String :=
         "SelfDecl";
-      Desc_For_Internal_Entity_Self_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Self_Decl'Access);
+      Type_Doc_For_Internal_Entity_Self_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Self_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Self_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Self_Decl'Access);
       
       Debug_Name_For_Internal_Entity_User_Val_Decl : aliased constant String :=
         "UserValDecl";
-      Desc_For_Internal_Entity_User_Val_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_User_Val_Decl'Access);
+      Type_Doc_For_Internal_Entity_User_Val_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_User_Val_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_User_Val_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_User_Val_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Binding_Val_Decl : aliased constant String :=
         "BindingValDecl";
-      Desc_For_Internal_Entity_Binding_Val_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Binding_Val_Decl'Access);
+      Type_Doc_For_Internal_Entity_Binding_Val_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Binding_Val_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Binding_Val_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Binding_Val_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Enum_Lit_Decl : aliased constant String :=
         "EnumLitDecl";
-      Desc_For_Internal_Entity_Enum_Lit_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Enum_Lit_Decl'Access);
+      Type_Doc_For_Internal_Entity_Enum_Lit_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Enum_Lit_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Enum_Lit_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Enum_Lit_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Explicitly_Typed_Decl : aliased constant String :=
         "ExplicitlyTypedDecl";
-      Desc_For_Internal_Entity_Explicitly_Typed_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Explicitly_Typed_Decl'Access);
+      Type_Doc_For_Internal_Entity_Explicitly_Typed_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Explicitly_Typed_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Explicitly_Typed_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Explicitly_Typed_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Component_Decl : aliased constant String :=
         "ComponentDecl";
-      Desc_For_Internal_Entity_Component_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Component_Decl'Access);
+      Type_Doc_For_Internal_Entity_Component_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Component_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Component_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Component_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Field_Decl : aliased constant String :=
         "FieldDecl";
-      Desc_For_Internal_Entity_Field_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Field_Decl'Access);
+      Type_Doc_For_Internal_Entity_Field_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Field_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Field_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Field_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Fun_Param_Decl : aliased constant String :=
         "FunParamDecl";
-      Desc_For_Internal_Entity_Fun_Param_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Fun_Param_Decl'Access);
+      Type_Doc_For_Internal_Entity_Fun_Param_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Fun_Param_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Fun_Param_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Fun_Param_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Lambda_Param_Decl : aliased constant String :=
         "LambdaParamDecl";
-      Desc_For_Internal_Entity_Lambda_Param_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lambda_Param_Decl'Access);
+      Type_Doc_For_Internal_Entity_Lambda_Param_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lambda_Param_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lambda_Param_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lambda_Param_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Dyn_Var_Decl : aliased constant String :=
         "DynVarDecl";
-      Desc_For_Internal_Entity_Dyn_Var_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Dyn_Var_Decl'Access);
+      Type_Doc_For_Internal_Entity_Dyn_Var_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Dyn_Var_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Dyn_Var_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Dyn_Var_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Match_Val_Decl : aliased constant String :=
         "MatchValDecl";
-      Desc_For_Internal_Entity_Match_Val_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Match_Val_Decl'Access);
+      Type_Doc_For_Internal_Entity_Match_Val_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Match_Val_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Match_Val_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Match_Val_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Val_Decl : aliased constant String :=
         "ValDecl";
-      Desc_For_Internal_Entity_Val_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Val_Decl'Access);
+      Type_Doc_For_Internal_Entity_Val_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Val_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Val_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Val_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Fun_Decl : aliased constant String :=
         "FunDecl";
-      Desc_For_Internal_Entity_Fun_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Fun_Decl'Access);
+      Type_Doc_For_Internal_Entity_Fun_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Fun_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Fun_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Fun_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Env_Spec_Decl : aliased constant String :=
         "EnvSpecDecl";
-      Desc_For_Internal_Entity_Env_Spec_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Env_Spec_Decl'Access);
+      Type_Doc_For_Internal_Entity_Env_Spec_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Env_Spec_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Env_Spec_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Env_Spec_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Error_Decl : aliased constant String :=
         "ErrorDecl";
-      Desc_For_Internal_Entity_Error_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Error_Decl'Access);
+      Type_Doc_For_Internal_Entity_Error_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Error_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Error_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Error_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Generic_Decl : aliased constant String :=
         "GenericDecl";
-      Desc_For_Internal_Entity_Generic_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Generic_Decl'Access);
+      Type_Doc_For_Internal_Entity_Generic_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Generic_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Generic_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Generic_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Decl : aliased constant String :=
         "GrammarDecl";
-      Desc_For_Internal_Entity_Grammar_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Decl'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Lexer_Decl : aliased constant String :=
         "LexerDecl";
-      Desc_For_Internal_Entity_Lexer_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lexer_Decl'Access);
+      Type_Doc_For_Internal_Entity_Lexer_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lexer_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lexer_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lexer_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Lexer_Family_Decl : aliased constant String :=
         "LexerFamilyDecl";
-      Desc_For_Internal_Entity_Lexer_Family_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lexer_Family_Decl'Access);
+      Type_Doc_For_Internal_Entity_Lexer_Family_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lexer_Family_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lexer_Family_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lexer_Family_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Synth_Fun_Decl : aliased constant String :=
         "SynthFunDecl";
-      Desc_For_Internal_Entity_Synth_Fun_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Synth_Fun_Decl'Access);
+      Type_Doc_For_Internal_Entity_Synth_Fun_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Synth_Fun_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Synth_Fun_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Synth_Fun_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Synth_Param_Decl : aliased constant String :=
         "SynthParamDecl";
-      Desc_For_Internal_Entity_Synth_Param_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Synth_Param_Decl'Access);
+      Type_Doc_For_Internal_Entity_Synth_Param_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Synth_Param_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Synth_Param_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Synth_Param_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Type_Decl : aliased constant String :=
         "TypeDecl";
-      Desc_For_Internal_Entity_Type_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Type_Decl'Access);
+      Type_Doc_For_Internal_Entity_Type_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Type_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Type_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Type_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Any_Type_Decl : aliased constant String :=
         "AnyTypeDecl";
-      Desc_For_Internal_Entity_Any_Type_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Any_Type_Decl'Access);
+      Type_Doc_For_Internal_Entity_Any_Type_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Any_Type_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Any_Type_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Any_Type_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Enum_Class_Alt_Decl : aliased constant String :=
         "EnumClassAltDecl";
-      Desc_For_Internal_Entity_Enum_Class_Alt_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Enum_Class_Alt_Decl'Access);
+      Type_Doc_For_Internal_Entity_Enum_Class_Alt_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Enum_Class_Alt_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Enum_Class_Alt_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Enum_Class_Alt_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Function_Type : aliased constant String :=
         "FunctionType";
-      Desc_For_Internal_Entity_Function_Type : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Function_Type'Access);
+      Type_Doc_For_Internal_Entity_Function_Type        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Function_Type       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Function_Type'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Function_Type'Access);
       
       Debug_Name_For_Internal_Entity_Generic_Param_Type_Decl : aliased constant String :=
         "GenericParamTypeDecl";
-      Desc_For_Internal_Entity_Generic_Param_Type_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Generic_Param_Type_Decl'Access);
+      Type_Doc_For_Internal_Entity_Generic_Param_Type_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Generic_Param_Type_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Generic_Param_Type_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Generic_Param_Type_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Named_Type_Decl : aliased constant String :=
         "NamedTypeDecl";
-      Desc_For_Internal_Entity_Named_Type_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Named_Type_Decl'Access);
+      Type_Doc_For_Internal_Entity_Named_Type_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Named_Type_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Named_Type_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Named_Type_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Basic_Class_Decl : aliased constant String :=
         "BasicClassDecl";
-      Desc_For_Internal_Entity_Basic_Class_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Basic_Class_Decl'Access);
+      Type_Doc_For_Internal_Entity_Basic_Class_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Basic_Class_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Basic_Class_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Basic_Class_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Class_Decl : aliased constant String :=
         "ClassDecl";
-      Desc_For_Internal_Entity_Class_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Class_Decl'Access);
+      Type_Doc_For_Internal_Entity_Class_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Class_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Class_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Class_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Enum_Class_Decl : aliased constant String :=
         "EnumClassDecl";
-      Desc_For_Internal_Entity_Enum_Class_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Enum_Class_Decl'Access);
+      Type_Doc_For_Internal_Entity_Enum_Class_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Enum_Class_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Enum_Class_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Enum_Class_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Enum_Type_Decl : aliased constant String :=
         "EnumTypeDecl";
-      Desc_For_Internal_Entity_Enum_Type_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Enum_Type_Decl'Access);
+      Type_Doc_For_Internal_Entity_Enum_Type_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Enum_Type_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Enum_Type_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Enum_Type_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Struct_Decl : aliased constant String :=
         "StructDecl";
-      Desc_For_Internal_Entity_Struct_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Struct_Decl'Access);
+      Type_Doc_For_Internal_Entity_Struct_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Struct_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Struct_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Struct_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Trait_Decl : aliased constant String :=
         "TraitDecl";
-      Desc_For_Internal_Entity_Trait_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Trait_Decl'Access);
+      Type_Doc_For_Internal_Entity_Trait_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Trait_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Trait_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Trait_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Decl_Annotation : aliased constant String :=
         "DeclAnnotation";
-      Desc_For_Internal_Entity_Decl_Annotation : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Decl_Annotation'Access);
+      Type_Doc_For_Internal_Entity_Decl_Annotation        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Decl_Annotation       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Decl_Annotation'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Decl_Annotation'Access);
       
       Debug_Name_For_Internal_Entity_Decl_Annotation_Args : aliased constant String :=
         "DeclAnnotationArgs";
-      Desc_For_Internal_Entity_Decl_Annotation_Args : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Decl_Annotation_Args'Access);
+      Type_Doc_For_Internal_Entity_Decl_Annotation_Args        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Decl_Annotation_Args       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Decl_Annotation_Args'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Decl_Annotation_Args'Access);
       
       Debug_Name_For_Internal_Entity_Dyn_Env_Wrapper : aliased constant String :=
         "DynEnvWrapper";
-      Desc_For_Internal_Entity_Dyn_Env_Wrapper : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Dyn_Env_Wrapper'Access);
+      Type_Doc_For_Internal_Entity_Dyn_Env_Wrapper        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Dyn_Env_Wrapper       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Dyn_Env_Wrapper'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Dyn_Env_Wrapper'Access);
       
       Debug_Name_For_Internal_Entity_Elsif_Branch : aliased constant String :=
         "ElsifBranch";
-      Desc_For_Internal_Entity_Elsif_Branch : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Elsif_Branch'Access);
+      Type_Doc_For_Internal_Entity_Elsif_Branch        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Elsif_Branch       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Elsif_Branch'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Elsif_Branch'Access);
       
       Debug_Name_For_Internal_Entity_Enum_Class_Case : aliased constant String :=
         "EnumClassCase";
-      Desc_For_Internal_Entity_Enum_Class_Case : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Enum_Class_Case'Access);
+      Type_Doc_For_Internal_Entity_Enum_Class_Case        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Enum_Class_Case       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Enum_Class_Case'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Enum_Class_Case'Access);
       
       Debug_Name_For_Internal_Entity_Excludes_Null : aliased constant String :=
         "ExcludesNull";
-      Desc_For_Internal_Entity_Excludes_Null : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Excludes_Null'Access);
+      Type_Doc_For_Internal_Entity_Excludes_Null        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Excludes_Null       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Excludes_Null'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Excludes_Null'Access);
       
       Debug_Name_For_Internal_Entity_Excludes_Null_Absent : aliased constant String :=
         "ExcludesNull.Absent";
-      Desc_For_Internal_Entity_Excludes_Null_Absent : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Excludes_Null_Absent'Access);
+      Type_Doc_For_Internal_Entity_Excludes_Null_Absent        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Excludes_Null_Absent       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Excludes_Null_Absent'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Excludes_Null_Absent'Access);
       
       Debug_Name_For_Internal_Entity_Excludes_Null_Present : aliased constant String :=
         "ExcludesNull.Present";
-      Desc_For_Internal_Entity_Excludes_Null_Present : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Excludes_Null_Present'Access);
+      Type_Doc_For_Internal_Entity_Excludes_Null_Present        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Excludes_Null_Present       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Excludes_Null_Present'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Excludes_Null_Present'Access);
       
       Debug_Name_For_Internal_Entity_Expr : aliased constant String :=
         "Expr";
-      Desc_For_Internal_Entity_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Expr'Access);
+      Type_Doc_For_Internal_Entity_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Any_Of : aliased constant String :=
         "AnyOf";
-      Desc_For_Internal_Entity_Any_Of : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Any_Of'Access);
+      Type_Doc_For_Internal_Entity_Any_Of        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Any_Of       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Any_Of'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Any_Of'Access);
       
       Debug_Name_For_Internal_Entity_Array_Literal : aliased constant String :=
         "ArrayLiteral";
-      Desc_For_Internal_Entity_Array_Literal : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Array_Literal'Access);
+      Type_Doc_For_Internal_Entity_Array_Literal        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Array_Literal       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Array_Literal'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Array_Literal'Access);
       
       Debug_Name_For_Internal_Entity_Base_Call_Expr : aliased constant String :=
         "BaseCallExpr";
-      Desc_For_Internal_Entity_Base_Call_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Base_Call_Expr'Access);
+      Type_Doc_For_Internal_Entity_Base_Call_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Base_Call_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Base_Call_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Base_Call_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Call_Expr : aliased constant String :=
         "CallExpr";
-      Desc_For_Internal_Entity_Call_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Call_Expr'Access);
+      Type_Doc_For_Internal_Entity_Call_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Call_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Call_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Call_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Logic_Call_Expr : aliased constant String :=
         "LogicCallExpr";
-      Desc_For_Internal_Entity_Logic_Call_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Logic_Call_Expr'Access);
+      Type_Doc_For_Internal_Entity_Logic_Call_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Logic_Call_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Logic_Call_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Logic_Call_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Logic_Predicate : aliased constant String :=
         "LogicPredicate";
-      Desc_For_Internal_Entity_Logic_Predicate : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Logic_Predicate'Access);
+      Type_Doc_For_Internal_Entity_Logic_Predicate        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Logic_Predicate       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Logic_Predicate'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Logic_Predicate'Access);
       
       Debug_Name_For_Internal_Entity_Logic_Propagate_Call : aliased constant String :=
         "LogicPropagateCall";
-      Desc_For_Internal_Entity_Logic_Propagate_Call : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Logic_Propagate_Call'Access);
+      Type_Doc_For_Internal_Entity_Logic_Propagate_Call        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Logic_Propagate_Call       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Logic_Propagate_Call'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Logic_Propagate_Call'Access);
       
       Debug_Name_For_Internal_Entity_Bin_Op : aliased constant String :=
         "BinOp";
-      Desc_For_Internal_Entity_Bin_Op : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Bin_Op'Access);
+      Type_Doc_For_Internal_Entity_Bin_Op        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Bin_Op       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Bin_Op'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Bin_Op'Access);
       
       Debug_Name_For_Internal_Entity_Block_Expr : aliased constant String :=
         "BlockExpr";
-      Desc_For_Internal_Entity_Block_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Block_Expr'Access);
+      Type_Doc_For_Internal_Entity_Block_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Block_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Block_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Block_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Cast_Expr : aliased constant String :=
         "CastExpr";
-      Desc_For_Internal_Entity_Cast_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Cast_Expr'Access);
+      Type_Doc_For_Internal_Entity_Cast_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Cast_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Cast_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Cast_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Dot_Expr : aliased constant String :=
         "DotExpr";
-      Desc_For_Internal_Entity_Dot_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Dot_Expr'Access);
+      Type_Doc_For_Internal_Entity_Dot_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Dot_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Dot_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Dot_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Error_On_Null : aliased constant String :=
         "ErrorOnNull";
-      Desc_For_Internal_Entity_Error_On_Null : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Error_On_Null'Access);
+      Type_Doc_For_Internal_Entity_Error_On_Null        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Error_On_Null       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Error_On_Null'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Error_On_Null'Access);
       
       Debug_Name_For_Internal_Entity_Generic_Instantiation : aliased constant String :=
         "GenericInstantiation";
-      Desc_For_Internal_Entity_Generic_Instantiation : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Generic_Instantiation'Access);
+      Type_Doc_For_Internal_Entity_Generic_Instantiation        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Generic_Instantiation       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Generic_Instantiation'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Generic_Instantiation'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Expr : aliased constant String :=
         "GrammarExpr";
-      Desc_For_Internal_Entity_Grammar_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Expr'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Error_Grammar_Expr : aliased constant String :=
         "ErrorGrammarExpr";
-      Desc_For_Internal_Entity_Error_Grammar_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Error_Grammar_Expr'Access);
+      Type_Doc_For_Internal_Entity_Error_Grammar_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Error_Grammar_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Error_Grammar_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Error_Grammar_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Cut : aliased constant String :=
         "GrammarCut";
-      Desc_For_Internal_Entity_Grammar_Cut : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Cut'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Cut        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Cut       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Cut'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Cut'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Discard : aliased constant String :=
         "GrammarDiscard";
-      Desc_For_Internal_Entity_Grammar_Discard : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Discard'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Discard        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Discard       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Discard'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Discard'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Dont_Skip : aliased constant String :=
         "GrammarDontSkip";
-      Desc_For_Internal_Entity_Grammar_Dont_Skip : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Dont_Skip'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Dont_Skip        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Dont_Skip       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Dont_Skip'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Dont_Skip'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_List : aliased constant String :=
         "GrammarList";
-      Desc_For_Internal_Entity_Grammar_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_List'Access);
+      Type_Doc_For_Internal_Entity_Grammar_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_List'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Null : aliased constant String :=
         "GrammarNull";
-      Desc_For_Internal_Entity_Grammar_Null : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Null'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Null        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Null       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Null'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Null'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Opt : aliased constant String :=
         "GrammarOpt";
-      Desc_For_Internal_Entity_Grammar_Opt : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Opt'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Opt        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Opt       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Opt'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Opt'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Opt_Error : aliased constant String :=
         "GrammarOptError";
-      Desc_For_Internal_Entity_Grammar_Opt_Error : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Opt_Error'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Opt_Error        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Opt_Error       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Opt_Error'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Opt_Error'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Opt_Error_Group : aliased constant String :=
         "GrammarOptErrorGroup";
-      Desc_For_Internal_Entity_Grammar_Opt_Error_Group : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Opt_Error_Group'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Opt_Error_Group        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Opt_Error_Group       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Opt_Error_Group'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Opt_Error_Group'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Opt_Group : aliased constant String :=
         "GrammarOptGroup";
-      Desc_For_Internal_Entity_Grammar_Opt_Group : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Opt_Group'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Opt_Group        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Opt_Group       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Opt_Group'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Opt_Group'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Or_Expr : aliased constant String :=
         "GrammarOrExpr";
-      Desc_For_Internal_Entity_Grammar_Or_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Or_Expr'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Or_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Or_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Or_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Or_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Pick : aliased constant String :=
         "GrammarPick";
-      Desc_For_Internal_Entity_Grammar_Pick : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Pick'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Pick        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Pick       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Pick'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Pick'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Implicit_Pick : aliased constant String :=
         "GrammarImplicitPick";
-      Desc_For_Internal_Entity_Grammar_Implicit_Pick : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Implicit_Pick'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Implicit_Pick        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Implicit_Pick       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Implicit_Pick'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Implicit_Pick'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Predicate : aliased constant String :=
         "GrammarPredicate";
-      Desc_For_Internal_Entity_Grammar_Predicate : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Predicate'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Predicate        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Predicate       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Predicate'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Predicate'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Rule_Ref : aliased constant String :=
         "GrammarRuleRef";
-      Desc_For_Internal_Entity_Grammar_Rule_Ref : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Rule_Ref'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Rule_Ref        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Rule_Ref       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Rule_Ref'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Rule_Ref'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Skip : aliased constant String :=
         "GrammarSkip";
-      Desc_For_Internal_Entity_Grammar_Skip : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Skip'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Skip        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Skip       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Skip'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Skip'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Stop_Cut : aliased constant String :=
         "GrammarStopCut";
-      Desc_For_Internal_Entity_Grammar_Stop_Cut : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Stop_Cut'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Stop_Cut        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Stop_Cut       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Stop_Cut'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Stop_Cut'Access);
       
       Debug_Name_For_Internal_Entity_Parse_Node_Expr : aliased constant String :=
         "ParseNodeExpr";
-      Desc_For_Internal_Entity_Parse_Node_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Parse_Node_Expr'Access);
+      Type_Doc_For_Internal_Entity_Parse_Node_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Parse_Node_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Parse_Node_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Parse_Node_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Token_Lit : aliased constant String :=
         "TokenLit";
-      Desc_For_Internal_Entity_Token_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Token_Lit'Access);
+      Type_Doc_For_Internal_Entity_Token_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Token_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Token_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Token_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Token_No_Case_Lit : aliased constant String :=
         "TokenNoCaseLit";
-      Desc_For_Internal_Entity_Token_No_Case_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Token_No_Case_Lit'Access);
+      Type_Doc_For_Internal_Entity_Token_No_Case_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Token_No_Case_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Token_No_Case_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Token_No_Case_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Token_Pattern_Concat : aliased constant String :=
         "TokenPatternConcat";
-      Desc_For_Internal_Entity_Token_Pattern_Concat : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Token_Pattern_Concat'Access);
+      Type_Doc_For_Internal_Entity_Token_Pattern_Concat        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Token_Pattern_Concat       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Token_Pattern_Concat'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Token_Pattern_Concat'Access);
       
       Debug_Name_For_Internal_Entity_Token_Pattern_Lit : aliased constant String :=
         "TokenPatternLit";
-      Desc_For_Internal_Entity_Token_Pattern_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Token_Pattern_Lit'Access);
+      Type_Doc_For_Internal_Entity_Token_Pattern_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Token_Pattern_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Token_Pattern_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Token_Pattern_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Token_Ref : aliased constant String :=
         "TokenRef";
-      Desc_For_Internal_Entity_Token_Ref : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Token_Ref'Access);
+      Type_Doc_For_Internal_Entity_Token_Ref        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Token_Ref       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Token_Ref'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Token_Ref'Access);
       
       Debug_Name_For_Internal_Entity_Id : aliased constant String :=
         "Id";
-      Desc_For_Internal_Entity_Id : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Id'Access);
+      Type_Doc_For_Internal_Entity_Id        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Id       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Id'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Id'Access);
       
       Debug_Name_For_Internal_Entity_Def_Id : aliased constant String :=
         "DefId";
-      Desc_For_Internal_Entity_Def_Id : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Def_Id'Access);
+      Type_Doc_For_Internal_Entity_Def_Id        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Def_Id       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Def_Id'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Def_Id'Access);
       
       Debug_Name_For_Internal_Entity_Module_Ref_Id : aliased constant String :=
         "ModuleRefId";
-      Desc_For_Internal_Entity_Module_Ref_Id : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Module_Ref_Id'Access);
+      Type_Doc_For_Internal_Entity_Module_Ref_Id        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Module_Ref_Id       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Module_Ref_Id'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Module_Ref_Id'Access);
       
       Debug_Name_For_Internal_Entity_Ref_Id : aliased constant String :=
         "RefId";
-      Desc_For_Internal_Entity_Ref_Id : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Ref_Id'Access);
+      Type_Doc_For_Internal_Entity_Ref_Id        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Ref_Id       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Ref_Id'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Ref_Id'Access);
       
       Debug_Name_For_Internal_Entity_If_Expr : aliased constant String :=
         "IfExpr";
-      Desc_For_Internal_Entity_If_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_If_Expr'Access);
+      Type_Doc_For_Internal_Entity_If_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_If_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_If_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_If_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Isa : aliased constant String :=
         "Isa";
-      Desc_For_Internal_Entity_Isa : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Isa'Access);
+      Type_Doc_For_Internal_Entity_Isa        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Isa       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Isa'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Isa'Access);
       
       Debug_Name_For_Internal_Entity_Keep_Expr : aliased constant String :=
         "KeepExpr";
-      Desc_For_Internal_Entity_Keep_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Keep_Expr'Access);
+      Type_Doc_For_Internal_Entity_Keep_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Keep_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Keep_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Keep_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Lambda_Expr : aliased constant String :=
         "LambdaExpr";
-      Desc_For_Internal_Entity_Lambda_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lambda_Expr'Access);
+      Type_Doc_For_Internal_Entity_Lambda_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lambda_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lambda_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lambda_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Lit : aliased constant String :=
         "Lit";
-      Desc_For_Internal_Entity_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lit'Access);
+      Type_Doc_For_Internal_Entity_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Big_Num_Lit : aliased constant String :=
         "BigNumLit";
-      Desc_For_Internal_Entity_Big_Num_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Big_Num_Lit'Access);
+      Type_Doc_For_Internal_Entity_Big_Num_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Big_Num_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Big_Num_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Big_Num_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Char_Lit : aliased constant String :=
         "CharLit";
-      Desc_For_Internal_Entity_Char_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Char_Lit'Access);
+      Type_Doc_For_Internal_Entity_Char_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Char_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Char_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Char_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Null_Lit : aliased constant String :=
         "NullLit";
-      Desc_For_Internal_Entity_Null_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Null_Lit'Access);
+      Type_Doc_For_Internal_Entity_Null_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Null_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Null_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Null_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Num_Lit : aliased constant String :=
         "NumLit";
-      Desc_For_Internal_Entity_Num_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Num_Lit'Access);
+      Type_Doc_For_Internal_Entity_Num_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Num_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Num_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Num_Lit'Access);
       
       Debug_Name_For_Internal_Entity_String_Lit : aliased constant String :=
         "StringLit";
-      Desc_For_Internal_Entity_String_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_String_Lit'Access);
+      Type_Doc_For_Internal_Entity_String_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_String_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_String_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_String_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Block_String_Lit : aliased constant String :=
         "BlockStringLit";
-      Desc_For_Internal_Entity_Block_String_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Block_String_Lit'Access);
+      Type_Doc_For_Internal_Entity_Block_String_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Block_String_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Block_String_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Block_String_Lit'Access);
+      
+      Debug_Name_For_Internal_Entity_Module_Doc_String_Lit : aliased constant String :=
+        "ModuleDocStringLit";
+      Type_Doc_For_Internal_Entity_Module_Doc_String_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Module_Doc_String_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Module_Doc_String_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Module_Doc_String_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Single_Line_String_Lit : aliased constant String :=
         "SingleLineStringLit";
-      Desc_For_Internal_Entity_Single_Line_String_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Single_Line_String_Lit'Access);
+      Type_Doc_For_Internal_Entity_Single_Line_String_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Single_Line_String_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Single_Line_String_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Single_Line_String_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Pattern_Single_Line_String_Lit : aliased constant String :=
         "PatternSingleLineStringLit";
-      Desc_For_Internal_Entity_Pattern_Single_Line_String_Lit : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Pattern_Single_Line_String_Lit'Access);
+      Type_Doc_For_Internal_Entity_Pattern_Single_Line_String_Lit        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Pattern_Single_Line_String_Lit       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Pattern_Single_Line_String_Lit'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Pattern_Single_Line_String_Lit'Access);
       
       Debug_Name_For_Internal_Entity_Logic_Assign : aliased constant String :=
         "LogicAssign";
-      Desc_For_Internal_Entity_Logic_Assign : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Logic_Assign'Access);
+      Type_Doc_For_Internal_Entity_Logic_Assign        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Logic_Assign       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Logic_Assign'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Logic_Assign'Access);
       
       Debug_Name_For_Internal_Entity_Logic_Expr : aliased constant String :=
         "LogicExpr";
-      Desc_For_Internal_Entity_Logic_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Logic_Expr'Access);
+      Type_Doc_For_Internal_Entity_Logic_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Logic_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Logic_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Logic_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Logic_Propagate : aliased constant String :=
         "LogicPropagate";
-      Desc_For_Internal_Entity_Logic_Propagate : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Logic_Propagate'Access);
+      Type_Doc_For_Internal_Entity_Logic_Propagate        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Logic_Propagate       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Logic_Propagate'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Logic_Propagate'Access);
       
       Debug_Name_For_Internal_Entity_Logic_Unify : aliased constant String :=
         "LogicUnify";
-      Desc_For_Internal_Entity_Logic_Unify : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Logic_Unify'Access);
+      Type_Doc_For_Internal_Entity_Logic_Unify        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Logic_Unify       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Logic_Unify'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Logic_Unify'Access);
       
       Debug_Name_For_Internal_Entity_Match_Expr : aliased constant String :=
         "MatchExpr";
-      Desc_For_Internal_Entity_Match_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Match_Expr'Access);
+      Type_Doc_For_Internal_Entity_Match_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Match_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Match_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Match_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Not_Expr : aliased constant String :=
         "NotExpr";
-      Desc_For_Internal_Entity_Not_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Not_Expr'Access);
+      Type_Doc_For_Internal_Entity_Not_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Not_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Not_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Not_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Paren_Expr : aliased constant String :=
         "ParenExpr";
-      Desc_For_Internal_Entity_Paren_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Paren_Expr'Access);
+      Type_Doc_For_Internal_Entity_Paren_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Paren_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Paren_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Paren_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Query : aliased constant String :=
         "Query";
-      Desc_For_Internal_Entity_Query : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Query'Access);
+      Type_Doc_For_Internal_Entity_Query        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Query       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Query'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Query'Access);
       
       Debug_Name_For_Internal_Entity_Raise_Expr : aliased constant String :=
         "RaiseExpr";
-      Desc_For_Internal_Entity_Raise_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Raise_Expr'Access);
+      Type_Doc_For_Internal_Entity_Raise_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Raise_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Raise_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Raise_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Subscript_Expr : aliased constant String :=
         "SubscriptExpr";
-      Desc_For_Internal_Entity_Subscript_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Subscript_Expr'Access);
+      Type_Doc_For_Internal_Entity_Subscript_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Subscript_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Subscript_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Subscript_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Try_Expr : aliased constant String :=
         "TryExpr";
-      Desc_For_Internal_Entity_Try_Expr : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Try_Expr'Access);
+      Type_Doc_For_Internal_Entity_Try_Expr        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Try_Expr       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Try_Expr'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Try_Expr'Access);
       
       Debug_Name_For_Internal_Entity_Un_Op : aliased constant String :=
         "UnOp";
-      Desc_For_Internal_Entity_Un_Op : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Un_Op'Access);
+      Type_Doc_For_Internal_Entity_Un_Op        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Un_Op       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Un_Op'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Un_Op'Access);
       
       Debug_Name_For_Internal_Entity_Full_Decl : aliased constant String :=
         "FullDecl";
-      Desc_For_Internal_Entity_Full_Decl : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Full_Decl'Access);
+      Type_Doc_For_Internal_Entity_Full_Decl        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Full_Decl       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Full_Decl'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Full_Decl'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_List_Sep : aliased constant String :=
         "GrammarListSep";
-      Desc_For_Internal_Entity_Grammar_List_Sep : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_List_Sep'Access);
+      Type_Doc_For_Internal_Entity_Grammar_List_Sep        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_List_Sep       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_List_Sep'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_List_Sep'Access);
       
       Debug_Name_For_Internal_Entity_Import : aliased constant String :=
         "Import";
-      Desc_For_Internal_Entity_Import : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Import'Access);
+      Type_Doc_For_Internal_Entity_Import        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Import       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Import'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Import'Access);
       
       Debug_Name_For_Internal_Entity_Langkit_Root : aliased constant String :=
         "LangkitRoot";
-      Desc_For_Internal_Entity_Langkit_Root : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Langkit_Root'Access);
+      Type_Doc_For_Internal_Entity_Langkit_Root        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Langkit_Root       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Langkit_Root'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Langkit_Root'Access);
       
       Debug_Name_For_Internal_Entity_Lexer_Case_Rule : aliased constant String :=
         "LexerCaseRule";
-      Desc_For_Internal_Entity_Lexer_Case_Rule : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lexer_Case_Rule'Access);
+      Type_Doc_For_Internal_Entity_Lexer_Case_Rule        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lexer_Case_Rule       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lexer_Case_Rule'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lexer_Case_Rule'Access);
       
       Debug_Name_For_Internal_Entity_Lexer_Case_Rule_Send : aliased constant String :=
         "LexerCaseRuleSend";
-      Desc_For_Internal_Entity_Lexer_Case_Rule_Send : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lexer_Case_Rule_Send'Access);
+      Type_Doc_For_Internal_Entity_Lexer_Case_Rule_Send        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lexer_Case_Rule_Send       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lexer_Case_Rule_Send'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lexer_Case_Rule_Send'Access);
       
       Debug_Name_For_Internal_Entity_List_Kind : aliased constant String :=
         "ListKind";
-      Desc_For_Internal_Entity_List_Kind : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_List_Kind'Access);
+      Type_Doc_For_Internal_Entity_List_Kind        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_List_Kind       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_List_Kind'Access,
+         Documentation => Type_Doc_For_Internal_Entity_List_Kind'Access);
       
       Debug_Name_For_Internal_Entity_List_Kind_One : aliased constant String :=
         "ListKind.One";
-      Desc_For_Internal_Entity_List_Kind_One : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_List_Kind_One'Access);
+      Type_Doc_For_Internal_Entity_List_Kind_One        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_List_Kind_One       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_List_Kind_One'Access,
+         Documentation => Type_Doc_For_Internal_Entity_List_Kind_One'Access);
       
       Debug_Name_For_Internal_Entity_List_Kind_Zero : aliased constant String :=
         "ListKind.Zero";
-      Desc_For_Internal_Entity_List_Kind_Zero : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_List_Kind_Zero'Access);
+      Type_Doc_For_Internal_Entity_List_Kind_Zero        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_List_Kind_Zero       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_List_Kind_Zero'Access,
+         Documentation => Type_Doc_For_Internal_Entity_List_Kind_Zero'Access);
       
       Debug_Name_For_Internal_Entity_Lkt_Node_Base_List : aliased constant String :=
         "LktNodeBaseList";
-      Desc_For_Internal_Entity_Lkt_Node_Base_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lkt_Node_Base_List'Access);
+      Type_Doc_For_Internal_Entity_Lkt_Node_Base_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lkt_Node_Base_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lkt_Node_Base_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lkt_Node_Base_List'Access);
       
       Debug_Name_For_Internal_Entity_Argument_List : aliased constant String :=
         "ASTList[Argument]";
-      Desc_For_Internal_Entity_Argument_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Argument_List'Access);
+      Type_Doc_For_Internal_Entity_Argument_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Argument_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Argument_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Argument_List'Access);
       
       Debug_Name_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List : aliased constant String :=
         "ASTList[BaseLexerCaseRuleAlt]";
-      Desc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List'Access);
+      Type_Doc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Base_Lexer_Case_Rule_Alt_List'Access);
       
       Debug_Name_For_Internal_Entity_Base_Match_Branch_List : aliased constant String :=
         "ASTList[BaseMatchBranch]";
-      Desc_For_Internal_Entity_Base_Match_Branch_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Base_Match_Branch_List'Access);
+      Type_Doc_For_Internal_Entity_Base_Match_Branch_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Base_Match_Branch_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Base_Match_Branch_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Base_Match_Branch_List'Access);
       
       Debug_Name_For_Internal_Entity_Block_String_Line_List : aliased constant String :=
         "ASTList[BlockStringLine]";
-      Desc_For_Internal_Entity_Block_String_Line_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Block_String_Line_List'Access);
+      Type_Doc_For_Internal_Entity_Block_String_Line_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Block_String_Line_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Block_String_Line_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Block_String_Line_List'Access);
       
       Debug_Name_For_Internal_Entity_Call_Expr_List : aliased constant String :=
         "ASTList[CallExpr]";
-      Desc_For_Internal_Entity_Call_Expr_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Call_Expr_List'Access);
+      Type_Doc_For_Internal_Entity_Call_Expr_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Call_Expr_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Call_Expr_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Call_Expr_List'Access);
       
       Debug_Name_For_Internal_Entity_Decl_Annotation_List : aliased constant String :=
         "ASTList[DeclAnnotation]";
-      Desc_For_Internal_Entity_Decl_Annotation_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Decl_Annotation_List'Access);
+      Type_Doc_For_Internal_Entity_Decl_Annotation_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Decl_Annotation_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Decl_Annotation_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Decl_Annotation_List'Access);
       
       Debug_Name_For_Internal_Entity_Elsif_Branch_List : aliased constant String :=
         "ASTList[ElsifBranch]";
-      Desc_For_Internal_Entity_Elsif_Branch_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Elsif_Branch_List'Access);
+      Type_Doc_For_Internal_Entity_Elsif_Branch_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Elsif_Branch_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Elsif_Branch_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Elsif_Branch_List'Access);
       
       Debug_Name_For_Internal_Entity_Enum_Class_Alt_Decl_List : aliased constant String :=
         "ASTList[EnumClassAltDecl]";
-      Desc_For_Internal_Entity_Enum_Class_Alt_Decl_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Enum_Class_Alt_Decl_List'Access);
+      Type_Doc_For_Internal_Entity_Enum_Class_Alt_Decl_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Enum_Class_Alt_Decl_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Enum_Class_Alt_Decl_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Enum_Class_Alt_Decl_List'Access);
       
       Debug_Name_For_Internal_Entity_Enum_Class_Case_List : aliased constant String :=
         "ASTList[EnumClassCase]";
-      Desc_For_Internal_Entity_Enum_Class_Case_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Enum_Class_Case_List'Access);
+      Type_Doc_For_Internal_Entity_Enum_Class_Case_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Enum_Class_Case_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Enum_Class_Case_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Enum_Class_Case_List'Access);
       
       Debug_Name_For_Internal_Entity_Enum_Lit_Decl_List : aliased constant String :=
         "ASTList[EnumLitDecl]";
-      Desc_For_Internal_Entity_Enum_Lit_Decl_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Enum_Lit_Decl_List'Access);
+      Type_Doc_For_Internal_Entity_Enum_Lit_Decl_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Enum_Lit_Decl_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Enum_Lit_Decl_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Enum_Lit_Decl_List'Access);
       
       Debug_Name_For_Internal_Entity_Expr_List : aliased constant String :=
         "ASTList[Expr]";
-      Desc_For_Internal_Entity_Expr_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Expr_List'Access);
+      Type_Doc_For_Internal_Entity_Expr_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Expr_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Expr_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Expr_List'Access);
       
       Debug_Name_For_Internal_Entity_Any_Of_List : aliased constant String :=
         "AnyOfList";
-      Desc_For_Internal_Entity_Any_Of_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Any_Of_List'Access);
+      Type_Doc_For_Internal_Entity_Any_Of_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Any_Of_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Any_Of_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Any_Of_List'Access);
       
       Debug_Name_For_Internal_Entity_Full_Decl_List : aliased constant String :=
         "ASTList[FullDecl]";
-      Desc_For_Internal_Entity_Full_Decl_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Full_Decl_List'Access);
+      Type_Doc_For_Internal_Entity_Full_Decl_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Full_Decl_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Full_Decl_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Full_Decl_List'Access);
       
       Debug_Name_For_Internal_Entity_Decl_Block : aliased constant String :=
         "DeclBlock";
-      Desc_For_Internal_Entity_Decl_Block : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Decl_Block'Access);
+      Type_Doc_For_Internal_Entity_Decl_Block        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Decl_Block       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Decl_Block'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Decl_Block'Access);
       
       Debug_Name_For_Internal_Entity_Generic_Param_Decl_List : aliased constant String :=
         "GenericParamDeclList";
-      Desc_For_Internal_Entity_Generic_Param_Decl_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Generic_Param_Decl_List'Access);
+      Type_Doc_For_Internal_Entity_Generic_Param_Decl_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Generic_Param_Decl_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Generic_Param_Decl_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Generic_Param_Decl_List'Access);
       
       Debug_Name_For_Internal_Entity_Fun_Param_Decl_List : aliased constant String :=
         "ASTList[FunParamDecl]";
-      Desc_For_Internal_Entity_Fun_Param_Decl_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Fun_Param_Decl_List'Access);
+      Type_Doc_For_Internal_Entity_Fun_Param_Decl_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Fun_Param_Decl_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Fun_Param_Decl_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Fun_Param_Decl_List'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Expr_List : aliased constant String :=
         "ASTList[GrammarExpr]";
-      Desc_For_Internal_Entity_Grammar_Expr_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Expr_List'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Expr_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Expr_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Expr_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Expr_List'Access);
       
       Debug_Name_For_Internal_Entity_Grammar_Expr_List_List : aliased constant String :=
         "ASTList[ASTList[GrammarExpr]]";
-      Desc_For_Internal_Entity_Grammar_Expr_List_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Grammar_Expr_List_List'Access);
+      Type_Doc_For_Internal_Entity_Grammar_Expr_List_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Grammar_Expr_List_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Expr_List_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Grammar_Expr_List_List'Access);
       
       Debug_Name_For_Internal_Entity_Import_List : aliased constant String :=
         "ASTList[Import]";
-      Desc_For_Internal_Entity_Import_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Import_List'Access);
+      Type_Doc_For_Internal_Entity_Import_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Import_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Import_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Import_List'Access);
       
       Debug_Name_For_Internal_Entity_Lambda_Param_Decl_List : aliased constant String :=
         "ASTList[LambdaParamDecl]";
-      Desc_For_Internal_Entity_Lambda_Param_Decl_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lambda_Param_Decl_List'Access);
+      Type_Doc_For_Internal_Entity_Lambda_Param_Decl_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lambda_Param_Decl_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lambda_Param_Decl_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lambda_Param_Decl_List'Access);
       
       Debug_Name_For_Internal_Entity_Lkt_Node_List : aliased constant String :=
         "ASTList[LktNode]";
-      Desc_For_Internal_Entity_Lkt_Node_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Lkt_Node_List'Access);
+      Type_Doc_For_Internal_Entity_Lkt_Node_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Lkt_Node_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Lkt_Node_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Lkt_Node_List'Access);
+      
+      Debug_Name_For_Internal_Entity_Module_Doc_String_Line_List : aliased constant String :=
+        "ASTList[ModuleDocStringLine]";
+      Type_Doc_For_Internal_Entity_Module_Doc_String_Line_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Module_Doc_String_Line_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Module_Doc_String_Line_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Module_Doc_String_Line_List'Access);
       
       Debug_Name_For_Internal_Entity_Pattern_Detail_List : aliased constant String :=
         "ASTList[PatternDetail]";
-      Desc_For_Internal_Entity_Pattern_Detail_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Pattern_Detail_List'Access);
+      Type_Doc_For_Internal_Entity_Pattern_Detail_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Pattern_Detail_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Pattern_Detail_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Pattern_Detail_List'Access);
       
       Debug_Name_For_Internal_Entity_Pattern_List : aliased constant String :=
         "ASTList[Pattern]";
-      Desc_For_Internal_Entity_Pattern_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Pattern_List'Access);
+      Type_Doc_For_Internal_Entity_Pattern_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Pattern_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Pattern_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Pattern_List'Access);
       
       Debug_Name_For_Internal_Entity_Ref_Id_List : aliased constant String :=
         "ASTList[RefId]";
-      Desc_For_Internal_Entity_Ref_Id_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Ref_Id_List'Access);
+      Type_Doc_For_Internal_Entity_Ref_Id_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Ref_Id_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Ref_Id_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Ref_Id_List'Access);
       
       Debug_Name_For_Internal_Entity_Type_Ref_List : aliased constant String :=
         "ASTList[TypeRef]";
-      Desc_For_Internal_Entity_Type_Ref_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Type_Ref_List'Access);
+      Type_Doc_For_Internal_Entity_Type_Ref_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Type_Ref_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Type_Ref_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Type_Ref_List'Access);
       
       Debug_Name_For_Internal_Entity_Synthetic_Type_Ref_List : aliased constant String :=
         "SyntheticTypeRefList";
-      Desc_For_Internal_Entity_Synthetic_Type_Ref_List : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Synthetic_Type_Ref_List'Access);
+      Type_Doc_For_Internal_Entity_Synthetic_Type_Ref_List        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Synthetic_Type_Ref_List       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Synthetic_Type_Ref_List'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Synthetic_Type_Ref_List'Access);
+      
+      Debug_Name_For_Internal_Entity_Module_Doc_String_Line : aliased constant String :=
+        "ModuleDocStringLine";
+      Type_Doc_For_Internal_Entity_Module_Doc_String_Line        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Module_Doc_String_Line       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Module_Doc_String_Line'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Module_Doc_String_Line'Access);
       
       Debug_Name_For_Internal_Entity_Null_Cond_Qualifier : aliased constant String :=
         "NullCondQualifier";
-      Desc_For_Internal_Entity_Null_Cond_Qualifier : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Null_Cond_Qualifier'Access);
+      Type_Doc_For_Internal_Entity_Null_Cond_Qualifier        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Null_Cond_Qualifier       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Null_Cond_Qualifier'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Null_Cond_Qualifier'Access);
       
       Debug_Name_For_Internal_Entity_Null_Cond_Qualifier_Absent : aliased constant String :=
         "NullCondQualifier.Absent";
-      Desc_For_Internal_Entity_Null_Cond_Qualifier_Absent : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Null_Cond_Qualifier_Absent'Access);
+      Type_Doc_For_Internal_Entity_Null_Cond_Qualifier_Absent        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Null_Cond_Qualifier_Absent       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Null_Cond_Qualifier_Absent'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Null_Cond_Qualifier_Absent'Access);
       
       Debug_Name_For_Internal_Entity_Null_Cond_Qualifier_Present : aliased constant String :=
         "NullCondQualifier.Present";
-      Desc_For_Internal_Entity_Null_Cond_Qualifier_Present : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Null_Cond_Qualifier_Present'Access);
+      Type_Doc_For_Internal_Entity_Null_Cond_Qualifier_Present        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Null_Cond_Qualifier_Present       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Null_Cond_Qualifier_Present'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Null_Cond_Qualifier_Present'Access);
       
       Debug_Name_For_Internal_Entity_Op : aliased constant String :=
         "Op";
-      Desc_For_Internal_Entity_Op : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op'Access);
+      Type_Doc_For_Internal_Entity_Op        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op'Access);
       
       Debug_Name_For_Internal_Entity_Op_Amp : aliased constant String :=
         "Op.Amp";
-      Desc_For_Internal_Entity_Op_Amp : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Amp'Access);
+      Type_Doc_For_Internal_Entity_Op_Amp        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Amp       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Amp'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Amp'Access);
       
       Debug_Name_For_Internal_Entity_Op_And : aliased constant String :=
         "Op.And";
-      Desc_For_Internal_Entity_Op_And : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_And'Access);
+      Type_Doc_For_Internal_Entity_Op_And        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_And       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_And'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_And'Access);
       
       Debug_Name_For_Internal_Entity_Op_Div : aliased constant String :=
         "Op.Div";
-      Desc_For_Internal_Entity_Op_Div : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Div'Access);
+      Type_Doc_For_Internal_Entity_Op_Div        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Div       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Div'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Div'Access);
       
       Debug_Name_For_Internal_Entity_Op_Eq : aliased constant String :=
         "Op.Eq";
-      Desc_For_Internal_Entity_Op_Eq : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Eq'Access);
+      Type_Doc_For_Internal_Entity_Op_Eq        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Eq       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Eq'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Eq'Access);
       
       Debug_Name_For_Internal_Entity_Op_Gt : aliased constant String :=
         "Op.Gt";
-      Desc_For_Internal_Entity_Op_Gt : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Gt'Access);
+      Type_Doc_For_Internal_Entity_Op_Gt        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Gt       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Gt'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Gt'Access);
       
       Debug_Name_For_Internal_Entity_Op_Gte : aliased constant String :=
         "Op.Gte";
-      Desc_For_Internal_Entity_Op_Gte : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Gte'Access);
+      Type_Doc_For_Internal_Entity_Op_Gte        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Gte       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Gte'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Gte'Access);
       
       Debug_Name_For_Internal_Entity_Op_Logic_And : aliased constant String :=
         "Op.LogicAnd";
-      Desc_For_Internal_Entity_Op_Logic_And : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Logic_And'Access);
+      Type_Doc_For_Internal_Entity_Op_Logic_And        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Logic_And       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Logic_And'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Logic_And'Access);
       
       Debug_Name_For_Internal_Entity_Op_Logic_Or : aliased constant String :=
         "Op.LogicOr";
-      Desc_For_Internal_Entity_Op_Logic_Or : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Logic_Or'Access);
+      Type_Doc_For_Internal_Entity_Op_Logic_Or        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Logic_Or       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Logic_Or'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Logic_Or'Access);
       
       Debug_Name_For_Internal_Entity_Op_Lt : aliased constant String :=
         "Op.Lt";
-      Desc_For_Internal_Entity_Op_Lt : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Lt'Access);
+      Type_Doc_For_Internal_Entity_Op_Lt        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Lt       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Lt'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Lt'Access);
       
       Debug_Name_For_Internal_Entity_Op_Lte : aliased constant String :=
         "Op.Lte";
-      Desc_For_Internal_Entity_Op_Lte : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Lte'Access);
+      Type_Doc_For_Internal_Entity_Op_Lte        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Lte       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Lte'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Lte'Access);
       
       Debug_Name_For_Internal_Entity_Op_Minus : aliased constant String :=
         "Op.Minus";
-      Desc_For_Internal_Entity_Op_Minus : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Minus'Access);
+      Type_Doc_For_Internal_Entity_Op_Minus        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Minus       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Minus'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Minus'Access);
       
       Debug_Name_For_Internal_Entity_Op_Mult : aliased constant String :=
         "Op.Mult";
-      Desc_For_Internal_Entity_Op_Mult : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Mult'Access);
+      Type_Doc_For_Internal_Entity_Op_Mult        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Mult       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Mult'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Mult'Access);
       
       Debug_Name_For_Internal_Entity_Op_Ne : aliased constant String :=
         "Op.Ne";
-      Desc_For_Internal_Entity_Op_Ne : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Ne'Access);
+      Type_Doc_For_Internal_Entity_Op_Ne        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Ne       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Ne'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Ne'Access);
       
       Debug_Name_For_Internal_Entity_Op_Or : aliased constant String :=
         "Op.Or";
-      Desc_For_Internal_Entity_Op_Or : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Or'Access);
+      Type_Doc_For_Internal_Entity_Op_Or        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Or       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Or'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Or'Access);
       
       Debug_Name_For_Internal_Entity_Op_Or_Int : aliased constant String :=
         "Op.OrInt";
-      Desc_For_Internal_Entity_Op_Or_Int : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Or_Int'Access);
+      Type_Doc_For_Internal_Entity_Op_Or_Int        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Or_Int       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Or_Int'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Or_Int'Access);
       
       Debug_Name_For_Internal_Entity_Op_Plus : aliased constant String :=
         "Op.Plus";
-      Desc_For_Internal_Entity_Op_Plus : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Plus'Access);
+      Type_Doc_For_Internal_Entity_Op_Plus        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Plus       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Plus'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Plus'Access);
       
       Debug_Name_For_Internal_Entity_Op_Stream_Concat : aliased constant String :=
         "Op.StreamConcat";
-      Desc_For_Internal_Entity_Op_Stream_Concat : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Stream_Concat'Access);
+      Type_Doc_For_Internal_Entity_Op_Stream_Concat        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Stream_Concat       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Stream_Concat'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Stream_Concat'Access);
       
       Debug_Name_For_Internal_Entity_Op_Stream_Cons : aliased constant String :=
         "Op.StreamCons";
-      Desc_For_Internal_Entity_Op_Stream_Cons : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Op_Stream_Cons'Access);
+      Type_Doc_For_Internal_Entity_Op_Stream_Cons        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Op_Stream_Cons       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Op_Stream_Cons'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Op_Stream_Cons'Access);
       
       Debug_Name_For_Internal_Entity_Pattern : aliased constant String :=
         "Pattern";
-      Desc_For_Internal_Entity_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Any_Type_Pattern : aliased constant String :=
         "AnyTypePattern";
-      Desc_For_Internal_Entity_Any_Type_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Any_Type_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Any_Type_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Any_Type_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Any_Type_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Any_Type_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Binding_Pattern : aliased constant String :=
         "BindingPattern";
-      Desc_For_Internal_Entity_Binding_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Binding_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Binding_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Binding_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Binding_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Binding_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Bool_Pattern : aliased constant String :=
         "BoolPattern";
-      Desc_For_Internal_Entity_Bool_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Bool_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Bool_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Bool_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Bool_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Bool_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Bool_Pattern_False : aliased constant String :=
         "BoolPattern.False";
-      Desc_For_Internal_Entity_Bool_Pattern_False : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Bool_Pattern_False'Access);
+      Type_Doc_For_Internal_Entity_Bool_Pattern_False        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Bool_Pattern_False       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Bool_Pattern_False'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Bool_Pattern_False'Access);
       
       Debug_Name_For_Internal_Entity_Bool_Pattern_True : aliased constant String :=
         "BoolPattern.True";
-      Desc_For_Internal_Entity_Bool_Pattern_True : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Bool_Pattern_True'Access);
+      Type_Doc_For_Internal_Entity_Bool_Pattern_True        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Bool_Pattern_True       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Bool_Pattern_True'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Bool_Pattern_True'Access);
       
       Debug_Name_For_Internal_Entity_Ellipsis_Pattern : aliased constant String :=
         "EllipsisPattern";
-      Desc_For_Internal_Entity_Ellipsis_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Ellipsis_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Ellipsis_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Ellipsis_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Ellipsis_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Ellipsis_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Extended_Pattern : aliased constant String :=
         "ExtendedPattern";
-      Desc_For_Internal_Entity_Extended_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Extended_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Extended_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Extended_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Extended_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Extended_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Filtered_Pattern : aliased constant String :=
         "FilteredPattern";
-      Desc_For_Internal_Entity_Filtered_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Filtered_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Filtered_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Filtered_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Filtered_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Filtered_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Integer_Pattern : aliased constant String :=
         "IntegerPattern";
-      Desc_For_Internal_Entity_Integer_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Integer_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Integer_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Integer_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Integer_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Integer_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_List_Pattern : aliased constant String :=
         "ListPattern";
-      Desc_For_Internal_Entity_List_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_List_Pattern'Access);
+      Type_Doc_For_Internal_Entity_List_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_List_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_List_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_List_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Not_Pattern : aliased constant String :=
         "NotPattern";
-      Desc_For_Internal_Entity_Not_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Not_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Not_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Not_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Not_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Not_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Null_Pattern : aliased constant String :=
         "NullPattern";
-      Desc_For_Internal_Entity_Null_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Null_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Null_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Null_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Null_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Null_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Or_Pattern : aliased constant String :=
         "OrPattern";
-      Desc_For_Internal_Entity_Or_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Or_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Or_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Or_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Or_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Or_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Paren_Pattern : aliased constant String :=
         "ParenPattern";
-      Desc_For_Internal_Entity_Paren_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Paren_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Paren_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Paren_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Paren_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Paren_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Regex_Pattern : aliased constant String :=
         "RegexPattern";
-      Desc_For_Internal_Entity_Regex_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Regex_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Regex_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Regex_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Regex_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Regex_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Tuple_Pattern : aliased constant String :=
         "TuplePattern";
-      Desc_For_Internal_Entity_Tuple_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Tuple_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Tuple_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Tuple_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Tuple_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Tuple_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Type_Pattern : aliased constant String :=
         "TypePattern";
-      Desc_For_Internal_Entity_Type_Pattern : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Type_Pattern'Access);
+      Type_Doc_For_Internal_Entity_Type_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Type_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Type_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Type_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Pattern_Detail : aliased constant String :=
         "PatternDetail";
-      Desc_For_Internal_Entity_Pattern_Detail : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Pattern_Detail'Access);
+      Type_Doc_For_Internal_Entity_Pattern_Detail        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Pattern_Detail       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Pattern_Detail'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Pattern_Detail'Access);
       
       Debug_Name_For_Internal_Entity_Field_Pattern_Detail : aliased constant String :=
         "FieldPatternDetail";
-      Desc_For_Internal_Entity_Field_Pattern_Detail : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Field_Pattern_Detail'Access);
+      Type_Doc_For_Internal_Entity_Field_Pattern_Detail        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Field_Pattern_Detail       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Field_Pattern_Detail'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Field_Pattern_Detail'Access);
       
       Debug_Name_For_Internal_Entity_Property_Pattern_Detail : aliased constant String :=
         "PropertyPatternDetail";
-      Desc_For_Internal_Entity_Property_Pattern_Detail : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Property_Pattern_Detail'Access);
+      Type_Doc_For_Internal_Entity_Property_Pattern_Detail        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Property_Pattern_Detail       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Property_Pattern_Detail'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Property_Pattern_Detail'Access);
       
       Debug_Name_For_Internal_Entity_Selector_Pattern_Detail : aliased constant String :=
         "SelectorPatternDetail";
-      Desc_For_Internal_Entity_Selector_Pattern_Detail : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Selector_Pattern_Detail'Access);
+      Type_Doc_For_Internal_Entity_Selector_Pattern_Detail        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Selector_Pattern_Detail       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Selector_Pattern_Detail'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Selector_Pattern_Detail'Access);
       
       Debug_Name_For_Internal_Entity_Selector_Call : aliased constant String :=
         "SelectorCall";
-      Desc_For_Internal_Entity_Selector_Call : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Selector_Call'Access);
+      Type_Doc_For_Internal_Entity_Selector_Call        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Selector_Call       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Selector_Call'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Selector_Call'Access);
       
       Debug_Name_For_Internal_Entity_Type_Ref : aliased constant String :=
         "TypeRef";
-      Desc_For_Internal_Entity_Type_Ref : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Type_Ref'Access);
+      Type_Doc_For_Internal_Entity_Type_Ref        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Type_Ref       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Type_Ref'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Type_Ref'Access);
       
       Debug_Name_For_Internal_Entity_Default_List_Type_Ref : aliased constant String :=
         "DefaultListTypeRef";
-      Desc_For_Internal_Entity_Default_List_Type_Ref : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Default_List_Type_Ref'Access);
+      Type_Doc_For_Internal_Entity_Default_List_Type_Ref        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Default_List_Type_Ref       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Default_List_Type_Ref'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Default_List_Type_Ref'Access);
       
       Debug_Name_For_Internal_Entity_Function_Type_Ref : aliased constant String :=
         "FunctionTypeRef";
-      Desc_For_Internal_Entity_Function_Type_Ref : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Function_Type_Ref'Access);
+      Type_Doc_For_Internal_Entity_Function_Type_Ref        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Function_Type_Ref       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Function_Type_Ref'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Function_Type_Ref'Access);
       
       Debug_Name_For_Internal_Entity_Generic_Type_Ref : aliased constant String :=
         "GenericTypeRef";
-      Desc_For_Internal_Entity_Generic_Type_Ref : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Generic_Type_Ref'Access);
+      Type_Doc_For_Internal_Entity_Generic_Type_Ref        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Generic_Type_Ref       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Generic_Type_Ref'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Generic_Type_Ref'Access);
       
       Debug_Name_For_Internal_Entity_Simple_Type_Ref : aliased constant String :=
         "SimpleTypeRef";
-      Desc_For_Internal_Entity_Simple_Type_Ref : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Simple_Type_Ref'Access);
+      Type_Doc_For_Internal_Entity_Simple_Type_Ref        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Simple_Type_Ref       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Simple_Type_Ref'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Simple_Type_Ref'Access);
       
       Debug_Name_For_Internal_Entity_Var_Bind : aliased constant String :=
         "VarBind";
-      Desc_For_Internal_Entity_Var_Bind : aliased constant Type_Descriptor :=
-        (Category   => Struct_Category,
-         Debug_Name => Debug_Name_For_Internal_Entity_Var_Bind'Access);
+      Type_Doc_For_Internal_Entity_Var_Bind        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Var_Bind       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Var_Bind'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Var_Bind'Access);
 
    Types : aliased constant Type_Descriptor_Array := (
       Desc_For_Internal_Unit'Access,
@@ -3397,6 +4005,7 @@ Desc_For_Internal_Entity_Null_Lit'Access,
 Desc_For_Internal_Entity_Num_Lit'Access,
 Desc_For_Internal_Entity_String_Lit'Access,
 Desc_For_Internal_Entity_Block_String_Lit'Access,
+Desc_For_Internal_Entity_Module_Doc_String_Lit'Access,
 Desc_For_Internal_Entity_Single_Line_String_Lit'Access,
 Desc_For_Internal_Entity_Pattern_Single_Line_String_Lit'Access,
 Desc_For_Internal_Entity_Logic_Assign'Access,
@@ -3442,11 +4051,13 @@ Desc_For_Internal_Entity_Grammar_Expr_List_List'Access,
 Desc_For_Internal_Entity_Import_List'Access,
 Desc_For_Internal_Entity_Lambda_Param_Decl_List'Access,
 Desc_For_Internal_Entity_Lkt_Node_List'Access,
+Desc_For_Internal_Entity_Module_Doc_String_Line_List'Access,
 Desc_For_Internal_Entity_Pattern_Detail_List'Access,
 Desc_For_Internal_Entity_Pattern_List'Access,
 Desc_For_Internal_Entity_Ref_Id_List'Access,
 Desc_For_Internal_Entity_Type_Ref_List'Access,
 Desc_For_Internal_Entity_Synthetic_Type_Ref_List'Access,
+Desc_For_Internal_Entity_Module_Doc_String_Line'Access,
 Desc_For_Internal_Entity_Null_Cond_Qualifier'Access,
 Desc_For_Internal_Entity_Null_Cond_Qualifier_Absent'Access,
 Desc_For_Internal_Entity_Null_Cond_Qualifier_Present'Access,
@@ -3649,202 +4260,208 @@ Desc_For_Internal_Entity_Var_Bind'Access
          Enum_Name_For_Grammar_Rule_6 : aliased constant Text_Type :=
            "Doc_Rule";
          Enum_Name_For_Grammar_Rule_7 : aliased constant Text_Type :=
-           "Import_Stmt_Rule";
+           "Module_Doc_Rule";
          Enum_Name_For_Grammar_Rule_8 : aliased constant Text_Type :=
-           "Imports_Rule";
+           "Import_Stmt_Rule";
          Enum_Name_For_Grammar_Rule_9 : aliased constant Text_Type :=
-           "Lexer_Decl_Rule";
+           "Imports_Rule";
          Enum_Name_For_Grammar_Rule_10 : aliased constant Text_Type :=
-           "Grammar_Decl_Rule";
+           "Lexer_Decl_Rule";
          Enum_Name_For_Grammar_Rule_11 : aliased constant Text_Type :=
-           "Grammar_Rule_Rule";
+           "Grammar_Decl_Rule";
          Enum_Name_For_Grammar_Rule_12 : aliased constant Text_Type :=
-           "Lexer_Case_Rule_Rule";
+           "Grammar_Rule_Rule";
          Enum_Name_For_Grammar_Rule_13 : aliased constant Text_Type :=
-           "Lexer_Case_Alt_Rule";
+           "Lexer_Case_Rule_Rule";
          Enum_Name_For_Grammar_Rule_14 : aliased constant Text_Type :=
-           "Lexer_Case_Send_Rule";
+           "Lexer_Case_Alt_Rule";
          Enum_Name_For_Grammar_Rule_15 : aliased constant Text_Type :=
-           "Grammar_Primary_Rule";
+           "Lexer_Case_Send_Rule";
          Enum_Name_For_Grammar_Rule_16 : aliased constant Text_Type :=
-           "Grammar_Expr_Rule";
+           "Grammar_Primary_Rule";
          Enum_Name_For_Grammar_Rule_17 : aliased constant Text_Type :=
-           "Grammar_Pick_Rule";
+           "Grammar_Expr_Rule";
          Enum_Name_For_Grammar_Rule_18 : aliased constant Text_Type :=
-           "Grammar_Implicit_Pick_Rule";
+           "Grammar_Pick_Rule";
          Enum_Name_For_Grammar_Rule_19 : aliased constant Text_Type :=
-           "Grammar_Opt_Rule";
+           "Grammar_Implicit_Pick_Rule";
          Enum_Name_For_Grammar_Rule_20 : aliased constant Text_Type :=
-           "Grammar_Opt_Error_Rule";
+           "Grammar_Opt_Rule";
          Enum_Name_For_Grammar_Rule_21 : aliased constant Text_Type :=
-           "Grammar_Cut_Rule";
+           "Grammar_Opt_Error_Rule";
          Enum_Name_For_Grammar_Rule_22 : aliased constant Text_Type :=
-           "Grammar_Stopcut_Rule";
+           "Grammar_Cut_Rule";
          Enum_Name_For_Grammar_Rule_23 : aliased constant Text_Type :=
-           "Grammar_Or_Expr_Rule";
+           "Grammar_Stopcut_Rule";
          Enum_Name_For_Grammar_Rule_24 : aliased constant Text_Type :=
-           "Grammar_Discard_Expr_Rule";
+           "Grammar_Or_Expr_Rule";
          Enum_Name_For_Grammar_Rule_25 : aliased constant Text_Type :=
-           "Token_Literal_Rule";
+           "Grammar_Discard_Expr_Rule";
          Enum_Name_For_Grammar_Rule_26 : aliased constant Text_Type :=
-           "Token_No_Case_Literal_Rule";
+           "Token_Literal_Rule";
          Enum_Name_For_Grammar_Rule_27 : aliased constant Text_Type :=
-           "Token_Pattern_Rule";
+           "Token_No_Case_Literal_Rule";
          Enum_Name_For_Grammar_Rule_28 : aliased constant Text_Type :=
-           "Token_Pattern_Literal_Rule";
+           "Token_Pattern_Rule";
          Enum_Name_For_Grammar_Rule_29 : aliased constant Text_Type :=
-           "Parse_Node_Expr_Rule";
+           "Token_Pattern_Literal_Rule";
          Enum_Name_For_Grammar_Rule_30 : aliased constant Text_Type :=
-           "Grammar_Rule_Ref_Rule";
+           "Parse_Node_Expr_Rule";
          Enum_Name_For_Grammar_Rule_31 : aliased constant Text_Type :=
-           "Grammar_List_Expr_Rule";
+           "Grammar_Rule_Ref_Rule";
          Enum_Name_For_Grammar_Rule_32 : aliased constant Text_Type :=
-           "Grammar_List_Sep_Rule";
+           "Grammar_List_Expr_Rule";
          Enum_Name_For_Grammar_Rule_33 : aliased constant Text_Type :=
-           "Grammar_Skip_Rule";
+           "Grammar_List_Sep_Rule";
          Enum_Name_For_Grammar_Rule_34 : aliased constant Text_Type :=
-           "Grammar_Null_Rule";
+           "Grammar_Skip_Rule";
          Enum_Name_For_Grammar_Rule_35 : aliased constant Text_Type :=
-           "Grammar_Token_Rule";
+           "Grammar_Null_Rule";
          Enum_Name_For_Grammar_Rule_36 : aliased constant Text_Type :=
-           "Type_Decl_Rule";
+           "Grammar_Token_Rule";
          Enum_Name_For_Grammar_Rule_37 : aliased constant Text_Type :=
-           "Generic_Decl_Rule";
+           "Type_Decl_Rule";
          Enum_Name_For_Grammar_Rule_38 : aliased constant Text_Type :=
-           "Generic_Param_Type_Rule";
+           "Generic_Decl_Rule";
          Enum_Name_For_Grammar_Rule_39 : aliased constant Text_Type :=
-           "Enum_Lit_Decl_Rule";
+           "Generic_Param_Type_Rule";
          Enum_Name_For_Grammar_Rule_40 : aliased constant Text_Type :=
-           "Fun_Decl_Rule";
+           "Enum_Lit_Decl_Rule";
          Enum_Name_For_Grammar_Rule_41 : aliased constant Text_Type :=
-           "Lambda_Param_Decl_Rule";
+           "Fun_Decl_Rule";
          Enum_Name_For_Grammar_Rule_42 : aliased constant Text_Type :=
-           "Fun_Param_Decl_Rule";
+           "Lambda_Param_Decl_Rule";
          Enum_Name_For_Grammar_Rule_43 : aliased constant Text_Type :=
-           "Fun_Param_List_Rule";
+           "Fun_Param_Decl_Rule";
          Enum_Name_For_Grammar_Rule_44 : aliased constant Text_Type :=
-           "Lambda_Param_List_Rule";
+           "Fun_Param_List_Rule";
          Enum_Name_For_Grammar_Rule_45 : aliased constant Text_Type :=
-           "Field_Decl_Rule";
+           "Lambda_Param_List_Rule";
          Enum_Name_For_Grammar_Rule_46 : aliased constant Text_Type :=
-           "Lexer_Family_Decl_Rule";
+           "Field_Decl_Rule";
          Enum_Name_For_Grammar_Rule_47 : aliased constant Text_Type :=
-           "Bare_Decl_Rule";
+           "Lexer_Family_Decl_Rule";
          Enum_Name_For_Grammar_Rule_48 : aliased constant Text_Type :=
-           "Decl_Rule";
+           "Bare_Decl_Rule";
          Enum_Name_For_Grammar_Rule_49 : aliased constant Text_Type :=
-           "Type_Member_Ref_Rule";
+           "Decl_Rule";
          Enum_Name_For_Grammar_Rule_50 : aliased constant Text_Type :=
-           "Type_Expr_Rule";
+           "Type_Member_Ref_Rule";
          Enum_Name_For_Grammar_Rule_51 : aliased constant Text_Type :=
-           "Type_Ref_Rule";
+           "Type_Expr_Rule";
          Enum_Name_For_Grammar_Rule_52 : aliased constant Text_Type :=
-           "Type_List_Rule";
+           "Type_Ref_Rule";
          Enum_Name_For_Grammar_Rule_53 : aliased constant Text_Type :=
-           "Decls_Rule";
+           "Type_List_Rule";
          Enum_Name_For_Grammar_Rule_54 : aliased constant Text_Type :=
-           "Decl_Block_Rule";
+           "Decls_Rule";
          Enum_Name_For_Grammar_Rule_55 : aliased constant Text_Type :=
-           "Val_Decl_Rule";
+           "Decl_Block_Rule";
          Enum_Name_For_Grammar_Rule_56 : aliased constant Text_Type :=
-           "Dynvar_Decl_Rule";
+           "Val_Decl_Rule";
          Enum_Name_For_Grammar_Rule_57 : aliased constant Text_Type :=
-           "Var_Bind_Rule";
+           "Dynvar_Decl_Rule";
          Enum_Name_For_Grammar_Rule_58 : aliased constant Text_Type :=
-           "Env_Spec_Action_Rule";
+           "Var_Bind_Rule";
          Enum_Name_For_Grammar_Rule_59 : aliased constant Text_Type :=
-           "Env_Spec_Decl_Rule";
+           "Env_Spec_Action_Rule";
          Enum_Name_For_Grammar_Rule_60 : aliased constant Text_Type :=
-           "Block_Rule";
+           "Env_Spec_Decl_Rule";
          Enum_Name_For_Grammar_Rule_61 : aliased constant Text_Type :=
-           "Pattern_Rule";
+           "Block_Rule";
          Enum_Name_For_Grammar_Rule_62 : aliased constant Text_Type :=
-           "Fil_Pattern_Rule";
+           "Pattern_Rule";
          Enum_Name_For_Grammar_Rule_63 : aliased constant Text_Type :=
-           "Value_Pattern_Rule";
+           "Fil_Pattern_Rule";
          Enum_Name_For_Grammar_Rule_64 : aliased constant Text_Type :=
-           "Regex_Pattern_Rule";
+           "Value_Pattern_Rule";
          Enum_Name_For_Grammar_Rule_65 : aliased constant Text_Type :=
-           "Bool_Pattern_Rule";
+           "Regex_Pattern_Rule";
          Enum_Name_For_Grammar_Rule_66 : aliased constant Text_Type :=
-           "Ellipsis_Pattern_Rule";
+           "Bool_Pattern_Rule";
          Enum_Name_For_Grammar_Rule_67 : aliased constant Text_Type :=
-           "Integer_Pattern_Rule";
+           "Ellipsis_Pattern_Rule";
          Enum_Name_For_Grammar_Rule_68 : aliased constant Text_Type :=
-           "List_Pattern_Rule";
+           "Integer_Pattern_Rule";
          Enum_Name_For_Grammar_Rule_69 : aliased constant Text_Type :=
-           "Tuple_Pattern_Rule";
+           "List_Pattern_Rule";
          Enum_Name_For_Grammar_Rule_70 : aliased constant Text_Type :=
-           "Pattern_Arg_Rule";
+           "Tuple_Pattern_Rule";
          Enum_Name_For_Grammar_Rule_71 : aliased constant Text_Type :=
-           "Selector_Call_Rule";
+           "Pattern_Arg_Rule";
          Enum_Name_For_Grammar_Rule_72 : aliased constant Text_Type :=
-           "Expr_Rule";
+           "Selector_Call_Rule";
          Enum_Name_For_Grammar_Rule_73 : aliased constant Text_Type :=
-           "Rel_Rule";
+           "Expr_Rule";
          Enum_Name_For_Grammar_Rule_74 : aliased constant Text_Type :=
-           "Eq_Rule";
+           "Stream_Concat_Rule";
          Enum_Name_For_Grammar_Rule_75 : aliased constant Text_Type :=
-           "Arith_1_Rule";
+           "Logic_Rule";
          Enum_Name_For_Grammar_Rule_76 : aliased constant Text_Type :=
-           "Arith_2_Rule";
+           "Rel_Rule";
          Enum_Name_For_Grammar_Rule_77 : aliased constant Text_Type :=
-           "Arith_3_Rule";
+           "Eq_Rule";
          Enum_Name_For_Grammar_Rule_78 : aliased constant Text_Type :=
-           "Isa_Or_Primary_Rule";
+           "Arith_1_Rule";
          Enum_Name_For_Grammar_Rule_79 : aliased constant Text_Type :=
-           "Logic_Propagate_Call_Rule";
+           "Arith_2_Rule";
          Enum_Name_For_Grammar_Rule_80 : aliased constant Text_Type :=
-           "Primary_Rule";
+           "Arith_3_Rule";
          Enum_Name_For_Grammar_Rule_81 : aliased constant Text_Type :=
-           "Match_Expr_Rule";
+           "Isa_Or_Primary_Rule";
          Enum_Name_For_Grammar_Rule_82 : aliased constant Text_Type :=
-           "Num_Lit_Rule";
+           "Logic_Propagate_Call_Rule";
          Enum_Name_For_Grammar_Rule_83 : aliased constant Text_Type :=
-           "Big_Num_Lit_Rule";
+           "Primary_Rule";
          Enum_Name_For_Grammar_Rule_84 : aliased constant Text_Type :=
-           "String_Lit_Rule";
+           "Match_Expr_Rule";
          Enum_Name_For_Grammar_Rule_85 : aliased constant Text_Type :=
-           "Block_String_Lit_Rule";
+           "Num_Lit_Rule";
          Enum_Name_For_Grammar_Rule_86 : aliased constant Text_Type :=
-           "Char_Lit_Rule";
+           "Big_Num_Lit_Rule";
          Enum_Name_For_Grammar_Rule_87 : aliased constant Text_Type :=
-           "If_Expr_Rule";
+           "String_Lit_Rule";
          Enum_Name_For_Grammar_Rule_88 : aliased constant Text_Type :=
-           "Raise_Expr_Rule";
+           "Block_String_Lit_Rule";
          Enum_Name_For_Grammar_Rule_89 : aliased constant Text_Type :=
-           "Try_Expr_Rule";
+           "Char_Lit_Rule";
          Enum_Name_For_Grammar_Rule_90 : aliased constant Text_Type :=
-           "Array_Literal_Rule";
+           "If_Expr_Rule";
          Enum_Name_For_Grammar_Rule_91 : aliased constant Text_Type :=
-           "Callable_Ref_Rule";
+           "Raise_Expr_Rule";
          Enum_Name_For_Grammar_Rule_92 : aliased constant Text_Type :=
-           "Null_Cond_Qual_Rule";
+           "Try_Expr_Rule";
          Enum_Name_For_Grammar_Rule_93 : aliased constant Text_Type :=
-           "Basic_Expr_Rule";
+           "Array_Literal_Rule";
          Enum_Name_For_Grammar_Rule_94 : aliased constant Text_Type :=
-           "Term_Rule";
+           "Callable_Ref_Rule";
          Enum_Name_For_Grammar_Rule_95 : aliased constant Text_Type :=
-           "Basic_Name_Rule";
+           "Null_Cond_Qual_Rule";
          Enum_Name_For_Grammar_Rule_96 : aliased constant Text_Type :=
-           "Lambda_Expr_Rule";
+           "Basic_Expr_Rule";
          Enum_Name_For_Grammar_Rule_97 : aliased constant Text_Type :=
-           "Null_Lit_Rule";
+           "Term_Rule";
          Enum_Name_For_Grammar_Rule_98 : aliased constant Text_Type :=
-           "Argument_Rule";
+           "Basic_Name_Rule";
          Enum_Name_For_Grammar_Rule_99 : aliased constant Text_Type :=
-           "Args_Rule";
+           "Lambda_Expr_Rule";
          Enum_Name_For_Grammar_Rule_100 : aliased constant Text_Type :=
-           "Decl_Annotation_Args_Rule";
+           "Null_Lit_Rule";
          Enum_Name_For_Grammar_Rule_101 : aliased constant Text_Type :=
-           "Decl_Annotation_Rule";
+           "Argument_Rule";
          Enum_Name_For_Grammar_Rule_102 : aliased constant Text_Type :=
+           "Args_Rule";
+         Enum_Name_For_Grammar_Rule_103 : aliased constant Text_Type :=
+           "Decl_Annotation_Args_Rule";
+         Enum_Name_For_Grammar_Rule_104 : aliased constant Text_Type :=
+           "Decl_Annotation_Rule";
+         Enum_Name_For_Grammar_Rule_105 : aliased constant Text_Type :=
            "Query_Comprehension_Rule";
 
       Enum_Name_For_Grammar_Rule : aliased constant Text_Type :=
         "Grammar_Rule";
       Enum_Desc_For_Grammar_Rule : aliased constant Enum_Type_Descriptor := (
-         Last_Value    => 102,
+         Last_Value    => 105,
          Name          => Enum_Name_For_Grammar_Rule'Access,
          Default_Value => 0,
          Value_Names   => (
@@ -3949,7 +4566,10 @@ Desc_For_Internal_Entity_Var_Bind'Access
 99 => Enum_Name_For_Grammar_Rule_99'Access,
 100 => Enum_Name_For_Grammar_Rule_100'Access,
 101 => Enum_Name_For_Grammar_Rule_101'Access,
-102 => Enum_Name_For_Grammar_Rule_102'Access
+102 => Enum_Name_For_Grammar_Rule_102'Access,
+103 => Enum_Name_For_Grammar_Rule_103'Access,
+104 => Enum_Name_For_Grammar_Rule_104'Access,
+105 => Enum_Name_For_Grammar_Rule_105'Access
          )
       );
       
@@ -4360,9 +4980,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Complete_Item_Declaration : aliased constant Text_Type :=
         "Declaration";
-      Member_Desc_For_Complete_Item_Declaration : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Complete_Item_Declaration  : aliased constant Text_Type := "";
+      Member_Desc_For_Complete_Item_Declaration  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Complete_Item_Declaration'Access,
+         Documentation => Member_Doc_For_Complete_Item_Declaration'Access,
          Owner         => Type_Index_For_Complete_Item,
          Member_Type   => Type_Index_For_Decl,
          Null_For      => null,
@@ -4380,9 +5002,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Decoded_Char_Value_Value : aliased constant Text_Type :=
         "Value";
-      Member_Desc_For_Decoded_Char_Value_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decoded_Char_Value_Value  : aliased constant Text_Type := "";
+      Member_Desc_For_Decoded_Char_Value_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decoded_Char_Value_Value'Access,
+         Documentation => Member_Doc_For_Decoded_Char_Value_Value'Access,
          Owner         => Type_Index_For_Decoded_Char_Value,
          Member_Type   => Type_Index_For_Char,
          Null_For      => null,
@@ -4400,9 +5024,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Decoded_Char_Value_Has_Error : aliased constant Text_Type :=
         "Has_Error";
-      Member_Desc_For_Decoded_Char_Value_Has_Error : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decoded_Char_Value_Has_Error  : aliased constant Text_Type := "";
+      Member_Desc_For_Decoded_Char_Value_Has_Error  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decoded_Char_Value_Has_Error'Access,
+         Documentation => Member_Doc_For_Decoded_Char_Value_Has_Error'Access,
          Owner         => Type_Index_For_Decoded_Char_Value,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -4420,9 +5046,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Decoded_Char_Value_Error_Sloc : aliased constant Text_Type :=
         "Error_Sloc";
-      Member_Desc_For_Decoded_Char_Value_Error_Sloc : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decoded_Char_Value_Error_Sloc  : aliased constant Text_Type := "";
+      Member_Desc_For_Decoded_Char_Value_Error_Sloc  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decoded_Char_Value_Error_Sloc'Access,
+         Documentation => Member_Doc_For_Decoded_Char_Value_Error_Sloc'Access,
          Owner         => Type_Index_For_Decoded_Char_Value,
          Member_Type   => Type_Index_For_Source_Location,
          Null_For      => null,
@@ -4440,9 +5068,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Decoded_Char_Value_Error_Message : aliased constant Text_Type :=
         "Error_Message";
-      Member_Desc_For_Decoded_Char_Value_Error_Message : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decoded_Char_Value_Error_Message  : aliased constant Text_Type := "";
+      Member_Desc_For_Decoded_Char_Value_Error_Message  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decoded_Char_Value_Error_Message'Access,
+         Documentation => Member_Doc_For_Decoded_Char_Value_Error_Message'Access,
          Owner         => Type_Index_For_Decoded_Char_Value,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -4460,9 +5090,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Decoded_String_Value_Value : aliased constant Text_Type :=
         "Value";
-      Member_Desc_For_Decoded_String_Value_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decoded_String_Value_Value  : aliased constant Text_Type := "";
+      Member_Desc_For_Decoded_String_Value_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decoded_String_Value_Value'Access,
+         Documentation => Member_Doc_For_Decoded_String_Value_Value'Access,
          Owner         => Type_Index_For_Decoded_String_Value,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -4480,9 +5112,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Decoded_String_Value_Has_Error : aliased constant Text_Type :=
         "Has_Error";
-      Member_Desc_For_Decoded_String_Value_Has_Error : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decoded_String_Value_Has_Error  : aliased constant Text_Type := "";
+      Member_Desc_For_Decoded_String_Value_Has_Error  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decoded_String_Value_Has_Error'Access,
+         Documentation => Member_Doc_For_Decoded_String_Value_Has_Error'Access,
          Owner         => Type_Index_For_Decoded_String_Value,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -4500,9 +5134,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Decoded_String_Value_Error_Sloc : aliased constant Text_Type :=
         "Error_Sloc";
-      Member_Desc_For_Decoded_String_Value_Error_Sloc : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decoded_String_Value_Error_Sloc  : aliased constant Text_Type := "";
+      Member_Desc_For_Decoded_String_Value_Error_Sloc  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decoded_String_Value_Error_Sloc'Access,
+         Documentation => Member_Doc_For_Decoded_String_Value_Error_Sloc'Access,
          Owner         => Type_Index_For_Decoded_String_Value,
          Member_Type   => Type_Index_For_Source_Location,
          Null_For      => null,
@@ -4520,9 +5156,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Decoded_String_Value_Error_Message : aliased constant Text_Type :=
         "Error_Message";
-      Member_Desc_For_Decoded_String_Value_Error_Message : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decoded_String_Value_Error_Message  : aliased constant Text_Type := "";
+      Member_Desc_For_Decoded_String_Value_Error_Message  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decoded_String_Value_Error_Message'Access,
+         Documentation => Member_Doc_For_Decoded_String_Value_Error_Message'Access,
          Owner         => Type_Index_For_Decoded_String_Value,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -4540,9 +5178,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Logic_Context_Ref_Node : aliased constant Text_Type :=
         "Ref_Node";
-      Member_Desc_For_Logic_Context_Ref_Node : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Logic_Context_Ref_Node  : aliased constant Text_Type := "";
+      Member_Desc_For_Logic_Context_Ref_Node  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Logic_Context_Ref_Node'Access,
+         Documentation => Member_Doc_For_Logic_Context_Ref_Node'Access,
          Owner         => Type_Index_For_Logic_Context,
          Member_Type   => Type_Index_For_Lkt_Node,
          Null_For      => null,
@@ -4560,9 +5200,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Logic_Context_Decl_Node : aliased constant Text_Type :=
         "Decl_Node";
-      Member_Desc_For_Logic_Context_Decl_Node : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Logic_Context_Decl_Node  : aliased constant Text_Type := "";
+      Member_Desc_For_Logic_Context_Decl_Node  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Logic_Context_Decl_Node'Access,
+         Documentation => Member_Doc_For_Logic_Context_Decl_Node'Access,
          Owner         => Type_Index_For_Logic_Context,
          Member_Type   => Type_Index_For_Lkt_Node,
          Null_For      => null,
@@ -4580,9 +5222,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Ref_Result_Ref : aliased constant Text_Type :=
         "Ref";
-      Member_Desc_For_Ref_Result_Ref : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Ref_Result_Ref  : aliased constant Text_Type := "";
+      Member_Desc_For_Ref_Result_Ref  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Ref_Result_Ref'Access,
+         Documentation => Member_Doc_For_Ref_Result_Ref'Access,
          Owner         => Type_Index_For_Ref_Result,
          Member_Type   => Type_Index_For_Ref_Id,
          Null_For      => null,
@@ -4600,9 +5244,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Solver_Diagnostic_Message_Template : aliased constant Text_Type :=
         "Message_Template";
-      Member_Desc_For_Solver_Diagnostic_Message_Template : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Solver_Diagnostic_Message_Template  : aliased constant Text_Type := "";
+      Member_Desc_For_Solver_Diagnostic_Message_Template  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Solver_Diagnostic_Message_Template'Access,
+         Documentation => Member_Doc_For_Solver_Diagnostic_Message_Template'Access,
          Owner         => Type_Index_For_Solver_Diagnostic,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -4620,9 +5266,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Solver_Diagnostic_Args : aliased constant Text_Type :=
         "Args";
-      Member_Desc_For_Solver_Diagnostic_Args : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Solver_Diagnostic_Args  : aliased constant Text_Type := "";
+      Member_Desc_For_Solver_Diagnostic_Args  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Solver_Diagnostic_Args'Access,
+         Documentation => Member_Doc_For_Solver_Diagnostic_Args'Access,
          Owner         => Type_Index_For_Solver_Diagnostic,
          Member_Type   => Type_Index_For_Lkt_Node_Array,
          Null_For      => null,
@@ -4640,9 +5288,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Solver_Diagnostic_Location : aliased constant Text_Type :=
         "Location";
-      Member_Desc_For_Solver_Diagnostic_Location : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Solver_Diagnostic_Location  : aliased constant Text_Type := "";
+      Member_Desc_For_Solver_Diagnostic_Location  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Solver_Diagnostic_Location'Access,
+         Documentation => Member_Doc_For_Solver_Diagnostic_Location'Access,
          Owner         => Type_Index_For_Solver_Diagnostic,
          Member_Type   => Type_Index_For_Lkt_Node,
          Null_For      => null,
@@ -4660,9 +5310,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Solver_Diagnostic_Contexts : aliased constant Text_Type :=
         "Contexts";
-      Member_Desc_For_Solver_Diagnostic_Contexts : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Solver_Diagnostic_Contexts  : aliased constant Text_Type := "";
+      Member_Desc_For_Solver_Diagnostic_Contexts  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Solver_Diagnostic_Contexts'Access,
+         Documentation => Member_Doc_For_Solver_Diagnostic_Contexts'Access,
          Owner         => Type_Index_For_Solver_Diagnostic,
          Member_Type   => Type_Index_For_Logic_Context_Array,
          Null_For      => null,
@@ -4680,9 +5332,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Solver_Diagnostic_Round : aliased constant Text_Type :=
         "Round";
-      Member_Desc_For_Solver_Diagnostic_Round : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Solver_Diagnostic_Round  : aliased constant Text_Type := "";
+      Member_Desc_For_Solver_Diagnostic_Round  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Solver_Diagnostic_Round'Access,
+         Documentation => Member_Doc_For_Solver_Diagnostic_Round'Access,
          Owner         => Type_Index_For_Solver_Diagnostic,
          Member_Type   => Type_Index_For_Int,
          Null_For      => null,
@@ -4700,9 +5354,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Solver_Result_Success : aliased constant Text_Type :=
         "Success";
-      Member_Desc_For_Solver_Result_Success : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Solver_Result_Success  : aliased constant Text_Type := "";
+      Member_Desc_For_Solver_Result_Success  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Solver_Result_Success'Access,
+         Documentation => Member_Doc_For_Solver_Result_Success'Access,
          Owner         => Type_Index_For_Solver_Result,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -4720,9 +5376,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Solver_Result_Diagnostics : aliased constant Text_Type :=
         "Diagnostics";
-      Member_Desc_For_Solver_Result_Diagnostics : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Solver_Result_Diagnostics  : aliased constant Text_Type := "";
+      Member_Desc_For_Solver_Result_Diagnostics  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Solver_Result_Diagnostics'Access,
+         Documentation => Member_Doc_For_Solver_Result_Diagnostics'Access,
          Owner         => Type_Index_For_Solver_Result,
          Member_Type   => Type_Index_For_Solver_Diagnostic_Array,
          Null_For      => null,
@@ -4742,9 +5400,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Argument_F_Name : aliased constant Text_Type :=
         "F_Name";
-      Member_Desc_For_Argument_F_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Argument_F_Name  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Argument_F_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Argument_F_Name'Access,
+         Documentation => Member_Doc_For_Argument_F_Name'Access,
          Owner         => Type_Index_For_Argument,
          Member_Type   => Type_Index_For_Ref_Id,
          Null_For      => null,
@@ -4764,9 +5424,13 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Argument_F_Value : aliased constant Text_Type :=
         "F_Value";
-      Member_Desc_For_Argument_F_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Argument_F_Value  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Argument_F_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Argument_F_Value'Access,
+         Documentation => Member_Doc_For_Argument_F_Value'Access,
          Owner         => Type_Index_For_Argument,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -4786,9 +5450,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs : aliased constant Text_Type :=
         "F_Cond_Exprs";
-      Member_Desc_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs'Access,
+         Documentation => Member_Doc_For_Lexer_Case_Rule_Cond_Alt_F_Cond_Exprs'Access,
          Owner         => Type_Index_For_Lexer_Case_Rule_Cond_Alt,
          Member_Type   => Type_Index_For_Ref_Id_List,
          Null_For      => null,
@@ -4808,9 +5474,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Lexer_Case_Rule_Cond_Alt_F_Send : aliased constant Text_Type :=
         "F_Send";
-      Member_Desc_For_Lexer_Case_Rule_Cond_Alt_F_Send : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lexer_Case_Rule_Cond_Alt_F_Send  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lexer_Case_Rule_Cond_Alt_F_Send  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lexer_Case_Rule_Cond_Alt_F_Send'Access,
+         Documentation => Member_Doc_For_Lexer_Case_Rule_Cond_Alt_F_Send'Access,
          Owner         => Type_Index_For_Lexer_Case_Rule_Cond_Alt,
          Member_Type   => Type_Index_For_Lexer_Case_Rule_Send,
          Null_For      => null,
@@ -4830,9 +5498,11 @@ Type_Index_For_Analysis_Unit_Array => (Element_Type => Type_Index_For_Analysis_U
 
       Member_Name_For_Lexer_Case_Rule_Default_Alt_F_Send : aliased constant Text_Type :=
         "F_Send";
-      Member_Desc_For_Lexer_Case_Rule_Default_Alt_F_Send : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lexer_Case_Rule_Default_Alt_F_Send  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lexer_Case_Rule_Default_Alt_F_Send  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lexer_Case_Rule_Default_Alt_F_Send'Access,
+         Documentation => Member_Doc_For_Lexer_Case_Rule_Default_Alt_F_Send'Access,
          Owner         => Type_Index_For_Lexer_Case_Rule_Default_Alt,
          Member_Type   => Type_Index_For_Lexer_Case_Rule_Send,
          Null_For      => null,
@@ -4854,9 +5524,13 @@ Type_Index_For_Pattern_Match_Branch => 2);
 
       Member_Name_For_Base_Match_Branch_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Base_Match_Branch_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Base_Match_Branch_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Base_Match_Branch_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Base_Match_Branch_F_Expr'Access,
+         Documentation => Member_Doc_For_Base_Match_Branch_F_Expr'Access,
          Owner         => Type_Index_For_Base_Match_Branch,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -4876,9 +5550,11 @@ Type_Index_For_Pattern_Match_Branch => 2);
 
       Member_Name_For_Match_Branch_F_Decl : aliased constant Text_Type :=
         "F_Decl";
-      Member_Desc_For_Match_Branch_F_Decl : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Match_Branch_F_Decl  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Match_Branch_F_Decl  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Match_Branch_F_Decl'Access,
+         Documentation => Member_Doc_For_Match_Branch_F_Decl'Access,
          Owner         => Type_Index_For_Match_Branch,
          Member_Type   => Type_Index_For_Match_Val_Decl,
          Null_For      => null,
@@ -4898,9 +5574,13 @@ Type_Index_For_Pattern_Match_Branch => 2);
 
       Member_Name_For_Pattern_Match_Branch_F_Pattern : aliased constant Text_Type :=
         "F_Pattern";
-      Member_Desc_For_Pattern_Match_Branch_F_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Pattern_Match_Branch_F_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`FilteredPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`OrPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Pattern_Match_Branch_F_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Pattern_Match_Branch_F_Pattern'Access,
+         Documentation => Member_Doc_For_Pattern_Match_Branch_F_Pattern'Access,
          Owner         => Type_Index_For_Pattern_Match_Branch,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -4920,9 +5600,13 @@ Type_Index_For_Pattern_Match_Branch => 2);
 
       Member_Name_For_Block_Expr_Clause_F_Clause : aliased constant Text_Type :=
         "F_Clause";
-      Member_Desc_For_Block_Expr_Clause_F_Clause : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Block_Expr_Clause_F_Clause  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FullDecl`, :typeref:`VarBind`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Block_Expr_Clause_F_Clause  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Block_Expr_Clause_F_Clause'Access,
+         Documentation => Member_Doc_For_Block_Expr_Clause_F_Clause'Access,
          Owner         => Type_Index_For_Block_Expr_Clause,
          Member_Type   => Type_Index_For_Lkt_Node,
          Null_For      => null,
@@ -5019,9 +5703,11 @@ Type_Index_For_Trait_Decl => 1);
 
       Member_Name_For_Decl_F_Syn_Name : aliased constant Text_Type :=
         "F_Syn_Name";
-      Member_Desc_For_Decl_F_Syn_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_F_Syn_Name  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Decl_F_Syn_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_F_Syn_Name'Access,
+         Documentation => Member_Doc_For_Decl_F_Syn_Name'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Def_Id,
          Null_For      => Null_For_Decl_F_Syn_Name'Access,
@@ -5046,9 +5732,11 @@ Type_Index_For_Synthetic_Lexer_Decl => 0);
 
       Member_Name_For_Base_Grammar_Rule_Decl_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Base_Grammar_Rule_Decl_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Base_Grammar_Rule_Decl_F_Expr  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Base_Grammar_Rule_Decl_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Base_Grammar_Rule_Decl_F_Expr'Access,
+         Documentation => Member_Doc_For_Base_Grammar_Rule_Decl_F_Expr'Access,
          Owner         => Type_Index_For_Base_Grammar_Rule_Decl,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => Null_For_Base_Grammar_Rule_Decl_F_Expr'Access,
@@ -5075,9 +5763,13 @@ Type_Index_For_Val_Decl => 2);
 
       Member_Name_For_Explicitly_Typed_Decl_F_Decl_Type : aliased constant Text_Type :=
         "F_Decl_Type";
-      Member_Desc_For_Explicitly_Typed_Decl_F_Decl_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Explicitly_Typed_Decl_F_Decl_Type  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Explicitly_Typed_Decl_F_Decl_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Explicitly_Typed_Decl_F_Decl_Type'Access,
+         Documentation => Member_Doc_For_Explicitly_Typed_Decl_F_Decl_Type'Access,
          Owner         => Type_Index_For_Explicitly_Typed_Decl,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -5100,9 +5792,13 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Component_Decl_F_Default_Val : aliased constant Text_Type :=
         "F_Default_Val";
-      Member_Desc_For_Component_Decl_F_Default_Val : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Component_Decl_F_Default_Val  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Component_Decl_F_Default_Val  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Component_Decl_F_Default_Val'Access,
+         Documentation => Member_Doc_For_Component_Decl_F_Default_Val'Access,
          Owner         => Type_Index_For_Component_Decl,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5122,9 +5818,11 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Field_Decl_F_Trait_Ref : aliased constant Text_Type :=
         "F_Trait_Ref";
-      Member_Desc_For_Field_Decl_F_Trait_Ref : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Field_Decl_F_Trait_Ref  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Field_Decl_F_Trait_Ref  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Field_Decl_F_Trait_Ref'Access,
+         Documentation => Member_Doc_For_Field_Decl_F_Trait_Ref'Access,
          Owner         => Type_Index_For_Field_Decl,
          Member_Type   => Type_Index_For_Dot_Expr,
          Null_For      => null,
@@ -5144,9 +5842,11 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Fun_Param_Decl_F_Decl_Annotations : aliased constant Text_Type :=
         "F_Decl_Annotations";
-      Member_Desc_For_Fun_Param_Decl_F_Decl_Annotations : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Fun_Param_Decl_F_Decl_Annotations  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Fun_Param_Decl_F_Decl_Annotations  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Fun_Param_Decl_F_Decl_Annotations'Access,
+         Documentation => Member_Doc_For_Fun_Param_Decl_F_Decl_Annotations'Access,
          Owner         => Type_Index_For_Fun_Param_Decl,
          Member_Type   => Type_Index_For_Decl_Annotation_List,
          Null_For      => null,
@@ -5166,9 +5866,13 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Val_Decl_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Val_Decl_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Val_Decl_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Val_Decl_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Val_Decl_F_Expr'Access,
+         Documentation => Member_Doc_For_Val_Decl_F_Expr'Access,
          Owner         => Type_Index_For_Val_Decl,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5188,9 +5892,11 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Fun_Decl_F_Params : aliased constant Text_Type :=
         "F_Params";
-      Member_Desc_For_Fun_Decl_F_Params : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Fun_Decl_F_Params  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Fun_Decl_F_Params  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Fun_Decl_F_Params'Access,
+         Documentation => Member_Doc_For_Fun_Decl_F_Params'Access,
          Owner         => Type_Index_For_Fun_Decl,
          Member_Type   => Type_Index_For_Fun_Param_Decl_List,
          Null_For      => null,
@@ -5210,9 +5916,13 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Fun_Decl_F_Return_Type : aliased constant Text_Type :=
         "F_Return_Type";
-      Member_Desc_For_Fun_Decl_F_Return_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Fun_Decl_F_Return_Type  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Fun_Decl_F_Return_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Fun_Decl_F_Return_Type'Access,
+         Documentation => Member_Doc_For_Fun_Decl_F_Return_Type'Access,
          Owner         => Type_Index_For_Fun_Decl,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -5232,9 +5942,11 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Fun_Decl_F_Trait_Ref : aliased constant Text_Type :=
         "F_Trait_Ref";
-      Member_Desc_For_Fun_Decl_F_Trait_Ref : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Fun_Decl_F_Trait_Ref  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Fun_Decl_F_Trait_Ref  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Fun_Decl_F_Trait_Ref'Access,
+         Documentation => Member_Doc_For_Fun_Decl_F_Trait_Ref'Access,
          Owner         => Type_Index_For_Fun_Decl,
          Member_Type   => Type_Index_For_Dot_Expr,
          Null_For      => null,
@@ -5254,9 +5966,13 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Fun_Decl_F_Body : aliased constant Text_Type :=
         "F_Body";
-      Member_Desc_For_Fun_Decl_F_Body : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Fun_Decl_F_Body  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Fun_Decl_F_Body  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Fun_Decl_F_Body'Access,
+         Documentation => Member_Doc_For_Fun_Decl_F_Body'Access,
          Owner         => Type_Index_For_Fun_Decl,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5276,9 +5992,11 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Env_Spec_Decl_F_Actions : aliased constant Text_Type :=
         "F_Actions";
-      Member_Desc_For_Env_Spec_Decl_F_Actions : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Env_Spec_Decl_F_Actions  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Env_Spec_Decl_F_Actions  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Env_Spec_Decl_F_Actions'Access,
+         Documentation => Member_Doc_For_Env_Spec_Decl_F_Actions'Access,
          Owner         => Type_Index_For_Env_Spec_Decl,
          Member_Type   => Type_Index_For_Call_Expr_List,
          Null_For      => null,
@@ -5298,9 +6016,11 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Generic_Decl_F_Generic_Param_Decls : aliased constant Text_Type :=
         "F_Generic_Param_Decls";
-      Member_Desc_For_Generic_Decl_F_Generic_Param_Decls : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Generic_Decl_F_Generic_Param_Decls  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Generic_Decl_F_Generic_Param_Decls  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Generic_Decl_F_Generic_Param_Decls'Access,
+         Documentation => Member_Doc_For_Generic_Decl_F_Generic_Param_Decls'Access,
          Owner         => Type_Index_For_Generic_Decl,
          Member_Type   => Type_Index_For_Generic_Param_Decl_List,
          Null_For      => null,
@@ -5320,9 +6040,13 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Generic_Decl_F_Decl : aliased constant Text_Type :=
         "F_Decl";
-      Member_Desc_For_Generic_Decl_F_Decl : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Generic_Decl_F_Decl  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`DynVarDecl`, :typeref:`EnvSpecDecl`, :typeref:`ErrorDecl`, :typeref:`FieldDecl`, :typeref:`FunDecl`, :typeref:`GenericDecl`, :typeref:`GrammarDecl`, :typeref:`GrammarRuleDecl`, :typeref:`LexerDecl`, :typeref:`LexerFamilyDecl`, :typeref:`NamedTypeDecl`, :typeref:`ValDecl`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Generic_Decl_F_Decl  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Generic_Decl_F_Decl'Access,
+         Documentation => Member_Doc_For_Generic_Decl_F_Decl'Access,
          Owner         => Type_Index_For_Generic_Decl,
          Member_Type   => Type_Index_For_Decl,
          Null_For      => null,
@@ -5342,9 +6066,11 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Grammar_Decl_F_Rules : aliased constant Text_Type :=
         "F_Rules";
-      Member_Desc_For_Grammar_Decl_F_Rules : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Decl_F_Rules  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Decl_F_Rules  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Decl_F_Rules'Access,
+         Documentation => Member_Doc_For_Grammar_Decl_F_Rules'Access,
          Owner         => Type_Index_For_Grammar_Decl,
          Member_Type   => Type_Index_For_Full_Decl_List,
          Null_For      => null,
@@ -5364,9 +6090,13 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Lexer_Decl_F_Rules : aliased constant Text_Type :=
         "F_Rules";
-      Member_Desc_For_Lexer_Decl_F_Rules : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lexer_Decl_F_Rules  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`FullDecl`, :typeref:`LexerCaseRule`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lexer_Decl_F_Rules  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lexer_Decl_F_Rules'Access,
+         Documentation => Member_Doc_For_Lexer_Decl_F_Rules'Access,
          Owner         => Type_Index_For_Lexer_Decl,
          Member_Type   => Type_Index_For_Lkt_Node_List,
          Null_For      => null,
@@ -5386,9 +6116,11 @@ Type_Index_For_Lambda_Param_Decl => 3);
 
       Member_Name_For_Lexer_Family_Decl_F_Rules : aliased constant Text_Type :=
         "F_Rules";
-      Member_Desc_For_Lexer_Family_Decl_F_Rules : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lexer_Family_Decl_F_Rules  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lexer_Family_Decl_F_Rules  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lexer_Family_Decl_F_Rules'Access,
+         Documentation => Member_Doc_For_Lexer_Family_Decl_F_Rules'Access,
          Owner         => Type_Index_For_Lexer_Family_Decl,
          Member_Type   => Type_Index_For_Full_Decl_List,
          Null_For      => null,
@@ -5419,9 +6151,11 @@ Type_Index_For_Trait_Decl => 2);
 
       Member_Name_For_Type_Decl_F_Traits : aliased constant Text_Type :=
         "F_Traits";
-      Member_Desc_For_Type_Decl_F_Traits : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Type_Decl_F_Traits  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Type_Decl_F_Traits  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Type_Decl_F_Traits'Access,
+         Documentation => Member_Doc_For_Type_Decl_F_Traits'Access,
          Owner         => Type_Index_For_Type_Decl,
          Member_Type   => Type_Index_For_Type_Ref_List,
          Null_For      => null,
@@ -5464,9 +6198,11 @@ Type_Index_For_Trait_Decl => 0);
 
       Member_Name_For_Type_Decl_F_Syn_Base_Type : aliased constant Text_Type :=
         "F_Syn_Base_Type";
-      Member_Desc_For_Type_Decl_F_Syn_Base_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Type_Decl_F_Syn_Base_Type  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Type_Decl_F_Syn_Base_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Type_Decl_F_Syn_Base_Type'Access,
+         Documentation => Member_Doc_For_Type_Decl_F_Syn_Base_Type'Access,
          Owner         => Type_Index_For_Type_Decl,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => Null_For_Type_Decl_F_Syn_Base_Type'Access,
@@ -5486,9 +6222,11 @@ Type_Index_For_Trait_Decl => 0);
 
       Member_Name_For_Generic_Param_Type_Decl_F_Has_Class : aliased constant Text_Type :=
         "F_Has_Class";
-      Member_Desc_For_Generic_Param_Type_Decl_F_Has_Class : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Generic_Param_Type_Decl_F_Has_Class  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Generic_Param_Type_Decl_F_Has_Class  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Generic_Param_Type_Decl_F_Has_Class'Access,
+         Documentation => Member_Doc_For_Generic_Param_Type_Decl_F_Has_Class'Access,
          Owner         => Type_Index_For_Generic_Param_Type_Decl,
          Member_Type   => Type_Index_For_Class_Qualifier,
          Null_For      => null,
@@ -5514,9 +6252,11 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Named_Type_Decl_F_Decls : aliased constant Text_Type :=
         "F_Decls";
-      Member_Desc_For_Named_Type_Decl_F_Decls : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Named_Type_Decl_F_Decls  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Named_Type_Decl_F_Decls  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Named_Type_Decl_F_Decls'Access,
+         Documentation => Member_Doc_For_Named_Type_Decl_F_Decls'Access,
          Owner         => Type_Index_For_Named_Type_Decl,
          Member_Type   => Type_Index_For_Decl_Block,
          Null_For      => null,
@@ -5536,9 +6276,11 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Enum_Class_Decl_F_Branches : aliased constant Text_Type :=
         "F_Branches";
-      Member_Desc_For_Enum_Class_Decl_F_Branches : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Enum_Class_Decl_F_Branches  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Enum_Class_Decl_F_Branches  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Enum_Class_Decl_F_Branches'Access,
+         Documentation => Member_Doc_For_Enum_Class_Decl_F_Branches'Access,
          Owner         => Type_Index_For_Enum_Class_Decl,
          Member_Type   => Type_Index_For_Enum_Class_Case_List,
          Null_For      => null,
@@ -5558,9 +6300,11 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Enum_Type_Decl_F_Literals : aliased constant Text_Type :=
         "F_Literals";
-      Member_Desc_For_Enum_Type_Decl_F_Literals : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Enum_Type_Decl_F_Literals  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Enum_Type_Decl_F_Literals  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Enum_Type_Decl_F_Literals'Access,
+         Documentation => Member_Doc_For_Enum_Type_Decl_F_Literals'Access,
          Owner         => Type_Index_For_Enum_Type_Decl,
          Member_Type   => Type_Index_For_Enum_Lit_Decl_List,
          Null_For      => null,
@@ -5580,9 +6324,11 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Decl_Annotation_F_Name : aliased constant Text_Type :=
         "F_Name";
-      Member_Desc_For_Decl_Annotation_F_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_Annotation_F_Name  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Decl_Annotation_F_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_Annotation_F_Name'Access,
+         Documentation => Member_Doc_For_Decl_Annotation_F_Name'Access,
          Owner         => Type_Index_For_Decl_Annotation,
          Member_Type   => Type_Index_For_Id,
          Null_For      => null,
@@ -5602,9 +6348,11 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Decl_Annotation_F_Args : aliased constant Text_Type :=
         "F_Args";
-      Member_Desc_For_Decl_Annotation_F_Args : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_Annotation_F_Args  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Decl_Annotation_F_Args  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_Annotation_F_Args'Access,
+         Documentation => Member_Doc_For_Decl_Annotation_F_Args'Access,
          Owner         => Type_Index_For_Decl_Annotation,
          Member_Type   => Type_Index_For_Decl_Annotation_Args,
          Null_For      => null,
@@ -5624,9 +6372,11 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Decl_Annotation_Args_F_Args : aliased constant Text_Type :=
         "F_Args";
-      Member_Desc_For_Decl_Annotation_Args_F_Args : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_Annotation_Args_F_Args  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Decl_Annotation_Args_F_Args  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_Annotation_Args_F_Args'Access,
+         Documentation => Member_Doc_For_Decl_Annotation_Args_F_Args'Access,
          Owner         => Type_Index_For_Decl_Annotation_Args,
          Member_Type   => Type_Index_For_Argument_List,
          Null_For      => null,
@@ -5646,9 +6396,13 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Elsif_Branch_F_Cond_Expr : aliased constant Text_Type :=
         "F_Cond_Expr";
-      Member_Desc_For_Elsif_Branch_F_Cond_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Elsif_Branch_F_Cond_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Elsif_Branch_F_Cond_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Elsif_Branch_F_Cond_Expr'Access,
+         Documentation => Member_Doc_For_Elsif_Branch_F_Cond_Expr'Access,
          Owner         => Type_Index_For_Elsif_Branch,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5668,9 +6422,13 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Elsif_Branch_F_Then_Expr : aliased constant Text_Type :=
         "F_Then_Expr";
-      Member_Desc_For_Elsif_Branch_F_Then_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Elsif_Branch_F_Then_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Elsif_Branch_F_Then_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Elsif_Branch_F_Then_Expr'Access,
+         Documentation => Member_Doc_For_Elsif_Branch_F_Then_Expr'Access,
          Owner         => Type_Index_For_Elsif_Branch,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5690,9 +6448,11 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Enum_Class_Case_F_Decls : aliased constant Text_Type :=
         "F_Decls";
-      Member_Desc_For_Enum_Class_Case_F_Decls : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Enum_Class_Case_F_Decls  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Enum_Class_Case_F_Decls  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Enum_Class_Case_F_Decls'Access,
+         Documentation => Member_Doc_For_Enum_Class_Case_F_Decls'Access,
          Owner         => Type_Index_For_Enum_Class_Case,
          Member_Type   => Type_Index_For_Enum_Class_Alt_Decl_List,
          Null_For      => null,
@@ -5712,9 +6472,13 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Any_Of_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Any_Of_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Any_Of_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Any_Of_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Any_Of_F_Expr'Access,
+         Documentation => Member_Doc_For_Any_Of_F_Expr'Access,
          Owner         => Type_Index_For_Any_Of,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5734,9 +6498,13 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Any_Of_F_Values : aliased constant Text_Type :=
         "F_Values";
-      Member_Desc_For_Any_Of_F_Values : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Any_Of_F_Values  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Any_Of_F_Values  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Any_Of_F_Values'Access,
+         Documentation => Member_Doc_For_Any_Of_F_Values'Access,
          Owner         => Type_Index_For_Any_Of,
          Member_Type   => Type_Index_For_Any_Of_List,
          Null_For      => null,
@@ -5756,9 +6524,13 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Array_Literal_F_Exprs : aliased constant Text_Type :=
         "F_Exprs";
-      Member_Desc_For_Array_Literal_F_Exprs : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Array_Literal_F_Exprs  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Array_Literal_F_Exprs  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Array_Literal_F_Exprs'Access,
+         Documentation => Member_Doc_For_Array_Literal_F_Exprs'Access,
          Owner         => Type_Index_For_Array_Literal,
          Member_Type   => Type_Index_For_Expr_List,
          Null_For      => null,
@@ -5778,9 +6550,13 @@ Type_Index_For_Trait_Decl => 3);
 
       Member_Name_For_Array_Literal_F_Element_Type : aliased constant Text_Type :=
         "F_Element_Type";
-      Member_Desc_For_Array_Literal_F_Element_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Array_Literal_F_Element_Type  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Array_Literal_F_Element_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Array_Literal_F_Element_Type'Access,
+         Documentation => Member_Doc_For_Array_Literal_F_Element_Type'Access,
          Owner         => Type_Index_For_Array_Literal,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -5804,9 +6580,13 @@ Type_Index_For_Logic_Propagate_Call => 1);
 
       Member_Name_For_Base_Call_Expr_F_Name : aliased constant Text_Type :=
         "F_Name";
-      Member_Desc_For_Base_Call_Expr_F_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Base_Call_Expr_F_Name  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`KeepExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Base_Call_Expr_F_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Base_Call_Expr_F_Name'Access,
+         Documentation => Member_Doc_For_Base_Call_Expr_F_Name'Access,
          Owner         => Type_Index_For_Base_Call_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5830,9 +6610,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Base_Call_Expr_F_Args : aliased constant Text_Type :=
         "F_Args";
-      Member_Desc_For_Base_Call_Expr_F_Args : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Base_Call_Expr_F_Args  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Base_Call_Expr_F_Args  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Base_Call_Expr_F_Args'Access,
+         Documentation => Member_Doc_For_Base_Call_Expr_F_Args'Access,
          Owner         => Type_Index_For_Base_Call_Expr,
          Member_Type   => Type_Index_For_Argument_List,
          Null_For      => null,
@@ -5852,9 +6634,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Bin_Op_F_Left : aliased constant Text_Type :=
         "F_Left";
-      Member_Desc_For_Bin_Op_F_Left : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Bin_Op_F_Left  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Bin_Op_F_Left  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Bin_Op_F_Left'Access,
+         Documentation => Member_Doc_For_Bin_Op_F_Left'Access,
          Owner         => Type_Index_For_Bin_Op,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5874,9 +6660,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Bin_Op_F_Op : aliased constant Text_Type :=
         "F_Op";
-      Member_Desc_For_Bin_Op_F_Op : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Bin_Op_F_Op  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Bin_Op_F_Op  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Bin_Op_F_Op'Access,
+         Documentation => Member_Doc_For_Bin_Op_F_Op'Access,
          Owner         => Type_Index_For_Bin_Op,
          Member_Type   => Type_Index_For_Op,
          Null_For      => null,
@@ -5896,9 +6684,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Bin_Op_F_Right : aliased constant Text_Type :=
         "F_Right";
-      Member_Desc_For_Bin_Op_F_Right : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Bin_Op_F_Right  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Bin_Op_F_Right  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Bin_Op_F_Right'Access,
+         Documentation => Member_Doc_For_Bin_Op_F_Right'Access,
          Owner         => Type_Index_For_Bin_Op,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5918,9 +6710,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Block_Expr_F_Clauses : aliased constant Text_Type :=
         "F_Clauses";
-      Member_Desc_For_Block_Expr_F_Clauses : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Block_Expr_F_Clauses  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExprClause`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorDecl`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Block_Expr_F_Clauses  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Block_Expr_F_Clauses'Access,
+         Documentation => Member_Doc_For_Block_Expr_F_Clauses'Access,
          Owner         => Type_Index_For_Block_Expr,
          Member_Type   => Type_Index_For_Lkt_Node_List,
          Null_For      => null,
@@ -5940,9 +6736,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Cast_Expr_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Cast_Expr_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Cast_Expr_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`KeepExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Cast_Expr_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Cast_Expr_F_Expr'Access,
+         Documentation => Member_Doc_For_Cast_Expr_F_Expr'Access,
          Owner         => Type_Index_For_Cast_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -5962,9 +6762,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Cast_Expr_F_Null_Cond : aliased constant Text_Type :=
         "F_Null_Cond";
-      Member_Desc_For_Cast_Expr_F_Null_Cond : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Cast_Expr_F_Null_Cond  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Cast_Expr_F_Null_Cond  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Cast_Expr_F_Null_Cond'Access,
+         Documentation => Member_Doc_For_Cast_Expr_F_Null_Cond'Access,
          Owner         => Type_Index_For_Cast_Expr,
          Member_Type   => Type_Index_For_Null_Cond_Qualifier,
          Null_For      => null,
@@ -5984,9 +6786,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Cast_Expr_F_Excludes_Null : aliased constant Text_Type :=
         "F_Excludes_Null";
-      Member_Desc_For_Cast_Expr_F_Excludes_Null : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Cast_Expr_F_Excludes_Null  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Cast_Expr_F_Excludes_Null  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Cast_Expr_F_Excludes_Null'Access,
+         Documentation => Member_Doc_For_Cast_Expr_F_Excludes_Null'Access,
          Owner         => Type_Index_For_Cast_Expr,
          Member_Type   => Type_Index_For_Excludes_Null,
          Null_For      => null,
@@ -6006,9 +6810,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Cast_Expr_F_Dest_Type : aliased constant Text_Type :=
         "F_Dest_Type";
-      Member_Desc_For_Cast_Expr_F_Dest_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Cast_Expr_F_Dest_Type  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Cast_Expr_F_Dest_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Cast_Expr_F_Dest_Type'Access,
+         Documentation => Member_Doc_For_Cast_Expr_F_Dest_Type'Access,
          Owner         => Type_Index_For_Cast_Expr,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -6028,9 +6836,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Dot_Expr_F_Prefix : aliased constant Text_Type :=
         "F_Prefix";
-      Member_Desc_For_Dot_Expr_F_Prefix : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Dot_Expr_F_Prefix  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`KeepExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Dot_Expr_F_Prefix  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Dot_Expr_F_Prefix'Access,
+         Documentation => Member_Doc_For_Dot_Expr_F_Prefix'Access,
          Owner         => Type_Index_For_Dot_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6050,9 +6862,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Dot_Expr_F_Null_Cond : aliased constant Text_Type :=
         "F_Null_Cond";
-      Member_Desc_For_Dot_Expr_F_Null_Cond : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Dot_Expr_F_Null_Cond  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Dot_Expr_F_Null_Cond  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Dot_Expr_F_Null_Cond'Access,
+         Documentation => Member_Doc_For_Dot_Expr_F_Null_Cond'Access,
          Owner         => Type_Index_For_Dot_Expr,
          Member_Type   => Type_Index_For_Null_Cond_Qualifier,
          Null_For      => null,
@@ -6072,9 +6886,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Dot_Expr_F_Suffix : aliased constant Text_Type :=
         "F_Suffix";
-      Member_Desc_For_Dot_Expr_F_Suffix : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Dot_Expr_F_Suffix  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Dot_Expr_F_Suffix  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Dot_Expr_F_Suffix'Access,
+         Documentation => Member_Doc_For_Dot_Expr_F_Suffix'Access,
          Owner         => Type_Index_For_Dot_Expr,
          Member_Type   => Type_Index_For_Ref_Id,
          Null_For      => null,
@@ -6094,9 +6910,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Error_On_Null_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Error_On_Null_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Error_On_Null_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`KeepExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Error_On_Null_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Error_On_Null_F_Expr'Access,
+         Documentation => Member_Doc_For_Error_On_Null_F_Expr'Access,
          Owner         => Type_Index_For_Error_On_Null,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6116,9 +6936,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Generic_Instantiation_F_Name : aliased constant Text_Type :=
         "F_Name";
-      Member_Desc_For_Generic_Instantiation_F_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Generic_Instantiation_F_Name  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`KeepExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Generic_Instantiation_F_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Generic_Instantiation_F_Name'Access,
+         Documentation => Member_Doc_For_Generic_Instantiation_F_Name'Access,
          Owner         => Type_Index_For_Generic_Instantiation,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6138,9 +6962,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Generic_Instantiation_F_Args : aliased constant Text_Type :=
         "F_Args";
-      Member_Desc_For_Generic_Instantiation_F_Args : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Generic_Instantiation_F_Args  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Generic_Instantiation_F_Args  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Generic_Instantiation_F_Args'Access,
+         Documentation => Member_Doc_For_Generic_Instantiation_F_Args'Access,
          Owner         => Type_Index_For_Generic_Instantiation,
          Member_Type   => Type_Index_For_Type_Ref_List,
          Null_For      => null,
@@ -6160,9 +6988,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_Discard_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Grammar_Discard_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Discard_F_Expr  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Discard_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Discard_F_Expr'Access,
+         Documentation => Member_Doc_For_Grammar_Discard_F_Expr'Access,
          Owner         => Type_Index_For_Grammar_Discard,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -6182,9 +7012,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_Dont_Skip_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Grammar_Dont_Skip_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Dont_Skip_F_Expr  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Dont_Skip_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Dont_Skip_F_Expr'Access,
+         Documentation => Member_Doc_For_Grammar_Dont_Skip_F_Expr'Access,
          Owner         => Type_Index_For_Grammar_Dont_Skip,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -6204,9 +7036,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_Dont_Skip_F_Dont_Skip : aliased constant Text_Type :=
         "F_Dont_Skip";
-      Member_Desc_For_Grammar_Dont_Skip_F_Dont_Skip : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Dont_Skip_F_Dont_Skip  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Dont_Skip_F_Dont_Skip  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Dont_Skip_F_Dont_Skip'Access,
+         Documentation => Member_Doc_For_Grammar_Dont_Skip_F_Dont_Skip'Access,
          Owner         => Type_Index_For_Grammar_Dont_Skip,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -6226,9 +7060,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_List_F_List_Type : aliased constant Text_Type :=
         "F_List_Type";
-      Member_Desc_For_Grammar_List_F_List_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_List_F_List_Type  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_List_F_List_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_List_F_List_Type'Access,
+         Documentation => Member_Doc_For_Grammar_List_F_List_Type'Access,
          Owner         => Type_Index_For_Grammar_List,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -6248,9 +7084,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_List_F_Kind : aliased constant Text_Type :=
         "F_Kind";
-      Member_Desc_For_Grammar_List_F_Kind : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_List_F_Kind  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_List_F_Kind  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_List_F_Kind'Access,
+         Documentation => Member_Doc_For_Grammar_List_F_Kind'Access,
          Owner         => Type_Index_For_Grammar_List,
          Member_Type   => Type_Index_For_List_Kind,
          Null_For      => null,
@@ -6270,9 +7108,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_List_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Grammar_List_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_List_F_Expr  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_List_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_List_F_Expr'Access,
+         Documentation => Member_Doc_For_Grammar_List_F_Expr'Access,
          Owner         => Type_Index_For_Grammar_List,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -6292,9 +7132,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_List_F_Sep : aliased constant Text_Type :=
         "F_Sep";
-      Member_Desc_For_Grammar_List_F_Sep : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_List_F_Sep  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Grammar_List_F_Sep  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_List_F_Sep'Access,
+         Documentation => Member_Doc_For_Grammar_List_F_Sep'Access,
          Owner         => Type_Index_For_Grammar_List,
          Member_Type   => Type_Index_For_Grammar_List_Sep,
          Null_For      => null,
@@ -6314,9 +7156,13 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_Null_F_Name : aliased constant Text_Type :=
         "F_Name";
-      Member_Desc_For_Grammar_Null_F_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Null_F_Name  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Grammar_Null_F_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Null_F_Name'Access,
+         Documentation => Member_Doc_For_Grammar_Null_F_Name'Access,
          Owner         => Type_Index_For_Grammar_Null,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -6336,9 +7182,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_Opt_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Grammar_Opt_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Opt_F_Expr  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Opt_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Opt_F_Expr'Access,
+         Documentation => Member_Doc_For_Grammar_Opt_F_Expr'Access,
          Owner         => Type_Index_For_Grammar_Opt,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -6358,9 +7206,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_Opt_Error_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Grammar_Opt_Error_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Opt_Error_F_Expr  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Opt_Error_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Opt_Error_F_Expr'Access,
+         Documentation => Member_Doc_For_Grammar_Opt_Error_F_Expr'Access,
          Owner         => Type_Index_For_Grammar_Opt_Error,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -6380,9 +7230,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_Opt_Error_Group_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Grammar_Opt_Error_Group_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Opt_Error_Group_F_Expr  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Opt_Error_Group_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Opt_Error_Group_F_Expr'Access,
+         Documentation => Member_Doc_For_Grammar_Opt_Error_Group_F_Expr'Access,
          Owner         => Type_Index_For_Grammar_Opt_Error_Group,
          Member_Type   => Type_Index_For_Grammar_Expr_List,
          Null_For      => null,
@@ -6402,9 +7254,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_Opt_Group_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Grammar_Opt_Group_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Opt_Group_F_Expr  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Opt_Group_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Opt_Group_F_Expr'Access,
+         Documentation => Member_Doc_For_Grammar_Opt_Group_F_Expr'Access,
          Owner         => Type_Index_For_Grammar_Opt_Group,
          Member_Type   => Type_Index_For_Grammar_Expr_List,
          Null_For      => null,
@@ -6424,9 +7278,11 @@ Type_Index_For_Logic_Propagate_Call => 2);
 
       Member_Name_For_Grammar_Or_Expr_F_Sub_Exprs : aliased constant Text_Type :=
         "F_Sub_Exprs";
-      Member_Desc_For_Grammar_Or_Expr_F_Sub_Exprs : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Or_Expr_F_Sub_Exprs  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Or_Expr_F_Sub_Exprs  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Or_Expr_F_Sub_Exprs'Access,
+         Documentation => Member_Doc_For_Grammar_Or_Expr_F_Sub_Exprs'Access,
          Owner         => Type_Index_For_Grammar_Or_Expr,
          Member_Type   => Type_Index_For_Grammar_Expr_List_List,
          Null_For      => null,
@@ -6447,9 +7303,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Grammar_Pick_F_Exprs : aliased constant Text_Type :=
         "F_Exprs";
-      Member_Desc_For_Grammar_Pick_F_Exprs : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Pick_F_Exprs  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Pick_F_Exprs  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Pick_F_Exprs'Access,
+         Documentation => Member_Doc_For_Grammar_Pick_F_Exprs'Access,
          Owner         => Type_Index_For_Grammar_Pick,
          Member_Type   => Type_Index_For_Grammar_Expr_List,
          Null_For      => null,
@@ -6469,9 +7327,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Grammar_Predicate_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Grammar_Predicate_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Predicate_F_Expr  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Predicate_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Predicate_F_Expr'Access,
+         Documentation => Member_Doc_For_Grammar_Predicate_F_Expr'Access,
          Owner         => Type_Index_For_Grammar_Predicate,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -6491,9 +7351,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Grammar_Predicate_F_Prop_Ref : aliased constant Text_Type :=
         "F_Prop_Ref";
-      Member_Desc_For_Grammar_Predicate_F_Prop_Ref : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Predicate_F_Prop_Ref  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`DotExpr`, :typeref:`RefId`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Predicate_F_Prop_Ref  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Predicate_F_Prop_Ref'Access,
+         Documentation => Member_Doc_For_Grammar_Predicate_F_Prop_Ref'Access,
          Owner         => Type_Index_For_Grammar_Predicate,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6513,9 +7377,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Grammar_Rule_Ref_F_Node_Name : aliased constant Text_Type :=
         "F_Node_Name";
-      Member_Desc_For_Grammar_Rule_Ref_F_Node_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Rule_Ref_F_Node_Name  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Rule_Ref_F_Node_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Rule_Ref_F_Node_Name'Access,
+         Documentation => Member_Doc_For_Grammar_Rule_Ref_F_Node_Name'Access,
          Owner         => Type_Index_For_Grammar_Rule_Ref,
          Member_Type   => Type_Index_For_Ref_Id,
          Null_For      => null,
@@ -6535,9 +7401,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Grammar_Skip_F_Name : aliased constant Text_Type :=
         "F_Name";
-      Member_Desc_For_Grammar_Skip_F_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Skip_F_Name  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Skip_F_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Skip_F_Name'Access,
+         Documentation => Member_Doc_For_Grammar_Skip_F_Name'Access,
          Owner         => Type_Index_For_Grammar_Skip,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -6557,9 +7427,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Grammar_Stop_Cut_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Grammar_Stop_Cut_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_Stop_Cut_F_Expr  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_Stop_Cut_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_Stop_Cut_F_Expr'Access,
+         Documentation => Member_Doc_For_Grammar_Stop_Cut_F_Expr'Access,
          Owner         => Type_Index_For_Grammar_Stop_Cut,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -6579,9 +7451,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Parse_Node_Expr_F_Node_Name : aliased constant Text_Type :=
         "F_Node_Name";
-      Member_Desc_For_Parse_Node_Expr_F_Node_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Parse_Node_Expr_F_Node_Name  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Parse_Node_Expr_F_Node_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Parse_Node_Expr_F_Node_Name'Access,
+         Documentation => Member_Doc_For_Parse_Node_Expr_F_Node_Name'Access,
          Owner         => Type_Index_For_Parse_Node_Expr,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -6601,9 +7477,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Parse_Node_Expr_F_Sub_Exprs : aliased constant Text_Type :=
         "F_Sub_Exprs";
-      Member_Desc_For_Parse_Node_Expr_F_Sub_Exprs : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Parse_Node_Expr_F_Sub_Exprs  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Parse_Node_Expr_F_Sub_Exprs  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Parse_Node_Expr_F_Sub_Exprs'Access,
+         Documentation => Member_Doc_For_Parse_Node_Expr_F_Sub_Exprs'Access,
          Owner         => Type_Index_For_Parse_Node_Expr,
          Member_Type   => Type_Index_For_Grammar_Expr_List,
          Null_For      => null,
@@ -6623,9 +7501,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Token_No_Case_Lit_F_Lit : aliased constant Text_Type :=
         "F_Lit";
-      Member_Desc_For_Token_No_Case_Lit_F_Lit : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Token_No_Case_Lit_F_Lit  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Token_No_Case_Lit_F_Lit  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Token_No_Case_Lit_F_Lit'Access,
+         Documentation => Member_Doc_For_Token_No_Case_Lit_F_Lit'Access,
          Owner         => Type_Index_For_Token_No_Case_Lit,
          Member_Type   => Type_Index_For_Token_Lit,
          Null_For      => null,
@@ -6645,9 +7525,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Token_Pattern_Concat_F_Left : aliased constant Text_Type :=
         "F_Left";
-      Member_Desc_For_Token_Pattern_Concat_F_Left : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Token_Pattern_Concat_F_Left  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`TokenPatternConcat`, :typeref:`TokenPatternLit`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Token_Pattern_Concat_F_Left  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Token_Pattern_Concat_F_Left'Access,
+         Documentation => Member_Doc_For_Token_Pattern_Concat_F_Left'Access,
          Owner         => Type_Index_For_Token_Pattern_Concat,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -6667,9 +7551,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Token_Pattern_Concat_F_Right : aliased constant Text_Type :=
         "F_Right";
-      Member_Desc_For_Token_Pattern_Concat_F_Right : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Token_Pattern_Concat_F_Right  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Token_Pattern_Concat_F_Right  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Token_Pattern_Concat_F_Right'Access,
+         Documentation => Member_Doc_For_Token_Pattern_Concat_F_Right'Access,
          Owner         => Type_Index_For_Token_Pattern_Concat,
          Member_Type   => Type_Index_For_Token_Pattern_Lit,
          Null_For      => null,
@@ -6689,9 +7575,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Token_Ref_F_Token_Name : aliased constant Text_Type :=
         "F_Token_Name";
-      Member_Desc_For_Token_Ref_F_Token_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Token_Ref_F_Token_Name  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Token_Ref_F_Token_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Token_Ref_F_Token_Name'Access,
+         Documentation => Member_Doc_For_Token_Ref_F_Token_Name'Access,
          Owner         => Type_Index_For_Token_Ref,
          Member_Type   => Type_Index_For_Ref_Id,
          Null_For      => null,
@@ -6711,9 +7599,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Token_Ref_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Token_Ref_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Token_Ref_F_Expr  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Token_Ref_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Token_Ref_F_Expr'Access,
+         Documentation => Member_Doc_For_Token_Ref_F_Expr'Access,
          Owner         => Type_Index_For_Token_Ref,
          Member_Type   => Type_Index_For_Token_Lit,
          Null_For      => null,
@@ -6733,9 +7623,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_If_Expr_F_Cond_Expr : aliased constant Text_Type :=
         "F_Cond_Expr";
-      Member_Desc_For_If_Expr_F_Cond_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_If_Expr_F_Cond_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_If_Expr_F_Cond_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_If_Expr_F_Cond_Expr'Access,
+         Documentation => Member_Doc_For_If_Expr_F_Cond_Expr'Access,
          Owner         => Type_Index_For_If_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6755,9 +7649,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_If_Expr_F_Then_Expr : aliased constant Text_Type :=
         "F_Then_Expr";
-      Member_Desc_For_If_Expr_F_Then_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_If_Expr_F_Then_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_If_Expr_F_Then_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_If_Expr_F_Then_Expr'Access,
+         Documentation => Member_Doc_For_If_Expr_F_Then_Expr'Access,
          Owner         => Type_Index_For_If_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6777,9 +7675,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_If_Expr_F_Alternatives : aliased constant Text_Type :=
         "F_Alternatives";
-      Member_Desc_For_If_Expr_F_Alternatives : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_If_Expr_F_Alternatives  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_If_Expr_F_Alternatives  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_If_Expr_F_Alternatives'Access,
+         Documentation => Member_Doc_For_If_Expr_F_Alternatives'Access,
          Owner         => Type_Index_For_If_Expr,
          Member_Type   => Type_Index_For_Elsif_Branch_List,
          Null_For      => null,
@@ -6799,9 +7699,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_If_Expr_F_Else_Expr : aliased constant Text_Type :=
         "F_Else_Expr";
-      Member_Desc_For_If_Expr_F_Else_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_If_Expr_F_Else_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_If_Expr_F_Else_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_If_Expr_F_Else_Expr'Access,
+         Documentation => Member_Doc_For_If_Expr_F_Else_Expr'Access,
          Owner         => Type_Index_For_If_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6821,9 +7725,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Isa_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Isa_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Isa_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Isa_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Isa_F_Expr'Access,
+         Documentation => Member_Doc_For_Isa_F_Expr'Access,
          Owner         => Type_Index_For_Isa,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6843,9 +7751,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Isa_F_Pattern : aliased constant Text_Type :=
         "F_Pattern";
-      Member_Desc_For_Isa_F_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Isa_F_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`FilteredPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`OrPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Isa_F_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Isa_F_Pattern'Access,
+         Documentation => Member_Doc_For_Isa_F_Pattern'Access,
          Owner         => Type_Index_For_Isa,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -6865,9 +7777,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Keep_Expr_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Keep_Expr_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Keep_Expr_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`KeepExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Keep_Expr_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Keep_Expr_F_Expr'Access,
+         Documentation => Member_Doc_For_Keep_Expr_F_Expr'Access,
          Owner         => Type_Index_For_Keep_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6887,9 +7803,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Keep_Expr_F_Null_Cond : aliased constant Text_Type :=
         "F_Null_Cond";
-      Member_Desc_For_Keep_Expr_F_Null_Cond : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Keep_Expr_F_Null_Cond  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Keep_Expr_F_Null_Cond  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Keep_Expr_F_Null_Cond'Access,
+         Documentation => Member_Doc_For_Keep_Expr_F_Null_Cond'Access,
          Owner         => Type_Index_For_Keep_Expr,
          Member_Type   => Type_Index_For_Null_Cond_Qualifier,
          Null_For      => null,
@@ -6909,9 +7827,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Keep_Expr_F_Keep_Type : aliased constant Text_Type :=
         "F_Keep_Type";
-      Member_Desc_For_Keep_Expr_F_Keep_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Keep_Expr_F_Keep_Type  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Keep_Expr_F_Keep_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Keep_Expr_F_Keep_Type'Access,
+         Documentation => Member_Doc_For_Keep_Expr_F_Keep_Type'Access,
          Owner         => Type_Index_For_Keep_Expr,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -6931,9 +7853,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lambda_Expr_F_Params : aliased constant Text_Type :=
         "F_Params";
-      Member_Desc_For_Lambda_Expr_F_Params : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lambda_Expr_F_Params  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lambda_Expr_F_Params  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lambda_Expr_F_Params'Access,
+         Documentation => Member_Doc_For_Lambda_Expr_F_Params'Access,
          Owner         => Type_Index_For_Lambda_Expr,
          Member_Type   => Type_Index_For_Lambda_Param_Decl_List,
          Null_For      => null,
@@ -6953,9 +7877,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lambda_Expr_F_Return_Type : aliased constant Text_Type :=
         "F_Return_Type";
-      Member_Desc_For_Lambda_Expr_F_Return_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lambda_Expr_F_Return_Type  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Lambda_Expr_F_Return_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lambda_Expr_F_Return_Type'Access,
+         Documentation => Member_Doc_For_Lambda_Expr_F_Return_Type'Access,
          Owner         => Type_Index_For_Lambda_Expr,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -6975,9 +7903,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lambda_Expr_F_Body : aliased constant Text_Type :=
         "F_Body";
-      Member_Desc_For_Lambda_Expr_F_Body : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lambda_Expr_F_Body  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lambda_Expr_F_Body  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lambda_Expr_F_Body'Access,
+         Documentation => Member_Doc_For_Lambda_Expr_F_Body'Access,
          Owner         => Type_Index_For_Lambda_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -6997,9 +7929,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Null_Lit_F_Dest_Type : aliased constant Text_Type :=
         "F_Dest_Type";
-      Member_Desc_For_Null_Lit_F_Dest_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Null_Lit_F_Dest_Type  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Null_Lit_F_Dest_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Null_Lit_F_Dest_Type'Access,
+         Documentation => Member_Doc_For_Null_Lit_F_Dest_Type'Access,
          Owner         => Type_Index_For_Null_Lit,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -7019,13 +7955,39 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Block_String_Lit_F_Lines : aliased constant Text_Type :=
         "F_Lines";
-      Member_Desc_For_Block_String_Lit_F_Lines : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Block_String_Lit_F_Lines  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Block_String_Lit_F_Lines  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Block_String_Lit_F_Lines'Access,
+         Documentation => Member_Doc_For_Block_String_Lit_F_Lines'Access,
          Owner         => Type_Index_For_Block_String_Lit,
          Member_Type   => Type_Index_For_Block_String_Line_List,
          Null_For      => null,
          Indexes       => Indexes_For_Block_String_Lit_F_Lines'Access,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+         Indexes_For_Module_Doc_String_Lit_F_Lines : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Module_Doc_String_Lit => 1);
+
+      Member_Name_For_Module_Doc_String_Lit_F_Lines : aliased constant Text_Type :=
+        "F_Lines";
+      Member_Doc_For_Module_Doc_String_Lit_F_Lines  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Module_Doc_String_Lit_F_Lines  : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Module_Doc_String_Lit_F_Lines'Access,
+         Documentation => Member_Doc_For_Module_Doc_String_Lit_F_Lines'Access,
+         Owner         => Type_Index_For_Module_Doc_String_Lit,
+         Member_Type   => Type_Index_For_Module_Doc_String_Line_List,
+         Null_For      => null,
+         Indexes       => Indexes_For_Module_Doc_String_Lit_F_Lines'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -7041,9 +8003,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Logic_Assign_F_Dest_Var : aliased constant Text_Type :=
         "F_Dest_Var";
-      Member_Desc_For_Logic_Assign_F_Dest_Var : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Logic_Assign_F_Dest_Var  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Logic_Assign_F_Dest_Var  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Logic_Assign_F_Dest_Var'Access,
+         Documentation => Member_Doc_For_Logic_Assign_F_Dest_Var'Access,
          Owner         => Type_Index_For_Logic_Assign,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7063,9 +8029,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Logic_Assign_F_Value : aliased constant Text_Type :=
         "F_Value";
-      Member_Desc_For_Logic_Assign_F_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Logic_Assign_F_Value  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Logic_Assign_F_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Logic_Assign_F_Value'Access,
+         Documentation => Member_Doc_For_Logic_Assign_F_Value'Access,
          Owner         => Type_Index_For_Logic_Assign,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7085,9 +8055,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Logic_Expr_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Logic_Expr_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Logic_Expr_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`CallExpr`, :typeref:`RefId`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Logic_Expr_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Logic_Expr_F_Expr'Access,
+         Documentation => Member_Doc_For_Logic_Expr_F_Expr'Access,
          Owner         => Type_Index_For_Logic_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7107,9 +8081,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Logic_Propagate_F_Dest_Var : aliased constant Text_Type :=
         "F_Dest_Var";
-      Member_Desc_For_Logic_Propagate_F_Dest_Var : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Logic_Propagate_F_Dest_Var  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Logic_Propagate_F_Dest_Var  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Logic_Propagate_F_Dest_Var'Access,
+         Documentation => Member_Doc_For_Logic_Propagate_F_Dest_Var'Access,
          Owner         => Type_Index_For_Logic_Propagate,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7129,9 +8107,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Logic_Propagate_F_Call : aliased constant Text_Type :=
         "F_Call";
-      Member_Desc_For_Logic_Propagate_F_Call : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Logic_Propagate_F_Call  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Logic_Propagate_F_Call  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Logic_Propagate_F_Call'Access,
+         Documentation => Member_Doc_For_Logic_Propagate_F_Call'Access,
          Owner         => Type_Index_For_Logic_Propagate,
          Member_Type   => Type_Index_For_Logic_Propagate_Call,
          Null_For      => null,
@@ -7151,9 +8131,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Logic_Unify_F_Lhs : aliased constant Text_Type :=
         "F_Lhs";
-      Member_Desc_For_Logic_Unify_F_Lhs : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Logic_Unify_F_Lhs  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Logic_Unify_F_Lhs  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Logic_Unify_F_Lhs'Access,
+         Documentation => Member_Doc_For_Logic_Unify_F_Lhs'Access,
          Owner         => Type_Index_For_Logic_Unify,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7173,9 +8157,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Logic_Unify_F_Rhs : aliased constant Text_Type :=
         "F_Rhs";
-      Member_Desc_For_Logic_Unify_F_Rhs : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Logic_Unify_F_Rhs  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Logic_Unify_F_Rhs  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Logic_Unify_F_Rhs'Access,
+         Documentation => Member_Doc_For_Logic_Unify_F_Rhs'Access,
          Owner         => Type_Index_For_Logic_Unify,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7195,9 +8183,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Match_Expr_F_Match_Expr : aliased constant Text_Type :=
         "F_Match_Expr";
-      Member_Desc_For_Match_Expr_F_Match_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Match_Expr_F_Match_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Match_Expr_F_Match_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Match_Expr_F_Match_Expr'Access,
+         Documentation => Member_Doc_For_Match_Expr_F_Match_Expr'Access,
          Owner         => Type_Index_For_Match_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7217,9 +8209,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Match_Expr_F_Branches : aliased constant Text_Type :=
         "F_Branches";
-      Member_Desc_For_Match_Expr_F_Branches : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Match_Expr_F_Branches  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Match_Expr_F_Branches  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Match_Expr_F_Branches'Access,
+         Documentation => Member_Doc_For_Match_Expr_F_Branches'Access,
          Owner         => Type_Index_For_Match_Expr,
          Member_Type   => Type_Index_For_Base_Match_Branch_List,
          Null_For      => null,
@@ -7239,9 +8233,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Not_Expr_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Not_Expr_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Not_Expr_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Not_Expr_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Not_Expr_F_Expr'Access,
+         Documentation => Member_Doc_For_Not_Expr_F_Expr'Access,
          Owner         => Type_Index_For_Not_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7261,9 +8259,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Paren_Expr_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Paren_Expr_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Paren_Expr_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Paren_Expr_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Paren_Expr_F_Expr'Access,
+         Documentation => Member_Doc_For_Paren_Expr_F_Expr'Access,
          Owner         => Type_Index_For_Paren_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7283,9 +8285,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Query_F_Source : aliased constant Text_Type :=
         "F_Source";
-      Member_Desc_For_Query_F_Source : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Query_F_Source  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Query_F_Source  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Query_F_Source'Access,
+         Documentation => Member_Doc_For_Query_F_Source'Access,
          Owner         => Type_Index_For_Query,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7305,9 +8311,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Query_F_Pattern : aliased constant Text_Type :=
         "F_Pattern";
-      Member_Desc_For_Query_F_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Query_F_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`FilteredPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`OrPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Query_F_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Query_F_Pattern'Access,
+         Documentation => Member_Doc_For_Query_F_Pattern'Access,
          Owner         => Type_Index_For_Query,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -7327,9 +8337,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Query_F_Mapping : aliased constant Text_Type :=
         "F_Mapping";
-      Member_Desc_For_Query_F_Mapping : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Query_F_Mapping  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Query_F_Mapping  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Query_F_Mapping'Access,
+         Documentation => Member_Doc_For_Query_F_Mapping'Access,
          Owner         => Type_Index_For_Query,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7349,9 +8363,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Query_F_Guard : aliased constant Text_Type :=
         "F_Guard";
-      Member_Desc_For_Query_F_Guard : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Query_F_Guard  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Query_F_Guard  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Query_F_Guard'Access,
+         Documentation => Member_Doc_For_Query_F_Guard'Access,
          Owner         => Type_Index_For_Query,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7371,9 +8389,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Raise_Expr_F_Dest_Type : aliased constant Text_Type :=
         "F_Dest_Type";
-      Member_Desc_For_Raise_Expr_F_Dest_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Raise_Expr_F_Dest_Type  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Raise_Expr_F_Dest_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Raise_Expr_F_Dest_Type'Access,
+         Documentation => Member_Doc_For_Raise_Expr_F_Dest_Type'Access,
          Owner         => Type_Index_For_Raise_Expr,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -7393,9 +8415,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Raise_Expr_F_Except_Expr : aliased constant Text_Type :=
         "F_Except_Expr";
-      Member_Desc_For_Raise_Expr_F_Except_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Raise_Expr_F_Except_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Raise_Expr_F_Except_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Raise_Expr_F_Except_Expr'Access,
+         Documentation => Member_Doc_For_Raise_Expr_F_Except_Expr'Access,
          Owner         => Type_Index_For_Raise_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7415,9 +8441,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Subscript_Expr_F_Prefix : aliased constant Text_Type :=
         "F_Prefix";
-      Member_Desc_For_Subscript_Expr_F_Prefix : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Subscript_Expr_F_Prefix  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`KeepExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Subscript_Expr_F_Prefix  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Subscript_Expr_F_Prefix'Access,
+         Documentation => Member_Doc_For_Subscript_Expr_F_Prefix'Access,
          Owner         => Type_Index_For_Subscript_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7437,9 +8467,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Subscript_Expr_F_Null_Cond : aliased constant Text_Type :=
         "F_Null_Cond";
-      Member_Desc_For_Subscript_Expr_F_Null_Cond : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Subscript_Expr_F_Null_Cond  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Subscript_Expr_F_Null_Cond  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Subscript_Expr_F_Null_Cond'Access,
+         Documentation => Member_Doc_For_Subscript_Expr_F_Null_Cond'Access,
          Owner         => Type_Index_For_Subscript_Expr,
          Member_Type   => Type_Index_For_Null_Cond_Qualifier,
          Null_For      => null,
@@ -7459,9 +8491,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Subscript_Expr_F_Index : aliased constant Text_Type :=
         "F_Index";
-      Member_Desc_For_Subscript_Expr_F_Index : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Subscript_Expr_F_Index  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Subscript_Expr_F_Index  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Subscript_Expr_F_Index'Access,
+         Documentation => Member_Doc_For_Subscript_Expr_F_Index'Access,
          Owner         => Type_Index_For_Subscript_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7481,9 +8517,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Try_Expr_F_Try_Expr : aliased constant Text_Type :=
         "F_Try_Expr";
-      Member_Desc_For_Try_Expr_F_Try_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Try_Expr_F_Try_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Try_Expr_F_Try_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Try_Expr_F_Try_Expr'Access,
+         Documentation => Member_Doc_For_Try_Expr_F_Try_Expr'Access,
          Owner         => Type_Index_For_Try_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7503,9 +8543,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Try_Expr_F_Or_Expr : aliased constant Text_Type :=
         "F_Or_Expr";
-      Member_Desc_For_Try_Expr_F_Or_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Try_Expr_F_Or_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Try_Expr_F_Or_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Try_Expr_F_Or_Expr'Access,
+         Documentation => Member_Doc_For_Try_Expr_F_Or_Expr'Access,
          Owner         => Type_Index_For_Try_Expr,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7525,9 +8569,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Un_Op_F_Op : aliased constant Text_Type :=
         "F_Op";
-      Member_Desc_For_Un_Op_F_Op : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Un_Op_F_Op  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`OpMinus`, :typeref:`OpPlus`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Un_Op_F_Op  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Un_Op_F_Op'Access,
+         Documentation => Member_Doc_For_Un_Op_F_Op'Access,
          Owner         => Type_Index_For_Un_Op,
          Member_Type   => Type_Index_For_Op,
          Null_For      => null,
@@ -7547,9 +8595,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Un_Op_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Un_Op_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Un_Op_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Un_Op_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Un_Op_F_Expr'Access,
+         Documentation => Member_Doc_For_Un_Op_F_Expr'Access,
          Owner         => Type_Index_For_Un_Op,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7569,9 +8621,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Full_Decl_F_Doc : aliased constant Text_Type :=
         "F_Doc";
-      Member_Desc_For_Full_Decl_F_Doc : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Full_Decl_F_Doc  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BlockStringLit`, :typeref:`SingleLineStringLit`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Full_Decl_F_Doc  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Full_Decl_F_Doc'Access,
+         Documentation => Member_Doc_For_Full_Decl_F_Doc'Access,
          Owner         => Type_Index_For_Full_Decl,
          Member_Type   => Type_Index_For_String_Lit,
          Null_For      => null,
@@ -7591,9 +8647,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Full_Decl_F_Decl_Annotations : aliased constant Text_Type :=
         "F_Decl_Annotations";
-      Member_Desc_For_Full_Decl_F_Decl_Annotations : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Full_Decl_F_Decl_Annotations  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Full_Decl_F_Decl_Annotations  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Full_Decl_F_Decl_Annotations'Access,
+         Documentation => Member_Doc_For_Full_Decl_F_Decl_Annotations'Access,
          Owner         => Type_Index_For_Full_Decl,
          Member_Type   => Type_Index_For_Decl_Annotation_List,
          Null_For      => null,
@@ -7613,9 +8671,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Full_Decl_F_Decl : aliased constant Text_Type :=
         "F_Decl";
-      Member_Desc_For_Full_Decl_F_Decl : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Full_Decl_F_Decl  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`DynVarDecl`, :typeref:`EnvSpecDecl`, :typeref:`ErrorDecl`, :typeref:`FieldDecl`, :typeref:`FunDecl`, :typeref:`GenericDecl`, :typeref:`GenericParamTypeDecl`, :typeref:`GrammarDecl`, :typeref:`GrammarRuleDecl`, :typeref:`LexerDecl`, :typeref:`LexerFamilyDecl`, :typeref:`NamedTypeDecl`, :typeref:`ValDecl`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Full_Decl_F_Decl  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Full_Decl_F_Decl'Access,
+         Documentation => Member_Doc_For_Full_Decl_F_Decl'Access,
          Owner         => Type_Index_For_Full_Decl,
          Member_Type   => Type_Index_For_Decl,
          Null_For      => null,
@@ -7635,9 +8697,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Grammar_List_Sep_F_Token : aliased constant Text_Type :=
         "F_Token";
-      Member_Desc_For_Grammar_List_Sep_F_Token : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_List_Sep_F_Token  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Grammar_List_Sep_F_Token  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_List_Sep_F_Token'Access,
+         Documentation => Member_Doc_For_Grammar_List_Sep_F_Token'Access,
          Owner         => Type_Index_For_Grammar_List_Sep,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -7657,9 +8721,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Grammar_List_Sep_F_Extra : aliased constant Text_Type :=
         "F_Extra";
-      Member_Desc_For_Grammar_List_Sep_F_Extra : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Grammar_List_Sep_F_Extra  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Grammar_List_Sep_F_Extra  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Grammar_List_Sep_F_Extra'Access,
+         Documentation => Member_Doc_For_Grammar_List_Sep_F_Extra'Access,
          Owner         => Type_Index_For_Grammar_List_Sep,
          Member_Type   => Type_Index_For_Id,
          Null_For      => null,
@@ -7679,9 +8745,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Import_F_Name : aliased constant Text_Type :=
         "F_Name";
-      Member_Desc_For_Import_F_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Import_F_Name  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Import_F_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Import_F_Name'Access,
+         Documentation => Member_Doc_For_Import_F_Name'Access,
          Owner         => Type_Index_For_Import,
          Member_Type   => Type_Index_For_Module_Ref_Id,
          Null_For      => null,
@@ -7696,14 +8764,40 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
       
 
       
-         Indexes_For_Langkit_Root_F_Imports : aliased constant Syntax_Field_Indexes :=
+         Indexes_For_Langkit_Root_F_Doc : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Langkit_Root => 1);
+
+      Member_Name_For_Langkit_Root_F_Doc : aliased constant Text_Type :=
+        "F_Doc";
+      Member_Doc_For_Langkit_Root_F_Doc  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Langkit_Root_F_Doc  : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Langkit_Root_F_Doc'Access,
+         Documentation => Member_Doc_For_Langkit_Root_F_Doc'Access,
+         Owner         => Type_Index_For_Langkit_Root,
+         Member_Type   => Type_Index_For_Module_Doc_String_Lit,
+         Null_For      => null,
+         Indexes       => Indexes_For_Langkit_Root_F_Doc'Access,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+         Indexes_For_Langkit_Root_F_Imports : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Langkit_Root => 2);
 
       Member_Name_For_Langkit_Root_F_Imports : aliased constant Text_Type :=
         "F_Imports";
-      Member_Desc_For_Langkit_Root_F_Imports : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Langkit_Root_F_Imports  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Langkit_Root_F_Imports  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Langkit_Root_F_Imports'Access,
+         Documentation => Member_Doc_For_Langkit_Root_F_Imports'Access,
          Owner         => Type_Index_For_Langkit_Root,
          Member_Type   => Type_Index_For_Import_List,
          Null_For      => null,
@@ -7719,13 +8813,15 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       
          Indexes_For_Langkit_Root_F_Decls : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Langkit_Root => 2);
+           (Type_Index_For_Langkit_Root => 3);
 
       Member_Name_For_Langkit_Root_F_Decls : aliased constant Text_Type :=
         "F_Decls";
-      Member_Desc_For_Langkit_Root_F_Decls : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Langkit_Root_F_Decls  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Langkit_Root_F_Decls  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Langkit_Root_F_Decls'Access,
+         Documentation => Member_Doc_For_Langkit_Root_F_Decls'Access,
          Owner         => Type_Index_For_Langkit_Root,
          Member_Type   => Type_Index_For_Full_Decl_List,
          Null_For      => null,
@@ -7745,9 +8841,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lexer_Case_Rule_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Lexer_Case_Rule_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lexer_Case_Rule_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ErrorGrammarExpr`, :typeref:`GrammarCut`, :typeref:`GrammarDiscard`, :typeref:`GrammarList`, :typeref:`GrammarNull`, :typeref:`GrammarOptErrorGroup`, :typeref:`GrammarOptError`, :typeref:`GrammarOptGroup`, :typeref:`GrammarOpt`, :typeref:`GrammarOrExpr`, :typeref:`GrammarPick`, :typeref:`GrammarRuleRef`, :typeref:`GrammarSkip`, :typeref:`GrammarStopCut`, :typeref:`ParseNodeExpr`, :typeref:`TokenLit`, :typeref:`TokenNoCaseLit`, :typeref:`TokenPatternConcat`, :typeref:`TokenPatternLit`, :typeref:`TokenRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lexer_Case_Rule_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lexer_Case_Rule_F_Expr'Access,
+         Documentation => Member_Doc_For_Lexer_Case_Rule_F_Expr'Access,
          Owner         => Type_Index_For_Lexer_Case_Rule,
          Member_Type   => Type_Index_For_Grammar_Expr,
          Null_For      => null,
@@ -7767,9 +8867,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lexer_Case_Rule_F_Alts : aliased constant Text_Type :=
         "F_Alts";
-      Member_Desc_For_Lexer_Case_Rule_F_Alts : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lexer_Case_Rule_F_Alts  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lexer_Case_Rule_F_Alts  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lexer_Case_Rule_F_Alts'Access,
+         Documentation => Member_Doc_For_Lexer_Case_Rule_F_Alts'Access,
          Owner         => Type_Index_For_Lexer_Case_Rule,
          Member_Type   => Type_Index_For_Base_Lexer_Case_Rule_Alt_List,
          Null_For      => null,
@@ -7789,9 +8891,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lexer_Case_Rule_Send_F_Sent : aliased constant Text_Type :=
         "F_Sent";
-      Member_Desc_For_Lexer_Case_Rule_Send_F_Sent : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lexer_Case_Rule_Send_F_Sent  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lexer_Case_Rule_Send_F_Sent  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lexer_Case_Rule_Send_F_Sent'Access,
+         Documentation => Member_Doc_For_Lexer_Case_Rule_Send_F_Sent'Access,
          Owner         => Type_Index_For_Lexer_Case_Rule_Send,
          Member_Type   => Type_Index_For_Ref_Id,
          Null_For      => null,
@@ -7811,9 +8915,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lexer_Case_Rule_Send_F_Match_Size : aliased constant Text_Type :=
         "F_Match_Size";
-      Member_Desc_For_Lexer_Case_Rule_Send_F_Match_Size : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lexer_Case_Rule_Send_F_Match_Size  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Lexer_Case_Rule_Send_F_Match_Size  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lexer_Case_Rule_Send_F_Match_Size'Access,
+         Documentation => Member_Doc_For_Lexer_Case_Rule_Send_F_Match_Size'Access,
          Owner         => Type_Index_For_Lexer_Case_Rule_Send,
          Member_Type   => Type_Index_For_Num_Lit,
          Null_For      => null,
@@ -7833,9 +8939,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Binding_Pattern_F_Decl : aliased constant Text_Type :=
         "F_Decl";
-      Member_Desc_For_Binding_Pattern_F_Decl : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Binding_Pattern_F_Decl  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Binding_Pattern_F_Decl  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Binding_Pattern_F_Decl'Access,
+         Documentation => Member_Doc_For_Binding_Pattern_F_Decl'Access,
          Owner         => Type_Index_For_Binding_Pattern,
          Member_Type   => Type_Index_For_Binding_Val_Decl,
          Null_For      => null,
@@ -7855,9 +8963,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Binding_Pattern_F_Sub_Pattern : aliased constant Text_Type :=
         "F_Sub_Pattern";
-      Member_Desc_For_Binding_Pattern_F_Sub_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Binding_Pattern_F_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Binding_Pattern_F_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Binding_Pattern_F_Sub_Pattern'Access,
+         Documentation => Member_Doc_For_Binding_Pattern_F_Sub_Pattern'Access,
          Owner         => Type_Index_For_Binding_Pattern,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -7877,9 +8989,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Ellipsis_Pattern_F_Binding : aliased constant Text_Type :=
         "F_Binding";
-      Member_Desc_For_Ellipsis_Pattern_F_Binding : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Ellipsis_Pattern_F_Binding  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Ellipsis_Pattern_F_Binding  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Ellipsis_Pattern_F_Binding'Access,
+         Documentation => Member_Doc_For_Ellipsis_Pattern_F_Binding'Access,
          Owner         => Type_Index_For_Ellipsis_Pattern,
          Member_Type   => Type_Index_For_Id,
          Null_For      => null,
@@ -7899,9 +9013,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Extended_Pattern_F_Sub_Pattern : aliased constant Text_Type :=
         "F_Sub_Pattern";
-      Member_Desc_For_Extended_Pattern_F_Sub_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Extended_Pattern_F_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyTypePattern`, :typeref:`ParenPattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Extended_Pattern_F_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Extended_Pattern_F_Sub_Pattern'Access,
+         Documentation => Member_Doc_For_Extended_Pattern_F_Sub_Pattern'Access,
          Owner         => Type_Index_For_Extended_Pattern,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -7921,9 +9039,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Extended_Pattern_F_Details : aliased constant Text_Type :=
         "F_Details";
-      Member_Desc_For_Extended_Pattern_F_Details : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Extended_Pattern_F_Details  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Extended_Pattern_F_Details  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Extended_Pattern_F_Details'Access,
+         Documentation => Member_Doc_For_Extended_Pattern_F_Details'Access,
          Owner         => Type_Index_For_Extended_Pattern,
          Member_Type   => Type_Index_For_Pattern_Detail_List,
          Null_For      => null,
@@ -7943,9 +9063,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Filtered_Pattern_F_Sub_Pattern : aliased constant Text_Type :=
         "F_Sub_Pattern";
-      Member_Desc_For_Filtered_Pattern_F_Sub_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Filtered_Pattern_F_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Filtered_Pattern_F_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Filtered_Pattern_F_Sub_Pattern'Access,
+         Documentation => Member_Doc_For_Filtered_Pattern_F_Sub_Pattern'Access,
          Owner         => Type_Index_For_Filtered_Pattern,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -7965,9 +9089,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Filtered_Pattern_F_Predicate : aliased constant Text_Type :=
         "F_Predicate";
-      Member_Desc_For_Filtered_Pattern_F_Predicate : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Filtered_Pattern_F_Predicate  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Filtered_Pattern_F_Predicate  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Filtered_Pattern_F_Predicate'Access,
+         Documentation => Member_Doc_For_Filtered_Pattern_F_Predicate'Access,
          Owner         => Type_Index_For_Filtered_Pattern,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -7987,9 +9115,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_List_Pattern_F_Sub_Patterns : aliased constant Text_Type :=
         "F_Sub_Patterns";
-      Member_Desc_For_List_Pattern_F_Sub_Patterns : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_List_Pattern_F_Sub_Patterns  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`EllipsisPattern`, :typeref:`ExtendedPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_List_Pattern_F_Sub_Patterns  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_List_Pattern_F_Sub_Patterns'Access,
+         Documentation => Member_Doc_For_List_Pattern_F_Sub_Patterns'Access,
          Owner         => Type_Index_For_List_Pattern,
          Member_Type   => Type_Index_For_Pattern_List,
          Null_For      => null,
@@ -8009,9 +9141,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Not_Pattern_F_Sub_Pattern : aliased constant Text_Type :=
         "F_Sub_Pattern";
-      Member_Desc_For_Not_Pattern_F_Sub_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Not_Pattern_F_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Not_Pattern_F_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Not_Pattern_F_Sub_Pattern'Access,
+         Documentation => Member_Doc_For_Not_Pattern_F_Sub_Pattern'Access,
          Owner         => Type_Index_For_Not_Pattern,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -8031,9 +9167,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Or_Pattern_F_Left_Sub_Pattern : aliased constant Text_Type :=
         "F_Left_Sub_Pattern";
-      Member_Desc_For_Or_Pattern_F_Left_Sub_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Or_Pattern_F_Left_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`FilteredPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Or_Pattern_F_Left_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Or_Pattern_F_Left_Sub_Pattern'Access,
+         Documentation => Member_Doc_For_Or_Pattern_F_Left_Sub_Pattern'Access,
          Owner         => Type_Index_For_Or_Pattern,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -8053,9 +9193,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Or_Pattern_F_Right_Sub_Pattern : aliased constant Text_Type :=
         "F_Right_Sub_Pattern";
-      Member_Desc_For_Or_Pattern_F_Right_Sub_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Or_Pattern_F_Right_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`FilteredPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`OrPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Or_Pattern_F_Right_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Or_Pattern_F_Right_Sub_Pattern'Access,
+         Documentation => Member_Doc_For_Or_Pattern_F_Right_Sub_Pattern'Access,
          Owner         => Type_Index_For_Or_Pattern,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -8075,9 +9219,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Paren_Pattern_F_Sub_Pattern : aliased constant Text_Type :=
         "F_Sub_Pattern";
-      Member_Desc_For_Paren_Pattern_F_Sub_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Paren_Pattern_F_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`FilteredPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`OrPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Paren_Pattern_F_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Paren_Pattern_F_Sub_Pattern'Access,
+         Documentation => Member_Doc_For_Paren_Pattern_F_Sub_Pattern'Access,
          Owner         => Type_Index_For_Paren_Pattern,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -8097,9 +9245,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Tuple_Pattern_F_Sub_Patterns : aliased constant Text_Type :=
         "F_Sub_Patterns";
-      Member_Desc_For_Tuple_Pattern_F_Sub_Patterns : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Tuple_Pattern_F_Sub_Patterns  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Tuple_Pattern_F_Sub_Patterns  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Tuple_Pattern_F_Sub_Patterns'Access,
+         Documentation => Member_Doc_For_Tuple_Pattern_F_Sub_Patterns'Access,
          Owner         => Type_Index_For_Tuple_Pattern,
          Member_Type   => Type_Index_For_Pattern_List,
          Null_For      => null,
@@ -8119,9 +9271,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Type_Pattern_F_Type_Name : aliased constant Text_Type :=
         "F_Type_Name";
-      Member_Desc_For_Type_Pattern_F_Type_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Type_Pattern_F_Type_Name  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Type_Pattern_F_Type_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Type_Pattern_F_Type_Name'Access,
+         Documentation => Member_Doc_For_Type_Pattern_F_Type_Name'Access,
          Owner         => Type_Index_For_Type_Pattern,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -8141,9 +9297,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Field_Pattern_Detail_F_Id : aliased constant Text_Type :=
         "F_Id";
-      Member_Desc_For_Field_Pattern_Detail_F_Id : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Field_Pattern_Detail_F_Id  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Field_Pattern_Detail_F_Id  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Field_Pattern_Detail_F_Id'Access,
+         Documentation => Member_Doc_For_Field_Pattern_Detail_F_Id'Access,
          Owner         => Type_Index_For_Field_Pattern_Detail,
          Member_Type   => Type_Index_For_Id,
          Null_For      => null,
@@ -8163,9 +9321,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Field_Pattern_Detail_F_Expected_Value : aliased constant Text_Type :=
         "F_Expected_Value";
-      Member_Desc_For_Field_Pattern_Detail_F_Expected_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Field_Pattern_Detail_F_Expected_Value  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`FilteredPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`OrPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Field_Pattern_Detail_F_Expected_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Field_Pattern_Detail_F_Expected_Value'Access,
+         Documentation => Member_Doc_For_Field_Pattern_Detail_F_Expected_Value'Access,
          Owner         => Type_Index_For_Field_Pattern_Detail,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -8185,9 +9347,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Property_Pattern_Detail_F_Call : aliased constant Text_Type :=
         "F_Call";
-      Member_Desc_For_Property_Pattern_Detail_F_Call : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Property_Pattern_Detail_F_Call  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`KeepExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Property_Pattern_Detail_F_Call  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Property_Pattern_Detail_F_Call'Access,
+         Documentation => Member_Doc_For_Property_Pattern_Detail_F_Call'Access,
          Owner         => Type_Index_For_Property_Pattern_Detail,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -8207,9 +9373,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Property_Pattern_Detail_F_Expected_Value : aliased constant Text_Type :=
         "F_Expected_Value";
-      Member_Desc_For_Property_Pattern_Detail_F_Expected_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Property_Pattern_Detail_F_Expected_Value  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`FilteredPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`OrPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Property_Pattern_Detail_F_Expected_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Property_Pattern_Detail_F_Expected_Value'Access,
+         Documentation => Member_Doc_For_Property_Pattern_Detail_F_Expected_Value'Access,
          Owner         => Type_Index_For_Property_Pattern_Detail,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -8229,9 +9399,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Selector_Pattern_Detail_F_Call : aliased constant Text_Type :=
         "F_Call";
-      Member_Desc_For_Selector_Pattern_Detail_F_Call : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Selector_Pattern_Detail_F_Call  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Selector_Pattern_Detail_F_Call  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Selector_Pattern_Detail_F_Call'Access,
+         Documentation => Member_Doc_For_Selector_Pattern_Detail_F_Call'Access,
          Owner         => Type_Index_For_Selector_Pattern_Detail,
          Member_Type   => Type_Index_For_Selector_Call,
          Null_For      => null,
@@ -8251,9 +9423,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Selector_Pattern_Detail_F_Sub_Pattern : aliased constant Text_Type :=
         "F_Sub_Pattern";
-      Member_Desc_For_Selector_Pattern_Detail_F_Sub_Pattern : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Selector_Pattern_Detail_F_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`BindingPattern`, :typeref:`BoolPattern`, :typeref:`ExtendedPattern`, :typeref:`FilteredPattern`, :typeref:`IntegerPattern`, :typeref:`ListPattern`, :typeref:`NotPattern`, :typeref:`NullPattern`, :typeref:`OrPattern`, :typeref:`ParenPattern`, :typeref:`RegexPattern`, :typeref:`TuplePattern`, :typeref:`TypePattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Selector_Pattern_Detail_F_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Selector_Pattern_Detail_F_Sub_Pattern'Access,
+         Documentation => Member_Doc_For_Selector_Pattern_Detail_F_Sub_Pattern'Access,
          Owner         => Type_Index_For_Selector_Pattern_Detail,
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
@@ -8273,9 +9449,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Selector_Call_F_Quantifier : aliased constant Text_Type :=
         "F_Quantifier";
-      Member_Desc_For_Selector_Call_F_Quantifier : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Selector_Call_F_Quantifier  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Selector_Call_F_Quantifier  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Selector_Call_F_Quantifier'Access,
+         Documentation => Member_Doc_For_Selector_Call_F_Quantifier'Access,
          Owner         => Type_Index_For_Selector_Call,
          Member_Type   => Type_Index_For_Id,
          Null_For      => null,
@@ -8295,9 +9473,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Selector_Call_F_Binding : aliased constant Text_Type :=
         "F_Binding";
-      Member_Desc_For_Selector_Call_F_Binding : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Selector_Call_F_Binding  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Selector_Call_F_Binding  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Selector_Call_F_Binding'Access,
+         Documentation => Member_Doc_For_Selector_Call_F_Binding'Access,
          Owner         => Type_Index_For_Selector_Call,
          Member_Type   => Type_Index_For_Id,
          Null_For      => null,
@@ -8317,9 +9497,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Selector_Call_F_Selector_Call : aliased constant Text_Type :=
         "F_Selector_Call";
-      Member_Desc_For_Selector_Call_F_Selector_Call : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Selector_Call_F_Selector_Call  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`KeepExpr`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`MatchExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Selector_Call_F_Selector_Call  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Selector_Call_F_Selector_Call'Access,
+         Documentation => Member_Doc_For_Selector_Call_F_Selector_Call'Access,
          Owner         => Type_Index_For_Selector_Call,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -8339,9 +9523,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Function_Type_Ref_F_Param_Types : aliased constant Text_Type :=
         "F_Param_Types";
-      Member_Desc_For_Function_Type_Ref_F_Param_Types : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Function_Type_Ref_F_Param_Types  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Function_Type_Ref_F_Param_Types  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Function_Type_Ref_F_Param_Types'Access,
+         Documentation => Member_Doc_For_Function_Type_Ref_F_Param_Types'Access,
          Owner         => Type_Index_For_Function_Type_Ref,
          Member_Type   => Type_Index_For_Type_Ref_List,
          Null_For      => null,
@@ -8361,9 +9549,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Function_Type_Ref_F_Return_Type : aliased constant Text_Type :=
         "F_Return_Type";
-      Member_Desc_For_Function_Type_Ref_F_Return_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Function_Type_Ref_F_Return_Type  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Function_Type_Ref_F_Return_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Function_Type_Ref_F_Return_Type'Access,
+         Documentation => Member_Doc_For_Function_Type_Ref_F_Return_Type'Access,
          Owner         => Type_Index_For_Function_Type_Ref,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -8383,9 +9575,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Generic_Type_Ref_F_Type_Name : aliased constant Text_Type :=
         "F_Type_Name";
-      Member_Desc_For_Generic_Type_Ref_F_Type_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Generic_Type_Ref_F_Type_Name  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`DotExpr`, :typeref:`RefId`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Generic_Type_Ref_F_Type_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Generic_Type_Ref_F_Type_Name'Access,
+         Documentation => Member_Doc_For_Generic_Type_Ref_F_Type_Name'Access,
          Owner         => Type_Index_For_Generic_Type_Ref,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -8405,9 +9601,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Generic_Type_Ref_F_Args : aliased constant Text_Type :=
         "F_Args";
-      Member_Desc_For_Generic_Type_Ref_F_Args : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Generic_Type_Ref_F_Args  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`FunctionTypeRef`, :typeref:`GenericTypeRef`, :typeref:`SimpleTypeRef`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Generic_Type_Ref_F_Args  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Generic_Type_Ref_F_Args'Access,
+         Documentation => Member_Doc_For_Generic_Type_Ref_F_Args'Access,
          Owner         => Type_Index_For_Generic_Type_Ref,
          Member_Type   => Type_Index_For_Type_Ref_List,
          Null_For      => null,
@@ -8427,9 +9627,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Simple_Type_Ref_F_Type_Name : aliased constant Text_Type :=
         "F_Type_Name";
-      Member_Desc_For_Simple_Type_Ref_F_Type_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Simple_Type_Ref_F_Type_Name  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`DotExpr`, :typeref:`RefId`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Simple_Type_Ref_F_Type_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Simple_Type_Ref_F_Type_Name'Access,
+         Documentation => Member_Doc_For_Simple_Type_Ref_F_Type_Name'Access,
          Owner         => Type_Index_For_Simple_Type_Ref,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -8449,9 +9653,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Var_Bind_F_Name : aliased constant Text_Type :=
         "F_Name";
-      Member_Desc_For_Var_Bind_F_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Var_Bind_F_Name  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Var_Bind_F_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Var_Bind_F_Name'Access,
+         Documentation => Member_Doc_For_Var_Bind_F_Name'Access,
          Owner         => Type_Index_For_Var_Bind,
          Member_Type   => Type_Index_For_Ref_Id,
          Null_For      => null,
@@ -8471,9 +9677,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Var_Bind_F_Expr : aliased constant Text_Type :=
         "F_Expr";
-      Member_Desc_For_Var_Bind_F_Expr : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Var_Bind_F_Expr  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`AnyOf`, :typeref:`ArrayLiteral`, :typeref:`BigNumLit`, :typeref:`BinOp`, :typeref:`BlockExpr`, :typeref:`BlockStringLit`, :typeref:`CallExpr`, :typeref:`CastExpr`, :typeref:`CharLit`, :typeref:`DotExpr`, :typeref:`ErrorOnNull`, :typeref:`GenericInstantiation`, :typeref:`IfExpr`, :typeref:`Isa`, :typeref:`KeepExpr`, :typeref:`LambdaExpr`, :typeref:`LogicAssign`, :typeref:`LogicExpr`, :typeref:`LogicPredicate`, :typeref:`LogicPropagate`, :typeref:`LogicUnify`, :typeref:`MatchExpr`, :typeref:`NotExpr`, :typeref:`NullLit`, :typeref:`NumLit`, :typeref:`ParenExpr`, :typeref:`Query`, :typeref:`RaiseExpr`, :typeref:`RefId`, :typeref:`SingleLineStringLit`, :typeref:`SubscriptExpr`, :typeref:`TryExpr`, :typeref:`UnOp`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Var_Bind_F_Expr  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Var_Bind_F_Expr'Access,
+         Documentation => Member_Doc_For_Var_Bind_F_Expr'Access,
          Owner         => Type_Index_For_Var_Bind,
          Member_Type   => Type_Index_For_Expr,
          Null_For      => null,
@@ -8491,9 +9701,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Parent : aliased constant Text_Type :=
         "Parent";
-      Member_Desc_For_Parent : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Parent  : aliased constant Text_Type := "Return the syntactic parent for this node. Return null for the root node.";
+      Member_Desc_For_Parent  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Parent'Access,
+         Documentation => Member_Doc_For_Parent'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Lkt_Node,
          Null_For      => null,
@@ -8514,9 +9726,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Parents : aliased constant Text_Type :=
         "Parents";
-      Member_Desc_For_Parents : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Parents  : aliased constant Text_Type := "Return an array that contains the lexical parents, this node included iff ``with_self`` is True. Nearer parents are first in the list.";
+      Member_Desc_For_Parents  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Parents'Access,
+         Documentation => Member_Doc_For_Parents'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Lkt_Node_Array,
          Null_For      => null,
@@ -8537,9 +9751,18 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Children : aliased constant Text_Type :=
         "Children";
-      Member_Desc_For_Children : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Children  : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "                Return an array that contains the direct lexical" & Character_Type'Val (10)
+ & "                children." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "                .. warning:: This constructs a whole array every-time you call" & Character_Type'Val (10)
+ & "                    it, and as such is less efficient than calling the" & Character_Type'Val (10)
+ & "                    ``Child`` built-in." & Character_Type'Val (10)
+ & "                ";
+      Member_Desc_For_Children  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Children'Access,
+         Documentation => Member_Doc_For_Children'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Lkt_Node_Array,
          Null_For      => null,
@@ -8557,9 +9780,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Token_Start : aliased constant Text_Type :=
         "Token_Start";
-      Member_Desc_For_Token_Start : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Token_Start  : aliased constant Text_Type := "Return the first token used to parse this node.";
+      Member_Desc_For_Token_Start  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Token_Start'Access,
+         Documentation => Member_Doc_For_Token_Start'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Token,
          Null_For      => null,
@@ -8577,9 +9802,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Token_End : aliased constant Text_Type :=
         "Token_End";
-      Member_Desc_For_Token_End : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Token_End  : aliased constant Text_Type := "Return the last token used to parse this node.";
+      Member_Desc_For_Token_End  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Token_End'Access,
+         Documentation => Member_Doc_For_Token_End'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Token,
          Null_For      => null,
@@ -8597,9 +9824,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Child_Index : aliased constant Text_Type :=
         "Child_Index";
-      Member_Desc_For_Child_Index : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Child_Index  : aliased constant Text_Type := "Return the 0-based index for Node in its parent's children.";
+      Member_Desc_For_Child_Index  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Child_Index'Access,
+         Documentation => Member_Doc_For_Child_Index'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Int,
          Null_For      => null,
@@ -8617,9 +9846,14 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Previous_Sibling : aliased constant Text_Type :=
         "Previous_Sibling";
-      Member_Desc_For_Previous_Sibling : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Previous_Sibling  : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "                Return the node's previous sibling, or null if there is no such" & Character_Type'Val (10)
+ & "                sibling." & Character_Type'Val (10)
+ & "                ";
+      Member_Desc_For_Previous_Sibling  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Previous_Sibling'Access,
+         Documentation => Member_Doc_For_Previous_Sibling'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Lkt_Node,
          Null_For      => null,
@@ -8637,9 +9871,14 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Next_Sibling : aliased constant Text_Type :=
         "Next_Sibling";
-      Member_Desc_For_Next_Sibling : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Next_Sibling  : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "                Return the node's next sibling, or null if there is no such" & Character_Type'Val (10)
+ & "                sibling." & Character_Type'Val (10)
+ & "                ";
+      Member_Desc_For_Next_Sibling  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Next_Sibling'Access,
+         Documentation => Member_Doc_For_Next_Sibling'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Lkt_Node,
          Null_For      => null,
@@ -8657,9 +9896,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Unit : aliased constant Text_Type :=
         "Unit";
-      Member_Desc_For_Unit : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Unit  : aliased constant Text_Type := "Return the analysis unit owning this node.";
+      Member_Desc_For_Unit  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Unit'Access,
+         Documentation => Member_Doc_For_Unit'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Analysis_Unit,
          Null_For      => null,
@@ -8677,9 +9918,18 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Is_Ghost : aliased constant Text_Type :=
         "Is_Ghost";
-      Member_Desc_For_Is_Ghost : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Is_Ghost  : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "                Return whether the node is a ghost." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "                Unlike regular nodes, ghost nodes cover no token in the input" & Character_Type'Val (10)
+ & "                source: they are logically located instead between two tokens." & Character_Type'Val (10)
+ & "                Both the ``token_start`` and the ``token_end`` of all ghost" & Character_Type'Val (10)
+ & "                nodes is the token right after this logical position." & Character_Type'Val (10)
+ & "                ";
+      Member_Desc_For_Is_Ghost  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Is_Ghost'Access,
+         Documentation => Member_Doc_For_Is_Ghost'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -8697,9 +9947,14 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Full_Sloc_Image : aliased constant Text_Type :=
         "Full_Sloc_Image";
-      Member_Desc_For_Full_Sloc_Image : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Full_Sloc_Image  : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "                Return a string containing the filename + the sloc in GNU" & Character_Type'Val (10)
+ & "                conformant format. Useful to create diagnostics from a node." & Character_Type'Val (10)
+ & "                ";
+      Member_Desc_For_Full_Sloc_Image  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Full_Sloc_Image'Access,
+         Documentation => Member_Doc_For_Full_Sloc_Image'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -8720,9 +9975,14 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Completion_Item_Kind_To_Int : aliased constant Text_Type :=
         "Completion_Item_Kind_To_Int";
-      Member_Desc_For_Completion_Item_Kind_To_Int : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Completion_Item_Kind_To_Int  : aliased constant Text_Type := "" & Character_Type'Val (10)
+ & "                Convert a CompletionItemKind enum to its corresponding" & Character_Type'Val (10)
+ & "                integer value." & Character_Type'Val (10)
+ & "                ";
+      Member_Desc_For_Completion_Item_Kind_To_Int  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Completion_Item_Kind_To_Int'Access,
+         Documentation => Member_Doc_For_Completion_Item_Kind_To_Int'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Int,
          Null_For      => null,
@@ -8746,9 +10006,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Set_Solver_Debug_Mode : aliased constant Text_Type :=
         "P_Set_Solver_Debug_Mode";
-      Member_Desc_For_Lkt_Node_P_Set_Solver_Debug_Mode : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Set_Solver_Debug_Mode  : aliased constant Text_Type := "Enable or disable the solver traces for debugging purposes." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Set_Solver_Debug_Mode  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Lkt_Node_P_Set_Solver_Debug_Mode'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Set_Solver_Debug_Mode'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -8769,9 +10032,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Basic_Trait_Gen : aliased constant Text_Type :=
         "P_Basic_Trait_Gen";
-      Member_Desc_For_Lkt_Node_P_Basic_Trait_Gen : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Basic_Trait_Gen  : aliased constant Text_Type := "Unit method. Return the ``BasicTrait`` builtin generic trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Basic_Trait_Gen  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Basic_Trait_Gen'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Basic_Trait_Gen'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Generic_Decl,
          Null_For      => null,
@@ -8789,9 +10055,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Basic_Trait : aliased constant Text_Type :=
         "P_Basic_Trait";
-      Member_Desc_For_Lkt_Node_P_Basic_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Basic_Trait  : aliased constant Text_Type := "Unit method. Return the ``BasicTrait`` builtin trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Basic_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Basic_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Basic_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Trait_Decl,
          Null_For      => null,
@@ -8809,9 +10078,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Node_Gen_Trait : aliased constant Text_Type :=
         "P_Node_Gen_Trait";
-      Member_Desc_For_Lkt_Node_P_Node_Gen_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Node_Gen_Trait  : aliased constant Text_Type := "Unit method. Return the ``Node`` builtin generic trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Node_Gen_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Node_Gen_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Node_Gen_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Generic_Decl,
          Null_For      => null,
@@ -8829,9 +10101,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Node_Trait : aliased constant Text_Type :=
         "P_Node_Trait";
-      Member_Desc_For_Lkt_Node_P_Node_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Node_Trait  : aliased constant Text_Type := "Unit method. Return the ``Node`` builtin trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Node_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Node_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Node_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Trait_Decl,
          Null_For      => null,
@@ -8849,9 +10124,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Indexable_Gen_Trait : aliased constant Text_Type :=
         "P_Indexable_Gen_Trait";
-      Member_Desc_For_Lkt_Node_P_Indexable_Gen_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Indexable_Gen_Trait  : aliased constant Text_Type := "Unit method. Return the ``Node`` builtin generic trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Indexable_Gen_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Indexable_Gen_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Indexable_Gen_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Generic_Decl,
          Null_For      => null,
@@ -8869,9 +10147,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Indexable_Trait : aliased constant Text_Type :=
         "P_Indexable_Trait";
-      Member_Desc_For_Lkt_Node_P_Indexable_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Indexable_Trait  : aliased constant Text_Type := "Unit method. Return the ``Node`` builtin trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Indexable_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Indexable_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Indexable_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Trait_Decl,
          Null_For      => null,
@@ -8889,9 +10170,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Token_Node_Trait : aliased constant Text_Type :=
         "P_Token_Node_Trait";
-      Member_Desc_For_Lkt_Node_P_Token_Node_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Token_Node_Trait  : aliased constant Text_Type := "Unit method. Return the ``TokenNode`` builtin trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Token_Node_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Token_Node_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Token_Node_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -8909,9 +10193,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Error_Node_Trait : aliased constant Text_Type :=
         "P_Error_Node_Trait";
-      Member_Desc_For_Lkt_Node_P_Error_Node_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Error_Node_Trait  : aliased constant Text_Type := "Unit method. Return the ``ErrorNode`` builtin trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Error_Node_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Error_Node_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Error_Node_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -8929,9 +10216,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Char_Type : aliased constant Text_Type :=
         "P_Char_Type";
-      Member_Desc_For_Lkt_Node_P_Char_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Char_Type  : aliased constant Text_Type := "Unit method. Return the character builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Char_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Char_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Char_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -8949,9 +10239,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Int_Type : aliased constant Text_Type :=
         "P_Int_Type";
-      Member_Desc_For_Lkt_Node_P_Int_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Int_Type  : aliased constant Text_Type := "Unit method. Return the integer builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Int_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Int_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Int_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -8969,9 +10262,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Bool_Type : aliased constant Text_Type :=
         "P_Bool_Type";
-      Member_Desc_For_Lkt_Node_P_Bool_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Bool_Type  : aliased constant Text_Type := "Unit method. Return the boolean builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Bool_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Bool_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Bool_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -8989,9 +10285,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Bigint_Type : aliased constant Text_Type :=
         "P_Bigint_Type";
-      Member_Desc_For_Lkt_Node_P_Bigint_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Bigint_Type  : aliased constant Text_Type := "Unit method. Return the big integer builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Bigint_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Bigint_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Bigint_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9009,9 +10308,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_String_Type : aliased constant Text_Type :=
         "P_String_Type";
-      Member_Desc_For_Lkt_Node_P_String_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_String_Type  : aliased constant Text_Type := "Unit method. Return the string builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_String_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_String_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_String_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9029,9 +10331,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Symbol_Type : aliased constant Text_Type :=
         "P_Symbol_Type";
-      Member_Desc_For_Lkt_Node_P_Symbol_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Symbol_Type  : aliased constant Text_Type := "Unit method. Return the string builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Symbol_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Symbol_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Symbol_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9049,9 +10354,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Property_Error_Type : aliased constant Text_Type :=
         "P_Property_Error_Type";
-      Member_Desc_For_Lkt_Node_P_Property_Error_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Property_Error_Type  : aliased constant Text_Type := "Unit method. Return the property error builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Property_Error_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Property_Error_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Property_Error_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9069,9 +10377,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Regexp_Type : aliased constant Text_Type :=
         "P_Regexp_Type";
-      Member_Desc_For_Lkt_Node_P_Regexp_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Regexp_Type  : aliased constant Text_Type := "Unit method. Return the regexp builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Regexp_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Regexp_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Regexp_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9089,9 +10400,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Entity_Gen_Type : aliased constant Text_Type :=
         "P_Entity_Gen_Type";
-      Member_Desc_For_Lkt_Node_P_Entity_Gen_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Entity_Gen_Type  : aliased constant Text_Type := "Unit method. Return the logicvar builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Entity_Gen_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Entity_Gen_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Entity_Gen_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Generic_Decl,
          Null_For      => null,
@@ -9109,9 +10423,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Entity_Type : aliased constant Text_Type :=
         "P_Entity_Type";
-      Member_Desc_For_Lkt_Node_P_Entity_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Entity_Type  : aliased constant Text_Type := "Unit method. Return the logicvar builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Entity_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Entity_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Entity_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9129,9 +10446,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Logicvar_Type : aliased constant Text_Type :=
         "P_Logicvar_Type";
-      Member_Desc_For_Lkt_Node_P_Logicvar_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Logicvar_Type  : aliased constant Text_Type := "Unit method. Return the logicvar builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Logicvar_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Logicvar_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Logicvar_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9149,9 +10469,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Equation_Type : aliased constant Text_Type :=
         "P_Equation_Type";
-      Member_Desc_For_Lkt_Node_P_Equation_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Equation_Type  : aliased constant Text_Type := "Unit method. Return the logicvar builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Equation_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Equation_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Equation_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9169,9 +10492,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Array_Gen_Type : aliased constant Text_Type :=
         "P_Array_Gen_Type";
-      Member_Desc_For_Lkt_Node_P_Array_Gen_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Array_Gen_Type  : aliased constant Text_Type := "Unit method. Return the array builtin generic type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Array_Gen_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Array_Gen_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Array_Gen_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Generic_Decl,
          Null_For      => null,
@@ -9189,9 +10515,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Array_Type : aliased constant Text_Type :=
         "P_Array_Type";
-      Member_Desc_For_Lkt_Node_P_Array_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Array_Type  : aliased constant Text_Type := "Unit method. Return the array builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Array_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Array_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Array_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9209,9 +10538,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Astlist_Gen_Type : aliased constant Text_Type :=
         "P_Astlist_Gen_Type";
-      Member_Desc_For_Lkt_Node_P_Astlist_Gen_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Astlist_Gen_Type  : aliased constant Text_Type := "Unit method. Return the ASTList builtin generic type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Astlist_Gen_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Astlist_Gen_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Astlist_Gen_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Generic_Decl,
          Null_For      => null,
@@ -9229,9 +10561,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Astlist_Type : aliased constant Text_Type :=
         "P_Astlist_Type";
-      Member_Desc_For_Lkt_Node_P_Astlist_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Astlist_Type  : aliased constant Text_Type := "Unit method. Return the ASTList builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Astlist_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Astlist_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Astlist_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9249,9 +10584,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Node_Builder_Gen_Type : aliased constant Text_Type :=
         "P_Node_Builder_Gen_Type";
-      Member_Desc_For_Lkt_Node_P_Node_Builder_Gen_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Node_Builder_Gen_Type  : aliased constant Text_Type := "Unit method. Return the NodeBuilder builtin generic type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Node_Builder_Gen_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Node_Builder_Gen_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Node_Builder_Gen_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Generic_Decl,
          Null_For      => null,
@@ -9269,9 +10607,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Node_Builder_Type : aliased constant Text_Type :=
         "P_Node_Builder_Type";
-      Member_Desc_For_Lkt_Node_P_Node_Builder_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Node_Builder_Type  : aliased constant Text_Type := "Unit method. Return the NodeBuilder builtin type." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Node_Builder_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Node_Builder_Type'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Node_Builder_Type'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Named_Type_Decl,
          Null_For      => null,
@@ -9289,9 +10630,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Iterator_Gen_Trait : aliased constant Text_Type :=
         "P_Iterator_Gen_Trait";
-      Member_Desc_For_Lkt_Node_P_Iterator_Gen_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Iterator_Gen_Trait  : aliased constant Text_Type := "Unit method. Return the Iterator builtin generic trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Iterator_Gen_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Iterator_Gen_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Iterator_Gen_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Generic_Decl,
          Null_For      => null,
@@ -9309,9 +10653,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Iterator_Trait : aliased constant Text_Type :=
         "P_Iterator_Trait";
-      Member_Desc_For_Lkt_Node_P_Iterator_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Iterator_Trait  : aliased constant Text_Type := "Unit method. Return the Iterator builtin trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Iterator_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Iterator_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Iterator_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Trait_Decl,
          Null_For      => null,
@@ -9329,9 +10676,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : aliased constant Text_Type :=
         "P_Analysis_Unit_Gen_Trait";
-      Member_Desc_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Analysis_Unit_Gen_Trait  : aliased constant Text_Type := "Unit method. Return the ``AnalysisUnit`` builtin generic trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Analysis_Unit_Gen_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Analysis_Unit_Gen_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Analysis_Unit_Gen_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Generic_Decl,
          Null_For      => null,
@@ -9349,9 +10699,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Analysis_Unit_Trait : aliased constant Text_Type :=
         "P_Analysis_Unit_Trait";
-      Member_Desc_For_Lkt_Node_P_Analysis_Unit_Trait : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Analysis_Unit_Trait  : aliased constant Text_Type := "Unit method. Return the ``AnalysisUnit`` builtin trait." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Analysis_Unit_Trait  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Analysis_Unit_Trait'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Analysis_Unit_Trait'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Trait_Decl,
          Null_For      => null,
@@ -9369,9 +10722,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Topmost_Invalid_Decl : aliased constant Text_Type :=
         "P_Topmost_Invalid_Decl";
-      Member_Desc_For_Lkt_Node_P_Topmost_Invalid_Decl : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Topmost_Invalid_Decl  : aliased constant Text_Type := "Return the topmost (from ``Self`` to the root node) FullDecl annotated" & Character_Type'Val (10)
+ & "with ``@invalid``, null otherwise." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Topmost_Invalid_Decl  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Topmost_Invalid_Decl'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Topmost_Invalid_Decl'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Lkt_Node,
          Null_For      => null,
@@ -9389,9 +10746,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Nameres_Diagnostics : aliased constant Text_Type :=
         "P_Nameres_Diagnostics";
-      Member_Desc_For_Lkt_Node_P_Nameres_Diagnostics : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Nameres_Diagnostics  : aliased constant Text_Type := "If name resolution on this lkt compilation unit fails, this returns all" & Character_Type'Val (10)
+ & "the diagnostics that were produced while resolving it." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Nameres_Diagnostics  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Nameres_Diagnostics'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Nameres_Diagnostics'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Solver_Diagnostic_Array,
          Null_For      => null,
@@ -9409,9 +10770,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Solve_Enclosing_Context : aliased constant Text_Type :=
         "P_Solve_Enclosing_Context";
-      Member_Desc_For_Lkt_Node_P_Solve_Enclosing_Context : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Solve_Enclosing_Context  : aliased constant Text_Type := "Finds the nearest parent that is an xref_entry_point and solve its" & Character_Type'Val (10)
+ & "equation." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Solve_Enclosing_Context  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Solve_Enclosing_Context'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Solve_Enclosing_Context'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Solver_Result,
          Null_For      => null,
@@ -9429,9 +10794,14 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Xref_Entry_Point : aliased constant Text_Type :=
         "P_Xref_Entry_Point";
-      Member_Desc_For_Lkt_Node_P_Xref_Entry_Point : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Xref_Entry_Point  : aliased constant Text_Type := "Designates entities that are entry point for the xref solving" & Character_Type'Val (10)
+ & "infrastructure. If this returns true, then nameres_diagnostics can be" & Character_Type'Val (10)
+ & "called on it." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Xref_Entry_Point  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Xref_Entry_Point'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Xref_Entry_Point'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -9449,9 +10819,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Lkt_Node_P_Complete : aliased constant Text_Type :=
         "P_Complete";
-      Member_Desc_For_Lkt_Node_P_Complete : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Lkt_Node_P_Complete  : aliased constant Text_Type := "Return an array of completion item for language server clients" & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Complete  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Lkt_Node_P_Complete'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Complete'Access,
          Owner         => Type_Index_For_Lkt_Node,
          Member_Type   => Type_Index_For_Complete_Item_Array,
          Null_For      => null,
@@ -9469,9 +10842,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Base_Match_Branch_P_Match_Part : aliased constant Text_Type :=
         "P_Match_Part";
-      Member_Desc_For_Base_Match_Branch_P_Match_Part : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Base_Match_Branch_P_Match_Part  : aliased constant Text_Type := "Return the ""match"" part of the branch, either a pattern branch or a" & Character_Type'Val (10)
+ & "legacy match branch with variable declaration." & Character_Type'Val (10)
+;
+      Member_Desc_For_Base_Match_Branch_P_Match_Part  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Base_Match_Branch_P_Match_Part'Access,
+         Documentation => Member_Doc_For_Base_Match_Branch_P_Match_Part'Access,
          Owner         => Type_Index_For_Base_Match_Branch,
          Member_Type   => Type_Index_For_Lkt_Node,
          Null_For      => null,
@@ -9489,9 +10866,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Class_Qualifier_P_As_Bool : aliased constant Text_Type :=
         "P_As_Bool";
-      Member_Desc_For_Class_Qualifier_P_As_Bool : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Class_Qualifier_P_As_Bool  : aliased constant Text_Type := "Return whether this node is present";
+      Member_Desc_For_Class_Qualifier_P_As_Bool  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Class_Qualifier_P_As_Bool'Access,
+         Documentation => Member_Doc_For_Class_Qualifier_P_As_Bool'Access,
          Owner         => Type_Index_For_Class_Qualifier,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -9509,9 +10888,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Custom_Image : aliased constant Text_Type :=
         "P_Custom_Image";
-      Member_Desc_For_Decl_P_Custom_Image : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Custom_Image  : aliased constant Text_Type := "Return the image string using entity information." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Custom_Image  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_Custom_Image'Access,
+         Documentation => Member_Doc_For_Decl_P_Custom_Image'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -9529,9 +10911,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Decl_Type_Name : aliased constant Text_Type :=
         "P_Decl_Type_Name";
-      Member_Desc_For_Decl_P_Decl_Type_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Decl_Type_Name  : aliased constant Text_Type := "Return the name of the declaration type, as it should be seen by" & Character_Type'Val (10)
+ & "users/shown in diagnostics." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Decl_Type_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_Decl_Type_Name'Access,
+         Documentation => Member_Doc_For_Decl_P_Decl_Type_Name'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -9549,9 +10935,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Def_Ids : aliased constant Text_Type :=
         "P_Def_Ids";
-      Member_Desc_For_Decl_P_Def_Ids : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Def_Ids  : aliased constant Text_Type := "Return all the defining names that this declaration defines." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Def_Ids  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_Def_Ids'Access,
+         Documentation => Member_Doc_For_Decl_P_Def_Ids'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Def_Id_Array,
          Null_For      => null,
@@ -9569,9 +10958,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_As_Bare_Decl : aliased constant Text_Type :=
         "P_As_Bare_Decl";
-      Member_Desc_For_Decl_P_As_Bare_Decl : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_As_Bare_Decl  : aliased constant Text_Type := "Get this declaration without rebindings information." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_As_Bare_Decl  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_As_Bare_Decl'Access,
+         Documentation => Member_Doc_For_Decl_P_As_Bare_Decl'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Decl,
          Null_For      => null,
@@ -9589,9 +10981,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Get_Type : aliased constant Text_Type :=
         "P_Get_Type";
-      Member_Desc_For_Decl_P_Get_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Get_Type  : aliased constant Text_Type := "Return the type of the Decl." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Get_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_Get_Type'Access,
+         Documentation => Member_Doc_For_Decl_P_Get_Type'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Type_Decl,
          Null_For      => null,
@@ -9612,9 +11007,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Get_Cast_Type : aliased constant Text_Type :=
         "P_Get_Cast_Type";
-      Member_Desc_For_Decl_P_Get_Cast_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Get_Cast_Type  : aliased constant Text_Type := "If we are casting an entity (Self) to something that is not an entity," & Character_Type'Val (10)
+ & "make it an entity." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Get_Cast_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Decl_P_Get_Cast_Type'Access,
+         Documentation => Member_Doc_For_Decl_P_Get_Cast_Type'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Type_Decl,
          Null_For      => null,
@@ -9638,9 +11037,14 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Get_Keep_Type : aliased constant Text_Type :=
         "P_Get_Keep_Type";
-      Member_Desc_For_Decl_P_Get_Keep_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Get_Keep_Type  : aliased constant Text_Type := "Return the type of Entity when we only keep elements of type keep_type." & Character_Type'Val (10)
+ & "If we are casting an entity (Self) to something that is not an entity," & Character_Type'Val (10)
+ & "make it an entity." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Get_Keep_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Decl_P_Get_Keep_Type'Access,
+         Documentation => Member_Doc_For_Decl_P_Get_Keep_Type'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Type_Decl,
          Null_For      => null,
@@ -9664,9 +11068,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Get_Suffix_Type : aliased constant Text_Type :=
         "P_Get_Suffix_Type";
-      Member_Desc_For_Decl_P_Get_Suffix_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Get_Suffix_Type  : aliased constant Text_Type := "If we are accessing a ParseField of an entity, then that field's type" & Character_Type'Val (10)
+ & "also needs to be an entity." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Get_Suffix_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Decl_P_Get_Suffix_Type'Access,
+         Documentation => Member_Doc_For_Decl_P_Get_Suffix_Type'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Type_Decl,
          Null_For      => null,
@@ -9687,9 +11095,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Is_Generic : aliased constant Text_Type :=
         "P_Is_Generic";
-      Member_Desc_For_Decl_P_Is_Generic : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Is_Generic  : aliased constant Text_Type := "Returns whether the Decl is generic." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Is_Generic  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_Is_Generic'Access,
+         Documentation => Member_Doc_For_Decl_P_Is_Generic'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -9707,9 +11118,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Return_Type_Is_Instantiated : aliased constant Text_Type :=
         "P_Return_Type_Is_Instantiated";
-      Member_Desc_For_Decl_P_Return_Type_Is_Instantiated : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Return_Type_Is_Instantiated  : aliased constant Text_Type := "Return True if the return type of this function is instantiated." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Return_Type_Is_Instantiated  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_Return_Type_Is_Instantiated'Access,
+         Documentation => Member_Doc_For_Decl_P_Return_Type_Is_Instantiated'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -9727,9 +11141,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Is_Instantiated : aliased constant Text_Type :=
         "P_Is_Instantiated";
-      Member_Desc_For_Decl_P_Is_Instantiated : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Is_Instantiated  : aliased constant Text_Type := "Return True if Self is an instantiated declaration, meaning that it" & Character_Type'Val (10)
+ & "does not use any of its declared generic types." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Is_Instantiated  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_Is_Instantiated'Access,
+         Documentation => Member_Doc_For_Decl_P_Is_Instantiated'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -9747,9 +11165,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Name : aliased constant Text_Type :=
         "P_Name";
-      Member_Desc_For_Decl_P_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Name  : aliased constant Text_Type := "Return the symbol corresponding to the name of this declaration." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_Name'Access,
+         Documentation => Member_Doc_For_Decl_P_Name'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_Symbol,
          Null_For      => null,
@@ -9767,9 +11188,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Decl_P_Full_Name : aliased constant Text_Type :=
         "P_Full_Name";
-      Member_Desc_For_Decl_P_Full_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Decl_P_Full_Name  : aliased constant Text_Type := "Return the full name of this decl, as it should be seen by users/shown" & Character_Type'Val (10)
+ & "in diagnostics." & Character_Type'Val (10)
+;
+      Member_Desc_For_Decl_P_Full_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Decl_P_Full_Name'Access,
+         Documentation => Member_Doc_For_Decl_P_Full_Name'Access,
          Owner         => Type_Index_For_Decl,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -9787,9 +11212,14 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Fun_Decl_P_Is_Dynamic_Combiner : aliased constant Text_Type :=
         "P_Is_Dynamic_Combiner";
-      Member_Desc_For_Fun_Decl_P_Is_Dynamic_Combiner : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Fun_Decl_P_Is_Dynamic_Combiner  : aliased constant Text_Type := "When this property is called by a LogicCallExpr, return whether it" & Character_Type'Val (10)
+ & "expects a dynamic number of arguments. In other words, it expects an" & Character_Type'Val (10)
+ & "array of entities as its first argument." & Character_Type'Val (10)
+;
+      Member_Desc_For_Fun_Decl_P_Is_Dynamic_Combiner  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Fun_Decl_P_Is_Dynamic_Combiner'Access,
+         Documentation => Member_Doc_For_Fun_Decl_P_Is_Dynamic_Combiner'Access,
          Owner         => Type_Index_For_Fun_Decl,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -9810,9 +11240,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Fun_Decl_P_Find_All_Overrides : aliased constant Text_Type :=
         "P_Find_All_Overrides";
-      Member_Desc_For_Fun_Decl_P_Find_All_Overrides : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Fun_Decl_P_Find_All_Overrides  : aliased constant Text_Type := "Return the list of all RefId that refer to this DefId." & Character_Type'Val (10)
+;
+      Member_Desc_For_Fun_Decl_P_Find_All_Overrides  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Fun_Decl_P_Find_All_Overrides'Access,
+         Documentation => Member_Doc_For_Fun_Decl_P_Find_All_Overrides'Access,
          Owner         => Type_Index_For_Fun_Decl,
          Member_Type   => Type_Index_For_Fun_Decl_Array,
          Null_For      => null,
@@ -9833,9 +11266,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Type_Decl_P_Def_Id : aliased constant Text_Type :=
         "P_Def_Id";
-      Member_Desc_For_Type_Decl_P_Def_Id : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Type_Decl_P_Def_Id  : aliased constant Text_Type := "Return the defining name of this type declaration" & Character_Type'Val (10)
+;
+      Member_Desc_For_Type_Decl_P_Def_Id  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Type_Decl_P_Def_Id'Access,
+         Documentation => Member_Doc_For_Type_Decl_P_Def_Id'Access,
          Owner         => Type_Index_For_Type_Decl,
          Member_Type   => Type_Index_For_Def_Id,
          Null_For      => null,
@@ -9853,9 +11289,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Type_Decl_P_Base_Type : aliased constant Text_Type :=
         "P_Base_Type";
-      Member_Desc_For_Type_Decl_P_Base_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Type_Decl_P_Base_Type  : aliased constant Text_Type := "Return the base type for this node, if any." & Character_Type'Val (10)
+;
+      Member_Desc_For_Type_Decl_P_Base_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Type_Decl_P_Base_Type'Access,
+         Documentation => Member_Doc_For_Type_Decl_P_Base_Type'Access,
          Owner         => Type_Index_For_Type_Decl,
          Member_Type   => Type_Index_For_Type_Ref,
          Null_For      => null,
@@ -9873,9 +11312,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Type_Decl_P_Base_Type_If_Entity : aliased constant Text_Type :=
         "P_Base_Type_If_Entity";
-      Member_Desc_For_Type_Decl_P_Base_Type_If_Entity : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Type_Decl_P_Base_Type_If_Entity  : aliased constant Text_Type := "Return the base type for this node, if any." & Character_Type'Val (10)
+;
+      Member_Desc_For_Type_Decl_P_Base_Type_If_Entity  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Type_Decl_P_Base_Type_If_Entity'Access,
+         Documentation => Member_Doc_For_Type_Decl_P_Base_Type_If_Entity'Access,
          Owner         => Type_Index_For_Type_Decl,
          Member_Type   => Type_Index_For_Type_Decl,
          Null_For      => null,
@@ -9893,9 +11335,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Excludes_Null_P_As_Bool : aliased constant Text_Type :=
         "P_As_Bool";
-      Member_Desc_For_Excludes_Null_P_As_Bool : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Excludes_Null_P_As_Bool  : aliased constant Text_Type := "Return whether this node is present";
+      Member_Desc_For_Excludes_Null_P_As_Bool  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Excludes_Null_P_As_Bool'Access,
+         Documentation => Member_Doc_For_Excludes_Null_P_As_Bool'Access,
          Owner         => Type_Index_For_Excludes_Null,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -9913,9 +11357,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Expr_P_Get_Type : aliased constant Text_Type :=
         "P_Get_Type";
-      Member_Desc_For_Expr_P_Get_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Expr_P_Get_Type  : aliased constant Text_Type := "Return the type of this expression." & Character_Type'Val (10)
+;
+      Member_Desc_For_Expr_P_Get_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Expr_P_Get_Type'Access,
+         Documentation => Member_Doc_For_Expr_P_Get_Type'Access,
          Owner         => Type_Index_For_Expr,
          Member_Type   => Type_Index_For_Type_Decl,
          Null_For      => null,
@@ -9933,9 +11380,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Expr_P_Get_Generic_Type : aliased constant Text_Type :=
         "P_Get_Generic_Type";
-      Member_Desc_For_Expr_P_Get_Generic_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Expr_P_Get_Generic_Type  : aliased constant Text_Type := "Return the expected type of this expression." & Character_Type'Val (10)
+;
+      Member_Desc_For_Expr_P_Get_Generic_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Expr_P_Get_Generic_Type'Access,
+         Documentation => Member_Doc_For_Expr_P_Get_Generic_Type'Access,
          Owner         => Type_Index_For_Expr,
          Member_Type   => Type_Index_For_Type_Decl,
          Null_For      => null,
@@ -9953,9 +11403,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Expr_P_Get_Expected_Type : aliased constant Text_Type :=
         "P_Get_Expected_Type";
-      Member_Desc_For_Expr_P_Get_Expected_Type : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Expr_P_Get_Expected_Type  : aliased constant Text_Type := "Return the expected type of this expression." & Character_Type'Val (10)
+;
+      Member_Desc_For_Expr_P_Get_Expected_Type  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Expr_P_Get_Expected_Type'Access,
+         Documentation => Member_Doc_For_Expr_P_Get_Expected_Type'Access,
          Owner         => Type_Index_For_Expr,
          Member_Type   => Type_Index_For_Type_Decl,
          Null_For      => null,
@@ -9973,9 +11426,18 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Expr_P_Referenced_Decl : aliased constant Text_Type :=
         "P_Referenced_Decl";
-      Member_Desc_For_Expr_P_Referenced_Decl : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Expr_P_Referenced_Decl  : aliased constant Text_Type := "Return the declaration referenced by this expression, if applicable," & Character_Type'Val (10)
+ & "else null." & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "The property is memoized in order to avoid use the value inside logic" & Character_Type'Val (10)
+ & "variables on every redundent call, causing faulty behavior when used" & Character_Type'Val (10)
+ & "with rebindings." & Character_Type'Val (10)
+ & "TODO: Do like LAL to avoid memoization for more safety." & Character_Type'Val (10)
+;
+      Member_Desc_For_Expr_P_Referenced_Decl  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Expr_P_Referenced_Decl'Access,
+         Documentation => Member_Doc_For_Expr_P_Referenced_Decl'Access,
          Owner         => Type_Index_For_Expr,
          Member_Type   => Type_Index_For_Decl,
          Null_For      => null,
@@ -9993,9 +11455,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Token_Lit_P_Denoted_Value : aliased constant Text_Type :=
         "P_Denoted_Value";
-      Member_Desc_For_Token_Lit_P_Denoted_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Token_Lit_P_Denoted_Value  : aliased constant Text_Type := "Return the content of the given token literal node." & Character_Type'Val (10)
+;
+      Member_Desc_For_Token_Lit_P_Denoted_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Token_Lit_P_Denoted_Value'Access,
+         Documentation => Member_Doc_For_Token_Lit_P_Denoted_Value'Access,
          Owner         => Type_Index_For_Token_Lit,
          Member_Type   => Type_Index_For_Decoded_String_Value,
          Null_For      => null,
@@ -10013,9 +11478,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Token_Pattern_Lit_P_Denoted_Value : aliased constant Text_Type :=
         "P_Denoted_Value";
-      Member_Desc_For_Token_Pattern_Lit_P_Denoted_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Token_Pattern_Lit_P_Denoted_Value  : aliased constant Text_Type := "Return the content of the given token pattern literal node." & Character_Type'Val (10)
+;
+      Member_Desc_For_Token_Pattern_Lit_P_Denoted_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Token_Pattern_Lit_P_Denoted_Value'Access,
+         Documentation => Member_Doc_For_Token_Pattern_Lit_P_Denoted_Value'Access,
          Owner         => Type_Index_For_Token_Pattern_Lit,
          Member_Type   => Type_Index_For_Decoded_String_Value,
          Null_For      => null,
@@ -10033,9 +11501,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Id_P_Custom_Image : aliased constant Text_Type :=
         "P_Custom_Image";
-      Member_Desc_For_Id_P_Custom_Image : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Id_P_Custom_Image  : aliased constant Text_Type := "Returns the image of this RefId using entity information." & Character_Type'Val (10)
+;
+      Member_Desc_For_Id_P_Custom_Image  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Id_P_Custom_Image'Access,
+         Documentation => Member_Doc_For_Id_P_Custom_Image'Access,
          Owner         => Type_Index_For_Id,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -10053,9 +11524,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Def_Id_P_Name : aliased constant Text_Type :=
         "P_Name";
-      Member_Desc_For_Def_Id_P_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Def_Id_P_Name  : aliased constant Text_Type := "Return the name defined by this DefId." & Character_Type'Val (10)
+;
+      Member_Desc_For_Def_Id_P_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Def_Id_P_Name'Access,
+         Documentation => Member_Doc_For_Def_Id_P_Name'Access,
          Owner         => Type_Index_For_Def_Id,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -10076,9 +11550,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Def_Id_P_Get_Implementatinons : aliased constant Text_Type :=
         "P_Get_Implementatinons";
-      Member_Desc_For_Def_Id_P_Get_Implementatinons : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Def_Id_P_Get_Implementatinons  : aliased constant Text_Type := "Return the implementations of this name." & Character_Type'Val (10)
+;
+      Member_Desc_For_Def_Id_P_Get_Implementatinons  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Def_Id_P_Get_Implementatinons'Access,
+         Documentation => Member_Doc_For_Def_Id_P_Get_Implementatinons'Access,
          Owner         => Type_Index_For_Def_Id,
          Member_Type   => Type_Index_For_Def_Id_Array,
          Null_For      => null,
@@ -10099,9 +11576,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Def_Id_P_Decl_Detail : aliased constant Text_Type :=
         "P_Decl_Detail";
-      Member_Desc_For_Def_Id_P_Decl_Detail : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Def_Id_P_Decl_Detail  : aliased constant Text_Type := "Return the details to display in the language server client when it" & Character_Type'Val (10)
+ & "requests for completion or hovering information." & Character_Type'Val (10)
+;
+      Member_Desc_For_Def_Id_P_Decl_Detail  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Def_Id_P_Decl_Detail'Access,
+         Documentation => Member_Doc_For_Def_Id_P_Decl_Detail'Access,
          Owner         => Type_Index_For_Def_Id,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -10119,9 +11600,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Def_Id_P_Completion_Item_Kind : aliased constant Text_Type :=
         "P_Completion_Item_Kind";
-      Member_Desc_For_Def_Id_P_Completion_Item_Kind : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Def_Id_P_Completion_Item_Kind  : aliased constant Text_Type := "Return the kind of completion item for this DefId." & Character_Type'Val (10)
+;
+      Member_Desc_For_Def_Id_P_Completion_Item_Kind  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Def_Id_P_Completion_Item_Kind'Access,
+         Documentation => Member_Doc_For_Def_Id_P_Completion_Item_Kind'Access,
          Owner         => Type_Index_For_Def_Id,
          Member_Type   => Type_Index_For_Int,
          Null_For      => null,
@@ -10139,9 +11623,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Def_Id_P_Doc : aliased constant Text_Type :=
         "P_Doc";
-      Member_Desc_For_Def_Id_P_Doc : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Def_Id_P_Doc  : aliased constant Text_Type := "Return the documentation associated to this DefId." & Character_Type'Val (10)
+;
+      Member_Desc_For_Def_Id_P_Doc  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Def_Id_P_Doc'Access,
+         Documentation => Member_Doc_For_Def_Id_P_Doc'Access,
          Owner         => Type_Index_For_Def_Id,
          Member_Type   => Type_Index_For_String,
          Null_For      => null,
@@ -10162,9 +11649,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Def_Id_P_Find_All_References : aliased constant Text_Type :=
         "P_Find_All_References";
-      Member_Desc_For_Def_Id_P_Find_All_References : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Def_Id_P_Find_All_References  : aliased constant Text_Type := "Return the list of all RefId that refer to this DefId." & Character_Type'Val (10)
+;
+      Member_Desc_For_Def_Id_P_Find_All_References  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Def_Id_P_Find_All_References'Access,
+         Documentation => Member_Doc_For_Def_Id_P_Find_All_References'Access,
          Owner         => Type_Index_For_Def_Id,
          Member_Type   => Type_Index_For_Ref_Result_Array,
          Null_For      => null,
@@ -10185,9 +11675,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Ref_Id_P_Referenced_Defining_Name : aliased constant Text_Type :=
         "P_Referenced_Defining_Name";
-      Member_Desc_For_Ref_Id_P_Referenced_Defining_Name : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Ref_Id_P_Referenced_Defining_Name  : aliased constant Text_Type := "Return the referenced defining name." & Character_Type'Val (10)
+;
+      Member_Desc_For_Ref_Id_P_Referenced_Defining_Name  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Ref_Id_P_Referenced_Defining_Name'Access,
+         Documentation => Member_Doc_For_Ref_Id_P_Referenced_Defining_Name'Access,
          Owner         => Type_Index_For_Ref_Id,
          Member_Type   => Type_Index_For_Def_Id,
          Null_For      => null,
@@ -10205,9 +11698,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Char_Lit_P_Denoted_Value : aliased constant Text_Type :=
         "P_Denoted_Value";
-      Member_Desc_For_Char_Lit_P_Denoted_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Char_Lit_P_Denoted_Value  : aliased constant Text_Type := "Return the content of the given character literal node." & Character_Type'Val (10)
+;
+      Member_Desc_For_Char_Lit_P_Denoted_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Char_Lit_P_Denoted_Value'Access,
+         Documentation => Member_Doc_For_Char_Lit_P_Denoted_Value'Access,
          Owner         => Type_Index_For_Char_Lit,
          Member_Type   => Type_Index_For_Decoded_Char_Value,
          Null_For      => null,
@@ -10225,9 +11721,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_String_Lit_P_Denoted_Value : aliased constant Text_Type :=
         "P_Denoted_Value";
-      Member_Desc_For_String_Lit_P_Denoted_Value : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_String_Lit_P_Denoted_Value  : aliased constant Text_Type := "Return the content of the given string literal node." & Character_Type'Val (10)
+;
+      Member_Desc_For_String_Lit_P_Denoted_Value  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_String_Lit_P_Denoted_Value'Access,
+         Documentation => Member_Doc_For_String_Lit_P_Denoted_Value'Access,
          Owner         => Type_Index_For_String_Lit,
          Member_Type   => Type_Index_For_Decoded_String_Value,
          Null_For      => null,
@@ -10245,9 +11744,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_String_Lit_P_Is_Prefixed_String : aliased constant Text_Type :=
         "P_Is_Prefixed_String";
-      Member_Desc_For_String_Lit_P_Is_Prefixed_String : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_String_Lit_P_Is_Prefixed_String  : aliased constant Text_Type := "Return whether this string is prefixed or not." & Character_Type'Val (10)
+;
+      Member_Desc_For_String_Lit_P_Is_Prefixed_String  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_String_Lit_P_Is_Prefixed_String'Access,
+         Documentation => Member_Doc_For_String_Lit_P_Is_Prefixed_String'Access,
          Owner         => Type_Index_For_String_Lit,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -10265,9 +11767,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_String_Lit_P_Prefix : aliased constant Text_Type :=
         "P_Prefix";
-      Member_Desc_For_String_Lit_P_Prefix : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_String_Lit_P_Prefix  : aliased constant Text_Type := "Return the prefix of this string, or the null character if there is no" & Character_Type'Val (10)
+ & "prefix." & Character_Type'Val (10)
+;
+      Member_Desc_For_String_Lit_P_Prefix  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_String_Lit_P_Prefix'Access,
+         Documentation => Member_Doc_For_String_Lit_P_Prefix'Access,
          Owner         => Type_Index_For_String_Lit,
          Member_Type   => Type_Index_For_Char,
          Null_For      => null,
@@ -10285,9 +11791,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_String_Lit_P_Is_Regexp_Literal : aliased constant Text_Type :=
         "P_Is_Regexp_Literal";
-      Member_Desc_For_String_Lit_P_Is_Regexp_Literal : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_String_Lit_P_Is_Regexp_Literal  : aliased constant Text_Type := "Return whether this string literal is actually a regexp literal, by" & Character_Type'Val (10)
+ & "checking that this string is prefixed by 'p'." & Character_Type'Val (10)
+;
+      Member_Desc_For_String_Lit_P_Is_Regexp_Literal  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_String_Lit_P_Is_Regexp_Literal'Access,
+         Documentation => Member_Doc_For_String_Lit_P_Is_Regexp_Literal'Access,
          Owner         => Type_Index_For_String_Lit,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -10308,9 +11818,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Full_Decl_P_Has_Annotation : aliased constant Text_Type :=
         "P_Has_Annotation";
-      Member_Desc_For_Full_Decl_P_Has_Annotation : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Full_Decl_P_Has_Annotation  : aliased constant Text_Type := "Return whether this node has an annotation with name ``name``." & Character_Type'Val (10)
+;
+      Member_Desc_For_Full_Decl_P_Has_Annotation  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 1,
          Name          => Member_Name_For_Full_Decl_P_Has_Annotation'Access,
+         Documentation => Member_Doc_For_Full_Decl_P_Has_Annotation'Access,
          Owner         => Type_Index_For_Full_Decl,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -10331,9 +11844,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Import_P_Referenced_Unit : aliased constant Text_Type :=
         "P_Referenced_Unit";
-      Member_Desc_For_Import_P_Referenced_Unit : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Import_P_Referenced_Unit  : aliased constant Text_Type := "Return the unit that this import statements designates. Load it if" & Character_Type'Val (10)
+ & "needed." & Character_Type'Val (10)
+;
+      Member_Desc_For_Import_P_Referenced_Unit  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Import_P_Referenced_Unit'Access,
+         Documentation => Member_Doc_For_Import_P_Referenced_Unit'Access,
          Owner         => Type_Index_For_Import,
          Member_Type   => Type_Index_For_Analysis_Unit,
          Null_For      => null,
@@ -10351,9 +11868,13 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Langkit_Root_P_Fetch_Prelude : aliased constant Text_Type :=
         "P_Fetch_Prelude";
-      Member_Desc_For_Langkit_Root_P_Fetch_Prelude : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Langkit_Root_P_Fetch_Prelude  : aliased constant Text_Type := "External property that will fetch the prelude unit, containing" & Character_Type'Val (10)
+ & "predefined types and values." & Character_Type'Val (10)
+;
+      Member_Desc_For_Langkit_Root_P_Fetch_Prelude  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Langkit_Root_P_Fetch_Prelude'Access,
+         Documentation => Member_Doc_For_Langkit_Root_P_Fetch_Prelude'Access,
          Owner         => Type_Index_For_Langkit_Root,
          Member_Type   => Type_Index_For_Analysis_Unit,
          Null_For      => null,
@@ -10371,9 +11892,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Null_Cond_Qualifier_P_As_Bool : aliased constant Text_Type :=
         "P_As_Bool";
-      Member_Desc_For_Null_Cond_Qualifier_P_As_Bool : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Null_Cond_Qualifier_P_As_Bool  : aliased constant Text_Type := "Return whether this node is present";
+      Member_Desc_For_Null_Cond_Qualifier_P_As_Bool  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Null_Cond_Qualifier_P_As_Bool'Access,
+         Documentation => Member_Doc_For_Null_Cond_Qualifier_P_As_Bool'Access,
          Owner         => Type_Index_For_Null_Cond_Qualifier,
          Member_Type   => Type_Index_For_Bool,
          Null_For      => null,
@@ -10391,9 +11914,12 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 
       Member_Name_For_Type_Ref_P_Referenced_Decl : aliased constant Text_Type :=
         "P_Referenced_Decl";
-      Member_Desc_For_Type_Ref_P_Referenced_Decl : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Type_Ref_P_Referenced_Decl  : aliased constant Text_Type := "Returns the referenced type declaration." & Character_Type'Val (10)
+;
+      Member_Desc_For_Type_Ref_P_Referenced_Decl  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Type_Ref_P_Referenced_Decl'Access,
+         Documentation => Member_Doc_For_Type_Ref_P_Referenced_Decl'Access,
          Owner         => Type_Index_For_Type_Ref,
          Member_Type   => Type_Index_For_Type_Decl,
          Null_For      => null,
@@ -10521,6 +12047,7 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
       Member_Index_For_Lambda_Expr_F_Body => Member_Desc_For_Lambda_Expr_F_Body'Access,
       Member_Index_For_Null_Lit_F_Dest_Type => Member_Desc_For_Null_Lit_F_Dest_Type'Access,
       Member_Index_For_Block_String_Lit_F_Lines => Member_Desc_For_Block_String_Lit_F_Lines'Access,
+      Member_Index_For_Module_Doc_String_Lit_F_Lines => Member_Desc_For_Module_Doc_String_Lit_F_Lines'Access,
       Member_Index_For_Logic_Assign_F_Dest_Var => Member_Desc_For_Logic_Assign_F_Dest_Var'Access,
       Member_Index_For_Logic_Assign_F_Value => Member_Desc_For_Logic_Assign_F_Value'Access,
       Member_Index_For_Logic_Expr_F_Expr => Member_Desc_For_Logic_Expr_F_Expr'Access,
@@ -10551,6 +12078,7 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
       Member_Index_For_Grammar_List_Sep_F_Token => Member_Desc_For_Grammar_List_Sep_F_Token'Access,
       Member_Index_For_Grammar_List_Sep_F_Extra => Member_Desc_For_Grammar_List_Sep_F_Extra'Access,
       Member_Index_For_Import_F_Name => Member_Desc_For_Import_F_Name'Access,
+      Member_Index_For_Langkit_Root_F_Doc => Member_Desc_For_Langkit_Root_F_Doc'Access,
       Member_Index_For_Langkit_Root_F_Imports => Member_Desc_For_Langkit_Root_F_Imports'Access,
       Member_Index_For_Langkit_Root_F_Decls => Member_Desc_For_Langkit_Root_F_Decls'Access,
       Member_Index_For_Lexer_Case_Rule_F_Expr => Member_Desc_For_Lexer_Case_Rule_F_Expr'Access,
@@ -10858,7 +12386,7 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
          Node_Repr_Name_For_Lkt_Node : aliased constant Text_Type :=
            "LktNode";
       Node_Desc_For_Lkt_Node : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 29,
+        (Derivations_Count => 30,
          Member_Count      => 48,
          Base_Type         => No_Type_Index,
          Is_Abstract       => True,
@@ -10893,13 +12421,14 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 20 => Type_Index_For_Lexer_Case_Rule_Send,
 21 => Type_Index_For_List_Kind,
 22 => Type_Index_For_Lkt_Node_Base_List,
-23 => Type_Index_For_Null_Cond_Qualifier,
-24 => Type_Index_For_Op,
-25 => Type_Index_For_Pattern,
-26 => Type_Index_For_Pattern_Detail,
-27 => Type_Index_For_Selector_Call,
-28 => Type_Index_For_Type_Ref,
-29 => Type_Index_For_Var_Bind
+23 => Type_Index_For_Module_Doc_String_Line,
+24 => Type_Index_For_Null_Cond_Qualifier,
+25 => Type_Index_For_Op,
+26 => Type_Index_For_Pattern,
+27 => Type_Index_For_Pattern_Detail,
+28 => Type_Index_For_Selector_Call,
+29 => Type_Index_For_Type_Ref,
+30 => Type_Index_For_Var_Bind
          ),
          Members           => (
               1 => Member_Index_For_Parent,
@@ -13818,7 +15347,7 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
          Node_Repr_Name_For_String_Lit : aliased constant Text_Type :=
            "StringLit";
       Node_Desc_For_String_Lit : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 2,
+        (Derivations_Count => 3,
          Member_Count      => 4,
          Base_Type         => Type_Index_For_Lit,
          Is_Abstract       => True,
@@ -13832,7 +15361,8 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
          Inherited_Members => 56,
          Derivations       => (
              1 => Type_Index_For_Block_String_Lit,
-2 => Type_Index_For_Single_Line_String_Lit
+2 => Type_Index_For_Module_Doc_String_Lit,
+3 => Type_Index_For_Single_Line_String_Lit
          ),
          Members           => (
               1 => Member_Index_For_String_Lit_P_Denoted_Value,
@@ -13863,6 +15393,30 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
          ),
          Members           => (
               1 => Member_Index_For_Block_String_Lit_F_Lines
+         ));
+      
+      Node_Name_For_Module_Doc_String_Lit : aliased constant Text_Type :=
+        "Module_Doc_String_Lit";
+         Node_Repr_Name_For_Module_Doc_String_Lit : aliased constant Text_Type :=
+           "ModuleDocStringLit";
+      Node_Desc_For_Module_Doc_String_Lit : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 1,
+         Base_Type         => Type_Index_For_String_Lit,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Module_Doc_String_Lit'Access,
+         Repr_Name         => Node_Repr_Name_For_Module_Doc_String_Lit'Access,
+         Inherited_Members => 57,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 => Member_Index_For_Module_Doc_String_Lit_F_Lines
          ));
       
       Node_Name_For_Single_Line_String_Lit : aliased constant Text_Type :=
@@ -14296,7 +15850,7 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
            "LangkitRoot";
       Node_Desc_For_Langkit_Root : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => 0,
-         Member_Count      => 3,
+         Member_Count      => 4,
          Base_Type         => Type_Index_For_Lkt_Node,
          Is_Abstract       => False,
          Is_Error_Node     => False,
@@ -14306,14 +15860,15 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Langkit_Root'Access,
          Repr_Name         => Node_Repr_Name_For_Langkit_Root'Access,
-         Inherited_Members => 51,
+         Inherited_Members => 52,
          Derivations       => (
              1 .. 0 => <>
          ),
          Members           => (
-              1 => Member_Index_For_Langkit_Root_F_Imports,
-2 => Member_Index_For_Langkit_Root_F_Decls,
-3 => Member_Index_For_Langkit_Root_P_Fetch_Prelude
+              1 => Member_Index_For_Langkit_Root_F_Doc,
+2 => Member_Index_For_Langkit_Root_F_Imports,
+3 => Member_Index_For_Langkit_Root_F_Decls,
+4 => Member_Index_For_Langkit_Root_P_Fetch_Prelude
          ));
       
       Node_Name_For_Lexer_Case_Rule : aliased constant Text_Type :=
@@ -14444,7 +15999,7 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
          Node_Repr_Name_For_Lkt_Node_Base_List : aliased constant Text_Type :=
            "LktNodeBaseList";
       Node_Desc_For_Lkt_Node_Base_List : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 22,
+        (Derivations_Count => 23,
          Member_Count      => 0,
          Base_Type         => Type_Index_For_Lkt_Node,
          Is_Abstract       => True,
@@ -14475,10 +16030,11 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
 16 => Type_Index_For_Import_List,
 17 => Type_Index_For_Lambda_Param_Decl_List,
 18 => Type_Index_For_Lkt_Node_List,
-19 => Type_Index_For_Pattern_Detail_List,
-20 => Type_Index_For_Pattern_List,
-21 => Type_Index_For_Ref_Id_List,
-22 => Type_Index_For_Type_Ref_List
+19 => Type_Index_For_Module_Doc_String_Line_List,
+20 => Type_Index_For_Pattern_Detail_List,
+21 => Type_Index_For_Pattern_List,
+22 => Type_Index_For_Ref_Id_List,
+23 => Type_Index_For_Type_Ref_List
          ),
          Members           => (
               1 .. 0 => <>
@@ -14989,6 +16545,30 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
               1 .. 0 => <>
          ));
       
+      Node_Name_For_Module_Doc_String_Line_List : aliased constant Text_Type :=
+        "Module_Doc_String_Line_List";
+         Node_Repr_Name_For_Module_Doc_String_Line_List : aliased constant Text_Type :=
+           "ModuleDocStringLineList";
+      Node_Desc_For_Module_Doc_String_Line_List : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 0,
+         Base_Type         => Type_Index_For_Lkt_Node_Base_List,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => Type_Index_For_Module_Doc_String_Line,
+         Name              => Node_Name_For_Module_Doc_String_Line_List'Access,
+         Repr_Name         => Node_Repr_Name_For_Module_Doc_String_Line_List'Access,
+         Inherited_Members => 48,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 .. 0 => <>
+         ));
+      
       Node_Name_For_Pattern_Detail_List : aliased constant Text_Type :=
         "Pattern_Detail_List";
          Node_Repr_Name_For_Pattern_Detail_List : aliased constant Text_Type :=
@@ -15101,6 +16681,30 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
          List_Element_Type => Type_Index_For_Type_Ref,
          Name              => Node_Name_For_Synthetic_Type_Ref_List'Access,
          Repr_Name         => Node_Repr_Name_For_Synthetic_Type_Ref_List'Access,
+         Inherited_Members => 48,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 .. 0 => <>
+         ));
+      
+      Node_Name_For_Module_Doc_String_Line : aliased constant Text_Type :=
+        "Module_Doc_String_Line";
+         Node_Repr_Name_For_Module_Doc_String_Line : aliased constant Text_Type :=
+           "ModuleDocStringLine";
+      Node_Desc_For_Module_Doc_String_Line : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 0,
+         Base_Type         => Type_Index_For_Lkt_Node,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => True,
+         Token_Node_Kind   => Token_Index_For_Lkt_Module_Doc_String_Line,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Module_Doc_String_Line'Access,
+         Repr_Name         => Node_Repr_Name_For_Module_Doc_String_Line'Access,
          Inherited_Members => 48,
          Derivations       => (
              1 .. 0 => <>
@@ -16505,6 +18109,7 @@ Type_Index_For_Null_Lit => Node_Desc_For_Null_Lit'Access,
 Type_Index_For_Num_Lit => Node_Desc_For_Num_Lit'Access,
 Type_Index_For_String_Lit => Node_Desc_For_String_Lit'Access,
 Type_Index_For_Block_String_Lit => Node_Desc_For_Block_String_Lit'Access,
+Type_Index_For_Module_Doc_String_Lit => Node_Desc_For_Module_Doc_String_Lit'Access,
 Type_Index_For_Single_Line_String_Lit => Node_Desc_For_Single_Line_String_Lit'Access,
 Type_Index_For_Pattern_Single_Line_String_Lit => Node_Desc_For_Pattern_Single_Line_String_Lit'Access,
 Type_Index_For_Logic_Assign => Node_Desc_For_Logic_Assign'Access,
@@ -16550,11 +18155,13 @@ Type_Index_For_Grammar_Expr_List_List => Node_Desc_For_Grammar_Expr_List_List'Ac
 Type_Index_For_Import_List => Node_Desc_For_Import_List'Access,
 Type_Index_For_Lambda_Param_Decl_List => Node_Desc_For_Lambda_Param_Decl_List'Access,
 Type_Index_For_Lkt_Node_List => Node_Desc_For_Lkt_Node_List'Access,
+Type_Index_For_Module_Doc_String_Line_List => Node_Desc_For_Module_Doc_String_Line_List'Access,
 Type_Index_For_Pattern_Detail_List => Node_Desc_For_Pattern_Detail_List'Access,
 Type_Index_For_Pattern_List => Node_Desc_For_Pattern_List'Access,
 Type_Index_For_Ref_Id_List => Node_Desc_For_Ref_Id_List'Access,
 Type_Index_For_Type_Ref_List => Node_Desc_For_Type_Ref_List'Access,
 Type_Index_For_Synthetic_Type_Ref_List => Node_Desc_For_Synthetic_Type_Ref_List'Access,
+Type_Index_For_Module_Doc_String_Line => Node_Desc_For_Module_Doc_String_Line'Access,
 Type_Index_For_Null_Cond_Qualifier => Node_Desc_For_Null_Cond_Qualifier'Access,
 Type_Index_For_Null_Cond_Qualifier_Absent => Node_Desc_For_Null_Cond_Qualifier_Absent'Access,
 Type_Index_For_Null_Cond_Qualifier_Present => Node_Desc_For_Null_Cond_Qualifier_Present'Access,
@@ -16726,6 +18333,7 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Null_Lit => Type_Index_For_Null_Lit,
       Lkt_Num_Lit => Type_Index_For_Num_Lit,
       Lkt_Block_String_Lit => Type_Index_For_Block_String_Lit,
+      Lkt_Module_Doc_String_Lit => Type_Index_For_Module_Doc_String_Lit,
       Lkt_Single_Line_String_Lit => Type_Index_For_Single_Line_String_Lit,
       Lkt_Pattern_Single_Line_String_Lit => Type_Index_For_Pattern_Single_Line_String_Lit,
       Lkt_Logic_Assign => Type_Index_For_Logic_Assign,
@@ -16769,11 +18377,13 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Import_List => Type_Index_For_Import_List,
       Lkt_Lambda_Param_Decl_List => Type_Index_For_Lambda_Param_Decl_List,
       Lkt_Lkt_Node_List => Type_Index_For_Lkt_Node_List,
+      Lkt_Module_Doc_String_Line_List => Type_Index_For_Module_Doc_String_Line_List,
       Lkt_Pattern_Detail_List => Type_Index_For_Pattern_Detail_List,
       Lkt_Pattern_List => Type_Index_For_Pattern_List,
       Lkt_Ref_Id_List => Type_Index_For_Ref_Id_List,
       Lkt_Type_Ref_List => Type_Index_For_Type_Ref_List,
       Lkt_Synthetic_Type_Ref_List => Type_Index_For_Synthetic_Type_Ref_List,
+      Lkt_Module_Doc_String_Line => Type_Index_For_Module_Doc_String_Line,
       Lkt_Null_Cond_Qualifier_Absent => Type_Index_For_Null_Cond_Qualifier_Absent,
       Lkt_Null_Cond_Qualifier_Present => Type_Index_For_Null_Cond_Qualifier_Present,
       Lkt_Op_Amp => Type_Index_For_Op_Amp,

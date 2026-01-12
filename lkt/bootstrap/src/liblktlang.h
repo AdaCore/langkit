@@ -91,9 +91,10 @@ typedef enum {
          * ``lkt_full_decl``, ``lkt_grammar_list_sep``, ``lkt_import``,
          * ``lkt_langkit_root``, ``lkt_lexer_case_rule_send``,
          * ``lkt_lexer_case_rule``, ``lkt_list_kind``,
-         * ``lkt_lkt_node_base_list``, ``lkt_null_cond_qualifier``, ``lkt_op``,
-         * ``lkt_pattern_detail``, ``lkt_pattern``, ``lkt_selector_call``,
-         * ``lkt_type_ref``, ``lkt_var_bind``
+         * ``lkt_lkt_node_base_list``, ``lkt_module_doc_string_line``,
+         * ``lkt_null_cond_qualifier``, ``lkt_op``, ``lkt_pattern_detail``,
+         * ``lkt_pattern``, ``lkt_selector_call``, ``lkt_type_ref``,
+         * ``lkt_var_bind``
          */
     
 
@@ -162,8 +163,7 @@ typedef enum {
     
 
         /*
-         * Branch inside a match expression. LKQL pattern based syntax ``case
-         * <pattern> => <expr>``.
+         * Branch inside a match expression. ``case <pattern> => <expr>``.
          *
          * This node type has no derivation.
          */
@@ -973,7 +973,7 @@ typedef enum {
     
 
         /*
-         * Id referencing a langkit module.
+         * Id referencing a Lkt module.
          *
          * This node type has no derivation.
          */
@@ -1066,7 +1066,7 @@ typedef enum {
          * Base node type for string literals.
          *
          * Derived nodes: ``lkt_block_string_lit``,
-         * ``lkt_single_line_string_lit``
+         * ``lkt_module_doc_string_lit``, ``lkt_single_line_string_lit``
          */
     
 
@@ -1091,6 +1091,15 @@ typedef enum {
     
 
         /*
+         * Module documentation made from multiple line strings. Unlike for
+         * other docstrings, this uses the ``|""`` prefix.
+         *
+         * This node type has no derivation.
+         */
+        lkt_module_doc_string_lit = 95,
+    
+
+        /*
          * Single line string literal expression.
          *
          * Note that in order to reduce the size of the node type hierarchy, we
@@ -1100,7 +1109,7 @@ typedef enum {
          *
          * Derived nodes: ``lkt_pattern_single_line_string_lit``
          */
-        lkt_single_line_string_lit = 95,
+        lkt_single_line_string_lit = 96,
     
 
         /*
@@ -1108,7 +1117,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_pattern_single_line_string_lit = 96,
+        lkt_pattern_single_line_string_lit = 97,
     
 
         /*
@@ -1116,7 +1125,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_assign = 97,
+        lkt_logic_assign = 98,
     
 
         /*
@@ -1124,7 +1133,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_expr = 98,
+        lkt_logic_expr = 99,
     
 
         /*
@@ -1132,7 +1141,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_propagate = 99,
+        lkt_logic_propagate = 100,
     
 
         /*
@@ -1140,7 +1149,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_logic_unify = 100,
+        lkt_logic_unify = 101,
     
 
         /*
@@ -1148,7 +1157,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_match_expr = 101,
+        lkt_match_expr = 102,
     
 
         /*
@@ -1156,7 +1165,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_not_expr = 102,
+        lkt_not_expr = 103,
     
 
         /*
@@ -1164,16 +1173,15 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_paren_expr = 103,
+        lkt_paren_expr = 104,
     
 
         /*
-         * Query comprehension. Reserved for the LKQL_V2 for now. ``from <expr>
-         * match <pattern> [if <expr>]``
+         * Query comprehension. ``from <expr> match <pattern> [if <expr>]``
          *
          * This node type has no derivation.
          */
-        lkt_query = 104,
+        lkt_query = 105,
     
 
         /*
@@ -1181,7 +1189,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_raise_expr = 105,
+        lkt_raise_expr = 106,
     
 
         /*
@@ -1189,7 +1197,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_subscript_expr = 106,
+        lkt_subscript_expr = 107,
     
 
         /*
@@ -1197,7 +1205,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_try_expr = 107,
+        lkt_try_expr = 108,
     
 
         /*
@@ -1205,7 +1213,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_un_op = 108,
+        lkt_un_op = 109,
     
 
         /*
@@ -1214,7 +1222,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_full_decl = 109,
+        lkt_full_decl = 110,
     
 
         /*
@@ -1222,7 +1230,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_list_sep = 110,
+        lkt_grammar_list_sep = 111,
     
 
         /*
@@ -1230,7 +1238,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_import = 111,
+        lkt_import = 112,
     
 
         /*
@@ -1238,7 +1246,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_langkit_root = 112,
+        lkt_langkit_root = 113,
     
 
         /*
@@ -1246,7 +1254,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lexer_case_rule = 113,
+        lkt_lexer_case_rule = 114,
     
 
         /*
@@ -1255,7 +1263,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lexer_case_rule_send = 114,
+        lkt_lexer_case_rule_send = 115,
     
 
         /* list_kind (abstract)  */
@@ -1269,13 +1277,13 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_list_kind_one = 115,
+        lkt_list_kind_one = 116,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_list_kind_zero = 116,
+        lkt_list_kind_zero = 117,
     
 
         /* lkt_node_base_list (abstract)  */
@@ -1290,8 +1298,8 @@ typedef enum {
          * ``lkt_fun_param_decl_list``, ``lkt_grammar_expr_list_list``,
          * ``lkt_grammar_expr_list``, ``lkt_import_list``,
          * ``lkt_lambda_param_decl_list``, ``lkt_lkt_node_list``,
-         * ``lkt_pattern_detail_list``, ``lkt_pattern_list``,
-         * ``lkt_ref_id_list``, ``lkt_type_ref_list``
+         * ``lkt_module_doc_string_line_list``, ``lkt_pattern_detail_list``,
+         * ``lkt_pattern_list``, ``lkt_ref_id_list``, ``lkt_type_ref_list``
          */
     
 
@@ -1300,7 +1308,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_argument_list = 117,
+        lkt_argument_list = 118,
     
 
         /*
@@ -1308,7 +1316,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_base_lexer_case_rule_alt_list = 118,
+        lkt_base_lexer_case_rule_alt_list = 119,
     
 
         /*
@@ -1316,7 +1324,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_base_match_branch_list = 119,
+        lkt_base_match_branch_list = 120,
     
 
         /*
@@ -1324,7 +1332,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_block_string_line_list = 120,
+        lkt_block_string_line_list = 121,
     
 
         /*
@@ -1332,7 +1340,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_call_expr_list = 121,
+        lkt_call_expr_list = 122,
     
 
         /*
@@ -1340,7 +1348,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_decl_annotation_list = 122,
+        lkt_decl_annotation_list = 123,
     
 
         /*
@@ -1348,7 +1356,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_elsif_branch_list = 123,
+        lkt_elsif_branch_list = 124,
     
 
         /*
@@ -1356,7 +1364,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_class_alt_decl_list = 124,
+        lkt_enum_class_alt_decl_list = 125,
     
 
         /*
@@ -1364,7 +1372,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_class_case_list = 125,
+        lkt_enum_class_case_list = 126,
     
 
         /*
@@ -1372,27 +1380,29 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_enum_lit_decl_list = 126,
+        lkt_enum_lit_decl_list = 127,
     
 
         /*
          * List of Expr.
          *
          * This list node can contain one of the following nodes:
-         * ``lkt_any_of``, ``lkt_array_literal``, ``lkt_bin_op``,
-         * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``,
+         * ``lkt_any_of``, ``lkt_array_literal``, ``lkt_big_num_lit``,
+         * ``lkt_bin_op``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+         * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``,
          * ``lkt_dot_expr``, ``lkt_error_on_null``,
          * ``lkt_generic_instantiation``, ``lkt_if_expr``, ``lkt_isa``,
-         * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
-         * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
+         * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+         * ``lkt_logic_expr``, ``lkt_logic_predicate``,
          * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
-         * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``,
-         * ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``,
-         * ``lkt_try_expr``, ``lkt_un_op``
+         * ``lkt_not_expr``, ``lkt_null_lit``, ``lkt_num_lit``,
+         * ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+         * ``lkt_ref_id``, ``lkt_single_line_string_lit``,
+         * ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
          *
          * Derived nodes: ``lkt_any_of_list``
          */
-        lkt_expr_list = 127,
+        lkt_expr_list = 128,
     
 
         /*
@@ -1402,17 +1412,19 @@ typedef enum {
          * expression.
          *
          * This list node can contain one of the following nodes:
-         * ``lkt_array_literal``, ``lkt_block_expr``, ``lkt_call_expr``,
-         * ``lkt_cast_expr``, ``lkt_dot_expr``, ``lkt_error_on_null``,
+         * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_block_expr``,
+         * ``lkt_block_string_lit``, ``lkt_call_expr``, ``lkt_cast_expr``,
+         * ``lkt_char_lit``, ``lkt_dot_expr``, ``lkt_error_on_null``,
          * ``lkt_generic_instantiation``, ``lkt_if_expr``, ``lkt_keep_expr``,
-         * ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_expr``,
-         * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_paren_expr``,
-         * ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``,
+         * ``lkt_lambda_expr``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
+         * ``lkt_match_expr``, ``lkt_null_lit``, ``lkt_num_lit``,
+         * ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+         * ``lkt_ref_id``, ``lkt_single_line_string_lit``,
          * ``lkt_subscript_expr``, ``lkt_try_expr``
          *
          * This node type has no derivation.
          */
-        lkt_any_of_list = 128,
+        lkt_any_of_list = 129,
     
 
         /*
@@ -1420,7 +1432,7 @@ typedef enum {
          *
          * Derived nodes: ``lkt_decl_block``, ``lkt_generic_param_decl_list``
          */
-        lkt_full_decl_list = 129,
+        lkt_full_decl_list = 130,
     
 
         /*
@@ -1429,7 +1441,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_decl_block = 130,
+        lkt_decl_block = 131,
     
 
         /*
@@ -1437,7 +1449,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_param_decl_list = 131,
+        lkt_generic_param_decl_list = 132,
     
 
         /*
@@ -1445,7 +1457,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_fun_param_decl_list = 132,
+        lkt_fun_param_decl_list = 133,
     
 
         /*
@@ -1453,7 +1465,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_expr_list = 133,
+        lkt_grammar_expr_list = 134,
     
 
         /*
@@ -1461,7 +1473,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_grammar_expr_list_list = 134,
+        lkt_grammar_expr_list_list = 135,
     
 
         /*
@@ -1469,7 +1481,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_import_list = 135,
+        lkt_import_list = 136,
     
 
         /*
@@ -1477,29 +1489,38 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_lambda_param_decl_list = 136,
+        lkt_lambda_param_decl_list = 137,
     
 
         /*
          * List of LktNode.
          *
          * This list node can contain one of the following nodes:
-         * ``lkt_any_of``, ``lkt_array_literal``, ``lkt_bin_op``,
-         * ``lkt_block_expr_clause``, ``lkt_block_expr``, ``lkt_call_expr``,
-         * ``lkt_cast_expr``, ``lkt_dot_expr``, ``lkt_error_decl``,
+         * ``lkt_any_of``, ``lkt_array_literal``, ``lkt_big_num_lit``,
+         * ``lkt_bin_op``, ``lkt_block_expr_clause``, ``lkt_block_expr``,
+         * ``lkt_block_string_lit``, ``lkt_call_expr``, ``lkt_cast_expr``,
+         * ``lkt_char_lit``, ``lkt_dot_expr``, ``lkt_error_decl``,
          * ``lkt_error_on_null``, ``lkt_full_decl``,
          * ``lkt_generic_instantiation``, ``lkt_if_expr``, ``lkt_isa``,
          * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lexer_case_rule``,
-         * ``lkt_lit``, ``lkt_logic_assign``, ``lkt_logic_expr``,
-         * ``lkt_logic_predicate``, ``lkt_logic_propagate``,
-         * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``,
+         * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
+         * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
+         * ``lkt_not_expr``, ``lkt_null_lit``, ``lkt_num_lit``,
          * ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
-         * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``,
-         * ``lkt_un_op``
+         * ``lkt_ref_id``, ``lkt_single_line_string_lit``,
+         * ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
          *
          * This node type has no derivation.
          */
-        lkt_lkt_node_list = 137,
+        lkt_lkt_node_list = 138,
+    
+
+        /*
+         * List of ModuleDocStringLine.
+         *
+         * This node type has no derivation.
+         */
+        lkt_module_doc_string_line_list = 139,
     
 
         /*
@@ -1507,7 +1528,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_pattern_detail_list = 138,
+        lkt_pattern_detail_list = 140,
     
 
         /*
@@ -1522,7 +1543,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_pattern_list = 139,
+        lkt_pattern_list = 141,
     
 
         /*
@@ -1530,7 +1551,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_ref_id_list = 140,
+        lkt_ref_id_list = 142,
     
 
         /*
@@ -1542,7 +1563,7 @@ typedef enum {
          *
          * Derived nodes: ``lkt_synthetic_type_ref_list``
          */
-        lkt_type_ref_list = 141,
+        lkt_type_ref_list = 143,
     
 
         /*
@@ -1551,7 +1572,15 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_synthetic_type_ref_list = 142,
+        lkt_synthetic_type_ref_list = 144,
+    
+
+        /*
+         * A single line in a module docstring.
+         *
+         * This node type has no derivation.
+         */
+        lkt_module_doc_string_line = 145,
     
 
         /* null_cond_qualifier (abstract)  */
@@ -1567,13 +1596,13 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_null_cond_qualifier_absent = 143,
+        lkt_null_cond_qualifier_absent = 146,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_null_cond_qualifier_present = 144,
+        lkt_null_cond_qualifier_present = 147,
     
 
         /* op (abstract)  */
@@ -1592,117 +1621,114 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_op_amp = 145,
+        lkt_op_amp = 148,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_and = 146,
+        lkt_op_and = 149,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_div = 147,
+        lkt_op_div = 150,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_eq = 148,
+        lkt_op_eq = 151,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_gt = 149,
+        lkt_op_gt = 152,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_gte = 150,
+        lkt_op_gte = 153,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_logic_and = 151,
+        lkt_op_logic_and = 154,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_logic_or = 152,
+        lkt_op_logic_or = 155,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_lt = 153,
+        lkt_op_lt = 156,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_lte = 154,
+        lkt_op_lte = 157,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_minus = 155,
+        lkt_op_minus = 158,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_mult = 156,
+        lkt_op_mult = 159,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_ne = 157,
+        lkt_op_ne = 160,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_or = 158,
+        lkt_op_or = 161,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_or_int = 159,
+        lkt_op_or_int = 162,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_plus = 160,
+        lkt_op_plus = 163,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_stream_concat = 161,
+        lkt_op_stream_concat = 164,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_op_stream_cons = 162,
+        lkt_op_stream_cons = 165,
     
 
         /* pattern (abstract)  */
         /*
          * Root node class for patterns.
-         *
-         * This is a mostly LKQL specific node for the moment, as are every
-         * node derived from it.
          *
          * The only patterns that are currently used and implemented in Lkt's
          * IsA are ``OrPattern`` and ``TypePattern``.
@@ -1733,7 +1759,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_any_type_pattern = 163,
+        lkt_any_type_pattern = 166,
     
 
         /*
@@ -1747,7 +1773,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_binding_pattern = 164,
+        lkt_binding_pattern = 167,
     
 
         /* bool_pattern (abstract)  */
@@ -1761,13 +1787,13 @@ typedef enum {
         /*
          * This node type has no derivation.
          */
-        lkt_bool_pattern_false = 165,
+        lkt_bool_pattern_false = 168,
     
 
         /*
          * This node type has no derivation.
          */
-        lkt_bool_pattern_true = 166,
+        lkt_bool_pattern_true = 169,
     
 
         /*
@@ -1775,7 +1801,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_ellipsis_pattern = 167,
+        lkt_ellipsis_pattern = 170,
     
 
         /*
@@ -1794,7 +1820,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_extended_pattern = 168,
+        lkt_extended_pattern = 171,
     
 
         /*
@@ -1809,7 +1835,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_filtered_pattern = 169,
+        lkt_filtered_pattern = 172,
     
 
         /*
@@ -1817,7 +1843,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_integer_pattern = 170,
+        lkt_integer_pattern = 173,
     
 
         /*
@@ -1825,7 +1851,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_list_pattern = 171,
+        lkt_list_pattern = 174,
     
 
         /*
@@ -1839,7 +1865,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_not_pattern = 172,
+        lkt_not_pattern = 175,
     
 
         /*
@@ -1847,7 +1873,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_null_pattern = 173,
+        lkt_null_pattern = 176,
     
 
         /*
@@ -1861,7 +1887,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_or_pattern = 174,
+        lkt_or_pattern = 177,
     
 
         /*
@@ -1870,7 +1896,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_paren_pattern = 175,
+        lkt_paren_pattern = 178,
     
 
         /*
@@ -1879,7 +1905,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_regex_pattern = 176,
+        lkt_regex_pattern = 179,
     
 
         /*
@@ -1887,7 +1913,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_tuple_pattern = 177,
+        lkt_tuple_pattern = 180,
     
 
         /*
@@ -1895,7 +1921,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_type_pattern = 178,
+        lkt_type_pattern = 181,
     
 
         /* pattern_detail (abstract)  */
@@ -1912,7 +1938,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_field_pattern_detail = 179,
+        lkt_field_pattern_detail = 182,
     
 
         /*
@@ -1920,7 +1946,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_property_pattern_detail = 180,
+        lkt_property_pattern_detail = 183,
     
 
         /*
@@ -1928,7 +1954,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_selector_pattern_detail = 181,
+        lkt_selector_pattern_detail = 184,
     
 
         /*
@@ -1936,7 +1962,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_selector_call = 182,
+        lkt_selector_call = 185,
     
 
         /* type_ref (abstract)  */
@@ -1954,7 +1980,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_default_list_type_ref = 183,
+        lkt_default_list_type_ref = 186,
     
 
         /*
@@ -1962,7 +1988,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_function_type_ref = 184,
+        lkt_function_type_ref = 187,
     
 
         /*
@@ -1970,7 +1996,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_type_ref = 185,
+        lkt_generic_type_ref = 188,
     
 
         /*
@@ -1978,7 +2004,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_simple_type_ref = 186,
+        lkt_simple_type_ref = 189,
     
 
         /*
@@ -1986,7 +2012,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_var_bind = 187,
+        lkt_var_bind = 190,
 } lkt_node_kind_enum;
 
 /*
@@ -2159,65 +2185,67 @@ typedef enum {
       ,
       LKT_MINUS = 48
       ,
-      LKT_N_E = 49
+      LKT_MODULE_DOC_STRING_LINE = 49
       ,
-      LKT_NOT_KW = 50
+      LKT_N_E = 50
       ,
-      LKT_NULL_KW = 51
+      LKT_NOT_KW = 51
       ,
-      LKT_NUMBER = 52
+      LKT_NULL_KW = 52
       ,
-      LKT_OR_KW = 53
+      LKT_NUMBER = 53
       ,
-      LKT_P_STRING = 54
+      LKT_OR_KW = 54
       ,
-      LKT_PERCENT = 55
+      LKT_P_STRING = 55
       ,
-      LKT_PIPE = 56
+      LKT_PERCENT = 56
       ,
-      LKT_PLUS = 57
+      LKT_PIPE = 57
       ,
-      LKT_PRIVATE_KW = 58
+      LKT_PLUS = 58
       ,
-      LKT_PUBLIC_KW = 59
+      LKT_PRIVATE_KW = 59
       ,
-      LKT_R_BRACE = 60
+      LKT_PUBLIC_KW = 60
       ,
-      LKT_R_BRACK = 61
+      LKT_R_BRACE = 61
       ,
-      LKT_R_PAR = 62
+      LKT_R_BRACK = 62
       ,
-      LKT_RAISE_KW = 63
+      LKT_R_PAR = 63
       ,
-      LKT_RIGHT_ARROW = 64
+      LKT_RAISE_KW = 64
       ,
-      LKT_SELECT_KW = 65
+      LKT_RIGHT_ARROW = 65
       ,
-      LKT_SEMICOLON = 66
+      LKT_SELECT_KW = 66
       ,
-      LKT_STRING = 67
+      LKT_SEMICOLON = 67
       ,
-      LKT_STRUCT_KW = 68
+      LKT_STRING = 68
       ,
-      LKT_TERMINATION = 69
+      LKT_STRUCT_KW = 69
       ,
-      LKT_THEN_KW = 70
+      LKT_TERMINATION = 70
       ,
-      LKT_TIMES = 71
+      LKT_THEN_KW = 71
       ,
-      LKT_TRAIT_KW = 72
+      LKT_TIMES = 72
       ,
-      LKT_TRIPLE_COLON = 73
+      LKT_TRAIT_KW = 73
       ,
-      LKT_TRY_KW = 74
+      LKT_TRIPLE_COLON = 74
       ,
-      LKT_TWO_SIDED_ARROW = 75
+      LKT_TRY_KW = 75
       ,
-      LKT_VAL_KW = 76
+      LKT_TWO_SIDED_ARROW = 76
       ,
-      LKT_WHEN_KW = 77
+      LKT_VAL_KW = 77
       ,
-      LKT_WHITESPACE = 78
+      LKT_WHEN_KW = 78
+      ,
+      LKT_WHITESPACE = 79
 } lkt_token_kind;
 
 typedef struct
@@ -2269,7 +2297,7 @@ typedef struct {
     * Discriminant for DesignatedEnv structures.
     */
    typedef enum {
-      LKT_GRAMMAR_RULE_MAIN_RULE_RULE, LKT_GRAMMAR_RULE_ID_RULE, LKT_GRAMMAR_RULE_REF_ID_RULE, LKT_GRAMMAR_RULE_TYPE_REF_ID_RULE, LKT_GRAMMAR_RULE_DEF_ID_RULE, LKT_GRAMMAR_RULE_DOC_RULE, LKT_GRAMMAR_RULE_IMPORT_STMT_RULE, LKT_GRAMMAR_RULE_IMPORTS_RULE, LKT_GRAMMAR_RULE_LEXER_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_ALT_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_SEND_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PRIMARY_RULE, LKT_GRAMMAR_RULE_GRAMMAR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_IMPLICIT_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_ERROR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_CUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_STOPCUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DISCARD_EXPR_RULE, LKT_GRAMMAR_RULE_TOKEN_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_NO_CASE_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_LITERAL_RULE, LKT_GRAMMAR_RULE_PARSE_NODE_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_REF_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_SEP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_SKIP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_NULL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_TOKEN_RULE, LKT_GRAMMAR_RULE_TYPE_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_PARAM_TYPE_RULE, LKT_GRAMMAR_RULE_ENUM_LIT_DECL_RULE, LKT_GRAMMAR_RULE_FUN_DECL_RULE, LKT_GRAMMAR_RULE_LAMBDA_PARAM_DECL_RULE, LKT_GRAMMAR_RULE_FUN_PARAM_DECL_RULE, LKT_GRAMMAR_RULE_FUN_PARAM_LIST_RULE, LKT_GRAMMAR_RULE_LAMBDA_PARAM_LIST_RULE, LKT_GRAMMAR_RULE_FIELD_DECL_RULE, LKT_GRAMMAR_RULE_LEXER_FAMILY_DECL_RULE, LKT_GRAMMAR_RULE_BARE_DECL_RULE, LKT_GRAMMAR_RULE_DECL_RULE, LKT_GRAMMAR_RULE_TYPE_MEMBER_REF_RULE, LKT_GRAMMAR_RULE_TYPE_EXPR_RULE, LKT_GRAMMAR_RULE_TYPE_REF_RULE, LKT_GRAMMAR_RULE_TYPE_LIST_RULE, LKT_GRAMMAR_RULE_DECLS_RULE, LKT_GRAMMAR_RULE_DECL_BLOCK_RULE, LKT_GRAMMAR_RULE_VAL_DECL_RULE, LKT_GRAMMAR_RULE_DYNVAR_DECL_RULE, LKT_GRAMMAR_RULE_VAR_BIND_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_ACTION_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_DECL_RULE, LKT_GRAMMAR_RULE_BLOCK_RULE, LKT_GRAMMAR_RULE_PATTERN_RULE, LKT_GRAMMAR_RULE_FIL_PATTERN_RULE, LKT_GRAMMAR_RULE_VALUE_PATTERN_RULE, LKT_GRAMMAR_RULE_REGEX_PATTERN_RULE, LKT_GRAMMAR_RULE_BOOL_PATTERN_RULE, LKT_GRAMMAR_RULE_ELLIPSIS_PATTERN_RULE, LKT_GRAMMAR_RULE_INTEGER_PATTERN_RULE, LKT_GRAMMAR_RULE_LIST_PATTERN_RULE, LKT_GRAMMAR_RULE_TUPLE_PATTERN_RULE, LKT_GRAMMAR_RULE_PATTERN_ARG_RULE, LKT_GRAMMAR_RULE_SELECTOR_CALL_RULE, LKT_GRAMMAR_RULE_EXPR_RULE, LKT_GRAMMAR_RULE_REL_RULE, LKT_GRAMMAR_RULE_EQ_RULE, LKT_GRAMMAR_RULE_ARITH_1_RULE, LKT_GRAMMAR_RULE_ARITH_2_RULE, LKT_GRAMMAR_RULE_ARITH_3_RULE, LKT_GRAMMAR_RULE_ISA_OR_PRIMARY_RULE, LKT_GRAMMAR_RULE_LOGIC_PROPAGATE_CALL_RULE, LKT_GRAMMAR_RULE_PRIMARY_RULE, LKT_GRAMMAR_RULE_MATCH_EXPR_RULE, LKT_GRAMMAR_RULE_NUM_LIT_RULE, LKT_GRAMMAR_RULE_BIG_NUM_LIT_RULE, LKT_GRAMMAR_RULE_STRING_LIT_RULE, LKT_GRAMMAR_RULE_BLOCK_STRING_LIT_RULE, LKT_GRAMMAR_RULE_CHAR_LIT_RULE, LKT_GRAMMAR_RULE_IF_EXPR_RULE, LKT_GRAMMAR_RULE_RAISE_EXPR_RULE, LKT_GRAMMAR_RULE_TRY_EXPR_RULE, LKT_GRAMMAR_RULE_ARRAY_LITERAL_RULE, LKT_GRAMMAR_RULE_CALLABLE_REF_RULE, LKT_GRAMMAR_RULE_NULL_COND_QUAL_RULE, LKT_GRAMMAR_RULE_BASIC_EXPR_RULE, LKT_GRAMMAR_RULE_TERM_RULE, LKT_GRAMMAR_RULE_BASIC_NAME_RULE, LKT_GRAMMAR_RULE_LAMBDA_EXPR_RULE, LKT_GRAMMAR_RULE_NULL_LIT_RULE, LKT_GRAMMAR_RULE_ARGUMENT_RULE, LKT_GRAMMAR_RULE_ARGS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_ARGS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_RULE, LKT_GRAMMAR_RULE_QUERY_COMPREHENSION_RULE
+      LKT_GRAMMAR_RULE_MAIN_RULE_RULE, LKT_GRAMMAR_RULE_ID_RULE, LKT_GRAMMAR_RULE_REF_ID_RULE, LKT_GRAMMAR_RULE_TYPE_REF_ID_RULE, LKT_GRAMMAR_RULE_DEF_ID_RULE, LKT_GRAMMAR_RULE_DOC_RULE, LKT_GRAMMAR_RULE_MODULE_DOC_RULE, LKT_GRAMMAR_RULE_IMPORT_STMT_RULE, LKT_GRAMMAR_RULE_IMPORTS_RULE, LKT_GRAMMAR_RULE_LEXER_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DECL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_RULE_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_ALT_RULE, LKT_GRAMMAR_RULE_LEXER_CASE_SEND_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PRIMARY_RULE, LKT_GRAMMAR_RULE_GRAMMAR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_IMPLICIT_PICK_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OPT_ERROR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_CUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_STOPCUT_RULE, LKT_GRAMMAR_RULE_GRAMMAR_OR_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_DISCARD_EXPR_RULE, LKT_GRAMMAR_RULE_TOKEN_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_NO_CASE_LITERAL_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_RULE, LKT_GRAMMAR_RULE_TOKEN_PATTERN_LITERAL_RULE, LKT_GRAMMAR_RULE_PARSE_NODE_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_RULE_REF_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_EXPR_RULE, LKT_GRAMMAR_RULE_GRAMMAR_LIST_SEP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_SKIP_RULE, LKT_GRAMMAR_RULE_GRAMMAR_NULL_RULE, LKT_GRAMMAR_RULE_GRAMMAR_TOKEN_RULE, LKT_GRAMMAR_RULE_TYPE_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_DECL_RULE, LKT_GRAMMAR_RULE_GENERIC_PARAM_TYPE_RULE, LKT_GRAMMAR_RULE_ENUM_LIT_DECL_RULE, LKT_GRAMMAR_RULE_FUN_DECL_RULE, LKT_GRAMMAR_RULE_LAMBDA_PARAM_DECL_RULE, LKT_GRAMMAR_RULE_FUN_PARAM_DECL_RULE, LKT_GRAMMAR_RULE_FUN_PARAM_LIST_RULE, LKT_GRAMMAR_RULE_LAMBDA_PARAM_LIST_RULE, LKT_GRAMMAR_RULE_FIELD_DECL_RULE, LKT_GRAMMAR_RULE_LEXER_FAMILY_DECL_RULE, LKT_GRAMMAR_RULE_BARE_DECL_RULE, LKT_GRAMMAR_RULE_DECL_RULE, LKT_GRAMMAR_RULE_TYPE_MEMBER_REF_RULE, LKT_GRAMMAR_RULE_TYPE_EXPR_RULE, LKT_GRAMMAR_RULE_TYPE_REF_RULE, LKT_GRAMMAR_RULE_TYPE_LIST_RULE, LKT_GRAMMAR_RULE_DECLS_RULE, LKT_GRAMMAR_RULE_DECL_BLOCK_RULE, LKT_GRAMMAR_RULE_VAL_DECL_RULE, LKT_GRAMMAR_RULE_DYNVAR_DECL_RULE, LKT_GRAMMAR_RULE_VAR_BIND_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_ACTION_RULE, LKT_GRAMMAR_RULE_ENV_SPEC_DECL_RULE, LKT_GRAMMAR_RULE_BLOCK_RULE, LKT_GRAMMAR_RULE_PATTERN_RULE, LKT_GRAMMAR_RULE_FIL_PATTERN_RULE, LKT_GRAMMAR_RULE_VALUE_PATTERN_RULE, LKT_GRAMMAR_RULE_REGEX_PATTERN_RULE, LKT_GRAMMAR_RULE_BOOL_PATTERN_RULE, LKT_GRAMMAR_RULE_ELLIPSIS_PATTERN_RULE, LKT_GRAMMAR_RULE_INTEGER_PATTERN_RULE, LKT_GRAMMAR_RULE_LIST_PATTERN_RULE, LKT_GRAMMAR_RULE_TUPLE_PATTERN_RULE, LKT_GRAMMAR_RULE_PATTERN_ARG_RULE, LKT_GRAMMAR_RULE_SELECTOR_CALL_RULE, LKT_GRAMMAR_RULE_EXPR_RULE, LKT_GRAMMAR_RULE_STREAM_CONCAT_RULE, LKT_GRAMMAR_RULE_LOGIC_RULE, LKT_GRAMMAR_RULE_REL_RULE, LKT_GRAMMAR_RULE_EQ_RULE, LKT_GRAMMAR_RULE_ARITH_1_RULE, LKT_GRAMMAR_RULE_ARITH_2_RULE, LKT_GRAMMAR_RULE_ARITH_3_RULE, LKT_GRAMMAR_RULE_ISA_OR_PRIMARY_RULE, LKT_GRAMMAR_RULE_LOGIC_PROPAGATE_CALL_RULE, LKT_GRAMMAR_RULE_PRIMARY_RULE, LKT_GRAMMAR_RULE_MATCH_EXPR_RULE, LKT_GRAMMAR_RULE_NUM_LIT_RULE, LKT_GRAMMAR_RULE_BIG_NUM_LIT_RULE, LKT_GRAMMAR_RULE_STRING_LIT_RULE, LKT_GRAMMAR_RULE_BLOCK_STRING_LIT_RULE, LKT_GRAMMAR_RULE_CHAR_LIT_RULE, LKT_GRAMMAR_RULE_IF_EXPR_RULE, LKT_GRAMMAR_RULE_RAISE_EXPR_RULE, LKT_GRAMMAR_RULE_TRY_EXPR_RULE, LKT_GRAMMAR_RULE_ARRAY_LITERAL_RULE, LKT_GRAMMAR_RULE_CALLABLE_REF_RULE, LKT_GRAMMAR_RULE_NULL_COND_QUAL_RULE, LKT_GRAMMAR_RULE_BASIC_EXPR_RULE, LKT_GRAMMAR_RULE_TERM_RULE, LKT_GRAMMAR_RULE_BASIC_NAME_RULE, LKT_GRAMMAR_RULE_LAMBDA_EXPR_RULE, LKT_GRAMMAR_RULE_NULL_LIT_RULE, LKT_GRAMMAR_RULE_ARGUMENT_RULE, LKT_GRAMMAR_RULE_ARGS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_ARGS_RULE, LKT_GRAMMAR_RULE_DECL_ANNOTATION_RULE, LKT_GRAMMAR_RULE_QUERY_COMPREHENSION_RULE
    } lkt_grammar_rule;
    /*
     * Gramar rule to use for parsing.
@@ -2876,324 +2904,328 @@ typedef enum {
         = 116,
       lkt_member_ref_block_string_lit_f_lines
         = 117,
-      lkt_member_ref_logic_assign_f_dest_var
+      lkt_member_ref_module_doc_string_lit_f_lines
         = 118,
-      lkt_member_ref_logic_assign_f_value
+      lkt_member_ref_logic_assign_f_dest_var
         = 119,
-      lkt_member_ref_logic_expr_f_expr
+      lkt_member_ref_logic_assign_f_value
         = 120,
-      lkt_member_ref_logic_propagate_f_dest_var
+      lkt_member_ref_logic_expr_f_expr
         = 121,
-      lkt_member_ref_logic_propagate_f_call
+      lkt_member_ref_logic_propagate_f_dest_var
         = 122,
-      lkt_member_ref_logic_unify_f_lhs
+      lkt_member_ref_logic_propagate_f_call
         = 123,
-      lkt_member_ref_logic_unify_f_rhs
+      lkt_member_ref_logic_unify_f_lhs
         = 124,
-      lkt_member_ref_match_expr_f_match_expr
+      lkt_member_ref_logic_unify_f_rhs
         = 125,
-      lkt_member_ref_match_expr_f_branches
+      lkt_member_ref_match_expr_f_match_expr
         = 126,
-      lkt_member_ref_not_expr_f_expr
+      lkt_member_ref_match_expr_f_branches
         = 127,
-      lkt_member_ref_paren_expr_f_expr
+      lkt_member_ref_not_expr_f_expr
         = 128,
-      lkt_member_ref_query_f_source
+      lkt_member_ref_paren_expr_f_expr
         = 129,
-      lkt_member_ref_query_f_pattern
+      lkt_member_ref_query_f_source
         = 130,
-      lkt_member_ref_query_f_mapping
+      lkt_member_ref_query_f_pattern
         = 131,
-      lkt_member_ref_query_f_guard
+      lkt_member_ref_query_f_mapping
         = 132,
-      lkt_member_ref_raise_expr_f_dest_type
+      lkt_member_ref_query_f_guard
         = 133,
-      lkt_member_ref_raise_expr_f_except_expr
+      lkt_member_ref_raise_expr_f_dest_type
         = 134,
-      lkt_member_ref_subscript_expr_f_prefix
+      lkt_member_ref_raise_expr_f_except_expr
         = 135,
-      lkt_member_ref_subscript_expr_f_null_cond
+      lkt_member_ref_subscript_expr_f_prefix
         = 136,
-      lkt_member_ref_subscript_expr_f_index
+      lkt_member_ref_subscript_expr_f_null_cond
         = 137,
-      lkt_member_ref_try_expr_f_try_expr
+      lkt_member_ref_subscript_expr_f_index
         = 138,
-      lkt_member_ref_try_expr_f_or_expr
+      lkt_member_ref_try_expr_f_try_expr
         = 139,
-      lkt_member_ref_un_op_f_op
+      lkt_member_ref_try_expr_f_or_expr
         = 140,
-      lkt_member_ref_un_op_f_expr
+      lkt_member_ref_un_op_f_op
         = 141,
-      lkt_member_ref_full_decl_f_doc
+      lkt_member_ref_un_op_f_expr
         = 142,
-      lkt_member_ref_full_decl_f_decl_annotations
+      lkt_member_ref_full_decl_f_doc
         = 143,
-      lkt_member_ref_full_decl_f_decl
+      lkt_member_ref_full_decl_f_decl_annotations
         = 144,
-      lkt_member_ref_grammar_list_sep_f_token
+      lkt_member_ref_full_decl_f_decl
         = 145,
-      lkt_member_ref_grammar_list_sep_f_extra
+      lkt_member_ref_grammar_list_sep_f_token
         = 146,
-      lkt_member_ref_import_f_name
+      lkt_member_ref_grammar_list_sep_f_extra
         = 147,
-      lkt_member_ref_langkit_root_f_imports
+      lkt_member_ref_import_f_name
         = 148,
-      lkt_member_ref_langkit_root_f_decls
+      lkt_member_ref_langkit_root_f_doc
         = 149,
-      lkt_member_ref_lexer_case_rule_f_expr
+      lkt_member_ref_langkit_root_f_imports
         = 150,
-      lkt_member_ref_lexer_case_rule_f_alts
+      lkt_member_ref_langkit_root_f_decls
         = 151,
-      lkt_member_ref_lexer_case_rule_send_f_sent
+      lkt_member_ref_lexer_case_rule_f_expr
         = 152,
-      lkt_member_ref_lexer_case_rule_send_f_match_size
+      lkt_member_ref_lexer_case_rule_f_alts
         = 153,
-      lkt_member_ref_binding_pattern_f_decl
+      lkt_member_ref_lexer_case_rule_send_f_sent
         = 154,
-      lkt_member_ref_binding_pattern_f_sub_pattern
+      lkt_member_ref_lexer_case_rule_send_f_match_size
         = 155,
-      lkt_member_ref_ellipsis_pattern_f_binding
+      lkt_member_ref_binding_pattern_f_decl
         = 156,
-      lkt_member_ref_extended_pattern_f_sub_pattern
+      lkt_member_ref_binding_pattern_f_sub_pattern
         = 157,
-      lkt_member_ref_extended_pattern_f_details
+      lkt_member_ref_ellipsis_pattern_f_binding
         = 158,
-      lkt_member_ref_filtered_pattern_f_sub_pattern
+      lkt_member_ref_extended_pattern_f_sub_pattern
         = 159,
-      lkt_member_ref_filtered_pattern_f_predicate
+      lkt_member_ref_extended_pattern_f_details
         = 160,
-      lkt_member_ref_list_pattern_f_sub_patterns
+      lkt_member_ref_filtered_pattern_f_sub_pattern
         = 161,
-      lkt_member_ref_not_pattern_f_sub_pattern
+      lkt_member_ref_filtered_pattern_f_predicate
         = 162,
-      lkt_member_ref_or_pattern_f_left_sub_pattern
+      lkt_member_ref_list_pattern_f_sub_patterns
         = 163,
-      lkt_member_ref_or_pattern_f_right_sub_pattern
+      lkt_member_ref_not_pattern_f_sub_pattern
         = 164,
-      lkt_member_ref_paren_pattern_f_sub_pattern
+      lkt_member_ref_or_pattern_f_left_sub_pattern
         = 165,
-      lkt_member_ref_tuple_pattern_f_sub_patterns
+      lkt_member_ref_or_pattern_f_right_sub_pattern
         = 166,
-      lkt_member_ref_type_pattern_f_type_name
+      lkt_member_ref_paren_pattern_f_sub_pattern
         = 167,
-      lkt_member_ref_field_pattern_detail_f_id
+      lkt_member_ref_tuple_pattern_f_sub_patterns
         = 168,
-      lkt_member_ref_field_pattern_detail_f_expected_value
+      lkt_member_ref_type_pattern_f_type_name
         = 169,
-      lkt_member_ref_property_pattern_detail_f_call
+      lkt_member_ref_field_pattern_detail_f_id
         = 170,
-      lkt_member_ref_property_pattern_detail_f_expected_value
+      lkt_member_ref_field_pattern_detail_f_expected_value
         = 171,
-      lkt_member_ref_selector_pattern_detail_f_call
+      lkt_member_ref_property_pattern_detail_f_call
         = 172,
-      lkt_member_ref_selector_pattern_detail_f_sub_pattern
+      lkt_member_ref_property_pattern_detail_f_expected_value
         = 173,
-      lkt_member_ref_selector_call_f_quantifier
+      lkt_member_ref_selector_pattern_detail_f_call
         = 174,
-      lkt_member_ref_selector_call_f_binding
+      lkt_member_ref_selector_pattern_detail_f_sub_pattern
         = 175,
-      lkt_member_ref_selector_call_f_selector_call
+      lkt_member_ref_selector_call_f_quantifier
         = 176,
-      lkt_member_ref_function_type_ref_f_param_types
+      lkt_member_ref_selector_call_f_binding
         = 177,
-      lkt_member_ref_function_type_ref_f_return_type
+      lkt_member_ref_selector_call_f_selector_call
         = 178,
-      lkt_member_ref_generic_type_ref_f_type_name
+      lkt_member_ref_function_type_ref_f_param_types
         = 179,
-      lkt_member_ref_generic_type_ref_f_args
+      lkt_member_ref_function_type_ref_f_return_type
         = 180,
-      lkt_member_ref_simple_type_ref_f_type_name
+      lkt_member_ref_generic_type_ref_f_type_name
         = 181,
-      lkt_member_ref_var_bind_f_name
+      lkt_member_ref_generic_type_ref_f_args
         = 182,
-      lkt_member_ref_var_bind_f_expr
+      lkt_member_ref_simple_type_ref_f_type_name
         = 183,
-      lkt_member_ref_parent
+      lkt_member_ref_var_bind_f_name
         = 184,
-      lkt_member_ref_parents
+      lkt_member_ref_var_bind_f_expr
         = 185,
-      lkt_member_ref_children
+      lkt_member_ref_parent
         = 186,
-      lkt_member_ref_token_start
+      lkt_member_ref_parents
         = 187,
-      lkt_member_ref_token_end
+      lkt_member_ref_children
         = 188,
-      lkt_member_ref_child_index
+      lkt_member_ref_token_start
         = 189,
-      lkt_member_ref_previous_sibling
+      lkt_member_ref_token_end
         = 190,
-      lkt_member_ref_next_sibling
+      lkt_member_ref_child_index
         = 191,
-      lkt_member_ref_unit
+      lkt_member_ref_previous_sibling
         = 192,
-      lkt_member_ref_is_ghost
+      lkt_member_ref_next_sibling
         = 193,
-      lkt_member_ref_full_sloc_image
+      lkt_member_ref_unit
         = 194,
-      lkt_member_ref_completion_item_kind_to_int
+      lkt_member_ref_is_ghost
         = 195,
-      lkt_member_ref_lkt_node_p_set_solver_debug_mode
+      lkt_member_ref_full_sloc_image
         = 196,
-      lkt_member_ref_lkt_node_p_basic_trait_gen
+      lkt_member_ref_completion_item_kind_to_int
         = 197,
-      lkt_member_ref_lkt_node_p_basic_trait
+      lkt_member_ref_lkt_node_p_set_solver_debug_mode
         = 198,
-      lkt_member_ref_lkt_node_p_node_gen_trait
+      lkt_member_ref_lkt_node_p_basic_trait_gen
         = 199,
-      lkt_member_ref_lkt_node_p_node_trait
+      lkt_member_ref_lkt_node_p_basic_trait
         = 200,
-      lkt_member_ref_lkt_node_p_indexable_gen_trait
+      lkt_member_ref_lkt_node_p_node_gen_trait
         = 201,
-      lkt_member_ref_lkt_node_p_indexable_trait
+      lkt_member_ref_lkt_node_p_node_trait
         = 202,
-      lkt_member_ref_lkt_node_p_token_node_trait
+      lkt_member_ref_lkt_node_p_indexable_gen_trait
         = 203,
-      lkt_member_ref_lkt_node_p_error_node_trait
+      lkt_member_ref_lkt_node_p_indexable_trait
         = 204,
-      lkt_member_ref_lkt_node_p_char_type
+      lkt_member_ref_lkt_node_p_token_node_trait
         = 205,
-      lkt_member_ref_lkt_node_p_int_type
+      lkt_member_ref_lkt_node_p_error_node_trait
         = 206,
-      lkt_member_ref_lkt_node_p_bool_type
+      lkt_member_ref_lkt_node_p_char_type
         = 207,
-      lkt_member_ref_lkt_node_p_bigint_type
+      lkt_member_ref_lkt_node_p_int_type
         = 208,
-      lkt_member_ref_lkt_node_p_string_type
+      lkt_member_ref_lkt_node_p_bool_type
         = 209,
-      lkt_member_ref_lkt_node_p_symbol_type
+      lkt_member_ref_lkt_node_p_bigint_type
         = 210,
-      lkt_member_ref_lkt_node_p_property_error_type
+      lkt_member_ref_lkt_node_p_string_type
         = 211,
-      lkt_member_ref_lkt_node_p_regexp_type
+      lkt_member_ref_lkt_node_p_symbol_type
         = 212,
-      lkt_member_ref_lkt_node_p_entity_gen_type
+      lkt_member_ref_lkt_node_p_property_error_type
         = 213,
-      lkt_member_ref_lkt_node_p_entity_type
+      lkt_member_ref_lkt_node_p_regexp_type
         = 214,
-      lkt_member_ref_lkt_node_p_logicvar_type
+      lkt_member_ref_lkt_node_p_entity_gen_type
         = 215,
-      lkt_member_ref_lkt_node_p_equation_type
+      lkt_member_ref_lkt_node_p_entity_type
         = 216,
-      lkt_member_ref_lkt_node_p_array_gen_type
+      lkt_member_ref_lkt_node_p_logicvar_type
         = 217,
-      lkt_member_ref_lkt_node_p_array_type
+      lkt_member_ref_lkt_node_p_equation_type
         = 218,
-      lkt_member_ref_lkt_node_p_astlist_gen_type
+      lkt_member_ref_lkt_node_p_array_gen_type
         = 219,
-      lkt_member_ref_lkt_node_p_astlist_type
+      lkt_member_ref_lkt_node_p_array_type
         = 220,
-      lkt_member_ref_lkt_node_p_node_builder_gen_type
+      lkt_member_ref_lkt_node_p_astlist_gen_type
         = 221,
-      lkt_member_ref_lkt_node_p_node_builder_type
+      lkt_member_ref_lkt_node_p_astlist_type
         = 222,
-      lkt_member_ref_lkt_node_p_iterator_gen_trait
+      lkt_member_ref_lkt_node_p_node_builder_gen_type
         = 223,
-      lkt_member_ref_lkt_node_p_iterator_trait
+      lkt_member_ref_lkt_node_p_node_builder_type
         = 224,
-      lkt_member_ref_lkt_node_p_analysis_unit_gen_trait
+      lkt_member_ref_lkt_node_p_iterator_gen_trait
         = 225,
-      lkt_member_ref_lkt_node_p_analysis_unit_trait
+      lkt_member_ref_lkt_node_p_iterator_trait
         = 226,
-      lkt_member_ref_lkt_node_p_topmost_invalid_decl
+      lkt_member_ref_lkt_node_p_analysis_unit_gen_trait
         = 227,
-      lkt_member_ref_lkt_node_p_nameres_diagnostics
+      lkt_member_ref_lkt_node_p_analysis_unit_trait
         = 228,
-      lkt_member_ref_lkt_node_p_solve_enclosing_context
+      lkt_member_ref_lkt_node_p_topmost_invalid_decl
         = 229,
-      lkt_member_ref_lkt_node_p_xref_entry_point
+      lkt_member_ref_lkt_node_p_nameres_diagnostics
         = 230,
-      lkt_member_ref_lkt_node_p_complete
+      lkt_member_ref_lkt_node_p_solve_enclosing_context
         = 231,
-      lkt_member_ref_base_match_branch_p_match_part
+      lkt_member_ref_lkt_node_p_xref_entry_point
         = 232,
-      lkt_member_ref_class_qualifier_p_as_bool
+      lkt_member_ref_lkt_node_p_complete
         = 233,
-      lkt_member_ref_decl_p_custom_image
+      lkt_member_ref_base_match_branch_p_match_part
         = 234,
-      lkt_member_ref_decl_p_decl_type_name
+      lkt_member_ref_class_qualifier_p_as_bool
         = 235,
-      lkt_member_ref_decl_p_def_ids
+      lkt_member_ref_decl_p_custom_image
         = 236,
-      lkt_member_ref_decl_p_as_bare_decl
+      lkt_member_ref_decl_p_decl_type_name
         = 237,
-      lkt_member_ref_decl_p_get_type
+      lkt_member_ref_decl_p_def_ids
         = 238,
-      lkt_member_ref_decl_p_get_cast_type
+      lkt_member_ref_decl_p_as_bare_decl
         = 239,
-      lkt_member_ref_decl_p_get_keep_type
+      lkt_member_ref_decl_p_get_type
         = 240,
-      lkt_member_ref_decl_p_get_suffix_type
+      lkt_member_ref_decl_p_get_cast_type
         = 241,
-      lkt_member_ref_decl_p_is_generic
+      lkt_member_ref_decl_p_get_keep_type
         = 242,
-      lkt_member_ref_decl_p_return_type_is_instantiated
+      lkt_member_ref_decl_p_get_suffix_type
         = 243,
-      lkt_member_ref_decl_p_is_instantiated
+      lkt_member_ref_decl_p_is_generic
         = 244,
-      lkt_member_ref_decl_p_name
+      lkt_member_ref_decl_p_return_type_is_instantiated
         = 245,
-      lkt_member_ref_decl_p_full_name
+      lkt_member_ref_decl_p_is_instantiated
         = 246,
-      lkt_member_ref_fun_decl_p_is_dynamic_combiner
+      lkt_member_ref_decl_p_name
         = 247,
-      lkt_member_ref_fun_decl_p_find_all_overrides
+      lkt_member_ref_decl_p_full_name
         = 248,
-      lkt_member_ref_type_decl_p_def_id
+      lkt_member_ref_fun_decl_p_is_dynamic_combiner
         = 249,
-      lkt_member_ref_type_decl_p_base_type
+      lkt_member_ref_fun_decl_p_find_all_overrides
         = 250,
-      lkt_member_ref_type_decl_p_base_type_if_entity
+      lkt_member_ref_type_decl_p_def_id
         = 251,
-      lkt_member_ref_excludes_null_p_as_bool
+      lkt_member_ref_type_decl_p_base_type
         = 252,
-      lkt_member_ref_expr_p_get_type
+      lkt_member_ref_type_decl_p_base_type_if_entity
         = 253,
-      lkt_member_ref_expr_p_get_generic_type
+      lkt_member_ref_excludes_null_p_as_bool
         = 254,
-      lkt_member_ref_expr_p_get_expected_type
+      lkt_member_ref_expr_p_get_type
         = 255,
-      lkt_member_ref_expr_p_referenced_decl
+      lkt_member_ref_expr_p_get_generic_type
         = 256,
-      lkt_member_ref_token_lit_p_denoted_value
+      lkt_member_ref_expr_p_get_expected_type
         = 257,
-      lkt_member_ref_token_pattern_lit_p_denoted_value
+      lkt_member_ref_expr_p_referenced_decl
         = 258,
-      lkt_member_ref_id_p_custom_image
+      lkt_member_ref_token_lit_p_denoted_value
         = 259,
-      lkt_member_ref_def_id_p_name
+      lkt_member_ref_token_pattern_lit_p_denoted_value
         = 260,
-      lkt_member_ref_def_id_p_get_implementatinons
+      lkt_member_ref_id_p_custom_image
         = 261,
-      lkt_member_ref_def_id_p_decl_detail
+      lkt_member_ref_def_id_p_name
         = 262,
-      lkt_member_ref_def_id_p_completion_item_kind
+      lkt_member_ref_def_id_p_get_implementatinons
         = 263,
-      lkt_member_ref_def_id_p_doc
+      lkt_member_ref_def_id_p_decl_detail
         = 264,
-      lkt_member_ref_def_id_p_find_all_references
+      lkt_member_ref_def_id_p_completion_item_kind
         = 265,
-      lkt_member_ref_ref_id_p_referenced_defining_name
+      lkt_member_ref_def_id_p_doc
         = 266,
-      lkt_member_ref_char_lit_p_denoted_value
+      lkt_member_ref_def_id_p_find_all_references
         = 267,
-      lkt_member_ref_string_lit_p_denoted_value
+      lkt_member_ref_ref_id_p_referenced_defining_name
         = 268,
-      lkt_member_ref_string_lit_p_is_prefixed_string
+      lkt_member_ref_char_lit_p_denoted_value
         = 269,
-      lkt_member_ref_string_lit_p_prefix
+      lkt_member_ref_string_lit_p_denoted_value
         = 270,
-      lkt_member_ref_string_lit_p_is_regexp_literal
+      lkt_member_ref_string_lit_p_is_prefixed_string
         = 271,
-      lkt_member_ref_full_decl_p_has_annotation
+      lkt_member_ref_string_lit_p_prefix
         = 272,
-      lkt_member_ref_import_p_referenced_unit
+      lkt_member_ref_string_lit_p_is_regexp_literal
         = 273,
-      lkt_member_ref_langkit_root_p_fetch_prelude
+      lkt_member_ref_full_decl_p_has_annotation
         = 274,
-      lkt_member_ref_null_cond_qualifier_p_as_bool
+      lkt_member_ref_import_p_referenced_unit
         = 275,
-      lkt_member_ref_type_ref_p_referenced_decl
+      lkt_member_ref_langkit_root_p_fetch_prelude
         = 276,
+      lkt_member_ref_null_cond_qualifier_p_as_bool
+        = 277,
+      lkt_member_ref_type_ref_p_referenced_decl
+        = 278,
 } lkt_introspection_member_ref;
 
 /*
@@ -4701,14 +4733,16 @@ extern int lkt_argument_f_name(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -4771,14 +4805,16 @@ extern int lkt_lexer_case_rule_default_alt_f_send(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5140,14 +5176,16 @@ extern int lkt_explicitly_typed_decl_f_decl_type(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * This field may be null even when there are no parsing errors.
  */
@@ -5195,14 +5233,16 @@ extern int lkt_fun_param_decl_f_decl_annotations(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5268,14 +5308,16 @@ extern int lkt_fun_decl_f_trait_ref(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * This field may be null even when there are no parsing errors.
  */
@@ -5607,14 +5649,16 @@ extern int lkt_decl_annotation_args_f_args(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5632,14 +5676,16 @@ extern int lkt_elsif_branch_f_cond_expr(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5752,11 +5798,13 @@ extern int lkt_expr_p_referenced_decl(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_expr``,
- * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_paren_expr``,
- * ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``,
+ * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_expr``,
+ * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
  * ``lkt_try_expr``
  *
  * When there are no parsing errors, this field is never null.
@@ -5775,13 +5823,14 @@ extern int lkt_any_of_f_expr(
 
 /*
  * This field contains a list that itself contains one of the following nodes:
- * ``lkt_array_literal``, ``lkt_block_expr``, ``lkt_call_expr``,
- * ``lkt_cast_expr``, ``lkt_dot_expr``, ``lkt_error_on_null``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_block_expr``,
+ * ``lkt_block_string_lit``, ``lkt_call_expr``, ``lkt_cast_expr``,
+ * ``lkt_char_lit``, ``lkt_dot_expr``, ``lkt_error_on_null``,
  * ``lkt_generic_instantiation``, ``lkt_if_expr``, ``lkt_keep_expr``,
- * ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_expr``,
- * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_paren_expr``,
- * ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``,
- * ``lkt_try_expr``
+ * ``lkt_lambda_expr``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
+ * ``lkt_match_expr``, ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``,
+ * ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``,
+ * ``lkt_single_line_string_lit``, ``lkt_subscript_expr``, ``lkt_try_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5799,14 +5848,16 @@ extern int lkt_any_of_f_values(
 
 /*
  * This field contains a list that itself contains one of the following nodes:
- * ``lkt_any_of``, ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_any_of``, ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5842,11 +5893,12 @@ extern int lkt_array_literal_f_element_type(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
+ * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5879,14 +5931,16 @@ extern int lkt_base_call_expr_f_args(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5919,14 +5973,16 @@ extern int lkt_bin_op_f_op(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5944,15 +6000,17 @@ extern int lkt_bin_op_f_right(
 
 /*
  * This field contains a list that itself contains one of the following nodes:
- * ``lkt_any_of``, ``lkt_array_literal``, ``lkt_bin_op``,
- * ``lkt_block_expr_clause``, ``lkt_block_expr``, ``lkt_call_expr``,
- * ``lkt_cast_expr``, ``lkt_dot_expr``, ``lkt_error_decl``,
- * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
+ * ``lkt_any_of``, ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr_clause``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
+ * ``lkt_error_decl``, ``lkt_error_on_null``, ``lkt_generic_instantiation``,
+ * ``lkt_if_expr``, ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``,
  * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
  * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_not_expr``, ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``,
+ * ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``,
+ * ``lkt_single_line_string_lit``, ``lkt_subscript_expr``, ``lkt_try_expr``,
+ * ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -5970,11 +6028,12 @@ extern int lkt_block_expr_f_clauses(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
+ * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -6040,11 +6099,12 @@ extern int lkt_cast_expr_f_dest_type(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
+ * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -6092,11 +6152,12 @@ extern int lkt_dot_expr_f_suffix(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
+ * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -6114,11 +6175,12 @@ extern int lkt_error_on_null_f_expr(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
+ * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -6716,14 +6778,16 @@ extern int lkt_ref_id_p_referenced_defining_name(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -6741,14 +6805,16 @@ extern int lkt_if_expr_f_cond_expr(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -6781,14 +6847,16 @@ extern int lkt_if_expr_f_alternatives(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -6806,11 +6874,13 @@ extern int lkt_if_expr_f_else_expr(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_expr``,
- * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_paren_expr``,
- * ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``,
+ * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_expr``,
+ * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
  * ``lkt_try_expr``
  *
  * When there are no parsing errors, this field is never null.
@@ -6850,11 +6920,12 @@ extern int lkt_isa_f_pattern(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
+ * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -6938,14 +7009,16 @@ extern int lkt_lambda_expr_f_return_type(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7072,14 +7145,31 @@ extern int lkt_block_string_lit_f_lines(
 
 
 /*
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_module_doc_string_lit_f_lines(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_block_expr``, ``lkt_call_expr``,
- * ``lkt_cast_expr``, ``lkt_dot_expr``, ``lkt_error_on_null``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_block_expr``,
+ * ``lkt_block_string_lit``, ``lkt_call_expr``, ``lkt_cast_expr``,
+ * ``lkt_char_lit``, ``lkt_dot_expr``, ``lkt_error_on_null``,
  * ``lkt_generic_instantiation``, ``lkt_if_expr``, ``lkt_isa``,
- * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_assign``,
+ * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
  * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
- * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``,
- * ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_null_lit``, ``lkt_num_lit``,
+ * ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``,
+ * ``lkt_single_line_string_lit``, ``lkt_subscript_expr``, ``lkt_try_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7097,11 +7187,13 @@ extern int lkt_logic_assign_f_dest_var(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_expr``,
- * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_paren_expr``,
- * ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``,
+ * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_expr``,
+ * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
  * ``lkt_try_expr``
  *
  * When there are no parsing errors, this field is never null.
@@ -7138,13 +7230,15 @@ extern int lkt_logic_expr_f_expr(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_block_expr``, ``lkt_call_expr``,
- * ``lkt_cast_expr``, ``lkt_dot_expr``, ``lkt_error_on_null``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_block_expr``,
+ * ``lkt_block_string_lit``, ``lkt_call_expr``, ``lkt_cast_expr``,
+ * ``lkt_char_lit``, ``lkt_dot_expr``, ``lkt_error_on_null``,
  * ``lkt_generic_instantiation``, ``lkt_if_expr``, ``lkt_isa``,
- * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_assign``,
+ * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
  * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
- * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``,
- * ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_null_lit``, ``lkt_num_lit``,
+ * ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``,
+ * ``lkt_single_line_string_lit``, ``lkt_subscript_expr``, ``lkt_try_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7177,13 +7271,15 @@ extern int lkt_logic_propagate_f_call(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_block_expr``, ``lkt_call_expr``,
- * ``lkt_cast_expr``, ``lkt_dot_expr``, ``lkt_error_on_null``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_block_expr``,
+ * ``lkt_block_string_lit``, ``lkt_call_expr``, ``lkt_cast_expr``,
+ * ``lkt_char_lit``, ``lkt_dot_expr``, ``lkt_error_on_null``,
  * ``lkt_generic_instantiation``, ``lkt_if_expr``, ``lkt_isa``,
- * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_assign``,
+ * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
  * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
- * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``,
- * ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_null_lit``, ``lkt_num_lit``,
+ * ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``,
+ * ``lkt_single_line_string_lit``, ``lkt_subscript_expr``, ``lkt_try_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7201,11 +7297,13 @@ extern int lkt_logic_unify_f_lhs(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_expr``,
- * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_paren_expr``,
- * ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``,
+ * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_expr``,
+ * ``lkt_logic_predicate``, ``lkt_match_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
  * ``lkt_try_expr``
  *
  * When there are no parsing errors, this field is never null.
@@ -7224,14 +7322,16 @@ extern int lkt_logic_unify_f_rhs(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7264,14 +7364,16 @@ extern int lkt_match_expr_f_branches(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_null_lit``, ``lkt_num_lit``,
  * ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_single_line_string_lit``, ``lkt_subscript_expr``, ``lkt_try_expr``,
+ * ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7289,14 +7391,16 @@ extern int lkt_not_expr_f_expr(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7314,14 +7418,16 @@ extern int lkt_paren_expr_f_expr(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7360,14 +7466,16 @@ extern int lkt_query_f_pattern(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * This field may be null even when there are no parsing errors.
  */
@@ -7385,14 +7493,16 @@ extern int lkt_query_f_mapping(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * This field may be null even when there are no parsing errors.
  */
@@ -7428,14 +7538,16 @@ extern int lkt_raise_expr_f_dest_type(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7453,11 +7565,12 @@ extern int lkt_raise_expr_f_except_expr(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
+ * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7490,14 +7603,16 @@ extern int lkt_subscript_expr_f_null_cond(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7515,14 +7630,16 @@ extern int lkt_subscript_expr_f_index(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7540,14 +7657,16 @@ extern int lkt_try_expr_f_try_expr(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * This field may be null even when there are no parsing errors.
  */
@@ -7583,13 +7702,15 @@ extern int lkt_un_op_f_op(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_block_expr``, ``lkt_call_expr``,
- * ``lkt_cast_expr``, ``lkt_dot_expr``, ``lkt_error_on_null``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_block_expr``,
+ * ``lkt_block_string_lit``, ``lkt_call_expr``, ``lkt_cast_expr``,
+ * ``lkt_char_lit``, ``lkt_dot_expr``, ``lkt_error_on_null``,
  * ``lkt_generic_instantiation``, ``lkt_if_expr``, ``lkt_isa``,
- * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``, ``lkt_logic_assign``,
+ * ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
  * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
- * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``,
- * ``lkt_raise_expr``, ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_null_lit``, ``lkt_num_lit``,
+ * ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``, ``lkt_ref_id``,
+ * ``lkt_single_line_string_lit``, ``lkt_subscript_expr``, ``lkt_try_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -7606,6 +7727,9 @@ extern int lkt_un_op_f_expr(
 
 
 /*
+ * This field can contain one of the following nodes: ``lkt_block_string_lit``,
+ * ``lkt_single_line_string_lit``
+ *
  * This field may be null even when there are no parsing errors.
  */
 extern int lkt_full_decl_f_doc(
@@ -7727,6 +7851,21 @@ extern int lkt_import_p_referenced_unit(
 
 
     lkt_analysis_unit *value_p
+);
+
+
+        
+
+
+
+/*
+ * This field may be null even when there are no parsing errors.
+ */
+extern int lkt_langkit_root_f_doc(
+    lkt_node *node,
+
+
+    lkt_node *value_p
 );
 
 
@@ -7971,14 +8110,16 @@ extern int lkt_filtered_pattern_f_sub_pattern(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -8176,11 +8317,12 @@ extern int lkt_field_pattern_detail_f_expected_value(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
+ * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -8285,11 +8427,12 @@ extern int lkt_selector_call_f_binding(
 
 /*
  * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_block_expr``, ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
+ * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_lit``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_match_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_ref_id``,
- * ``lkt_subscript_expr``
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
+ * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
  *
  * When there are no parsing errors, this field is never null.
  */
@@ -8427,14 +8570,16 @@ extern int lkt_var_bind_f_name(
 
 /*
  * This field can contain one of the following nodes: ``lkt_any_of``,
- * ``lkt_array_literal``, ``lkt_bin_op``, ``lkt_block_expr``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_dot_expr``,
+ * ``lkt_array_literal``, ``lkt_big_num_lit``, ``lkt_bin_op``,
+ * ``lkt_block_expr``, ``lkt_block_string_lit``, ``lkt_call_expr``,
+ * ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
  * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_if_expr``,
- * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_lit``,
- * ``lkt_logic_assign``, ``lkt_logic_expr``, ``lkt_logic_predicate``,
- * ``lkt_logic_propagate``, ``lkt_logic_unify``, ``lkt_match_expr``,
- * ``lkt_not_expr``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
- * ``lkt_ref_id``, ``lkt_subscript_expr``, ``lkt_try_expr``, ``lkt_un_op``
+ * ``lkt_isa``, ``lkt_keep_expr``, ``lkt_lambda_expr``, ``lkt_logic_assign``,
+ * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_logic_propagate``,
+ * ``lkt_logic_unify``, ``lkt_match_expr``, ``lkt_not_expr``, ``lkt_null_lit``,
+ * ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``, ``lkt_raise_expr``,
+ * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``,
+ * ``lkt_try_expr``, ``lkt_un_op``
  *
  * When there are no parsing errors, this field is never null.
  */

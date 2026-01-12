@@ -16,6 +16,8 @@ pragma Warnings (Off, "obsolescent");
 with Liblktlang_Support.Generic_API.Introspection;
 use Liblktlang_Support.Generic_API.Introspection;
 
+with Prettier_Ada.Documents;
+
 package Liblktlang_Support.Internal.Unparsing is
 
    ---------------------
@@ -153,11 +155,15 @@ package Liblktlang_Support.Internal.Unparsing is
    --  indexes for concrete nodes are not continuous, some null items are
    --  expected in Node_Unparser_Map values.
 
+   type Format_Options_Access is access constant
+     Prettier_Ada.Documents.Format_Options_Type;
+
    type Unparsers_Impl is record
       Token_Spacings : Token_Spacing_Table;
       Token_Newlines : Token_Newline_Table;
       Node_Unparsers : Node_Unparser_Map;
       Default_Config : Bytes_Access;
+      Format_Options : Format_Options_Access;
    end record;
    type Unparsers is access constant Unparsers_Impl;
 

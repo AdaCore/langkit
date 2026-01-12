@@ -4,6 +4,8 @@ with Liblktlang_Support.Internal.Unparsing;
 use Liblktlang_Support.Internal.Unparsing;
 with Liblktlang_Support.Text;     use Liblktlang_Support.Text;
 
+with Prettier_Ada.Documents; use Prettier_Ada.Documents;
+
 with Liblktlang.Generic_Introspection;
 use Liblktlang.Generic_Introspection;
 
@@ -78,6 +80,7 @@ private package Liblktlang.Unparsers is
       Token_Index_For_Lkt_Lexing_Failure => False,
       Token_Index_For_Lkt_Match_Kw => False,
       Token_Index_For_Lkt_Minus => False,
+      Token_Index_For_Lkt_Module_Doc_String_Line => True,
       Token_Index_For_Lkt_N_E => False,
       Token_Index_For_Lkt_Not_Kw => False,
       Token_Index_For_Lkt_Null_Kw => False,
@@ -1433,6 +1436,16 @@ private package Liblktlang.Unparsers is
 
          
 
+         Bare_Module_Doc_String_Lit_Fields_Unparser_List
+            : aliased constant Field_Unparser_List_Impl
+            := (N               => 1,
+                Field_Unparsers =>
+                  (1 => (Member_Index_For_Module_Doc_String_Lit_F_Lines, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                Inter_Tokens    =>
+                  (1 => Empty_Token_Sequence));
+
+         
+
          Bare_Logic_Assign_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
             := (N               => 2,
@@ -1615,13 +1628,15 @@ private package Liblktlang.Unparsers is
 
          Bare_Langkit_Root_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
-            := (N               => 2,
+            := (N               => 3,
                 Field_Unparsers =>
-                  (1 => (Member_Index_For_Langkit_Root_F_Imports, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Langkit_Root_F_Decls, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                  (1 => (Member_Index_For_Langkit_Root_F_Doc, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   2 => (Member_Index_For_Langkit_Root_F_Imports, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   3 => (Member_Index_For_Langkit_Root_F_Decls, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Empty_Token_Sequence));
+                   2 => Empty_Token_Sequence,
+                   3 => Empty_Token_Sequence));
 
          
 
@@ -2467,6 +2482,13 @@ private package Liblktlang.Unparsers is
             Post_Tokens => Empty_Token_Sequence);
       
 
+         Unparser_For_Module_Doc_String_Lit : aliased constant Node_Unparser_Impl :=
+           (Kind => Regular,
+            Pre_Tokens => Empty_Token_Sequence,
+            Field_Unparsers => Bare_Module_Doc_String_Lit_Fields_Unparser_List'Access,
+            Post_Tokens => Empty_Token_Sequence);
+      
+
          Unparser_For_Single_Line_String_Lit : aliased constant Node_Unparser_Impl :=
            (Kind => Token);
       
@@ -2745,6 +2767,12 @@ private package Liblktlang.Unparsers is
             Sep_Extra => Allow_None);
       
 
+         Unparser_For_Module_Doc_String_Line_List : aliased constant Node_Unparser_Impl :=
+           (Kind => List,
+            Separator => null,
+            Sep_Extra => Allow_None);
+      
+
          Unparser_For_Pattern_Detail_List : aliased constant Node_Unparser_Impl :=
            (Kind => List,
             Separator => Token_Unparser_8'Access,
@@ -2769,6 +2797,10 @@ private package Liblktlang.Unparsers is
             Sep_Extra => Allow_None);
       
 
+      
+
+         Unparser_For_Module_Doc_String_Line : aliased constant Node_Unparser_Impl :=
+           (Kind => Token);
       
 
       
@@ -3319,6 +3351,8 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Block_String_Lit => Unparser_For_Block_String_Lit'Access
          ,
+         Type_Index_For_Module_Doc_String_Lit => Unparser_For_Module_Doc_String_Lit'Access
+         ,
          Type_Index_For_Single_Line_String_Lit => Unparser_For_Single_Line_String_Lit'Access
          ,
          Type_Index_For_Pattern_Single_Line_String_Lit => Unparser_For_Pattern_Single_Line_String_Lit'Access
@@ -3409,6 +3443,8 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Lkt_Node_List => Unparser_For_Lkt_Node_List'Access
          ,
+         Type_Index_For_Module_Doc_String_Line_List => Unparser_For_Module_Doc_String_Line_List'Access
+         ,
          Type_Index_For_Pattern_Detail_List => Unparser_For_Pattern_Detail_List'Access
          ,
          Type_Index_For_Pattern_List => Unparser_For_Pattern_List'Access
@@ -3418,6 +3454,8 @@ private package Liblktlang.Unparsers is
          Type_Index_For_Type_Ref_List => Unparser_For_Type_Ref_List'Access
          ,
          Type_Index_For_Synthetic_Type_Ref_List => null
+         ,
+         Type_Index_For_Module_Doc_String_Line => Unparser_For_Module_Doc_String_Line'Access
          ,
          Type_Index_For_Null_Cond_Qualifier => null
          ,
@@ -4694,6 +4732,9 @@ private package Liblktlang.Unparsers is
       & "        ""f_decl_type"": [""whitespace"", ""recurse""]" & Character'Val (10)
       & "      }" & Character'Val (10)
       & "    }," & Character'Val (10)
+      & "    ""ModuleDocStringLine"": {}," & Character'Val (10)
+      & "    ""ModuleDocStringLineList"": {}," & Character'Val (10)
+      & "    ""ModuleDocStringLit"": {}," & Character'Val (10)
       & "    ""ModuleRefId"": {}," & Character'Val (10)
       & "    ""NotExpr"": {" & Character'Val (10)
       & "      ""fields"": {" & Character'Val (10)
@@ -4926,10 +4967,21 @@ private package Liblktlang.Unparsers is
       & "}" & Character'Val (10)
 ;
 
+   
+   Format_Options : aliased constant Format_Options_Type :=
+     (Width       => 80,
+      Indentation =>
+        (Kind         => Prettier_Ada.Documents.Spaces,
+         Width        => 2,
+         Continuation => 2,
+         Offset       => (Tabs => 0, Spaces => 0)),
+      End_Of_Line => Prettier_Ada.Documents.LF);
+
    Unparsers : aliased constant Unparsers_Impl :=
      (Token_Spacings'Access,
       Token_Newlines'Access,
       Node_Unparsers'Access,
-      Default_Config'Access);
+      Default_Config'Access,
+      Format_Options'Access);
 
 end Liblktlang.Unparsers;

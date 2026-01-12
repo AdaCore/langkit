@@ -5145,6 +5145,29 @@ end;
 when others => null;
 end case;
 end;
+when Lkt_Module_Doc_String_Lit_Range =>
+declare
+N_Bare_Module_Doc_String_Lit : constant Analysis.Module_Doc_String_Lit := N_Bare_String_Lit.As_Module_Doc_String_Lit;
+begin
+case Member is
+when Member_Index_For_Module_Doc_String_Lit_F_Lines =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Module_Doc_String_Lit.F_Lines);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
 when others => null;
 end case;
 end;
@@ -5760,6 +5783,21 @@ declare
 N_Bare_Langkit_Root : constant Analysis.Langkit_Root := N.As_Langkit_Root;
 begin
 case Member is
+when Member_Index_For_Langkit_Root_F_Doc =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Langkit_Root.F_Doc);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Langkit_Root_F_Imports =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;

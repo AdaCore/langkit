@@ -4939,6 +4939,90 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Module_Doc_String_Line
+        (Node : Lkt_Node'Class) return Module_Doc_String_Line
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Module_Doc_String_Line;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Module_Doc_String_Line_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ModuleDocStringLine";
+         
+            end if;
+      end;
+      function As_Module_Doc_String_Line_List
+        (Node : Lkt_Node'Class) return Module_Doc_String_Line_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Module_Doc_String_Line_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Module_Doc_String_Line_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ASTList[ModuleDocStringLine]";
+         
+            end if;
+      end;
+      function As_Module_Doc_String_Lit
+        (Node : Lkt_Node'Class) return Module_Doc_String_Lit
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Module_Doc_String_Lit;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Module_Doc_String_Lit_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ModuleDocStringLit";
+         
+            end if;
+      end;
       function As_Module_Ref_Id
         (Node : Lkt_Node'Class) return Module_Ref_Id
       is
@@ -14701,6 +14785,29 @@ package body Liblktlang.Analysis is
          
    
 
+   function F_Doc
+     (Node : Langkit_Root'Class) return Module_Doc_String_Lit
+   is
+      Result : Bare_Module_Doc_String_Lit;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Langkit_Root_F_Doc (Node.Internal.Node);
+         if Result = null then
+            return No_Module_Doc_String_Lit;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Doc;
+
+
+         
+   
+
    function F_Imports
      (Node : Langkit_Root'Class) return Import_List
    is
@@ -15380,6 +15487,104 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+
+
+
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Module_Doc_String_Line_List'Class; Index : Positive) return Module_Doc_String_Line
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Module_Doc_String_Line;
+         end List_Child;
+
+         
+
+         function Module_Doc_String_Line_List_First (Node : Module_Doc_String_Line_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Module_Doc_String_Line_List_Next
+           (Node : Module_Doc_String_Line_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Module_Doc_String_Line_List_Has_Element
+           (Node : Module_Doc_String_Line_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Module_Doc_String_Line_List_Element
+           (Node : Module_Doc_String_Line_List; Cursor : Positive) return Module_Doc_String_Line'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Module_Doc_String_Line'(Child.As_Module_Doc_String_Line);
+         end;
+
+
+
+
+
+
+         
+   
+
+   function F_Lines
+     (Node : Module_Doc_String_Lit'Class) return Module_Doc_String_Line_List
+   is
+      Result : Bare_Module_Doc_String_Line_List;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Module_Doc_String_Lit_F_Lines (Node.Internal.Node);
+         if Result = null then
+            return No_Module_Doc_String_Line_List;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Lines;
 
 
 

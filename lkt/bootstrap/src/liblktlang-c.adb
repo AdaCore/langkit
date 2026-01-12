@@ -52,4 +52,25 @@ package body Liblktlang.C is
       return Wrap_Unit (+Unit);
    end Ada_Unit;
 
+   ------------
+   -- C_Node --
+   ------------
+
+   function C_Node (Node : Analysis.Lkt_Node) return C_Node_Type
+   is
+      N : constant Implementation.Internal_Entity := Unwrap_Entity (Node);
+   begin
+      return C_Node_Type (N);
+   end C_Node;
+
+   --------------
+   -- Ada_Node --
+   --------------
+
+   function Ada_Node
+     (Node : C_Node_Type) return Analysis.Lkt_Node is
+   begin
+      return Wrap_Node (Node.Node, Node.Info);
+   end Ada_Node;
+
 end Liblktlang.C;

@@ -3,6 +3,7 @@ with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 pragma Warnings (Off, "internal");
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
 pragma Warnings (On, "internal");
+with Ada.Unchecked_Deallocation;
 
 with GNATCOLL.Iconv;
 
@@ -21,26 +22,31 @@ use Liblktlang_Support.Token_Data_Handlers;
 
 package body Liblktlang_Support.Rewriting.Unparsing is
 
-   package Rewriting_Tile_Sets is new Ada.Containers.Vectors
-     (Index_Type => Rewriting_Tile, Element_Type => Boolean);
-   --  Vector of booleans indexed by rewriting tile numbers, used as a dense
-   --  set.
+   type Rewriting_Tile_Set is array (Rewriting_Tile range <>) of Boolean;
+   --  Used as a dense set of tiles
+
+   type Rewriting_Tile_Set_Access is access Rewriting_Tile_Set;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Rewriting_Tile_Set, Rewriting_Tile_Set_Access);
 
    function Has_Changed (Node : Node_Rewriting_Handle_Access) return Boolean;
    --  Whether the given node was modified during rewriting. Note that this
    --  does not consider modifications in children.
 
-   procedure Compute_Rewriting_Tiles
-     (Tiles            : out Rewriting_Tile_Sets.Vector;
-      Node             : Abstract_Node;
-      Unparsing_Config : Unparsing_Configuration_Access);
+   function Compute_Rewriting_Tiles
+     (Node             : Abstract_Node;
+      Unparsing_Config : Unparsing_Configuration_Access)
+      return Rewriting_Tile_Set_Access
+   with Pre => Unparsing_Config /= null;
    --  Using the "independent_lines" setting from the given unparsing
    --  configuration, create rewriting tiles and assign them to all nodes in
    --  the subtree rooted at ``Node``.
    --
    --  After completion, all nodes have their ``.Tile`` component initialized,
-   --  and ``Tiles`` indicates which tiles must be reformatted, i.e.
-   --  ``Tiles.Element (T)`` is True iff tile ``T`` must be reformatted.
+   --  and the returned array of booleans indicates which tiles must be
+   --  reformatted, i.e. its component at index ``T`` is True iff tile
+   --  ``T`` must be reformatted.
    --
    --  By default, a node belongs to the same tile as its parent, except when
    --  that node is the direct child of a list node for which the unparsing
@@ -137,30 +143,53 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    --  Return whether the given field is to be considered present according to
    --  the given field unparser.
 
+   type Unparsing_Context is record
+      Tables   : Unparsing_Tables;
+      Tiles    : Rewriting_Tile_Set_Access;
+      Reformat : Boolean;
+   end record;
+   --  Holds precomputed data as well as information about the current state
+   --  of unparsing on this subtree. In particular, reformat indicates whether
+   --  the current subtree should be reformatted.
+
    procedure Unparse_Node
-     (Tables           : Unparsing_Tables;
-      Node             : Abstract_Node;
-      Unparsing_Config : Unparsing_Configuration_Access;
-      Result           : in out Unparsing_Buffer);
-   --  Using the node unparsing tables, unparse the given Node
+     (Context        : Unparsing_Context;
+      Node           : Abstract_Node;
+      Formatted_Node : Lk_Node;
+      Result         : in out Unparsing_Buffer);
+   --  Using the node unparsing tables, unparse the given Node.
+   --  If Reformat is True in the Context, use the data from Formatted_Node to
+   --  guide the unparsing. Otherwise, if Node refers to a parsing node,
+   --  preserve the original formatting when possible.
+   --
+   --  Note that this will fetch rewriting tile information in order to
+   --  instruct whether children nodes should themselves be reformatted or not.
 
    procedure Unparse_Regular_Node
-     (Tables           : Unparsing_Tables;
-      Node             : Abstract_Node;
-      Unparser         : Regular_Node_Unparser;
-      Rewritten_Node   : Lk_Node;
-      Unparsing_Config : Unparsing_Configuration_Access;
-      Result           : in out Unparsing_Buffer);
+     (Context        : Unparsing_Context;
+      Node           : Abstract_Node;
+      Reference_Node : Lk_Node;
+      Unparser       : Regular_Node_Unparser;
+      Formatted_Node : Lk_Node;
+      Result         : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on regular nodes
 
    procedure Unparse_List_Node
-     (Tables           : Unparsing_Tables;
-      Node             : Abstract_Node;
-      Unparser         : List_Node_Unparser;
-      Rewritten_Node   : Lk_Node;
-      Unparsing_Config : Unparsing_Configuration_Access;
-      Result           : in out Unparsing_Buffer);
+     (Context        : Unparsing_Context;
+      Node           : Abstract_Node;
+      Reference_Node : Lk_Node;
+      Unparser       : List_Node_Unparser;
+      Formatted_Node : Lk_Node;
+      Result         : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on list nodes
+
+   procedure Unparse_Token_Node
+     (Context        : Unparsing_Context;
+      Node           : Abstract_Node;
+      Tok_Kind       : Token_Kind_Index;
+      Reference_Node : Lk_Node;
+      Result         : in out Unparsing_Buffer);
+   --  Helper for Unparse_Node, focuses on token nodes
 
    procedure Unparse_Token
      (Tables   : Unparsing_Tables;
@@ -280,14 +309,21 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    -- Compute_Rewriting_Tiles --
    -----------------------------
 
-   procedure Compute_Rewriting_Tiles
-     (Tiles            : out Rewriting_Tile_Sets.Vector;
-      Node             : Abstract_Node;
+   function Compute_Rewriting_Tiles
+     (Node             : Abstract_Node;
       Unparsing_Config : Unparsing_Configuration_Access)
+      return Rewriting_Tile_Set_Access
    is
+      package Rewriting_Tile_Sets is new Ada.Containers.Vectors
+        (Index_Type => Rewriting_Tile, Element_Type => Boolean);
+      --  Vector of booleans indexed by rewriting tile numbers, used as a dense
+      --  set.
+
       procedure Recurse (Node : Abstract_Node; Parent_Tile : Rewriting_Tile);
       --  Set the rewriting tiles for all nodes in the subtree rooted at
       --  ``Node``. ``Parent_Tile`` is the tile assigned to ``Node``'s parent.
+
+      Tiles : Rewriting_Tile_Sets.Vector;
 
       -------------
       -- Recurse --
@@ -360,10 +396,18 @@ package body Liblktlang_Support.Rewriting.Unparsing is
             end case;
          end if;
       end Recurse;
+
    begin
-      Tiles.Clear;
       Tiles.Append (False);
       Recurse (Node, Tiles.Last_Index);
+
+      return Result : constant Rewriting_Tile_Set_Access :=
+         new Rewriting_Tile_Set (1 .. Rewriting_Tile (Tiles.Length))
+      do
+         for I in Result'Range loop
+            Result (I) := Tiles (I);
+         end loop;
+      end return;
    end Compute_Rewriting_Tiles;
 
    --------------------------------
@@ -768,15 +812,28 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    procedure Unparse
      (Node             : Abstract_Node;
       Unit             : Lk_Unit;
+      Formatted_Node   : Lk_Node;
       Unparsing_Config : Unparsing_Configuration_Access;
       As_Unit          : Boolean;
       Result           : out Unparsing_Buffer)
    is
-      Tables : constant Unparsing_Tables := Unparsing_Tables_From_Node (Node);
-      Tiles  : Rewriting_Tile_Sets.Vector;
+      Tables : constant Unparsing_Tables :=
+        Unparsing_Tables_From_Node (Node);
+
+      Context : Unparsing_Context :=
+        (Tables   => Tables,
+         Tiles    => null,
+         Reformat => False);
    begin
-      if Unparsing_Config /= null then
-         Compute_Rewriting_Tiles (Tiles, Node, Unparsing_Config);
+      --  If a corresponding formatted tree is present, we will try to use it
+      --  to format nodes that come from rewriting, but also to reformat nodes
+      --  that come from parsing when their enclosing rewriting tile is marked
+      --  for reformatting. Thus, start by computing those rewriting tiles.
+      --  Note that Unparsing_Config cannot be null if Formatted_Node is not.
+
+      if Formatted_Node /= No_Lk_Node then
+         pragma Assert (Unparsing_Config /= null);
+         Context.Tiles := Compute_Rewriting_Tiles (Node, Unparsing_Config);
       end if;
 
       --  Unparse Node, and the leading trivia if we are unparsing the unit as
@@ -796,7 +853,12 @@ package body Liblktlang_Support.Rewriting.Unparsing is
             end if;
          end;
       end if;
-      Unparse_Node (Tables, Node, Unparsing_Config, Result);
+
+      Unparse_Node (Context, Node, Formatted_Node, Result);
+
+      if Context.Tiles /= null then
+         Free (Context.Tiles);
+      end if;
    end Unparse;
 
    -------------
@@ -806,11 +868,12 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    function Unparse
      (Node             : Abstract_Node;
       Unit             : Lk_Unit;
+      Formatted_Node   : Lk_Node;
       Unparsing_Config : Unparsing_Configuration_Access;
       As_Unit          : Boolean) return String
    is
       Result : String_Access :=
-         Unparse (Node, Unit, Unparsing_Config, As_Unit);
+         Unparse (Node, Unit, Formatted_Node, Unparsing_Config, As_Unit);
       R      : constant String := Result.all;
    begin
       Free (Result);
@@ -824,6 +887,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    function Unparse
      (Node             : Abstract_Node;
       Unit             : Lk_Unit;
+      Formatted_Node   : Lk_Node;
       Unparsing_Config : Unparsing_Configuration_Access;
       As_Unit          : Boolean) return String_Access
    is
@@ -836,7 +900,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
       Length        : Natural;
       --  Buffer internals, to avoid costly buffer copies
    begin
-      Unparse (Node, Unit, Unparsing_Config, As_Unit, Buffer);
+      Unparse (Node, Unit, Formatted_Node, Unparsing_Config, As_Unit, Buffer);
       Get_Wide_Wide_String (Buffer.Content, Buffer_Access, Length);
 
       --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
@@ -900,6 +964,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    function Unparse
      (Node             : Abstract_Node;
       Unit             : Lk_Unit;
+      Formatted_Node   : Lk_Node;
       Unparsing_Config : Unparsing_Configuration_Access;
       As_Unit          : Boolean) return Unbounded_Text_Type
    is
@@ -911,7 +976,7 @@ package body Liblktlang_Support.Rewriting.Unparsing is
          raise Program_Error with "cannot unparse node as unit without a unit";
       end if;
 
-      Unparse (Node, Unit, Unparsing_Config, As_Unit, Buffer);
+      Unparse (Node, Unit, Formatted_Node, Unparsing_Config, As_Unit, Buffer);
       return Buffer.Content;
    end Unparse;
 
@@ -920,66 +985,85 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    ------------------
 
    procedure Unparse_Node
-     (Tables           : Unparsing_Tables;
-      Node             : Abstract_Node;
-      Unparsing_Config : Unparsing_Configuration_Access;
-      Result           : in out Unparsing_Buffer)
+     (Context        : Unparsing_Context;
+      Node           : Abstract_Node;
+      Formatted_Node : Lk_Node;
+      Result         : in out Unparsing_Buffer)
    is
       Kind     : constant Type_Ref := Node.Type_Of;
       Unparser : Node_Unparser_Impl renames
-        Tables.Node_Unparsers (Kind.To_Index).all;
+        Context.Tables.Node_Unparsers (Kind.To_Index).all;
 
-      RN : constant Lk_Node :=
-        (if Unparsing_Config = null
-         then No_Lk_Node
+      Reformat_Self : constant Boolean :=
+        (if Node.Kind = From_Parsing
+         then Context.Reformat
+         else (not Formatted_Node.Is_Null
+               and then Context.Tiles (Node.Rewriting_Node.Tile)));
+      --  Whether this node and its children should be reformatted.
+      --
+      --  If this node comes from rewriting, inspect the node's corresponding
+      --  tile to determine if we should reformat it, as well as its children.
+      --
+      --  If this node comes from parsing, we know that its tile is the same
+      --  one as its parent's. Thus, whether we should reformat it or not was
+      --  determined at the time we processed its closest ancestor which was a
+      --  rewriting node, and this information was propagated to this point
+      --  through the ``Context.Reformat`` field.
+      --
+      --  Note that children of a rewritten list node are always rewritten
+      --  nodes themselves. Thus, for a rewritten list that has the
+      --  "independent_lines" setting, we cannot mistakenly reformat one of
+      --  child node that was unmodified, because it will always have its own
+      --  dedicated tile.
+
+      Reference_Node : constant Lk_Node :=
+        (if Reformat_Self
+         then Formatted_Node
          else Node.Rewritten_Node);
+      --  The node that unparsing implementation uses to extract formatting
+      --  information. When this evaluates to ``Rewritten_Node``, the result
+      --  will naturally preserve the original formatting, whereas if this
+      --  evaluates to ``Formatted_Node``, the result will follow the style
+      --  described by the given unparsing configuration.
+
+      Down_Context : constant Unparsing_Context :=
+        (Context with delta Reformat => Reformat_Self);
    begin
+      --  If we have a formatted tree, the node kinds should always correspond
+      --  since we're traversing both the rewriting tree and the formatted
+      --  trees in parallel.
+
+      pragma Assert
+        (Formatted_Node.Is_Null or else Type_Of (Formatted_Node) = Kind);
+
+      --  Dispatch to the specific unparsing routine
+
       case Unparser.Kind is
          when Regular =>
             Unparse_Regular_Node
-              (Tables,
+              (Down_Context,
                Node,
+               Reference_Node,
                Unparser,
-               RN,
-               Unparsing_Config,
+               Formatted_Node,
                Result);
 
          when List =>
             Unparse_List_Node
-              (Tables,
+              (Down_Context,
                Node,
+               Reference_Node,
                Unparser,
-               RN,
-               Unparsing_Config,
+               Formatted_Node,
                Result);
 
          when Token =>
-            declare
-               Tok_Kind : constant Token_Kind_Index :=
-                 Kind.Token_Node_Kind.To_Index;
-            begin
-               --  Add the single token that materialize Node itself
-
-               Apply_Spacing_Rules (Tables, Result, Tok_Kind);
-               Append (Result, Tok_Kind, Text (Node));
-
-               --  If Node comes from an original node, also append the trivia
-               --  that comes after.
-
-               if not RN.Is_Null then
-                  declare
-                     Token     : constant Lk_Token := RN.Token_End;
-                     Last_Triv : constant Lk_Token := Last_Trivia (Token);
-                  begin
-                     Append_Tokens
-                       (Tables,
-                        Result,
-                        Token.Next,
-                        Last_Triv,
-                        With_Trailing_Trivia => False);
-                  end;
-               end if;
-            end;
+            Unparse_Token_Node
+              (Context,
+               Node,
+               Kind.Token_Node_Kind.To_Index,
+               Reference_Node,
+               Result);
       end case;
    end Unparse_Node;
 
@@ -988,18 +1072,20 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    --------------------------
 
    procedure Unparse_Regular_Node
-     (Tables           : Unparsing_Tables;
-      Node             : Abstract_Node;
-      Unparser         : Regular_Node_Unparser;
-      Rewritten_Node   : Lk_Node;
-      Unparsing_Config : Unparsing_Configuration_Access;
-      Result           : in out Unparsing_Buffer)
+     (Context        : Unparsing_Context;
+      Node           : Abstract_Node;
+      Reference_Node : Lk_Node;
+      Unparser       : Regular_Node_Unparser;
+      Formatted_Node : Lk_Node;
+      Result         : in out Unparsing_Buffer)
    is
+      Tables   : Unparsing_Tables renames Context.Tables;
       Template : constant Regular_Node_Template :=
-         Extract_Regular_Node_Template (Unparser, Rewritten_Node);
+         Extract_Regular_Node_Template (Unparser, Reference_Node);
    begin
-      --  Unparse tokens that precede the first field. Re-use original ones if
-      --  available.
+      --  Unparse tokens that precede the first field. If available, use the
+      --  tokens from Reference_Node in order to match its formatting and
+      --  preserve comments.
 
       if Template.Present then
          Append_Tokens (Tables, Result, Template.Pre_Tokens);
@@ -1033,13 +1119,18 @@ package body Liblktlang_Support.Rewriting.Unparsing is
                   if Template.Present and then Template.Fields (I).Present then
                      Append_Tokens
                        (Tables, Result, Template.Fields (I).Pre_Tokens);
-                     Unparse_Node (Tables, Child, Unparsing_Config, Result);
+                     Unparse_Node
+                       (Context,
+                        Child,
+                        (if Formatted_Node.Is_Null
+                         then No_Lk_Node
+                         else Formatted_Node.Child (I)),
+                        Result);
                      Append_Tokens
                        (Tables, Result, Template.Fields (I).Post_Tokens);
-
                   else
                      Unparse_Token_Sequence (Tables, F.Pre_Tokens.all, Result);
-                     Unparse_Node (Tables, Child, Unparsing_Config, Result);
+                     Unparse_Node (Context, Child, No_Lk_Node, Result);
                      Unparse_Token_Sequence
                        (Tables, F.Post_Tokens.all, Result);
                   end if;
@@ -1048,8 +1139,9 @@ package body Liblktlang_Support.Rewriting.Unparsing is
          end loop;
       end;
 
-      --  Unparse tokens that suceed to the last field. Re-use original ones if
-      --  available.
+      --  Unparse tokens that succeed to the last field. If available, use the
+      --  tokens from Reference_Node in order to match its formatting and
+      --  preserve comments.
 
       if Template.Present then
          Append_Tokens (Tables, Result, Template.Post_Tokens);
@@ -1063,12 +1155,12 @@ package body Liblktlang_Support.Rewriting.Unparsing is
    -----------------------
 
    procedure Unparse_List_Node
-     (Tables           : Unparsing_Tables;
-      Node             : Abstract_Node;
-      Unparser         : List_Node_Unparser;
-      Rewritten_Node   : Lk_Node;
-      Unparsing_Config : Unparsing_Configuration_Access;
-      Result           : in out Unparsing_Buffer)
+     (Context        : Unparsing_Context;
+      Node           : Abstract_Node;
+      Reference_Node : Lk_Node;
+      Unparser       : List_Node_Unparser;
+      Formatted_Node : Lk_Node;
+      Result         : in out Unparsing_Buffer)
    is
       Cursor   : Abstract_Cursor := Node.Iterate_List;
       I        : Positive := 1;
@@ -1078,16 +1170,16 @@ package body Liblktlang_Support.Rewriting.Unparsing is
 
       if Unparser.Separator /= null
          and then Unparser.Sep_Extra in Allow_Leading
-         and then not Rewritten_Node.Is_Null
-         and then Rewritten_Node.Children_Count > 0
+         and then not Reference_Node.Is_Null
+         and then Reference_Node.Children_Count > 0
       then
          declare
-            First_Child : constant Lk_Node := Rewritten_Node.Child (1);
+            First_Child : constant Lk_Node := Reference_Node.Child (1);
          begin
             Append_Tokens
-              (Tables,
+              (Context.Tables,
                Result,
-               Rewritten_Node.Token_Start,
+               Reference_Node.Token_Start,
                First_Child.Token_Start.Previous);
          end;
       end if;
@@ -1096,31 +1188,38 @@ package body Liblktlang_Support.Rewriting.Unparsing is
 
       while Cursor.Has_Element loop
          AN_Child := Cursor.Element;
+
          if AN_Child.Is_Null then
             raise Malformed_Tree_Error with "null node found in a list";
          end if;
 
          --  For all elements but the first one, emit the separator. If
-         --  possible, preserve original formatting for the corresponding
-         --  separator in the original source.
+         --  possible, retrieve the formatting for the corresponding separator
+         --  in Reference_Node to match its formatting.
 
          if I > 1 and then Unparser.Separator /= null then
-            if not Rewritten_Node.Is_Null
-               and then Rewritten_Node.Children_Count >= I
+            if not Reference_Node.Is_Null
+               and then Reference_Node.Children_Count >= I
             then
                declare
-                  BN_Child : constant Lk_Node := Rewritten_Node.Child (I);
+                  BN_Child : constant Lk_Node := Reference_Node.Child (I);
                   Tok      : constant Lk_Token :=
                     Relative_Token (BN_Child.Token_Start, -1);
                begin
-                  Append_Tokens (Tables, Result, Tok, Tok);
+                  Append_Tokens (Context.Tables, Result, Tok, Tok);
                end;
-            elsif Unparser.Separator /= null then
-               Unparse_Token (Tables, Unparser.Separator.all, Result);
+            else
+               Unparse_Token (Context.Tables, Unparser.Separator.all, Result);
             end if;
          end if;
 
-         Unparse_Node (Tables, AN_Child, Unparsing_Config, Result);
+         Unparse_Node
+           (Context,
+            AN_Child,
+            (if Formatted_Node.Is_Null
+             then No_Lk_Node
+             else Formatted_Node.Child (I)),
+            Result);
 
          Cursor := Cursor.Next;
          I := I + 1;
@@ -1130,21 +1229,56 @@ package body Liblktlang_Support.Rewriting.Unparsing is
 
       if Unparser.Separator /= null
          and then Unparser.Sep_Extra in Allow_Trailing
-         and then not Rewritten_Node.Is_Null
-         and then Rewritten_Node.Children_Count > 0
+         and then not Reference_Node.Is_Null
+         and then Reference_Node.Children_Count > 0
       then
          declare
-            Last_Child : constant Lk_Node := Rewritten_Node.Child
-              (Rewritten_Node.Children_Count);
+            Last_Child : constant Lk_Node := Reference_Node.Child
+              (Reference_Node.Children_Count);
          begin
             Append_Tokens
-              (Tables,
+              (Context.Tables,
                Result,
                Last_Child.Token_End.Next,
-               Rewritten_Node.Token_End);
+               Reference_Node.Token_End);
          end;
       end if;
    end Unparse_List_Node;
+
+   ------------------------
+   -- Unparse_Token_Node --
+   ------------------------
+
+   procedure Unparse_Token_Node
+     (Context        : Unparsing_Context;
+      Node           : Abstract_Node;
+      Tok_Kind       : Token_Kind_Index;
+      Reference_Node : Lk_Node;
+      Result         : in out Unparsing_Buffer)
+   is
+   begin
+      --  Add the single token that materializes Node itself
+
+      Apply_Spacing_Rules (Context.Tables, Result, Tok_Kind);
+      Append (Result, Tok_Kind, Text (Node));
+
+      --  If available, append the trivia from Reference_Node in order to
+      --  match its formatting and preserve the comments.
+
+      if not Reference_Node.Is_Null then
+         declare
+            Token     : constant Lk_Token := Reference_Node.Token_End;
+            Last_Triv : constant Lk_Token := Last_Trivia (Token);
+         begin
+            Append_Tokens
+              (Context.Tables,
+               Result,
+               Token.Next,
+               Last_Triv,
+               With_Trailing_Trivia => False);
+         end;
+      end if;
+   end Unparse_Token_Node;
 
    -------------------
    -- Unparse_Token --

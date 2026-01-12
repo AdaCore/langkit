@@ -47,6 +47,10 @@ package Liblktlang_Support.Generic_API.Introspection is
    --  Return the free-form name of this type for debug purposes, or
    --  "<No_Type_Ref>" if ``T`` is ``No_Type_Ref``.
 
+   function Documentation (T : Type_Ref) return Unbounded_Text_Type;
+   --  Return the documentation associated to this type, or the empty string if
+   --  there is none.
+
    function All_Types (Id : Language_Id) return Type_Ref_Array;
    --  Return the list of all types that the given language defines
 
@@ -453,6 +457,11 @@ package Liblktlang_Support.Generic_API.Introspection is
    function Debug_Name (Member : Struct_Member_Ref) return String;
    --  Return "X.Y" where X is the type that owns this member and Y is the name
    --  of this member, or "<No_Struct_Member_Ref>" if ``Member`` is null.
+
+   function Documentation
+     (Member : Struct_Member_Ref) return Unbounded_Text_Type;
+   --  Return the documentation associated to this member, or the empty string
+   --  if there is none.
 
    function Owner (Member : Struct_Member_Ref) return Type_Ref;
    --  Return the type that owns this member. Raise a ``Precondition_Failure``

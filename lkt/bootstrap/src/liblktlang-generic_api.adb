@@ -387,6 +387,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Num_Lit;
                   when Type_Index_For_Block_String_Lit =>
                      return Lkt_Block_String_Lit;
+                  when Type_Index_For_Module_Doc_String_Lit =>
+                     return Lkt_Module_Doc_String_Lit;
                   when Type_Index_For_Single_Line_String_Lit =>
                      return Lkt_Single_Line_String_Lit;
                   when Type_Index_For_Pattern_Single_Line_String_Lit =>
@@ -473,6 +475,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Lambda_Param_Decl_List;
                   when Type_Index_For_Lkt_Node_List =>
                      return Lkt_Lkt_Node_List;
+                  when Type_Index_For_Module_Doc_String_Line_List =>
+                     return Lkt_Module_Doc_String_Line_List;
                   when Type_Index_For_Pattern_Detail_List =>
                      return Lkt_Pattern_Detail_List;
                   when Type_Index_For_Pattern_List =>
@@ -483,6 +487,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Type_Ref_List;
                   when Type_Index_For_Synthetic_Type_Ref_List =>
                      return Lkt_Synthetic_Type_Ref_List;
+                  when Type_Index_For_Module_Doc_String_Line =>
+                     return Lkt_Module_Doc_String_Line;
                   when Type_Index_For_Null_Cond_Qualifier_Absent =>
                      return Lkt_Null_Cond_Qualifier_Absent;
                   when Type_Index_For_Null_Cond_Qualifier_Present =>

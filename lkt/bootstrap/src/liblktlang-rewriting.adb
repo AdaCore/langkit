@@ -1579,6 +1579,18 @@ package body Liblktlang.Rewriting is
          end;
 
 
+         function Create_Module_Doc_String_Lit
+           (Handle : Rewriting_Handle
+               ; F_Lines : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Module_Doc_String_Lit,
+                 (1 => F_Lines));
+         end;
+
+
          function Create_Logic_Assign
            (Handle : Rewriting_Handle
                ; F_Dest_Var : Node_Rewriting_Handle
@@ -1791,6 +1803,7 @@ package body Liblktlang.Rewriting is
 
          function Create_Langkit_Root
            (Handle : Rewriting_Handle
+               ; F_Doc : Node_Rewriting_Handle
                ; F_Imports : Node_Rewriting_Handle
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
@@ -1798,8 +1811,9 @@ package body Liblktlang.Rewriting is
             return Create_Regular_Node
               (Handle,
                Lkt_Langkit_Root,
-                 (1 => F_Imports,
-                  2 => F_Decls));
+                 (1 => F_Doc,
+                  2 => F_Imports,
+                  3 => F_Decls));
          end;
 
 

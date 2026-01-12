@@ -463,6 +463,15 @@ package Liblktlang_Support.Generic_API.Analysis is
    --  Raise a ``Precondition_Failure`` error if they do not belong to the same
    --  analysis unit.
 
+   function "<=" (Left, Right : Lk_Token) return Boolean
+   is (Left = Right or else Left < Right);
+
+   function ">=" (Left, Right : Lk_Token) return Boolean
+   is (not (Left < Right));
+
+   function ">" (Left, Right : Lk_Token) return Boolean
+   is (Left /= Right and then not (Left < Right));
+
    function Next
      (Self           : Lk_Token'Class;
       Exclude_Trivia : Boolean := False) return Lk_Token;

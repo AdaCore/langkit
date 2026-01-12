@@ -16,8 +16,6 @@ limited with Liblktlang.Implementation;
 
 private package Liblktlang.Parsers is
 
-   type Fail_Info_Kind is (Token_Fail, Predicate_Fail);
-
    --  In principle, ``Fail_Info`` itself should be the discriminated record,
    --  but having a separate ``Fail_Info_Record`` type is useful so that
    --  ``Fail_Info`` has a compile-time known size, and thus copying it is

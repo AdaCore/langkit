@@ -645,6 +645,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Block_String_Lit)
                or else Kind (Bare_Block_String_Lit) in Lkt_Block_String_Lit_Range;
+         subtype Bare_Module_Doc_String_Lit is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Module_Doc_String_Lit)
+               or else Kind (Bare_Module_Doc_String_Lit) in Lkt_Module_Doc_String_Lit_Range;
          subtype Bare_Single_Line_String_Lit is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Single_Line_String_Lit)
@@ -825,6 +829,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Lkt_Node_List)
                or else Kind (Bare_Lkt_Node_List) in Lkt_Lkt_Node_List_Range;
+         subtype Bare_Module_Doc_String_Line_List is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Module_Doc_String_Line_List)
+               or else Kind (Bare_Module_Doc_String_Line_List) in Lkt_Module_Doc_String_Line_List_Range;
          subtype Bare_Pattern_Detail_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Pattern_Detail_List)
@@ -845,6 +853,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Synthetic_Type_Ref_List)
                or else Kind (Bare_Synthetic_Type_Ref_List) in Lkt_Synthetic_Type_Ref_List_Range;
+         subtype Bare_Module_Doc_String_Line is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Module_Doc_String_Line)
+               or else Kind (Bare_Module_Doc_String_Line) in Lkt_Module_Doc_String_Line_Range;
          subtype Bare_Null_Cond_Qualifier is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Null_Cond_Qualifier)
@@ -2252,6 +2264,18 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Match_Val_Decl;
+      
+
+         
+      type Internal_Entity_Module_Doc_String_Line;
+      
+
+         
+      type Internal_Entity_Module_Doc_String_Line_List;
+      
+
+         
+      type Internal_Entity_Module_Doc_String_Lit;
       
 
          
@@ -7051,6 +7075,90 @@ private package Liblktlang.Implementation is
 
       
 
+      type Internal_Entity_Module_Doc_String_Line is record
+
+               Node : aliased Bare_Module_Doc_String_Line;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Module_Doc_String_Line : constant Internal_Entity_Module_Doc_String_Line;
+
+
+      function Create_Internal_Entity_Module_Doc_String_Line
+        (Node : Bare_Module_Doc_String_Line; Info : Internal_Entity_Info)
+         return Internal_Entity_Module_Doc_String_Line;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Module_Doc_String_Line) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Module_Doc_String_Line_List is record
+
+               Node : aliased Bare_Module_Doc_String_Line_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Module_Doc_String_Line_List : constant Internal_Entity_Module_Doc_String_Line_List;
+
+
+      function Create_Internal_Entity_Module_Doc_String_Line_List
+        (Node : Bare_Module_Doc_String_Line_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Module_Doc_String_Line_List;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Module_Doc_String_Line_List) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Module_Doc_String_Lit is record
+
+               Node : aliased Bare_Module_Doc_String_Lit;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Module_Doc_String_Lit : constant Internal_Entity_Module_Doc_String_Lit;
+
+
+      function Create_Internal_Entity_Module_Doc_String_Lit
+        (Node : Bare_Module_Doc_String_Lit; Info : Internal_Entity_Info)
+         return Internal_Entity_Module_Doc_String_Lit;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Module_Doc_String_Lit) return String;
+
+
+         
+
+      
+
       type Internal_Entity_Module_Ref_Id is record
 
                Node : aliased Bare_Module_Ref_Id;
@@ -11145,6 +11253,7 @@ Lkt_Char_Lit => 0,
 Lkt_Null_Lit => 1, 
 Lkt_Num_Lit => 0, 
 Lkt_Block_String_Lit => 1, 
+Lkt_Module_Doc_String_Lit => 1, 
 Lkt_Single_Line_String_Lit => 0, 
 Lkt_Pattern_Single_Line_String_Lit => 0, 
 Lkt_Logic_Assign => 2, 
@@ -11162,7 +11271,7 @@ Lkt_Un_Op => 2,
 Lkt_Full_Decl => 3, 
 Lkt_Grammar_List_Sep => 2, 
 Lkt_Import => 1, 
-Lkt_Langkit_Root => 2, 
+Lkt_Langkit_Root => 3, 
 Lkt_Lexer_Case_Rule => 2, 
 Lkt_Lexer_Case_Rule_Send => 2, 
 Lkt_List_Kind_One => 0, 
@@ -11188,11 +11297,13 @@ Lkt_Grammar_Expr_List_List => -1,
 Lkt_Import_List => -1, 
 Lkt_Lambda_Param_Decl_List => -1, 
 Lkt_Lkt_Node_List => -1, 
+Lkt_Module_Doc_String_Line_List => -1, 
 Lkt_Pattern_Detail_List => -1, 
 Lkt_Pattern_List => -1, 
 Lkt_Ref_Id_List => -1, 
 Lkt_Type_Ref_List => -1, 
 Lkt_Synthetic_Type_Ref_List => -1, 
+Lkt_Module_Doc_String_Line => 0, 
 Lkt_Null_Cond_Qualifier_Absent => 0, 
 Lkt_Null_Cond_Qualifier_Present => 0, 
 Lkt_Op_Amp => 0, 
@@ -13085,6 +13196,19 @@ Lkt_Var_Bind => 2);
 
 
       
+                  when Lkt_Module_Doc_String_Lit_Range =>
+                     
+         
+
+
+            Module_Doc_String_Lit_F_Lines : aliased Bare_Module_Doc_String_Line_List :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
                   when Lkt_Single_Line_String_Lit_Range =>
                      
          
@@ -13357,6 +13481,8 @@ Lkt_Var_Bind => 2);
          
 
 
+            Langkit_Root_F_Doc : aliased Bare_Module_Doc_String_Lit :=
+               No_Bare_Lkt_Node;
             Langkit_Root_F_Imports : aliased Bare_Import_List :=
                No_Bare_Lkt_Node;
             Langkit_Root_F_Decls : aliased Bare_Full_Decl_List :=
@@ -13707,6 +13833,18 @@ Lkt_Var_Bind => 2);
 
             null;
       
+                  when Lkt_Module_Doc_String_Line_List_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
+      
                   when Lkt_Pattern_Detail_List_Range =>
                      
          
@@ -13772,6 +13910,18 @@ Lkt_Var_Bind => 2);
                when others => null;
             end case;
 
+      
+                  when Lkt_Module_Doc_String_Line_Range =>
+                     
+         
+
+
+
+         
+
+
+
+            null;
       
                   when Lkt_Null_Cond_Qualifier =>
                      
@@ -23189,6 +23339,55 @@ function Block_String_Lit_P_Prefix
    
 
       
+      procedure Initialize_Fields_For_Module_Doc_String_Lit
+        (Self : Bare_Module_Doc_String_Lit
+         ; Module_Doc_String_Lit_F_Lines : Bare_Module_Doc_String_Line_List
+        );
+
+      
+   function Module_Doc_String_Lit_F_Lines
+     (Node : Bare_Module_Doc_String_Lit) return Bare_Module_Doc_String_Line_List;
+
+
+         
+
+
+
+
+function Module_Doc_String_Lit_P_Is_Prefixed_String
+   
+  (Node : Bare_Module_Doc_String_Lit
+  )
+
+   return Boolean
+   ;
+
+
+         
+
+
+
+
+function Module_Doc_String_Lit_P_Prefix
+   
+  (Node : Bare_Module_Doc_String_Lit
+  )
+
+   return Character_Type
+   ;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
       procedure Initialize_Fields_For_Single_Line_String_Lit
         (Self : Bare_Single_Line_String_Lit
         );
@@ -24034,9 +24233,14 @@ function Internal_Env_Do_16
       
       procedure Initialize_Fields_For_Langkit_Root
         (Self : Bare_Langkit_Root
+         ; Langkit_Root_F_Doc : Bare_Module_Doc_String_Lit
          ; Langkit_Root_F_Imports : Bare_Import_List
          ; Langkit_Root_F_Decls : Bare_Full_Decl_List
         );
+
+      
+   function Langkit_Root_F_Doc
+     (Node : Bare_Langkit_Root) return Bare_Module_Doc_String_Lit;
 
       
    function Langkit_Root_F_Imports
@@ -24409,6 +24613,30 @@ function Internal_Ref_Cond_19
            (Self            : Bare_Decl_Block;
             State           : in out PLE_Node_State;
             Add_To_Env_Only : Boolean := False);
+
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+
+      
+
+   
+
+
+
+
+   
 
 
 
@@ -28549,6 +28777,42 @@ private
 
 
       No_Entity_Match_Val_Decl : constant Internal_Entity_Match_Val_Decl :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Module_Doc_String_Line : constant Internal_Entity_Module_Doc_String_Line :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Module_Doc_String_Line_List : constant Internal_Entity_Module_Doc_String_Line_List :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Module_Doc_String_Lit : constant Internal_Entity_Module_Doc_String_Lit :=
       (
                Node =>
                   No_Bare_Lkt_Node, 

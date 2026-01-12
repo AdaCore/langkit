@@ -627,6 +627,7 @@ package body Liblktlang.Implementation.C is
       Lkt_Null_Lit => new Text_Type'(To_Text ("NullLit")),
       Lkt_Num_Lit => new Text_Type'(To_Text ("NumLit")),
       Lkt_Block_String_Lit => new Text_Type'(To_Text ("BlockStringLit")),
+      Lkt_Module_Doc_String_Lit => new Text_Type'(To_Text ("ModuleDocStringLit")),
       Lkt_Single_Line_String_Lit => new Text_Type'(To_Text ("SingleLineStringLit")),
       Lkt_Pattern_Single_Line_String_Lit => new Text_Type'(To_Text ("PatternSingleLineStringLit")),
       Lkt_Logic_Assign => new Text_Type'(To_Text ("LogicAssign")),
@@ -670,11 +671,13 @@ package body Liblktlang.Implementation.C is
       Lkt_Import_List => new Text_Type'(To_Text ("ImportList")),
       Lkt_Lambda_Param_Decl_List => new Text_Type'(To_Text ("LambdaParamDeclList")),
       Lkt_Lkt_Node_List => new Text_Type'(To_Text ("LktNodeList")),
+      Lkt_Module_Doc_String_Line_List => new Text_Type'(To_Text ("ModuleDocStringLineList")),
       Lkt_Pattern_Detail_List => new Text_Type'(To_Text ("PatternDetailList")),
       Lkt_Pattern_List => new Text_Type'(To_Text ("PatternList")),
       Lkt_Ref_Id_List => new Text_Type'(To_Text ("RefIdList")),
       Lkt_Type_Ref_List => new Text_Type'(To_Text ("TypeRefList")),
       Lkt_Synthetic_Type_Ref_List => new Text_Type'(To_Text ("SyntheticTypeRefList")),
+      Lkt_Module_Doc_String_Line => new Text_Type'(To_Text ("ModuleDocStringLine")),
       Lkt_Null_Cond_Qualifier_Absent => new Text_Type'(To_Text ("NullCondQualifierAbsent")),
       Lkt_Null_Cond_Qualifier_Present => new Text_Type'(To_Text ("NullCondQualifierPresent")),
       Lkt_Op_Amp => new Text_Type'(To_Text ("OpAmp")),
@@ -11442,6 +11445,57 @@ package body Liblktlang.Implementation.C is
    
    
 
+   function lkt_module_doc_string_lit_f_lines
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Module_Doc_String_Lit_Range then
+
+         declare
+            
+
+            Result : Bare_Module_Doc_String_Line_List;
+         begin
+            Result := Module_Doc_String_Lit_F_Lines
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_module_doc_string_lit_f_lines;
+
+
+           
+
+   
+
+   
+   
+
    function lkt_logic_assign_f_dest_var
      (Node : lkt_node_Ptr;
 
@@ -13073,6 +13127,57 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_import_p_referenced_unit;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_langkit_root_f_doc
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Langkit_Root_Range then
+
+         declare
+            
+
+            Result : Bare_Module_Doc_String_Lit;
+         begin
+            Result := Langkit_Root_F_Doc
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_langkit_root_f_doc;
 
 
            

@@ -890,6 +890,12 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
+         function Create_Module_Doc_String_Lit
+           (Handle : Rewriting_Handle
+               ; F_Lines : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Logic_Assign
            (Handle : Rewriting_Handle
                ; F_Dest_Var : Node_Rewriting_Handle
@@ -997,6 +1003,7 @@ package Liblktlang.Rewriting is
 
          function Create_Langkit_Root
            (Handle : Rewriting_Handle
+               ; F_Doc : Node_Rewriting_Handle
                ; F_Imports : Node_Rewriting_Handle
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
