@@ -13,7 +13,7 @@ import yaml
 
 import langkit
 
-from utils import emit_and_print_errors
+from utils import derive_config, emit_and_print_errors, python_support_dir
 
 
 # Extract test configuration from "test.yaml"
@@ -37,14 +37,31 @@ args = parser.parse_args()
 
 # Compile all *.lkt" file except the ones starting with "common", as they
 # contain just common code for the other sources, but are not compilable alone.
-tests = args.lkt_files or [
-    f for f in glob.glob("*.lkt") if not f.startswith("common")
-]
+if args.lkt_files:
+    tests = list(args.lkt_files)
+else:
+    tests = [
+        f for f in glob.glob("*.lkt") if not f.startswith("common")
+    ] + glob.glob("*/test.lkt")
 
 
 for lkt_file in sorted(tests):
     print(f"== {lkt_file} ==")
-    ctx = emit_and_print_errors(lkt_file=lkt_file, config=config)
+
+    test_config = derive_config(
+        config,
+        {
+            "lkt_spec": {
+                "source_dirs": [
+                    ".",
+                    os.path.dirname(lkt_file),
+                    python_support_dir,
+                ]
+            }
+        },
+    )
+
+    ctx = emit_and_print_errors(lkt_file=lkt_file, config=test_config)
     print("")
 
     # If there is a "test.py" script in the test directory, run it
