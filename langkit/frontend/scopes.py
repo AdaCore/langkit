@@ -261,9 +261,17 @@ class Scope:
         ``@with_dynvars`` property annotation.
         """
 
-        variable: E.DynamicVariable
+        variable_or_none: E.DynamicVariable | None = None
 
         kind_name = "dynamic variable"
+
+        @property
+        def variable(self) -> E.DynamicVariable:
+            """
+            Reference to the corresponding dynamic variable.
+            """
+            assert self.variable_or_none is not None
+            return self.variable_or_none
 
     @dataclasses.dataclass
     class GenericInterface(UserEntity):

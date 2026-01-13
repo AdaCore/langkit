@@ -416,6 +416,49 @@ class FieldKinds:
         )
 
 
+@dataclasses.dataclass(frozen=True)
+class ToLowerDynVar:
+    """
+    Helper to store information about a dynamic variable to create.
+
+    This is instantiated when processing all top-level declarations in a unit,
+    and is used once types are lowered, when the dyn vars can be actually
+    created.
+    """
+
+    name: str
+    """
+    Name for the dynamic variable (already validated).
+    """
+
+    decl: L.DynVarDecl
+    """
+    Lkt declaration for this dynamic variable.
+    """
+
+    scope: Scope
+    """
+    Scope in which this dynamic variable is defined.
+    """
+
+    entity: Scope.DynVar
+    """
+    Scope entity created for this dynamic variable.
+    """
+
+    @classmethod
+    def from_lkt_node(cls, decl: L.DynVarDecl, scope: Scope) -> ToLowerDynVar:
+        name_node = decl.f_syn_name
+        name = name_node.text
+
+        # Ensure the dynamic variable name has proper casing
+        _ = name_from_lower("dynamic variable", name_node)
+
+        entity = Scope.DynVar(name, decl)
+        scope.add(entity)
+        return cls(name, decl, scope, entity)
+
+
 class LktTypesLoader:
     """
     Helper class to instantiate ``CompiledType`` for all types described in
@@ -508,7 +551,7 @@ class LktTypesLoader:
         self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
 
         type_decls: list[Scope.UserType] = []
-        dyn_vars: list[L.DynVarDecl] = []
+        dyn_vars: list[ToLowerDynVar] = []
         root_node_decl: L.BasicClassDecl | None = None
         metadata_found = False
 
@@ -558,7 +601,9 @@ class LktTypesLoader:
                     )
 
                 elif isinstance(decl, L.DynVarDecl):
-                    dyn_vars.append(decl)
+                    dyn_vars.append(
+                        ToLowerDynVar.from_lkt_node(decl, self.root_scope)
+                    )
 
                 else:
                     error(
@@ -615,22 +660,14 @@ class LktTypesLoader:
         #
 
         # Create dynamic variables
-        for dyn_var_decl in dyn_vars:
-            name_node = dyn_var_decl.f_syn_name
-
-            # Ensure the dynamic variable name has proper casing
-            _ = name_from_lower("dynamic variable", name_node)
-
-            name = name_node.text
+        for dv in dyn_vars:
             dyn_var = E.DynamicVariable(
-                location=Location.from_lkt_node(dyn_var_decl),
-                name=name,
-                type=self.resolver.resolve_type(
-                    dyn_var_decl.f_decl_type, self.root_scope
-                ),
-                doc=lkt_doc(dyn_var_decl),
+                location=Location.from_lkt_node(dv.decl),
+                name=dv.name,
+                type=self.resolver.resolve_type(dv.decl.f_decl_type, dv.scope),
+                doc=lkt_doc(dv.decl),
             )
-            self.root_scope.add(Scope.DynVar(name, dyn_var_decl, dyn_var))
+            dv.entity.variable_or_none = dyn_var
 
         #
         # TYPE_MEMBERS_LOWERING
