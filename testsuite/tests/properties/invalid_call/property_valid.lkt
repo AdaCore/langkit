@@ -1,7 +1,0 @@
-import common
-
-class BarNode: FooNode {
-    @property fun get_int(): Int = 1
-
-    @exported fun p(): Int = node.get_int
-}

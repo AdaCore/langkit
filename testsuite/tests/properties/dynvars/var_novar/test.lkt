@@ -1,0 +1,13 @@
+from common import RootNode, v
+
+@abstract class AbstractNode: RootNode {
+    @abstract @with_dynvars(v) fun prop(): Int
+    @exported fun use_prop(): Int = {
+        bind v = 10;
+        node.prop()
+    }
+}
+
+class ConcreteNode: AbstractNode {
+    @with_dynvars() fun prop(): Int = 12
+}

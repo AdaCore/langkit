@@ -1,7 +1,7 @@
 # Check that one cannot rebind using an environment whose node isn't tagged as
 # rebindable.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

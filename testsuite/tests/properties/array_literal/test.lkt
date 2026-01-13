@@ -1,7 +1,7 @@
 # Test creating an array literal whose element_type is the node type defined by
 # the enclosing class.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

@@ -4,7 +4,7 @@
 # contexts are bound. Hence, this also checks that the DSL allows attaching
 # logic contexts to atoms.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

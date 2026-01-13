@@ -1,7 +1,7 @@
 # Test that garbage tokens left after the main parsing rule completes does not
 # crash. It used to!
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

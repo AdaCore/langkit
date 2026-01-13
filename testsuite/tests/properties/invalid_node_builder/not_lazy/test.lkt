@@ -1,0 +1,8 @@
+from common import BaseExample, FooNode
+
+@synthetic class EmptyNode: FooNode {
+}
+
+class Example: BaseExample {
+    @exported fun prop(): EmptyNode = EmptyNode.builder().build()
+}

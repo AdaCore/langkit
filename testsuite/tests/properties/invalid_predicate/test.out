@@ -1,31 +1,31 @@
-== bad_argument_type.lkt ==
-bad_argument_type.lkt:5:17: error: Argument #1 of BaseExample.pred1 has type Bool, should be Entity[FooNode]
+== bad_argument_type/test.lkt ==
+test.lkt:5:17: error: Argument #1 of BaseExample.pred1 has type Bool, should be Entity[FooNode]
 5 |         val _ = Example.pred1%(node.var1, true);
   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== bad_variadic.lkt ==
-bad_variadic.lkt:5:17: error: BaseExample.pred1 property's first argument must be an array of entities, not Entity[FooNode])
+== bad_variadic/test.lkt ==
+test.lkt:5:17: error: BaseExample.pred1 property's first argument must be an array of entities, not Entity[FooNode])
 5 |         val _ = Example.pred1%([node.var1]);
   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== no_logic_var.lkt ==
-no_logic_var.lkt:5:32: error: at least one argument expected
+== no_logic_var/test.lkt ==
+test.lkt:5:32: error: at least one argument expected
 5 |         val _ = Example.pred1%();
 
 
-== ok_no_default_var.lkt ==
+== ok_no_default_var/test.lkt ==
 Code generation was successful
 
-== ok_one_passed_default_var.lkt ==
+== ok_one_passed_default_var/test.lkt ==
 Code generation was successful
 
-== ok_one_unpassed_default_var.lkt ==
+== ok_one_unpassed_default_var/test.lkt ==
 Code generation was successful
 
-== one_missing_var.lkt ==
-one_missing_var.lkt:5:17: error: Missing an actual for argument #1 (n)
+== one_missing_var/test.lkt ==
+test.lkt:5:17: error: Missing an actual for argument #1 (n)
 5 |         val _ = Example.pred1%(node.var1);
   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^
 

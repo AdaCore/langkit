@@ -1,0 +1,5 @@
+from common import FooNode
+
+class BarNode: FooNode {
+    @exported fun prop(): Bool = true
+}

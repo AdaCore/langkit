@@ -1,5 +1,0 @@
-import common
-
-class Example: FooNode implements TokenNode {
-    u: MyEnum = MyEnum.a
-}

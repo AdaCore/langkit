@@ -1,0 +1,8 @@
+from common import EmptyNode, FooNode, Literal
+
+@synthetic class LiteralList: ASTList[Literal] {
+    fun prop(): Int = {
+        val e = Entity[Int](0, null[EntityInfo]);
+        e.node
+    }
+}

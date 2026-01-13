@@ -1,6 +1,6 @@
 # Test the handling of analysis units in the properties DSL
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

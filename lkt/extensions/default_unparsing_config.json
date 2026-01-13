@@ -43,6 +43,7 @@
         ]
       }
     },
+    "BaseImportList": {},
     "Pattern": {},
     "ExtendedPattern": {
       "fields": {
@@ -872,7 +873,16 @@
     "Import": {
       "node": ["recurse", "hardline"]
     },
-    "ImportList": {},
+    "ImportFrom": {
+      "node": ["recurse", "hardline"]
+    },
+    "ImportAllFrom": {
+      "node": ["recurse", "hardline"]
+    },
+    "ImportedId": {},
+    "ImportedIdList": {
+        "sep": ["recurse", "softline"]
+    },
     "Isa": {
       "node": {
         "kind": "group",
@@ -1171,7 +1181,7 @@
     "ModuleDocStringLine": {},
     "ModuleDocStringLineList": {},
     "ModuleDocStringLit": {},
-    "ModuleRefId": {},
+    "ModuleId": {},
     "NotExpr": {
       "fields": {
         "f_expr": {

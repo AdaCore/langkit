@@ -1,7 +1,0 @@
-import common
-
-class Example: FooNode implements TokenNode {
-    env_spec {
-        add_to_env_kv(key=node.symbol, value=node, dest_env=1)
-    }
-}

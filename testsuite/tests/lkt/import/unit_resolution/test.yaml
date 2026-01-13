@@ -1,1 +1,2 @@
 driver: python
+canonicalize_directory_separators: true

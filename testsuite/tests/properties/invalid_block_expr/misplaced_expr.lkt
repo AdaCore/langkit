@@ -1,8 +1,0 @@
-import common
-
-class Example: FooNode {
-    @exported fun p(): Bool = {
-        false
-        val _ = 2;
-    }
-}

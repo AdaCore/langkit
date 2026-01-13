@@ -1,6 +1,6 @@
 # Check node synthetization and a basic use of it in the Python API
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

@@ -1,5 +1,0 @@
-import common
-
-class Example: FooNode {
-    fun p(): Int = null[FooNode].get_parent
-}

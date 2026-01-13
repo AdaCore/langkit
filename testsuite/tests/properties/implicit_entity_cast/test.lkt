@@ -6,7 +6,7 @@
 # compile. This testcase tries to exhaustively check that these conversions are
 # present.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

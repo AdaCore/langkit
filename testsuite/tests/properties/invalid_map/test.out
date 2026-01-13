@@ -1,20 +1,20 @@
-== arg_type.lkt ==
-arg_type.lkt:6:30: error: Entity[NumberNode] expected
+== arg_type/test.lkt ==
+test.lkt:6:30: error: Entity[NumberNode] expected
 6 |         self.nb_list.map((x: Int) => x)
   |                              ^^^
 
 
-== correct.lkt ==
+== correct/test.lkt ==
 Code generation was successful
 
-== default_value.lkt ==
-default_value.lkt:6:27: error: default values are not allowed here
+== default_value/test.lkt ==
+test.lkt:6:27: error: default values are not allowed here
 6 |         self.nb_list.map((x=12) => x)
   |                           ^^^^
 
 
-== too_many_args.lkt ==
-too_many_args.lkt:6:28: error: 2 arguments expected, got 3
+== too_many_args/test.lkt ==
+test.lkt:6:28: error: 2 arguments expected, got 3
 6 |         self.nb_list.imap((x, y, z) => x)
   |                            ^^^^^^^
 

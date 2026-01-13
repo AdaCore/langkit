@@ -1,5 +1,0 @@
-import common
-
-class ExampleBlock: BaseExampleBlock {
-    @exported fun p(): Array[Int] = node.do((n: Int) => n)
-}

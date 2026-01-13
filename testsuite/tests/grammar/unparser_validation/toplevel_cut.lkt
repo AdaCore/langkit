@@ -1,0 +1,17 @@
+from lexer_example import foo_lexer
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+}
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    # pick() should be allowed at the root of a parsing rule when it does not
+    # discard any token.
+    @main_rule
+    main_rule <- pick(/ Example("example"))
+}

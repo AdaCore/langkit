@@ -1,7 +1,7 @@
 # Test that the introspection API works as expected for queries related to node
 # types.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

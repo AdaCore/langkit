@@ -1,7 +1,7 @@
 # Check that compiling a list node derivation that occurs in the Lkt source
 # before the root node declaration works correctly (it used to crash).
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

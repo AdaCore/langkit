@@ -1,6 +1,6 @@
 # Check that "then" expressions work as expected in properties
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

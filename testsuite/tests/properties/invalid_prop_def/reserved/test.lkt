@@ -1,0 +1,5 @@
+from common import FooNode
+
+class BarNode: FooNode {
+    @exported fun prop(node: Int, lex_env: Int): Int = node + lex_env
+}

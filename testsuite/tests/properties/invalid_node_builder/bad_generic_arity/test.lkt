@@ -1,0 +1,8 @@
+from common import BaseExample, FooNode
+
+@synthetic class EmptyNode: FooNode {
+}
+
+class Example: BaseExample {
+    fun f(): NodeBuilder[FooNode, FooNode] = EmptyNode.builder()
+}

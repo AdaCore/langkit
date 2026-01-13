@@ -1,65 +1,65 @@
-== bad_expr.lkt ==
-bad_expr.lkt:4:29: error: value expected, got the builtin type Bool
+== bad_expr/test.lkt ==
+test.lkt:4:29: error: value expected, got the builtin type Bool
 4 |     @exported fun p(a: Bool=Bool): Bool = a
   |                             ^^^^
 
 
-== bad_kwarg.lkt ==
-bad_kwarg.lkt:5:46: error: Expected type Bool, got Int
+== bad_kwarg/test.lkt ==
+test.lkt:5:46: error: Expected type Bool, got Int
 5 |     @exported fun calling(): Bool = node.p(a=1, b=true)
   |                                              ^
 
 
-== bad_literal_1.lkt ==
-bad_literal_1.lkt:4:32: error: no entity called 'node' in the root scope
+== bad_literal_1/test.lkt ==
+test.lkt:4:32: error: no entity called 'node' in scope for unit test.lkt
 4 |     @exported fun p(a: Example=node): FooNode = a
   |                                ^^^^
 
 
-== bad_literal_2.lkt ==
-bad_literal_2.lkt:4:38: error: static expression expected in this context
+== bad_literal_2/test.lkt ==
+test.lkt:4:38: error: static expression expected in this context
 4 |     @exported fun p(a: Bool, b: Bool=true == false): Bool = a and b
   |                                      ^^^^^^^^^^^^^
 
 
-== bad_type.lkt ==
-bad_type.lkt:4:29: error: Expected type Bool, got Int
+== bad_type/test.lkt ==
+test.lkt:4:29: error: Expected type Bool, got Int
 4 |     @exported fun p(a: Bool=1): Bool = a
   |                             ^
 
 
-== missing_arg_1.lkt ==
-missing_arg_1.lkt:5:37: error: Missing actual for argument a
+== missing_arg_1/test.lkt ==
+test.lkt:5:37: error: Missing actual for argument a
 5 |     @exported fun calling(): Bool = node.p()
   |                                     ^^^^^^^^
 
 
-== missing_arg_2.lkt ==
-missing_arg_2.lkt:5:37: error: Missing actual for argument a
+== missing_arg_2/test.lkt ==
+test.lkt:5:37: error: Missing actual for argument a
 5 |     @exported fun calling(): Bool = node.p(b=true)
   |                                     ^^^^^^^^^^^^^^
 
 
-== too_many_args_1.lkt ==
-too_many_args_1.lkt:5:50: error: Unexpected argument
+== too_many_args_1/test.lkt ==
+test.lkt:5:50: error: Unexpected argument
 5 |     @exported fun calling(): Bool = node.p(true, false, b=false)
   |                                                  ^^^^^
 
 
-== too_many_args_2.lkt ==
-too_many_args_2.lkt:5:44: error: Unexpected argument
+== too_many_args_2/test.lkt ==
+test.lkt:5:44: error: Unexpected argument
 5 |     @exported fun calling(): Bool = node.p(true, a=false, b=false)
   |                                            ^^^^
 
 
-== too_many_args_3.lkt ==
-too_many_args_3.lkt:5:57: error: Unexpected keyword argument
+== too_many_args_3/test.lkt ==
+test.lkt:5:57: error: Unexpected keyword argument
 5 |     @exported fun calling(): Bool = node.p(true, false, c=false)
   |                                                         ^^^^^^^
 
 
-== too_many_args_4.lkt ==
-too_many_args_4.lkt:5:50: error: Unexpected argument
+== too_many_args_4/test.lkt ==
+test.lkt:5:50: error: Unexpected argument
 5 |     @exported fun calling(): Bool = node.p(true, false, 1, a=false)
   |                                                  ^^^^^
 

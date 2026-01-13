@@ -1,0 +1,5 @@
+from common import FooNode
+
+class BarNode: FooNode {
+    @exported fun bar_prop(): Int = node.root_prop(12, 15)
+}

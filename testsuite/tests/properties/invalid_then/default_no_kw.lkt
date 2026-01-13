@@ -1,7 +1,0 @@
-import common
-
-class Example: FooNode {
-    @parse_field name: Name
-
-    fun prop(): Name = node.name.do((x) => x, node)
-}

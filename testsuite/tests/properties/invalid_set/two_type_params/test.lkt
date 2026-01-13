@@ -1,0 +1,6 @@
+from common import FooNode
+
+class Example: FooNode {
+    @external() fun test(): Set[Int, Bool]
+}
+

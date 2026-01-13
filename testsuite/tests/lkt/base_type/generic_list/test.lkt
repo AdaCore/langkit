@@ -1,7 +1,7 @@
 # Check that references to the implicit generic list type are correctly handled
 # in base node types (i.e. rejected with a correct error message).
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

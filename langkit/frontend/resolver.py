@@ -10,6 +10,7 @@ from langkit.diagnostics import Location, error
 from langkit.envs import RefKind
 import langkit.expressions as E
 from langkit.frontend.scopes import Scope
+from langkit.frontend.utils import extract_lkt_module_name
 from langkit.generic_interface import (
     BaseGenericInterface,
     GenericInterface,
@@ -180,6 +181,33 @@ class Resolver:
                 Scope.RefKindValue(ref_kind_value.name, ref_kind_value)
             )
 
+        # Create a scope whose sole purpose is to prevent two global entities
+        # from having the same name: they do not belong to the same namespace
+        # at the Lkt level, but they will for code generation, so they need to
+        # have unique names.
+        self.global_scope = Scope("global scope", context)
+
+        # Create one scope per Lkt unit, to act as the local scope for that
+        # module. Also create one entity per module.
+        self.lkt_modules: dict[str, Scope.Module] = {}
+        self.lkt_modules_by_unit: dict[L.AnalysisUnit, Scope.Module] = {}
+        for u in lkt_units:
+            module_name = extract_lkt_module_name(u.filename)
+            other_module = self.lkt_modules.get(module_name)
+            if other_module is not None:
+                error(
+                    f"conflicting Lkt source filenames: {u.filename!r} and"
+                    f" {other_module.unit.filename!r}",
+                    Location.nowhere,
+                )
+
+            unit_scope = self.root_scope.create_child(
+                f"scope for unit {os.path.basename(u.filename)}"
+            )
+            module = Scope.Module(module_name, u, unit_scope)
+            self.lkt_modules_by_unit[u] = module
+            self.lkt_modules[module_name] = module
+
     @property
     def root_lkt_source_loc(self) -> Location:
         """
@@ -195,13 +223,14 @@ class Resolver:
         self,
         node_type: type,
         label: str,
-    ) -> L.FullDecl:
+    ) -> tuple[L.FullDecl, Scope.Module]:
         """
         Look for a top-level declaration of type ``node_type`` in the Lkt
         units.
 
         If none or several are found, emit error diagnostics. Return the
-        associated full declaration.
+        associated full declaration and the scope for the unit that contains
+        this declaration.
 
         :param node_type: Node type to look for.
         :param label: Human readable string for what to look for. Used to
@@ -222,17 +251,27 @@ class Resolver:
                         location=decl,
                     )
                 result = decl
+                module = self.lkt_modules_by_unit[decl.unit]
 
         if result is None:
             error(f"missing {label}", location=self.root_lkt_source_loc)
 
-        return result
+        return result, module
 
     def resolve_entity(self, name: L.Expr, scope: Scope) -> Scope.Entity:
         """
         Resolve the entity designated by ``name`` in the given scope.
         """
         return scope.resolve(name)
+
+    def resolve_module(self, name: L.ModuleId) -> Scope.Module:
+        """
+        Resolve the module designated by ``name``.
+        """
+        # All the modules referenced by import clauses are loaded early
+        # (in langkit.frontend.utils.load_lkt), and failures at that time are
+        # fatal, so the following dict lookup should never fail.
+        return self.lkt_modules[name.text]
 
     def resolve_generic(self, name: L.Expr, scope: Scope) -> Scope.Generic:
         """
@@ -432,7 +471,11 @@ class Resolver:
         """
         Like ``resolve_type``, but working on a type expression directly.
         """
-        if isinstance(name, L.RefId):
+        if isinstance(name, L.RefId) or (
+            isinstance(name, L.DotExpr)
+            and isinstance(name.f_prefix, L.Id)
+            and name.f_prefix.text.islower()
+        ):
             return self.resolve_type_entity(name, scope).t
 
         elif isinstance(name, L.DotExpr):

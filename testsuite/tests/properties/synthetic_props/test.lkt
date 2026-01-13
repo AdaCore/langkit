@@ -1,7 +1,7 @@
 # Check the specific behavior of several properties (.is_synthetic, .text and
 # .sloc_range) when given a synthetic node.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

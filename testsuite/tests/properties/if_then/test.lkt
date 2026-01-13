@@ -1,6 +1,6 @@
 # Test that doing If(...).then(...) compiles properly. It used not to
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

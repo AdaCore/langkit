@@ -1,7 +1,7 @@
 # Test that the String type works as expected in the property DSL and in the
 # generated APIs.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

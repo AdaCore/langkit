@@ -1,7 +1,7 @@
 # Test that empty structs are compiled as expected both in properties and at
 # public API boundary.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

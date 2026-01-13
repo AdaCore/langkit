@@ -1,10 +1,10 @@
-== bad_type.lkt ==
-bad_type.lkt:4:38: error: Invalid type for Null expression: Int
+== bad_type/test.lkt ==
+test.lkt:4:38: error: Invalid type for Null expression: Int
 4 |     @exported fun prop(): Int = null[Int]
   |                                      ^^^
 
 
-== correct.lkt ==
+== correct/test.lkt ==
 Code generation was successful
 
 lkt_compile: Done

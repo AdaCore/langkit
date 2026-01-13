@@ -1,6 +1,6 @@
 # Check that array concatenation works as expected
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

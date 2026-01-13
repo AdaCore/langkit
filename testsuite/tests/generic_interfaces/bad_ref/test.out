@@ -1,5 +1,5 @@
 == foo.lkt ==
-foo.lkt:10:35: error: no entity called 'NonExisting' in the root scope
+foo.lkt:10:35: error: no entity called 'NonExisting' in scope for unit foo.lkt
 10 | class BarNode: FooNode implements NonExisting {
    |                                   ^^^^^^^^^^^
 

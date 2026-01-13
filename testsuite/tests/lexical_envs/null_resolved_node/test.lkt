@@ -4,7 +4,7 @@
 # Such null nodes used to be included, which showed up as crashes in "can_reach"
 # properties (Self was null).
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

@@ -1,6 +1,6 @@
 # Check that parser gives precedence to the "in" operator over "and"
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

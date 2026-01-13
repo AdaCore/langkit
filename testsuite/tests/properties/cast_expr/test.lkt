@@ -2,7 +2,7 @@
 # works as expected. Due to the way "cast" expressions are represented in the
 # DSL, this used to compute a stripped expression.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

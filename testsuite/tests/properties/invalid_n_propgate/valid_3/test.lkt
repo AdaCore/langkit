@@ -1,0 +1,10 @@
+from common import BazNode, FooNode
+
+class BarNode: FooNode {
+    @ignored fun main_prop(): Equation =
+        node.ref_var <- BazNode.prop3%(
+            node.type_var,
+            node.type_var,
+            node.type_var
+        )
+}

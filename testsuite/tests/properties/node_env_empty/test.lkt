@@ -2,7 +2,7 @@
 # self-env is also EmptyEnv. It used to return null, which is an erroneous
 # environment value in the DSL.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

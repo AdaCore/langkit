@@ -1,5 +1,0 @@
-import common
-
-class Example: FooNode {
-    @exported fun resolve(): Bool = (node.var1 <- node).solve()
-}

@@ -1,4 +1,7 @@
-@with_lexer(lkt_lexer)
+from nodes import *
+import tokens
+
+@with_lexer(tokens.lkt_lexer)
 @with_unparsers
 grammar lkt_grammar {
     @main_rule

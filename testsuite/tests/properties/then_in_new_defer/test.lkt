@@ -2,7 +2,7 @@
 # whose prefix is a defered ("T.*") type. This used to skip the "prepare"
 # compilation pass, which resulted in a Langkit crash.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

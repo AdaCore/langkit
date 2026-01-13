@@ -1,7 +1,7 @@
 # Check that code generation produces valid Ada sources when a dynamic variable
 # has the same name as a local variable.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

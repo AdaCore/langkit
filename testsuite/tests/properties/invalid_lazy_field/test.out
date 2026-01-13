@@ -1,29 +1,29 @@
-== call.lkt ==
-call.lkt:10:28: error: cannot call a lazy field
+== call/test.lkt ==
+test.lkt:10:28: error: cannot call a lazy field
 10 |     fun p(): Bool = node.lf()
    |                            ^^
 
 
-== entity_info_1.lkt ==
-entity_info_1.lkt:7:21: error: no entity called 'self' in scope for initializer for lazy field Example.p
+== entity_info_1/test.lkt ==
+test.lkt:7:21: error: no entity called 'self' in scope for initializer for lazy field Example.p
 7 |     @lazy p: Bool = self.info.md.flag
   |                     ^^^^
 
 
-== entity_info_2.lkt ==
-entity_info_2.lkt:8:31: error: Call to FooNode.flag_set must be done on an entity
+== entity_info_2/test.lkt ==
+test.lkt:8:31: error: Call to FooNode.flag_set must be done on an entity
 8 |     @exported @lazy p: Bool = node.flag_set()
   |                               ^^^^^^^^^^^^^^^
 
 
-== inconsistent_base_1.lkt ==
-inconsistent_base_1.lkt:8:21: error: lazy fields cannot override properties, and conversely
+== inconsistent_base_1/test.lkt ==
+test.lkt:8:21: error: lazy fields cannot override properties, and conversely
 8 |     @exported @lazy p: Int = 2
   |                     ^^^^^^^^^^
 
 
-== inconsistent_base_2.lkt ==
-inconsistent_base_2.lkt:8:15: error: lazy fields cannot override properties, and conversely
+== inconsistent_base_2/test.lkt ==
+test.lkt:8:15: error: lazy fields cannot override properties, and conversely
 8 |     @exported fun p(): Int = 2
   |               ^^^^^^^^^^^^^^^^
 

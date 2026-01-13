@@ -56,6 +56,10 @@ lexer {lexer} {{
 """
 
 parser_template = """\
+from nodes import ExampleNode
+from tokens import {lexer}
+
+
 @with_lexer({lexer})
 grammar {grammar} {{
     @main_rule main_rule <- ExampleNode("example")
@@ -64,7 +68,6 @@ grammar {grammar} {{
 
 nodes_template = """\
 import parser
-import tokens
 
 
 |" Root node class for {lang_name} nodes.

@@ -1,9 +1,0 @@
-import common
-
-class ExampleBlock: BaseExampleBlock {
-    @exported fun p(): Array[Entity[Example]] =
-        node.items.ifiltermap(
-            (e: Example, i: Bool) => if i then node.items.at(1) else e,
-            (e: Example, i: Int) => not e.is_null or i == 0
-        )
-}

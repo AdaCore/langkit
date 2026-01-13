@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import OrderedDict
 import os.path
 
 from langkit.config import LktSpecConfig
@@ -74,6 +73,25 @@ def lkt_doc(decl: L.Decl) -> str:
     return "" if full_decl.f_doc is None else denoted_str(full_decl.f_doc)
 
 
+def extract_lkt_module_name(filename: str) -> str:
+    """
+    Return the module name for the given Lkt source filename.
+
+    Abort with a language spec error if this is not a valid Lkt source
+    filename.
+    """
+    basename = os.path.basename(filename)
+    name, ext = os.path.splitext(basename)
+    valid = True
+    try:
+        names.check_lower(name)
+    except ValueError:
+        valid = False
+    if not valid or ext != ".lkt":
+        error(f"invalid Lkt source filename: {basename!r}", Location.nowhere)
+    return name
+
+
 def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
     """
     Load a Lktlang source file and return the closure of Lkt units referenced.
@@ -81,15 +99,28 @@ def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
 
     :param lkt_file: Name of the file to parse.
     """
-    units_map = OrderedDict()
+    processed_units: set[L.AnalysisUnit] = set()
+    modules_map: dict[str, L.AnalysisUnit] = {}
     diagnostics = []
 
     def process_unit(unit: L.AnalysisUnit) -> None:
-        if unit.filename in units_map:
+        # Do nothing if this unit was already loaded
+        if unit in processed_units:
             return
+        processed_units.add(unit)
+
+        # Determine the module name for this unit and ensure it is unique
+        module_name = extract_lkt_module_name(unit.filename)
+        other_unit = modules_map.get(module_name)
+        if other_unit is not None:
+            error(
+                f"conflicting Lkt source filenames: {unit.filename!r} and"
+                f" {other_unit.filename!r}",
+                Location.nowhere,
+            )
 
         # Register this unit and its diagnostics
-        units_map[unit.filename] = unit
+        modules_map[module_name] = unit
         for d in unit.diagnostics:
             diagnostics.append((unit, d))
 
@@ -117,4 +148,4 @@ def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
             d.message, Location.from_sloc_range(u, d.sloc_range)
         )
     errors_checkpoint()
-    return list(units_map.values())
+    return list(modules_map.values())

@@ -1,7 +1,7 @@
 LangkitRoot[2:1-13:18]
 |f_doc: <null>
 |f_imports:
-|  ImportList[2:1-2:1]: <empty list>
+|  BaseImportList[2:1-2:1]: <empty list>
 |f_decls:
 |  FullDeclList[2:1-13:18]
 |  |  FullDecl[2:1-2:18]

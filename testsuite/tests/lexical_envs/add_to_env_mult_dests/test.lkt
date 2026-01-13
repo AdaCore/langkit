@@ -1,7 +1,7 @@
 # Test add_to_env with multiple env_assoc having different destination
 # environments.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

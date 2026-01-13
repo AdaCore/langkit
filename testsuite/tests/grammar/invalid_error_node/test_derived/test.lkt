@@ -1,0 +1,7 @@
+from common import FooNode, Example
+
+class BaseErrorDecl: FooNode implements ErrorNode {
+}
+
+@synthetic class ErrorDecl: BaseErrorDecl {
+}

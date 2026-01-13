@@ -1,0 +1,5 @@
+from common import FooNode
+
+class BarNode: FooNode {
+    @exported fun bar_prop(): Int = node.many_args(a=1, b=2, 3)
+}

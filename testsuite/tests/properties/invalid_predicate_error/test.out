@@ -1,23 +1,23 @@
-== no_such_param.lkt ==
-no_such_param.lkt:6:5: error: no such parameter referenced in predicate_error: 'p'
+== no_such_param/test.lkt ==
+test.lkt:6:5: error: no such parameter referenced in predicate_error: 'p'
 6 |     fun pred(n: Example): Bool = false
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== non_entity.lkt ==
-non_entity.lkt:6:14: error: since it is referenced by the predicate error template, this parameter must be an entity
+== non_entity/test.lkt ==
+test.lkt:6:14: error: since it is referenced by the predicate error template, this parameter must be an entity
 6 |     fun pred(n: Example): Bool = false
   |              ^^^^^^^^^^
 
 
-== stray_dollar_middle.lkt ==
-stray_dollar_middle.lkt:6:5: error: stray dollar in the predicate error template
+== stray_dollar_middle/test.lkt ==
+test.lkt:6:5: error: stray dollar in the predicate error template
 6 |     fun pred(@ignored n: Entity[Example]): Bool = false
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== stray_dollar_trailing.lkt ==
-stray_dollar_trailing.lkt:6:5: error: stray dollar in the predicate error template
+== stray_dollar_trailing/test.lkt ==
+test.lkt:6:5: error: stray dollar in the predicate error template
 6 |     fun pred(@ignored n: Entity[Example]): Bool = false
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

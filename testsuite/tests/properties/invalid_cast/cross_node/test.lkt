@@ -1,0 +1,8 @@
+from common import FooNode, NumberNode, BarNode
+
+class ListNode: FooNode {
+    @parse_field nb_list: ASTList[NumberNode]
+
+    fun bar_node_parent(): BarNode = node.parent.as[BarNode]
+    @exported fun prop(): ListNode = node.bar_node_parent().as[ListNode]
+}

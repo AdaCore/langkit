@@ -1,14 +1,14 @@
-== foo_node.lkt ==
-foo_node.lkt:4:5: error: ExampleNode.get_random_node returns FooNode whereas it overrides MiddleNode.get_random_node, which returns MiddleNode. The former should match the latter.
+== foo_node/test.lkt ==
+test.lkt:4:5: error: ExampleNode.get_random_node returns FooNode whereas it overrides MiddleNode.get_random_node, which returns MiddleNode. The former should match the latter.
 4 |     fun get_random_node(): FooNode = null[FooNode]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== middle_node.lkt ==
+== middle_node/test.lkt ==
 Code generation was successful
 
-== null_node.lkt ==
-null_node.lkt:4:5: error: ExampleNode.get_random_node returns NullNode whereas it overrides MiddleNode.get_random_node, which returns MiddleNode. The former should match the latter.
+== null_node/test.lkt ==
+test.lkt:4:5: error: ExampleNode.get_random_node returns NullNode whereas it overrides MiddleNode.get_random_node, which returns MiddleNode. The former should match the latter.
 4 |     fun get_random_node(): NullNode = null[NullNode]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

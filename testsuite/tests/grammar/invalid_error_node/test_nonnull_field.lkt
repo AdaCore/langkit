@@ -1,5 +1,0 @@
-import common
-
-class ErrorDecl : FooNode implements ErrorNode {
-    @parse_field f: Example
-}

@@ -1,0 +1,24 @@
+from lexer_example import foo_lexer
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Root : FooNode {
+    @nullable @parse_field f: FooNode
+}
+
+class Identifier: FooNode implements TokenNode {
+}
+
+class Number: FooNode implements TokenNode {
+}
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    @main_rule main_rule <- Root(or(
+        | pick("example" null(FooNode))
+        | Identifier(@Identifier)
+        | Number(@Number)
+    ))
+}

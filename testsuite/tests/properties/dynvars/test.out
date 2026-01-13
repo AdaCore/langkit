@@ -1,40 +1,40 @@
-== default_default.lkt ==
+== default_default/test.lkt ==
 Code generation was successful
 
-== default_novar.lkt ==
+== default_novar/test.lkt ==
 Code generation was successful
 
-== default_var.lkt ==
-common_concrete_var.lkt:2:22: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
-2 |     @with_dynvars(v) fun prop(): Int = 12
-  |                      ^^^^^^^^^^^^^^^^^^^^
+== default_var/test.lkt ==
+test.lkt:13:22: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+13 |     @with_dynvars(v) fun prop(): Int = 12
+   |                      ^^^^^^^^^^^^^^^^^^^^
 
 
-== novar_default.lkt ==
+== novar_default/test.lkt ==
 Code generation was successful
 
-== novar_novar.lkt ==
+== novar_novar/test.lkt ==
 Code generation was successful
 
-== novar_var.lkt ==
-common_concrete_var.lkt:2:22: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
-2 |     @with_dynvars(v) fun prop(): Int = 12
-  |                      ^^^^^^^^^^^^^^^^^^^^
+== novar_var/test.lkt ==
+test.lkt:13:22: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+13 |     @with_dynvars(v) fun prop(): Int = 12
+   |                      ^^^^^^^^^^^^^^^^^^^^
 
 
-== var_default.lkt ==
+== var_default/test.lkt ==
 Code generation was successful
 
-== var_default_use.lkt ==
+== var_default_use/test.lkt ==
 Code generation was successful
 
-== var_novar.lkt ==
-common_concrete_novar.lkt:2:21: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
-2 |     @with_dynvars() fun prop(): Int = 12
-  |                     ^^^^^^^^^^^^^^^^^^^^
+== var_novar/test.lkt ==
+test.lkt:12:21: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+12 |     @with_dynvars() fun prop(): Int = 12
+   |                     ^^^^^^^^^^^^^^^^^^^^
 
 
-== var_var.lkt ==
+== var_var/test.lkt ==
 Code generation was successful
 
 lkt_compile: Done

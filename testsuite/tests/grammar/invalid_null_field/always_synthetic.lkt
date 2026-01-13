@@ -1,7 +1,7 @@
 # Check that we do not reject "non null fields" that are parse fields which
 # always belong to synthetic nodes.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

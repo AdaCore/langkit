@@ -1,7 +1,12 @@
 # Check that abstract properties in the root node are rejected when at least
 # one list types does not override it.
 
-import common
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example("example"))
+}
 
 class FooNode implements Node[FooNode] {
     @exported @abstract fun prop(): Bool
@@ -11,8 +16,5 @@ class FooNode implements Node[FooNode] {
     fun prop(): Bool = true
 }
 
-class Identifier: BaseNode {
-}
-
-class Number: BaseNode {
+class Example: BaseNode {
 }

@@ -1,30 +1,30 @@
-== invalid-astlist.lkt ==
-invalid-astlist.lkt:6:7: error: ASTList expects one type argument: the list element type
-6 |       ASTList[FooNode, Example, Example]+(Example("example"))
+== invalid_astlist.lkt ==
+invalid_astlist.lkt:7:7: error: ASTList expects one type argument: the list element type
+7 |       ASTList[FooNode, Example, Example]+(Example("example"))
   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== invalid-element-type.lkt ==
-invalid-element-type.lkt:8:9: error: Invalid list type for List parser: sub-parser produces Num nodes while ASTList[Example] accepts only Example nodes
-8 |         ASTList[Example]*(num)
+== invalid_element_type.lkt ==
+invalid_element_type.lkt:9:9: error: Invalid list type for List parser: sub-parser produces Num nodes while ASTList[Example] accepts only Example nodes
+9 |         ASTList[Example]*(num)
   |         ^^^^^^^^^^^^^^^^^^^^^^
 
 
-== invalid-list-cls.lkt ==
-invalid-list-cls.lkt:5:29: error: no entity called 'NoSuchGeneric' in the root scope
-5 |     @main_rule main_rule <- NoSuchGeneric[Example]+(Example("example"))
+== invalid_list_cls.lkt ==
+invalid_list_cls.lkt:6:29: error: no entity called 'NoSuchGeneric' in scope for unit invalid_list_cls.lkt
+6 |     @main_rule main_rule <- NoSuchGeneric[Example]+(Example("example"))
   |                             ^^^^^^^^^^^^^
 
 
-== non-list-cls.lkt ==
-non-list-cls.lkt:6:29: error: Invalid list type for List parser: ListNode. Not a list type
-6 |     @main_rule main_rule <- ListNode+(num)
+== non_list_cls.lkt ==
+non_list_cls.lkt:7:29: error: Invalid list type for List parser: ListNode. Not a list type
+7 |     @main_rule main_rule <- ListNode+(num)
   |                             ^^^^^^^^^^^^^^
 
 
-== token-element.lkt ==
-token-element.lkt:5:38: error: List parsers only accept subparsers that yield AST nodes (Token provided here)
-5 |     @main_rule main_rule <- ListNode(list+(@Number))
+== token_element.lkt ==
+token_element.lkt:6:38: error: List parsers only accept subparsers that yield AST nodes (Token provided here)
+6 |     @main_rule main_rule <- ListNode(list+(@Number))
   |                                      ^^^^^^^^^^^^^^
 
 

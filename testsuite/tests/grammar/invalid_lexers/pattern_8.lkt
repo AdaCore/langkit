@@ -1,4 +1,4 @@
-import common
+from common import Example
 
 lexer foo_lexer {
     val pat: Int = p"example"

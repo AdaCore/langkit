@@ -1,0 +1,8 @@
+from common import FooNode, OpKind
+
+class Example: FooNode implements TokenNode {
+    @exported fun p(): Int = match node.parent {
+        case _: OpKind.Foo => 1
+        case _ => 0
+    }
+}

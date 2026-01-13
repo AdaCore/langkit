@@ -1,0 +1,10 @@
+from common import FooNode
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- NoSuchGeneric[Example]+(Example("example"))
+}
+
+class Example : FooNode implements TokenNode {
+}

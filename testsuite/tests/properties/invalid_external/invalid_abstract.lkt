@@ -1,9 +1,0 @@
-import common
-
-@abstract class AbstractExample: FooNode {
-    @exported @external() @abstract fun p(): Bool
-}
-
-class Example: AbstractExample {
-    fun p(): Bool = false
-}

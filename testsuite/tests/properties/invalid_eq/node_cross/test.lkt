@@ -1,0 +1,5 @@
+from common import FooNode, Lit
+
+class Example: FooNode {
+    @exported fun prop(): Bool = node.parent.as[Lit] == node
+}

@@ -1,0 +1,7 @@
+from lexer_example import *
+from common import *
+import homonym
+
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}

@@ -1,9 +1,0 @@
-import common
-
-class FooNode implements Node[FooNode] {
-    @exported fun p(): Int = 1
-}
-
-class Example: FooNode {
-    @exported @lazy p: Int = 2
-}

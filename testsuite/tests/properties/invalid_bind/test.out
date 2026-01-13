@@ -1,25 +1,25 @@
-== bad_arity.lkt ==
-common.lkt:18:9: error: Missing an actual for argument #1 (b)
-18 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
+== bad_arity/test.lkt ==
+common.lkt:19:9: error: Missing an actual for argument #1 (b)
+19 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== bad_return_type.lkt ==
-common.lkt:18:9: error: Converter property must return a subtype of Entity[FooNode]
-18 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
+== bad_return_type/test.lkt ==
+common.lkt:19:9: error: Converter property must return a subtype of Entity[FooNode]
+19 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== unbound_dynvar.lkt ==
-common.lkt:18:9: error: In closure for BazNode.conv_prop, dyn_node2 needs to be bound
-18 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
+== unbound_dynvar/test.lkt ==
+common.lkt:19:9: error: In closure for BazNode.conv_prop, dyn_node2 needs to be bound
+19 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== valid.lkt ==
+== valid/test.lkt ==
 Code generation was successful
 
-== valid_default_arg.lkt ==
+== valid_default_arg/test.lkt ==
 Code generation was successful
 
 lkt_compile: Done

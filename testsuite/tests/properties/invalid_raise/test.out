@@ -1,23 +1,23 @@
-== bad_rtype.lkt ==
-bad_rtype.lkt:4:20: error: Expected type Int, got String
+== bad_rtype/test.lkt ==
+test.lkt:4:20: error: Expected type Int, got String
 4 |     fun p(): Int = raise[String] PropertyError()
   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== no_rtype.lkt ==
-no_rtype.lkt:4:20: error: Return type required (`raise[T]`)
+== no_rtype/test.lkt ==
+test.lkt:4:20: error: Return type required (`raise[T]`)
 4 |     fun p(): Int = raise PropertyError()
   |                    ^^^^^
 
 
-== not_exception.lkt ==
-not_exception.lkt:4:31: error: exception expected, got the type FooNode at common.lkt:8:1
+== not_exception/test.lkt ==
+test.lkt:4:31: error: exception expected, got the type FooNode at common.lkt:9:1
 4 |     fun p(): Int = raise[Int] FooNode()
   |                               ^^^^^^^
 
 
-== not_string.lkt ==
-not_string.lkt:4:45: error: static string value expected
+== not_string/test.lkt ==
+test.lkt:4:45: error: static string value expected
 4 |     fun p(): Int = raise[Int] PropertyError(1)
   |                                             ^
 

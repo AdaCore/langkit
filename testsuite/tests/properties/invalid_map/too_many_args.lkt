@@ -1,7 +1,0 @@
-import common
-
-class ListNode: FooNode {
-    @parse_field nb_list: ASTList[NumberNode]
-    @exported fun prop(): Array[Entity[NumberNode]] =
-        self.nb_list.imap((x, y, z) => x)
-}

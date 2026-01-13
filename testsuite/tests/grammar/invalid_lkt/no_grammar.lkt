@@ -1,2 +1,2 @@
-import common
-import lexer_example
+from common import FooNode, Example
+from lexer_example import foo_lexer

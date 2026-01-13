@@ -1,5 +1,0 @@
-import common
-
-class LiteralList: ASTList[Literal] {
-    fun prop(): EmptyNode = EmptyNode()
-}

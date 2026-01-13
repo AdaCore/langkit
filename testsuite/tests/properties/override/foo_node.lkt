@@ -1,5 +1,0 @@
-import common
-
-class ExampleNode: MiddleNode {
-    fun get_random_node(): FooNode = null[FooNode]
-}

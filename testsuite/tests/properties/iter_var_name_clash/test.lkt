@@ -4,7 +4,7 @@
 # variable being an entity, another being a bare node, one masking the other,
 # and thus having an entity whene a bare node was expected).
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

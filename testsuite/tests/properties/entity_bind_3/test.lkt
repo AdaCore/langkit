@@ -1,7 +1,7 @@
 # Test that Bind works when binding entities, and using an equality property
 # that takes entities.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

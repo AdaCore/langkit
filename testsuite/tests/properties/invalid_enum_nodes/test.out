@@ -1,20 +1,20 @@
-== bad_alt.lkt ==
-bad_alt.lkt:5:24: error: no such alternative
+== bad_alt/test.lkt ==
+test.lkt:5:24: error: no such alternative
 5 |         case _: OpKind.Baz => 1
   |                        ^^^
 
 
-== correct.lkt ==
+== correct/test.lkt ==
 Code generation was successful
 
-== not_enum_node.lkt ==
-not_enum_node.lkt:5:17: error: base enum node expected
+== not_enum_node/test.lkt ==
+test.lkt:5:17: error: base enum node expected
 5 |         case _: Example.Foo => 1
   |                 ^^^^^^^
 
 
-== not_node.lkt ==
-not_node.lkt:5:17: error: base enum node expected
+== not_node/test.lkt ==
+test.lkt:5:17: error: base enum node expected
 5 |         case _: Int.Foo => 1
   |                 ^^^
 

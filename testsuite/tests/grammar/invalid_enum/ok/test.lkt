@@ -1,0 +1,11 @@
+from common import Example
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(
+        Example.Example1("example")
+        | Example.Example2("null")
+        | Example.Example3("def")
+    )
+}

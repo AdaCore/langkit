@@ -1,7 +1,7 @@
 # Test that property dispatchers properly fail (i.e. raising a Property_Error
 # instead of dereferencing a null access) when their Self argument is null.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

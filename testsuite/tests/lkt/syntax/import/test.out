@@ -4,22 +4,22 @@ LangkitRoot[1:1-4:17]
 |  BaseImportList[1:1-4:17]
 |  |  Import[1:1-1:10]
 |  |  |f_module_name:
-|  |  |  ModuleRefId[1:8-1:10]: m1
+|  |  |  ModuleId[1:8-1:10]: m1
 |  |  ImportFrom[2:1-2:18]
 |  |  |f_module_name:
-|  |  |  ModuleRefId[2:6-2:8]: m2
+|  |  |  ModuleId[2:6-2:8]: m2
 |  |  |f_imported_names:
 |  |  |  ImportedIdList[2:16-2:18]
 |  |  |  |  ImportedId[2:16-2:18]: d1
 |  |  ImportFrom[3:1-3:22]
 |  |  |f_module_name:
-|  |  |  ModuleRefId[3:6-3:8]: m3
+|  |  |  ModuleId[3:6-3:8]: m3
 |  |  |f_imported_names:
 |  |  |  ImportedIdList[3:16-3:22]
 |  |  |  |  ImportedId[3:16-3:18]: d2
 |  |  |  |  ImportedId[3:20-3:22]: d3
 |  |  ImportAllFrom[4:1-4:17]
 |  |  |f_module_name:
-|  |  |  ModuleRefId[4:6-4:8]: m5
+|  |  |  ModuleId[4:6-4:8]: m5
 |f_decls:
 |  FullDeclList[4:17-4:17]: <empty list>

@@ -1,0 +1,8 @@
+from common import BaseExample, FooNode, Literal
+
+@synthetic class EmptyNode: FooNode {
+}
+
+class Example: BaseExample {
+    @lazy prop: EmptyNode = Literal.builder().build()
+}

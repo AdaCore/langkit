@@ -3,7 +3,7 @@
 # rebindings and a coherent safety net. The code in the test used to raise
 # a `Stale_Reference` exception.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

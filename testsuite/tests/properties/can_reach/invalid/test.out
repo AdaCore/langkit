@@ -1,39 +1,39 @@
-== bad_arg_type.lkt ==
-bad_arg_type.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
+== bad_arg_type/test.lkt ==
+test.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
 4 |     fun can_reach(b: Bool): Bool = b
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== bad_return_type.lkt ==
-bad_return_type.lkt:4:5: error: FooNode.can_reach must return a boolean
+== bad_return_type/test.lkt ==
+test.lkt:4:5: error: FooNode.can_reach must return a boolean
 4 |     fun can_reach(n: FooNode): FooNode = n
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== no_argument.lkt ==
-no_argument.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
+== no_argument/test.lkt ==
+test.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
 4 |     fun can_reach(): Bool = true
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== not_a_property.lkt ==
-not_a_property.lkt:4:5: error: FooNode.can_reach must be a property
+== not_a_property/test.lkt ==
+test.lkt:4:5: error: FooNode.can_reach must be a property
 4 |     can_reach: Bool
   |     ^^^^^^^^^^^^^^^
 
 
-== too_many_arguments.lkt ==
-too_many_arguments.lkt:4:19: warning: unused argument
+== too_many_arguments/test.lkt ==
+test.lkt:4:19: warning: unused argument
 4 |     fun can_reach(n: FooNode, b: Bool): Bool = b
   |                   ^^^^^^^^^^
 
-too_many_arguments.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
+test.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
 4 |     fun can_reach(n: FooNode, b: Bool): Bool = b
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== use_entity_info.lkt ==
-use_entity_info.lkt:4:5: error: FooNode.can_reach cannot use entities
+== use_entity_info/test.lkt ==
+test.lkt:4:5: error: FooNode.can_reach cannot use entities
 4 |     fun can_reach(n: FooNode): Bool = n.as_bare_entity == self
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

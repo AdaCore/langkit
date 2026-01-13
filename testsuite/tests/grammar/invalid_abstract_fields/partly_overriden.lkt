@@ -1,0 +1,23 @@
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- SomeExampleHolder(Example("example"))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+@abstract class BaseExampleHolder : FooNode {
+    @abstract @parse_field f: FooNode
+}
+
+class SomeExampleHolder : BaseExampleHolder {
+    @parse_field f: FooNode
+}
+
+class OtherExampleHolder : BaseExampleHolder {
+}
+
+class Example : FooNode implements TokenNode {
+}

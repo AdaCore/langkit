@@ -1,0 +1,9 @@
+from common import BaseExample, FooNode, Literal
+
+class Example: BaseExample {
+    @ignored fun p(): Int = {
+        val i = 0;
+        val b = i.to_builder();
+        b.build()
+    }
+}

@@ -1,19 +1,19 @@
-== empty_missing_type.lkt ==
-empty_missing_type.lkt:4:38: error: Missing element type for empty array literal
+== empty_missing_type/test.lkt ==
+test.lkt:4:38: error: Missing element type for empty array literal
 4 |     @exported fun p(): Array[Bool] = []
   |                                      ^^
 
 
-== empty_ok.lkt ==
+== empty_ok/test.lkt ==
 Code generation was successful
 
-== multiple_incompatible.lkt ==
-multiple_incompatible.lkt:4:45: error: Element of type Bool expected, got Example
+== multiple_incompatible/test.lkt ==
+test.lkt:4:45: error: Element of type Bool expected, got Example
 4 |     @exported fun p(): Array[Bool] = [true, node]
   |                                             ^^^^
 
 
-== single_ok.lkt ==
+== single_ok/test.lkt ==
 Code generation was successful
 
 lkt_compile: Done

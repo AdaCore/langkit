@@ -2,7 +2,7 @@
 # "reference" env action triggers a Property_Error. It used to trigger an
 # assertion error.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

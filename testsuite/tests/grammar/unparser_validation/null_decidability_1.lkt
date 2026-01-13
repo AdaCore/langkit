@@ -1,0 +1,25 @@
+from lexer_example import foo_lexer
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Root: FooNode {
+    @nullable
+    @parse_field
+    f: Identifier
+}
+
+class Identifier: FooNode implements TokenNode {
+}
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    # id_or_null can yield a null node, so we cannot check whether Root.f is
+    # null to decide whether to unparse the "example" keyword: the following
+    # parser is illegal.
+    @main_rule
+    main_rule <- Root("def" ?("example" id_or_null))
+    id_or_null <- ?Identifier(@Identifier)
+}

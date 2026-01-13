@@ -1,8 +1,8 @@
-== default_value.lkt ==
+== default_value/test.lkt ==
 Code generation was successful
 
-== no_null_expr.lkt ==
-no_null_expr.lkt:4:5: error: MyEnum does not have a null value, so Example.u must have a default value
+== no_null_expr/test.lkt ==
+test.lkt:4:5: error: MyEnum does not have a null value, so Example.u must have a default value
 4 |     u: MyEnum
   |     ^^^^^^^^^
 

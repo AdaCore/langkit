@@ -1,7 +1,7 @@
 # Test that creating an array of "TypeRef" nodes in a property generates valid
 # (compilable) Ada code. It used to trigger name clashes in the Ada library.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

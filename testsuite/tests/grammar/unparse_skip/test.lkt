@@ -1,7 +1,7 @@
 # Test the generation of unparsers involving Or parsers that contain Skip
 # parsers as alternatives.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 @with_unparsers

@@ -14,4 +14,8 @@ Code generation was successful
 Code generation was successful
 ... done
 
+== Homonym module ==
+error: conflicting Lkt source filenames: '<working-dir>/homonym.lkt' and '<working-dir>/src/homonym.lkt'
+... done
+
 Done

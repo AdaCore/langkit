@@ -1,0 +1,16 @@
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(Identifier(@Identifier)) |> when(Example.n)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Identifier : FooNode implements TokenNode {
+}
+
+class Example : FooNode {
+    @parse_field n: Identifier
+}

@@ -1,0 +1,5 @@
+from common import FooNode, Example
+
+class ExampleSeq: FooNode {
+    @parse_field items: ASTList
+}

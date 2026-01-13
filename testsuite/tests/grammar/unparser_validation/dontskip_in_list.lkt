@@ -1,0 +1,12 @@
+from common import Identifier, Number, Root
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    @main_rule main_rule <- Root(
+        "(" or(num_list | Identifier(@Identifier)) ")"
+    )
+    num_list <- list*(num.dont_skip(")"))
+    num <- Number(@Number)
+}

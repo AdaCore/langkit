@@ -1,7 +1,7 @@
 # Check that the "parents" builtin property behaves properly both in the DSL and
 # in the public API.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

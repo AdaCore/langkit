@@ -1,18 +1,18 @@
-== bad_return_type.lkt ==
-common.lkt:27:9: error: Entity resolver properties must return entities (got Array[Entity[FooNode]])
-27 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
+== bad_return_type/test.lkt ==
+common.lkt:28:9: error: Entity resolver properties must return entities (got Array[Entity[FooNode]])
+28 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== has_args.lkt ==
-common.lkt:27:9: error: Entity resolver properties must have no argument
-27 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
+== has_args/test.lkt ==
+common.lkt:28:9: error: Entity resolver properties must have no argument
+28 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== has_dynvars.lkt ==
-common.lkt:27:9: error: Entity resolver properties must have no dynamically bound variable
-27 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
+== has_dynvars/test.lkt ==
+common.lkt:28:9: error: Entity resolver properties must have no dynamically bound variable
+28 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 

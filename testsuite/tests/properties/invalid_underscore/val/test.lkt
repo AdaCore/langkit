@@ -1,0 +1,9 @@
+from common import FooNode
+
+
+class Example: FooNode implements TokenNode {
+    @exported fun p(): Bool = {
+        val _ = true;
+        _
+    }
+}

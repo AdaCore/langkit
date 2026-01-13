@@ -1,6 +1,0 @@
-import common
-
-class Example: FooNode implements TokenNode {
-    @ignored
-    fun f(lhs: Equation, rhs: Equation): Equation = lhs and lhs
-}

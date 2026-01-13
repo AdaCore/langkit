@@ -34,10 +34,11 @@ lib_config = C.LibraryConfig(
 )
 
 for t in [
-    Test("Unit not found", "other-dir.lkt", [base_path]),
-    Test("Unit in path, relative", "other-dir.lkt", [base_path, src_dir]),
-    Test("Unit in path, absolute", "other-dir.lkt", [base_path, abs_src_dir]),
+    Test("Unit not found", "other_dir.lkt", [base_path]),
+    Test("Unit in path, relative", "other_dir.lkt", [base_path, src_dir]),
+    Test("Unit in path, absolute", "other_dir.lkt", [base_path, abs_src_dir]),
     Test("Import loop", "loop.lkt", [base_path]),
+    Test("Homonym module", "src/homonym.lkt", [base_path, src_dir]),
 ]:
     print(f"== {t.label} ==")
     config = C.CompilationConfig(

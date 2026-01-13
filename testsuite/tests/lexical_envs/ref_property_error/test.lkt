@@ -1,7 +1,7 @@
 # Test that there is no memory leak when a reference resolved aborts with a
 # property error.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

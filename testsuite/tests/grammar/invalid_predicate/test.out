@@ -1,44 +1,44 @@
-== more-general.lkt ==
+== more_general.lkt ==
 Code generation was successful
 
-== no-dot.lkt ==
-no-dot.lkt:5:56: error: invalid reference to a property (should be: ``T.property_name``)
-5 |     @main_rule main_rule <- Example("example") |> when(Example)
+== no_dot.lkt ==
+no_dot.lkt:6:56: error: invalid reference to a property (should be: ``T.property_name``)
+6 |     @main_rule main_rule <- Example("example") |> when(Example)
   |                                                        ^^^^^^^
 
 
-== not-a-prop.lkt ==
-not-a-prop.lkt:5:78: error: property expected, got a field
+== not_a_prop.lkt ==
+not_a_prop.lkt:5:78: error: property expected, got a field
 5 |     @main_rule main_rule <- Example(Identifier(@Identifier)) |> when(Example.n)
   |                                                                              ^
 
 
-== prop-bad-return-type.lkt ==
-prop-bad-return-type.lkt:5:29: error: predicate properties must return booleans
+== prop_bad_return_type.lkt ==
+prop_bad_return_type.lkt:5:29: error: predicate properties must return booleans
 5 |     @main_rule main_rule <- Example("example") |> when(Example.pred)
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== prop-too-many-args.lkt ==
-prop-too-many-args.lkt:5:29: error: predicate properties must take no argument
+== prop_too_many_args.lkt ==
+prop_too_many_args.lkt:5:29: error: predicate properties must take no argument
 5 |     @main_rule main_rule <- Example("example") |> when(Example.pred)
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== too-specific.lkt ==
-too-specific.lkt:5:29: error: Property passed as predicate must accept all nodes the sub-parser may yield. Here, it should take anything that matches a FooNode, while here Example.pred takes Example arguments
+== too_specific.lkt ==
+too_specific.lkt:5:29: error: Property passed as predicate must accept all nodes the sub-parser may yield. Here, it should take anything that matches a FooNode, while here Example.pred takes Example arguments
 5 |     @main_rule main_rule <- or(
 
 
-== unknown-node.lkt ==
-unknown-node.lkt:5:56: error: no entity called 'NoSuchNode' in the root scope
-5 |     @main_rule main_rule <- Example("example") |> when(NoSuchNode.no_such_prop)
+== unknown_node.lkt ==
+unknown_node.lkt:6:56: error: no entity called 'NoSuchNode' in scope for unit unknown_node.lkt
+6 |     @main_rule main_rule <- Example("example") |> when(NoSuchNode.no_such_prop)
   |                                                        ^^^^^^^^^^
 
 
-== unknown-prop.lkt ==
-unknown-prop.lkt:5:64: error: no such member for Example
-5 |     @main_rule main_rule <- Example("example") |> when(Example.no_such_prop)
+== unknown_prop.lkt ==
+unknown_prop.lkt:6:64: error: no such member for Example
+6 |     @main_rule main_rule <- Example("example") |> when(Example.no_such_prop)
   |                                                                ^^^^^^^^^^^^
 
 

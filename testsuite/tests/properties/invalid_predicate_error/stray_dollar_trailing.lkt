@@ -1,7 +1,0 @@
-import common
-
-@abstract
-class FooNode implements Node[FooNode] {
-    @predicate_error("msg: $n $")
-    fun pred(@ignored n: Entity[Example]): Bool = false
-}

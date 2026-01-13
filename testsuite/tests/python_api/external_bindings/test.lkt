@@ -1,7 +1,7 @@
 # Test that the $.C Ada API and the Python bindings can be used to create
 # Python bindings for user libraries.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @metadata
 struct Metadata {

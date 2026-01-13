@@ -1,0 +1,7 @@
+from common import FooNode
+
+class Example: FooNode {
+    @exported
+    fun test(): Bool = node.token_start.singleton().to_set()
+}
+

@@ -1,6 +1,6 @@
 # Test the "text_to_locale_string" C API helper
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

@@ -2,7 +2,7 @@
 # DynamicLexicalEnv works as intended. In particular, check that it behaves
 # safely when any of lexical envs in the rebindings entry become stale.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

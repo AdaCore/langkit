@@ -1,5 +1,0 @@
-import common
-
-class BarNode: FooNode {
-    @exported fun bar_prop(): Int = node.no_such_prop(12)
-}

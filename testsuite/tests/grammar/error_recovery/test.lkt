@@ -1,6 +1,6 @@
 # Test that the cut/stop_cut/dont_skip parsers work correctly
 
-import lexer_example
+from lexer_example import foo_lexer
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule stmt_rule <- or(

@@ -1,5 +1,0 @@
-import common_empty
-
-class Example: BaseExample {
-    @lazy prop: EmptyNode = EmptyNode.builder(1).build()
-}

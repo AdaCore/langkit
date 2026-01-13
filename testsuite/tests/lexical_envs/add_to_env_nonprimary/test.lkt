@@ -1,7 +1,7 @@
 # Check that add_to_env on a non-primary environment raises a Property_Error. It
 # used to crash with a Constraint_Error.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

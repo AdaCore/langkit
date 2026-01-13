@@ -1,7 +1,7 @@
 # Test that, thanks to the PLE root mechanism, it is possible to run PLE on only
 # one PLE root in an analysis unit that contains multiple PLE roots.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

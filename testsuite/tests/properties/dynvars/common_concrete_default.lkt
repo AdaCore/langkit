@@ -1,3 +1,0 @@
-class ConcreteNode: AbstractNode {
-    fun prop(): Int = 12
-}

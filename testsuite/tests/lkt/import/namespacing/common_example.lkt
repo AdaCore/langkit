@@ -1,0 +1,4 @@
+from common_foo_node import FooNode
+
+class Example: FooNode implements TokenNode {
+}

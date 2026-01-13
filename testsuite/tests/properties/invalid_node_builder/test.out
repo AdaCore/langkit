@@ -1,94 +1,94 @@
-== bad_build_type.lkt ==
-bad_build_type.lkt:7:31: error: Expected type DerivedNode, got EmptyNode
-7 |     @lazy prop: DerivedNode = EmptyNode.builder().build()
-  |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+== bad_build_type/test.lkt ==
+test.lkt:10:31: error: Expected type DerivedNode, got EmptyNode
+10 |     @lazy prop: DerivedNode = EmptyNode.builder().build()
+   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== bad_generic_arity.lkt ==
-bad_generic_arity.lkt:4:14: error: NodeBuilder expects one type argument: the node type
-4 |     fun f(): NodeBuilder[FooNode, FooNode] = EmptyNode.builder()
+== bad_generic_arity/test.lkt ==
+test.lkt:7:14: error: NodeBuilder expects one type argument: the node type
+7 |     fun f(): NodeBuilder[FooNode, FooNode] = EmptyNode.builder()
   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== bad_generic_type.lkt ==
-bad_generic_type.lkt:4:26: error: node expected
+== bad_generic_type/test.lkt ==
+test.lkt:4:26: error: node expected
 4 |     fun f(): NodeBuilder[Int] = 0
   |                          ^^^
 
 
-== bad_kwarg_type_1.lkt ==
-bad_kwarg_type_1.lkt:9:9: error: Wrong type for field SynthNode.f1: expected NodeBuilder[Literal], got NodeBuilder[EmptyNode]
-9 |         SynthNode.builder(
-  |         ^
+== bad_kwarg_type_1/test.lkt ==
+test.lkt:16:9: error: Wrong type for field SynthNode.f1: expected NodeBuilder[Literal], got NodeBuilder[EmptyNode]
+16 |         SynthNode.builder(
+   |         ^
 
 
-== bad_kwarg_type_2.lkt ==
-bad_kwarg_type_2.lkt:4:29: error: Wrong type for field SynthNode.f1: expected NodeBuilder[Literal], got Literal
-4 |     @lazy prop: SynthNode = SynthNode.builder(
+== bad_kwarg_type_2/test.lkt ==
+test.lkt:11:29: error: Wrong type for field SynthNode.f1: expected NodeBuilder[Literal], got Literal
+11 |     @lazy prop: SynthNode = SynthNode.builder(
 
 
-== bad_parent.lkt ==
-bad_parent.lkt:4:55: error: Expected type FooNode, got Int
-4 |     @lazy prop: EmptyNode = EmptyNode.builder().build(1)
+== bad_parent/test.lkt ==
+test.lkt:8:55: error: Expected type FooNode, got Int
+8 |     @lazy prop: EmptyNode = EmptyNode.builder().build(1)
   |                                                       ^
 
 
-== list_bad_type.lkt ==
-list_bad_type.lkt:11:38: error: Expected type Array[NodeBuilder[Literal]], got Array[NodeBuilder[FooNode]]
-11 |         SyntheticLiteralList.builder([]: NodeBuilder[FooNode]).build()
+== list_bad_type/test.lkt ==
+test.lkt:18:38: error: Expected type Array[NodeBuilder[Literal]], got Array[NodeBuilder[FooNode]]
+18 |         SyntheticLiteralList.builder([]: NodeBuilder[FooNode]).build()
    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== list_missing_user_field.lkt ==
-list_missing_user_field.lkt:12:9: error: Values are missing for SyntheticLiteralList fields: f
-12 |         SyntheticLiteralList.builder([]: NodeBuilder[Literal]).build()
+== list_missing_user_field/test.lkt ==
+test.lkt:16:9: error: Values are missing for SyntheticLiteralList fields: f
+16 |         SyntheticLiteralList.builder([]: NodeBuilder[Literal]).build()
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== list_no_children.lkt ==
-list_no_children.lkt:10:55: error: One positional argument expected: the array of node builders for each element for the list node to synthetize
-10 |     prop: SyntheticLiteralList = SyntheticLiteralList.builder().build()
+== list_no_children/test.lkt ==
+test.lkt:13:55: error: One positional argument expected: the array of node builders for each element for the list node to synthetize
+13 |     prop: SyntheticLiteralList = SyntheticLiteralList.builder().build()
    |                                                       ^^^^^^^
 
 
-== missing_kwarg.lkt ==
-missing_kwarg.lkt:4:30: error: Values are missing for SynthNode fields: f2, number
-4 |     @lazy prop1: SynthNode = SynthNode.builder(f1=null[Literal]).build()
-  |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+== missing_kwarg/test.lkt ==
+test.lkt:11:30: error: Values are missing for SynthNode fields: f2, number
+11 |     @lazy prop1: SynthNode = SynthNode.builder(f1=null[Literal]).build()
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== not_lazy.lkt ==
-not_lazy.lkt:4:39: error: NodeBuilder.build can be called in lazy field initializers only
-4 |     @exported fun prop(): EmptyNode = EmptyNode.builder().build()
+== not_lazy/test.lkt ==
+test.lkt:7:39: error: NodeBuilder.build can be called in lazy field initializers only
+7 |     @exported fun prop(): EmptyNode = EmptyNode.builder().build()
   |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== not_synth.lkt ==
-not_synth.lkt:4:37: error: node builders can yield synthetic nodes only
-4 |     @lazy prop: EmptyNode = Literal.builder().build()
+== not_synth/test.lkt ==
+test.lkt:7:37: error: node builders can yield synthetic nodes only
+7 |     @lazy prop: EmptyNode = Literal.builder().build()
   |                                     ^^^^^^^
 
 
-== null.lkt ==
-null.lkt:4:44: error: Invalid type for Null expression: NodeBuilder[EmptyNode]
-4 |     fun f(): NodeBuilder[EmptyNode] = null[NodeBuilder[EmptyNode]]
+== null/test.lkt ==
+test.lkt:8:44: error: Invalid type for Null expression: NodeBuilder[EmptyNode]
+8 |     fun f(): NodeBuilder[EmptyNode] = null[NodeBuilder[EmptyNode]]
   |                                            ^^^^^^^^^^^^^^^^^^^^^^
 
 
-== pos_arg.lkt ==
-pos_arg.lkt:4:47: error: Positional arguments not allowed for .builder
-4 |     @lazy prop: EmptyNode = EmptyNode.builder(1).build()
+== pos_arg/test.lkt ==
+test.lkt:7:47: error: Positional arguments not allowed for .builder
+7 |     @lazy prop: EmptyNode = EmptyNode.builder(1).build()
   |                                               ^
 
 
-== spurious_kwarg.lkt ==
-spurious_kwarg.lkt:4:29: error: Extraneous fields for EmptyNode: foo
-4 |     @lazy prop: EmptyNode = EmptyNode.builder(foo=null[FooNode]).build()
+== spurious_kwarg/test.lkt ==
+test.lkt:8:29: error: Extraneous fields for EmptyNode: foo
+8 |     @lazy prop: EmptyNode = EmptyNode.builder(foo=null[FooNode]).build()
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== to_builder_non_node.lkt ==
-to_builder_non_node.lkt:6:17: error: Expected type FooNode, got Int
+== to_builder_non_node/test.lkt ==
+test.lkt:6:17: error: Expected type FooNode, got Int
 6 |         val b = i.to_builder();
   |                 ^
 
