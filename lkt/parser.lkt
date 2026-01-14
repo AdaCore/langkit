@@ -15,10 +15,19 @@ grammar lkt_grammar {
     module_doc <- ?ModuleDocStringLit(
         list+(ModuleDocStringLine(@ModuleDocStringLine))
     )
+    imported_name <- ImportedName(
+        ImportedId(@Identifier)
+        ?pick(@Identifier("as") / def_id)
+    )
     import_clause <- or(
-        | Import("import" / module_id)
+        | Import(
+            "import"
+            /
+            module_id
+            ?pick(@Identifier("as") / def_id)
+        )
         | ImportFrom(
-            "from" module_id "import" list+(ImportedId(@Identifier), ",")
+            "from" module_id "import" list+(imported_name, ",")
         )
         | ImportAllFrom("from" / module_id "import" "*")
     )

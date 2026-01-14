@@ -5283,12 +5283,25 @@ class BaseImport: LktNode {
 
 |" Clause to import a module.
 class Import: BaseImport {
+    @nullable
+    @parse_field
+    renaming: DefId
+}
+
+|" Couple of imported entity name and renaming identifier.
+class ImportedName: LktNode {
+    @parse_field
+    original_name: ImportedId
+
+    @nullable
+    @parse_field
+    renaming: DefId
 }
 
 |" Clause to import declarations from another module.
 class ImportFrom: BaseImport {
     @parse_field
-    imported_names: ASTList[ImportedId]
+    imported_names: ASTList[ImportedName]
 }
 
 |" Clause to import all declarations from another module.
