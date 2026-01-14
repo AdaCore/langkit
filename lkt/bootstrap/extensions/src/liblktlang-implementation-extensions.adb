@@ -127,7 +127,7 @@ package body Liblktlang.Implementation.Extensions is
             --  There are two legal cases:
             --
             --  * '|"' (or '|""'), which designates an empty line
-            --  * '|" ...' (or '|" ...'), which desigantes a non-empty line:
+            --  * '|" ...' (or '|" ...'), which designates a non-empty line:
             --    the space after '|"' (or '|""') is mandatory. Decode escape
             --    sequences in the line content.
             --

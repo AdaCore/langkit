@@ -2530,6 +2530,29 @@ end;
 when others => null;
 end case;
 case Lkt_Base_Import (Kind) is
+when Lkt_Import_Range =>
+declare
+N_Bare_Import : constant Analysis.Import := N_Bare_Base_Import.As_Import;
+begin
+case Member is
+when Member_Index_For_Import_F_Renaming =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Import.F_Renaming);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Import_From_Range =>
 declare
 N_Bare_Import_From : constant Analysis.Import_From := N_Bare_Base_Import.As_Import_From;
@@ -5791,6 +5814,44 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Grammar_List_Sep.F_Extra);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Imported_Name_Range =>
+declare
+N_Bare_Imported_Name : constant Analysis.Imported_Name := N.As_Imported_Name;
+begin
+case Member is
+when Member_Index_For_Imported_Name_F_Original_Name =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Imported_Name.F_Original_Name);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Imported_Name_F_Renaming =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Imported_Name.F_Renaming);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

@@ -359,6 +359,7 @@ package Liblktlang.Rewriting is
          function Create_Import
            (Handle : Rewriting_Handle
                ; F_Module_Name : Node_Rewriting_Handle
+               ; F_Renaming : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
@@ -1011,6 +1012,13 @@ package Liblktlang.Rewriting is
            (Handle : Rewriting_Handle
                ; F_Token : Node_Rewriting_Handle
                ; F_Extra : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Imported_Name
+           (Handle : Rewriting_Handle
+               ; F_Original_Name : Node_Rewriting_Handle
+               ; F_Renaming : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 

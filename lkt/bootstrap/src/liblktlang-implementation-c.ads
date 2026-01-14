@@ -212,6 +212,16 @@ type lkt_node_Ptr is access Internal_Entity;
       subtype lkt_grammar_rule is Grammar_Rule;
       subtype lkt_lookup_kind is Lookup_Kind;
 
+   function Copy_Bytes
+     (Address : System.Address; Length : size_t) return System.Address
+     with Export        => True,
+          Convention    => C,
+          External_Name => "lkt_copy_bytes";
+   --  Return a copy of the given bytes string.
+   --
+   --  This is a helper to allocate memory from dynamic languages that the C
+   --  bindings will then be able to free.
+
    procedure Free (Address : System.Address)
      with Export        => True,
           Convention    => C,
@@ -219,7 +229,6 @@ type lkt_node_Ptr is access Internal_Entity;
    --  Free dynamically allocated memory.
    --
    --  This is a helper to free objects from dynamic languages.
-   --  Helper to free objects in dynamic languages
 
    procedure lkt_destroy_text (T : access lkt_text)
      with Export        => True,
@@ -369,6 +378,25 @@ type lkt_node_Ptr is access Internal_Entity;
    --
    --  See the documentation of each unit provider for the exact semantics of
    --  the unit name/kind information.
+
+   type lkt_unit_provider_get_unit_location_type is access procedure
+     (Data           : System.Address;
+      Name           : access constant lkt_text;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : access chars_ptr;
+      PLE_Root_Index : access int)
+      with Convention => C;
+   --  Callback that will be called to resolve a reference to a unit.
+   --
+   --  Upon return, the resolved unit filename must be assigned to
+   --  ``*filename``, and its PLE root index (0-based) of the reference must be
+   --  assigned to ``*ple_root_index``.
+
+   type lkt_unit_provider_destroy_callback is access procedure
+     (Data : System.Address)
+      with Convention => C;
+   --  Callback type for functions that are called when destroying a unit
+   --  provider.
 
    -------------------------
    -- Analysis primitives --
@@ -926,6 +954,27 @@ type lkt_node_Ptr is access Internal_Entity;
    --------------------
    -- Unit providers --
    --------------------
+
+   function lkt_create_unit_provider
+     (Data                   : System.Address;
+      Destroy_Func           : lkt_unit_provider_destroy_callback;
+      Get_Unit_Location_Func : lkt_unit_provider_get_unit_location_type)
+      return lkt_unit_provider
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_create_unit_provider";
+   --  Create a unit provider. When done with it, the result must be passed to
+   --  ``lkt_dec_ref_unit_provider``.
+   --
+   --  Pass as ``data`` a pointer to hold your private data: it will be passed
+   --  to all callbacks below.
+   --
+   --  ``destroy`` is a callback that is called by
+   --  ``lkt_dec_ref_unit_provider`` to leave a chance to free resources that
+   --  ``data`` may hold.
+   --
+   --  ``get_unit_location`` is a callback that will be called in order to
+   --  resolve a reference to a unit.
 
    procedure lkt_dec_ref_unit_provider
      (Provider : lkt_unit_provider)
@@ -2255,6 +2304,23 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            External_name => "lkt_base_import_p_referenced_unit";
    --  Return the unit that contains the module this import clause designates.
    --  Load it if needed.
+
+           
+   
+
+   
+   
+
+   function lkt_import_f_renaming
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_import_f_renaming";
+   --  This field may be null even when there are no parsing errors.
 
            
    
@@ -5802,6 +5868,40 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_grammar_list_sep_f_extra";
+   --  This field may be null even when there are no parsing errors.
+
+           
+   
+
+   
+   
+
+   function lkt_imported_name_f_original_name
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_imported_name_f_original_name";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_imported_name_f_renaming
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_imported_name_f_renaming";
    --  This field may be null even when there are no parsing errors.
 
            

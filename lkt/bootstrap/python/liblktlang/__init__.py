@@ -19,6 +19,7 @@ from __future__ import annotations
 
 
 
+import abc
 import argparse
 import collections
 import ctypes
@@ -564,6 +565,7 @@ class GrammarRule(_Enum):
     def_id_rule = 'def_id_rule'
     doc_rule = 'doc_rule'
     module_doc_rule = 'module_doc_rule'
+    imported_name_rule = 'imported_name_rule'
     import_clause_rule = 'import_clause_rule'
     imports_rule = 'imports_rule'
     lexer_decl_rule = 'lexer_decl_rule'
@@ -665,7 +667,7 @@ class GrammarRule(_Enum):
 
     _name = 'GrammarRule'
     _c_to_py = [
-        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, module_id_rule, def_id_rule, doc_rule, module_doc_rule, import_clause_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, lexer_family_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, fil_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, tuple_pattern_rule, pattern_arg_rule, selector_call_rule, expr_rule, stream_concat_rule, logic_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule, query_comprehension_rule]
+        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, module_id_rule, def_id_rule, doc_rule, module_doc_rule, imported_name_rule, import_clause_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, lexer_family_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, fil_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, tuple_pattern_rule, pattern_arg_rule, selector_call_rule, expr_rule, stream_concat_rule, logic_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule, query_comprehension_rule]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 class LookupKind(_Enum):
     """
@@ -690,43 +692,104 @@ _unit_provider = _hashable_c_pointer()
 _event_handler = _hashable_c_pointer()
 
 
+class _UnitProviderWrapper:
+    """
+    Wrapper for UnitProvider instances, responsible to create the low-level
+    unit provider value and hold its callbacks.
+    """
+
+    __slots__ = ("unit_provider", "c_value")
+
+    def __init__(self, unit_provider: UnitProvider):
+        self.unit_provider = unit_provider
+
+        if isinstance(unit_provider, _CUnitProvider):
+            self.c_value = unit_provider._c_value
+        else:
+            # Create the C-level unit provider, which keeps a reference to
+            # "self" and uses _UnitProviderWrapper's static methods as
+            # callbacks.
+            self.c_value = _create_unit_provider(
+                ctypes.py_object(self),
+                _unit_provider_cb_destroy,
+                _unit_provider_cb_get_unit_location,
+            )
+
+    def __del__(self) -> None:
+        if not isinstance(self.unit_provider, _CUnitProvider):
+            _dec_ref_unit_provider(self.c_value)
+        self.c_value = None
+
+    @classmethod
+    def create(
+        cls,
+        unit_provider: Opt[UnitProvider]
+    ) -> Tuple[Opt[_UnitProviderWrapper], Opt[object]]:
+        """
+        Helper to wrap an UnitProvider instance. Return also the C value that
+        is created for that unit provider. For convenience, just return None
+        for both if ``unit_provider`` is None.
+        """
+        if unit_provider is None:
+            return None, None
+        else:
+            up = cls(unit_provider)
+            return up, up.c_value
+
+    @staticmethod
+    def destroy_func(self: _UnitProviderWrapper) -> None:
+        pass
+
+    @staticmethod
+    def get_unit_location(
+        self: _UnitProviderWrapper,
+        name: _text,
+        kind: ctypes.c_int,
+        filename_ptr: ctypes.POINTER(ctypes.c_char_p),
+        ple_root_index_ptr: ctypes.POINTER(ctypes.c_int),
+    ) -> None:
+        py_name = name.contents._wrap()
+        py_kind = AnalysisUnitKind._c_to_py[kind]
+        try:
+            py_filename, py_ple_root_index = self.unit_provider.unit_location(
+                py_name, py_kind
+            )
+            assert isinstance(py_filename, str)
+            assert isinstance(py_ple_root_index, int)
+            assert py_ple_root_index >= 0
+            py_bytes_filename = py_filename.encode()
+        except BaseException:
+            _log_uncaught_error("UnitProvider.unit_location")
+            py_bytes_filename = b"<error>"
+            py_ple_root_index = 0
+
+        filename_buffer = ctypes.create_string_buffer(
+            py_bytes_filename + b"\x00"
+        )
+        filename_ptr[0] = _copy_bytes(
+            ctypes.byref(filename_buffer), len(filename_buffer)
+        )
+        ple_root_index_ptr[0] = py_ple_root_index
+
+
 class _EventHandlerWrapper:
     """
     Wrapper for EventHandler instances, responsible to create the low-level
     event handler value and hold its callbacks.
     """
 
-    __slots__ = (
-        "event_handler",
-        "c_value",
-        "destroy_callback",
-        "unit_requested_callback",
-        "unit_parsed_callback",
-    )
+    __slots__ = ("event_handler", "c_value")
 
     def __init__(self, event_handler: EventHandler):
         self.event_handler = event_handler
-
-        # Create the C callbacks (wrappers around the _EventHandlerWrapper
-        # static method) and keep references to them in "self" so that they
-        # survive at least as long as "self".
-        self.destroy_callback = _event_handler_destroy_func(
-            _EventHandlerWrapper.destroy_func
-        )
-        self.unit_requested_callback = _event_handler_unit_requested_func(
-            _EventHandlerWrapper.unit_requested_func
-        )
-        self.unit_parsed_callback = _event_handler_unit_parsed_func(
-            _EventHandlerWrapper.unit_parsed_func
-        )
 
         # Create the C-level event handler, which keeps a reference to "self"
         # and uses _EventHandlerWrapper's static methods as callbacks.
         self.c_value = _create_event_handler(
             ctypes.py_object(self),
-            self.destroy_callback,
-            self.unit_requested_callback,
-            self.unit_parsed_callback,
+            _event_handler_cb_destroy,
+            _event_handler_cb_unit_requested,
+            _event_handler_cb_unit_parsed,
         )
 
     def __del__(self) -> None:
@@ -1069,7 +1132,9 @@ class AnalysisContext:
                 raise ValueError(
                     'Invalid tab_stop (positive integer expected)')
             c_file_reader = file_reader._c_value if file_reader else None
-            c_unit_provider = unit_provider._c_value if unit_provider else None
+            self._unit_provider, c_unit_provider = (
+                _UnitProviderWrapper.create(unit_provider)
+            )
             self._event_handler_wrapper, c_event_handler = (
                 _EventHandlerWrapper.create(event_handler)
             )
@@ -1104,10 +1169,6 @@ class AnalysisContext:
                 with_trivia,
                 tab_stop
             )
-
-        # Keep a reference to the unit provider so that it is live at least as
-        # long as the analysis context is live.
-        self._unit_provider = unit_provider
 
     def __del__(self) -> None:
         if self._c_value:
@@ -1955,15 +2016,17 @@ class UnitProvider:
     unit name/kind information.
     """
 
-    def __init__(self, c_value: Any):
+    @abc.abstractmethod
+    def unit_location(
+        self,
+        name: str,
+        kind: AnalysisUnitKind,
+    ) -> Tuple[str, int]:
         """
-        This constructor is an implementation detail, and is not meant to be
-        used directly.
+        Resolve the unit that ``name``/``kind`` designate and return the
+        corresponding filename and index of the PLE root (0-based).
         """
-        self._c_value = c_value
-
-    def __del__(self) -> None:
-        _dec_ref_unit_provider(self._c_value)
+        pass
 
 
       
@@ -1993,7 +2056,7 @@ class UnitProvider:
         )
 
         c_value = _create_default_provider(directories_arg)
-        return cls(c_value)
+        return _CUnitProvider(c_value)
 
     @classmethod
     def from_lkt_path(cls) -> UnitProvider:
@@ -2008,6 +2071,24 @@ class UnitProvider:
 
 
 
+class _CUnitProvider(UnitProvider):
+
+    def __init__(self, c_value: Any):
+        self._c_value = c_value
+
+    def unit_location(
+        self,
+        name: str,
+        kind: AnalysisUnitKind,
+    ) -> Tuple[str, int]:
+        # This is never supposed to be called: the analysis context should
+        # directly call the primitive from the C value.
+        raise NotImplementedError
+
+    def __del__(self) -> None:
+        _dec_ref_unit_provider(self._c_value)
+
+
 class LktNode:
     """
     Root node class for lkt AST nodes.
@@ -2019,12 +2100,13 @@ class LktNode:
     :py:class:`DeclAnnotation`, :py:class:`Decl`, :py:class:`DynEnvWrapper`,
     :py:class:`ElsifBranch`, :py:class:`EnumClassCase`,
     :py:class:`ExcludesNull`, :py:class:`Expr`, :py:class:`FullDecl`,
-    :py:class:`GrammarListSep`, :py:class:`LangkitRoot`,
-    :py:class:`LexerCaseRuleSend`, :py:class:`LexerCaseRule`,
-    :py:class:`ListKind`, :py:class:`LktNodeBaseList`,
-    :py:class:`ModuleDocStringLine`, :py:class:`NullCondQualifier`,
-    :py:class:`Op`, :py:class:`PatternDetail`, :py:class:`Pattern`,
-    :py:class:`SelectorCall`, :py:class:`TypeRef`, :py:class:`VarBind`
+    :py:class:`GrammarListSep`, :py:class:`ImportedName`,
+    :py:class:`LangkitRoot`, :py:class:`LexerCaseRuleSend`,
+    :py:class:`LexerCaseRule`, :py:class:`ListKind`,
+    :py:class:`LktNodeBaseList`, :py:class:`ModuleDocStringLine`,
+    :py:class:`NullCondQualifier`, :py:class:`Op`, :py:class:`PatternDetail`,
+    :py:class:`Pattern`, :py:class:`SelectorCall`, :py:class:`TypeRef`,
+    :py:class:`VarBind`
     """
 
     is_list_type = False
@@ -3621,8 +3703,26 @@ class Import(BaseImport):
 
     
 
+    
+    @property
+    def f_renaming(
+        self
+    ) -> DefId:
+        """
+        This field may be null even when there are no parsing errors.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_import_f_renaming)
+
+
+
+        return result
 
     _field_names = BaseImport._field_names + (
+        "f_renaming",
     )
 
     _kind_name = 'Import'
@@ -3671,7 +3771,7 @@ class ImportFrom(BaseImport):
     @property
     def f_imported_names(
         self
-    ) -> ImportedIdList:
+    ) -> ImportedNameList:
         """
         When there are no parsing errors, this field is never null.
         """
@@ -10514,6 +10614,65 @@ class GrammarListSep(LktNode):
 
 
 
+class ImportedName(LktNode):
+    """
+    Subclass of :py:class:`LktNode`.
+
+    Couple of imported entity name and renaming identifier.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+    
+    @property
+    def f_original_name(
+        self
+    ) -> ImportedId:
+        """
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_imported_name_f_original_name)
+
+
+
+        return result
+    
+    @property
+    def f_renaming(
+        self
+    ) -> DefId:
+        """
+        This field may be null even when there are no parsing errors.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_imported_name_f_renaming)
+
+
+
+        return result
+
+    _field_names = LktNode._field_names + (
+        "f_original_name",
+        "f_renaming",
+    )
+
+    _kind_name = 'ImportedName'
+
+
+
+
+
+
 class LangkitRoot(LktNode):
     """
     Subclass of :py:class:`LktNode`.
@@ -10818,7 +10977,7 @@ class LktNodeBaseList(LktNode):
     :py:class:`EnumLitDeclList`, :py:class:`ExprList`,
     :py:class:`FullDeclList`, :py:class:`FunParamDeclList`,
     :py:class:`GrammarExprListList`, :py:class:`GrammarExprList`,
-    :py:class:`ImportedIdList`, :py:class:`LambdaParamDeclList`,
+    :py:class:`ImportedNameList`, :py:class:`LambdaParamDeclList`,
     :py:class:`LktNodeList`, :py:class:`ModuleDocStringLineList`,
     :py:class:`PatternDetailList`, :py:class:`PatternList`,
     :py:class:`RefIdList`, :py:class:`TypeRefList`
@@ -11529,11 +11688,11 @@ class GrammarExprListList(LktNodeBaseList):
 
 
 
-class ImportedIdList(LktNodeBaseList):
+class ImportedNameList(LktNodeBaseList):
     """
     Subclass of :py:class:`LktNodeBaseList`.
 
-    List of ImportedId.
+    List of ImportedName.
 
     This node type has no derivation.
     """
@@ -11545,19 +11704,19 @@ class ImportedIdList(LktNodeBaseList):
     _field_names = LktNodeBaseList._field_names + (
     )
 
-    _kind_name = 'ImportedIdList'
+    _kind_name = 'ImportedNameList'
 
     is_list_type = True
 
     def __iter__(
         self
-    ) -> Iterator[ImportedId]:
+    ) -> Iterator[ImportedName]:
         return super().__iter__()  # type: ignore
 
     def __getitem__(
         self,
         index: int
-    ) -> ImportedId:
+    ) -> ImportedName:
         return super().__getitem__(index)  # type: ignore
 
 
@@ -15146,6 +15305,11 @@ context data that is stale.
 
 
 
+_copy_bytes = _import_func(
+    'lkt_copy_bytes',
+    [ctypes.c_void_p, ctypes.c_size_t],
+    ctypes.c_void_p,
+)
 _free = _import_func(
     'lkt_free',
     [ctypes.c_void_p], None
@@ -15670,6 +15834,12 @@ _base_import_p_referenced_unit = _import_func(
     'lkt_base_import_p_referenced_unit',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(AnalysisUnit._c_type)],
+    ctypes.c_int
+)
+_import_f_renaming = _import_func(
+    'lkt_import_f_renaming',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
 _import_from_f_imported_names = _import_func(
@@ -16694,6 +16864,18 @@ _grammar_list_sep_f_extra = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
+_imported_name_f_original_name = _import_func(
+    'lkt_imported_name_f_original_name',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_imported_name_f_renaming = _import_func(
+    'lkt_imported_name_f_renaming',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
 _langkit_root_f_doc = _import_func(
     'lkt_langkit_root_f_doc',
     [ctypes.POINTER(_Entity_c_type),
@@ -16975,7 +17157,37 @@ _dec_ref_event_handler = _import_func(
     'lkt_dec_ref_event_handler', [_event_handler], None
 )
 
+# C callbacks for _EventHandlerWrapper
+
+_event_handler_cb_destroy = _event_handler_destroy_func(
+    _EventHandlerWrapper.destroy_func
+)
+_event_handler_cb_unit_requested = _event_handler_unit_requested_func(
+    _EventHandlerWrapper.unit_requested_func
+)
+_event_handler_cb_unit_parsed = _event_handler_unit_parsed_func(
+    _EventHandlerWrapper.unit_parsed_func
+)
+
 # Unit providers
+_unit_provider_destroy_type = ctypes.CFUNCTYPE(None, ctypes.py_object)
+_unit_provider_get_unit_location_type = ctypes.CFUNCTYPE(
+    None,
+    ctypes.py_object,                # data
+    ctypes.POINTER(_text),           # name
+    ctypes.c_int,                    # kind
+    ctypes.POINTER(ctypes.c_char_p), # filename (out)
+    ctypes.POINTER(ctypes.c_int),    # ple_root_index (out)
+)
+_create_unit_provider = _import_func(
+    'lkt_create_unit_provider',
+    [
+        ctypes.py_object,
+        _unit_provider_destroy_type,
+        _unit_provider_get_unit_location_type,
+    ],
+    _unit_provider,
+)
 _dec_ref_unit_provider = _import_func(
     'lkt_dec_ref_unit_provider',
     [_unit_provider], None
@@ -16988,6 +17200,16 @@ _create_default_provider = _import_func(
     _unit_provider,
 )
 
+
+
+# C callbacks for _UnitProviderWrapper
+
+_unit_provider_cb_destroy = _unit_provider_destroy_type(
+    _UnitProviderWrapper.destroy_func
+)
+_unit_provider_cb_get_unit_location = _unit_provider_get_unit_location_type(
+    _UnitProviderWrapper.get_unit_location
+)
 
 
 # Misc
@@ -17151,85 +17373,86 @@ _kind_to_astnode_cls = {
     113: UnOp,
     114: FullDecl,
     115: GrammarListSep,
-    116: LangkitRoot,
-    117: LexerCaseRule,
-    118: LexerCaseRuleSend,
-    119: ListKindOne,
-    120: ListKindZero,
-    121: ArgumentList,
-    122: BaseImportList,
-    123: BaseLexerCaseRuleAltList,
-    124: BaseMatchBranchList,
-    125: BlockStringLineList,
-    126: CallExprList,
-    127: DeclAnnotationList,
-    128: ElsifBranchList,
-    129: EnumClassAltDeclList,
-    130: EnumClassCaseList,
-    131: EnumLitDeclList,
-    132: ExprList,
-    133: AnyOfList,
-    134: FullDeclList,
-    135: DeclBlock,
-    136: GenericParamDeclList,
-    137: FunParamDeclList,
-    138: GrammarExprList,
-    139: GrammarExprListList,
-    140: ImportedIdList,
-    141: LambdaParamDeclList,
-    142: LktNodeList,
-    143: ModuleDocStringLineList,
-    144: PatternDetailList,
-    145: PatternList,
-    146: RefIdList,
-    147: TypeRefList,
-    148: SyntheticTypeRefList,
-    149: ModuleDocStringLine,
-    150: NullCondQualifierAbsent,
-    151: NullCondQualifierPresent,
-    152: OpAmp,
-    153: OpAnd,
-    154: OpDiv,
-    155: OpEq,
-    156: OpGt,
-    157: OpGte,
-    158: OpLogicAnd,
-    159: OpLogicOr,
-    160: OpLt,
-    161: OpLte,
-    162: OpMinus,
-    163: OpMult,
-    164: OpNe,
-    165: OpOr,
-    166: OpOrInt,
-    167: OpPlus,
-    168: OpStreamConcat,
-    169: OpStreamCons,
-    170: AnyTypePattern,
-    171: BindingPattern,
-    172: BoolPatternFalse,
-    173: BoolPatternTrue,
-    174: EllipsisPattern,
-    175: ExtendedPattern,
-    176: FilteredPattern,
-    177: IntegerPattern,
-    178: ListPattern,
-    179: NotPattern,
-    180: NullPattern,
-    181: OrPattern,
-    182: ParenPattern,
-    183: RegexPattern,
-    184: TuplePattern,
-    185: TypePattern,
-    186: FieldPatternDetail,
-    187: PropertyPatternDetail,
-    188: SelectorPatternDetail,
-    189: SelectorCall,
-    190: DefaultListTypeRef,
-    191: FunctionTypeRef,
-    192: GenericTypeRef,
-    193: SimpleTypeRef,
-    194: VarBind,
+    116: ImportedName,
+    117: LangkitRoot,
+    118: LexerCaseRule,
+    119: LexerCaseRuleSend,
+    120: ListKindOne,
+    121: ListKindZero,
+    122: ArgumentList,
+    123: BaseImportList,
+    124: BaseLexerCaseRuleAltList,
+    125: BaseMatchBranchList,
+    126: BlockStringLineList,
+    127: CallExprList,
+    128: DeclAnnotationList,
+    129: ElsifBranchList,
+    130: EnumClassAltDeclList,
+    131: EnumClassCaseList,
+    132: EnumLitDeclList,
+    133: ExprList,
+    134: AnyOfList,
+    135: FullDeclList,
+    136: DeclBlock,
+    137: GenericParamDeclList,
+    138: FunParamDeclList,
+    139: GrammarExprList,
+    140: GrammarExprListList,
+    141: ImportedNameList,
+    142: LambdaParamDeclList,
+    143: LktNodeList,
+    144: ModuleDocStringLineList,
+    145: PatternDetailList,
+    146: PatternList,
+    147: RefIdList,
+    148: TypeRefList,
+    149: SyntheticTypeRefList,
+    150: ModuleDocStringLine,
+    151: NullCondQualifierAbsent,
+    152: NullCondQualifierPresent,
+    153: OpAmp,
+    154: OpAnd,
+    155: OpDiv,
+    156: OpEq,
+    157: OpGt,
+    158: OpGte,
+    159: OpLogicAnd,
+    160: OpLogicOr,
+    161: OpLt,
+    162: OpLte,
+    163: OpMinus,
+    164: OpMult,
+    165: OpNe,
+    166: OpOr,
+    167: OpOrInt,
+    168: OpPlus,
+    169: OpStreamConcat,
+    170: OpStreamCons,
+    171: AnyTypePattern,
+    172: BindingPattern,
+    173: BoolPatternFalse,
+    174: BoolPatternTrue,
+    175: EllipsisPattern,
+    176: ExtendedPattern,
+    177: FilteredPattern,
+    178: IntegerPattern,
+    179: ListPattern,
+    180: NotPattern,
+    181: NullPattern,
+    182: OrPattern,
+    183: ParenPattern,
+    184: RegexPattern,
+    185: TuplePattern,
+    186: TypePattern,
+    187: FieldPatternDetail,
+    188: PropertyPatternDetail,
+    189: SelectorPatternDetail,
+    190: SelectorCall,
+    191: DefaultListTypeRef,
+    192: FunctionTypeRef,
+    193: GenericTypeRef,
+    194: SimpleTypeRef,
+    195: VarBind,
 }
 
 

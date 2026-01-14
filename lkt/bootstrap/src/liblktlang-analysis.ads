@@ -129,11 +129,11 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
       --  :ada:ref:`Enum_Class_Case`, :ada:ref:`Excludes_Null`,
       --  :ada:ref:`Expr`, :ada:ref:`Full_Decl`, :ada:ref:`Grammar_List_Sep`,
-      --  :ada:ref:`Langkit_Root`, :ada:ref:`Lexer_Case_Rule_Send`,
-      --  :ada:ref:`Lexer_Case_Rule`, :ada:ref:`List_Kind`,
-      --  :ada:ref:`Lkt_Node_Base_List`, :ada:ref:`Module_Doc_String_Line`,
-      --  :ada:ref:`Null_Cond_Qualifier`, :ada:ref:`Op`,
-      --  :ada:ref:`Pattern_Detail`, :ada:ref:`Pattern`,
+      --  :ada:ref:`Imported_Name`, :ada:ref:`Langkit_Root`,
+      --  :ada:ref:`Lexer_Case_Rule_Send`, :ada:ref:`Lexer_Case_Rule`,
+      --  :ada:ref:`List_Kind`, :ada:ref:`Lkt_Node_Base_List`,
+      --  :ada:ref:`Module_Doc_String_Line`, :ada:ref:`Null_Cond_Qualifier`,
+      --  :ada:ref:`Op`, :ada:ref:`Pattern_Detail`, :ada:ref:`Pattern`,
       --  :ada:ref:`Selector_Call`, :ada:ref:`Type_Ref`, :ada:ref:`Var_Bind`
 
       function Equals (L, R : Lkt_Node) return Boolean;
@@ -191,7 +191,7 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Enum_Class_Case_List`, :ada:ref:`Enum_Lit_Decl_List`,
       --  :ada:ref:`Expr_List`, :ada:ref:`Full_Decl_List`,
       --  :ada:ref:`Fun_Param_Decl_List`, :ada:ref:`Grammar_Expr_List_List`,
-      --  :ada:ref:`Grammar_Expr_List`, :ada:ref:`Imported_Id_List`,
+      --  :ada:ref:`Grammar_Expr_List`, :ada:ref:`Imported_Name_List`,
       --  :ada:ref:`Lambda_Param_Decl_List`, :ada:ref:`Lkt_Node_List`,
       --  :ada:ref:`Module_Doc_String_Line_List`,
       --  :ada:ref:`Pattern_Detail_List`, :ada:ref:`Pattern_List`,
@@ -1234,14 +1234,21 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Imported_Id_List is new Lkt_Node_Base_List with private
+      type Imported_Name is new Lkt_Node with private
          with First_Controlling_Parameter
-            , Iterable => (First       => Imported_Id_List_First,
-                           Next        => Imported_Id_List_Next,
-                           Has_Element => Imported_Id_List_Has_Element,
-                           Element     => Imported_Id_List_Element)
       ;
-      --  List of ImportedId.
+      --  Couple of imported entity name and renaming identifier.
+      --
+      --  This node type has no derivation.
+
+      type Imported_Name_List is new Lkt_Node_Base_List with private
+         with First_Controlling_Parameter
+            , Iterable => (First       => Imported_Name_List_First,
+                           Next        => Imported_Name_List_Next,
+                           Has_Element => Imported_Name_List_Has_Element,
+                           Element     => Imported_Name_List_Element)
+      ;
+      --  List of ImportedName.
       --
       --  This node type has no derivation.
 
@@ -2245,7 +2252,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Imported_Id : constant Imported_Id;
       --% no-document: True
-      No_Imported_Id_List : constant Imported_Id_List;
+      No_Imported_Name : constant Imported_Name;
+      --% no-document: True
+      No_Imported_Name_List : constant Imported_Name_List;
       --% no-document: True
       No_Integer_Pattern : constant Integer_Pattern;
       --% no-document: True
@@ -5996,6 +6005,15 @@ package Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Renaming
+     (Node : Import'Class) return Def_Id;
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Import
+
+
 
 
 
@@ -6010,7 +6028,7 @@ package Liblktlang.Analysis is
    
 
    function F_Imported_Names
-     (Node : Import_From'Class) return Imported_Id_List;
+     (Node : Import_From'Class) return Imported_Name_List;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Import_From
 
@@ -6023,26 +6041,49 @@ package Liblktlang.Analysis is
 
 
 
+
+
+         
+   
+
+   function F_Original_Name
+     (Node : Imported_Name'Class) return Imported_Id;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Imported_Name
+
+
+         
+   
+
+   function F_Renaming
+     (Node : Imported_Name'Class) return Def_Id;
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Imported_Name
+
+
+
+
+
          function List_Child
-           (Node : Imported_Id_List'Class; Index : Positive)
-            return Imported_Id;
+           (Node : Imported_Name_List'Class; Index : Positive)
+            return Imported_Name;
          --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
          --  no such child.
 
-         function Imported_Id_List_First (Node : Imported_Id_List) return Positive;
+         function Imported_Name_List_First (Node : Imported_Name_List) return Positive;
          --  Implementation detail for the Iterable aspect
 
-         function Imported_Id_List_Next
-           (Node : Imported_Id_List; Cursor : Positive) return Positive;
+         function Imported_Name_List_Next
+           (Node : Imported_Name_List; Cursor : Positive) return Positive;
          --  Implementation detail for the Iterable aspect
 
-         function Imported_Id_List_Has_Element
-           (Node : Imported_Id_List; Cursor : Positive) return Boolean;
+         function Imported_Name_List_Has_Element
+           (Node : Imported_Name_List; Cursor : Positive) return Boolean;
          --  Implementation detail for the Iterable aspect
 
-         function Imported_Id_List_Element
-           (Node : Imported_Id_List; Cursor : Positive)
-            return Imported_Id'Class;
+         function Imported_Name_List_Element
+           (Node : Imported_Name_List; Cursor : Positive)
+            return Imported_Name'Class;
          --  Implementation detail for the Iterable aspect
 
 
@@ -8357,8 +8398,11 @@ package Liblktlang.Analysis is
       function As_Imported_Id
         (Node : Lkt_Node'Class) return Imported_Id;
       --% no-document: True
-      function As_Imported_Id_List
-        (Node : Lkt_Node'Class) return Imported_Id_List;
+      function As_Imported_Name
+        (Node : Lkt_Node'Class) return Imported_Name;
+      --% no-document: True
+      function As_Imported_Name_List
+        (Node : Lkt_Node'Class) return Imported_Name_List;
       --% no-document: True
       function As_Integer_Pattern
         (Node : Lkt_Node'Class) return Integer_Pattern;
@@ -9192,8 +9236,12 @@ private
       No_Imported_Id : constant Imported_Id :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Imported_Id_List is new Lkt_Node_Base_List with null record;
-      No_Imported_Id_List : constant Imported_Id_List :=
+         type Imported_Name is new Lkt_Node with null record;
+      No_Imported_Name : constant Imported_Name :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Imported_Name_List is new Lkt_Node_Base_List with null record;
+      No_Imported_Name_List : constant Imported_Name_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Integer_Pattern is new Pattern with null record;

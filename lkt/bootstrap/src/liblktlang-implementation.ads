@@ -733,6 +733,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Grammar_List_Sep)
                or else Kind (Bare_Grammar_List_Sep) in Lkt_Grammar_List_Sep_Range;
+         subtype Bare_Imported_Name is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Imported_Name)
+               or else Kind (Bare_Imported_Name) in Lkt_Imported_Name_Range;
          subtype Bare_Langkit_Root is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Langkit_Root)
@@ -837,10 +841,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Grammar_Expr_List_List)
                or else Kind (Bare_Grammar_Expr_List_List) in Lkt_Grammar_Expr_List_List_Range;
-         subtype Bare_Imported_Id_List is Bare_Lkt_Node
+         subtype Bare_Imported_Name_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
-               Is_Null (Bare_Imported_Id_List)
-               or else Kind (Bare_Imported_Id_List) in Lkt_Imported_Id_List_Range;
+               Is_Null (Bare_Imported_Name_List)
+               or else Kind (Bare_Imported_Name_List) in Lkt_Imported_Name_List_Range;
          subtype Bare_Lambda_Param_Decl_List is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Lambda_Param_Decl_List)
@@ -2191,7 +2195,11 @@ private package Liblktlang.Implementation is
       
 
          
-      type Internal_Entity_Imported_Id_List;
+      type Internal_Entity_Imported_Name;
+      
+
+         
+      type Internal_Entity_Imported_Name_List;
       
 
          
@@ -6443,9 +6451,9 @@ private package Liblktlang.Implementation is
 
       
 
-      type Internal_Entity_Imported_Id_List is record
+      type Internal_Entity_Imported_Name is record
 
-               Node : aliased Bare_Imported_Id_List;
+               Node : aliased Bare_Imported_Name;
                --  The stored AST node
                
                Info : aliased Internal_Entity_Info;
@@ -6453,18 +6461,46 @@ private package Liblktlang.Implementation is
                
       end record
         with Convention => C;
-      No_Entity_Imported_Id_List : constant Internal_Entity_Imported_Id_List;
+      No_Entity_Imported_Name : constant Internal_Entity_Imported_Name;
 
 
-      function Create_Internal_Entity_Imported_Id_List
-        (Node : Bare_Imported_Id_List; Info : Internal_Entity_Info)
-         return Internal_Entity_Imported_Id_List;
+      function Create_Internal_Entity_Imported_Name
+        (Node : Bare_Imported_Name; Info : Internal_Entity_Info)
+         return Internal_Entity_Imported_Name;
 
 
    
 
 
-      function Trace_Image (R : Internal_Entity_Imported_Id_List) return String;
+      function Trace_Image (R : Internal_Entity_Imported_Name) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Imported_Name_List is record
+
+               Node : aliased Bare_Imported_Name_List;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Imported_Name_List : constant Internal_Entity_Imported_Name_List;
+
+
+      function Create_Internal_Entity_Imported_Name_List
+        (Node : Bare_Imported_Name_List; Info : Internal_Entity_Info)
+         return Internal_Entity_Imported_Name_List;
+
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Imported_Name_List) return String;
 
 
          
@@ -11340,7 +11376,7 @@ private package Liblktlang.Implementation is
 
    Kind_To_Node_Children_Count : constant array (Lkt_Node_Kind_Type) of Integer :=
      (Lkt_Argument => 2, 
-Lkt_Import => 1, 
+Lkt_Import => 2, 
 Lkt_Import_All_From => 1, 
 Lkt_Import_From => 2, 
 Lkt_Error_Lexer_Case_Rule_Alt => 0, 
@@ -11454,6 +11490,7 @@ Lkt_Try_Expr => 2,
 Lkt_Un_Op => 2, 
 Lkt_Full_Decl => 3, 
 Lkt_Grammar_List_Sep => 2, 
+Lkt_Imported_Name => 2, 
 Lkt_Langkit_Root => 3, 
 Lkt_Lexer_Case_Rule => 2, 
 Lkt_Lexer_Case_Rule_Send => 2, 
@@ -11478,7 +11515,7 @@ Lkt_Generic_Param_Decl_List => -1,
 Lkt_Fun_Param_Decl_List => -1, 
 Lkt_Grammar_Expr_List => -1, 
 Lkt_Grammar_Expr_List_List => -1, 
-Lkt_Imported_Id_List => -1, 
+Lkt_Imported_Name_List => -1, 
 Lkt_Lambda_Param_Decl_List => -1, 
 Lkt_Lkt_Node_List => -1, 
 Lkt_Module_Doc_String_Line_List => -1, 
@@ -11783,12 +11820,13 @@ Lkt_Var_Bind => 2);
          
 
 
+            Import_F_Renaming : aliased Bare_Def_Id :=
+               No_Bare_Lkt_Node;
 
          
 
 
 
-            null;
       
                   when Lkt_Import_All_From_Range =>
                      
@@ -11807,7 +11845,7 @@ Lkt_Var_Bind => 2);
          
 
 
-            Import_From_F_Imported_Names : aliased Bare_Imported_Id_List :=
+            Import_From_F_Imported_Names : aliased Bare_Imported_Name_List :=
                No_Bare_Lkt_Node;
 
          
@@ -13712,6 +13750,21 @@ Lkt_Var_Bind => 2);
 
 
       
+                  when Lkt_Imported_Name_Range =>
+                     
+         
+
+
+            Imported_Name_F_Original_Name : aliased Bare_Imported_Id :=
+               No_Bare_Lkt_Node;
+            Imported_Name_F_Renaming : aliased Bare_Def_Id :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
                   when Lkt_Langkit_Root_Range =>
                      
          
@@ -14045,7 +14098,7 @@ Lkt_Var_Bind => 2);
 
             null;
       
-                  when Lkt_Imported_Id_List_Range =>
+                  when Lkt_Imported_Name_List_Range =>
                      
          
 
@@ -16342,7 +16395,12 @@ function Internal_Env_Do_16
       procedure Initialize_Fields_For_Import
         (Self : Bare_Import
          ; Base_Import_F_Module_Name : Bare_Module_Id
+         ; Import_F_Renaming : Bare_Def_Id
         );
+
+      
+   function Import_F_Renaming
+     (Node : Bare_Import) return Bare_Def_Id;
 
 
 
@@ -16376,12 +16434,12 @@ function Internal_Env_Do_16
       procedure Initialize_Fields_For_Import_From
         (Self : Bare_Import_From
          ; Base_Import_F_Module_Name : Bare_Module_Id
-         ; Import_From_F_Imported_Names : Bare_Imported_Id_List
+         ; Import_From_F_Imported_Names : Bare_Imported_Name_List
         );
 
       
    function Import_From_F_Imported_Names
-     (Node : Bare_Import_From) return Bare_Imported_Id_List;
+     (Node : Bare_Import_From) return Bare_Imported_Name_List;
 
 
 
@@ -24566,6 +24624,32 @@ function Full_Decl_P_Get_Annotation
    
 
       
+      procedure Initialize_Fields_For_Imported_Name
+        (Self : Bare_Imported_Name
+         ; Imported_Name_F_Original_Name : Bare_Imported_Id
+         ; Imported_Name_F_Renaming : Bare_Def_Id
+        );
+
+      
+   function Imported_Name_F_Original_Name
+     (Node : Bare_Imported_Name) return Bare_Imported_Id;
+
+      
+   function Imported_Name_F_Renaming
+     (Node : Bare_Imported_Name) return Bare_Def_Id;
+
+
+
+   
+
+
+
+
+      
+
+   
+
+      
       procedure Initialize_Fields_For_Langkit_Root
         (Self : Bare_Langkit_Root
          ; Langkit_Root_F_Doc : Bare_Module_Doc_String_Lit
@@ -28847,7 +28931,19 @@ private
       
 
 
-      No_Entity_Imported_Id_List : constant Internal_Entity_Imported_Id_List :=
+      No_Entity_Imported_Name : constant Internal_Entity_Imported_Name :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Imported_Name_List : constant Internal_Entity_Imported_Name_List :=
       (
                Node =>
                   No_Bare_Lkt_Node, 
