@@ -261,6 +261,18 @@ typedef void (*${file_reader_read_type})(
 ${c_doc('langkit.unit_provider_type')}
 ${define_opaque_ptr(unit_provider_type)}
 
+${c_doc('langkit.unit_provider_get_unit_location_type')}
+typedef void (*${unit_provider_get_unit_location_type})(
+   void *data,
+   ${text_type} *name,
+   ${T.AnalysisUnitKind.c_type(capi).name} kind,
+   char **filename,
+   int *ple_root_index
+);
+
+${c_doc('langkit.unit_provider_destroy_type')}
+typedef void (*${unit_provider_destroy_type})(void *data);
+
 /*
  * Types for introspection
  */
@@ -575,6 +587,10 @@ ${capi.get_name("string_from_utf8")}(const char *bytes,
                                      size_t length,
                                      ${string_type} *string);
 
+${c_doc('langkit.copy_bytes')}
+extern void *
+${capi.get_name("copy_bytes")}(const void *address, size_t length);
+
 ${c_doc('langkit.free')}
 extern void
 ${capi.get_name("free")}(void *address);
@@ -668,6 +684,14 @@ ${exts.include_extension(
 /*
  * Unit providers
  */
+
+${c_doc('langkit.create_unit_provider')}
+extern ${unit_provider_type}
+${capi.get_name('create_unit_provider')}(
+   void *data,
+   ${unit_provider_destroy_type} destroy_func,
+   ${unit_provider_get_unit_location_type} get_unit_location_func
+);
 
 ${c_doc('langkit.unit_provider_dec_ref')}
 extern void

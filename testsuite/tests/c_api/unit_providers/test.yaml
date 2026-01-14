@@ -1,0 +1,2 @@
+driver: lkt_build_and_run
+gpr_mains: [main.c]

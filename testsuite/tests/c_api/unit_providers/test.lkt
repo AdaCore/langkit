@@ -1,0 +1,56 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- pick(list*(block) @Termination)
+    block <- Block("{" list*(or(ref | def)) "}")
+    ref <- Ref(@Identifier("ref") id "." id)
+    def <- Def(id)
+    id <- Id(@Identifier)
+}
+
+struct BlockLocation {
+    unit: AnalysisUnit
+    ple_root_index: Int
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Id: FooNode implements TokenNode {
+    @external()
+    fun block_location(): BlockLocation
+
+    fun referenced_block(): Block = {
+        val loc = node.block_location();
+        loc.unit.root.as[ASTList[Block]]?.at(loc.ple_root_index)
+    }
+}
+
+class Ref: FooNode {
+    @parse_field block_name: Id
+    @parse_field def_name: Id
+
+    @exported
+    fun resolve(): Entity[FooNode] = {
+        val block = node.block_name.referenced_block();
+        block.children_env.get_first(node.def_name.symbol)
+    }
+}
+
+class Def: FooNode {
+    @parse_field name: Id
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
+}
+
+@ple_unit_root
+class Block: FooNode {
+    @parse_field items: ASTList[FooNode]
+     env_spec {
+         add_env()
+     }
+}

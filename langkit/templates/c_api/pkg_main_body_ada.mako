@@ -95,6 +95,39 @@ package body ${ada_lib_name}.Implementation.C is
       Contents    : out Decoded_File_Contents;
       Diagnostics : in out Diagnostics_Vectors.Vector);
 
+   --------------------
+   -- Unit providers --
+   --------------------
+
+   type C_Unit_Provider is limited new
+     Ada.Finalization.Limited_Controlled
+     and Internal_Unit_Provider
+   with record
+      Ref_Count              : Natural;
+      Data                   : System.Address;
+      Destroy_Func           : ${unit_provider_destroy_type};
+      Get_Unit_Location_Func : ${unit_provider_get_unit_location_type};
+   end record;
+
+   overriding procedure Finalize (Self : in out C_Unit_Provider);
+   overriding procedure Inc_Ref (Self : in out C_Unit_Provider);
+   overriding function Dec_Ref (Self : in out C_Unit_Provider) return Boolean;
+   overriding procedure Get_Unit_Location
+     (Self           : C_Unit_Provider;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out Unbounded_String;
+      PLE_Root_Index : out Positive);
+   overriding procedure Get_Unit_And_PLE_Root
+     (Self           : C_Unit_Provider;
+      Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Charset        : String := "";
+      Reparse        : Boolean := False;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive);
+
    function Value_Or_Empty (S : chars_ptr) return String
    --  If S is null, return an empty string. Return Value (S) otherwise.
    is (if S = Null_Ptr
@@ -134,6 +167,33 @@ package body ${ada_lib_name}.Implementation.C is
    procedure UTF8_To_UTF32 (UTF8 : U8_Array; UTF32 : out U32_Array);
    --  Assuming that UTF8 contains UTF32'Size codepoints, transcode UTF8 into
    --  UTF32.
+
+   ----------------
+   -- Copy_Bytes --
+   ----------------
+
+   function Copy_Bytes
+     (Address : System.Address; Length : size_t) return System.Address is
+   begin
+      Clear_Last_Exception;
+      begin
+         return Result : constant System.Address :=
+           System.Memory.Alloc (System.Memory.size_t (Length))
+         do
+            declare
+               subtype Bytes is String (1 .. Natural (Length));
+               In_Bytes  : Bytes with Import, Address => Address;
+               Out_Bytes : Bytes with Import, Address => Result;
+            begin
+               Out_Bytes := In_Bytes;
+            end;
+         end return;
+      exception
+         when Exc : others =>
+            Set_Last_Exception (Exc);
+            return System.Null_Address;
+      end;
+   end Copy_Bytes;
 
    ----------
    -- Free --
@@ -1516,6 +1576,30 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
+   function ${capi.get_name('create_unit_provider')}
+     (Data                   : System.Address;
+      Destroy_Func           : ${unit_provider_destroy_type};
+      Get_Unit_Location_Func : ${unit_provider_get_unit_location_type})
+      return ${unit_provider_type} is
+   begin
+      Clear_Last_Exception;
+      declare
+         Result : constant Internal_Unit_Provider_Access :=
+           new C_Unit_Provider'
+             (Ada.Finalization.Limited_Controlled with
+              Ref_Count              => 1,
+              Data                   => Data,
+              Destroy_Func           => Destroy_Func,
+              Get_Unit_Location_Func => Get_Unit_Location_Func);
+      begin
+         return Wrap_Private_Provider (Result);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${unit_provider_type} (System.Null_Address);
+   end;
+
    procedure ${capi.get_name('dec_ref_unit_provider')}
      (Provider : ${unit_provider_type}) is
    begin
@@ -1783,6 +1867,96 @@ package body ${ada_lib_name}.Implementation.C is
    ${exts.include_extension(
       ctx.ext('analysis', 'c_api', 'unit_providers', 'body')
    )}
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Self : in out C_Unit_Provider) is
+   begin
+      Self.Destroy_Func.all (Self.Data);
+   end Finalize;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   overriding procedure Inc_Ref (Self : in out C_Unit_Provider) is
+   begin
+      Self.Ref_Count := Self.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   overriding function Dec_Ref (Self : in out C_Unit_Provider) return Boolean
+   is
+   begin
+      Self.Ref_Count := Self.Ref_Count - 1;
+      if Self.Ref_Count = 0 then
+         return True;
+      else
+         return False;
+      end if;
+   end Dec_Ref;
+
+   -----------------------
+   -- Get_Unit_Location --
+   -----------------------
+
+   overriding procedure Get_Unit_Location
+     (Self           : C_Unit_Provider;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out Unbounded_String;
+      PLE_Root_Index : out Positive)
+   is
+      Name_Access      : constant Text_Cst_Access := Name'Unrestricted_Access;
+      C_Name           : aliased constant ${text_type} := Wrap (Name_Access);
+      C_Filename       : aliased chars_ptr;
+      C_PLE_Root_Index : aliased int;
+   begin
+      Self.Get_Unit_Location_Func.all
+        (Self.Data,
+         C_Name'Access,
+         Kind,
+         C_Filename'Access,
+         C_PLE_Root_Index'Access);
+
+      Filename := To_Unbounded_String (Value (C_Filename));
+      Free (C_Filename);
+
+      --  PLE root indexes are 0-based in the C API, but are 1-based in the Ada
+      --  API.
+
+      PLE_Root_Index := Positive (C_PLE_Root_Index + 1);
+   end Get_Unit_Location;
+
+   ---------------------------
+   -- Get_Unit_And_PLE_Root --
+   ---------------------------
+
+   overriding procedure Get_Unit_And_PLE_Root
+     (Self           : C_Unit_Provider;
+      Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Charset        : String := "";
+      Reparse        : Boolean := False;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive)
+   is
+      Filename : Unbounded_String;
+   begin
+      Self.Get_Unit_Location (Name, Kind, Filename, PLE_Root_Index);
+      Unit := Get_From_File
+        (Context,
+         To_String (Filename),
+         Charset,
+         Reparse,
+         Default_Grammar_Rule);
+   end Get_Unit_And_PLE_Root;
 
    ----------
    -- Wrap --

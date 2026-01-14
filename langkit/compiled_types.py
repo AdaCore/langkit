@@ -123,11 +123,8 @@ def template_extensions(ctx: CompileCtx) -> dict:
         "unit_provider_destroy_type": CAPIType(
             capi, "unit_provider_destroy_callback"
         ).name,
-        "unit_provider_get_unit_filename_type": CAPIType(
-            capi, "unit_provider_get_unit_filename_callback"
-        ).name,
-        "unit_provider_get_unit_from_name_type": CAPIType(
-            capi, "unit_provider_get_unit_from_name_callback"
+        "unit_provider_get_unit_location_type": CAPIType(
+            capi, "unit_provider_get_unit_location_type"
         ).name,
         "token_kind": CAPIType(capi, "token_kind").name,
         "tdh_ptr_type": CAPIType(capi, "token_data_handler").name,

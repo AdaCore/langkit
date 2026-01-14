@@ -26,6 +26,7 @@ from __future__ import annotations
 %>
 
 
+import abc
 import argparse
 import collections
 import ctypes
@@ -520,43 +521,104 @@ _unit_provider = _hashable_c_pointer()
 _event_handler = _hashable_c_pointer()
 
 
+class _UnitProviderWrapper:
+    """
+    Wrapper for UnitProvider instances, responsible to create the low-level
+    unit provider value and hold its callbacks.
+    """
+
+    __slots__ = ("unit_provider", "c_value")
+
+    def __init__(self, unit_provider: UnitProvider):
+        self.unit_provider = unit_provider
+
+        if isinstance(unit_provider, _CUnitProvider):
+            self.c_value = unit_provider._c_value
+        else:
+            # Create the C-level unit provider, which keeps a reference to
+            # "self" and uses _UnitProviderWrapper's static methods as
+            # callbacks.
+            self.c_value = _create_unit_provider(
+                ctypes.py_object(self),
+                _unit_provider_cb_destroy,
+                _unit_provider_cb_get_unit_location,
+            )
+
+    def __del__(self) -> None:
+        if not isinstance(self.unit_provider, _CUnitProvider):
+            _dec_ref_unit_provider(self.c_value)
+        self.c_value = None
+
+    @classmethod
+    def create(
+        cls,
+        unit_provider: Opt[UnitProvider]
+    ) -> Tuple[Opt[_UnitProviderWrapper], Opt[object]]:
+        """
+        Helper to wrap an UnitProvider instance. Return also the C value that
+        is created for that unit provider. For convenience, just return None
+        for both if ``unit_provider`` is None.
+        """
+        if unit_provider is None:
+            return None, None
+        else:
+            up = cls(unit_provider)
+            return up, up.c_value
+
+    @staticmethod
+    def destroy_func(self: _UnitProviderWrapper) -> None:
+        pass
+
+    @staticmethod
+    def get_unit_location(
+        self: _UnitProviderWrapper,
+        name: _text,
+        kind: ctypes.c_int,
+        filename_ptr: ctypes.POINTER(ctypes.c_char_p),
+        ple_root_index_ptr: ctypes.POINTER(ctypes.c_int),
+    ) -> None:
+        py_name = name.contents._wrap()
+        py_kind = AnalysisUnitKind._c_to_py[kind]
+        try:
+            py_filename, py_ple_root_index = self.unit_provider.unit_location(
+                py_name, py_kind
+            )
+            assert isinstance(py_filename, str)
+            assert isinstance(py_ple_root_index, int)
+            assert py_ple_root_index >= 0
+            py_bytes_filename = py_filename.encode()
+        except BaseException:
+            _log_uncaught_error("UnitProvider.unit_location")
+            py_bytes_filename = b"<error>"
+            py_ple_root_index = 0
+
+        filename_buffer = ctypes.create_string_buffer(
+            py_bytes_filename + b"\x00"
+        )
+        filename_ptr[0] = _copy_bytes(
+            ctypes.byref(filename_buffer), len(filename_buffer)
+        )
+        ple_root_index_ptr[0] = py_ple_root_index
+
+
 class _EventHandlerWrapper:
     """
     Wrapper for EventHandler instances, responsible to create the low-level
     event handler value and hold its callbacks.
     """
 
-    __slots__ = (
-        "event_handler",
-        "c_value",
-        "destroy_callback",
-        "unit_requested_callback",
-        "unit_parsed_callback",
-    )
+    __slots__ = ("event_handler", "c_value")
 
     def __init__(self, event_handler: EventHandler):
         self.event_handler = event_handler
-
-        # Create the C callbacks (wrappers around the _EventHandlerWrapper
-        # static method) and keep references to them in "self" so that they
-        # survive at least as long as "self".
-        self.destroy_callback = _event_handler_destroy_func(
-            _EventHandlerWrapper.destroy_func
-        )
-        self.unit_requested_callback = _event_handler_unit_requested_func(
-            _EventHandlerWrapper.unit_requested_func
-        )
-        self.unit_parsed_callback = _event_handler_unit_parsed_func(
-            _EventHandlerWrapper.unit_parsed_func
-        )
 
         # Create the C-level event handler, which keeps a reference to "self"
         # and uses _EventHandlerWrapper's static methods as callbacks.
         self.c_value = _create_event_handler(
             ctypes.py_object(self),
-            self.destroy_callback,
-            self.unit_requested_callback,
-            self.unit_parsed_callback,
+            _event_handler_cb_destroy,
+            _event_handler_cb_unit_requested,
+            _event_handler_cb_unit_parsed,
         )
 
     def __del__(self) -> None:
@@ -718,7 +780,9 @@ class AnalysisContext:
                 raise ValueError(
                     'Invalid tab_stop (positive integer expected)')
             c_file_reader = file_reader._c_value if file_reader else None
-            c_unit_provider = unit_provider._c_value if unit_provider else None
+            self._unit_provider, c_unit_provider = (
+                _UnitProviderWrapper.create(unit_provider)
+            )
             self._event_handler_wrapper, c_event_handler = (
                 _EventHandlerWrapper.create(event_handler)
             )
@@ -753,10 +817,6 @@ class AnalysisContext:
                 with_trivia,
                 tab_stop
             )
-
-        # Keep a reference to the unit provider so that it is live at least as
-        # long as the analysis context is live.
-        self._unit_provider = unit_provider
 
     def __del__(self) -> None:
         if self._c_value:
@@ -1440,16 +1500,36 @@ ${exts.include_extension(
 class UnitProvider:
     ${py_doc('langkit.unit_provider_type', 4)}
 
-    def __init__(self, c_value: Any):
-        ${py_doc('langkit.python.UnitProvider.__init__', 8)}
-        self._c_value = c_value
-
-    def __del__(self) -> None:
-        _dec_ref_unit_provider(self._c_value)
+    @abc.abstractmethod
+    def unit_location(
+        self,
+        name: str,
+        kind: AnalysisUnitKind,
+    ) -> Tuple[str, int]:
+        ${py_doc("langkit.python.UnitProvider.unit_location", 8)}
+        pass
 
 ${exts.include_extension(
    ctx.ext('python_api', 'unit_providers', 'methods')
 )}
+
+
+class _CUnitProvider(UnitProvider):
+
+    def __init__(self, c_value: Any):
+        self._c_value = c_value
+
+    def unit_location(
+        self,
+        name: str,
+        kind: AnalysisUnitKind,
+    ) -> Tuple[str, int]:
+        # This is never supposed to be called: the analysis context should
+        # directly call the primitive from the C value.
+        raise NotImplementedError
+
+    def __del__(self) -> None:
+        _dec_ref_unit_provider(self._c_value)
 
 
 class ${root_astnode_name}:
@@ -1979,6 +2059,11 @@ ${iterator_types.decl(iterator_type)}
 % endfor
 
 
+_copy_bytes = _import_func(
+    '${capi.get_name("copy_bytes")}',
+    [ctypes.c_void_p, ctypes.c_size_t],
+    ctypes.c_void_p,
+)
 _free = _import_func(
     '${capi.get_name("free")}',
     [ctypes.c_void_p], None
@@ -2252,7 +2337,37 @@ _dec_ref_event_handler = _import_func(
     '${capi.get_name("dec_ref_event_handler")}', [_event_handler], None
 )
 
+# C callbacks for _EventHandlerWrapper
+
+_event_handler_cb_destroy = _event_handler_destroy_func(
+    _EventHandlerWrapper.destroy_func
+)
+_event_handler_cb_unit_requested = _event_handler_unit_requested_func(
+    _EventHandlerWrapper.unit_requested_func
+)
+_event_handler_cb_unit_parsed = _event_handler_unit_parsed_func(
+    _EventHandlerWrapper.unit_parsed_func
+)
+
 # Unit providers
+_unit_provider_destroy_type = ctypes.CFUNCTYPE(None, ctypes.py_object)
+_unit_provider_get_unit_location_type = ctypes.CFUNCTYPE(
+    None,
+    ctypes.py_object,                # data
+    ctypes.POINTER(_text),           # name
+    ctypes.c_int,                    # kind
+    ctypes.POINTER(ctypes.c_char_p), # filename (out)
+    ctypes.POINTER(ctypes.c_int),    # ple_root_index (out)
+)
+_create_unit_provider = _import_func(
+    '${capi.get_name("create_unit_provider")}',
+    [
+        ctypes.py_object,
+        _unit_provider_destroy_type,
+        _unit_provider_get_unit_location_type,
+    ],
+    _unit_provider,
+)
 _dec_ref_unit_provider = _import_func(
     '${capi.get_name("dec_ref_unit_provider")}',
     [_unit_provider], None
@@ -2260,6 +2375,16 @@ _dec_ref_unit_provider = _import_func(
 ${exts.include_extension(
    ctx.ext('python_api', 'unit_providers', 'low_level_bindings')
 )}
+
+# C callbacks for _UnitProviderWrapper
+
+_unit_provider_cb_destroy = _unit_provider_destroy_type(
+    _UnitProviderWrapper.destroy_func
+)
+_unit_provider_cb_get_unit_location = _unit_provider_get_unit_location_type(
+    _UnitProviderWrapper.get_unit_location
+)
+
 
 # Misc
 _token_get_kind = _import_func(
