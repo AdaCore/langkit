@@ -58,6 +58,7 @@ from langkit.frontend.scopes import Scope
 from langkit.frontend.static import parse_static_bool, parse_static_str
 from langkit.frontend.utils import (
     arg_name_from_expr,
+    determine_casing,
     lkt_doc,
     name_from_camel,
     name_from_lower,
@@ -833,13 +834,19 @@ class LktTypesLoader:
                 name: str,
                 entity: Scope.Entity | Resolver,
                 diagnostic_node: L.LktNode,
+                renaming: L.DefId | None = None,
             ) -> None:
                 """
                 Add an imported entity to the current unit scope.
                 """
+                # If the imported entity is renamed, ensure the casing for the
+                # renaming is consistent with the casing of the original entity
+                # name.
+                target_name = name if renaming is None else renaming.text
+
                 # Reject the import if the target scope already has an entity
                 # with the same name.
-                other_entity = mapping.get(name)
+                other_entity = mapping.get(target_name)
                 if other_entity is not None:
                     error(
                         "this import conflicts with"
@@ -866,9 +873,13 @@ class LktTypesLoader:
                 # that this entity has been imported (it is not
                 # defined/exported by this module itself).
                 imported = Scope.Imported(
-                    name, actual_entity, diagnostic_node, resolver
+                    target_name,
+                    actual_entity,
+                    diagnostic_node,
+                    renaming,
+                    resolver,
                 )
-                mapping[name] = imported
+                mapping[target_name] = imported
                 imported_entities.append(imported)
 
             for clause in unit.root.f_imports:
@@ -876,16 +887,23 @@ class LktTypesLoader:
                 module = self.resolver.resolve_module(module_name)
                 match clause:
                     case L.Import():
-                        add(module_name.text, module, module_name)
+                        add(
+                            module_name.text,
+                            module,
+                            clause.f_renaming or module_name,
+                            clause.f_renaming,
+                        )
 
                     case L.ImportFrom():
                         for imported_name in clause.f_imported_names:
+                            original_name = imported_name.f_original_name
                             add(
-                                imported_name.text,
+                                original_name.text,
                                 make_resolver(
-                                    module.unit_scope, imported_name
+                                    module.unit_scope, original_name
                                 ),
-                                imported_name,
+                                original_name,
+                                imported_name.f_renaming,
                             )
 
                     case L.ImportAllFrom():
@@ -902,6 +920,28 @@ class LktTypesLoader:
         # to return an entity).
         for entity in imported_entities:
             entity.resolve()
+
+            # Now that the imported entity is resolved, we can assume that its
+            # casing is valid. Check that the casing of the renaming is
+            # consistent with it.
+            if entity.renaming_node:
+                original_casing = determine_casing(entity.entity.name)
+                consistent = True
+                if original_casing == names.lower:
+                    try:
+                        names.check_lower(entity.name)
+                    except ValueError:
+                        consistent = False
+                else:
+                    try:
+                        names.check_camel(entity.name)
+                    except ValueError:
+                        consistent = False
+                if not consistent:
+                    error(
+                        "casing convention inconsistent with imported entity",
+                        entity.renaming_node,
+                    )
 
     def lower_expressions(self) -> None:
         #

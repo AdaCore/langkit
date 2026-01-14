@@ -71,6 +71,12 @@ class Scope:
         Lkt node that triggered the entity import. Used for diagnostics.
         """
 
+        renaming_node: L.DefId | None
+        """
+        If this entity was imported through a renaming, reference to the Lkt
+        node that defines the renaming.
+        """
+
         resolver: Callable[[], Scope.Entity]
         """
         Callback used to initialize ``entity_or_none`` (see the ``resolve``

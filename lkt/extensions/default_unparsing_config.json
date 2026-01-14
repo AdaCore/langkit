@@ -879,10 +879,9 @@
     "ImportAllFrom": {
       "node": ["recurse", "hardline"]
     },
+    "ImportedName": {},
+    "ImportedNameList": {},
     "ImportedId": {},
-    "ImportedIdList": {
-        "sep": ["recurse", "softline"]
-    },
     "Isa": {
       "node": {
         "kind": "group",

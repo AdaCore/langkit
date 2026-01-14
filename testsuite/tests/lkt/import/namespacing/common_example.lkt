@@ -1,4 +1,4 @@
-from common_foo_node import FooNode
+from common_foo_node import FooNode as RenamedFooNode
 
-class Example: FooNode implements TokenNode {
+class Example: RenamedFooNode implements TokenNode {
 }

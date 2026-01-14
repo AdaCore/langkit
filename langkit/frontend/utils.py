@@ -46,6 +46,16 @@ def name_from_camel(kind: str, id: L.Id) -> names.Name:
     return names.Name.from_camel(id.text)
 
 
+def determine_casing(name: str) -> names.Convention:
+    """
+    Determine the casing convention for ``name``.
+
+    Note that this handles casing conventions used in Lkt only: lower and
+    camel.
+    """
+    return names.lower if name == name.lower() else names.camel
+
+
 def arg_name_from_expr(e: L.Expr) -> L.Id:
     """
     Return the argument name for a given argument value expression.

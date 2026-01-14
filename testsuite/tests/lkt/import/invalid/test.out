@@ -1,3 +1,15 @@
+== casing_1.lkt ==
+casing_1.lkt:1:18: error: casing convention inconsistent with imported entity
+1 | import common as Common
+  |                  ^^^^^^
+
+
+== casing_2.lkt ==
+casing_2.lkt:2:31: error: casing convention inconsistent with imported entity
+2 | from common import FooNode as foo_node
+  |                               ^^^^^^^^
+
+
 == conflict_1.lkt ==
 conflict_1.lkt:1:8: error: this import conflicts with the dynamic variable common at conflict_1.lkt:8:1
 1 | import common
@@ -14,6 +26,12 @@ conflict_2.lkt:2:8: error: this import conflicts with module 'common' (imported 
 conflict_3.lkt:2:20: error: this import conflicts with the dynamic variable myvar at common.lkt:3:1 (imported at 1:1)
 2 | from common import myvar
   |                    ^^^^^
+
+
+== conflict_4.lkt ==
+conflict_4.lkt:4:27: error: this import conflicts with module 'common' (imported at 3:18)
+4 | import common_reimport as mod
+  |                           ^^^
 
 
 == invalid_module_name.lkt ==

@@ -1,4 +1,7 @@
 import m1
+import m1 as m1_1
 from m2 import d1
+from m2 import d1 as d1_1
 from m3 import d2, d3
+from m3 import d2, d3 as d3_3, d4
 from m5 import *
