@@ -60,8 +60,18 @@ with run("Build after an output file has changed"):
     check_impl_body()
 check_impl_body()
 
+# Make sure that, with --force/-f, even the emitter cache (used to determine
+# whether it is worth re-writing a file or not) is disregarded. Since it relies
+# on side-stored contents hashes, tampering generated files used not to trigger
+# their re-generation even with --force/-f.
+filename = "build/gdbinit.py"
+dummy_contents = b"dummy contents\n"
 with run("Build with -f", "-f"):
-    pass
+    assert os.path.isfile(filename)
+    with open(filename, "wb") as f:
+        f.write(dummy_contents)
+with open(filename, "rb") as f:
+    assert f.read() != dummy_contents
 
 with run("Build with --portable-project", "--portable-project"):
     pass
