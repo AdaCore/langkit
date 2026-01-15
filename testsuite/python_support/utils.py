@@ -306,6 +306,7 @@ def build_and_run(
         valgrind = kwargs.pop("valgrind", False)
         suppressions = kwargs.pop("valgrind_suppressions", [])
         encoding = kwargs.pop("encoding", "utf-8")
+        forward_output = kwargs.pop("forward_output", True)
         assert not kwargs
 
         if valgrind_enabled and valgrind:
@@ -319,8 +320,9 @@ def build_and_run(
             stderr=subprocess.STDOUT,
             encoding=encoding,
         )
-        sys.stdout.write(p.stdout)
-        sys.stdout.flush()
+        if forward_output:
+            sys.stdout.write(p.stdout)
+            sys.stdout.flush()
         p.check_returncode()
 
     if py_script is not None:
@@ -458,6 +460,11 @@ def build_and_run(
                 m.dirs.build_dir(
                     "java", "target", f"{m.lib_name.lower()}.jar"
                 ),
+                m.dirs.build_dir(
+                    "java", "target", "lib", "langkit_support.jar"
+                ),
+                m.dirs.build_dir("java", "target", "lib", "truffle-api.jar"),
+                m.dirs.build_dir("java", "target", "lib", "polyglot.jar"),
             ]
         )
         os_specific_options = []
@@ -497,6 +504,7 @@ def build_and_run(
             "main",
             env=java_env,
             encoding=ni_main.encoding,
+            forward_output=False,
         )
 
         # Run the newly created main

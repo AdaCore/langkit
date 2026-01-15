@@ -20,6 +20,8 @@
     </properties>
 
     <build>
+        <finalName>${ctx.lib_name.lower}</finalName>
+
         <plugins>
 
             <plugin>
@@ -33,6 +35,30 @@
                     </compilerArgs>
                     <release>24</release>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <%text>
+                            <outputDirectory>
+                                ${project.build.directory}/lib
+                            </outputDirectory>
+                            </%text>
+                            <stripVersion>true</stripVersion>
+                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>
@@ -98,48 +124,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-
-        <profile>
-            <id>with-shade</id>
-
-            <activation>
-                <property>
-                    <name>skipShade</name>
-                    <value>!true</value>
-                </property>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>shade</goal>
-                                </goals>
-                                <configuration>
-                                    <finalName>
-                                        ${ctx.lib_name.lower}
-                                    </finalName>
-                                    <artifactSet>
-                                        <includes>
-                                            <include>
-                                                com.adacore:langkit_support
-                                            </include>
-                                        </includes>
-                                    </artifactSet>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-
         </profile>
     </profiles>
 

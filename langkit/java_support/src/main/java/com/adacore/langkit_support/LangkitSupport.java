@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.interop.TruffleObject;
 
 
 public class LangkitSupport {
@@ -244,7 +245,7 @@ public class LangkitSupport {
     /**
      * Reference to a token in an analysis unit.
      */
-    public interface TokenInterface {
+    public interface TokenInterface extends TruffleObject {
         /** The source location range of the token. */
         public abstract SourceLocationRange getSourceLocationRange();
 
@@ -508,7 +509,7 @@ public class LangkitSupport {
     }
 
     /** This type represents the analysis of a single file. */
-    public abstract static class AnalysisUnit {
+    public abstract static class AnalysisUnit implements TruffleObject {
 
         /** The root node of the analysis unit. */
         public abstract NodeInterface getRoot();
@@ -556,6 +557,8 @@ public class LangkitSupport {
 
         /** This class represents a parameter description. */
         public abstract static class Param {
+            /** Get the name of the parameter. */
+            public abstract String getName();
             /** The type of the parameter */
             public abstract Class<?> getType();
             /** The optional default value of the parameter */
@@ -626,7 +629,7 @@ public class LangkitSupport {
     }
 
     /** The base type shared by all Langkit nodes. */
-    public interface NodeInterface {
+    public interface NodeInterface extends TruffleObject {
         /** The description of the node. */
         public abstract Reflection.Node getDescription();
 
