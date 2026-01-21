@@ -1,0 +1,5 @@
+from common import BaseExample
+
+class Example: BaseExample {
+    fun f(): NodeBuilder[Int] = 0
+}

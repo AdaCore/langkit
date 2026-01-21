@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from typing import ClassVar
+from typing import Callable, ClassVar
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import CompiledType
@@ -34,6 +34,82 @@ class Scope:
             """
             ...
 
+    @dataclasses.dataclass
+    class Module(Entity):
+        """
+        Module declared by a Lkt source file.
+        """
+
+        unit: L.AnalysisUnit
+        """
+        Analysis unit that implements this module.
+        """
+
+        unit_scope: Scope
+        """
+        Root scope for the unit that implement this module.
+        """
+
+        @property
+        def diagnostic_name(self) -> str:
+            return f"module {self.name!r}"
+
+    @dataclasses.dataclass
+    class Imported(Entity):
+        """
+        Wrapper to materialize the fact that an entity was imported into a
+        scope.
+        """
+
+        entity_or_none: Scope.Entity | None
+        """
+        Entity that is imported.
+        """
+
+        import_node: L.LktNode
+        """
+        Lkt node that triggered the entity import. Used for diagnostics.
+        """
+
+        renaming_node: L.DefId | None
+        """
+        If this entity was imported through a renaming, reference to the Lkt
+        node that defines the renaming.
+        """
+
+        resolver: Callable[[], Scope.Entity]
+        """
+        Callback used to initialize ``entity_or_none`` (see the ``resolve``
+        method). Used to implement correctly the module import scheme: all
+        imports are made before the imported entities are actually resolved,
+        which allows to properly report imports of imported entities (which are
+        illegal).
+        """
+
+        def resolve(self) -> None:
+            """
+            Set ``entity_or_none`` using the resolver callback.
+            """
+            self.entity_or_none = self.resolver()
+
+        @property
+        def entity(self) -> Scope.Entity:
+            assert self.entity_or_none is not None
+            return self.entity_or_none
+
+        @property
+        def diagnostic_name(self) -> str:
+            # Entities imported into module X are always imported because of a
+            # clause in that module X, so there is no point in including the
+            # filename in the diagnostic name.
+            sloc = self.import_node.sloc_range.start
+            sloc_repr = f"{sloc.line}:{sloc.column}"
+            return (
+                f"entity imported at {sloc_repr}"
+                if self.entity_or_none is None
+                else f"{self.entity.diagnostic_name} (imported at {sloc_repr})"
+            )
+
     class BuiltinEntity(Entity):
         """
         Any entity that is created automatically by Lkt.
@@ -60,6 +136,16 @@ class Scope:
         """
         Reference to the corresponding compiled type.
         """
+
+        @property
+        def scope(self) -> Scope:
+            """
+            Convenience attribute so that ``BuiltinType`` and ``UserType`` have
+            a ``scope`` attribute/property. Its value here is not significant:
+            it is never supposed to be used, as builtin types are always
+            lowered.
+            """
+            raise AssertionError()
 
         @property
         def t_or_none(self) -> CompiledType:
@@ -192,10 +278,18 @@ class Scope:
         Type declaration.
         """
 
-        t_or_none: CompiledType | None = None
+        t_or_none: CompiledType | None
         """
         Reference to the corresponding compiled type (if available). None
         before type lowering has processed this type.
+        """
+
+        scope: Scope
+        """
+        Scope in which this type is declared.
+
+        Used to lower the type declaration on demand with the right scope to
+        resolve type references in that declaration.
         """
 
         kind_name = "type"
@@ -261,9 +355,17 @@ class Scope:
         ``@with_dynvars`` property annotation.
         """
 
-        variable: E.DynamicVariable
+        variable_or_none: E.DynamicVariable | None = None
 
         kind_name = "dynamic variable"
+
+        @property
+        def variable(self) -> E.DynamicVariable:
+            """
+            Reference to the corresponding dynamic variable.
+            """
+            assert self.variable_or_none is not None
+            return self.variable_or_none
 
     @dataclasses.dataclass
     class GenericInterface(UserEntity):
@@ -338,6 +440,7 @@ class Scope:
         self,
         name: str,
         location: Location | L.LktNode | None = None,
+        recursive: bool = True,
     ) -> Scope.Entity:
         """
         Look for the declaration for a given name in this scope or one of its
@@ -347,13 +450,19 @@ class Scope:
         :param location: If it is possible for this lookup to return an ignored
             entity, a Location is required to give context for the
             corresponding warning.
+        :param recursive: Whether to look in parent scopes if this scope does
+            not provide the requested entity. Also controls whether
+            ``Scope.Imported`` wrappers are automatically peeled.
         """
         scope: Scope | None = self
         while scope is not None:
             try:
                 result = scope.mapping[name]
             except KeyError:
-                scope = scope.parent
+                if recursive:
+                    scope = scope.parent
+                else:
+                    break
             else:
                 scope.looked_up.add(name)
                 if (
@@ -366,19 +475,38 @@ class Scope:
                         f"ignored {result.kind_name} is actually used",
                         location=location,
                     )
+
+                # If requested, automatically resolve imported entities
+                if recursive and isinstance(result, Scope.Imported):
+                    result = result.entity
+
                 return result
 
         raise KeyError(f"no entity called '{name}' in {self.label}")
 
-    def resolve(self, name: L.Expr) -> Scope.Entity:
+    def resolve(self, name: L.Expr, recursive: bool = True) -> Scope.Entity:
         """
         Resolve the entity designated by ``name`` in this scope.
 
         Unlike ``lookup``, this create a diagnostic if the entity is not found.
         """
-        if isinstance(name, L.RefId):
+        # If the entity reference is a dot expr, it means the entity to resolve
+        # actually belongs to another scope: first fetch it.
+        scope = self
+        while isinstance(name, L.DotExpr):
+            scope_entity = scope.resolve(name.f_prefix)
+            if isinstance(scope_entity, Scope.Module):
+                scope = scope_entity.unit_scope
+            else:
+                error(
+                    f"{scope_entity.diagnostic_name} is not a scope",
+                    name.f_prefix,
+                )
+            name = name.f_suffix
+
+        if isinstance(name, (L.ImportedId, L.ModuleId, L.RefId)):
             try:
-                return self.lookup(name.text, name)
+                return scope.lookup(name.text, name, recursive=recursive)
             except KeyError as exc:
                 error(exc.args[0], location=name)
         else:

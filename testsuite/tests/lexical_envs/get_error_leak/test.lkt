@@ -8,7 +8,7 @@
 # that the lookup of referenced environments raises a PropertyError. The data
 # in Local_Results used to leak at that point.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

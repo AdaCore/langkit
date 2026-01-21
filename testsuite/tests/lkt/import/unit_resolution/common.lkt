@@ -1,0 +1,7 @@
+from lexer_example import foo_lexer
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+}

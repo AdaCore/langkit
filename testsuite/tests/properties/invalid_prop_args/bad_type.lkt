@@ -1,5 +1,0 @@
-import common
-
-class BarNode: BarCode {
-    fun base_prop(x: Symbol): Int = 12
-}

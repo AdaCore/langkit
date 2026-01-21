@@ -1,0 +1,11 @@
+from common import BaseExample, FooNode, Literal
+
+@synthetic class EmptyNode: FooNode {
+}
+
+class DerivedNode: EmptyNode {
+}
+
+class Example: BaseExample {
+    @lazy prop: DerivedNode = EmptyNode.builder().build()
+}

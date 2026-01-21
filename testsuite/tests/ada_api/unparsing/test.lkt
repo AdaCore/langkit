@@ -1,6 +1,6 @@
 # Check that the Unparsing/Prettier API works as expect
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 @with_unparsers

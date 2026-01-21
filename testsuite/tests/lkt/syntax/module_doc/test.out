@@ -1,0 +1,154 @@
+== basic.lkt ==
+
+LangkitRoot basic.lkt:1:1-2:17
+|f_doc:
+|  ModuleDocStringLit basic.lkt:1:1-1:32
+|  |f_lines:
+|  |  ModuleDocStringLineList basic.lkt:1:1-1:32
+|  |  |item_0:
+|  |  |  ModuleDocStringLine basic.lkt:1:1-1:32: |"" Module-level documentation.
+|f_imports:
+|  BaseImportList basic.lkt:1:32-1:32
+|f_decls:
+|  FullDeclList basic.lkt:2:1-2:17
+|  |item_0:
+|  |  FullDecl basic.lkt:2:1-2:17
+|  |  |f_doc: None
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList basic.lkt:1:32-1:32
+|  |  |f_decl:
+|  |  |  FunDecl "f" basic.lkt:2:1-2:17
+|  |  |  |f_syn_name:
+|  |  |  |  DefId "f" basic.lkt:2:5-2:6: f
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList basic.lkt:2:7-2:7
+|  |  |  |f_return_type:
+|  |  |  |  SimpleTypeRef basic.lkt:2:10-2:13
+|  |  |  |  |f_type_name:
+|  |  |  |  |  RefId "Int" basic.lkt:2:10-2:13: Int
+|  |  |  |f_trait_ref: None
+|  |  |  |f_body:
+|  |  |  |  NumLit basic.lkt:2:16-2:17: 1
+
+doc = 'Module-level documentation.\n'
+
+== invalid_kind.lkt ==
+
+invalid_kind.lkt:3:1: Skipped token |"" Module doc in the wrong place.
+
+== multiline.lkt ==
+
+LangkitRoot multiline.lkt:1:1-6:17
+|f_doc:
+|  ModuleDocStringLit multiline.lkt:1:1-5:11
+|  |f_lines:
+|  |  ModuleDocStringLineList multiline.lkt:1:1-5:11
+|  |  |item_0:
+|  |  |  ModuleDocStringLine multiline.lkt:1:1-1:32: |"" Module-level documentation.
+|  |  |item_1:
+|  |  |  ModuleDocStringLine multiline.lkt:2:1-2:4: |""
+|  |  |item_2:
+|  |  |  ModuleDocStringLine multiline.lkt:3:1-3:13: |"" It spans
+|  |  |item_3:
+|  |  |  ModuleDocStringLine multiline.lkt:4:1-4:13: |"" multiple
+|  |  |item_4:
+|  |  |  ModuleDocStringLine multiline.lkt:5:1-5:11: |"" lines.
+|f_imports:
+|  BaseImportList multiline.lkt:5:11-5:11
+|f_decls:
+|  FullDeclList multiline.lkt:6:1-6:17
+|  |item_0:
+|  |  FullDecl multiline.lkt:6:1-6:17
+|  |  |f_doc: None
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList multiline.lkt:5:11-5:11
+|  |  |f_decl:
+|  |  |  FunDecl "f" multiline.lkt:6:1-6:17
+|  |  |  |f_syn_name:
+|  |  |  |  DefId "f" multiline.lkt:6:5-6:6: f
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList multiline.lkt:6:7-6:7
+|  |  |  |f_return_type:
+|  |  |  |  SimpleTypeRef multiline.lkt:6:10-6:13
+|  |  |  |  |f_type_name:
+|  |  |  |  |  RefId "Int" multiline.lkt:6:10-6:13: Int
+|  |  |  |f_trait_ref: None
+|  |  |  |f_body:
+|  |  |  |  NumLit multiline.lkt:6:16-6:17: 1
+
+doc = 'Module-level documentation.\n\nIt spans\nmultiple\nlines.\n'
+
+== no_doc.lkt ==
+
+LangkitRoot no_doc.lkt:1:1-2:17
+|f_doc: None
+|f_imports:
+|  BaseImportList no_doc.lkt:1:1-1:1
+|f_decls:
+|  FullDeclList no_doc.lkt:1:1-2:17
+|  |item_0:
+|  |  FullDecl no_doc.lkt:1:1-2:17
+|  |  |f_doc:
+|  |  |  BlockStringLit no_doc.lkt:1:1-1:33
+|  |  |  |f_lines:
+|  |  |  |  BlockStringLineList no_doc.lkt:1:1-1:33
+|  |  |  |  |item_0:
+|  |  |  |  |  BlockStringLine no_doc.lkt:1:1-1:33: |" Function-level documentation.
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList no_doc.lkt:1:33-1:33
+|  |  |f_decl:
+|  |  |  FunDecl "f" no_doc.lkt:2:1-2:17
+|  |  |  |f_syn_name:
+|  |  |  |  DefId "f" no_doc.lkt:2:5-2:6: f
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList no_doc.lkt:2:7-2:7
+|  |  |  |f_return_type:
+|  |  |  |  SimpleTypeRef no_doc.lkt:2:10-2:13
+|  |  |  |  |f_type_name:
+|  |  |  |  |  RefId "Int" no_doc.lkt:2:10-2:13: Int
+|  |  |  |f_trait_ref: None
+|  |  |  |f_body:
+|  |  |  |  NumLit no_doc.lkt:2:16-2:17: 1
+
+No module-level documentation
+
+== with_decl_doc.lkt ==
+
+LangkitRoot with_decl_doc.lkt:1:1-3:17
+|f_doc:
+|  ModuleDocStringLit with_decl_doc.lkt:1:1-1:32
+|  |f_lines:
+|  |  ModuleDocStringLineList with_decl_doc.lkt:1:1-1:32
+|  |  |item_0:
+|  |  |  ModuleDocStringLine with_decl_doc.lkt:1:1-1:32: |"" Module-level documentation.
+|f_imports:
+|  BaseImportList with_decl_doc.lkt:1:32-1:32
+|f_decls:
+|  FullDeclList with_decl_doc.lkt:2:1-3:17
+|  |item_0:
+|  |  FullDecl with_decl_doc.lkt:2:1-3:17
+|  |  |f_doc:
+|  |  |  BlockStringLit with_decl_doc.lkt:2:1-2:33
+|  |  |  |f_lines:
+|  |  |  |  BlockStringLineList with_decl_doc.lkt:2:1-2:33
+|  |  |  |  |item_0:
+|  |  |  |  |  BlockStringLine with_decl_doc.lkt:2:1-2:33: |" Function-level documentation.
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList with_decl_doc.lkt:2:33-2:33
+|  |  |f_decl:
+|  |  |  FunDecl "f" with_decl_doc.lkt:3:1-3:17
+|  |  |  |f_syn_name:
+|  |  |  |  DefId "f" with_decl_doc.lkt:3:5-3:6: f
+|  |  |  |f_params:
+|  |  |  |  FunParamDeclList with_decl_doc.lkt:3:7-3:7
+|  |  |  |f_return_type:
+|  |  |  |  SimpleTypeRef with_decl_doc.lkt:3:10-3:13
+|  |  |  |  |f_type_name:
+|  |  |  |  |  RefId "Int" with_decl_doc.lkt:3:10-3:13: Int
+|  |  |  |f_trait_ref: None
+|  |  |  |f_body:
+|  |  |  |  NumLit with_decl_doc.lkt:3:16-3:17: 1
+
+doc = 'Module-level documentation.\n'
+
+Done

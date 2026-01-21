@@ -1,7 +1,7 @@
 # Test the safety nets of iterators on a complex example, where node references
 # lie in a deeply nested structure.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

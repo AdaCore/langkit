@@ -1,0 +1,9 @@
+from common import BaseExample, FooNode, Literal
+
+@synthetic
+class EmptyNode: FooNode {
+}
+
+class Example: BaseExample {
+    fun f(): NodeBuilder[EmptyNode] = null[NodeBuilder[EmptyNode]]
+}

@@ -1,17 +1,17 @@
-== with_int.lkt ==
-with_int.lkt:5:54: error: Entity collection expected, got Int
+== with_int/test.lkt ==
+test.lkt:5:54: error: Entity collection expected, got Int
 5 |     fun get_eq(): Equation = %domain(self.get_var(), 1)
   |                                                      ^
 
 
-== with_int_array.lkt ==
-with_int_array.lkt:5:54: error: Entity collection expected, got Array[Int]
+== with_int_array/test.lkt ==
+test.lkt:5:54: error: Entity collection expected, got Array[Int]
 5 |     fun get_eq(): Equation = %domain(self.get_var(), [1])
   |                                                      ^^^
 
 
-== with_node.lkt ==
-with_node.lkt:6:54: error: Entity collection expected, got Array[FooNode]
+== with_node/test.lkt ==
+test.lkt:6:54: error: Entity collection expected, got Array[FooNode]
 6 |     fun get_eq(): Equation = %domain(self.get_var(), node.get_domain())
   |                                                      ^^^^^^^^^^^^^^^^^
 

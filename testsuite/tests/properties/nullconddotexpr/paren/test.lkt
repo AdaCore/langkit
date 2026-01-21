@@ -1,7 +1,7 @@
 # Check that using parens breaks the propagation behavior of null-conditional
 # operations in Lkt.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

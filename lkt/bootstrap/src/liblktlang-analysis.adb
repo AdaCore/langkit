@@ -1243,6 +1243,62 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Base_Import
+        (Node : Lkt_Node'Class) return Base_Import
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Base_Import;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Base_Import then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BaseImport";
+         
+            end if;
+      end;
+      function As_Base_Import_List
+        (Node : Lkt_Node'Class) return Base_Import_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Base_Import_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Base_Import_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ASTList[BaseImport]";
+         
+            end if;
+      end;
       function As_Base_Lexer_Case_Rule_Alt
         (Node : Lkt_Node'Class) return Base_Lexer_Case_Rule_Alt
       is
@@ -4127,13 +4183,13 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Import_List
-        (Node : Lkt_Node'Class) return Import_List
+      function As_Import_All_From
+        (Node : Lkt_Node'Class) return Import_All_From
       is
          N : constant Bare_Lkt_Node := Node.Internal.Node;
       begin
          if N = null then
-            return No_Import_List;
+            return No_Import_All_From;
          end if;
 
          Check_Safety_Net (Node);
@@ -4141,7 +4197,7 @@ package body Liblktlang.Analysis is
          
          
 
-            if N.Kind in Lkt_Import_List_Range then
+            if N.Kind in Lkt_Import_All_From_Range then
                
             return (Internal   => (Node => N, Info => Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -4151,7 +4207,119 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to ASTList[Import]";
+              & " to ImportAllFrom";
+         
+            end if;
+      end;
+      function As_Import_From
+        (Node : Lkt_Node'Class) return Import_From
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Import_From;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Import_From_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ImportFrom";
+         
+            end if;
+      end;
+      function As_Imported_Id
+        (Node : Lkt_Node'Class) return Imported_Id
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Imported_Id;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Imported_Id_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ImportedId";
+         
+            end if;
+      end;
+      function As_Imported_Name
+        (Node : Lkt_Node'Class) return Imported_Name
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Imported_Name;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Imported_Name_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ImportedName";
+         
+            end if;
+      end;
+      function As_Imported_Name_List
+        (Node : Lkt_Node'Class) return Imported_Name_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Imported_Name_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Imported_Name_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ASTList[ImportedName]";
          
             end if;
       end;
@@ -4939,13 +5107,13 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
-      function As_Module_Ref_Id
-        (Node : Lkt_Node'Class) return Module_Ref_Id
+      function As_Module_Doc_String_Line
+        (Node : Lkt_Node'Class) return Module_Doc_String_Line
       is
          N : constant Bare_Lkt_Node := Node.Internal.Node;
       begin
          if N = null then
-            return No_Module_Ref_Id;
+            return No_Module_Doc_String_Line;
          end if;
 
          Check_Safety_Net (Node);
@@ -4953,7 +5121,7 @@ package body Liblktlang.Analysis is
          
          
 
-            if N.Kind in Lkt_Module_Ref_Id_Range then
+            if N.Kind in Lkt_Module_Doc_String_Line_Range then
                
             return (Internal   => (Node => N, Info => Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -4963,7 +5131,91 @@ package body Liblktlang.Analysis is
             raise Constraint_Error with
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
-              & " to ModuleRefId";
+              & " to ModuleDocStringLine";
+         
+            end if;
+      end;
+      function As_Module_Doc_String_Line_List
+        (Node : Lkt_Node'Class) return Module_Doc_String_Line_List
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Module_Doc_String_Line_List;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Module_Doc_String_Line_List_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ASTList[ModuleDocStringLine]";
+         
+            end if;
+      end;
+      function As_Module_Doc_String_Lit
+        (Node : Lkt_Node'Class) return Module_Doc_String_Lit
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Module_Doc_String_Lit;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Module_Doc_String_Lit_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ModuleDocStringLit";
+         
+            end if;
+      end;
+      function As_Module_Id
+        (Node : Lkt_Node'Class) return Module_Id
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Module_Id;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Module_Id_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ModuleId";
          
             end if;
       end;
@@ -10412,6 +10664,129 @@ package body Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Module_Name
+     (Node : Base_Import'Class) return Module_Id
+   is
+      Result : Bare_Module_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Base_Import_F_Module_Name (Node.Internal.Node);
+         if Result = null then
+            return No_Module_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Module_Name;
+
+
+
+         
+   function P_Referenced_Unit
+     (Node : Base_Import'Class) return Analysis_Unit is
+      
+
+
+      Property_Result : Internal_Unit;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Base_Import_P_Referenced_Unit
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
+
+
+            null;
+      end return;
+
+   end;
+
+
+
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Base_Import_List'Class; Index : Positive) return Base_Import
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Base_Import;
+         end List_Child;
+
+         
+
+         function Base_Import_List_First (Node : Base_Import_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Base_Import_List_Next
+           (Node : Base_Import_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Base_Import_List_Has_Element
+           (Node : Base_Import_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Base_Import_List_Element
+           (Node : Base_Import_List; Cursor : Positive) return Base_Import'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Base_Import'(Child.As_Base_Import);
+         end;
+
+
+
+
+
+
 
 
 
@@ -14300,56 +14675,115 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Name
-     (Node : Import'Class) return Module_Ref_Id
+   function F_Renaming
+     (Node : Import'Class) return Def_Id
    is
-      Result : Bare_Module_Ref_Id;
+      Result : Bare_Def_Id;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Import_F_Name (Node.Internal.Node);
+      Result := Implementation.Import_F_Renaming (Node.Internal.Node);
          if Result = null then
-            return No_Module_Ref_Id;
+            return No_Def_Id;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          end if;
-   end F_Name;
+   end F_Renaming;
+
+
+
+
+
+
+
+
+
 
 
 
          
-   function P_Referenced_Unit
-     (Node : Import'Class) return Analysis_Unit is
-      
+   
 
-
-      Property_Result : Internal_Unit;
-
-
+   function F_Imported_Names
+     (Node : Import_From'Class) return Imported_Name_List
+   is
+      Result : Bare_Imported_Name_List;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
       end if;
 
       Check_Safety_Net (Node);
+      Result := Implementation.Import_From_F_Imported_Names (Node.Internal.Node);
+         if Result = null then
+            return No_Imported_Name_List;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Imported_Names;
 
 
-      
-      Property_Result :=
-         Liblktlang.Implementation.Import_P_Referenced_Unit
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
 
 
-            null;
-      end return;
 
-   end;
+
+
+
+
+
+
+
+         
+   
+
+   function F_Original_Name
+     (Node : Imported_Name'Class) return Imported_Id
+   is
+      Result : Bare_Imported_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Imported_Name_F_Original_Name (Node.Internal.Node);
+         if Result = null then
+            return No_Imported_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Original_Name;
+
+
+         
+   
+
+   function F_Renaming
+     (Node : Imported_Name'Class) return Def_Id
+   is
+      Result : Bare_Def_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Imported_Name_F_Renaming (Node.Internal.Node);
+         if Result = null then
+            return No_Def_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Renaming;
+
+
 
 
 
@@ -14359,7 +14793,7 @@ package body Liblktlang.Analysis is
          ----------------
 
          function List_Child
-           (Node : Import_List'Class; Index : Positive) return Import
+           (Node : Imported_Name_List'Class; Index : Positive) return Imported_Name
          is
             Result : Lkt_Node;
          begin
@@ -14368,12 +14802,12 @@ package body Liblktlang.Analysis is
             end if;
 
             Result := Node.Child (Index);
-            return Result.As_Import;
+            return Result.As_Imported_Name;
          end List_Child;
 
          
 
-         function Import_List_First (Node : Import_List) return Positive is
+         function Imported_Name_List_First (Node : Imported_Name_List) return Positive is
          begin
             if Node.Internal.Node = null then
                raise Precondition_Failure with "null node argument";
@@ -14382,8 +14816,8 @@ package body Liblktlang.Analysis is
             return 1;
          end;
 
-         function Import_List_Next
-           (Node : Import_List; Cursor : Positive) return Positive is
+         function Imported_Name_List_Next
+           (Node : Imported_Name_List; Cursor : Positive) return Positive is
          begin
             if Node.Internal.Node = null then
                raise Precondition_Failure with "null node argument";
@@ -14392,8 +14826,8 @@ package body Liblktlang.Analysis is
             return Cursor + 1;
          end;
 
-         function Import_List_Has_Element
-           (Node : Import_List; Cursor : Positive) return Boolean is
+         function Imported_Name_List_Has_Element
+           (Node : Imported_Name_List; Cursor : Positive) return Boolean is
          begin
             if Node.Internal.Node = null then
                raise Precondition_Failure with "null node argument";
@@ -14402,8 +14836,8 @@ package body Liblktlang.Analysis is
             return Cursor in 1 .. Node.Children_Count;
          end;
 
-         function Import_List_Element
-           (Node : Import_List; Cursor : Positive) return Import'Class
+         function Imported_Name_List_Element
+           (Node : Imported_Name_List; Cursor : Positive) return Imported_Name'Class
          is
             Child : Lkt_Node;
          begin
@@ -14412,7 +14846,7 @@ package body Liblktlang.Analysis is
             end if;
 
             Child := Node.Child (Cursor);
-            return Import'(Child.As_Import);
+            return Imported_Name'(Child.As_Imported_Name);
          end;
 
 
@@ -14701,10 +15135,33 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Imports
-     (Node : Langkit_Root'Class) return Import_List
+   function F_Doc
+     (Node : Langkit_Root'Class) return Module_Doc_String_Lit
    is
-      Result : Bare_Import_List;
+      Result : Bare_Module_Doc_String_Lit;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Langkit_Root_F_Doc (Node.Internal.Node);
+         if Result = null then
+            return No_Module_Doc_String_Lit;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Doc;
+
+
+         
+   
+
+   function F_Imports
+     (Node : Langkit_Root'Class) return Base_Import_List
+   is
+      Result : Bare_Base_Import_List;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
@@ -14713,7 +15170,7 @@ package body Liblktlang.Analysis is
       Check_Safety_Net (Node);
       Result := Implementation.Langkit_Root_F_Imports (Node.Internal.Node);
          if Result = null then
-            return No_Import_List;
+            return No_Base_Import_List;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -15380,6 +15837,104 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+
+
+
+         
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : Module_Doc_String_Line_List'Class; Index : Positive) return Module_Doc_String_Line
+         is
+            Result : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
+            return Result.As_Module_Doc_String_Line;
+         end List_Child;
+
+         
+
+         function Module_Doc_String_Line_List_First (Node : Module_Doc_String_Line_List) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return 1;
+         end;
+
+         function Module_Doc_String_Line_List_Next
+           (Node : Module_Doc_String_Line_List; Cursor : Positive) return Positive is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor + 1;
+         end;
+
+         function Module_Doc_String_Line_List_Has_Element
+           (Node : Module_Doc_String_Line_List; Cursor : Positive) return Boolean is
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function Module_Doc_String_Line_List_Element
+           (Node : Module_Doc_String_Line_List; Cursor : Positive) return Module_Doc_String_Line'Class
+         is
+            Child : Lkt_Node;
+         begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
+            return Module_Doc_String_Line'(Child.As_Module_Doc_String_Line);
+         end;
+
+
+
+
+
+
+         
+   
+
+   function F_Lines
+     (Node : Module_Doc_String_Lit'Class) return Module_Doc_String_Line_List
+   is
+      Result : Bare_Module_Doc_String_Line_List;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Module_Doc_String_Lit_F_Lines (Node.Internal.Node);
+         if Result = null then
+            return No_Module_Doc_String_Line_List;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Lines;
 
 
 

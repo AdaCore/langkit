@@ -1,7 +1,7 @@
 # Check that, when traces are enabled, performing an env lookup on the empty env
 # does not crash.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

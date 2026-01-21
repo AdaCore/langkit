@@ -1,0 +1,4 @@
+import common_
+
+class Example: FooNode implements TokenNode {
+}

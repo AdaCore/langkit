@@ -1,5 +1,0 @@
-import common
-
-class BazNode: FooNode {
-    fun conv_prop(): Int = 12
-}

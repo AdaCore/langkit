@@ -1,9 +1,0 @@
-import common
-
-
-class Example: FooNode implements TokenNode {
-    @exported fun p(): Bool = {
-        val _ = true;
-        _
-    }
-}

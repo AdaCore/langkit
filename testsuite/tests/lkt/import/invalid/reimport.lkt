@@ -1,0 +1,10 @@
+from common import FooNode
+from common_reimport import myvar
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+class Example: FooNode implements TokenNode {
+}

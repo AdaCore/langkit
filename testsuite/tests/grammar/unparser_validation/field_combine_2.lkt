@@ -1,6 +1,7 @@
 # Combine never_absent/maybe_absent with pre/post tokens reconciliation
 
-import common_field_combine
+from common_field_combine import Assoc, Name
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 @with_unparsers

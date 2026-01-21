@@ -3,7 +3,7 @@
 # from B within a context where C is rebound should return entities from A
 # which are also in a context where C is rebound.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

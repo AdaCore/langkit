@@ -6,7 +6,7 @@
 # * It must initialize Self_Env fields for all nodes that are skipped because
 #   of a Property_Error.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

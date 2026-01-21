@@ -1,15 +1,37 @@
-@with_lexer(lkt_lexer)
+from nodes import *
+import tokens
+
+@with_lexer(tokens.lkt_lexer)
 @with_unparsers
 grammar lkt_grammar {
     @main_rule
-    main_rule <- LangkitRoot(/ imports decls @Termination)
+    main_rule <- LangkitRoot(/ module_doc imports decls @Termination)
     id <- Id(@Identifier)
     ref_id <- RefId(@Identifier)
     type_ref_id <- ref_id |> when(Id.is_type_name)
+    module_id <- ModuleId(@Identifier) |> when(Id.is_not_type_name)
     def_id <- DefId(@Identifier)
     doc <- ?string_lit
-    import_stmt <- Import("import" / ModuleRefId(@Identifier))
-    imports <- list*(import_stmt)
+    module_doc <- ?ModuleDocStringLit(
+        list+(ModuleDocStringLine(@ModuleDocStringLine))
+    )
+    imported_name <- ImportedName(
+        ImportedId(@Identifier)
+        ?pick(@Identifier("as") / def_id)
+    )
+    import_clause <- or(
+        | Import(
+            "import"
+            /
+            module_id
+            ?pick(@Identifier("as") / def_id)
+        )
+        | ImportFrom(
+            "from" module_id "import" list+(imported_name, ",")
+        )
+        | ImportAllFrom("from" / module_id "import" "*")
+    )
+    imports <- list*(import_clause)
     lexer_decl <- LexerDecl(
         "lexer"
         /
@@ -251,6 +273,7 @@ grammar lkt_grammar {
     decl <- FullDecl(doc list*(decl_annotation) bare_decl)
     type_member_ref <- DotExpr(type_ref_id null(NullCondQualifier)"." / ref_id)
     type_expr <- or(
+        | DotExpr(module_id null(NullCondQualifier)"." / type_ref_id)
         | DotExpr(type_expr null(NullCondQualifier)"." / type_ref_id)
         | type_ref_id
     )

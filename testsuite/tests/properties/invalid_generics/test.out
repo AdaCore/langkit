@@ -1,26 +1,26 @@
-== astlist_arity.lkt ==
+== astlist_arity/test.lkt ==
 Code generation was successful
 
-== astlist_instr.lkt ==
-astlist_instr.lkt:4:25: error: type expected, got the generic ASTList
+== astlist_instr/test.lkt ==
+test.lkt:4:25: error: type expected, got the generic ASTList
 4 |     @parse_field items: ASTList
   |                         ^^^^^^^
 
 
-== astlist_item.lkt ==
-astlist_item.lkt:4:25: error: ASTList expects one type argument: the list element type
+== astlist_item/test.lkt ==
+test.lkt:4:25: error: ASTList expects one type argument: the list element type
 4 |     @parse_field items: ASTList[Example, Int]
   |                         ^^^^^^^^^^^^^^^^^^^^^
 
 
-== astlist_root.lkt ==
-astlist_root.lkt:4:25: error: ASTList expects one type argument: the list element type
+== astlist_root/test.lkt ==
+test.lkt:4:25: error: ASTList expects one type argument: the list element type
 4 |     @parse_field items: ASTList[Example, Example]
   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== entity.lkt ==
-entity.lkt:6:40: error: node expected
+== entity/test.lkt ==
+test.lkt:6:40: error: node expected
 6 |     @exported fun p(@ignored e: Entity[Int]): Bool = true
   |                                        ^^^
 

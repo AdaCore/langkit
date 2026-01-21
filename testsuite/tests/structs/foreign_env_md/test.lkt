@@ -1,6 +1,6 @@
 # Test that foreign nodes in environment metadata are properly rejected
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

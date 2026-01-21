@@ -168,6 +168,16 @@ package body Liblktlang_Support.Generic_API.Introspection is
       end if;
    end Debug_Name;
 
+   -------------------
+   -- Documentation --
+   -------------------
+
+   function Documentation (T : Type_Ref) return Unbounded_Text_Type is
+   begin
+      Check_Type (T);
+      return To_Unbounded_Text (T.Id.Types.all (T.Index).Documentation.all);
+   end Documentation;
+
    ----------------
    -- Type_Range --
    ----------------
@@ -1578,6 +1588,18 @@ package body Liblktlang_Support.Generic_API.Introspection is
                 & Image (Format_Name (Member_Name (Member), Lower));
       end if;
    end Debug_Name;
+
+   -------------------
+   -- Documentation --
+   -------------------
+
+   function Documentation
+     (Member : Struct_Member_Ref) return Unbounded_Text_Type is
+   begin
+      Check_Struct_Member (Member);
+      return To_Unbounded_Text
+        (Member.Id.Struct_Members.all (Member.Index).Documentation.all);
+   end Documentation;
 
    -----------
    -- Owner --

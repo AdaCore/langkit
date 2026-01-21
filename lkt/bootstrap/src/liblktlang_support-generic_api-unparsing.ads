@@ -276,12 +276,12 @@ package Liblktlang_Support.Generic_API.Unparsing is
    --
    --        [
    --          {"kind": "text", "text": "var"},
-   --          {"kind": "recurse_field", "text": "f_name"},
+   --          {"kind": "recurse_field", "field": "f_name"},
    --          {
    --            "kind": "group",
    --            "document": [
    --              {"kind": "text", "text": ":"},
-   --              {"kind": "recurse_field", "text": "f_type"}
+   --              {"kind": "recurse_field", "field": "f_type"}
    --            ]
    --          },
    --          {"kind": "text", "text": ";"},
@@ -394,10 +394,10 @@ package Liblktlang_Support.Generic_API.Unparsing is
    --    each list child has and that returns whether to join rows, as a
    --    boolean.
    --
-   --    The optional "template" entry must be a template that describes how to
-   --    join two rows: the first row is substituted to the "recurse_left"
-   --    template and the second row is substituted to the "recurse_right"
-   --    template. For example::
+   --    The optional "sep" entry must be a template that describes how to join
+   --    two rows: the first row is substituted to the "recurse_left" template
+   --    and the second row is substituted to the "recurse_right" template. For
+   --    example::
    --
    --      "join": {
    --        "predicate": "p_my_predicate",
@@ -447,6 +447,11 @@ package Liblktlang_Support.Generic_API.Unparsing is
    --  that was processed when the error occured, and ``Message`` gives a short
    --  description of the error. If ``Process_Error`` is null, errors are
    --  printed on the standard output.
+
+   function Default_Format_Options
+     (Language : Language_Id)
+      return Prettier_Ada.Documents.Format_Options_Type;
+   --  Return the default formating options to use for this language
 
    procedure Pretty_Print_Main (Language : Language_Id);
    --  Implementation of the ``*_unparse`` test program for the given Language.

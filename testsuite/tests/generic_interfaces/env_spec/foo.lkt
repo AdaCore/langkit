@@ -1,7 +1,7 @@
 # Defining an env spec in a class implementing an interface used to cause a
 # compilation error.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 grammar foo_grammar {
     @main_rule main_rule <- BarNode("example")

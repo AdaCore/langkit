@@ -1,5 +1,0 @@
-import common
-
-class Example: FooNode {
-    @exported fun p(): Array[Bool] = [true, node]
-}

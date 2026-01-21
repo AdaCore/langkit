@@ -5,7 +5,7 @@
 # raised now that Children_And_Trivia stores nodes in dedicated allocated memory
 # (the current implementation uses an Ada vector to store the nodes).
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

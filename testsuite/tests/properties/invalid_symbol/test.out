@@ -1,14 +1,14 @@
-== bad_type.lkt ==
-bad_type.lkt:4:46: error: Token node expected, but got instead Bool
+== bad_type/test.lkt ==
+test.lkt:4:46: error: Token node expected, but got instead Bool
 4 |     @exported fun p(): Symbol = node.is_null.symbol
   |                                              ^^^^^^
 
 
-== correct.lkt ==
+== correct/test.lkt ==
 Code generation was successful
 
-== non_token.lkt ==
-non_token.lkt:4:50: error: Token node expected, but the input FooNode node is not a token node
+== non_token/test.lkt ==
+test.lkt:4:50: error: Token node expected, but the input FooNode node is not a token node
 4 |     @exported fun p(): Symbol = node.as[FooNode].symbol
   |                                                  ^^^^^^
 

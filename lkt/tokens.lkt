@@ -94,6 +94,8 @@ lexer lkt_lexer {
 
     Char <- p"{char_lit}"
     @with_unparsing_newline
+    ModuleDocStringLine <- p"\\|\"\"[^\\r\\n]*"
+    @with_unparsing_newline
     BlockStringLine <- p"\\|\"[^\\r\\n]*"
     @with_unparsing_newline
     @trivia(comment=true)

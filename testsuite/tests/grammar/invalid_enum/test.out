@@ -1,22 +1,22 @@
-== bad-alt.lkt ==
-bad-alt.lkt:5:37: error: no such alternative
-5 |     @main_rule main_rule <- Example.NoSuchAlt("example")
+== bad-alt/test.lkt ==
+test.lkt:6:37: error: no such alternative
+6 |     @main_rule main_rule <- Example.NoSuchAlt("example")
   |                                     ^^^^^^^^^
 
 
-== bad-prefix.lkt ==
-bad-prefix.lkt:5:29: error: no entity called 'NoSuchNode' in the root scope
-5 |     @main_rule main_rule <- NoSuchNode.Example1("example")
+== bad-prefix/test.lkt ==
+test.lkt:6:29: error: no entity called 'NoSuchNode' in scope for unit test.lkt
+6 |     @main_rule main_rule <- NoSuchNode.Example1("example")
   |                             ^^^^^^^^^^
 
 
-== no-dot.lkt ==
-no-dot.lkt:5:29: error: Parsers cannot create abstract nodes
-5 |     @main_rule main_rule <- Example("example")
+== no-dot/test.lkt ==
+test.lkt:6:29: error: Parsers cannot create abstract nodes
+6 |     @main_rule main_rule <- Example("example")
   |                             ^^^^^^^^^^^^^^^^^^
 
 
-== ok.lkt ==
+== ok/test.lkt ==
 Code generation was successful
 
 lkt_compile: Done

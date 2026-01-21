@@ -1,7 +1,0 @@
-@abstract class AbstractNode: RootNode {
-    @abstract @with_dynvars(v) fun prop(): Int
-    @exported fun use_prop(): Int = {
-        bind v = 10;
-        node.prop()
-    }
-}

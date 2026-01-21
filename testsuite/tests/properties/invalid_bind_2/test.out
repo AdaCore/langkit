@@ -1,49 +1,49 @@
-== assign_val_var.lkt ==
-assign_val_var.lkt:4:38: error: Expected type LogicVar, got Entity[Example]
+== assign_val_var/test.lkt ==
+test.lkt:4:38: error: Expected type LogicVar, got Entity[Example]
 4 |     @exported fun resolve(): Bool = (self <- node.var1).solve()
   |                                      ^^^^
 
 
-== assign_var_bool.lkt ==
-assign_var_bool.lkt:4:51: error: Expected type Entity[FooNode], got Bool
+== assign_var_bool/test.lkt ==
+test.lkt:4:51: error: Expected type Entity[FooNode], got Bool
 4 |     @exported fun resolve(): Bool = (node.var1 <- true).solve()
   |                                                   ^^^^
 
 
-== assign_var_node.lkt ==
-assign_var_node.lkt:4:51: error: Expected type Entity[FooNode], got Example
+== assign_var_node/test.lkt ==
+test.lkt:4:51: error: Expected type Entity[FooNode], got Example
 4 |     @exported fun resolve(): Bool = (node.var1 <- node).solve()
   |                                                   ^^^^
 
 
-== assign_var_val.lkt ==
+== assign_var_val/test.lkt ==
 Code generation was successful
 
-== assign_var_var.lkt ==
-assign_var_var.lkt:4:51: error: Assigning from a logic variable is forbidden: use unify instead
+== assign_var_var/test.lkt ==
+test.lkt:4:51: error: Assigning from a logic variable is forbidden: use unify instead
 4 |     @exported fun resolve(): Bool = (node.var1 <- node.var2).solve()
   |                                                   ^^^^^^^^^
 
 
-== unify_val_var.lkt ==
-unify_val_var.lkt:4:38: error: Expected type LogicVar, got Entity[Example]
+== unify_val_var/test.lkt ==
+test.lkt:4:38: error: Expected type LogicVar, got Entity[Example]
 4 |     @exported fun resolve(): Bool = (self <-> node.var1).solve()
   |                                      ^^^^
 
 
-== unify_var_bool.lkt ==
-unify_var_bool.lkt:4:52: error: Expected type LogicVar, got Bool
+== unify_var_bool/test.lkt ==
+test.lkt:4:52: error: Expected type LogicVar, got Bool
 4 |     @exported fun resolve(): Bool = (node.var1 <-> true).solve()
   |                                                    ^^^^
 
 
-== unify_var_val.lkt ==
-unify_var_val.lkt:4:52: error: Expected type LogicVar, got Entity[Example]
+== unify_var_val/test.lkt ==
+test.lkt:4:52: error: Expected type LogicVar, got Entity[Example]
 4 |     @exported fun resolve(): Bool = (node.var1 <-> self).solve()
   |                                                    ^^^^
 
 
-== unify_var_var.lkt ==
+== unify_var_var/test.lkt ==
 Code generation was successful
 
 lkt_compile: Done

@@ -1,0 +1,19 @@
+from common import BaseExample, FooNode, Literal
+
+@synthetic
+class SynthNode: FooNode {
+    number: Int
+    @parse_field f1: Literal
+    @parse_field f2: FooNode
+}
+
+@synthetic
+class SyntheticLiteralList: ASTList[Literal] {
+}
+
+class Example: BaseExample {
+    @exported
+    @lazy
+    prop: SyntheticLiteralList =
+        SyntheticLiteralList.builder([]: NodeBuilder[FooNode]).build()
+}

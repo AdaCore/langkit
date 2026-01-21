@@ -1,0 +1,7 @@
+from common import FooNode, Example
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example") |> when(Example.no_such_prop)
+}

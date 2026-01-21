@@ -1,29 +1,29 @@
-== assoc_resolver_bad_args.lkt ==
-assoc_resolver_bad_args.lkt:7:28: error: "assoc_resolver" cannot accept arguments
+== assoc_resolver_bad_args/test.lkt ==
+test.lkt:7:28: error: "assoc_resolver" cannot accept arguments
 7 |             assoc_resolver=Example.assoc_resolver
   |                            ^^^^^^^^^^^^^^^^^^^^^^
 
 
-== assoc_resolver_bad_rtype.lkt ==
-assoc_resolver_bad_rtype.lkt:7:28: error: "assoc_resolver" must return a Entity[FooNode] (got Bool)
+== assoc_resolver_bad_rtype/test.lkt ==
+test.lkt:7:28: error: "assoc_resolver" must return a Entity[FooNode] (got Bool)
 7 |             assoc_resolver=Example.assoc_resolver
   |                            ^^^^^^^^^^^^^^^^^^^^^^
 
 
-== assocs_getter_bad_args.lkt ==
-assocs_getter_bad_args.lkt:5:29: error: "assocs_getter" cannot accept arguments
+== assocs_getter_bad_args/test.lkt ==
+test.lkt:5:29: error: "assocs_getter" cannot accept arguments
 5 |         dynamic_lexical_env(Example.assocs_getter)
   |                             ^^^^^^^^^^^^^^^^^^^^^
 
 
-== assocs_getter_bad_rtype.lkt ==
-assocs_getter_bad_rtype.lkt:5:29: error: "assocs_getter" must return an array of InnerEnvAssoc (got Bool)
+== assocs_getter_bad_rtype/test.lkt ==
+test.lkt:5:29: error: "assocs_getter" must return an array of InnerEnvAssoc (got Bool)
 5 |         dynamic_lexical_env(Example.assocs_getter)
   |                             ^^^^^^^^^^^^^^^^^^^^^
 
 
-== not_in_lazy_field.lkt ==
-not_in_lazy_field.lkt:5:9: error: Dynamic lexical environment creation can only happen inside a lazy field initializer
+== not_in_lazy_field/test.lkt ==
+test.lkt:5:9: error: Dynamic lexical environment creation can only happen inside a lazy field initializer
 5 |         dynamic_lexical_env(Example.assocs_getter)
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

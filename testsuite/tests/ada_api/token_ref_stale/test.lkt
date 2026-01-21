@@ -1,7 +1,7 @@
 # Check that use of a ``Token_Reference`` value that refers to a stale token is
 # properly rejected.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

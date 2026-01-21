@@ -1,7 +1,7 @@
 # Test that ".symbol" raises a property error on null nodes or when symbol
 # canonicalization fails.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

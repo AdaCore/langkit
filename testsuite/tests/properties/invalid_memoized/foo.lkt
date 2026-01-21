@@ -1,7 +1,7 @@
 # Check that property memoization is properly rejected when using unsupported
 # argument types.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

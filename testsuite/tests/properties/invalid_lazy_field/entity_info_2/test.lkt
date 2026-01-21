@@ -1,0 +1,9 @@
+from common import Number
+
+class FooNode implements Node[FooNode] {
+    @exported fun flag_set(): Bool = self.info.md.flag
+}
+
+class Example: FooNode {
+    @exported @lazy p: Bool = node.flag_set()
+}

@@ -1,4 +1,5 @@
-import lexer_example
+from lexer_example import foo_lexer
+from test import FooNode, MixedList
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

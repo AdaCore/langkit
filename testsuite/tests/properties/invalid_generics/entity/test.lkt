@@ -1,0 +1,7 @@
+from common import FooNode, Example
+
+class ExampleSeq: FooNode {
+    @parse_field items: ASTList[Example]
+
+    @exported fun p(@ignored e: Entity[Int]): Bool = true
+}

@@ -1,20 +1,20 @@
-== correct.lkt ==
+== correct/test.lkt ==
 Code generation was successful
 
-== extra_default.lkt ==
-extra_default.lkt:8:5: error: Argument "a" cannot have a default value, to be consistent with its base property (FooNode.prop)
+== extra_default/test.lkt ==
+test.lkt:8:5: error: Argument "a" cannot have a default value, to be consistent with its base property (FooNode.prop)
 8 |     fun prop(a: Bool=true): Bool = a
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== missing_default.lkt ==
-missing_default.lkt:8:5: error: Argument "a" must have the same default value as in base property (FooNode.prop)
+== missing_default/test.lkt ==
+test.lkt:8:5: error: Argument "a" must have the same default value as in base property (FooNode.prop)
 8 |     fun prop(a: Bool): Bool = a
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== wrong_value.lkt ==
-wrong_value.lkt:8:5: error: Argument "a" does not have the same default value (<LiteralExpr False (Boolean)>) as in base property (<LiteralExpr True (Boolean)>)
+== wrong_value/test.lkt ==
+test.lkt:8:5: error: Argument "a" does not have the same default value (<LiteralExpr False (Boolean)>) as in base property (<LiteralExpr True (Boolean)>)
 8 |     fun prop(a: Bool=false): Bool = a
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

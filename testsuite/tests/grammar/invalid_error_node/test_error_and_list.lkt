@@ -1,4 +1,0 @@
-import common
-
-class ErrorDecl : ASTList[Example] implements ErrorNode {
-}

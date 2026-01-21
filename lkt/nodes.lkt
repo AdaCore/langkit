@@ -382,6 +382,10 @@ class LexerCaseRuleDefaultAlt: BaseLexerCaseRuleAlt {
 class BlockStringLine: LktNode implements TokenNode {
 }
 
+|" A single line in a module docstring.
+class ModuleDocStringLine: LktNode implements TokenNode {
+}
+
 |" Whether this generic parameter type must be a class.
 @qualifier
 enum class ClassQualifier: LktNode {
@@ -4175,6 +4179,8 @@ class Id: Expr implements TokenNode {
     |" Return whether this identifier refers to a type name.
     @external()
     fun is_type_name(): Bool
+
+    fun is_not_type_name(): Bool = not node.is_type_name()
 }
 
 |" Defining identifier.
@@ -4272,11 +4278,17 @@ class DefId: Id implements TokenNode, DefiningNameInterface {
         ).map((r) => RefResult(ref=r))
 }
 
-|" Id referencing a langkit module.
-class ModuleRefId: Id implements TokenNode {
+|" Id referencing a Lkt module. It is not a derivation of RefId because
+|" depending on the context, module Ids can be either considered as defining
+|" names or references.
+class ModuleId: Id implements TokenNode {
     # TODO: Being able to cross-reference modules seems like a good ability,
     # but for the moment they don't fit in the framework, because they're not
     # decls.
+}
+
+|" Id referencing a declaration imported from an Lkt module.
+class ImportedId: Id implements TokenNode {
 }
 
 |" Reference identifier.
@@ -4825,6 +4837,20 @@ class SingleLineStringLit: StringLit implements TokenNode {
     fun prefix(): Char
 }
 
+|" Module documentation made from multiple line strings. Unlike for other
+|" docstrings, this uses the ``|""`` prefix.
+class ModuleDocStringLit: StringLit {
+    @parse_field
+    lines: ASTList[ModuleDocStringLine]
+
+    @external()
+    fun denoted_value(): DecodedStringValue
+
+    fun is_prefixed_string(): Bool = false
+
+    fun prefix(): Char = '\x00'
+}
+
 |" Pattern single line string literal expression.
 class PatternSingleLineStringLit: SingleLineStringLit implements TokenNode {
 }
@@ -5238,26 +5264,57 @@ class GrammarListSep: LktNode {
     extra: Id
 }
 
-|" Statement to import another source file.
-class Import: LktNode {
+|" Base node for all import clauses.
+@abstract
+class BaseImport: LktNode {
     @parse_field
-    name: ModuleRefId
+    module_name: ModuleId
 
-    |" Return the unit that this import statements designates. Load it if
-    |" needed.
+    |" Return the unit that contains the module this import clause designates.
+    |" Load it if needed.
     @exported
     fun referenced_unit(): AnalysisUnit =
-        node.internal_fetch_referenced_unit(node.name.text)
+        node.internal_fetch_referenced_unit(node.module_name.text)
 
     env_spec {
         do(node.referenced_unit())
     }
 }
 
+|" Clause to import a module.
+class Import: BaseImport {
+    @nullable
+    @parse_field
+    renaming: DefId
+}
+
+|" Couple of imported entity name and renaming identifier.
+class ImportedName: LktNode {
+    @parse_field
+    original_name: ImportedId
+
+    @nullable
+    @parse_field
+    renaming: DefId
+}
+
+|" Clause to import declarations from another module.
+class ImportFrom: BaseImport {
+    @parse_field
+    imported_names: ASTList[ImportedName]
+}
+
+|" Clause to import all declarations from another module.
+class ImportAllFrom: BaseImport {
+}
+
 |" For the moment, root node of a lkt compilation unit.
 class LangkitRoot: LktNode {
+    @nullable
     @parse_field
-    imports: ASTList[Import]
+    doc: ModuleDocStringLit
+    @parse_field
+    imports: ASTList[BaseImport]
     @parse_field
     decls: ASTList[FullDecl]
 

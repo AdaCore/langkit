@@ -1,0 +1,27 @@
+from lexer_example import foo_lexer
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Root: FooNode {
+    @parse_field
+    f: Example
+}
+
+class Example: FooNode {
+    @nullable
+    @parse_field
+    f: Example
+}
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    # Naive parser nullability computation may choke on parsing rule direct
+    # recursion. We expect here field_unparser not to be nullable even though
+    # it directly calls itself.
+    @main_rule
+    main_rule <- Root("def" ?("example" field_parser))
+    field_parser <- Example(?("example" field_parser))
+}

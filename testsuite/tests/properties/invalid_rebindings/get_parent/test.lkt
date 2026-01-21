@@ -1,0 +1,5 @@
+from common import FooNode
+
+class Example: FooNode {
+    fun p(): Int = null[FooNode].get_parent
+}

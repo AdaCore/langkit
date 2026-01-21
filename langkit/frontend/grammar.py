@@ -45,19 +45,19 @@ class WithLexerAnnotationSpec(AnnotationSpec):
         assert len(args) == 1
         requested_name = args[0]
 
-        # Get the lexer declaration (find_toplevel_decl checks that there is
-        # exactly one).
-        full_decl = ctx.lkt_resolver.find_toplevel_decl(L.LexerDecl, "lexer")
-        decl = full_decl.f_decl
+        # Resolve once using scopes to make sure that the annotation references
+        # a lexer.
+        entity = scope.resolve(requested_name)
+        if not isinstance(entity, Scope.Lexer):
+            error(
+                f"lexer expected, got {entity.diagnostic_name}", requested_name
+            )
+        decl = entity.diagnostic_node
         assert isinstance(decl, L.LexerDecl)
 
-        # Make sure the name mentionned in this annotation matches the actual
-        # lexer name.
-        check_source_language(
-            decl.f_syn_name.text == requested_name.text,
-            f"Invalid lexer name: '{decl.f_syn_name.text}' expected",
-            location=requested_name,
-        )
+        # Resolve a second time using find_toplevel_decl, to check that there
+        # is exactly one lexer.
+        ctx.lkt_resolver.find_toplevel_decl(L.LexerDecl, "lexer")
 
         return decl
 
@@ -97,12 +97,11 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
     assert lexer_tokens is not None
 
     # Look for the GrammarDecl node in top-level lists
-    full_grammar = resolver.find_toplevel_decl(L.GrammarDecl, "grammar")
+    full_grammar, module = resolver.find_toplevel_decl(
+        L.GrammarDecl, "grammar"
+    )
     assert isinstance(full_grammar.f_decl, L.GrammarDecl)
-
-    # Scope in which the grammar is declared. This scope is used to resolve
-    # node references in the grammar.
-    scope = resolver.root_scope
+    scope = module.unit_scope
 
     # Ensure the grammar name has proper casing
     _ = name_from_lower("grammar", full_grammar.f_decl.f_syn_name)

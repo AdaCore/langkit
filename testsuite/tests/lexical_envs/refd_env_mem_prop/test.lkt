@@ -3,7 +3,7 @@
 # compute its result based on a stale value of the memoization map, which used
 # to be triggered by this test case.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

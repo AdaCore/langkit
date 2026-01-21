@@ -1,7 +1,7 @@
 # Test that node_env works correctly for a subclass of a concrete node with an
 # add_env directive.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

@@ -1,4 +1,0 @@
-import common
-
-@synthetic class ErrorDecl : FooNode implements ErrorNode {
-}

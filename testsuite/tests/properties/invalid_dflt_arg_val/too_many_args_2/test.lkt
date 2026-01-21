@@ -1,0 +1,6 @@
+from common import FooNode
+
+class Example: FooNode {
+    @exported fun p(a: Bool, b: Bool=true): Bool = a and b
+    @exported fun calling(): Bool = node.p(true, a=false, b=false)
+}

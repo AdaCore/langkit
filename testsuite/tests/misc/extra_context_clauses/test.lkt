@@ -1,6 +1,6 @@
 # Check that the "extra_context_clauses" configuration works as expected
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

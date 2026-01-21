@@ -1,5 +1,0 @@
-import common_nonempty
-
-class Example: BaseExample {
-    @lazy prop1: SynthNode = SynthNode.builder(f1=null[Literal]).build()
-}

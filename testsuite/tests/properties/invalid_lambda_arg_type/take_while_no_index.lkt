@@ -1,8 +1,0 @@
-import common
-
-class ExampleBlock: BaseExampleBlock {
-    @exported fun p(): Array[Entity[Example]] =
-        node.items
-        .take_while((e: Int) => e != 0)
-        .map((e: Example) => e.as_bare_entity)
-}

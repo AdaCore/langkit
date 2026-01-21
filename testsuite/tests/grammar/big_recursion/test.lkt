@@ -3,7 +3,7 @@
 # trigger the generation of another function it needed to use, etc. This could
 # create stack overflows in Langkit.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

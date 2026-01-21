@@ -1,110 +1,110 @@
-== all_index.lkt ==
-all_index.lkt:5:41: error: Int expected
+== all_index/test.lkt ==
+test.lkt:5:41: error: Int expected
 5 |         node.items.iall((e: Example, i: Bool) => e.is_null or i == 0)
   |                                         ^^^^
 
 
-== all_no_index.lkt ==
-all_no_index.lkt:5:28: error: Example expected
+== all_no_index/test.lkt ==
+test.lkt:5:28: error: Example expected
 5 |         node.items.all((e: Int) => e == 0)
   |                            ^^^
 
 
-== correct.lkt ==
+== correct/test.lkt ==
 Code generation was successful
 
-== filter_index.lkt ==
-filter_index.lkt:6:34: error: Int expected
+== filter_index/test.lkt ==
+test.lkt:6:34: error: Int expected
 6 |         .ifilter((e: Example, i: Bool) => not e.is_null or i == 0)
   |                                  ^^^^
 
 
-== filter_no_index.lkt ==
-filter_no_index.lkt:6:21: error: Example expected
+== filter_no_index/test.lkt ==
+test.lkt:6:21: error: Example expected
 6 |         .filter((e: Int) => e != 0)
   |                     ^^^
 
 
-== filtermap_index.lkt ==
-filtermap_index.lkt:6:29: error: Int expected
+== filtermap_index/test.lkt ==
+test.lkt:6:29: error: Int expected
 6 |             (e: Example, i: Bool) => if i then node.items.at(1) else e,
   |                             ^^^^
 
 
-== filtermap_index_2.lkt ==
-filtermap_index_2.lkt:7:29: error: Int expected
+== filtermap_index_2/test.lkt ==
+test.lkt:7:29: error: Int expected
 7 |             (e: Example, i: Bool) => not e.is_null or i
   |                             ^^^^
 
 
-== filtermap_no_index.lkt ==
-filtermap_no_index.lkt:6:17: error: Example expected
+== filtermap_no_index/test.lkt ==
+test.lkt:6:17: error: Example expected
 6 |             (e: Bool) => if e then node.items.at(1) else node.at(e),
   |                 ^^^^
 
 
-== filtermap_no_index_2.lkt ==
-filtermap_no_index_2.lkt:7:17: error: Example expected
+== filtermap_no_index_2/test.lkt ==
+test.lkt:7:17: error: Example expected
 7 |             (e: Bool) => e
   |                 ^^^^
 
 
-== find_no_index.lkt ==
-find_no_index.lkt:5:29: error: Example expected
+== find_no_index/test.lkt ==
+test.lkt:5:29: error: Example expected
 5 |         node.items.find((e: Int) => e != 0)
   |                             ^^^
 
 
-== logic_any_index.lkt ==
-logic_any_index.lkt:5:34: error: Example expected
+== logic_any_index/test.lkt ==
+test.lkt:5:34: error: Example expected
 5 |         node.items.logic_any((_: Int) => %true).solve()
   |                                  ^^^
 
 
-== logic_any_no_index.lkt ==
-logic_any_no_index.lkt:5:31: error: 1 arguments expected, got 2
+== logic_any_no_index/test.lkt ==
+test.lkt:5:31: error: 1 arguments expected, got 2
 5 |         node.items.logic_any((_: Example, _: Bool) => %true).solve()
   |                               ^^^^^^^^^^^^^^^^^^^
 
 
-== map_index.lkt ==
-map_index.lkt:5:41: error: Int expected
+== map_index/test.lkt ==
+test.lkt:5:41: error: Int expected
 5 |         node.items.imap((e: Example, i: Bool) => IndexedItem(
   |                                         ^^^^
 
 
-== map_no_index.lkt ==
-map_no_index.lkt:5:28: error: Example expected
+== map_no_index/test.lkt ==
+test.lkt:5:28: error: Example expected
 5 |         node.items.map((e: Int) => e.as_bare_entity)
   |                            ^^^
 
 
-== mapcat_index.lkt ==
-mapcat_index.lkt:6:29: error: Int expected
+== mapcat_index/test.lkt ==
+test.lkt:6:29: error: Int expected
 6 |             (e: Example, i: Bool) => [
   |                             ^^^^
 
 
-== mapcat_no_index.lkt ==
-mapcat_no_index.lkt:5:31: error: Example expected
+== mapcat_no_index/test.lkt ==
+test.lkt:5:31: error: Example expected
 5 |         node.items.mapcat((e: Int) => [e.as_bare_entity, e.as_bare_entity])
   |                               ^^^
 
 
-== take_while_index.lkt ==
-take_while_index.lkt:6:38: error: Int expected
+== take_while_index/test.lkt ==
+test.lkt:6:38: error: Int expected
 6 |         .itake_while((e: Example, i: Bool) => not e.is_null or i == 0)
   |                                      ^^^^
 
 
-== take_while_no_index.lkt ==
-take_while_no_index.lkt:6:25: error: Example expected
+== take_while_no_index/test.lkt ==
+test.lkt:6:25: error: Example expected
 6 |         .take_while((e: Int) => e != 0)
   |                         ^^^
 
 
-== then.lkt ==
-then.lkt:4:49: error: ExampleBlock expected
+== then/test.lkt ==
+test.lkt:4:49: error: ExampleBlock expected
 4 |     @exported fun p(): Array[Int] = node.do((n: Int) => n)
   |                                                 ^^^
 

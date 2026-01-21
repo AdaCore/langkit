@@ -1,7 +1,7 @@
 # Check that the Iterable aspect on the Ada API's Children_And_Trivia type
 # correctly supports empty list of children.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

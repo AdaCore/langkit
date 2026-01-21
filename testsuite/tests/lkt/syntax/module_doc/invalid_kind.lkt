@@ -1,0 +1,4 @@
+fun f1(): Int = 1
+
+|"" Module doc in the wrong place.
+fun f2(): Int = 1

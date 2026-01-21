@@ -1,12 +1,12 @@
-== bad-token-casing.lkt ==
-bad-token-casing.lkt:5:38: error: Unknown token: example
-5 |     @main_rule main_rule <- Example(@example)
+== bad_token_casing.lkt ==
+bad_token_casing.lkt:6:38: error: Unknown token: example
+6 |     @main_rule main_rule <- Example(@example)
   |                                      ^^^^^^^
 
 
-== unknown-token.lkt ==
-unknown-token.lkt:5:38: error: Unknown token: NoSuchToken
-5 |     @main_rule main_rule <- Example(@NoSuchToken)
+== unknown_token.lkt ==
+unknown_token.lkt:6:38: error: Unknown token: NoSuchToken
+6 |     @main_rule main_rule <- Example(@NoSuchToken)
   |                                      ^^^^^^^^^^^
 
 

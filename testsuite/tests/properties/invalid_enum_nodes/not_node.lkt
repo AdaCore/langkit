@@ -1,8 +1,0 @@
-import common
-
-class Example: FooNode implements TokenNode {
-    @exported fun p(): Int = match node.parent {
-        case _: Int.Foo => 1
-        case _ => 0
-    }
-}

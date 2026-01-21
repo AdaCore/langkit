@@ -180,12 +180,9 @@ def create_lexer(resolver: Resolver) -> Lexer:
     ctx = resolver.context
 
     # Look for the LexerDecl node in top-level lists
-    full_lexer = resolver.find_toplevel_decl(L.LexerDecl, "lexer")
+    full_lexer, module = resolver.find_toplevel_decl(L.LexerDecl, "lexer")
     assert isinstance(full_lexer.f_decl, L.LexerDecl)
-
-    # Scope in which the lexer is declared. This scope is used to resolve node
-    # references in the lexer.
-    scope = resolver.root_scope
+    scope = module.unit_scope
 
     # Ensure the lexer name has proper casing
     _ = name_from_lower("lexer", full_lexer.f_decl.f_syn_name)

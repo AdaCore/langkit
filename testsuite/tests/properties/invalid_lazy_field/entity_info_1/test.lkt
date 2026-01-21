@@ -1,0 +1,8 @@
+from common import Number
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @lazy p: Bool = self.info.md.flag
+}

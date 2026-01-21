@@ -1,6 +1,6 @@
 # Check that providing a custom "can_reach" has expected effects on env lookups
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

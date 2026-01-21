@@ -1,3 +1,0 @@
-class ConcreteNode: AbstractNode {
-    @with_dynvars() fun prop(): Int = 12
-}

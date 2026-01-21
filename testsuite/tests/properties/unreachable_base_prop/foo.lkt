@@ -2,7 +2,7 @@
 # are defined on an abstract node while all concrete subclasses have it
 # overriden.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

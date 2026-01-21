@@ -2,7 +2,7 @@
 # that lexical env request behave the same way no matter the order in which
 # lexical envs were populated by cross units.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

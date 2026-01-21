@@ -1,7 +1,7 @@
 # Test the "get all" procedure of lexical envs, and in particular its
 # determinism.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

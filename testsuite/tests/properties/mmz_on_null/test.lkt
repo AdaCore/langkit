@@ -3,7 +3,7 @@
 # execution runs as if the property was not memoized (i.e. possibly no
 # PropertyError).
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

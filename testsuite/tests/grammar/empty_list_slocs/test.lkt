@@ -11,7 +11,7 @@
 # these tokens must correspond to the location just past the previous token
 # (i.e. end sloc of token_2).
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 @with_unparsers

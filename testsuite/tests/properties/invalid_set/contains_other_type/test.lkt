@@ -1,0 +1,12 @@
+from common import FooNode
+
+class Example: FooNode {
+    @exported
+    fun test(): Bool = {
+        val arr = [1, 2, 3];
+        val set = arr.to_set();
+        set.contains(true)
+    }
+}
+
+

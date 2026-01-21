@@ -1,0 +1,21 @@
+from common import BaseExample, FooNode, Literal
+
+@synthetic
+class EmptyNode: FooNode {
+}
+
+@synthetic
+class SynthNode: FooNode {
+    number: Int
+    @parse_field f1: Literal
+    @parse_field f2: FooNode
+}
+
+class Example: BaseExample {
+    @lazy prop1: SynthNode =
+        SynthNode.builder(
+            number=0,
+            f1=EmptyNode.builder(),
+            f2=node.parent
+        ).build()
+}

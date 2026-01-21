@@ -1,0 +1,6 @@
+from common import BaseExampleBlock, Example, FooNode, IndexedItem
+
+class ExampleBlock: BaseExampleBlock {
+    @exported fun p(): Entity[Example] =
+        node.items.find((e: Int) => e != 0)
+}

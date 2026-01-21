@@ -1,6 +1,6 @@
 # Test the handling of the "or?" binary operator
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

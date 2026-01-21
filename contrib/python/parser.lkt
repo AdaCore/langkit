@@ -1,3 +1,6 @@
+from nodes import *
+from tokens import python_lexer
+
 @with_lexer(python_lexer)
 grammar python_grammar {
     name <- Id(@Identifier)

@@ -24,6 +24,9 @@ package body Liblktlang.Common is
 
    Is_Token_Node_Kind : constant array (Lkt_Node_Kind_Type) of Boolean :=
      (Lkt_Argument => False,
+      Lkt_Import => False,
+      Lkt_Import_All_From => False,
+      Lkt_Import_From => False,
       Lkt_Error_Lexer_Case_Rule_Alt => False,
       Lkt_Lexer_Case_Rule_Cond_Alt => False,
       Lkt_Lexer_Case_Rule_Default_Alt => False,
@@ -106,7 +109,8 @@ package body Liblktlang.Common is
       Lkt_Token_Ref => False,
       Lkt_Id => True,
       Lkt_Def_Id => True,
-      Lkt_Module_Ref_Id => True,
+      Lkt_Imported_Id => True,
+      Lkt_Module_Id => True,
       Lkt_Ref_Id => True,
       Lkt_If_Expr => False,
       Lkt_Isa => False,
@@ -117,6 +121,7 @@ package body Liblktlang.Common is
       Lkt_Null_Lit => False,
       Lkt_Num_Lit => True,
       Lkt_Block_String_Lit => False,
+      Lkt_Module_Doc_String_Lit => False,
       Lkt_Single_Line_String_Lit => True,
       Lkt_Pattern_Single_Line_String_Lit => True,
       Lkt_Logic_Assign => False,
@@ -133,13 +138,14 @@ package body Liblktlang.Common is
       Lkt_Un_Op => False,
       Lkt_Full_Decl => False,
       Lkt_Grammar_List_Sep => False,
-      Lkt_Import => False,
+      Lkt_Imported_Name => False,
       Lkt_Langkit_Root => False,
       Lkt_Lexer_Case_Rule => False,
       Lkt_Lexer_Case_Rule_Send => False,
       Lkt_List_Kind_One => False,
       Lkt_List_Kind_Zero => False,
       Lkt_Argument_List => False,
+      Lkt_Base_Import_List => False,
       Lkt_Base_Lexer_Case_Rule_Alt_List => False,
       Lkt_Base_Match_Branch_List => False,
       Lkt_Block_String_Line_List => False,
@@ -157,14 +163,16 @@ package body Liblktlang.Common is
       Lkt_Fun_Param_Decl_List => False,
       Lkt_Grammar_Expr_List => False,
       Lkt_Grammar_Expr_List_List => False,
-      Lkt_Import_List => False,
+      Lkt_Imported_Name_List => False,
       Lkt_Lambda_Param_Decl_List => False,
       Lkt_Lkt_Node_List => False,
+      Lkt_Module_Doc_String_Line_List => False,
       Lkt_Pattern_Detail_List => False,
       Lkt_Pattern_List => False,
       Lkt_Ref_Id_List => False,
       Lkt_Type_Ref_List => False,
       Lkt_Synthetic_Type_Ref_List => False,
+      Lkt_Module_Doc_String_Line => True,
       Lkt_Null_Cond_Qualifier_Absent => False,
       Lkt_Null_Cond_Qualifier_Present => False,
       Lkt_Op_Amp => False,
@@ -215,6 +223,9 @@ package body Liblktlang.Common is
 
    Is_Error_Node_Kind : constant array (Lkt_Node_Kind_Type) of Boolean :=
      (Lkt_Argument => False,
+      Lkt_Import => False,
+      Lkt_Import_All_From => False,
+      Lkt_Import_From => False,
       Lkt_Error_Lexer_Case_Rule_Alt => True,
       Lkt_Lexer_Case_Rule_Cond_Alt => False,
       Lkt_Lexer_Case_Rule_Default_Alt => False,
@@ -297,7 +308,8 @@ package body Liblktlang.Common is
       Lkt_Token_Ref => False,
       Lkt_Id => False,
       Lkt_Def_Id => False,
-      Lkt_Module_Ref_Id => False,
+      Lkt_Imported_Id => False,
+      Lkt_Module_Id => False,
       Lkt_Ref_Id => False,
       Lkt_If_Expr => False,
       Lkt_Isa => False,
@@ -308,6 +320,7 @@ package body Liblktlang.Common is
       Lkt_Null_Lit => False,
       Lkt_Num_Lit => False,
       Lkt_Block_String_Lit => False,
+      Lkt_Module_Doc_String_Lit => False,
       Lkt_Single_Line_String_Lit => False,
       Lkt_Pattern_Single_Line_String_Lit => False,
       Lkt_Logic_Assign => False,
@@ -324,13 +337,14 @@ package body Liblktlang.Common is
       Lkt_Un_Op => False,
       Lkt_Full_Decl => False,
       Lkt_Grammar_List_Sep => False,
-      Lkt_Import => False,
+      Lkt_Imported_Name => False,
       Lkt_Langkit_Root => False,
       Lkt_Lexer_Case_Rule => False,
       Lkt_Lexer_Case_Rule_Send => False,
       Lkt_List_Kind_One => False,
       Lkt_List_Kind_Zero => False,
       Lkt_Argument_List => False,
+      Lkt_Base_Import_List => False,
       Lkt_Base_Lexer_Case_Rule_Alt_List => False,
       Lkt_Base_Match_Branch_List => False,
       Lkt_Block_String_Line_List => False,
@@ -348,14 +362,16 @@ package body Liblktlang.Common is
       Lkt_Fun_Param_Decl_List => False,
       Lkt_Grammar_Expr_List => False,
       Lkt_Grammar_Expr_List_List => False,
-      Lkt_Import_List => False,
+      Lkt_Imported_Name_List => False,
       Lkt_Lambda_Param_Decl_List => False,
       Lkt_Lkt_Node_List => False,
+      Lkt_Module_Doc_String_Line_List => False,
       Lkt_Pattern_Detail_List => False,
       Lkt_Pattern_List => False,
       Lkt_Ref_Id_List => False,
       Lkt_Type_Ref_List => False,
       Lkt_Synthetic_Type_Ref_List => False,
+      Lkt_Module_Doc_String_Line => False,
       Lkt_Null_Cond_Qualifier_Absent => False,
       Lkt_Null_Cond_Qualifier_Present => False,
       Lkt_Op_Amp => False,
@@ -805,6 +821,9 @@ package body Liblktlang.Common is
           Lkt_Char =>
              new String'("Char")
               ,
+          Lkt_Module_Doc_String_Line =>
+             new String'("Module_Doc_String_Line")
+              ,
           Lkt_Block_String_Line =>
              new String'("Block_String_Line")
               ,
@@ -1140,7 +1159,7 @@ package body Liblktlang.Common is
                        else Get (L.TDH.Symbols, DL.Symbol).all
                             = Get (R.TDH.Symbols, DR.Symbol).all);
 
-            when Lkt_Big_Number | Lkt_Block_String_Line | Lkt_Char | Lkt_Comment | Lkt_Number | Lkt_P_String | Lkt_String | Lkt_Whitespace =>
+            when Lkt_Big_Number | Lkt_Block_String_Line | Lkt_Char | Lkt_Comment | Lkt_Module_Doc_String_Line | Lkt_Number | Lkt_P_String | Lkt_String | Lkt_Whitespace =>
                declare
                   TL : Text_Type renames
                     L.TDH.Source_Buffer (DL.Source_First .. DL.Source_Last);
@@ -1335,7 +1354,9 @@ package body Liblktlang.Common is
                   return Lkt_Identifier;
                when Lkt_Def_Id =>
                   return Lkt_Identifier;
-               when Lkt_Module_Ref_Id =>
+               when Lkt_Imported_Id =>
+                  return Lkt_Identifier;
+               when Lkt_Module_Id =>
                   return Lkt_Identifier;
                when Lkt_Ref_Id =>
                   return Lkt_Identifier;
@@ -1349,6 +1370,8 @@ package body Liblktlang.Common is
                   return Lkt_String;
                when Lkt_Pattern_Single_Line_String_Lit =>
                   return Lkt_P_String;
+               when Lkt_Module_Doc_String_Line =>
+                  return Lkt_Module_Doc_String_Line;
                when Lkt_Integer_Pattern =>
                   return Lkt_Number;
                when Lkt_Regex_Pattern =>

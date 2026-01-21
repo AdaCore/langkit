@@ -1,8 +1,0 @@
-import common_empty
-
-class DerivedNode: EmptyNode {
-}
-
-class Example: BaseExample {
-    @lazy prop: DerivedNode = EmptyNode.builder().build()
-}

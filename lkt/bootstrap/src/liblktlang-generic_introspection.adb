@@ -2492,6 +2492,93 @@ end;
 when others => null;
 end case;
 end;
+when Lkt_Base_Import =>
+declare
+N_Bare_Base_Import : constant Analysis.Base_Import := N.As_Base_Import;
+begin
+case Member is
+when Member_Index_For_Base_Import_F_Module_Name =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Base_Import.F_Module_Name);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Base_Import_P_Referenced_Unit =>
+declare
+R : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
+begin
+Set_Unit (R, N_Bare_Base_Import.P_Referenced_Unit);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+case Lkt_Base_Import (Kind) is
+when Lkt_Import_Range =>
+declare
+N_Bare_Import : constant Analysis.Import := N_Bare_Base_Import.As_Import;
+begin
+case Member is
+when Member_Index_For_Import_F_Renaming =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Import.F_Renaming);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Import_From_Range =>
+declare
+N_Bare_Import_From : constant Analysis.Import_From := N_Bare_Base_Import.As_Import_From;
+begin
+case Member is
+when Member_Index_For_Import_From_F_Imported_Names =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Import_From.F_Imported_Names);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Lexer_Case_Rule_Cond_Alt_Range =>
 declare
 N_Bare_Lexer_Case_Rule_Cond_Alt : constant Analysis.Lexer_Case_Rule_Cond_Alt := N.As_Lexer_Case_Rule_Cond_Alt;
@@ -5145,6 +5232,29 @@ end;
 when others => null;
 end case;
 end;
+when Lkt_Module_Doc_String_Lit_Range =>
+declare
+N_Bare_Module_Doc_String_Lit : constant Analysis.Module_Doc_String_Lit := N_Bare_String_Lit.As_Module_Doc_String_Lit;
+begin
+case Member is
+when Member_Index_For_Module_Doc_String_Lit_F_Lines =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Module_Doc_String_Lit.F_Lines);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
 when others => null;
 end case;
 end;
@@ -5717,16 +5827,16 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Import_Range =>
+when Lkt_Imported_Name_Range =>
 declare
-N_Bare_Import : constant Analysis.Import := N.As_Import;
+N_Bare_Imported_Name : constant Analysis.Imported_Name := N.As_Imported_Name;
 begin
 case Member is
-when Member_Index_For_Import_F_Name =>
+when Member_Index_For_Imported_Name_F_Original_Name =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Import.F_Name);
+Set_Node (R, N_Bare_Imported_Name.F_Original_Name);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -5737,11 +5847,11 @@ Free (Result);
 end if;
 raise;
 end;
-when Member_Index_For_Import_P_Referenced_Unit =>
+when Member_Index_For_Imported_Name_F_Renaming =>
 declare
-R : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Unit (R, N_Bare_Import.P_Referenced_Unit);
+Set_Node (R, N_Bare_Imported_Name.F_Renaming);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -5760,6 +5870,21 @@ declare
 N_Bare_Langkit_Root : constant Analysis.Langkit_Root := N.As_Langkit_Root;
 begin
 case Member is
+when Member_Index_For_Langkit_Root_F_Doc =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Langkit_Root.F_Doc);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Langkit_Root_F_Imports =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;

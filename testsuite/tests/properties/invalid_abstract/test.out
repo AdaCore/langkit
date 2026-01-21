@@ -1,13 +1,13 @@
 == abstract_overrides.lkt ==
-abstract_overrides.lkt:13:15: error: Abstract properties cannot override another property. Here, Identifier.prop is abstract and overrides BaseNode.prop.
-13 |     @abstract fun prop(): Bool
+abstract_overrides.lkt:18:15: error: Abstract properties cannot override another property. Here, Identifier.prop is abstract and overrides BaseNode.prop.
+18 |     @abstract fun prop(): Bool
    |               ^^^^^^^^^^^^^^^^
 
 
 == list_abstract_in_root.lkt ==
-list_abstract_in_root.lkt:7:25: error: Abstract property prop is not overriden in all subclasses. Missing overriding properties on classes: ASTList[BaseNode]
-7 |     @exported @abstract fun prop(): Bool
-  |                         ^^^^^^^^^^^^^^^^
+list_abstract_in_root.lkt:12:25: error: Abstract property prop is not overriden in all subclasses. Missing overriding properties on classes: ASTList[Example]
+12 |     @exported @abstract fun prop(): Bool
+   |                         ^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done

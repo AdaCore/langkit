@@ -1,29 +1,29 @@
-== bad_args.lkt ==
-bad_args.lkt:8:31: error: Unexpected argument
+== bad_args/test.lkt ==
+test.lkt:8:31: error: Unexpected argument
 8 |     fun p(): Int = node.super("foo")
   |                               ^^^^^
 
 
-== invalid_prefix.lkt ==
-invalid_prefix.lkt:8:32: error: .super() is allowed on Self or Entity only
+== invalid_prefix/test.lkt ==
+test.lkt:8:32: error: .super() is allowed on Self or Entity only
 8 |     fun p(): Int = node.parent.super() + 1
   |                                ^^^^^
 
 
-== no_overriden.lkt ==
-no_overriden.lkt:4:35: error: There is no overridden property to call
+== no_overriden/test.lkt ==
+test.lkt:4:35: error: There is no overridden property to call
 4 |     @exported fun p(): Int = node.super() + 1
   |                                   ^^^^^
 
 
-== overridden_abstract.lkt ==
-overridden_abstract.lkt:8:35: error: Cannot call abstract overridden property
+== overridden_abstract/test.lkt ==
+test.lkt:8:35: error: Cannot call abstract overridden property
 8 |     @exported fun p(): Int = node.super() + 1
   |                                   ^^^^^
 
 
-== self_prefix.lkt ==
-self_prefix.lkt:9:21: error: Call to FooNode.p2 must be done on an entity
+== self_prefix/test.lkt ==
+test.lkt:9:21: error: Call to FooNode.p2 must be done on an entity
 9 |     fun p2(): Int = node.super()
   |                     ^^^^^^^^^^^^
 

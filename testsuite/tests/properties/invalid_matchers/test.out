@@ -1,60 +1,60 @@
-== default_after_full.lkt ==
-default_after_full.lkt:8:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
+== default_after_full/test.lkt ==
+test.lkt:8:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
 8 |         case _           => 1
   |         ^^^^^^
 
 Code generation was successful
 
-== invalid_type.lkt ==
-invalid_type.lkt:9:17: error: Cannot match Bool (input type is BodyNode)
+== invalid_type/test.lkt ==
+test.lkt:9:17: error: Cannot match Bool (input type is BodyNode)
 9 |         case e: Bool       => e.prop()
   |                 ^^^^
 
 
-== irrelevant_node.lkt ==
-irrelevant_node.lkt:9:17: error: Cannot match FooNode (input type is BodyNode)
+== irrelevant_node/test.lkt ==
+test.lkt:9:17: error: Cannot match FooNode (input type is BodyNode)
 9 |         case e: FooNode    => e.prop()
   |                 ^^^^^^^
 
 
-== missing_comp.lkt ==
-missing_comp.lkt:7:23: error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
+== missing_comp/test.lkt ==
+test.lkt:7:23: error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
 7 |     fun prop(): Int = match node.body {
 
 
-== missing_expr.lkt ==
-missing_expr.lkt:6:23: error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
+== missing_expr/test.lkt ==
+test.lkt:6:23: error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
 6 |     fun prop(): Int = match node.body {
 
 
-== missing_nullnode.lkt ==
-missing_nullnode.lkt:6:23: error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
+== missing_nullnode/test.lkt ==
+test.lkt:6:23: error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
 6 |     fun prop(): Int = match node.body {
 
 
-== node_after_default_1.lkt ==
-node_after_default_1.lkt:8:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
+== node_after_default_1/test.lkt ==
+test.lkt:8:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
 8 |         case e: BodyNode => e.prop()
   |         ^^^^^^^^^^^^^^^^
 
 Code generation was successful
 
-== node_after_default_2.lkt ==
-node_after_default_2.lkt:8:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
+== node_after_default_2/test.lkt ==
+test.lkt:8:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
 8 |         case e: Number => e.prop()
   |         ^^^^^^^^^^^^^^
 
 Code generation was successful
 
-== node_after_full_1.lkt ==
-node_after_full_1.lkt:8:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
+== node_after_full_1/test.lkt ==
+test.lkt:8:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
 8 |         case e: Number   => e.prop()
   |         ^^^^^^^^^^^^^^
 
 Code generation was successful
 
-== node_after_full_2.lkt ==
-node_after_full_2.lkt:10:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
+== node_after_full_2/test.lkt ==
+test.lkt:10:9: warning: This branch is unreachable as previous branches cover all the nodes it can match
 10 |         case e: BodyNode   => e.prop()
    |         ^^^^^^^^^^^^^^^^
 

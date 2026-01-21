@@ -43,6 +43,7 @@
         ]
       }
     },
+    "BaseImportList": {},
     "Pattern": {},
     "ExtendedPattern": {
       "fields": {
@@ -872,7 +873,15 @@
     "Import": {
       "node": ["recurse", "hardline"]
     },
-    "ImportList": {},
+    "ImportFrom": {
+      "node": ["recurse", "hardline"]
+    },
+    "ImportAllFrom": {
+      "node": ["recurse", "hardline"]
+    },
+    "ImportedName": {},
+    "ImportedNameList": {},
+    "ImportedId": {},
     "Isa": {
       "node": {
         "kind": "group",
@@ -1168,7 +1177,10 @@
         "f_decl_type": ["whitespace", "recurse"]
       }
     },
-    "ModuleRefId": {},
+    "ModuleDocStringLine": {},
+    "ModuleDocStringLineList": {},
+    "ModuleDocStringLit": {},
+    "ModuleId": {},
     "NotExpr": {
       "fields": {
         "f_expr": {

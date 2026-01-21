@@ -1,6 +1,0 @@
-import common
-
-class ExampleBlock: BaseExampleBlock {
-    @exported fun p(): Array[IndexedItem] =
-        node.items.iall((e: Example, i: Bool) => e.is_null or i == 0)
-}

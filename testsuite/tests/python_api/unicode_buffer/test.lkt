@@ -1,6 +1,6 @@
 # Test various Unicode-related features in source buffer handling
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

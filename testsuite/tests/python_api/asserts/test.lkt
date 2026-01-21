@@ -3,7 +3,7 @@
 # not to work because "operational" code was in assert statements in the Python
 # bindings.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

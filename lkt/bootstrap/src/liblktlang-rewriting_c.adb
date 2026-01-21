@@ -101,8 +101,15 @@ package body Liblktlang.Rewriting_C is
      (Context : Internal_Context) return C_Rewriting_Handle is
    begin
       Clear_Last_Exception;
-      return
-        To_C_Rewriting_Handle (Start_Rewriting (From_C_Context (Context)));
+
+      --  For now, assume that all users of the rewriting API going through the
+      --  C bindings will want the rewritten parts of their tree be formatted
+      --  according to the language defaults.
+
+      return To_C_Rewriting_Handle
+        (Start_Rewriting
+          (From_C_Context (Context),
+           Default_Rewriting_Options (From_C_Context (Context).Language)));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);

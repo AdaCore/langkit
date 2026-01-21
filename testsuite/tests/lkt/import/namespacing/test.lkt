@@ -1,0 +1,10 @@
+import common_example as example_mod
+import common_foo_node as foo_node
+import lexer_example as lexer_mod
+
+@with_lexer(lexer_mod.foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <-
+        example_mod.Example("example")
+        |> when(foo_node.FooNode.parser_predicate)
+}

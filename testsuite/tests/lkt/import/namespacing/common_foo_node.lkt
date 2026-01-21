@@ -1,0 +1,6 @@
+import common_example as example
+
+class FooNode implements Node[FooNode] {
+    fun as_example_or_null(): example.Example = node.as[example.Example]
+    fun parser_predicate(): Bool = not node.as_example_or_null().is_null
+}

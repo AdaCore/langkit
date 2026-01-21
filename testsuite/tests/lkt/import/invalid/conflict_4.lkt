@@ -1,0 +1,12 @@
+from lexer_example import foo_lexer
+
+import common as mod
+import common_reimport as mod
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+class Example: mod.FooNode implements TokenNode {
+}

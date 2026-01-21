@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import functools
 import itertools
-from typing import Any, Callable, Type, overload
+from typing import Any, Callable, TYPE_CHECKING, Type, overload
 
 import liblktlang as L
 
@@ -58,6 +58,7 @@ from langkit.frontend.scopes import Scope
 from langkit.frontend.static import parse_static_bool, parse_static_str
 from langkit.frontend.utils import (
     arg_name_from_expr,
+    determine_casing,
     lkt_doc,
     name_from_camel,
     name_from_lower,
@@ -416,6 +417,59 @@ class FieldKinds:
         )
 
 
+@dataclasses.dataclass(frozen=True)
+class ToLowerDynVar:
+    """
+    Helper to store information about a dynamic variable to create.
+
+    This is instantiated when processing all top-level declarations in a unit,
+    and is used once types are lowered, when the dyn vars can be actually
+    created.
+    """
+
+    name: str
+    """
+    Name for the dynamic variable (already validated).
+    """
+
+    decl: L.DynVarDecl
+    """
+    Lkt declaration for this dynamic variable.
+    """
+
+    scope: Scope
+    """
+    Scope in which this dynamic variable is defined.
+    """
+
+    entity: Scope.DynVar
+    """
+    Scope entity created for this dynamic variable.
+    """
+
+    @classmethod
+    def from_lkt_node(
+        cls,
+        decl: L.DynVarDecl,
+        scope: Scope,
+        resolver: Resolver,
+    ) -> ToLowerDynVar:
+        name_node = decl.f_syn_name
+        name = name_node.text
+
+        # Ensure the dynamic variable name has proper casing
+        _ = name_from_lower("dynamic variable", name_node)
+
+        entity = Scope.DynVar(name, decl)
+        scope.add(entity)
+
+        # Reject homonymous dynamic vars, even if they are declared in
+        # different scopes.
+        resolver.global_scope.add(entity)
+
+        return cls(name, decl, scope, entity)
+
+
 class LktTypesLoader:
     """
     Helper class to instantiate ``CompiledType`` for all types described in
@@ -505,11 +559,17 @@ class LktTypesLoader:
         self.compiled_types: dict[L.Decl, CompiledType | None] = {}
         self.internal_property_counter = iter(itertools.count(0))
         self.error_nodes: list[ASTNodeType] = []
+        self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
 
         type_decls: list[Scope.UserType] = []
-        dyn_vars: list[L.DynVarDecl] = []
+        dyn_vars: list[ToLowerDynVar] = []
         root_node_decl: L.BasicClassDecl | None = None
-        self.gen_iface_decls: list[tuple[GenericInterface, L.TraitDecl]] = []
+        metadata_found = False
+
+        units_and_scopes = [
+            (module.unit, module.unit_scope)
+            for module in resolver.lkt_modules.values()
+        ]
 
         # Look for generic interfaces defined in the prelude
         assert isinstance(resolver.lkt_units[0].root, L.LangkitRoot)
@@ -520,33 +580,53 @@ class LktTypesLoader:
                 self.process_prelude_decl(full_decl)
 
         # Go through all units and register all top-level definitions in the
-        # root scope. This first pass allows to check for name uniqueness,
+        # unit scopes. This first pass allows to check for name uniqueness,
         # create TypeRepo.Defer objects and build the list of types to lower.
-        for unit in resolver.lkt_units:
+        for unit, unit_scope in units_and_scopes:
             assert isinstance(unit.root, L.LangkitRoot)
+
             for full_decl in unit.root.f_decls:
                 decl = full_decl.f_decl
                 name = decl.f_syn_name.text
                 if isinstance(decl, L.LexerDecl):
-                    self.root_scope.add(Scope.Lexer(name, decl))
+                    unit_scope.add(Scope.Lexer(name, decl))
                 elif isinstance(decl, L.GrammarDecl):
-                    self.root_scope.add(Scope.Grammar(name, decl))
+                    unit_scope.add(Scope.Grammar(name, decl))
                 elif isinstance(decl, L.TraitDecl):
                     self.process_user_trait(decl, self.root_scope)
                 elif isinstance(decl, L.TypeDecl):
-                    entity = Scope.UserType(name, decl, None)
-                    self.root_scope.add(entity)
-                    type_decls.append(entity)
+                    entity = Scope.UserType(name, decl, None, unit_scope)
+                    unit_scope.add(entity)
 
-                    # Keep track of anything that looks like the root node
+                    # Reject homonymous type names, even if they are declared
+                    # in different scopes.
+                    self.resolver.global_scope.add(entity)
+
+                    # Keep track of anything that looks like the root node, or
+                    # the Metadata struct.
+                    insert_first = False
                     if (
                         isinstance(decl, L.BasicClassDecl)
                         and decl.p_base_type is None
                     ):
                         root_node_decl = decl
+                        insert_first = True
+                    elif name == "Metadata":
+                        metadata_found = True
+
+                    # Plan to lower the root node first, so that the generic
+                    # list type is registered in scopes before we need to
+                    # lookup types.
+                    type_decls.insert(
+                        0 if insert_first else len(type_decls) + 1, entity
+                    )
 
                 elif isinstance(decl, L.DynVarDecl):
-                    dyn_vars.append(decl)
+                    dyn_vars.append(
+                        ToLowerDynVar.from_lkt_node(
+                            decl, unit_scope, self.resolver
+                        )
+                    )
 
                 else:
                     error(
@@ -562,6 +642,24 @@ class LktTypesLoader:
                 "no node type declaration found",
                 location=resolver.root_lkt_source_loc,
             )
+
+        # If user code does not define one, create a default Metadata struct
+        # and make it visible in the root scope.
+        if not metadata_found:
+            self.ctx.env_metadata = StructType(
+                context=self.ctx,
+                name=names.Name("Metadata"),
+                location=Location.builtin,
+                doc="",
+                fields=None,
+            )
+            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
+                "Metadata", self.ctx.env_metadata
+            )
+            self.has_env_metadata = True
+
+        # Finishing touch for unit scopes: apply imports
+        self.apply_module_imports(units_and_scopes)
 
         # At this stage, all generic interfaces are lowered, so we can process
         # all deferred references.
@@ -581,44 +679,21 @@ class LktTypesLoader:
         ] = []
         self.fields_to_lower: list[LktTypesLoader.FieldToLower] = []
         for entity in type_decls:
-            self.lower_type_decl(entity, self.root_scope)
-
-        # If user code does not define one, create a default Metadata struct
-        # and make it visible in the root scope. Otherwise, validate it.
-        if not self.ctx.has_env_metadata:
-            self.ctx.env_metadata = StructType(
-                context=self.ctx,
-                name=names.Name("Metadata"),
-                location=Location.builtin,
-                doc="",
-                fields=None,
-            )
-            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
-                "Metadata", self.ctx.env_metadata
-            )
-            self.has_env_metadata = True
+            self.lower_type_decl(entity, entity.scope)
 
         #
         # DYNVAR_LOWERING
         #
 
         # Create dynamic variables
-        for dyn_var_decl in dyn_vars:
-            name_node = dyn_var_decl.f_syn_name
-
-            # Ensure the dynamic variable name has proper casing
-            _ = name_from_lower("dynamic variable", name_node)
-
-            name = name_node.text
+        for dv in dyn_vars:
             dyn_var = E.DynamicVariable(
-                location=Location.from_lkt_node(dyn_var_decl),
-                name=name,
-                type=self.resolver.resolve_type(
-                    dyn_var_decl.f_decl_type, self.root_scope
-                ),
-                doc=lkt_doc(dyn_var_decl),
+                location=Location.from_lkt_node(dv.decl),
+                name=dv.name,
+                type=self.resolver.resolve_type(dv.decl.f_decl_type, dv.scope),
+                doc=lkt_doc(dv.decl),
             )
-            self.root_scope.add(Scope.DynVar(name, dyn_var_decl, dyn_var))
+            dv.entity.variable_or_none = dyn_var
 
         #
         # TYPE_MEMBERS_LOWERING
@@ -717,6 +792,157 @@ class LktTypesLoader:
                 f_to_lower.scope,
             )
 
+    def apply_module_imports(
+        self,
+        units_and_scopes: list[tuple[L.AnalysisUnit, Scope]],
+    ) -> None:
+        """
+        Add imported entities to the relevant unit scopes.
+        """
+        if TYPE_CHECKING:
+            Resolver = Callable[[], Scope.Entity]
+
+        def make_resolver(unit_scope: Scope, imported_name: L.Id) -> Resolver:
+            """
+            Return a resolver for the entity in the given scope and with the
+            given name. The return is intended to be used as a callback for
+            ``Scope.Imported.resolver``.
+            """
+
+            def resolver() -> Scope.Entity:
+                entity = unit_scope.resolve(imported_name, recursive=False)
+                if isinstance(entity, Scope.Imported):
+                    import_loc = Location.from_lkt_node(entity.import_node)
+                    error(
+                        "cannot re-import entities (imported at"
+                        f" {import_loc.gnu_style_repr()})",
+                        imported_name,
+                    )
+                return entity
+
+            return resolver
+
+        imported_entities: list[Scope.Imported] = []
+
+        # Create Scope.Imported instances for all imported entities and store
+        # them in the unit scopes that imported them.
+        for unit, unit_scope in units_and_scopes:
+            assert isinstance(unit.root, L.LangkitRoot)
+            mapping = unit_scope.mapping
+
+            def add(
+                name: str,
+                entity: Scope.Entity | Resolver,
+                diagnostic_node: L.LktNode,
+                renaming: L.DefId | None = None,
+            ) -> None:
+                """
+                Add an imported entity to the current unit scope.
+                """
+                # If the imported entity is renamed, ensure the casing for the
+                # renaming is consistent with the casing of the original entity
+                # name.
+                target_name = name if renaming is None else renaming.text
+
+                # Reject the import if the target scope already has an entity
+                # with the same name.
+                other_entity = mapping.get(target_name)
+                if other_entity is not None:
+                    error(
+                        "this import conflicts with"
+                        f" {other_entity.diagnostic_name}",
+                        diagnostic_node,
+                    )
+
+                # If we got an entity, store it directly in the scope.
+                # Otherwise, go through a resolver so that we resolve it only
+                # once all imports are done.
+                actual_entity: Scope.Entity | None
+                if isinstance(entity, Scope.Entity):
+                    actual_entity = entity
+
+                    def resolver() -> Scope.Entity:
+                        assert isinstance(entity, Scope.Entity)
+                        return entity
+
+                else:
+                    actual_entity = None
+                    resolver = entity
+
+                # Create an Scope.Imported instance, to clearly materialize
+                # that this entity has been imported (it is not
+                # defined/exported by this module itself).
+                imported = Scope.Imported(
+                    target_name,
+                    actual_entity,
+                    diagnostic_node,
+                    renaming,
+                    resolver,
+                )
+                mapping[target_name] = imported
+                imported_entities.append(imported)
+
+            for clause in unit.root.f_imports:
+                module_name = clause.f_module_name
+                module = self.resolver.resolve_module(module_name)
+                match clause:
+                    case L.Import():
+                        add(
+                            module_name.text,
+                            module,
+                            clause.f_renaming or module_name,
+                            clause.f_renaming,
+                        )
+
+                    case L.ImportFrom():
+                        for imported_name in clause.f_imported_names:
+                            original_name = imported_name.f_original_name
+                            add(
+                                original_name.text,
+                                make_resolver(
+                                    module.unit_scope, original_name
+                                ),
+                                original_name,
+                                imported_name.f_renaming,
+                            )
+
+                    case L.ImportAllFrom():
+                        for e in module.unit_scope.mapping.values():
+                            if not isinstance(e, Scope.Imported):
+                                add(e.name, e, diagnostic_node=clause)
+
+                    case _:
+                        raise AssertionError()
+
+        # Resolve all imported entities. It is essential to do it now so that
+        # all Scope.Imported.entity_or_none attributes are set to non-None
+        # values (i.e. so that Scope.Imported.entity properties are guaranteed
+        # to return an entity).
+        for entity in imported_entities:
+            entity.resolve()
+
+            # Now that the imported entity is resolved, we can assume that its
+            # casing is valid. Check that the casing of the renaming is
+            # consistent with it.
+            if entity.renaming_node:
+                original_casing = determine_casing(entity.entity.name)
+                consistent = True
+                if original_casing == names.lower:
+                    try:
+                        names.check_lower(entity.name)
+                    except ValueError:
+                        consistent = False
+                else:
+                    try:
+                        names.check_camel(entity.name)
+                    except ValueError:
+                        consistent = False
+                if not consistent:
+                    error(
+                        "casing convention inconsistent with imported entity",
+                        entity.renaming_node,
+                    )
+
     def lower_expressions(self) -> None:
         #
         # EXPR_LOWERING
@@ -806,7 +1032,7 @@ class LktTypesLoader:
             entity = self.resolver.resolve_type_entity(name.f_type_name, scope)
             if entity.t_or_none is None:
                 assert isinstance(entity.diagnostic_node, L.TypeDecl)
-                base_type = self.lower_type_decl(entity, scope)
+                base_type = self.lower_type_decl(entity, entity.scope)
             else:
                 base_type = entity.t_or_none
 
@@ -1952,6 +2178,11 @@ class LktTypesLoader:
                 " type",
                 location=annotations.syn_annotations["generic_list_type"],
             )
+            check_source_language(
+                not base_type.is_generic_list_type,
+                "Only root list types can derive from the generic list type",
+                location=base_type_node,
+            )
 
             check_trait(
                 node_trait_ref,
@@ -2366,13 +2597,16 @@ class LktTypesLoader:
         )
 
         # Register it in the root scope
-        scope.add(
-            Scope.GenericInterface(
-                name=name,
-                diagnostic_node=decl,
-                generic_interface=gen_iface,
-            )
+        entity = Scope.GenericInterface(
+            name=name,
+            diagnostic_node=decl,
+            generic_interface=gen_iface,
         )
+        scope.add(entity)
+
+        # Reject generic interfaces, even if they are declared in different
+        # scopes.
+        self.resolver.global_scope.add(entity)
 
         # Schedule the lowering of its member in the
         # GENERIC_INTERFACE_MEMBERS_LOWERING pass, when all compiled types will

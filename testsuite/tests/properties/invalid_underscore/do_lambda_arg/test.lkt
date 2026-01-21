@@ -1,0 +1,6 @@
+from common import FooNode
+
+
+class Example: FooNode implements TokenNode {
+    @exported fun p(n: Entity[FooNode]): Entity[FooNode] = n.do((_) => _)
+}

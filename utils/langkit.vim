@@ -5,14 +5,43 @@ if exists("b:current_syntax")
   finish
 endif
 
-syn keyword langkitKeyword grammar lexer family language class struct nextgroup=langkitEntity skipwhite
+syn keyword langkitKeyword class struct nextgroup=langkitEntity skipwhite
+syn keyword langkitKeyword grammar nextgroup=langkitEntity skipwhite
+syn keyword langkitKeyword family grammar nextgroup=langkitEntity skipwhite
+
 syn keyword langkitKeyword fun nextgroup=langkitFunction skipwhite
+
 syn match   langkitFunction	"\h\w*" display contained
 syn match   langkitEntity	"\h\w*" display contained
-syn keyword langkitKeyword is end match when field as if elif then else block case val in do bind is_a generic implements trait import dynvar try
-syn keyword langkitLiteral false true lfalse ltrue
-syn keyword langkitQualifier parse memoized public enum qualifier
-syn keyword langkitOperator new entity null or and dont_skip not
+
+syn keyword langkitKeyword as
+syn keyword langkitKeyword bind
+syn keyword langkitKeyword block
+syn keyword langkitKeyword case
+syn keyword langkitKeyword do
+syn keyword langkitKeyword dynvar try
+syn keyword langkitKeyword elif
+syn keyword langkitKeyword else
+syn keyword langkitKeyword end
+syn keyword langkitKeyword field
+syn keyword langkitKeyword from
+syn keyword langkitKeyword generic
+syn keyword langkitKeyword if
+syn keyword langkitKeyword implements
+syn keyword langkitKeyword import
+syn keyword langkitKeyword in
+syn keyword langkitKeyword is
+syn keyword langkitKeyword is_a
+syn keyword langkitKeyword match
+syn keyword langkitKeyword then
+syn keyword langkitKeyword trait
+syn keyword langkitKeyword val
+syn keyword langkitKeyword when
+
+syn keyword langkitLiteral false true
+syn keyword langkitQualifier enum memoized parse public qualifier
+syn keyword langkitOperator and dont_skip entity new not null or
+
 syn region  langkitString  start=+"+ skip=+\\"+ end=+"+
 syn region  langkitChar  start=+'+ skip=+\\"+ end=+'+
 syn match   langkitToken   "@\s*\h\%(\w\|\.\)*" display
@@ -41,13 +70,6 @@ hi def link langkitGrammarRule Define
 hi def link langkitLiteral     Number
 hi def link langkitLineString  String
 hi def link langkitComment     Comment
-" hi def link LalstateSloc            Type
-" hi def link LalstateCurrentExpr     Identifier
-" hi def link LalstateExpr            Identifier
-" hi def link LalstateVarName         Function
-" hi def link LalstateGenCodeVarName  Constant
-" hi def link LalstateValue           String
-" hi def link LalstateExprEvalValue   String
 
 set comments=b:#,b:\|\" " lkql block strings treated like comments for formatting
 set formatoptions+=crno " Automatically wrap, and insert comment lead on newline

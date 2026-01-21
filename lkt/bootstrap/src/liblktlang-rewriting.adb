@@ -511,6 +511,46 @@ package body Liblktlang.Rewriting is
          end;
 
 
+         function Create_Import
+           (Handle : Rewriting_Handle
+               ; F_Module_Name : Node_Rewriting_Handle
+               ; F_Renaming : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Import,
+                 (1 => F_Module_Name,
+                  2 => F_Renaming));
+         end;
+
+
+         function Create_Import_All_From
+           (Handle : Rewriting_Handle
+               ; F_Module_Name : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Import_All_From,
+                 (1 => F_Module_Name));
+         end;
+
+
+         function Create_Import_From
+           (Handle : Rewriting_Handle
+               ; F_Module_Name : Node_Rewriting_Handle
+               ; F_Imported_Names : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Import_From,
+                 (1 => F_Module_Name,
+                  2 => F_Imported_Names));
+         end;
+
+
          function Create_Lexer_Case_Rule_Cond_Alt
            (Handle : Rewriting_Handle
                ; F_Cond_Exprs : Node_Rewriting_Handle
@@ -1579,6 +1619,18 @@ package body Liblktlang.Rewriting is
          end;
 
 
+         function Create_Module_Doc_String_Lit
+           (Handle : Rewriting_Handle
+               ; F_Lines : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Module_Doc_String_Lit,
+                 (1 => F_Lines));
+         end;
+
+
          function Create_Logic_Assign
            (Handle : Rewriting_Handle
                ; F_Dest_Var : Node_Rewriting_Handle
@@ -1777,20 +1829,23 @@ package body Liblktlang.Rewriting is
          end;
 
 
-         function Create_Import
+         function Create_Imported_Name
            (Handle : Rewriting_Handle
-               ; F_Name : Node_Rewriting_Handle
+               ; F_Original_Name : Node_Rewriting_Handle
+               ; F_Renaming : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             return Create_Regular_Node
               (Handle,
-               Lkt_Import,
-                 (1 => F_Name));
+               Lkt_Imported_Name,
+                 (1 => F_Original_Name,
+                  2 => F_Renaming));
          end;
 
 
          function Create_Langkit_Root
            (Handle : Rewriting_Handle
+               ; F_Doc : Node_Rewriting_Handle
                ; F_Imports : Node_Rewriting_Handle
                ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
@@ -1798,8 +1853,9 @@ package body Liblktlang.Rewriting is
             return Create_Regular_Node
               (Handle,
                Lkt_Langkit_Root,
-                 (1 => F_Imports,
-                  2 => F_Decls));
+                 (1 => F_Doc,
+                  2 => F_Imports,
+                  3 => F_Decls));
          end;
 
 

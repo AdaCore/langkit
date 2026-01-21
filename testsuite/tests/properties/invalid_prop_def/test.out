@@ -1,14 +1,14 @@
-== correct.lkt ==
+== correct/test.lkt ==
 Code generation was successful
 
-== not_type.lkt ==
-not_type.lkt:4:27: error: type expected, got the generic Entity
+== not_type/test.lkt ==
+test.lkt:4:27: error: type expected, got the generic Entity
 4 |     @exported fun prop(a: Entity): Int = 0
   |                           ^^^^^^
 
 
-== reserved.lkt ==
-reserved.lkt:4:24: error: Arguments cannot have reserved names (node, bound_env)
+== reserved/test.lkt ==
+test.lkt:4:24: error: Arguments cannot have reserved names (node, bound_env)
 4 |     @exported fun prop(node: Int, lex_env: Int): Int = node + lex_env
   |                        ^^^^
 

@@ -1,7 +1,7 @@
 # Regression test for a code generation bug: we used to have compilation errors
 # in the generated library if dealing with an "index" precomputed symbol.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

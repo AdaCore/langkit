@@ -1,5 +1,0 @@
-import common_empty
-
-class Example: BaseExample {
-    fun f(): NodeBuilder[Int] = 0
-}

@@ -2,7 +2,7 @@
 # cannonical parser that contains all information for unparsing. As a
 # consequence, this also checks that unparsers are properly combined.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 @with_unparsers

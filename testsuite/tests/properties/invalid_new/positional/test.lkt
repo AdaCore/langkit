@@ -1,0 +1,5 @@
+from common import FooNode, MyStruct
+
+class BarNode: FooNode {
+    fun prop(): MyStruct = MyStruct(12, 15)
+}

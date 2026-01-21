@@ -1,7 +1,7 @@
 # Test that using an entity incompatible with the owning type is rejected when
 # passed as the first argument of a propagate.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

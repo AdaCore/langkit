@@ -6,7 +6,7 @@
 # Here, we are indeed using it later on by storing it as the first element of
 # the resulting array and then comparing it with a new literal.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

@@ -1,0 +1,6 @@
+from lexer_example import foo_lexer
+
+dynvar myvar: Int
+
+class FooNode implements Node[FooNode] {
+}

@@ -218,93 +218,96 @@ private package Liblktlang.Generic_Impl is
         "Minus";
       
       Token_Kind_Name_50 : aliased constant Text_Type :=
-        "N_E";
+        "Module_Doc_String_Line";
       
       Token_Kind_Name_51 : aliased constant Text_Type :=
-        "Not_Kw";
+        "N_E";
       
       Token_Kind_Name_52 : aliased constant Text_Type :=
-        "Null_Kw";
+        "Not_Kw";
       
       Token_Kind_Name_53 : aliased constant Text_Type :=
-        "Number";
+        "Null_Kw";
       
       Token_Kind_Name_54 : aliased constant Text_Type :=
-        "Or_Kw";
+        "Number";
       
       Token_Kind_Name_55 : aliased constant Text_Type :=
-        "P_String";
+        "Or_Kw";
       
       Token_Kind_Name_56 : aliased constant Text_Type :=
-        "Percent";
+        "P_String";
       
       Token_Kind_Name_57 : aliased constant Text_Type :=
-        "Pipe";
+        "Percent";
       
       Token_Kind_Name_58 : aliased constant Text_Type :=
-        "Plus";
+        "Pipe";
       
       Token_Kind_Name_59 : aliased constant Text_Type :=
-        "Private_Kw";
+        "Plus";
       
       Token_Kind_Name_60 : aliased constant Text_Type :=
-        "Public_Kw";
+        "Private_Kw";
       
       Token_Kind_Name_61 : aliased constant Text_Type :=
-        "R_Brace";
+        "Public_Kw";
       
       Token_Kind_Name_62 : aliased constant Text_Type :=
-        "R_Brack";
+        "R_Brace";
       
       Token_Kind_Name_63 : aliased constant Text_Type :=
-        "R_Par";
+        "R_Brack";
       
       Token_Kind_Name_64 : aliased constant Text_Type :=
-        "Raise_Kw";
+        "R_Par";
       
       Token_Kind_Name_65 : aliased constant Text_Type :=
-        "Right_Arrow";
+        "Raise_Kw";
       
       Token_Kind_Name_66 : aliased constant Text_Type :=
-        "Select_Kw";
+        "Right_Arrow";
       
       Token_Kind_Name_67 : aliased constant Text_Type :=
-        "Semicolon";
+        "Select_Kw";
       
       Token_Kind_Name_68 : aliased constant Text_Type :=
-        "String";
+        "Semicolon";
       
       Token_Kind_Name_69 : aliased constant Text_Type :=
-        "Struct_Kw";
+        "String";
       
       Token_Kind_Name_70 : aliased constant Text_Type :=
-        "Termination";
+        "Struct_Kw";
       
       Token_Kind_Name_71 : aliased constant Text_Type :=
-        "Then_Kw";
+        "Termination";
       
       Token_Kind_Name_72 : aliased constant Text_Type :=
-        "Times";
+        "Then_Kw";
       
       Token_Kind_Name_73 : aliased constant Text_Type :=
-        "Trait_Kw";
+        "Times";
       
       Token_Kind_Name_74 : aliased constant Text_Type :=
-        "Triple_Colon";
+        "Trait_Kw";
       
       Token_Kind_Name_75 : aliased constant Text_Type :=
-        "Try_Kw";
+        "Triple_Colon";
       
       Token_Kind_Name_76 : aliased constant Text_Type :=
-        "Two_Sided_Arrow";
+        "Try_Kw";
       
       Token_Kind_Name_77 : aliased constant Text_Type :=
-        "Val_Kw";
+        "Two_Sided_Arrow";
       
       Token_Kind_Name_78 : aliased constant Text_Type :=
-        "When_Kw";
+        "Val_Kw";
       
       Token_Kind_Name_79 : aliased constant Text_Type :=
+        "When_Kw";
+      
+      Token_Kind_Name_80 : aliased constant Text_Type :=
         "Whitespace";
    Token_Kind_Descriptors : aliased constant Token_Kind_Descriptor_Array := (
       Token_Index_For_Lkt_Amp =>
@@ -503,124 +506,128 @@ private package Liblktlang.Generic_Impl is
        (Name       => Token_Kind_Name_49'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_N_E =>
+      Token_Index_For_Lkt_Module_Doc_String_Line =>
        (Name       => Token_Kind_Name_50'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Not_Kw =>
+      Token_Index_For_Lkt_N_E =>
        (Name       => Token_Kind_Name_51'Access,
-        Family     => Token_Index_For_Alphanumericals,
+        Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Null_Kw =>
+      Token_Index_For_Lkt_Not_Kw =>
        (Name       => Token_Kind_Name_52'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
-      Token_Index_For_Lkt_Number =>
+      Token_Index_For_Lkt_Null_Kw =>
        (Name       => Token_Kind_Name_53'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
-      Token_Index_For_Lkt_Or_Kw =>
+      Token_Index_For_Lkt_Number =>
        (Name       => Token_Kind_Name_54'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
-      Token_Index_For_Lkt_P_String =>
+      Token_Index_For_Lkt_Or_Kw =>
        (Name       => Token_Kind_Name_55'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
-      Token_Index_For_Lkt_Percent =>
+      Token_Index_For_Lkt_P_String =>
        (Name       => Token_Kind_Name_56'Access,
-        Family     => Token_Index_For_Default_Family,
+        Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
-      Token_Index_For_Lkt_Pipe =>
+      Token_Index_For_Lkt_Percent =>
        (Name       => Token_Kind_Name_57'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Plus =>
+      Token_Index_For_Lkt_Pipe =>
        (Name       => Token_Kind_Name_58'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Private_Kw =>
+      Token_Index_For_Lkt_Plus =>
        (Name       => Token_Kind_Name_59'Access,
-        Family     => Token_Index_For_Alphanumericals,
+        Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Public_Kw =>
+      Token_Index_For_Lkt_Private_Kw =>
        (Name       => Token_Kind_Name_60'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
-      Token_Index_For_Lkt_R_Brace =>
+      Token_Index_For_Lkt_Public_Kw =>
        (Name       => Token_Kind_Name_61'Access,
-        Family     => Token_Index_For_Default_Family,
+        Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
-      Token_Index_For_Lkt_R_Brack =>
+      Token_Index_For_Lkt_R_Brace =>
        (Name       => Token_Kind_Name_62'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_R_Par =>
+      Token_Index_For_Lkt_R_Brack =>
        (Name       => Token_Kind_Name_63'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Raise_Kw =>
+      Token_Index_For_Lkt_R_Par =>
        (Name       => Token_Kind_Name_64'Access,
+        Family     => Token_Index_For_Default_Family,
+        Is_Comment => False),
+      Token_Index_For_Lkt_Raise_Kw =>
+       (Name       => Token_Kind_Name_65'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Right_Arrow =>
-       (Name       => Token_Kind_Name_65'Access,
+       (Name       => Token_Kind_Name_66'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Select_Kw =>
-       (Name       => Token_Kind_Name_66'Access,
+       (Name       => Token_Kind_Name_67'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Semicolon =>
-       (Name       => Token_Kind_Name_67'Access,
-        Family     => Token_Index_For_Default_Family,
-        Is_Comment => False),
-      Token_Index_For_Lkt_String =>
        (Name       => Token_Kind_Name_68'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
-      Token_Index_For_Lkt_Struct_Kw =>
+      Token_Index_For_Lkt_String =>
        (Name       => Token_Kind_Name_69'Access,
+        Family     => Token_Index_For_Default_Family,
+        Is_Comment => False),
+      Token_Index_For_Lkt_Struct_Kw =>
+       (Name       => Token_Kind_Name_70'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Termination =>
-       (Name       => Token_Kind_Name_70'Access,
+       (Name       => Token_Kind_Name_71'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Then_Kw =>
-       (Name       => Token_Kind_Name_71'Access,
+       (Name       => Token_Kind_Name_72'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Times =>
-       (Name       => Token_Kind_Name_72'Access,
+       (Name       => Token_Kind_Name_73'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Trait_Kw =>
-       (Name       => Token_Kind_Name_73'Access,
+       (Name       => Token_Kind_Name_74'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Triple_Colon =>
-       (Name       => Token_Kind_Name_74'Access,
+       (Name       => Token_Kind_Name_75'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Try_Kw =>
-       (Name       => Token_Kind_Name_75'Access,
+       (Name       => Token_Kind_Name_76'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
       Token_Index_For_Lkt_Two_Sided_Arrow =>
-       (Name       => Token_Kind_Name_76'Access,
+       (Name       => Token_Kind_Name_77'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False),
       Token_Index_For_Lkt_Val_Kw =>
-       (Name       => Token_Kind_Name_77'Access,
-        Family     => Token_Index_For_Alphanumericals,
-        Is_Comment => False),
-      Token_Index_For_Lkt_When_Kw =>
        (Name       => Token_Kind_Name_78'Access,
         Family     => Token_Index_For_Alphanumericals,
         Is_Comment => False),
-      Token_Index_For_Lkt_Whitespace =>
+      Token_Index_For_Lkt_When_Kw =>
        (Name       => Token_Kind_Name_79'Access,
+        Family     => Token_Index_For_Alphanumericals,
+        Is_Comment => False),
+      Token_Index_For_Lkt_Whitespace =>
+       (Name       => Token_Kind_Name_80'Access,
         Family     => Token_Index_For_Default_Family,
         Is_Comment => False)
    );

@@ -1,0 +1,5 @@
+from common import BaseExampleBlock, Example, FooNode, IndexedItem
+
+class ExampleBlock: BaseExampleBlock {
+    @exported fun p(): Array[Int] = node.do((n: Int) => n)
+}

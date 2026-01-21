@@ -3,7 +3,7 @@
 # that the result of memoized properties are consistent, and would be the same
 # as if properties were not memoized.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

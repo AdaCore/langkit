@@ -1,0 +1,14 @@
+from common import BaseExample, FooNode, Literal
+
+@synthetic class EmptyNode: FooNode {
+}
+
+@synthetic
+class SyntheticLiteralList: ASTList[Literal] {
+}
+
+class Example: BaseExample {
+    @exported
+    @lazy
+    prop: SyntheticLiteralList = SyntheticLiteralList.builder().build()
+}

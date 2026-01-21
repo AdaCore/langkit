@@ -1,0 +1,15 @@
+# Check that references to the implicit Metadata type are correctly handled in
+# base node types (i.e. rejected with a correct error message).
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class SomeNode: Metadata {
+}

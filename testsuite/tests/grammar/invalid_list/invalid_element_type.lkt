@@ -1,0 +1,22 @@
+from common import FooNode
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    example <- Example(@Example)
+    num <- Num(@Number)
+    @main_rule main_rule <- or(
+        ASTList[Example]*(num)
+        | ListNode(example)
+    )
+}
+
+class ListNode : FooNode {
+    @parse_field items: ASTList[FooNode]
+}
+
+class Example : FooNode implements TokenNode {
+}
+
+class Num : FooNode implements TokenNode {
+}

@@ -1,7 +1,7 @@
 # Check that warnings are correctly issued when a dynamic variable is bound but
 # is not used in the expression.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

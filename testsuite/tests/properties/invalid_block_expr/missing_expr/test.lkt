@@ -1,0 +1,7 @@
+from common import FooNode
+
+class Example: FooNode {
+    @exported fun p(): Bool = {
+        val _ = true;
+    }
+}

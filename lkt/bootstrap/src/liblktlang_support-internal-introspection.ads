@@ -57,6 +57,9 @@ package Liblktlang_Support.Internal.Introspection is
 
       Debug_Name : Debug_String_Access;
       --  Free-form name of this type for debug purposes
+
+      Documentation : Text_Access;
+      --  Documentation for this type
    end record;
 
    type Type_Descriptor_Access is not null access constant Type_Descriptor;
@@ -174,6 +177,9 @@ package Liblktlang_Support.Internal.Introspection is
    type Struct_Member_Descriptor (Last_Argument : Any_Argument_Index) is record
       Name : Text_Access;
       --  Name for this struct member in camel-with-underscores convention
+
+      Documentation : Text_Access;
+      --  Documentation for this struct member
 
       Owner : Type_Index;
       --  Type that owns this member

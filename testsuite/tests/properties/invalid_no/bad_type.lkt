@@ -1,5 +1,0 @@
-import common
-
-class BarNode: FooNode {
-    @exported fun prop(): Int = null[Int]
-}

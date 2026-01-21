@@ -1,0 +1,8 @@
+from common import FooNode, Example
+
+@abstract class BaseErrorDecl : FooNode {
+    @parse_field f: Example
+}
+
+class ErrorDecl : BaseErrorDecl implements ErrorNode {
+}

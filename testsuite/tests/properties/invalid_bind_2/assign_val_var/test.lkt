@@ -1,0 +1,5 @@
+from common import FooNode
+
+class Example: FooNode {
+    @exported fun resolve(): Bool = (self <- node.var1).solve()
+}

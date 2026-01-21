@@ -2,7 +2,7 @@
 # the Python binding results in a ``TypeError`` Python exception (it used to
 # crash with a ``Dynamic_Predicate`` exception in the Ada/C layer).
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

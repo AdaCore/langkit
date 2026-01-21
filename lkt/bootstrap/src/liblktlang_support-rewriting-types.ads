@@ -24,6 +24,8 @@ with Liblktlang_Support.Generic_API.Unparsing;
 use Liblktlang_Support.Generic_API.Unparsing;
 with Liblktlang_Support.Text;        use Liblktlang_Support.Text;
 
+with Prettier_Ada.Documents;
+
 package Liblktlang_Support.Rewriting.Types is
 
    type Rewriting_Handle_Record;
@@ -76,6 +78,9 @@ package Liblktlang_Support.Rewriting.Types is
 
       Config : Unparsing_Configuration;
       --  Unparsing configuration used to format rewritten parts of the tree
+
+      Options : Prettier_Ada.Documents.Format_Options_Type;
+      --  The options to use when formatting rewritten parts of the tree
 
       Units : Unit_Maps.Map;
       --  Keep track of rewriting handles we create for the units that Context

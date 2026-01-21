@@ -1,6 +1,0 @@
-import common
-
-class ExampleBlock: BaseExampleBlock {
-    @exported fun p(): Array[Entity[Example]] =
-        node.items.mapcat((e: Int) => [e.as_bare_entity, e.as_bare_entity])
-}

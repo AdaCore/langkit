@@ -1,26 +1,26 @@
-== bad_type.lkt ==
-bad_type.lkt:4:28: error: Wrong type for field MyStruct.b: expected Int, got Bool
+== bad_type/test.lkt ==
+test.lkt:4:28: error: Wrong type for field MyStruct.b: expected Int, got Bool
 4 |     fun prop(): MyStruct = MyStruct(a=12, b=false)
   |                            ^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== correct.lkt ==
+== correct/test.lkt ==
 Code generation was successful
 
-== extra_field.lkt ==
-extra_field.lkt:4:28: error: Extraneous fields for MyStruct: c
+== extra_field/test.lkt ==
+test.lkt:4:28: error: Extraneous fields for MyStruct: c
 4 |     fun prop(): MyStruct = MyStruct(a=12, b=15, c=19)
   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== missing_field.lkt ==
-missing_field.lkt:4:28: error: Values are missing for MyStruct fields: b
+== missing_field/test.lkt ==
+test.lkt:4:28: error: Values are missing for MyStruct fields: b
 4 |     fun prop(): MyStruct = MyStruct(a=12)
   |                            ^^^^^^^^^^^^^^
 
 
-== positional.lkt ==
-positional.lkt:4:37: error: Positional arguments not allowed for struct constructors
+== positional/test.lkt ==
+test.lkt:4:37: error: Positional arguments not allowed for struct constructors
 4 |     fun prop(): MyStruct = MyStruct(12, 15)
   |                                     ^^
 

@@ -1,0 +1,7 @@
+from common import FooNode
+
+class BarNode: FooNode {
+    v: LogicVar
+
+    @ignored fun p(): Array[LogicVar] = [node.v()]
+}

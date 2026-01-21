@@ -1,7 +1,7 @@
 # Test that 1) populate lexicale env is done asynchronously after a reparse and
 # that 2) semantic analysis still works after that.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

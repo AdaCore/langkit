@@ -1,9 +1,9 @@
-== ambiguous-lists.lkt ==
+== ambiguous_lists.lkt ==
 error: Inconsistent separation token for ASTList[FooNode]: , and <none>
 
 == test.py ==
 
-== dontskip-in-list.lkt ==
+== dontskip_in_list.lkt ==
 Code generation was successful
 
 == test.py ==
@@ -115,69 +115,69 @@ Unparser for Number: token
 Unparser for Root: regular
    Root.f
 
-== list-extra.lkt ==
+== list_extra.lkt ==
 error: Inconsistent extra separation token for ASTList[FooNode]: allow_leading and allow_none
 
 == test.py ==
 
-== null-decidability-1.lkt ==
-null-decidability-1.lkt:23:29: error: field parser for Root.f may yield a null node, so unparsers cannot decide when to include tokens associated to that field
+== null_decidability_1.lkt ==
+null_decidability_1.lkt:23:29: error: field parser for Root.f may yield a null node, so unparsers cannot decide when to include tokens associated to that field
 23 |     main_rule <- Root("def" ?("example" id_or_null))
    |                             ^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == test.py ==
 
-== null-decidability-2.lkt ==
-null-decidability-2.lkt:25:29: error: field parser for Root.f may yield a null node, so unparsers cannot decide when to include tokens associated to that field
+== null_decidability_2.lkt ==
+null_decidability_2.lkt:25:29: error: field parser for Root.f may yield a null node, so unparsers cannot decide when to include tokens associated to that field
 25 |     main_rule <- Root("def" ?("example" atom_list))
    |                             ^^^^^^^^^^^^^^^^^^^^^^
 
 
 == test.py ==
 
-== null-decidability-3.lkt ==
-null-decidability-3.lkt:25:29: error: This parsing rule can assign a null value to Root.f: a @nullable annotation is required for that field
+== null_decidability_3.lkt ==
+null_decidability_3.lkt:25:29: error: This parsing rule can assign a null value to Root.f: a @nullable annotation is required for that field
 25 |     main_rule <- Root("def" ?("example" field_parser))
    |                             ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == test.py ==
 
-== pick-in-list.lkt ==
-pick-in-list.lkt:6:29: error: Unparsers generation require list parsers to directly build nodes for each list item
-6 |     @main_rule main_rule <- list+("example" Root(or(
+== pick_in_list.lkt ==
+pick_in_list.lkt:7:29: error: Unparsers generation require list parsers to directly build nodes for each list item
+7 |     @main_rule main_rule <- list+("example" Root(or(
 
 
 == test.py ==
 
-== pick-in-or-1.lkt ==
-pick-in-or-1.lkt:7:9: error: Pick parser cannot appear as an Or subparser
-7 |         pick("example" Identifier(@Identifier))
+== pick_in_or_1.lkt ==
+pick_in_or_1.lkt:8:9: error: Pick parser cannot appear as an Or subparser
+8 |         pick("example" Identifier(@Identifier))
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == test.py ==
 
-== pick-in-or-2.lkt ==
-pick-in-or-2.lkt:20:11: error: Pick parser cannot appear as an Or subparser
+== pick_in_or_2.lkt ==
+pick_in_or_2.lkt:20:11: error: Pick parser cannot appear as an Or subparser
 20 |         | pick("example" null(FooNode))
    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == test.py ==
 
-== several-1.lkt ==
-several-1.lkt:7:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted
-7 |         Identifier(or(@Identifier | @Example))
+== several_1.lkt ==
+several_1.lkt:8:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted
+8 |         Identifier(or(@Identifier | @Example))
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == test.py ==
 
-== several-2.lkt ==
-several-2.lkt:8:22: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
-8 |         | Identifier(@Example)
+== several_2.lkt ==
+several_2.lkt:9:22: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
+9 |         | Identifier(@Example)
   |                      ^^^^^^^^
 
 
@@ -192,15 +192,15 @@ Unparser for Number: token
 Unparser for Root: regular
    Root.f
 
-== toplevel-cut.lkt ==
+== toplevel_cut.lkt ==
 Code generation was successful
 
 == test.py ==
 Unparser for Example: token
 
-== toplevel-pick.lkt ==
-toplevel-pick.lkt:6:29: error: Top-level information loss prevents unparsers generation
-6 |     @main_rule main_rule <- pick("example" Root(item))
+== toplevel_pick.lkt ==
+toplevel_pick.lkt:7:29: error: Top-level information loss prevents unparsers generation
+7 |     @main_rule main_rule <- pick("example" Root(item))
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 

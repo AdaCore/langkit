@@ -1,7 +1,7 @@
 # Check that creating domains with arrays of non-root entity types generates
 # valid and correctly running code.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

@@ -1,5 +1,0 @@
-import common
-
-class Example: FooNode implements TokenNode {
-    @ignored fun f(b1: Bool, b2: Bool, b3: Bool): Bool = %all(b1, b2, b3)
-}

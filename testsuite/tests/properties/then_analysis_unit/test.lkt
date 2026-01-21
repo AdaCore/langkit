@@ -1,7 +1,7 @@
 # Test that automatic default values are provided for Then expressions that
 # return analysis units.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

@@ -1,6 +1,6 @@
 # Test basic use of iterators in public APIs
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

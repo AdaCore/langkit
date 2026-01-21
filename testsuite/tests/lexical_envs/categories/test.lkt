@@ -1,6 +1,6 @@
 # Test that categories are properly considered during lexical env lookups
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

@@ -1,5 +1,0 @@
-import common
-
-class Example: BaseNode implements TokenNode {
-    fun get_int_impl(): Int = my_var
-}

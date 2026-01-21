@@ -1,0 +1,5 @@
+from common import FooNode
+
+class Example: FooNode implements TokenNode {
+    @ignored fun f(b: Bool, e: Equation): Bool = e and b
+}

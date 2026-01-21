@@ -1,0 +1,8 @@
+from common import FooNode
+
+class Example: FooNode {
+    fun args_env(): LexicalEnv =
+        dynamic_lexical_env(Example.assocs_getter)
+
+    fun assocs_getter(): Array[InnerEnvAssoc] = null[Array[InnerEnvAssoc]]
+}

@@ -1,5 +1,0 @@
-import common
-
-class Example: FooNode implements TokenNode {
-    fun p(): Int = raise[Int] PropertyError(1)
-}

@@ -1,7 +1,7 @@
 # Check that null parse fields are rejected when they contain list nodes: these
 # fields are never null, as the parser creates an empty list for them.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {

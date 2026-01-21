@@ -20,7 +20,12 @@ package body Liblktlang.Implementation.Extensions is
    function Common_Denoted_String
      (Node : Bare_Lkt_Node) return Internal_Decoded_String_Value;
    --  Common implementation for the ``p_denoted_string`` property of all
-   --  string/pattern literal nodes.
+   --  string/pattern literal token nodes.
+
+   function Block_Denoted_String
+     (Lines : Bare_Lkt_Node_Base_List) return Internal_Decoded_String_Value;
+   --  Common implementation for the ``p_denoted_string`` property of all block
+   --  string literals.
 
    procedure Read_Denoted_Char
      (Buffer       : Text_Type;
@@ -92,6 +97,92 @@ package body Liblktlang.Implementation.Extensions is
          Error_Sloc    => No_Source_Location,
          Error_Message => Empty_String);
    end Common_Denoted_String;
+
+   --------------------------
+   -- Block_Denoted_String --
+   --------------------------
+
+   function Block_Denoted_String
+     (Lines : Bare_Lkt_Node_Base_List) return Internal_Decoded_String_Value
+   is
+      Line_Prefix : constant Text_Type :=
+        (if Kind (Lines) in Lkt_Module_Doc_String_Line_List_Range
+         then "|"""""
+         else "|""");
+      --  The line prefix depends on the kind of block string (module docstring
+      --  of regular string literals).
+
+      Result : Unbounded_Text_Type;
+   begin
+      for I in 1 .. Lines.Count loop
+         declare
+            Item   : constant Bare_Lkt_Node := Lines.Nodes.all (I);
+            N_Text : constant Text_Type := Text (Item);
+
+            Cursor      : Positive := N_Text'First;
+            Cursor_Sloc : Source_Location := Start_Sloc (Sloc_Range (Item));
+
+            Char_Value : Internal_Decoded_Char_Value;
+         begin
+            --  There are two legal cases:
+            --
+            --  * '|"' (or '|""'), which designates an empty line
+            --  * '|" ...' (or '|" ...'), which designates a non-empty line:
+            --    the space after '|"' (or '|""') is mandatory. Decode escape
+            --    sequences in the line content.
+            --
+            --  The only thing guaranteed here (by the lexer) is that N_Next
+            --  starts with ``|"`` (or ``|""``): the rest is to be checked
+            --  here, as semantic checks.
+
+            pragma Assert (N_Text'Length >= Line_Prefix'Length);
+            pragma Assert
+              (N_Text (N_Text'First .. N_Text'First + Line_Prefix'Length - 1)
+               = Line_Prefix);
+            Cursor := Cursor + Line_Prefix'Length;
+            Cursor_Sloc.Column := Cursor_Sloc.Column + Line_Prefix'Length;
+
+            if N_Text'Length > Line_Prefix'Length then
+               if N_Text (Cursor) /= ' ' then
+                  return
+                    (Value         => Empty_String,
+                     Has_Error     => True,
+                     Error_Sloc    => Cursor_Sloc,
+                     Error_Message => Create_String ("space missing"));
+               elsif N_Text'Length = Line_Prefix'Length + 1 then
+                  return
+                    (Value         => Empty_String,
+                     Has_Error     => True,
+                     Error_Sloc    => Cursor_Sloc,
+                     Error_Message => Create_String
+                       ("empty line must not end with a space"));
+               end if;
+
+               Cursor := Cursor + 1;
+               Cursor_Sloc.Column := Cursor_Sloc.Column + 1;
+
+               while Cursor <= N_Text'Last loop
+                  Read_Denoted_Char
+                    (N_Text, False, Cursor, Cursor_Sloc, Char_Value);
+                  if Char_Value.Has_Error then
+                     return
+                       (Value         => Empty_String,
+                        Has_Error     => True,
+                        Error_Sloc    => Char_Value.Error_Sloc,
+                        Error_Message => Char_Value.Error_Message);
+                  end if;
+                  WWS.Append (Result, Char_Value.Value);
+               end loop;
+            end if;
+            WWS.Append (Result, Chars.LF);
+         end;
+      end loop;
+      return
+        (Value         => Create_String (To_Text (Result)),
+         Has_Error     => False,
+         Error_Sloc    => No_Source_Location,
+         Error_Message => Empty_String);
+   end Block_Denoted_String;
 
    -----------------------
    -- Read_Denoted_Char --
@@ -469,79 +560,20 @@ package body Liblktlang.Implementation.Extensions is
    --------------------------------------
 
    function Block_String_Lit_P_Denoted_Value
-     (Node : Bare_Block_String_Lit) return Internal_Decoded_String_Value
-   is
-      Result : Unbounded_Text_Type;
-      List   : constant Bare_Lkt_Node_Base_List :=
-        Node.Block_String_Lit_F_Lines;
+     (Node : Bare_Block_String_Lit) return Internal_Decoded_String_Value is
    begin
-      for I in 1 .. List.Count loop
-         declare
-            Item   : constant Bare_Block_String_Line := List.Nodes.all (I);
-            N_Text : constant Text_Type := Text (Item);
-
-            Cursor      : Positive := N_Text'First;
-            Cursor_Sloc : Source_Location := Start_Sloc (Sloc_Range (Item));
-
-            Char_Value : Internal_Decoded_Char_Value;
-         begin
-            --  There are two legal cases:
-            --
-            --  * '|"', which designates an empty line
-            --  * '|" ...', which desigantes a non-empty line: the space after
-            --    '|"' is mandatory. Decode escape sequences in the line
-            --    content.
-            --
-            --  The only thing guaranteed here (by the lexer) is that N_Next
-            --  starts with ``|"``: the rest is to be checked here, as semantic
-            --  checks.
-
-            pragma Assert (N_Text'Length >= 2);
-            pragma Assert (N_Text (N_Text'First .. N_Text'First + 1) = "|""");
-            Cursor := Cursor + 2;
-            Cursor_Sloc.Column := Cursor_Sloc.Column + 2;
-
-            if N_Text'Length > 2 then
-               if N_Text (Cursor) /= ' ' then
-                  return
-                    (Value         => Empty_String,
-                     Has_Error     => True,
-                     Error_Sloc    => Cursor_Sloc,
-                     Error_Message => Create_String ("space missing"));
-               elsif N_Text'Length = 3 then
-                  return
-                    (Value         => Empty_String,
-                     Has_Error     => True,
-                     Error_Sloc    => Cursor_Sloc,
-                     Error_Message => Create_String
-                       ("empty line must not end with a space"));
-               end if;
-
-               Cursor := Cursor + 1;
-               Cursor_Sloc.Column := Cursor_Sloc.Column + 1;
-
-               while Cursor <= N_Text'Last loop
-                  Read_Denoted_Char
-                    (N_Text, False, Cursor, Cursor_Sloc, Char_Value);
-                  if Char_Value.Has_Error then
-                     return
-                       (Value         => Empty_String,
-                        Has_Error     => True,
-                        Error_Sloc    => Char_Value.Error_Sloc,
-                        Error_Message => Char_Value.Error_Message);
-                  end if;
-                  WWS.Append (Result, Char_Value.Value);
-               end loop;
-            end if;
-            WWS.Append (Result, Chars.LF);
-         end;
-      end loop;
-      return
-        (Value         => Create_String (To_Text (Result)),
-         Has_Error     => False,
-         Error_Sloc    => No_Source_Location,
-         Error_Message => Empty_String);
+      return Block_Denoted_String (Node.Block_String_Lit_F_Lines);
    end Block_String_Lit_P_Denoted_Value;
+
+   -------------------------------------------
+   -- Module_Doc_String_Lit_P_Denoted_Value --
+   -------------------------------------------
+
+   function Module_Doc_String_Lit_P_Denoted_Value
+     (Node : Bare_Module_Doc_String_Lit) return Internal_Decoded_String_Value is
+   begin
+      return Block_Denoted_String (Node.Module_Doc_String_Lit_F_Lines);
+   end Module_Doc_String_Lit_P_Denoted_Value;
 
    --------------------------------------------
    -- Single_Line_String_Lit_P_Denoted_Value --

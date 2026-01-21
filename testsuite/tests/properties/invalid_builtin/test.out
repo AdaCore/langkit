@@ -1,11 +1,11 @@
-== invalid_attr.lkt ==
-invalid_attr.lkt:4:46: error: this is a builtin method, it should be called
+== invalid_attr/test.lkt ==
+test.lkt:4:46: error: this is a builtin method, it should be called
 4 |     @exported fun p(): Array[FooNode] = node.unique
   |                                              ^^^^^^
 
 
-== invalid_call.lkt ==
-invalid_call.lkt:4:38: error: this is a builtin attribute, it should not be called
+== invalid_call/test.lkt ==
+test.lkt:4:38: error: this is a builtin attribute, it should not be called
 4 |     @exported fun p(): Symbol = node.symbol()
   |                                      ^^^^^^
 

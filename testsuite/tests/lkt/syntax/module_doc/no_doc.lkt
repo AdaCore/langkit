@@ -1,0 +1,2 @@
+|" Function-level documentation.
+fun f(): Int = 1

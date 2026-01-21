@@ -1,0 +1,8 @@
+from common import BaseNode, FooNode, my_var
+
+class Example: BaseNode implements TokenNode {
+    fun get_int_impl(): Int = {
+        bind my_var = 12;
+        node.internal_get_int()
+    }
+}

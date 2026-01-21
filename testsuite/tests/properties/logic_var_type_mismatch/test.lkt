@@ -1,7 +1,7 @@
 # Check the correct propagation of PropertyError exceptions when property
 # references in logic equations are called on mismatching node types.
 
-import lexer_example
+from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
