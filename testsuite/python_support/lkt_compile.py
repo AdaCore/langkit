@@ -46,6 +46,9 @@ else:
 
 
 for lkt_file in sorted(tests):
+    # Harmonize pathnames so that output on Windows is identical to output on
+    # Unix systems.
+    lkt_file = lkt_file.replace("\\", "/")
     print(f"== {lkt_file} ==")
 
     test_config = derive_config(
