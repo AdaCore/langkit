@@ -124,8 +124,8 @@ def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
         other_unit = modules_map.get(module_name)
         if other_unit is not None:
             error(
-                f"conflicting Lkt source filenames: {unit.filename!r} and"
-                f" {other_unit.filename!r}",
+                f"conflicting Lkt source filenames: '{unit.filename}' and"
+                f" '{other_unit.filename}'",
                 Location.nowhere,
             )
 
