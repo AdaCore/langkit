@@ -134,7 +134,7 @@ package Liblktlang.Analysis is
       --  :ada:ref:`List_Kind`, :ada:ref:`Lkt_Node_Base_List`,
       --  :ada:ref:`Module_Doc_String_Line`, :ada:ref:`Null_Cond_Qualifier`,
       --  :ada:ref:`Op`, :ada:ref:`Pattern_Detail`, :ada:ref:`Pattern`,
-      --  :ada:ref:`Selector_Call`, :ada:ref:`Type_Ref`, :ada:ref:`Var_Bind`
+      --  :ada:ref:`Type_Ref`, :ada:ref:`Var_Bind`
 
       function Equals (L, R : Lkt_Node) return Boolean;
       --  Comparison function, meant to compare two nodes.
@@ -271,20 +271,18 @@ package Liblktlang.Analysis is
       --  The only patterns that are currently used and implemented in Lkt's
       --  IsA are ``OrPattern`` and ``TypePattern``.
       --
-      --  Derived nodes: :ada:ref:`Any_Type_Pattern`,
-      --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-      --  :ada:ref:`Ellipsis_Pattern`, :ada:ref:`Extended_Pattern`,
-      --  :ada:ref:`Filtered_Pattern`, :ada:ref:`Integer_Pattern`,
-      --  :ada:ref:`List_Pattern`, :ada:ref:`Not_Pattern`,
-      --  :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-      --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-      --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+      --  Derived nodes: :ada:ref:`Any_Type_Pattern`, :ada:ref:`Bool_Pattern`,
+      --  :ada:ref:`Complex_Pattern`, :ada:ref:`Ellipsis_Pattern`,
+      --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
+      --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`,
+      --  :ada:ref:`Or_Pattern`, :ada:ref:`Paren_Pattern`,
+      --  :ada:ref:`Regex_Pattern`, :ada:ref:`Type_Pattern`
 
       type Any_Type_Pattern is new Pattern with private
          with First_Controlling_Parameter
       ;
-      --  Pattern that allows to match any type. Only usable as an
-      --  ExtendedPattern's left side pattern:
+      --  Pattern that allows to match any type. Only usable as a
+      --  ComplexPattern's left side pattern:
       --
       --  .. code::
       --
@@ -446,19 +444,6 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Binding_Pattern is new Pattern with private
-         with First_Controlling_Parameter
-      ;
-      --  Pattern comprising a binding name and a value pattern.
-      --
-      --  For instance:
-      --
-      --  .. code::
-      --
-      --     o@ObjectDecl
-      --
-      --  This node type has no derivation.
-
       type User_Val_Decl is new Base_Val_Decl with private
          with First_Controlling_Parameter
       ;
@@ -610,6 +595,28 @@ package Liblktlang.Analysis is
          with First_Controlling_Parameter
       ;
       --  This node type has no derivation.
+
+      type Complex_Pattern is new Pattern with private
+         with First_Controlling_Parameter
+      ;
+      --  Composition of any of the following components:
+      --
+      --  * a binding name
+      --
+      --  * a value pattern
+      --
+      --  * pattern details
+      --
+      --  * a when clause
+      --
+      --  For instance:
+      --
+      --  .. code::
+      --
+      --     o@ObjectDecl(field: Pattern, prop(): Pattern)
+      --     when foo(o) == 42
+      --
+      --  Derived nodes: :ada:ref:`Renaming_Complex_Pattern`
 
       type Explicitly_Typed_Decl is new User_Val_Decl with private
          with First_Controlling_Parameter
@@ -900,24 +907,6 @@ package Liblktlang.Analysis is
       ;
       --  This node type has no derivation.
 
-      type Extended_Pattern is new Pattern with private
-         with First_Controlling_Parameter
-      ;
-      --  Pattern that takes a base pattern, and adds details to match on the
-      --  shape of what is being matched. The syntactic form is:
-      --
-      --  .. code::
-      --
-      --     <sub_pattern>(<detail>, <detail>, ...)
-      --
-      --  For instance:
-      --
-      --  .. code::
-      --
-      --     ObjectDecl(any children: AspectAssoc)
-      --
-      --  This node type has no derivation.
-
       type Field_Decl is new Component_Decl with private
          with First_Controlling_Parameter
       ;
@@ -928,30 +917,15 @@ package Liblktlang.Analysis is
       type Pattern_Detail is new Lkt_Node with private
          with First_Controlling_Parameter
       ;
-      --  Base class for a detail in an ExtendedPattern.
+      --  Base class for a detail in a ComplexPattern.
       --
       --  Derived nodes: :ada:ref:`Field_Pattern_Detail`,
-      --  :ada:ref:`Property_Pattern_Detail`,
-      --  :ada:ref:`Selector_Pattern_Detail`
+      --  :ada:ref:`Property_Pattern_Detail`
 
       type Field_Pattern_Detail is new Pattern_Detail with private
          with First_Controlling_Parameter
       ;
       --  Pattern detail denoting an access to a field.
-      --
-      --  This node type has no derivation.
-
-      type Filtered_Pattern is new Pattern with private
-         with First_Controlling_Parameter
-      ;
-      --  Pattern with a filtering predicate, of the form: ``<pattern> when
-      --  <predicate>``
-      --
-      --  For instance:
-      --
-      --  .. code::
-      --
-      --     o@ObjectDecl when o.children.length == 3
       --
       --  This node type has no derivation.
 
@@ -1741,12 +1715,8 @@ package Liblktlang.Analysis is
       --  List of Pattern.
       --
       --  This list node can contain one of the following nodes:
-      --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-      --  :ada:ref:`Ellipsis_Pattern`, :ada:ref:`Extended_Pattern`,
-      --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-      --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`,
-      --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-      --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+      --  :ada:ref:`Complex_Pattern`, :ada:ref:`Ellipsis_Pattern`,
+      --  :ada:ref:`Not_Pattern`
       --
       --  This node type has no derivation.
 
@@ -1823,17 +1793,11 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Selector_Call is new Lkt_Node with private
+      type Renaming_Complex_Pattern is new Complex_Pattern with private
          with First_Controlling_Parameter
       ;
-      --  Root node for selector patterns
-      --
-      --  This node type has no derivation.
-
-      type Selector_Pattern_Detail is new Pattern_Detail with private
-         with First_Controlling_Parameter
-      ;
-      --  Pattern detail denoting the use of a selector in a node pattern
+      --  Special case of a complex pattern with no pattern part. This subclass
+      --  exists only to facilitate the unparsing.
       --
       --  This node type has no derivation.
 
@@ -1966,13 +1930,6 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Tuple_Pattern is new Pattern with private
-         with First_Controlling_Parameter
-      ;
-      --  Pattern to match on tuples.
-      --
-      --  This node type has no derivation.
-
       type Type_Pattern is new Pattern with private
          with First_Controlling_Parameter
       ;
@@ -2060,8 +2017,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Bin_Op : constant Bin_Op;
       --% no-document: True
-      No_Binding_Pattern : constant Binding_Pattern;
-      --% no-document: True
       No_User_Val_Decl : constant User_Val_Decl;
       --% no-document: True
       No_Binding_Val_Decl : constant Binding_Val_Decl;
@@ -2099,6 +2054,8 @@ package Liblktlang.Analysis is
       No_Class_Qualifier_Absent : constant Class_Qualifier_Absent;
       --% no-document: True
       No_Class_Qualifier_Present : constant Class_Qualifier_Present;
+      --% no-document: True
+      No_Complex_Pattern : constant Complex_Pattern;
       --% no-document: True
       No_Explicitly_Typed_Decl : constant Explicitly_Typed_Decl;
       --% no-document: True
@@ -2168,15 +2125,11 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Excludes_Null_Present : constant Excludes_Null_Present;
       --% no-document: True
-      No_Extended_Pattern : constant Extended_Pattern;
-      --% no-document: True
       No_Field_Decl : constant Field_Decl;
       --% no-document: True
       No_Pattern_Detail : constant Pattern_Detail;
       --% no-document: True
       No_Field_Pattern_Detail : constant Field_Pattern_Detail;
-      --% no-document: True
-      No_Filtered_Pattern : constant Filtered_Pattern;
       --% no-document: True
       No_Full_Decl : constant Full_Decl;
       --% no-document: True
@@ -2406,9 +2359,7 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Regex_Pattern : constant Regex_Pattern;
       --% no-document: True
-      No_Selector_Call : constant Selector_Call;
-      --% no-document: True
-      No_Selector_Pattern_Detail : constant Selector_Pattern_Detail;
+      No_Renaming_Complex_Pattern : constant Renaming_Complex_Pattern;
       --% no-document: True
       No_Self_Decl : constant Self_Decl;
       --% no-document: True
@@ -2441,8 +2392,6 @@ package Liblktlang.Analysis is
       No_Trait_Decl : constant Trait_Decl;
       --% no-document: True
       No_Try_Expr : constant Try_Expr;
-      --% no-document: True
-      No_Tuple_Pattern : constant Tuple_Pattern;
       --% no-document: True
       No_Type_Pattern : constant Type_Pattern;
       --% no-document: True
@@ -4249,37 +4198,6 @@ package Liblktlang.Analysis is
 
 
 
-         
-   
-
-   function F_Decl
-     (Node : Binding_Pattern'Class) return Binding_Val_Decl;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Binding_Pattern
-
-
-         
-   
-
-   function F_Sub_Pattern
-     (Node : Binding_Pattern'Class) return Pattern;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Integer_Pattern`,
-   --  :ada:ref:`List_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Tuple_Pattern`,
-   --  :ada:ref:`Type_Pattern`
-   --
-   --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Binding_Pattern
-
-
-
-
-
-
-
 
 
 
@@ -4548,6 +4466,68 @@ package Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+         
+   
+
+   function F_Decl
+     (Node : Complex_Pattern'Class) return Binding_Val_Decl;
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Complex_Pattern
+
+
+         
+   
+
+   function F_Pattern
+     (Node : Complex_Pattern'Class) return Pattern;
+   --  This field can contain one of the following nodes:
+   --  :ada:ref:`Any_Type_Pattern`, :ada:ref:`Bool_Pattern`,
+   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
+   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
+   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Type_Pattern`
+   --
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Complex_Pattern
+
+
+         
+   
+
+   function F_Details
+     (Node : Complex_Pattern'Class) return Pattern_Detail_List;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Complex_Pattern
+
+
+         
+   
+
+   function F_Predicate
+     (Node : Complex_Pattern'Class) return Expr;
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Big_Num_Lit`, :ada:ref:`Bin_Op`,
+   --  :ada:ref:`Block_Expr`, :ada:ref:`Block_String_Lit`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Char_Lit`,
+   --  :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Null_Lit`,
+   --  :ada:ref:`Num_Lit`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
+   --
+   --  This field may be null even when there are no parsing errors.
+   --% belongs-to: Complex_Pattern
 
 
 
@@ -5122,33 +5102,6 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Sub_Pattern
-     (Node : Extended_Pattern'Class) return Pattern;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Any_Type_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Type_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Extended_Pattern
-
-
-         
-   
-
-   function F_Details
-     (Node : Extended_Pattern'Class) return Pattern_Detail_List;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Extended_Pattern
-
-
-
-
-
-
-
-         
-   
-
    function F_Trait_Ref
      (Node : Field_Decl'Class) return Dot_Expr;
    --  This field may be null even when there are no parsing errors.
@@ -5180,61 +5133,11 @@ package Liblktlang.Analysis is
    function F_Expected_Value
      (Node : Field_Pattern_Detail'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Field_Pattern_Detail
-
-
-
-
-
-
-
-         
-   
-
-   function F_Sub_Pattern
-     (Node : Filtered_Pattern'Class) return Pattern;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Integer_Pattern`,
-   --  :ada:ref:`List_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Tuple_Pattern`,
-   --  :ada:ref:`Type_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Filtered_Pattern
-
-
-         
-   
-
-   function F_Predicate
-     (Node : Filtered_Pattern'Class) return Expr;
-   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Big_Num_Lit`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Block_String_Lit`,
-   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Char_Lit`,
-   --  :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
-   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Null_Lit`,
-   --  :ada:ref:`Num_Lit`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Filtered_Pattern
 
 
 
@@ -6123,12 +6026,8 @@ package Liblktlang.Analysis is
    function F_Pattern
      (Node : Isa'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Isa
@@ -6455,12 +6354,8 @@ package Liblktlang.Analysis is
    function F_Sub_Patterns
      (Node : List_Pattern'Class) return Pattern_List;
    --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Ellipsis_Pattern`, :ada:ref:`Extended_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  nodes: :ada:ref:`Complex_Pattern`, :ada:ref:`Ellipsis_Pattern`,
+   --  :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: List_Pattern
@@ -6800,12 +6695,7 @@ package Liblktlang.Analysis is
    function F_Sub_Pattern
      (Node : Not_Pattern'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Integer_Pattern`,
-   --  :ada:ref:`List_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Tuple_Pattern`,
-   --  :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Not_Pattern
@@ -6966,12 +6856,7 @@ package Liblktlang.Analysis is
    function F_Left_Sub_Pattern
      (Node : Or_Pattern'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Or_Pattern
@@ -6983,12 +6868,8 @@ package Liblktlang.Analysis is
    function F_Right_Sub_Pattern
      (Node : Or_Pattern'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Or_Pattern
@@ -7034,12 +6915,8 @@ package Liblktlang.Analysis is
    function F_Sub_Pattern
      (Node : Paren_Pattern'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Paren_Pattern
@@ -7133,12 +7010,8 @@ package Liblktlang.Analysis is
    function F_Pattern
      (Node : Pattern_Match_Branch'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Pattern_Match_Branch
@@ -7184,12 +7057,8 @@ package Liblktlang.Analysis is
    function F_Expected_Value
      (Node : Property_Pattern_Detail'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Property_Pattern_Detail
@@ -7230,12 +7099,8 @@ package Liblktlang.Analysis is
    function F_Pattern
      (Node : Query'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Query
@@ -7375,74 +7240,6 @@ package Liblktlang.Analysis is
 
 
 
-
-
-         
-   
-
-   function F_Quantifier
-     (Node : Selector_Call'Class) return Id;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Selector_Call
-
-
-         
-   
-
-   function F_Binding
-     (Node : Selector_Call'Class) return Id;
-   --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Selector_Call
-
-
-         
-   
-
-   function F_Selector_Call
-     (Node : Selector_Call'Class) return Expr;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Big_Num_Lit`, :ada:ref:`Block_Expr`,
-   --  :ada:ref:`Block_String_Lit`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Char_Lit`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
-   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Null_Lit`, :ada:ref:`Num_Lit`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Selector_Call
-
-
-
-
-
-
-
-         
-   
-
-   function F_Call
-     (Node : Selector_Pattern_Detail'Class) return Selector_Call;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Selector_Pattern_Detail
-
-
-         
-   
-
-   function F_Sub_Pattern
-     (Node : Selector_Pattern_Detail'Class) return Pattern;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Selector_Pattern_Detail
 
 
 
@@ -7718,28 +7515,6 @@ package Liblktlang.Analysis is
    --
    --  This field may be null even when there are no parsing errors.
    --% belongs-to: Try_Expr
-
-
-
-
-
-
-
-         
-   
-
-   function F_Sub_Patterns
-     (Node : Tuple_Pattern'Class) return Pattern_List;
-   --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Integer_Pattern`,
-   --  :ada:ref:`List_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Tuple_Pattern`,
-   --  :ada:ref:`Type_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Tuple_Pattern
 
 
 
@@ -8110,9 +7885,6 @@ package Liblktlang.Analysis is
       function As_Bin_Op
         (Node : Lkt_Node'Class) return Bin_Op;
       --% no-document: True
-      function As_Binding_Pattern
-        (Node : Lkt_Node'Class) return Binding_Pattern;
-      --% no-document: True
       function As_User_Val_Decl
         (Node : Lkt_Node'Class) return User_Val_Decl;
       --% no-document: True
@@ -8169,6 +7941,9 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Class_Qualifier_Present
         (Node : Lkt_Node'Class) return Class_Qualifier_Present;
+      --% no-document: True
+      function As_Complex_Pattern
+        (Node : Lkt_Node'Class) return Complex_Pattern;
       --% no-document: True
       function As_Explicitly_Typed_Decl
         (Node : Lkt_Node'Class) return Explicitly_Typed_Decl;
@@ -8272,9 +8047,6 @@ package Liblktlang.Analysis is
       function As_Excludes_Null_Present
         (Node : Lkt_Node'Class) return Excludes_Null_Present;
       --% no-document: True
-      function As_Extended_Pattern
-        (Node : Lkt_Node'Class) return Extended_Pattern;
-      --% no-document: True
       function As_Field_Decl
         (Node : Lkt_Node'Class) return Field_Decl;
       --% no-document: True
@@ -8283,9 +8055,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Field_Pattern_Detail
         (Node : Lkt_Node'Class) return Field_Pattern_Detail;
-      --% no-document: True
-      function As_Filtered_Pattern
-        (Node : Lkt_Node'Class) return Filtered_Pattern;
       --% no-document: True
       function As_Full_Decl
         (Node : Lkt_Node'Class) return Full_Decl;
@@ -8629,11 +8398,8 @@ package Liblktlang.Analysis is
       function As_Regex_Pattern
         (Node : Lkt_Node'Class) return Regex_Pattern;
       --% no-document: True
-      function As_Selector_Call
-        (Node : Lkt_Node'Class) return Selector_Call;
-      --% no-document: True
-      function As_Selector_Pattern_Detail
-        (Node : Lkt_Node'Class) return Selector_Pattern_Detail;
+      function As_Renaming_Complex_Pattern
+        (Node : Lkt_Node'Class) return Renaming_Complex_Pattern;
       --% no-document: True
       function As_Self_Decl
         (Node : Lkt_Node'Class) return Self_Decl;
@@ -8682,9 +8448,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Try_Expr
         (Node : Lkt_Node'Class) return Try_Expr;
-      --% no-document: True
-      function As_Tuple_Pattern
-        (Node : Lkt_Node'Class) return Tuple_Pattern;
       --% no-document: True
       function As_Type_Pattern
         (Node : Lkt_Node'Class) return Type_Pattern;
@@ -8852,10 +8615,6 @@ private
       No_Bin_Op : constant Bin_Op :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Binding_Pattern is new Pattern with null record;
-      No_Binding_Pattern : constant Binding_Pattern :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
          type User_Val_Decl is new Base_Val_Decl with null record;
       No_User_Val_Decl : constant User_Val_Decl :=
         (Internal   => Implementation.No_Entity,
@@ -8930,6 +8689,10 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Class_Qualifier_Present is new Class_Qualifier with null record;
       No_Class_Qualifier_Present : constant Class_Qualifier_Present :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Complex_Pattern is new Pattern with null record;
+      No_Complex_Pattern : constant Complex_Pattern :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Explicitly_Typed_Decl is new User_Val_Decl with null record;
@@ -9068,10 +8831,6 @@ private
       No_Excludes_Null_Present : constant Excludes_Null_Present :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Extended_Pattern is new Pattern with null record;
-      No_Extended_Pattern : constant Extended_Pattern :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
          type Field_Decl is new Component_Decl with null record;
       No_Field_Decl : constant Field_Decl :=
         (Internal   => Implementation.No_Entity,
@@ -9082,10 +8841,6 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Field_Pattern_Detail is new Pattern_Detail with null record;
       No_Field_Pattern_Detail : constant Field_Pattern_Detail :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Filtered_Pattern is new Pattern with null record;
-      No_Filtered_Pattern : constant Filtered_Pattern :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Full_Decl is new Lkt_Node with null record;
@@ -9544,12 +9299,8 @@ private
       No_Regex_Pattern : constant Regex_Pattern :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Selector_Call is new Lkt_Node with null record;
-      No_Selector_Call : constant Selector_Call :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Selector_Pattern_Detail is new Pattern_Detail with null record;
-      No_Selector_Pattern_Detail : constant Selector_Pattern_Detail :=
+         type Renaming_Complex_Pattern is new Complex_Pattern with null record;
+      No_Renaming_Complex_Pattern : constant Renaming_Complex_Pattern :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Self_Decl is new Base_Val_Decl with null record;
@@ -9614,10 +9365,6 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Try_Expr is new Expr with null record;
       No_Try_Expr : constant Try_Expr :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Tuple_Pattern is new Pattern with null record;
-      No_Tuple_Pattern : constant Tuple_Pattern :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Type_Pattern is new Pattern with null record;

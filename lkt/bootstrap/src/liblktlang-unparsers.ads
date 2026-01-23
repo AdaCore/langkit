@@ -1704,15 +1704,35 @@ private package Liblktlang.Unparsers is
 
          
 
-         Bare_Binding_Pattern_Fields_Unparser_List
+         Bare_Complex_Pattern_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
-            := (N               => 2,
+            := (N               => 4,
                 Field_Unparsers =>
-                  (1 => (Member_Index_For_Binding_Pattern_F_Decl, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Binding_Pattern_F_Sub_Pattern, Token_Sequence_38'Access, Empty_Token_Sequence, False)),
+                  (1 => (Member_Index_For_Complex_Pattern_F_Decl, Empty_Token_Sequence, Token_Sequence_38'Access, False),
+                   2 => (Member_Index_For_Complex_Pattern_F_Pattern, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   3 => (Member_Index_For_Complex_Pattern_F_Details, Token_Sequence_9'Access, Token_Sequence_10'Access, True),
+                   4 => (Member_Index_For_Complex_Pattern_F_Predicate, Token_Sequence_85'Access, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
-                   2 => Empty_Token_Sequence));
+                   2 => Empty_Token_Sequence,
+                   3 => Empty_Token_Sequence,
+                   4 => Empty_Token_Sequence));
+
+         
+
+         Bare_Renaming_Complex_Pattern_Fields_Unparser_List
+            : aliased constant Field_Unparser_List_Impl
+            := (N               => 4,
+                Field_Unparsers =>
+                  (1 => (Member_Index_For_Complex_Pattern_F_Decl, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   2 => (Member_Index_For_Complex_Pattern_F_Pattern, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   3 => (Member_Index_For_Complex_Pattern_F_Details, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   4 => (Member_Index_For_Complex_Pattern_F_Predicate, Token_Sequence_85'Access, Empty_Token_Sequence, False)),
+                Inter_Tokens    =>
+                  (1 => Empty_Token_Sequence,
+                   2 => Empty_Token_Sequence,
+                   3 => Empty_Token_Sequence,
+                   4 => Empty_Token_Sequence));
 
          
 
@@ -1723,30 +1743,6 @@ private package Liblktlang.Unparsers is
                   (1 => (Member_Index_For_Ellipsis_Pattern_F_Binding, Empty_Token_Sequence, Token_Sequence_38'Access, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence));
-
-         
-
-         Bare_Extended_Pattern_Fields_Unparser_List
-            : aliased constant Field_Unparser_List_Impl
-            := (N               => 2,
-                Field_Unparsers =>
-                  (1 => (Member_Index_For_Extended_Pattern_F_Sub_Pattern, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Extended_Pattern_F_Details, Empty_Token_Sequence, Empty_Token_Sequence, False)),
-                Inter_Tokens    =>
-                  (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_9'Access));
-
-         
-
-         Bare_Filtered_Pattern_Fields_Unparser_List
-            : aliased constant Field_Unparser_List_Impl
-            := (N               => 2,
-                Field_Unparsers =>
-                  (1 => (Member_Index_For_Filtered_Pattern_F_Sub_Pattern, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Filtered_Pattern_F_Predicate, Empty_Token_Sequence, Empty_Token_Sequence, False)),
-                Inter_Tokens    =>
-                  (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_85'Access));
 
          
 
@@ -1792,16 +1788,6 @@ private package Liblktlang.Unparsers is
 
          
 
-         Bare_Tuple_Pattern_Fields_Unparser_List
-            : aliased constant Field_Unparser_List_Impl
-            := (N               => 1,
-                Field_Unparsers =>
-                  (1 => (Member_Index_For_Tuple_Pattern_F_Sub_Patterns, Empty_Token_Sequence, Empty_Token_Sequence, False)),
-                Inter_Tokens    =>
-                  (1 => Empty_Token_Sequence));
-
-         
-
          Bare_Type_Pattern_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
             := (N               => 1,
@@ -1833,32 +1819,6 @@ private package Liblktlang.Unparsers is
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
                    2 => Token_Sequence_23'Access));
-
-         
-
-         Bare_Selector_Pattern_Detail_Fields_Unparser_List
-            : aliased constant Field_Unparser_List_Impl
-            := (N               => 2,
-                Field_Unparsers =>
-                  (1 => (Member_Index_For_Selector_Pattern_Detail_F_Call, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Selector_Pattern_Detail_F_Sub_Pattern, Empty_Token_Sequence, Empty_Token_Sequence, False)),
-                Inter_Tokens    =>
-                  (1 => Empty_Token_Sequence,
-                   2 => Token_Sequence_23'Access));
-
-         
-
-         Bare_Selector_Call_Fields_Unparser_List
-            : aliased constant Field_Unparser_List_Impl
-            := (N               => 3,
-                Field_Unparsers =>
-                  (1 => (Member_Index_For_Selector_Call_F_Quantifier, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Selector_Call_F_Binding, Empty_Token_Sequence, Token_Sequence_38'Access, False),
-                   3 => (Member_Index_For_Selector_Call_F_Selector_Call, Empty_Token_Sequence, Empty_Token_Sequence, False)),
-                Inter_Tokens    =>
-                  (1 => Empty_Token_Sequence,
-                   2 => Empty_Token_Sequence,
-                   3 => Empty_Token_Sequence));
 
          
 
@@ -3029,13 +2989,6 @@ private package Liblktlang.Unparsers is
             Post_Tokens => Empty_Token_Sequence);
       
 
-         Unparser_For_Binding_Pattern : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Empty_Token_Sequence,
-            Field_Unparsers => Bare_Binding_Pattern_Fields_Unparser_List'Access,
-            Post_Tokens => Empty_Token_Sequence);
-      
-
       
 
          Unparser_For_Bool_Pattern_False : aliased constant Node_Unparser_Impl :=
@@ -3052,25 +3005,25 @@ private package Liblktlang.Unparsers is
             Post_Tokens => Empty_Token_Sequence);
       
 
+         Unparser_For_Complex_Pattern : aliased constant Node_Unparser_Impl :=
+           (Kind => Regular,
+            Pre_Tokens => Empty_Token_Sequence,
+            Field_Unparsers => Bare_Complex_Pattern_Fields_Unparser_List'Access,
+            Post_Tokens => Empty_Token_Sequence);
+      
+
+         Unparser_For_Renaming_Complex_Pattern : aliased constant Node_Unparser_Impl :=
+           (Kind => Regular,
+            Pre_Tokens => Empty_Token_Sequence,
+            Field_Unparsers => Bare_Renaming_Complex_Pattern_Fields_Unparser_List'Access,
+            Post_Tokens => Empty_Token_Sequence);
+      
+
          Unparser_For_Ellipsis_Pattern : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
             Pre_Tokens => Empty_Token_Sequence,
             Field_Unparsers => Bare_Ellipsis_Pattern_Fields_Unparser_List'Access,
             Post_Tokens => Token_Sequence_21'Access);
-      
-
-         Unparser_For_Extended_Pattern : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Empty_Token_Sequence,
-            Field_Unparsers => Bare_Extended_Pattern_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_10'Access);
-      
-
-         Unparser_For_Filtered_Pattern : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Empty_Token_Sequence,
-            Field_Unparsers => Bare_Filtered_Pattern_Fields_Unparser_List'Access,
-            Post_Tokens => Empty_Token_Sequence);
       
 
          Unparser_For_Integer_Pattern : aliased constant Node_Unparser_Impl :=
@@ -3116,13 +3069,6 @@ private package Liblktlang.Unparsers is
            (Kind => Token);
       
 
-         Unparser_For_Tuple_Pattern : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Token_Sequence_9'Access,
-            Field_Unparsers => Bare_Tuple_Pattern_Fields_Unparser_List'Access,
-            Post_Tokens => Token_Sequence_10'Access);
-      
-
          Unparser_For_Type_Pattern : aliased constant Node_Unparser_Impl :=
            (Kind => Regular,
             Pre_Tokens => Empty_Token_Sequence,
@@ -3143,20 +3089,6 @@ private package Liblktlang.Unparsers is
            (Kind => Regular,
             Pre_Tokens => Empty_Token_Sequence,
             Field_Unparsers => Bare_Property_Pattern_Detail_Fields_Unparser_List'Access,
-            Post_Tokens => Empty_Token_Sequence);
-      
-
-         Unparser_For_Selector_Pattern_Detail : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Empty_Token_Sequence,
-            Field_Unparsers => Bare_Selector_Pattern_Detail_Fields_Unparser_List'Access,
-            Post_Tokens => Empty_Token_Sequence);
-      
-
-         Unparser_For_Selector_Call : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Empty_Token_Sequence,
-            Field_Unparsers => Bare_Selector_Call_Fields_Unparser_List'Access,
             Post_Tokens => Empty_Token_Sequence);
       
 
@@ -3590,19 +3522,17 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Any_Type_Pattern => Unparser_For_Any_Type_Pattern'Access
          ,
-         Type_Index_For_Binding_Pattern => Unparser_For_Binding_Pattern'Access
-         ,
          Type_Index_For_Bool_Pattern => null
          ,
          Type_Index_For_Bool_Pattern_False => Unparser_For_Bool_Pattern_False'Access
          ,
          Type_Index_For_Bool_Pattern_True => Unparser_For_Bool_Pattern_True'Access
          ,
+         Type_Index_For_Complex_Pattern => Unparser_For_Complex_Pattern'Access
+         ,
+         Type_Index_For_Renaming_Complex_Pattern => Unparser_For_Renaming_Complex_Pattern'Access
+         ,
          Type_Index_For_Ellipsis_Pattern => Unparser_For_Ellipsis_Pattern'Access
-         ,
-         Type_Index_For_Extended_Pattern => Unparser_For_Extended_Pattern'Access
-         ,
-         Type_Index_For_Filtered_Pattern => Unparser_For_Filtered_Pattern'Access
          ,
          Type_Index_For_Integer_Pattern => Unparser_For_Integer_Pattern'Access
          ,
@@ -3618,8 +3548,6 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Regex_Pattern => Unparser_For_Regex_Pattern'Access
          ,
-         Type_Index_For_Tuple_Pattern => Unparser_For_Tuple_Pattern'Access
-         ,
          Type_Index_For_Type_Pattern => Unparser_For_Type_Pattern'Access
          ,
          Type_Index_For_Pattern_Detail => null
@@ -3627,10 +3555,6 @@ private package Liblktlang.Unparsers is
          Type_Index_For_Field_Pattern_Detail => Unparser_For_Field_Pattern_Detail'Access
          ,
          Type_Index_For_Property_Pattern_Detail => Unparser_For_Property_Pattern_Detail'Access
-         ,
-         Type_Index_For_Selector_Pattern_Detail => Unparser_For_Selector_Pattern_Detail'Access
-         ,
-         Type_Index_For_Selector_Call => Unparser_For_Selector_Call'Access
          ,
          Type_Index_For_Type_Ref => null
          ,
@@ -3694,9 +3618,9 @@ private package Liblktlang.Unparsers is
       & "    }," & Character'Val (10)
       & "    ""BaseImportList"": {}," & Character'Val (10)
       & "    ""Pattern"": {}," & Character'Val (10)
-      & "    ""ExtendedPattern"": {" & Character'Val (10)
+      & "    ""ComplexPattern"": {" & Character'Val (10)
       & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_sub_pattern"": {" & Character'Val (10)
+      & "        ""f_pattern"": {" & Character'Val (10)
       & "          ""kind"": ""group""," & Character'Val (10)
       & "          ""document"": {" & Character'Val (10)
       & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
@@ -3746,7 +3670,6 @@ private package Liblktlang.Unparsers is
       & "    ""ParenPattern"": {}," & Character'Val (10)
       & "    ""RegexPattern"": {}," & Character'Val (10)
       & "    ""EllipsisPattern"": {}," & Character'Val (10)
-      & "    ""TuplePattern"": {}," & Character'Val (10)
       & "    ""AnyTypePattern"": {}," & Character'Val (10)
       & "    ""PatternList"": {}," & Character'Val (10)
       & "    ""BindingValDecl"": {}," & Character'Val (10)
@@ -3770,16 +3693,6 @@ private package Liblktlang.Unparsers is
       & "        {""kind"": ""recurse_field"", ""field"": ""f_expected_value""}" & Character'Val (10)
       & "      ]" & Character'Val (10)
       & "    }," & Character'Val (10)
-      & "    ""SelectorPatternDetail"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_call""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_sub_pattern""}" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & Character'Val (10)
-      & "    ""SelectorCall"": {}," & Character'Val (10)
       & "    ""BaseCallExpr"": {" & Character'Val (10)
       & "      ""node"": {" & Character'Val (10)
       & "        ""kind"": ""group"", ""document"": ""recurse""" & Character'Val (10)
@@ -4528,10 +4441,9 @@ private package Liblktlang.Unparsers is
       & "    ""ImportAllFrom"": {" & Character'Val (10)
       & "      ""node"": [""recurse"", ""hardline""]" & Character'Val (10)
       & "    }," & Character'Val (10)
+      & "    ""ImportedName"": {}," & Character'Val (10)
+      & "    ""ImportedNameList"": {}," & Character'Val (10)
       & "    ""ImportedId"": {}," & Character'Val (10)
-      & "    ""ImportedIdList"": {" & Character'Val (10)
-      & "        ""sep"": [""recurse"", ""softline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
       & "    ""Isa"": {" & Character'Val (10)
       & "      ""node"": {" & Character'Val (10)
       & "        ""kind"": ""group""," & Character'Val (10)
