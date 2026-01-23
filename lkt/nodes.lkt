@@ -3093,7 +3093,7 @@ class FieldPatternDetail: PatternDetail {
 |" Pattern detail denoting an access to a property in a node pattern.
 class PropertyPatternDetail: PatternDetail {
     @parse_field
-    call: Expr
+    call: CallExpr
     @parse_field
     expected_value: Pattern
 }
@@ -3105,11 +3105,6 @@ class Expr: LktNode {
     expected_type_var: LogicVar
     actual_type_var: LogicVar
     generic_func_type_var: LogicVar
-
-    |" Simple predicate used to filter during parsing. Used to only allow
-    |" simple call expressions in PropertyPatternDetail.
-    fun is_simple_call_expr(): Bool =
-        node is CallExpr and node.as[CallExpr].name is RefId
 
     fun xref_entry_point(): Bool = match node.parent {
         case _: CastExpr => true
