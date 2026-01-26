@@ -13,7 +13,7 @@ def run(name, lhs, rhs):
     a property in Example.
     """
 
-    global FooNode, BarNode, ListNode
+    global FooNode
 
     print('== {} =='.format(name))
 
