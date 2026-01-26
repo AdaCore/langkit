@@ -24,41 +24,41 @@ procedure Lkt_Toolbox is
    package Arg is
 
       Parser : Argument_Parser := Create_Argument_Parser
-        (Help => "Lkt toolbox. Toolbox like command line frontend for the "
-                 & "LKT langkit library.");
+        (Help => "Command line frontend for the Lkt langkit library.");
 
       package Files is new Parse_Positional_Arg_List
         (Parser   => Parser,
          Name     => "files",
          Arg_Type => Unbounded_String,
-         Help     => "The files to parse");
+         Help     => "The files to analyze.");
 
       package Check_Only is new Parse_Flag
         (Parser => Parser,
          Short  => "-C",
          Long   => "--check-only",
-         Help   => "Only output the errors");
+         Help   => "Only output the errors.");
 
       package Flag_Invalid is new Parse_Flag
         (Parser => Parser,
          Short  => "-I",
          Long   => "--check-invalid-decls",
-         Help   => "Flag decls that generate errors that are not annotated"
-                   & " with the @invalid annotation. Also flag decls"
-                   & " annotated with @invalid that don't trigger any errors");
+         Help   =>
+           "Flag decls that generate errors that are not annotated with the"
+           & " @invalid annotation. Also flag decls annotated with @invalid"
+           & " that don't trigger any errors.");
 
       package Debug_Solver is new Parse_Flag
         (Parser => Parser,
          Short  => "-D",
          Long   => "--debug",
-         Help   => "Enable Solver debug traces");
+         Help   => "Enable debug traces for the logic solver.");
 
       package Solve_Line is new Parse_Option
-        (Parser => Parser,
-         Short  => "-L",
-         Long   => "--solve-line",
-         Arg_Type => Natural,
-         Help   => "Only do name resolution at line N",
+        (Parser      => Parser,
+         Short       => "-L",
+         Long        => "--solve-line",
+         Arg_Type    => Natural,
+         Help        => "Only do name resolution at line N.",
          Default_Val => 0);
    end Arg;
 
@@ -73,7 +73,7 @@ procedure Lkt_Toolbox is
    procedure Print_Lkt_Toolbox_Diagnostic
      (Node : Lkt_Node'Class; Message : Text_Type);
    --  Internal wrapper to ``Print_Diagnostic`` used by lkt_toolbox to print
-   --  additional diagnostics.
+   --  a diagnostic using ``Node`` for context.
 
    procedure Print_Nameres_Results
      (Node : Lkt_Node'Class; Perform_Analysis : Boolean := False);
@@ -164,7 +164,7 @@ procedure Lkt_Toolbox is
          elsif Node.Kind in Common.Lkt_Decl then
             return Node.As_Decl.P_Custom_Image;
          elsif Node.Kind = Common.Lkt_Ref_Id then
-            return  Node.As_Ref_Id.P_Custom_Image;
+            return Node.As_Ref_Id.P_Custom_Image;
          else
             return To_Text (Node.Image);
          end if;
@@ -210,7 +210,7 @@ procedure Lkt_Toolbox is
 
       use type Common.Lkt_Node_Kind_Type;
 
-      Indented     : Boolean := False;
+      Indented : Boolean := False;
 
       Node_Line    : constant Line_Number := Sloc_Range (Node).Start_Line;
       Allowed_Line : constant Line_Number := Line_Number (Arg.Solve_Line.Get);
@@ -219,6 +219,7 @@ procedure Lkt_Toolbox is
    begin
       --  The Lkt specification does not handle name and type resolution in
       --  lexer and grammar declarations: ignore them.
+
       if Node.Kind in Common.Lkt_Lexer_Decl | Common.Lkt_Grammar_Decl then
          return;
       end if;
@@ -226,6 +227,7 @@ procedure Lkt_Toolbox is
       --  If the analysis was not successful, print the emitted diagnostics.
       --  In any case, print the resulting name and type resolution
       --  information.
+
       if Can_Nameres then
          if Node.P_Xref_Entry_Point then
             declare
@@ -243,9 +245,9 @@ procedure Lkt_Toolbox is
          end if;
          begin
             if Node.Kind = Common.Lkt_Ref_Id then
-                  Print_Ref_Id_Nameres (Node.As_Ref_Id);
-                  Indented := True;
-                  Indent := Indent + 1;
+               Print_Ref_Id_Nameres (Node.As_Ref_Id);
+               Indented := True;
+               Indent := Indent + 1;
             elsif Node.Kind = Common.Lkt_Def_Id then
                null;
             elsif Node.Kind in Common.Lkt_Base_Val_Decl then
@@ -278,7 +280,6 @@ procedure Lkt_Toolbox is
       if Indented then
          Indent := Indent - 1;
       end if;
-
    end Print_Nameres_Results;
 
    -------------------------------
@@ -314,57 +315,58 @@ procedure Lkt_Toolbox is
 
    Ctx : constant Analysis.Analysis_Context := Analysis.Create_Context;
 begin
-   if Arg.Parser.Parse then
-      Set_Solver_Debug_Mode (Arg.Debug_Solver.Get);
-      for File_Name of Arg.Files.Get loop
-         declare
-            File_Name_Str : constant String := To_String (File_Name);
-            Unit          : constant Analysis.Analysis_Unit :=
-               Ctx.Get_From_File (File_Name_Str);
-         begin
-            if not Arg.Check_Only.Get then
-               Put_Line ("Resolving " & File_Name_Str);
-               Put_Line ((File_Name_Str'Length + 10) * "=");
-            end if;
-
-            if Unit.Diagnostics'Length > 0 then
-               for Diagnostic of Unit.Diagnostics loop
-                  Print_Diagnostic
-                    (Diagnostic, Unit, Simple_Name (Unit.Get_Filename));
-               end loop;
-               return;
-            end if;
-
-            if Arg.Flag_Invalid.Get then
-               Unit.Root.Traverse (Populate_Invalid_Decl_Map'Access);
-            end if;
-
-            if Arg.Check_Only.Get then
-               Print_Solver_Diagnostics_In_Unit (Unit);
-            else
-               Print_Nameres_Results (Unit.Root, Arg.Solve_Line.Get = 0);
-            end if;
-
-            if Arg.Flag_Invalid.Get then
-
-               --  Ensure that all ``@invalid`` declarations in the map have
-               --  corresponding diagnostics. Otherwise, emit an error.
-
-               for E in Invalid_Decl_Map.Iterate loop
-                  if not Invalid_Decl_Maps.Element (E) then
-                     Set_Exit_Status (1);
-
-                     Print_Lkt_Toolbox_Diagnostic
-                       (Invalid_Decl_Maps.Key (E),
-                        "@invalid declaration without diagnostic");
-                  end if;
-               end loop;
-
-            end if;
-
-         end;
-      end loop;
+   if not Arg.Parser.Parse then
+      return;
    end if;
+
+   Set_Solver_Debug_Mode (Arg.Debug_Solver.Get);
+   for File_Name of Arg.Files.Get loop
+      declare
+         File_Name_Str : constant String := To_String (File_Name);
+         Unit          : constant Analysis.Analysis_Unit :=
+            Ctx.Get_From_File (File_Name_Str);
+      begin
+         if not Arg.Check_Only.Get then
+            Put_Line ("Resolving " & File_Name_Str);
+            Put_Line ((File_Name_Str'Length + 10) * "=");
+         end if;
+
+         if Unit.Has_Diagnostics then
+            for D of Unit.Diagnostics loop
+               Print_Diagnostic (D, Unit, Simple_Name (Unit.Get_Filename));
+            end loop;
+            return;
+         end if;
+
+         if Arg.Flag_Invalid.Get then
+            Unit.Root.Traverse (Populate_Invalid_Decl_Map'Access);
+         end if;
+
+         if Arg.Check_Only.Get then
+            Print_Solver_Diagnostics_In_Unit (Unit);
+         else
+            Print_Nameres_Results
+              (Node             => Unit.Root,
+               Perform_Analysis => Arg.Solve_Line.Get = 0);
+         end if;
+
+         if Arg.Flag_Invalid.Get then
+
+            --  Ensure that all ``@invalid`` declarations in the map have
+            --  corresponding diagnostics. Otherwise, emit an error.
+
+            for E in Invalid_Decl_Map.Iterate loop
+               if not Invalid_Decl_Maps.Element (E) then
+                  Set_Exit_Status (1);
+
+                  Print_Lkt_Toolbox_Diagnostic
+                    (Invalid_Decl_Maps.Key (E),
+                     "@invalid declaration without diagnostic");
+               end if;
+            end loop;
+         end if;
+      end;
+   end loop;
 exception
    when E : Common.Property_Error =>
       Put_Line (Ada.Exceptions.Exception_Message (E));
