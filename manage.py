@@ -491,7 +491,6 @@ def make(args: Namespace) -> None:
         "make",
         "--config",
         str(LKT_LIB_ROOT / "langkit.yaml"),
-        "-Dgnu-full",
         f"--library-types={lib_types}",
         f"--build-mode={args.build_mode}",
         f"-j{args.jobs}",
