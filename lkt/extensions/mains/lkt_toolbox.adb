@@ -163,8 +163,8 @@ procedure Lkt_Toolbox is
             return "None";
          elsif Node.Kind in Common.Lkt_Decl then
             return Node.As_Decl.P_Custom_Image;
-         elsif Node.Kind = Common.Lkt_Ref_Id then
-            return Node.As_Ref_Id.P_Custom_Image;
+         elsif Node.Kind = Common.Lkt_Id then
+            return Node.As_Id.P_Custom_Image;
          else
             return To_Text (Node.Image);
          end if;
