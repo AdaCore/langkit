@@ -10,7 +10,7 @@ def run(name, expr):
     a property in ExampleNode.
     """
 
-    global Compound, Expression, FooNode, NullNode, Number
+    global FooNode
 
     print('== {} =='.format(name))
 
