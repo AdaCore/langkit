@@ -883,18 +883,25 @@ class LktTypesLoader:
                 imported_entities.append(imported)
 
             for clause in unit.root.f_imports:
-                module_name = clause.f_module_name
-                module = self.resolver.resolve_module(module_name)
                 match clause:
                     case L.Import():
-                        add(
-                            module_name.text,
-                            module,
-                            clause.f_renaming or module_name,
-                            clause.f_renaming,
-                        )
+                        for imported_name in clause.f_imported_names:
+                            original_name = imported_name.f_original_name
+                            renaming = imported_name.f_renaming
+                            module = self.resolver.resolve_module(
+                                original_name
+                            )
+                            add(
+                                imported_name.f_original_name.text,
+                                module,
+                                renaming or original_name,
+                                renaming,
+                            )
 
                     case L.ImportFrom():
+                        module = self.resolver.resolve_module(
+                            clause.f_module_name
+                        )
                         for imported_name in clause.f_imported_names:
                             original_name = imported_name.f_original_name
                             add(
@@ -907,6 +914,9 @@ class LktTypesLoader:
                             )
 
                     case L.ImportAllFrom():
+                        module = self.resolver.resolve_module(
+                            clause.f_module_name
+                        )
                         for e in module.unit_scope.mapping.values():
                             if not isinstance(e, Scope.Imported):
                                 add(e.name, e, diagnostic_node=clause)

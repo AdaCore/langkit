@@ -140,7 +140,8 @@ def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
             assert isinstance(unit.root, L.LangkitRoot)
             import_stmts = list(unit.root.f_imports)
             for imp in import_stmts:
-                process_unit(imp.p_referenced_unit)
+                for u in imp.p_referenced_units:
+                    process_unit(u)
 
     # Give Liblktlang access to the Lkt files to analyze
     old_path = os.environ.get("LKT_PATH", "")
