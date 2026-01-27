@@ -5284,7 +5284,11 @@ class ImportAllFrom: BaseImport {
 }
 
 |" For the moment, root node of a lkt compilation unit.
-class LangkitRoot: LktNode {
+class LangkitRoot: Decl {
+    @null_field
+    @parse_field
+    syn_name: DefId
+
     @nullable
     @parse_field
     doc: ModuleDocStringLit
@@ -5292,6 +5296,12 @@ class LangkitRoot: LktNode {
     imports: ASTList[BaseImport]
     @parse_field
     decls: ASTList[FullDecl]
+
+    fun decl_type_name(): String = "module declaration"
+
+    fun name(): Symbol = node.module_name() or? s"<prelude>"
+
+    fun defined_scope(): LexicalEnv = node.children_env
 
     |" External property that will fetch the prelude unit, containing
     |" predefined types and values.
@@ -5307,6 +5317,10 @@ class LangkitRoot: LktNode {
 
         node.children_env.get_first(s"__internal").as[Decl].defined_scope()
     }
+
+    |" Return the name of this Lkt module, or the empty symbol for the prelude.
+    @external()
+    fun module_name(): Symbol
 
     |" An empty synthetic TypeRef list node. Used to generate synthetic type
     |" declarations.

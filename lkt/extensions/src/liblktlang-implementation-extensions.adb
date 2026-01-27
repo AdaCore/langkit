@@ -5,6 +5,7 @@ with Ada.Text_IO;    use Ada.Text_IO;
 
 with Interfaces; use Interfaces;
 
+with GNAT.Regexp;
 with GNATCOLL.Traces;
 
 with Liblktlang.Analysis;          use Liblktlang.Analysis;
@@ -14,6 +15,9 @@ with Liblktlang_Support.Adalog.Debug;
 with Liblktlang_Support.Text;      use Liblktlang_Support.Text;
 
 package body Liblktlang.Implementation.Extensions is
+
+   Lkt_Filename_Regexp : constant GNAT.Regexp.Regexp :=
+     GNAT.Regexp.Compile ("([a-z](_?[a-z0-9]+)*)\.lkt");
 
    package WWS renames Ada.Strings.Wide_Wide_Unbounded;
 
@@ -368,6 +372,39 @@ package body Liblktlang.Implementation.Extensions is
       end if;
       return Unwrap_Unit (Prelude);
    end Langkit_Root_P_Fetch_Prelude;
+
+   --------------------------------
+   -- Langkit_Root_P_Module_Name --
+   --------------------------------
+
+   function Langkit_Root_P_Module_Name
+     (Node : Bare_Langkit_Root) return Symbol_Type
+   is
+      Filename : constant String :=
+        Ada.Directories.Simple_Name (Node.Unit.Get_Filename);
+   begin
+      --  If ``Node`` belongs to the prelude, which is not a regular module,
+      --  return the empty symbol, as documented.
+
+      if Node.Unit = Langkit_Root_P_Fetch_Prelude (Node) then
+         return No_Symbol;
+
+      --  Otherwise, make sure the unit has a valid Lkt filename
+
+      elsif not GNAT.Regexp.Match (Filename, Lkt_Filename_Regexp) then
+         Raise_Property_Exception
+           (Node, Property_Error'Identity, "invalid Lkt filename");
+      end if;
+
+      --  From there, just strip the extension and we have the module name
+
+      declare
+         Module_Name : String renames
+           Filename (Filename'First .. Filename'Last - 4);
+      begin
+         return Find (Node.Unit.Context.Symbols, To_Text (Module_Name));
+      end;
+   end Langkit_Root_P_Module_Name;
 
    --------------------------------------
    -- Lkt_Node_P_Set_Solver_Debug_Mode --

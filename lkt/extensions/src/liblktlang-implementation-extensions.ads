@@ -3,6 +3,10 @@ package Liblktlang.Implementation.Extensions is
    function Langkit_Root_P_Fetch_Prelude
      (Node : Bare_Langkit_Root) return Internal_Unit;
 
+   function Langkit_Root_P_Module_Name
+     (Node : Bare_Langkit_Root) return Symbol_Type;
+   --  Return the name of this Lkt module, or the empty symbol for the prelude
+
    function Lkt_Node_P_Set_Solver_Debug_Mode
      (Node   : Bare_Lkt_Node;
        Enable : Boolean) return Boolean;
