@@ -61,8 +61,10 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     @external()
     fun set_solver_debug_mode(enable: Bool): Bool
 
+    fun root_env(): LexicalEnv = node.unit.root.node_env
+
     fun root_get(entity_name: Symbol): Entity[Decl] =
-        node.unit.root.node_env.get_first(entity_name).as![Decl]
+        node.unit.root.children_env.get_first(entity_name).as![Decl]
 
     @memoized
     fun get_builtin_type(entity_name: Symbol): Entity[NamedTypeDecl] =
@@ -1067,9 +1069,9 @@ class Decl: LktNode implements DeclarationInterface {
                         key=s"RootNode__",
                         value=node,
                         dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
+                            kind=DesignatedEnvKind.direct_env,
                             env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
+                            direct_env=node.root_env()
                         ),
                         metadata=null[Metadata]
                     ),
@@ -1093,9 +1095,9 @@ class Decl: LktNode implements DeclarationInterface {
                         key=s"Metadata",
                         value=node,
                         dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
+                            kind=DesignatedEnvKind.direct_env,
                             env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
+                            direct_env=node.root_env()
                         ),
                         metadata=null[Metadata]
                     ),
