@@ -4372,19 +4372,13 @@ class RefId: Id implements TokenNode, ReferenceInterface{
             )
         )
         else
-            match first_var {
-                case _ =>
-                    self.actual_type_var
-                    <- match first_var {
-                        case _: LangkitRoot => null[Entity[TypeDecl]]
-                        case _: TypeDecl => null[Entity[TypeDecl]]
-                        case etd: BaseValDecl => etd.get_type()
-                        case gd: GenericDecl => gd.decl
-                        case _ =>
-                            raise[Entity[TypeDecl]] PropertyError(
-                                "Unreachable"
-                            )
-                    }
+            self.actual_type_var
+            <- match first_var {
+                case _: LangkitRoot => null[Entity[TypeDecl]]
+                case _: TypeDecl => null[Entity[TypeDecl]]
+                case etd: BaseValDecl => etd.get_type()
+                case gd: GenericDecl => gd.decl
+                case _ => raise[Entity[TypeDecl]] PropertyError("Unreachable")
             }
 
     fun xref_equation(): Equation = {
