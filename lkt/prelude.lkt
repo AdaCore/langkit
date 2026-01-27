@@ -687,11 +687,17 @@ fun add_env(
 
 |" Specify a single to add to the lexical environment.
 @builtin
-fun add_single_to_env(mapping: EnvAssoc): EnvAction
+fun add_single_to_env(
+    mapping: EnvAssoc,
+    resolver: ()->Entity[RootNode__] = null
+): EnvAction
 
 |" Specify elements to add to the lexical environment.
 @builtin
-fun add_all_to_env(mappings: Array[EnvAssoc]): EnvAction
+fun add_all_to_env(
+    mappings: Array[EnvAssoc],
+    resolver: ()->Entity[RootNode__] = null
+): EnvAction
 
 |" Specify a single element to add to the lexical environment. See ``EnvAssoc``
 |" for more precision about the first four arguments.
@@ -700,7 +706,8 @@ fun add_to_env_kv(
     key: Symbol,
     value: RootNode__,
     dest_env: DesignatedEnv = null,
-    metadata: Metadata = null
+    metadata: Metadata = null,
+    resolver: ()->Entity[RootNode__] = null
 ): EnvAction
 
 |" Evaluate given expression for its side effects, discarding its result.

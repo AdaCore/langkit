@@ -1,0 +1,447 @@
+Resolving test.lkt
+==================
+Decl <ValDecl "a" test.lkt:1:1-1:10>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:1:9-1:10>
+        has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "b" test.lkt:2:1-2:10>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:2:9-2:10>
+        has_type <StructDecl prelude: "Int">
+
+Id   <RefId "Node" test.lkt:4:26-4:30>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "FooNode" test.lkt:4:31-4:38>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:4:1-53:2>
+
+Decl <FunDecl "env_resolver" test.lkt:6:5-6:54>
+     has_type <FunctionType "() -> LexicalEnv" test.lkt>
+
+   Id   <RefId "LexicalEnv" test.lkt:6:25-6:35>
+        has_type None
+        references <StructDecl prelude: "LexicalEnv">
+
+   Expr <NullLit test.lkt:6:38-6:54>
+        has_type <StructDecl prelude: "LexicalEnv">
+
+      Id   <RefId "LexicalEnv" test.lkt:6:43-6:53>
+           has_type None
+           references <StructDecl prelude: "LexicalEnv">
+
+Decl <FunDecl "entity_resolver" test.lkt:7:5-7:67>
+     has_type <FunctionType "() -> Entity[FooNode]" test.lkt>
+
+   Id   <RefId "Entity" test.lkt:7:28-7:34>
+        has_type None
+        references <StructDecl prelude: "Entity[N]">
+
+   Id   <RefId "FooNode" test.lkt:7:35-7:42>
+        has_type None
+        references <ClassDecl "FooNode" test.lkt:4:1-53:2>
+
+   Expr <NullLit test.lkt:7:46-7:67>
+        has_type <StructDecl prelude: "Entity[FooNode]">
+
+      Id   <RefId "Entity" test.lkt:7:51-7:57>
+           has_type None
+           references <StructDecl prelude: "Entity[N]">
+
+      Id   <RefId "FooNode" test.lkt:7:58-7:65>
+           has_type None
+           references <ClassDecl "FooNode" test.lkt:4:1-53:2>
+
+Expr <CallExpr test.lkt:10:9-10:45>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "set_initial_env" test.lkt:10:9-10:24>
+        has_type <FunctionType prelude: "(DesignatedEnv) -> EnvAction">
+        references <FunDecl prelude: "set_initial_env">
+
+   Expr <NullLit test.lkt:10:25-10:44>
+        has_type <StructDecl prelude: "DesignatedEnv">
+
+      Id   <RefId "DesignatedEnv" test.lkt:10:30-10:43>
+           has_type None
+           references <StructDecl prelude: "DesignatedEnv">
+
+Expr <CallExpr test.lkt:11:9-11:49>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "set_initial_env" test.lkt:11:9-11:24>
+        has_type <FunctionType prelude: "(DesignatedEnv) -> EnvAction">
+        references <FunDecl prelude: "set_initial_env">
+
+   Id   <RefId "env" test.lkt:11:25-11:28>
+        has_type None
+        references <FunParamDecl prelude: "env">
+
+   Expr <NullLit test.lkt:11:29-11:48>
+        has_type <StructDecl prelude: "DesignatedEnv">
+
+      Id   <RefId "DesignatedEnv" test.lkt:11:34-11:47>
+           has_type None
+           references <StructDecl prelude: "DesignatedEnv">
+
+Expr <CallExpr test.lkt:13:9-13:18>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "add_env" test.lkt:13:9-13:16>
+        has_type <FunctionType prelude: "(Bool, Bool, Array[Symbol]) -> EnvAction">
+        references <FunDecl prelude: "add_env">
+
+Expr <CallExpr test.lkt:14:9-14:74>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "add_env" test.lkt:14:9-14:16>
+        has_type <FunctionType prelude: "(Bool, Bool, Array[Symbol]) -> EnvAction">
+        references <FunDecl prelude: "add_env">
+
+   Id   <RefId "no_parent" test.lkt:14:17-14:26>
+        has_type None
+        references <FunParamDecl prelude: "no_parent">
+
+   Id   <RefId "false" test.lkt:14:27-14:32>
+        has_type <EnumTypeDecl prelude: "Bool">
+        references <EnumLitDecl prelude: "false">
+
+   Id   <RefId "transitive_parent" test.lkt:14:34-14:51>
+        has_type None
+        references <FunParamDecl prelude: "transitive_parent">
+
+   Id   <RefId "false" test.lkt:14:52-14:57>
+        has_type <EnumTypeDecl prelude: "Bool">
+        references <EnumLitDecl prelude: "false">
+
+   Id   <RefId "names" test.lkt:14:59-14:64>
+        has_type None
+        references <FunParamDecl prelude: "names">
+
+   Expr <ArrayLiteral test.lkt:14:65-14:73>
+        has_type <StructDecl prelude: "Array[Symbol]">
+
+      Expr <PatternSingleLineStringLit test.lkt:14:66-14:72>
+           has_type <StructDecl prelude: "Symbol">
+
+Expr <CallExpr test.lkt:16:9-16:42>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "add_single_to_env" test.lkt:16:9-16:26>
+        has_type <FunctionType prelude: "(EnvAssoc, () -> Entity[FooNode]) -> EnvAction">
+        references <FunDecl prelude: "add_single_to_env">
+
+   Expr <NullLit test.lkt:16:27-16:41>
+        has_type <StructDecl prelude: "EnvAssoc">
+
+      Id   <RefId "EnvAssoc" test.lkt:16:32-16:40>
+           has_type None
+           references <StructDecl prelude: "EnvAssoc">
+
+Expr <CallExpr test.lkt:17:9-20:10>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "add_single_to_env" test.lkt:17:9-17:26>
+        has_type <FunctionType prelude: "(EnvAssoc, () -> Entity[FooNode]) -> EnvAction">
+        references <FunDecl prelude: "add_single_to_env">
+
+   Id   <RefId "mapping" test.lkt:18:13-18:20>
+        has_type None
+        references <FunParamDecl prelude: "mapping">
+
+   Expr <NullLit test.lkt:18:21-18:35>
+        has_type <StructDecl prelude: "EnvAssoc">
+
+      Id   <RefId "EnvAssoc" test.lkt:18:26-18:34>
+           has_type None
+           references <StructDecl prelude: "EnvAssoc">
+
+   Id   <RefId "resolver" test.lkt:19:13-19:21>
+        has_type None
+        references <FunParamDecl prelude: "resolver">
+
+   Expr <DotExpr test.lkt:19:22-19:45>
+        has_type <FunctionType "() -> Entity[FooNode]" test.lkt>
+
+      Id   <RefId "FooNode" test.lkt:19:22-19:29>
+           has_type None
+           references <ClassDecl "FooNode" test.lkt:4:1-53:2>
+
+      Id   <RefId "entity_resolver" test.lkt:19:30-19:45>
+           has_type <FunctionType "() -> Entity[FooNode]" test.lkt>
+           references <FunDecl "entity_resolver" test.lkt:7:5-7:67>
+
+Expr <CallExpr test.lkt:22:9-22:46>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "add_all_to_env" test.lkt:22:9-22:23>
+        has_type <FunctionType prelude: "(Array[EnvAssoc], () -> Entity[FooNode]) -> EnvAction">
+        references <FunDecl prelude: "add_all_to_env">
+
+   Expr <NullLit test.lkt:22:24-22:45>
+        has_type <StructDecl prelude: "Array[EnvAssoc]">
+
+      Id   <RefId "Array" test.lkt:22:29-22:34>
+           has_type None
+           references <StructDecl prelude: "Array[T]">
+
+      Id   <RefId "EnvAssoc" test.lkt:22:35-22:43>
+           has_type None
+           references <StructDecl prelude: "EnvAssoc">
+
+Expr <CallExpr test.lkt:23:9-26:10>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "add_all_to_env" test.lkt:23:9-23:23>
+        has_type <FunctionType prelude: "(Array[EnvAssoc], () -> Entity[FooNode]) -> EnvAction">
+        references <FunDecl prelude: "add_all_to_env">
+
+   Id   <RefId "mappings" test.lkt:24:13-24:21>
+        has_type None
+        references <FunParamDecl prelude: "mappings">
+
+   Expr <NullLit test.lkt:24:22-24:43>
+        has_type <StructDecl prelude: "Array[EnvAssoc]">
+
+      Id   <RefId "Array" test.lkt:24:27-24:32>
+           has_type None
+           references <StructDecl prelude: "Array[T]">
+
+      Id   <RefId "EnvAssoc" test.lkt:24:33-24:41>
+           has_type None
+           references <StructDecl prelude: "EnvAssoc">
+
+   Id   <RefId "resolver" test.lkt:25:13-25:21>
+        has_type None
+        references <FunParamDecl prelude: "resolver">
+
+   Expr <DotExpr test.lkt:25:22-25:45>
+        has_type <FunctionType "() -> Entity[FooNode]" test.lkt>
+
+      Id   <RefId "FooNode" test.lkt:25:22-25:29>
+           has_type None
+           references <ClassDecl "FooNode" test.lkt:4:1-53:2>
+
+      Id   <RefId "entity_resolver" test.lkt:25:30-25:45>
+           has_type <FunctionType "() -> Entity[FooNode]" test.lkt>
+           references <FunDecl "entity_resolver" test.lkt:7:5-7:67>
+
+Expr <CallExpr test.lkt:28:9-28:36>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "add_to_env_kv" test.lkt:28:9-28:22>
+        has_type <FunctionType prelude: "(Symbol, FooNode, DesignatedEnv, __EmptyMetadata, () -> Entity[FooNode]) -> EnvAction">
+        references <FunDecl prelude: "add_to_env_kv">
+
+   Expr <PatternSingleLineStringLit test.lkt:28:23-28:29>
+        has_type <StructDecl prelude: "Symbol">
+
+   Id   <RefId "node" test.lkt:28:31-28:35>
+        has_type <ClassDecl "FooNode" test.lkt:4:1-53:2>
+        references <NodeDecl "node" test.lkt:4:1-53:2>
+
+Expr <CallExpr test.lkt:29:9-35:10>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "add_to_env_kv" test.lkt:29:9-29:22>
+        has_type <FunctionType prelude: "(Symbol, FooNode, DesignatedEnv, __EmptyMetadata, () -> Entity[FooNode]) -> EnvAction">
+        references <FunDecl prelude: "add_to_env_kv">
+
+   Id   <RefId "key" test.lkt:30:13-30:16>
+        has_type None
+        references <FunParamDecl prelude: "key">
+
+   Expr <PatternSingleLineStringLit test.lkt:30:17-30:23>
+        has_type <StructDecl prelude: "Symbol">
+
+   Id   <RefId "value" test.lkt:31:13-31:18>
+        has_type None
+        references <FunParamDecl prelude: "value">
+
+   Id   <RefId "node" test.lkt:31:19-31:23>
+        has_type <ClassDecl "FooNode" test.lkt:4:1-53:2>
+        references <NodeDecl "node" test.lkt:4:1-53:2>
+
+   Id   <RefId "dest_env" test.lkt:32:13-32:21>
+        has_type None
+        references <FunParamDecl prelude: "dest_env">
+
+   Expr <NullLit test.lkt:32:22-32:41>
+        has_type <StructDecl prelude: "DesignatedEnv">
+
+      Id   <RefId "DesignatedEnv" test.lkt:32:27-32:40>
+           has_type None
+           references <StructDecl prelude: "DesignatedEnv">
+
+   Id   <RefId "metadata" test.lkt:33:13-33:21>
+        has_type None
+        references <FunParamDecl prelude: "metadata">
+
+   Expr <NullLit test.lkt:33:22-33:36>
+        has_type <StructDecl prelude: "__EmptyMetadata">
+
+      Id   <RefId "Metadata" test.lkt:33:27-33:35>
+           has_type None
+           references <StructDecl prelude: "__EmptyMetadata">
+
+   Id   <RefId "resolver" test.lkt:34:13-34:21>
+        has_type None
+        references <FunParamDecl prelude: "resolver">
+
+   Expr <DotExpr test.lkt:34:22-34:45>
+        has_type <FunctionType "() -> Entity[FooNode]" test.lkt>
+
+      Id   <RefId "FooNode" test.lkt:34:22-34:29>
+           has_type None
+           references <ClassDecl "FooNode" test.lkt:4:1-53:2>
+
+      Id   <RefId "entity_resolver" test.lkt:34:30-34:45>
+           has_type <FunctionType "() -> Entity[FooNode]" test.lkt>
+           references <FunDecl "entity_resolver" test.lkt:7:5-7:67>
+
+Expr <CallExpr test.lkt:37:9-37:18>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "do" test.lkt:37:9-37:11>
+        has_type <FunctionType prelude: "(Int) -> EnvAction">
+        references <FunDecl prelude: "do[T]">
+
+   Expr <BinOp test.lkt:37:12-37:17>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "a" test.lkt:37:12-37:13>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "a" test.lkt:1:1-1:10>
+
+      Id   <RefId "b" test.lkt:37:16-37:17>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "b" test.lkt:2:1-2:10>
+
+Expr <CallExpr test.lkt:38:9-38:18>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "do" test.lkt:38:9-38:11>
+        has_type <FunctionType prelude: "(String) -> EnvAction">
+        references <FunDecl prelude: "do[T]">
+
+   Expr <SingleLineStringLit test.lkt:38:12-38:17>
+        has_type <StructDecl prelude: "String">
+
+Expr <CallExpr test.lkt:40:9-40:26>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "handle_children" test.lkt:40:9-40:24>
+        has_type <FunctionType prelude: "() -> EnvAction">
+        references <FunDecl prelude: "handle_children">
+
+Expr <CallExpr test.lkt:42:9-42:48>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "reference" test.lkt:42:9-42:18>
+        has_type <FunctionType prelude: "(Array[FooNode], () -> LexicalEnv, RefKind, LexicalEnv, Bool, String, Bool) -> EnvAction">
+        references <FunDecl prelude: "reference">
+
+   Expr <ArrayLiteral test.lkt:42:19-42:25>
+        has_type <StructDecl prelude: "Array[FooNode]">
+
+      Id   <RefId "node" test.lkt:42:20-42:24>
+           has_type <ClassDecl "FooNode" test.lkt:4:1-53:2>
+           references <NodeDecl "node" test.lkt:4:1-53:2>
+
+   Expr <DotExpr test.lkt:42:27-42:47>
+        has_type <FunctionType "() -> LexicalEnv" test.lkt>
+
+      Id   <RefId "FooNode" test.lkt:42:27-42:34>
+           has_type None
+           references <ClassDecl "FooNode" test.lkt:4:1-53:2>
+
+      Id   <RefId "env_resolver" test.lkt:42:35-42:47>
+           has_type <FunctionType "() -> LexicalEnv" test.lkt>
+           references <FunDecl "env_resolver" test.lkt:6:5-6:54>
+
+Expr <CallExpr test.lkt:43:9-51:10>
+     has_type <StructDecl prelude: "EnvAction">
+
+   Id   <RefId "reference" test.lkt:43:9-43:18>
+        has_type <FunctionType prelude: "(Array[FooNode], () -> LexicalEnv, RefKind, LexicalEnv, Bool, String, Bool) -> EnvAction">
+        references <FunDecl prelude: "reference">
+
+   Id   <RefId "nodes" test.lkt:44:13-44:18>
+        has_type None
+        references <FunParamDecl prelude: "nodes">
+
+   Expr <ArrayLiteral test.lkt:44:19-44:25>
+        has_type <StructDecl prelude: "Array[FooNode]">
+
+      Id   <RefId "node" test.lkt:44:20-44:24>
+           has_type <ClassDecl "FooNode" test.lkt:4:1-53:2>
+           references <NodeDecl "node" test.lkt:4:1-53:2>
+
+   Id   <RefId "through" test.lkt:45:13-45:20>
+        has_type None
+        references <FunParamDecl prelude: "through">
+
+   Expr <DotExpr test.lkt:45:21-45:41>
+        has_type <FunctionType "() -> LexicalEnv" test.lkt>
+
+      Id   <RefId "FooNode" test.lkt:45:21-45:28>
+           has_type None
+           references <ClassDecl "FooNode" test.lkt:4:1-53:2>
+
+      Id   <RefId "env_resolver" test.lkt:45:29-45:41>
+           has_type <FunctionType "() -> LexicalEnv" test.lkt>
+           references <FunDecl "env_resolver" test.lkt:6:5-6:54>
+
+   Id   <RefId "kind" test.lkt:46:13-46:17>
+        has_type None
+        references <FunParamDecl prelude: "kind">
+
+   Expr <DotExpr test.lkt:46:18-46:32>
+        has_type <EnumTypeDecl prelude: "RefKind">
+
+      Id   <RefId "RefKind" test.lkt:46:18-46:25>
+           has_type None
+           references <EnumTypeDecl prelude: "RefKind">
+
+      Id   <RefId "normal" test.lkt:46:26-46:32>
+           has_type <EnumTypeDecl prelude: "RefKind">
+           references <EnumLitDecl prelude: "normal">
+
+   Id   <RefId "dest_env" test.lkt:47:13-47:21>
+        has_type None
+        references <FunParamDecl prelude: "dest_env">
+
+   Expr <NullLit test.lkt:47:22-47:38>
+        has_type <StructDecl prelude: "LexicalEnv">
+
+      Id   <RefId "LexicalEnv" test.lkt:47:27-47:37>
+           has_type None
+           references <StructDecl prelude: "LexicalEnv">
+
+   Id   <RefId "cond" test.lkt:48:13-48:17>
+        has_type None
+        references <FunParamDecl prelude: "cond">
+
+   Id   <RefId "true" test.lkt:48:18-48:22>
+        has_type <EnumTypeDecl prelude: "Bool">
+        references <EnumLitDecl prelude: "true">
+
+   Id   <RefId "category" test.lkt:49:13-49:21>
+        has_type None
+        references <FunParamDecl prelude: "category">
+
+   Expr <SingleLineStringLit test.lkt:49:22-49:27>
+        has_type <StructDecl prelude: "String">
+
+   Id   <RefId "shed_corresponding_rebindings" test.lkt:50:13-50:42>
+        has_type None
+        references <FunParamDecl prelude: "shed_corresponding_rebindings">
+
+   Id   <RefId "false" test.lkt:50:43-50:48>
+        has_type <EnumTypeDecl prelude: "Bool">
+        references <EnumLitDecl prelude: "false">
+
