@@ -45,7 +45,12 @@ def adaify_name(context: Context, name: str) -> str:
     pfx = context.analysis_prefix
     if name.startswith(pfx):
         name = name[len(pfx) :]
-    chunks = name.split("__")
+    if "__" in name:
+        chunks = name.split("__")
+    elif "." in name:
+        chunks = name.split(".")
+    else:
+        chunks = [name]
     return ".".join(Name.from_lower(c).camel_with_underscores for c in chunks)
 
 
