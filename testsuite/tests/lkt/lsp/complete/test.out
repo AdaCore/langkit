@@ -1,35 +1,34 @@
 Completing <DotExpr test.lkt:4:31-4:37> ('self.p')
- - info: field_kind
- - node: field_kind
+ - as_bare_entity: function_kind
+ - as_entity: function_kind
+ - can_reach: function_kind
+ - child_index: function_kind
+ - children: function_kind
+ - children_env: function_kind
+ - completion_item_kind_to_int: function_kind
  - example_prop: function_kind
- - other_prop: function_kind
- - prop: function_kind
- - can_reach: function_kind
- - child_index: function_kind
- - children: function_kind
- - children_env: function_kind
- - completion_item_kind_to_int: function_kind
  - full_sloc_image: function_kind
+ - info: field_kind
  - is_ghost: function_kind
+ - is_null: function_kind
  - next_sibling: function_kind
+ - node: field_kind
  - node_env: function_kind
+ - other_prop: function_kind
  - parent: function_kind
  - parents: function_kind
  - ple_root: function_kind
  - previous_sibling: function_kind
+ - prop: function_kind
+ - singleton: function_kind
  - text: function_kind
+ - to_builder: function_kind
  - token_end: function_kind
  - token_start: function_kind
  - unit: function_kind
- - as_bare_entity: function_kind
- - as_entity: function_kind
- - is_null: function_kind
- - singleton: function_kind
- - to_builder: function_kind
 Completing <DotExpr test.lkt:7:9-7:15> ('var3.i')
- - prop: function_kind
- - other_prop: function_kind
- - prop: function_kind
+ - as_bare_entity: function_kind
+ - as_entity: function_kind
  - can_reach: function_kind
  - child_index: function_kind
  - children: function_kind
@@ -37,21 +36,22 @@ Completing <DotExpr test.lkt:7:9-7:15> ('var3.i')
  - completion_item_kind_to_int: function_kind
  - full_sloc_image: function_kind
  - is_ghost: function_kind
+ - is_null: function_kind
  - next_sibling: function_kind
  - node_env: function_kind
+ - other_prop: function_kind
  - parent: function_kind
  - parents: function_kind
  - ple_root: function_kind
  - previous_sibling: function_kind
+ - prop: function_kind
+ - prop: function_kind
+ - singleton: function_kind
  - text: function_kind
+ - to_builder: function_kind
  - token_end: function_kind
  - token_start: function_kind
  - unit: function_kind
- - as_bare_entity: function_kind
- - as_entity: function_kind
- - is_null: function_kind
- - singleton: function_kind
- - to_builder: function_kind
 Completing <RefId "Stru" test.lkt:8:9-8:13> ('Stru')
  - Address: struct_kind
  - AnalysisUnit: interface_kind
@@ -75,6 +75,7 @@ Completing <RefId "Stru" test.lkt:8:9-8:13> ('Stru')
  - ErrorNode: interface_kind
  - Example: class_kind
  - FooNode: class_kind
+ - FooNode: class_kind
  - InnerEnvAssoc: struct_kind
  - Int: struct_kind
  - LexicalEnv: struct_kind
@@ -91,7 +92,6 @@ Completing <RefId "Stru" test.lkt:8:9-8:13> ('Stru')
  - RefResultInterface: interface_kind
  - ReferenceInterface: interface_kind
  - Regexp: struct_kind
- - FooNode: class_kind
  - Sized: interface_kind
  - SolverDiagnostic: struct_kind
  - SolverDiagnosticInterface: interface_kind
@@ -104,9 +104,9 @@ Completing <RefId "Stru" test.lkt:8:9-8:13> ('Stru')
  - TokenNode: interface_kind
  - TypableNodeInterface: interface_kind
  - TypeInterface: interface_kind
+ - __EmptyMetadata: struct_kind
+ - __EmptyMetadata: struct_kind
  - __internal: struct_kind
- - __EmptyMetadata: struct_kind
- - __EmptyMetadata: struct_kind
 Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - Address: struct_kind
  - AnalysisUnit: interface_kind
@@ -130,6 +130,7 @@ Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - ErrorNode: interface_kind
  - Example: class_kind
  - FooNode: class_kind
+ - FooNode: class_kind
  - InnerEnvAssoc: struct_kind
  - Int: struct_kind
  - LexicalEnv: struct_kind
@@ -146,7 +147,6 @@ Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - RefResultInterface: interface_kind
  - ReferenceInterface: interface_kind
  - Regexp: struct_kind
- - FooNode: class_kind
  - Sized: interface_kind
  - SolverDiagnostic: struct_kind
  - SolverDiagnosticInterface: interface_kind
@@ -161,6 +161,8 @@ Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - TypeInterface: interface_kind
  - _: variable_kind
  - _: variable_kind
+ - __EmptyMetadata: struct_kind
+ - __EmptyMetadata: struct_kind
  - __internal: struct_kind
  - add_all_to_env: function_kind
  - add_env: function_kind
@@ -181,5 +183,3 @@ Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - var1: variable_kind
  - var2: variable_kind
  - var3: variable_kind
- - __EmptyMetadata: struct_kind
- - __EmptyMetadata: struct_kind
