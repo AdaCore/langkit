@@ -1,12 +1,14 @@
 with Ada.Command_Line;      use Ada.Command_Line;
 with Ada.Containers.Hashed_Maps;
 with Ada.Directories;       use Ada.Directories;
+with Ada.Environment_Variables;
 with Ada.Exceptions;
 with Ada.Strings.Fixed;     use Ada.Strings.Fixed;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Wide_Wide_Text_IO;
 
+with GNAT.OS_Lib;
 with GNAT.Traceback.Symbolic;
 with GNATCOLL.Opt_Parse; use GNATCOLL.Opt_Parse;
 
@@ -70,6 +72,14 @@ procedure Lkt_Toolbox is
          Convert    => Value,
          Arg_Number => Single_Arg,
          Help       => "Call code completion at the given location.");
+
+      package Lkt_Path is new Parse_Option_List
+        (Parser     => Parser,
+         Long       => "--lkt-path",
+         Arg_Type   => Unbounded_String,
+         Convert    => To_Unbounded_String,
+         Arg_Number => Single_Arg,
+         Help       => "Additional lookup directories for Lkt sources.");
    end Arg;
 
    use Liblktlang;
@@ -323,12 +333,30 @@ procedure Lkt_Toolbox is
       return Common.Into;
    end Populate_Invalid_Decl_Map;
 
-   Ctx : constant Analysis.Analysis_Context := Analysis.Create_Context;
+   Ctx : Analysis.Analysis_Context;
 begin
    if not Arg.Parser.Parse then
       return;
    end if;
 
+   --  Before creating the context (and thus the unit provider), amend the
+   --  Lkt lookup path from command line arguments.
+
+   declare
+      Path : Unbounded_String :=
+        To_Unbounded_String
+          (Ada.Environment_Variables.Value ("LKT_PATH", ""));
+   begin
+      for D of Arg.Lkt_Path.Get loop
+         if Path /= Null_Unbounded_String then
+            Append (Path, GNAT.OS_Lib.Path_Separator);
+         end if;
+         Append (Path, D);
+      end loop;
+      Ada.Environment_Variables.Set ("LKT_PATH", To_String (Path));
+   end;
+
+   Ctx := Analysis.Create_Context;
    Set_Solver_Debug_Mode (Arg.Debug_Solver.Get);
    for File_Name of Arg.Files.Get loop
       declare
