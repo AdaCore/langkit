@@ -2276,7 +2276,25 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
-   function lkt_base_import_f_module_name
+   function lkt_base_import_p_referenced_units
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_analysis_unit_array) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_base_import_p_referenced_units";
+   --  Return the list of units that contain the modules that this clause
+   --  imports. Load them if needed.
+
+           
+   
+
+   
+   
+
+   function lkt_import_f_imported_names
      (Node : lkt_node_Ptr;
 
 
@@ -2284,7 +2302,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_base_import_f_module_name";
+           External_name => "lkt_import_f_imported_names";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -2293,25 +2311,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
-   function lkt_base_import_p_referenced_unit
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_analysis_unit) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_base_import_p_referenced_unit";
-   --  Return the unit that contains the module this import clause designates.
-   --  Load it if needed.
-
-           
-   
-
-   
-   
-
-   function lkt_import_f_renaming
+   function lkt_import_all_from_f_module_name
      (Node : lkt_node_Ptr;
 
 
@@ -2319,8 +2319,25 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_import_f_renaming";
-   --  This field may be null even when there are no parsing errors.
+           External_name => "lkt_import_all_from_f_module_name";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_import_from_f_module_name
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_import_from_f_module_name";
+   --  When there are no parsing errors, this field is never null.
 
            
    

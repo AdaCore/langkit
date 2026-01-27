@@ -1183,7 +1183,7 @@ package Liblktlang.Analysis is
       type Import is new Base_Import with private
          with First_Controlling_Parameter
       ;
-      --  Clause to import a module.
+      --  Clause to import modules.
       --
       --  This node type has no derivation.
 
@@ -3962,21 +3962,12 @@ package Liblktlang.Analysis is
 
 
 
-         
-   
-
-   function F_Module_Name
-     (Node : Base_Import'Class) return Module_Id;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Base_Import
-
-
 
          
-   function P_Referenced_Unit
-     (Node : Base_Import'Class) return Analysis_Unit;
-   --  Return the unit that contains the module this import clause designates.
-   --  Load it if needed.
+   function P_Referenced_Units
+     (Node : Base_Import'Class) return Analysis_Unit_Array;
+   --  Return the list of units that contain the modules that this clause
+   --  imports. Load them if needed.
    --% belongs-to: Base_Import
 
 
@@ -5911,9 +5902,9 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Renaming
-     (Node : Import'Class) return Def_Id;
-   --  This field may be null even when there are no parsing errors.
+   function F_Imported_Names
+     (Node : Import'Class) return Imported_Name_List;
+   --  When there are no parsing errors, this field is never null.
    --% belongs-to: Import
 
 
@@ -5922,9 +5913,27 @@ package Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Module_Name
+     (Node : Import_All_From'Class) return Module_Id;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Import_All_From
 
 
 
+
+
+
+
+         
+   
+
+   function F_Module_Name
+     (Node : Import_From'Class) return Module_Id;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Import_From
 
 
          

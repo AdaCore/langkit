@@ -626,13 +626,11 @@ private package Liblktlang.Unparsers is
 
          Bare_Import_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
-            := (N               => 2,
+            := (N               => 1,
                 Field_Unparsers =>
-                  (1 => (Member_Index_For_Base_Import_F_Module_Name, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Import_F_Renaming, Token_Sequence_42'Access, Empty_Token_Sequence, False)),
+                  (1 => (Member_Index_For_Import_F_Imported_Names, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
-                  (1 => Empty_Token_Sequence,
-                   2 => Empty_Token_Sequence));
+                  (1 => Empty_Token_Sequence));
 
          
 
@@ -640,7 +638,7 @@ private package Liblktlang.Unparsers is
             : aliased constant Field_Unparser_List_Impl
             := (N               => 1,
                 Field_Unparsers =>
-                  (1 => (Member_Index_For_Base_Import_F_Module_Name, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                  (1 => (Member_Index_For_Import_All_From_F_Module_Name, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence));
 
@@ -650,7 +648,7 @@ private package Liblktlang.Unparsers is
             : aliased constant Field_Unparser_List_Impl
             := (N               => 2,
                 Field_Unparsers =>
-                  (1 => (Member_Index_For_Base_Import_F_Module_Name, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                  (1 => (Member_Index_For_Import_From_F_Module_Name, Empty_Token_Sequence, Empty_Token_Sequence, False),
                    2 => (Member_Index_For_Import_From_F_Imported_Names, Empty_Token_Sequence, Empty_Token_Sequence, False)),
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,

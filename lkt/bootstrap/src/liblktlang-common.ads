@@ -186,7 +186,7 @@ package Liblktlang.Common is
          Def_Id_Rule,
          Doc_Rule,
          Module_Doc_Rule,
-         Imported_Name_Rule,
+         Imported_Names_Rule,
          Import_Clause_Rule,
          Imports_Rule,
          Lexer_Decl_Rule,

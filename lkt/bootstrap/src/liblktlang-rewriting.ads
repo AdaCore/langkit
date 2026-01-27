@@ -358,8 +358,7 @@ package Liblktlang.Rewriting is
 
          function Create_Import
            (Handle : Rewriting_Handle
-               ; F_Module_Name : Node_Rewriting_Handle
-               ; F_Renaming : Node_Rewriting_Handle
+               ; F_Imported_Names : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 

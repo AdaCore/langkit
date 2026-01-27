@@ -2626,6 +2626,10 @@ private package Liblktlang.Implementation is
    -------------------------------------------
 
          
+   type Bare_Id_Array_Record;
+   type Bare_Id_Array_Access is access all Bare_Id_Array_Record;
+
+         
    type Bare_Lkt_Node_Array_Record;
    type Bare_Lkt_Node_Array_Access is access all Bare_Lkt_Node_Array_Record;
 
@@ -9324,6 +9328,62 @@ private package Liblktlang.Implementation is
 
    
 
+   type Internal_Bare_Id_Array is
+      array (Positive range <>) of Bare_Id;
+
+   type Bare_Id_Array_Record (N : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Items     : Internal_Bare_Id_Array (1 .. N);
+   end record;
+
+   Empty_Bare_Id_Array_Record : aliased Bare_Id_Array_Record :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   No_Bare_Id_Array_Type : constant Bare_Id_Array_Access :=
+      Empty_Bare_Id_Array_Record'Access;
+
+
+   function Create_Bare_Id_Array (Items_Count : Natural) return Bare_Id_Array_Access;
+   --  Create a new array for N uninitialized elements and give its only
+   --  ownership share to the caller.
+
+   function Create_Bare_Id_Array
+     (Items : Internal_Bare_Id_Array) return Bare_Id_Array_Access;
+   --  Create a new array from an existing collection of elements
+
+   function Get
+     (Node    : Bare_Lkt_Node;
+      T       : Bare_Id_Array_Access;
+      Index   : Integer;
+      Or_Null : Boolean := False) return Bare_Id;
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based. If
+   --  the result is ref-counted, a new owning reference is returned.
+
+   function Concat (L, R : Bare_Id_Array_Access) return Bare_Id_Array_Access;
+
+
+   function Length (T : Bare_Id_Array_Access) return Natural;
+
+   procedure Inc_Ref (T : Bare_Id_Array_Access);
+   procedure Dec_Ref (T : in out Bare_Id_Array_Access);
+
+   function Equivalent (L, R : Bare_Id_Array_Access) return Boolean;
+
+
+      function Trace_Image (A : Bare_Id_Array_Access) return String;
+
+
+
+  procedure Free is new Ada.Unchecked_Deallocation
+    (Bare_Id_Array_Record, Bare_Id_Array_Access);
+
+         
+
+   
+
    type Internal_Bare_Lkt_Node_Array is
       array (Positive range <>) of Bare_Lkt_Node;
 
@@ -11232,7 +11292,7 @@ private package Liblktlang.Implementation is
 
    Kind_To_Node_Children_Count : constant array (Lkt_Node_Kind_Type) of Integer :=
      (Lkt_Argument => 2, 
-Lkt_Import => 2, 
+Lkt_Import => 1, 
 Lkt_Import_All_From => 1, 
 Lkt_Import_From => 2, 
 Lkt_Error_Lexer_Case_Rule_Alt => 0, 
@@ -11660,8 +11720,6 @@ Lkt_Var_Bind => 2);
          
 
 
-            Base_Import_F_Module_Name : aliased Bare_Module_Id :=
-               No_Bare_Lkt_Node;
 
          
 
@@ -11672,7 +11730,7 @@ Lkt_Var_Bind => 2);
          
 
 
-            Import_F_Renaming : aliased Bare_Def_Id :=
+            Import_F_Imported_Names : aliased Bare_Imported_Name_List :=
                No_Bare_Lkt_Node;
 
          
@@ -11685,18 +11743,21 @@ Lkt_Var_Bind => 2);
          
 
 
+            Import_All_From_F_Module_Name : aliased Bare_Module_Id :=
+               No_Bare_Lkt_Node;
 
          
 
 
 
-            null;
       
                   when Lkt_Import_From_Range =>
                      
          
 
 
+            Import_From_F_Module_Name : aliased Bare_Module_Id :=
+               No_Bare_Lkt_Node;
             Import_From_F_Imported_Names : aliased Bare_Imported_Name_List :=
                No_Bare_Lkt_Node;
 
@@ -16130,15 +16191,6 @@ function Argument_P_Xref_Equation
 
    
 
-      
-      procedure Initialize_Fields_For_Base_Import
-        (Self : Bare_Base_Import
-         ; Base_Import_F_Module_Name : Bare_Module_Id
-        );
-
-      
-   function Base_Import_F_Module_Name
-     (Node : Bare_Base_Import) return Bare_Module_Id;
 
 
          
@@ -16146,15 +16198,30 @@ function Argument_P_Xref_Equation
 
 
 
-function Base_Import_P_Referenced_Unit
+function Base_Import_P_Referenced_Units
    
   (Node : Bare_Base_Import
   )
 
-   return Internal_Unit
+   return Internal_Unit_Array_Access
    ;
---  Return the unit that contains the module this import clause designates.
---  Load it if needed.
+--  Return the list of units that contain the modules that this clause imports.
+--  Load them if needed.
+
+         
+
+
+
+
+function Dispatcher_Base_Import_P_Referenced_Modules
+   
+  (Node : Bare_Base_Import
+  )
+
+   return Bare_Id_Array_Access
+   with Inline_Always
+   ;
+--  Return identifiers for the list of modules that this clause imports.
 
          
 
@@ -16166,7 +16233,7 @@ function Internal_Env_Do_16
   (Node : Bare_Base_Import
   )
 
-   return Internal_Unit
+   return Internal_Unit_Array_Access
    ;
 
 
@@ -16190,13 +16257,26 @@ function Internal_Env_Do_16
       
       procedure Initialize_Fields_For_Import
         (Self : Bare_Import
-         ; Base_Import_F_Module_Name : Bare_Module_Id
-         ; Import_F_Renaming : Bare_Def_Id
+         ; Import_F_Imported_Names : Bare_Imported_Name_List
         );
 
       
-   function Import_F_Renaming
-     (Node : Bare_Import) return Bare_Def_Id;
+   function Import_F_Imported_Names
+     (Node : Bare_Import) return Bare_Imported_Name_List;
+
+
+         
+
+
+
+
+function Import_P_Referenced_Modules
+   
+  (Node : Bare_Import
+  )
+
+   return Bare_Id_Array_Access
+   ;
 
 
 
@@ -16212,8 +16292,26 @@ function Internal_Env_Do_16
       
       procedure Initialize_Fields_For_Import_All_From
         (Self : Bare_Import_All_From
-         ; Base_Import_F_Module_Name : Bare_Module_Id
+         ; Import_All_From_F_Module_Name : Bare_Module_Id
         );
+
+      
+   function Import_All_From_F_Module_Name
+     (Node : Bare_Import_All_From) return Bare_Module_Id;
+
+
+         
+
+
+
+
+function Import_All_From_P_Referenced_Modules
+   
+  (Node : Bare_Import_All_From
+  )
+
+   return Bare_Id_Array_Access
+   ;
 
 
 
@@ -16229,13 +16327,31 @@ function Internal_Env_Do_16
       
       procedure Initialize_Fields_For_Import_From
         (Self : Bare_Import_From
-         ; Base_Import_F_Module_Name : Bare_Module_Id
+         ; Import_From_F_Module_Name : Bare_Module_Id
          ; Import_From_F_Imported_Names : Bare_Imported_Name_List
         );
 
       
+   function Import_From_F_Module_Name
+     (Node : Bare_Import_From) return Bare_Module_Id;
+
+      
    function Import_From_F_Imported_Names
      (Node : Bare_Import_From) return Bare_Imported_Name_List;
+
+
+         
+
+
+
+
+function Import_From_P_Referenced_Modules
+   
+  (Node : Bare_Import_From
+  )
+
+   return Bare_Id_Array_Access
+   ;
 
 
 

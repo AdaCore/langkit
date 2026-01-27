@@ -513,15 +513,13 @@ package body Liblktlang.Rewriting is
 
          function Create_Import
            (Handle : Rewriting_Handle
-               ; F_Module_Name : Node_Rewriting_Handle
-               ; F_Renaming : Node_Rewriting_Handle
+               ; F_Imported_Names : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             return Create_Regular_Node
               (Handle,
                Lkt_Import,
-                 (1 => F_Module_Name,
-                  2 => F_Renaming));
+                 (1 => F_Imported_Names));
          end;
 
 

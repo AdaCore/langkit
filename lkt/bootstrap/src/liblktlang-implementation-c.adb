@@ -4600,11 +4600,11 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_base_import_f_module_name
+   function lkt_base_import_p_referenced_units
      (Node : lkt_node_Ptr;
 
 
-      Value_P : access lkt_node) return int
+      Value_P : access lkt_analysis_unit_array) return int
 
    is
       Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
@@ -4617,60 +4617,9 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Module_Id;
+            Result : Internal_Unit_Array_Access;
          begin
-            Result := Base_Import_F_Module_Name
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_base_import_f_module_name;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_base_import_p_referenced_unit
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_analysis_unit) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Base_Import then
-
-         declare
-            
-
-            Result : Internal_Unit;
-         begin
-            Result := Liblktlang.Implementation.Base_Import_P_Referenced_Unit
+            Result := Liblktlang.Implementation.Base_Import_P_Referenced_Units
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4692,7 +4641,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_base_import_p_referenced_unit;
+   end lkt_base_import_p_referenced_units;
 
 
            
@@ -4702,7 +4651,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_import_f_renaming
+   function lkt_import_f_imported_names
      (Node : lkt_node_Ptr;
 
 
@@ -4719,9 +4668,9 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Def_Id;
+            Result : Bare_Imported_Name_List;
          begin
-            Result := Import_F_Renaming
+            Result := Import_F_Imported_Names
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4743,7 +4692,109 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_import_f_renaming;
+   end lkt_import_f_imported_names;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_import_all_from_f_module_name
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Import_All_From_Range then
+
+         declare
+            
+
+            Result : Bare_Module_Id;
+         begin
+            Result := Import_All_From_F_Module_Name
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_import_all_from_f_module_name;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_import_from_f_module_name
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Import_From_Range then
+
+         declare
+            
+
+            Result : Bare_Module_Id;
+         begin
+            Result := Import_From_F_Module_Name
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_import_from_f_module_name;
 
 
            

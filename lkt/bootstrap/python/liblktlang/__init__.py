@@ -565,7 +565,7 @@ class GrammarRule(_Enum):
     def_id_rule = 'def_id_rule'
     doc_rule = 'doc_rule'
     module_doc_rule = 'module_doc_rule'
-    imported_name_rule = 'imported_name_rule'
+    imported_names_rule = 'imported_names_rule'
     import_clause_rule = 'import_clause_rule'
     imports_rule = 'imports_rule'
     lexer_decl_rule = 'lexer_decl_rule'
@@ -667,7 +667,7 @@ class GrammarRule(_Enum):
 
     _name = 'GrammarRule'
     _c_to_py = [
-        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, module_id_rule, def_id_rule, doc_rule, module_doc_rule, imported_name_rule, import_clause_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, lexer_family_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, neg_pattern_rule, pattern_binding_rule, complex_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, pattern_arg_rule, expr_rule, stream_concat_rule, logic_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule, query_comprehension_rule]
+        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, module_id_rule, def_id_rule, doc_rule, module_doc_rule, imported_names_rule, import_clause_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, lexer_family_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, neg_pattern_rule, pattern_binding_rule, complex_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, pattern_arg_rule, expr_rule, stream_concat_rule, logic_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule, query_comprehension_rule]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 class LookupKind(_Enum):
     """
@@ -3644,29 +3644,12 @@ class BaseImport(LktNode):
 
     
     @property
-    def f_module_name(
+    def p_referenced_units(
         self
-    ) -> ModuleId:
+    ) -> List[AnalysisUnit]:
         """
-        When there are no parsing errors, this field is never null.
-        """
-        
-
-        
-
-        result = self._eval_astnode_field(_base_import_f_module_name)
-
-
-
-        return result
-    
-    @property
-    def p_referenced_unit(
-        self
-    ) -> AnalysisUnit:
-        """
-        Return the unit that contains the module this import clause designates.
-        Load it if needed.
+        Return the list of units that contain the modules that this clause
+        imports. Load them if needed.
         """
         
 
@@ -3674,14 +3657,13 @@ class BaseImport(LktNode):
 
 
         
-        c_result = self._eval_field(AnalysisUnit._c_type(), _base_import_p_referenced_unit)
-        result = AnalysisUnit._wrap(c_result)
+        c_result = self._eval_field(_AnalysisUnitArrayConverter.c_type(), _base_import_p_referenced_units)
+        result = _AnalysisUnitArrayConverter.wrap(c_result, False)
 
 
         return result
 
     _field_names = LktNode._field_names + (
-        "f_module_name",
     )
 
 
@@ -3694,7 +3676,7 @@ class Import(BaseImport):
     """
     Subclass of :py:class:`BaseImport`.
 
-    Clause to import a module.
+    Clause to import modules.
 
     This node type has no derivation.
     """
@@ -3704,24 +3686,24 @@ class Import(BaseImport):
 
     
     @property
-    def f_renaming(
+    def f_imported_names(
         self
-    ) -> DefId:
+    ) -> ImportedNameList:
         """
-        This field may be null even when there are no parsing errors.
+        When there are no parsing errors, this field is never null.
         """
         
 
         
 
-        result = self._eval_astnode_field(_import_f_renaming)
+        result = self._eval_astnode_field(_import_f_imported_names)
 
 
 
         return result
 
     _field_names = BaseImport._field_names + (
-        "f_renaming",
+        "f_imported_names",
     )
 
     _kind_name = 'Import'
@@ -3743,8 +3725,26 @@ class ImportAllFrom(BaseImport):
 
     
 
+    
+    @property
+    def f_module_name(
+        self
+    ) -> ModuleId:
+        """
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_import_all_from_f_module_name)
+
+
+
+        return result
 
     _field_names = BaseImport._field_names + (
+        "f_module_name",
     )
 
     _kind_name = 'ImportAllFrom'
@@ -3768,6 +3768,23 @@ class ImportFrom(BaseImport):
 
     
     @property
+    def f_module_name(
+        self
+    ) -> ModuleId:
+        """
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_import_from_f_module_name)
+
+
+
+        return result
+    
+    @property
     def f_imported_names(
         self
     ) -> ImportedNameList:
@@ -3785,6 +3802,7 @@ class ImportFrom(BaseImport):
         return result
 
     _field_names = BaseImport._field_names + (
+        "f_module_name",
         "f_imported_names",
     )
 
@@ -15492,20 +15510,26 @@ _argument_f_value = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_base_import_f_module_name = _import_func(
-    'lkt_base_import_f_module_name',
+_base_import_p_referenced_units = _import_func(
+    'lkt_base_import_p_referenced_units',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_AnalysisUnitArrayConverter.c_type)],
+    ctypes.c_int
+)
+_import_f_imported_names = _import_func(
+    'lkt_import_f_imported_names',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_base_import_p_referenced_unit = _import_func(
-    'lkt_base_import_p_referenced_unit',
+_import_all_from_f_module_name = _import_func(
+    'lkt_import_all_from_f_module_name',
     [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(AnalysisUnit._c_type)],
+     ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_import_f_renaming = _import_func(
-    'lkt_import_f_renaming',
+_import_from_f_module_name = _import_func(
+    'lkt_import_from_f_module_name',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
