@@ -1,0 +1,69 @@
+Resolving test.lkt
+==================
+Expr <ImportedId "module_a" test.lkt:1:8-1:16>
+     has_type None
+
+Expr <ImportedId "module_b" test.lkt:2:8-2:16>
+     has_type None
+
+Expr <ModuleId "module_c" test.lkt:3:6-3:14>
+     has_type None
+
+Expr <ImportedId "var_c1" test.lkt:3:22-3:28>
+     has_type None
+
+Expr <ImportedId "var_c2" test.lkt:3:30-3:36>
+     has_type None
+
+Expr <ModuleId "module_d" test.lkt:4:6-4:14>
+     has_type None
+
+Decl <ValDecl "v1" test.lkt:6:1-6:27>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:6:10-6:27>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "renamed_mod" test.lkt:6:10-6:21>
+           has_type None
+           references <LangkitRoot "module_a" module_a.lkt:1:1-1:14>
+
+      Id   <RefId "var_a" test.lkt:6:22-6:27>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "var_a" module_a.lkt:1:1-1:14>
+
+Decl <ValDecl "v2" test.lkt:7:1-7:24>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:7:10-7:24>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "module_b" test.lkt:7:10-7:18>
+           has_type None
+           references <LangkitRoot "module_b" module_b.lkt:1:1-1:14>
+
+      Id   <RefId "var_b" test.lkt:7:19-7:24>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "var_b" module_b.lkt:1:1-1:14>
+
+Decl <ValDecl "v3" test.lkt:8:1-8:16>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "var_c1" test.lkt:8:10-8:16>
+        has_type <StructDecl prelude: "Int">
+        references <ValDecl "var_c1" module_c.lkt:1:1-1:15>
+
+Decl <ValDecl "v4" test.lkt:9:1-9:21>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "var2_from_c" test.lkt:9:10-9:21>
+        has_type <StructDecl prelude: "Int">
+        references <ValDecl "var_c2" module_c.lkt:2:1-2:15>
+
+Decl <ValDecl "v5" test.lkt:10:1-10:15>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "var_d" test.lkt:10:10-10:15>
+        has_type <StructDecl prelude: "Int">
+        references <ValDecl "var_d" module_d.lkt:6:1-6:23>
+

@@ -105,7 +105,6 @@ Completing <RefId "Stru" test.lkt:8:9-8:13> ('Stru')
  - TypableNodeInterface: interface_kind
  - TypeInterface: interface_kind
  - __EmptyMetadata: struct_kind
- - __EmptyMetadata: struct_kind
  - __internal: struct_kind
 Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - Address: struct_kind
@@ -161,7 +160,6 @@ Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - TypeInterface: interface_kind
  - _: variable_kind
  - _: variable_kind
- - __EmptyMetadata: struct_kind
  - __EmptyMetadata: struct_kind
  - __internal: struct_kind
  - add_all_to_env: function_kind

@@ -1,0 +1,10 @@
+import module_a as renamed_mod
+import module_b
+from module_c import var_c1, var_c2 as var2_from_c
+from module_d import *
+
+val v1 = renamed_mod.var_a
+val v2 = module_b.var_b
+val v3 = var_c1
+val v4 = var2_from_c
+val v5 = var_d

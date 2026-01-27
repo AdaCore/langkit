@@ -1,4 +1,4 @@
-import common
+from common import FooNode
 
 class Example : FooNode {
     |" Overide doc

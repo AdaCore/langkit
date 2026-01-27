@@ -1,0 +1,6 @@
+# The "from module_d import *" should not import the var_c1 entity defined
+# here, and so it should not hide the "var_c1" directly imported from module_c
+# in "test.lkt".
+from module_c import var_c2 as var_c1
+
+val var_d = var_c1 + 1
