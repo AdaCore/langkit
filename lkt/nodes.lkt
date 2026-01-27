@@ -5228,25 +5228,21 @@ class GrammarListSep: LktNode {
 |" Base node for all import clauses.
 @abstract
 class BaseImport: LktNode {
-    @parse_field
-    module_name: ModuleId
-
-    |" Return the unit that contains the module this import clause designates.
-    |" Load it if needed.
+    |" Return the list of units that contain the modules that this clause
+    |" imports. Load them if needed.
     @exported
-    fun referenced_unit(): AnalysisUnit =
-        node.internal_fetch_referenced_unit(node.module_name.text)
+    fun referenced_units(): Array[AnalysisUnit] =
+        node.referenced_modules().map(
+            (m) => node.internal_fetch_referenced_unit(m.text)
+        )
+
+    |" Return identifiers for the list of modules that this clause imports.
+    @abstract
+    fun referenced_modules(): Array[Id]
 
     env_spec {
-        do(node.referenced_unit())
+        do(node.referenced_units())
     }
-}
-
-|" Clause to import a module.
-class Import: BaseImport {
-    @nullable
-    @parse_field
-    renaming: DefId
 }
 
 |" Couple of imported entity name and renaming identifier.
@@ -5259,14 +5255,32 @@ class ImportedName: LktNode {
     renaming: DefId
 }
 
+|" Clause to import modules.
+class Import: BaseImport {
+    @parse_field
+    imported_names: ASTList[ImportedName]
+
+    fun referenced_modules(): Array[Id] =
+        node.imported_names.map((n) => n.original_name.as[Id])
+}
+
 |" Clause to import declarations from another module.
 class ImportFrom: BaseImport {
     @parse_field
+    module_name: ModuleId
+
+    @parse_field
     imported_names: ASTList[ImportedName]
+
+    fun referenced_modules(): Array[Id] = [node.module_name.as[Id]]
 }
 
 |" Clause to import all declarations from another module.
 class ImportAllFrom: BaseImport {
+    @parse_field
+    module_name: ModuleId
+
+    fun referenced_modules(): Array[Id] = [node.module_name.as[Id]]
 }
 
 |" For the moment, root node of a lkt compilation unit.
