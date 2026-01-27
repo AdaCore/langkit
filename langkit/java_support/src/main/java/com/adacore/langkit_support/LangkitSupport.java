@@ -388,7 +388,8 @@ public class LangkitSupport {
      * needed to start analyzing sources. It will contain the result of all
      * analysis, and is the main holder for all the data.
      */
-    public interface AnalysisContextInterface extends AutoCloseable {
+    public interface AnalysisContextInterface extends
+        AutoCloseable, TruffleObject {
 
         /**
          * Get an analysis unit from the given file in the current context.
