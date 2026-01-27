@@ -60,6 +60,16 @@ procedure Lkt_Toolbox is
          Arg_Type    => Natural,
          Help        => "Only do name resolution at line N.",
          Default_Val => 0);
+
+      package Completion_Slocs is new Parse_Option_List
+        (Parser     => Parser,
+         Short      => "-c",
+         Long       => "--complete",
+         Usage_Text => "SLOC",
+         Arg_Type   => Source_Location,
+         Convert    => Value,
+         Arg_Number => Single_Arg,
+         Help       => "Call code completion at the given location.");
    end Arg;
 
    use Liblktlang;
@@ -325,7 +335,45 @@ begin
          File_Name_Str : constant String := To_String (File_Name);
          Unit          : constant Analysis.Analysis_Unit :=
             Ctx.Get_From_File (File_Name_Str);
+         Comp_Slocs    : constant Arg.Completion_Slocs.Result_Array :=
+           Arg.Completion_Slocs.Get;
       begin
+         if Comp_Slocs'Length > 0 then
+            for Sloc of Comp_Slocs loop
+               declare
+                  N : constant Lkt_Node := Unit.Root.Lookup (Sloc);
+               begin
+                  if N.Is_Null then
+                     Put_Line ("No node at " & Image (Sloc));
+                     goto Next_Sloc;
+                  end if;
+
+                  Put_Line ("Completing " & N.Image);
+                  declare
+                     Items : constant Complete_Item_Array := N.P_Complete;
+                     D     : Decl;
+                  begin
+                     for CI of N.P_Complete loop
+                        D := CI.Declaration.As_Decl;
+                        Put ("  " & D.Image);
+                        if not D.F_Syn_Name.Is_Null then
+                           Put
+                             (" ("
+                              & D.F_Syn_Name.P_Completion_Item_Kind'Image
+                              & ")");
+                        end if;
+                        New_Line;
+                     end loop;
+                     if Items'Length = 0 then
+                        Put_Line ("<none>");
+                     end if;
+                  end;
+               end;
+               <<Next_Sloc>>
+            end loop;
+            return;
+         end if;
+
          if not Arg.Check_Only.Get then
             Put_Line ("Resolving " & File_Name_Str);
             Put_Line ((File_Name_Str'Length + 10) * "=");
