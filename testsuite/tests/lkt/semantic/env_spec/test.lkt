@@ -1,0 +1,53 @@
+val a = 1
+val b = 2
+
+class FooNode implements Node[FooNode] {
+
+    fun env_resolver(): LexicalEnv = null[LexicalEnv]
+    fun entity_resolver(): Entity[FooNode] = null[Entity[FooNode]]
+
+    env_spec {
+        set_initial_env(null[DesignatedEnv])
+        set_initial_env(env=null[DesignatedEnv])
+
+        add_env()
+        add_env(no_parent=false, transitive_parent=false, names=[s"foo"])
+
+        add_single_to_env(null[EnvAssoc])
+        add_single_to_env(
+            mapping=null[EnvAssoc],
+            resolver=FooNode.entity_resolver
+        )
+
+        add_all_to_env(null[Array[EnvAssoc]])
+        add_all_to_env(
+            mappings=null[Array[EnvAssoc]],
+            resolver=FooNode.entity_resolver
+        )
+
+        add_to_env_kv(s"foo", node)
+        add_to_env_kv(
+            key=s"foo",
+            value=node,
+            dest_env=null[DesignatedEnv],
+            metadata=null[Metadata],
+            resolver=FooNode.entity_resolver
+        )
+
+        do(a + b)
+        do("foo")
+
+        handle_children()
+
+        reference([node], FooNode.env_resolver)
+        reference(
+            nodes=[node],
+            through=FooNode.env_resolver,
+            kind=RefKind.normal,
+            dest_env=null[LexicalEnv],
+            cond=true,
+            category="foo",
+            shed_corresponding_rebindings=false
+        )
+    }
+}
