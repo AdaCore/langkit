@@ -98,103 +98,103 @@ private package Liblktlang.Generic_Introspection is
       Type_Index_For_Error_Decl : constant Type_Index := 69;
       Type_Index_For_Generic_Decl : constant Type_Index := 70;
       Type_Index_For_Grammar_Decl : constant Type_Index := 71;
-      Type_Index_For_Lexer_Decl : constant Type_Index := 72;
-      Type_Index_For_Lexer_Family_Decl : constant Type_Index := 73;
-      Type_Index_For_Synth_Fun_Decl : constant Type_Index := 74;
-      Type_Index_For_Synth_Param_Decl : constant Type_Index := 75;
-      Type_Index_For_Type_Decl : constant Type_Index := 76;
-      Type_Index_For_Any_Type_Decl : constant Type_Index := 77;
-      Type_Index_For_Enum_Class_Alt_Decl : constant Type_Index := 78;
-      Type_Index_For_Function_Type : constant Type_Index := 79;
-      Type_Index_For_Generic_Param_Type_Decl : constant Type_Index := 80;
-      Type_Index_For_Named_Type_Decl : constant Type_Index := 81;
-      Type_Index_For_Basic_Class_Decl : constant Type_Index := 82;
-      Type_Index_For_Class_Decl : constant Type_Index := 83;
-      Type_Index_For_Enum_Class_Decl : constant Type_Index := 84;
-      Type_Index_For_Enum_Type_Decl : constant Type_Index := 85;
-      Type_Index_For_Struct_Decl : constant Type_Index := 86;
-      Type_Index_For_Trait_Decl : constant Type_Index := 87;
-      Type_Index_For_Decl_Annotation : constant Type_Index := 88;
-      Type_Index_For_Decl_Annotation_Args : constant Type_Index := 89;
-      Type_Index_For_Dyn_Env_Wrapper : constant Type_Index := 90;
-      Type_Index_For_Elsif_Branch : constant Type_Index := 91;
-      Type_Index_For_Enum_Class_Case : constant Type_Index := 92;
-      Type_Index_For_Excludes_Null : constant Type_Index := 93;
-      Type_Index_For_Excludes_Null_Absent : constant Type_Index := 94;
-      Type_Index_For_Excludes_Null_Present : constant Type_Index := 95;
-      Type_Index_For_Expr : constant Type_Index := 96;
-      Type_Index_For_Any_Of : constant Type_Index := 97;
-      Type_Index_For_Array_Literal : constant Type_Index := 98;
-      Type_Index_For_Base_Call_Expr : constant Type_Index := 99;
-      Type_Index_For_Call_Expr : constant Type_Index := 100;
-      Type_Index_For_Logic_Call_Expr : constant Type_Index := 101;
-      Type_Index_For_Logic_Predicate : constant Type_Index := 102;
-      Type_Index_For_Logic_Propagate_Call : constant Type_Index := 103;
-      Type_Index_For_Bin_Op : constant Type_Index := 104;
-      Type_Index_For_Block_Expr : constant Type_Index := 105;
-      Type_Index_For_Cast_Expr : constant Type_Index := 106;
-      Type_Index_For_Dot_Expr : constant Type_Index := 107;
-      Type_Index_For_Error_On_Null : constant Type_Index := 108;
-      Type_Index_For_Generic_Instantiation : constant Type_Index := 109;
-      Type_Index_For_Grammar_Expr : constant Type_Index := 110;
-      Type_Index_For_Error_Grammar_Expr : constant Type_Index := 111;
-      Type_Index_For_Grammar_Cut : constant Type_Index := 112;
-      Type_Index_For_Grammar_Discard : constant Type_Index := 113;
-      Type_Index_For_Grammar_Dont_Skip : constant Type_Index := 114;
-      Type_Index_For_Grammar_List : constant Type_Index := 115;
-      Type_Index_For_Grammar_Null : constant Type_Index := 116;
-      Type_Index_For_Grammar_Opt : constant Type_Index := 117;
-      Type_Index_For_Grammar_Opt_Error : constant Type_Index := 118;
-      Type_Index_For_Grammar_Opt_Error_Group : constant Type_Index := 119;
-      Type_Index_For_Grammar_Opt_Group : constant Type_Index := 120;
-      Type_Index_For_Grammar_Or_Expr : constant Type_Index := 121;
-      Type_Index_For_Grammar_Pick : constant Type_Index := 122;
-      Type_Index_For_Grammar_Implicit_Pick : constant Type_Index := 123;
-      Type_Index_For_Grammar_Predicate : constant Type_Index := 124;
-      Type_Index_For_Grammar_Rule_Ref : constant Type_Index := 125;
-      Type_Index_For_Grammar_Skip : constant Type_Index := 126;
-      Type_Index_For_Grammar_Stop_Cut : constant Type_Index := 127;
-      Type_Index_For_Parse_Node_Expr : constant Type_Index := 128;
-      Type_Index_For_Token_Lit : constant Type_Index := 129;
-      Type_Index_For_Token_No_Case_Lit : constant Type_Index := 130;
-      Type_Index_For_Token_Pattern_Concat : constant Type_Index := 131;
-      Type_Index_For_Token_Pattern_Lit : constant Type_Index := 132;
-      Type_Index_For_Token_Ref : constant Type_Index := 133;
-      Type_Index_For_Id : constant Type_Index := 134;
-      Type_Index_For_Def_Id : constant Type_Index := 135;
-      Type_Index_For_Imported_Id : constant Type_Index := 136;
-      Type_Index_For_Module_Id : constant Type_Index := 137;
-      Type_Index_For_Ref_Id : constant Type_Index := 138;
-      Type_Index_For_If_Expr : constant Type_Index := 139;
-      Type_Index_For_Isa : constant Type_Index := 140;
-      Type_Index_For_Keep_Expr : constant Type_Index := 141;
-      Type_Index_For_Lambda_Expr : constant Type_Index := 142;
-      Type_Index_For_Lit : constant Type_Index := 143;
-      Type_Index_For_Big_Num_Lit : constant Type_Index := 144;
-      Type_Index_For_Char_Lit : constant Type_Index := 145;
-      Type_Index_For_Null_Lit : constant Type_Index := 146;
-      Type_Index_For_Num_Lit : constant Type_Index := 147;
-      Type_Index_For_String_Lit : constant Type_Index := 148;
-      Type_Index_For_Block_String_Lit : constant Type_Index := 149;
-      Type_Index_For_Module_Doc_String_Lit : constant Type_Index := 150;
-      Type_Index_For_Single_Line_String_Lit : constant Type_Index := 151;
-      Type_Index_For_Pattern_Single_Line_String_Lit : constant Type_Index := 152;
-      Type_Index_For_Logic_Assign : constant Type_Index := 153;
-      Type_Index_For_Logic_Expr : constant Type_Index := 154;
-      Type_Index_For_Logic_Propagate : constant Type_Index := 155;
-      Type_Index_For_Logic_Unify : constant Type_Index := 156;
-      Type_Index_For_Match_Expr : constant Type_Index := 157;
-      Type_Index_For_Not_Expr : constant Type_Index := 158;
-      Type_Index_For_Paren_Expr : constant Type_Index := 159;
-      Type_Index_For_Query : constant Type_Index := 160;
-      Type_Index_For_Raise_Expr : constant Type_Index := 161;
-      Type_Index_For_Subscript_Expr : constant Type_Index := 162;
-      Type_Index_For_Try_Expr : constant Type_Index := 163;
-      Type_Index_For_Un_Op : constant Type_Index := 164;
-      Type_Index_For_Full_Decl : constant Type_Index := 165;
-      Type_Index_For_Grammar_List_Sep : constant Type_Index := 166;
-      Type_Index_For_Imported_Name : constant Type_Index := 167;
-      Type_Index_For_Langkit_Root : constant Type_Index := 168;
+      Type_Index_For_Langkit_Root : constant Type_Index := 72;
+      Type_Index_For_Lexer_Decl : constant Type_Index := 73;
+      Type_Index_For_Lexer_Family_Decl : constant Type_Index := 74;
+      Type_Index_For_Synth_Fun_Decl : constant Type_Index := 75;
+      Type_Index_For_Synth_Param_Decl : constant Type_Index := 76;
+      Type_Index_For_Type_Decl : constant Type_Index := 77;
+      Type_Index_For_Any_Type_Decl : constant Type_Index := 78;
+      Type_Index_For_Enum_Class_Alt_Decl : constant Type_Index := 79;
+      Type_Index_For_Function_Type : constant Type_Index := 80;
+      Type_Index_For_Generic_Param_Type_Decl : constant Type_Index := 81;
+      Type_Index_For_Named_Type_Decl : constant Type_Index := 82;
+      Type_Index_For_Basic_Class_Decl : constant Type_Index := 83;
+      Type_Index_For_Class_Decl : constant Type_Index := 84;
+      Type_Index_For_Enum_Class_Decl : constant Type_Index := 85;
+      Type_Index_For_Enum_Type_Decl : constant Type_Index := 86;
+      Type_Index_For_Struct_Decl : constant Type_Index := 87;
+      Type_Index_For_Trait_Decl : constant Type_Index := 88;
+      Type_Index_For_Decl_Annotation : constant Type_Index := 89;
+      Type_Index_For_Decl_Annotation_Args : constant Type_Index := 90;
+      Type_Index_For_Dyn_Env_Wrapper : constant Type_Index := 91;
+      Type_Index_For_Elsif_Branch : constant Type_Index := 92;
+      Type_Index_For_Enum_Class_Case : constant Type_Index := 93;
+      Type_Index_For_Excludes_Null : constant Type_Index := 94;
+      Type_Index_For_Excludes_Null_Absent : constant Type_Index := 95;
+      Type_Index_For_Excludes_Null_Present : constant Type_Index := 96;
+      Type_Index_For_Expr : constant Type_Index := 97;
+      Type_Index_For_Any_Of : constant Type_Index := 98;
+      Type_Index_For_Array_Literal : constant Type_Index := 99;
+      Type_Index_For_Base_Call_Expr : constant Type_Index := 100;
+      Type_Index_For_Call_Expr : constant Type_Index := 101;
+      Type_Index_For_Logic_Call_Expr : constant Type_Index := 102;
+      Type_Index_For_Logic_Predicate : constant Type_Index := 103;
+      Type_Index_For_Logic_Propagate_Call : constant Type_Index := 104;
+      Type_Index_For_Bin_Op : constant Type_Index := 105;
+      Type_Index_For_Block_Expr : constant Type_Index := 106;
+      Type_Index_For_Cast_Expr : constant Type_Index := 107;
+      Type_Index_For_Dot_Expr : constant Type_Index := 108;
+      Type_Index_For_Error_On_Null : constant Type_Index := 109;
+      Type_Index_For_Generic_Instantiation : constant Type_Index := 110;
+      Type_Index_For_Grammar_Expr : constant Type_Index := 111;
+      Type_Index_For_Error_Grammar_Expr : constant Type_Index := 112;
+      Type_Index_For_Grammar_Cut : constant Type_Index := 113;
+      Type_Index_For_Grammar_Discard : constant Type_Index := 114;
+      Type_Index_For_Grammar_Dont_Skip : constant Type_Index := 115;
+      Type_Index_For_Grammar_List : constant Type_Index := 116;
+      Type_Index_For_Grammar_Null : constant Type_Index := 117;
+      Type_Index_For_Grammar_Opt : constant Type_Index := 118;
+      Type_Index_For_Grammar_Opt_Error : constant Type_Index := 119;
+      Type_Index_For_Grammar_Opt_Error_Group : constant Type_Index := 120;
+      Type_Index_For_Grammar_Opt_Group : constant Type_Index := 121;
+      Type_Index_For_Grammar_Or_Expr : constant Type_Index := 122;
+      Type_Index_For_Grammar_Pick : constant Type_Index := 123;
+      Type_Index_For_Grammar_Implicit_Pick : constant Type_Index := 124;
+      Type_Index_For_Grammar_Predicate : constant Type_Index := 125;
+      Type_Index_For_Grammar_Rule_Ref : constant Type_Index := 126;
+      Type_Index_For_Grammar_Skip : constant Type_Index := 127;
+      Type_Index_For_Grammar_Stop_Cut : constant Type_Index := 128;
+      Type_Index_For_Parse_Node_Expr : constant Type_Index := 129;
+      Type_Index_For_Token_Lit : constant Type_Index := 130;
+      Type_Index_For_Token_No_Case_Lit : constant Type_Index := 131;
+      Type_Index_For_Token_Pattern_Concat : constant Type_Index := 132;
+      Type_Index_For_Token_Pattern_Lit : constant Type_Index := 133;
+      Type_Index_For_Token_Ref : constant Type_Index := 134;
+      Type_Index_For_Id : constant Type_Index := 135;
+      Type_Index_For_Def_Id : constant Type_Index := 136;
+      Type_Index_For_Imported_Id : constant Type_Index := 137;
+      Type_Index_For_Module_Id : constant Type_Index := 138;
+      Type_Index_For_Ref_Id : constant Type_Index := 139;
+      Type_Index_For_If_Expr : constant Type_Index := 140;
+      Type_Index_For_Isa : constant Type_Index := 141;
+      Type_Index_For_Keep_Expr : constant Type_Index := 142;
+      Type_Index_For_Lambda_Expr : constant Type_Index := 143;
+      Type_Index_For_Lit : constant Type_Index := 144;
+      Type_Index_For_Big_Num_Lit : constant Type_Index := 145;
+      Type_Index_For_Char_Lit : constant Type_Index := 146;
+      Type_Index_For_Null_Lit : constant Type_Index := 147;
+      Type_Index_For_Num_Lit : constant Type_Index := 148;
+      Type_Index_For_String_Lit : constant Type_Index := 149;
+      Type_Index_For_Block_String_Lit : constant Type_Index := 150;
+      Type_Index_For_Module_Doc_String_Lit : constant Type_Index := 151;
+      Type_Index_For_Single_Line_String_Lit : constant Type_Index := 152;
+      Type_Index_For_Pattern_Single_Line_String_Lit : constant Type_Index := 153;
+      Type_Index_For_Logic_Assign : constant Type_Index := 154;
+      Type_Index_For_Logic_Expr : constant Type_Index := 155;
+      Type_Index_For_Logic_Propagate : constant Type_Index := 156;
+      Type_Index_For_Logic_Unify : constant Type_Index := 157;
+      Type_Index_For_Match_Expr : constant Type_Index := 158;
+      Type_Index_For_Not_Expr : constant Type_Index := 159;
+      Type_Index_For_Paren_Expr : constant Type_Index := 160;
+      Type_Index_For_Query : constant Type_Index := 161;
+      Type_Index_For_Raise_Expr : constant Type_Index := 162;
+      Type_Index_For_Subscript_Expr : constant Type_Index := 163;
+      Type_Index_For_Try_Expr : constant Type_Index := 164;
+      Type_Index_For_Un_Op : constant Type_Index := 165;
+      Type_Index_For_Full_Decl : constant Type_Index := 166;
+      Type_Index_For_Grammar_List_Sep : constant Type_Index := 167;
+      Type_Index_For_Imported_Name : constant Type_Index := 168;
       Type_Index_For_Lexer_Case_Rule : constant Type_Index := 169;
       Type_Index_For_Lexer_Case_Rule_Send : constant Type_Index := 170;
       Type_Index_For_List_Kind : constant Type_Index := 171;
@@ -329,115 +329,115 @@ private package Liblktlang.Generic_Introspection is
       Member_Index_For_Generic_Decl_F_Generic_Param_Decls : constant Struct_Member_Index := 45;
       Member_Index_For_Generic_Decl_F_Decl : constant Struct_Member_Index := 46;
       Member_Index_For_Grammar_Decl_F_Rules : constant Struct_Member_Index := 47;
-      Member_Index_For_Lexer_Decl_F_Rules : constant Struct_Member_Index := 48;
-      Member_Index_For_Lexer_Family_Decl_F_Rules : constant Struct_Member_Index := 49;
-      Member_Index_For_Type_Decl_F_Traits : constant Struct_Member_Index := 50;
-      Member_Index_For_Type_Decl_F_Syn_Base_Type : constant Struct_Member_Index := 51;
-      Member_Index_For_Generic_Param_Type_Decl_F_Has_Class : constant Struct_Member_Index := 52;
-      Member_Index_For_Named_Type_Decl_F_Decls : constant Struct_Member_Index := 53;
-      Member_Index_For_Enum_Class_Decl_F_Branches : constant Struct_Member_Index := 54;
-      Member_Index_For_Enum_Type_Decl_F_Literals : constant Struct_Member_Index := 55;
-      Member_Index_For_Decl_Annotation_F_Name : constant Struct_Member_Index := 56;
-      Member_Index_For_Decl_Annotation_F_Args : constant Struct_Member_Index := 57;
-      Member_Index_For_Decl_Annotation_Args_F_Args : constant Struct_Member_Index := 58;
-      Member_Index_For_Elsif_Branch_F_Cond_Expr : constant Struct_Member_Index := 59;
-      Member_Index_For_Elsif_Branch_F_Then_Expr : constant Struct_Member_Index := 60;
-      Member_Index_For_Enum_Class_Case_F_Decls : constant Struct_Member_Index := 61;
-      Member_Index_For_Any_Of_F_Expr : constant Struct_Member_Index := 62;
-      Member_Index_For_Any_Of_F_Values : constant Struct_Member_Index := 63;
-      Member_Index_For_Array_Literal_F_Exprs : constant Struct_Member_Index := 64;
-      Member_Index_For_Array_Literal_F_Element_Type : constant Struct_Member_Index := 65;
-      Member_Index_For_Base_Call_Expr_F_Name : constant Struct_Member_Index := 66;
-      Member_Index_For_Base_Call_Expr_F_Args : constant Struct_Member_Index := 67;
-      Member_Index_For_Bin_Op_F_Left : constant Struct_Member_Index := 68;
-      Member_Index_For_Bin_Op_F_Op : constant Struct_Member_Index := 69;
-      Member_Index_For_Bin_Op_F_Right : constant Struct_Member_Index := 70;
-      Member_Index_For_Block_Expr_F_Clauses : constant Struct_Member_Index := 71;
-      Member_Index_For_Cast_Expr_F_Expr : constant Struct_Member_Index := 72;
-      Member_Index_For_Cast_Expr_F_Null_Cond : constant Struct_Member_Index := 73;
-      Member_Index_For_Cast_Expr_F_Excludes_Null : constant Struct_Member_Index := 74;
-      Member_Index_For_Cast_Expr_F_Dest_Type : constant Struct_Member_Index := 75;
-      Member_Index_For_Dot_Expr_F_Prefix : constant Struct_Member_Index := 76;
-      Member_Index_For_Dot_Expr_F_Null_Cond : constant Struct_Member_Index := 77;
-      Member_Index_For_Dot_Expr_F_Suffix : constant Struct_Member_Index := 78;
-      Member_Index_For_Error_On_Null_F_Expr : constant Struct_Member_Index := 79;
-      Member_Index_For_Generic_Instantiation_F_Name : constant Struct_Member_Index := 80;
-      Member_Index_For_Generic_Instantiation_F_Args : constant Struct_Member_Index := 81;
-      Member_Index_For_Grammar_Discard_F_Expr : constant Struct_Member_Index := 82;
-      Member_Index_For_Grammar_Dont_Skip_F_Expr : constant Struct_Member_Index := 83;
-      Member_Index_For_Grammar_Dont_Skip_F_Dont_Skip : constant Struct_Member_Index := 84;
-      Member_Index_For_Grammar_List_F_List_Type : constant Struct_Member_Index := 85;
-      Member_Index_For_Grammar_List_F_Kind : constant Struct_Member_Index := 86;
-      Member_Index_For_Grammar_List_F_Expr : constant Struct_Member_Index := 87;
-      Member_Index_For_Grammar_List_F_Sep : constant Struct_Member_Index := 88;
-      Member_Index_For_Grammar_Null_F_Name : constant Struct_Member_Index := 89;
-      Member_Index_For_Grammar_Opt_F_Expr : constant Struct_Member_Index := 90;
-      Member_Index_For_Grammar_Opt_Error_F_Expr : constant Struct_Member_Index := 91;
-      Member_Index_For_Grammar_Opt_Error_Group_F_Expr : constant Struct_Member_Index := 92;
-      Member_Index_For_Grammar_Opt_Group_F_Expr : constant Struct_Member_Index := 93;
-      Member_Index_For_Grammar_Or_Expr_F_Sub_Exprs : constant Struct_Member_Index := 94;
-      Member_Index_For_Grammar_Pick_F_Exprs : constant Struct_Member_Index := 95;
-      Member_Index_For_Grammar_Predicate_F_Expr : constant Struct_Member_Index := 96;
-      Member_Index_For_Grammar_Predicate_F_Prop_Ref : constant Struct_Member_Index := 97;
-      Member_Index_For_Grammar_Rule_Ref_F_Node_Name : constant Struct_Member_Index := 98;
-      Member_Index_For_Grammar_Skip_F_Name : constant Struct_Member_Index := 99;
-      Member_Index_For_Grammar_Stop_Cut_F_Expr : constant Struct_Member_Index := 100;
-      Member_Index_For_Parse_Node_Expr_F_Node_Name : constant Struct_Member_Index := 101;
-      Member_Index_For_Parse_Node_Expr_F_Sub_Exprs : constant Struct_Member_Index := 102;
-      Member_Index_For_Token_No_Case_Lit_F_Lit : constant Struct_Member_Index := 103;
-      Member_Index_For_Token_Pattern_Concat_F_Left : constant Struct_Member_Index := 104;
-      Member_Index_For_Token_Pattern_Concat_F_Right : constant Struct_Member_Index := 105;
-      Member_Index_For_Token_Ref_F_Token_Name : constant Struct_Member_Index := 106;
-      Member_Index_For_Token_Ref_F_Expr : constant Struct_Member_Index := 107;
-      Member_Index_For_If_Expr_F_Cond_Expr : constant Struct_Member_Index := 108;
-      Member_Index_For_If_Expr_F_Then_Expr : constant Struct_Member_Index := 109;
-      Member_Index_For_If_Expr_F_Alternatives : constant Struct_Member_Index := 110;
-      Member_Index_For_If_Expr_F_Else_Expr : constant Struct_Member_Index := 111;
-      Member_Index_For_Isa_F_Expr : constant Struct_Member_Index := 112;
-      Member_Index_For_Isa_F_Pattern : constant Struct_Member_Index := 113;
-      Member_Index_For_Keep_Expr_F_Expr : constant Struct_Member_Index := 114;
-      Member_Index_For_Keep_Expr_F_Null_Cond : constant Struct_Member_Index := 115;
-      Member_Index_For_Keep_Expr_F_Keep_Type : constant Struct_Member_Index := 116;
-      Member_Index_For_Lambda_Expr_F_Params : constant Struct_Member_Index := 117;
-      Member_Index_For_Lambda_Expr_F_Return_Type : constant Struct_Member_Index := 118;
-      Member_Index_For_Lambda_Expr_F_Body : constant Struct_Member_Index := 119;
-      Member_Index_For_Null_Lit_F_Dest_Type : constant Struct_Member_Index := 120;
-      Member_Index_For_Block_String_Lit_F_Lines : constant Struct_Member_Index := 121;
-      Member_Index_For_Module_Doc_String_Lit_F_Lines : constant Struct_Member_Index := 122;
-      Member_Index_For_Logic_Assign_F_Dest_Var : constant Struct_Member_Index := 123;
-      Member_Index_For_Logic_Assign_F_Value : constant Struct_Member_Index := 124;
-      Member_Index_For_Logic_Expr_F_Expr : constant Struct_Member_Index := 125;
-      Member_Index_For_Logic_Propagate_F_Dest_Var : constant Struct_Member_Index := 126;
-      Member_Index_For_Logic_Propagate_F_Call : constant Struct_Member_Index := 127;
-      Member_Index_For_Logic_Unify_F_Lhs : constant Struct_Member_Index := 128;
-      Member_Index_For_Logic_Unify_F_Rhs : constant Struct_Member_Index := 129;
-      Member_Index_For_Match_Expr_F_Match_Expr : constant Struct_Member_Index := 130;
-      Member_Index_For_Match_Expr_F_Branches : constant Struct_Member_Index := 131;
-      Member_Index_For_Not_Expr_F_Expr : constant Struct_Member_Index := 132;
-      Member_Index_For_Paren_Expr_F_Expr : constant Struct_Member_Index := 133;
-      Member_Index_For_Query_F_Source : constant Struct_Member_Index := 134;
-      Member_Index_For_Query_F_Pattern : constant Struct_Member_Index := 135;
-      Member_Index_For_Query_F_Mapping : constant Struct_Member_Index := 136;
-      Member_Index_For_Query_F_Guard : constant Struct_Member_Index := 137;
-      Member_Index_For_Raise_Expr_F_Dest_Type : constant Struct_Member_Index := 138;
-      Member_Index_For_Raise_Expr_F_Except_Expr : constant Struct_Member_Index := 139;
-      Member_Index_For_Subscript_Expr_F_Prefix : constant Struct_Member_Index := 140;
-      Member_Index_For_Subscript_Expr_F_Null_Cond : constant Struct_Member_Index := 141;
-      Member_Index_For_Subscript_Expr_F_Index : constant Struct_Member_Index := 142;
-      Member_Index_For_Try_Expr_F_Try_Expr : constant Struct_Member_Index := 143;
-      Member_Index_For_Try_Expr_F_Or_Expr : constant Struct_Member_Index := 144;
-      Member_Index_For_Un_Op_F_Op : constant Struct_Member_Index := 145;
-      Member_Index_For_Un_Op_F_Expr : constant Struct_Member_Index := 146;
-      Member_Index_For_Full_Decl_F_Doc : constant Struct_Member_Index := 147;
-      Member_Index_For_Full_Decl_F_Decl_Annotations : constant Struct_Member_Index := 148;
-      Member_Index_For_Full_Decl_F_Decl : constant Struct_Member_Index := 149;
-      Member_Index_For_Grammar_List_Sep_F_Token : constant Struct_Member_Index := 150;
-      Member_Index_For_Grammar_List_Sep_F_Extra : constant Struct_Member_Index := 151;
-      Member_Index_For_Imported_Name_F_Original_Name : constant Struct_Member_Index := 152;
-      Member_Index_For_Imported_Name_F_Renaming : constant Struct_Member_Index := 153;
-      Member_Index_For_Langkit_Root_F_Doc : constant Struct_Member_Index := 154;
-      Member_Index_For_Langkit_Root_F_Imports : constant Struct_Member_Index := 155;
-      Member_Index_For_Langkit_Root_F_Decls : constant Struct_Member_Index := 156;
+      Member_Index_For_Langkit_Root_F_Doc : constant Struct_Member_Index := 48;
+      Member_Index_For_Langkit_Root_F_Imports : constant Struct_Member_Index := 49;
+      Member_Index_For_Langkit_Root_F_Decls : constant Struct_Member_Index := 50;
+      Member_Index_For_Lexer_Decl_F_Rules : constant Struct_Member_Index := 51;
+      Member_Index_For_Lexer_Family_Decl_F_Rules : constant Struct_Member_Index := 52;
+      Member_Index_For_Type_Decl_F_Traits : constant Struct_Member_Index := 53;
+      Member_Index_For_Type_Decl_F_Syn_Base_Type : constant Struct_Member_Index := 54;
+      Member_Index_For_Generic_Param_Type_Decl_F_Has_Class : constant Struct_Member_Index := 55;
+      Member_Index_For_Named_Type_Decl_F_Decls : constant Struct_Member_Index := 56;
+      Member_Index_For_Enum_Class_Decl_F_Branches : constant Struct_Member_Index := 57;
+      Member_Index_For_Enum_Type_Decl_F_Literals : constant Struct_Member_Index := 58;
+      Member_Index_For_Decl_Annotation_F_Name : constant Struct_Member_Index := 59;
+      Member_Index_For_Decl_Annotation_F_Args : constant Struct_Member_Index := 60;
+      Member_Index_For_Decl_Annotation_Args_F_Args : constant Struct_Member_Index := 61;
+      Member_Index_For_Elsif_Branch_F_Cond_Expr : constant Struct_Member_Index := 62;
+      Member_Index_For_Elsif_Branch_F_Then_Expr : constant Struct_Member_Index := 63;
+      Member_Index_For_Enum_Class_Case_F_Decls : constant Struct_Member_Index := 64;
+      Member_Index_For_Any_Of_F_Expr : constant Struct_Member_Index := 65;
+      Member_Index_For_Any_Of_F_Values : constant Struct_Member_Index := 66;
+      Member_Index_For_Array_Literal_F_Exprs : constant Struct_Member_Index := 67;
+      Member_Index_For_Array_Literal_F_Element_Type : constant Struct_Member_Index := 68;
+      Member_Index_For_Base_Call_Expr_F_Name : constant Struct_Member_Index := 69;
+      Member_Index_For_Base_Call_Expr_F_Args : constant Struct_Member_Index := 70;
+      Member_Index_For_Bin_Op_F_Left : constant Struct_Member_Index := 71;
+      Member_Index_For_Bin_Op_F_Op : constant Struct_Member_Index := 72;
+      Member_Index_For_Bin_Op_F_Right : constant Struct_Member_Index := 73;
+      Member_Index_For_Block_Expr_F_Clauses : constant Struct_Member_Index := 74;
+      Member_Index_For_Cast_Expr_F_Expr : constant Struct_Member_Index := 75;
+      Member_Index_For_Cast_Expr_F_Null_Cond : constant Struct_Member_Index := 76;
+      Member_Index_For_Cast_Expr_F_Excludes_Null : constant Struct_Member_Index := 77;
+      Member_Index_For_Cast_Expr_F_Dest_Type : constant Struct_Member_Index := 78;
+      Member_Index_For_Dot_Expr_F_Prefix : constant Struct_Member_Index := 79;
+      Member_Index_For_Dot_Expr_F_Null_Cond : constant Struct_Member_Index := 80;
+      Member_Index_For_Dot_Expr_F_Suffix : constant Struct_Member_Index := 81;
+      Member_Index_For_Error_On_Null_F_Expr : constant Struct_Member_Index := 82;
+      Member_Index_For_Generic_Instantiation_F_Name : constant Struct_Member_Index := 83;
+      Member_Index_For_Generic_Instantiation_F_Args : constant Struct_Member_Index := 84;
+      Member_Index_For_Grammar_Discard_F_Expr : constant Struct_Member_Index := 85;
+      Member_Index_For_Grammar_Dont_Skip_F_Expr : constant Struct_Member_Index := 86;
+      Member_Index_For_Grammar_Dont_Skip_F_Dont_Skip : constant Struct_Member_Index := 87;
+      Member_Index_For_Grammar_List_F_List_Type : constant Struct_Member_Index := 88;
+      Member_Index_For_Grammar_List_F_Kind : constant Struct_Member_Index := 89;
+      Member_Index_For_Grammar_List_F_Expr : constant Struct_Member_Index := 90;
+      Member_Index_For_Grammar_List_F_Sep : constant Struct_Member_Index := 91;
+      Member_Index_For_Grammar_Null_F_Name : constant Struct_Member_Index := 92;
+      Member_Index_For_Grammar_Opt_F_Expr : constant Struct_Member_Index := 93;
+      Member_Index_For_Grammar_Opt_Error_F_Expr : constant Struct_Member_Index := 94;
+      Member_Index_For_Grammar_Opt_Error_Group_F_Expr : constant Struct_Member_Index := 95;
+      Member_Index_For_Grammar_Opt_Group_F_Expr : constant Struct_Member_Index := 96;
+      Member_Index_For_Grammar_Or_Expr_F_Sub_Exprs : constant Struct_Member_Index := 97;
+      Member_Index_For_Grammar_Pick_F_Exprs : constant Struct_Member_Index := 98;
+      Member_Index_For_Grammar_Predicate_F_Expr : constant Struct_Member_Index := 99;
+      Member_Index_For_Grammar_Predicate_F_Prop_Ref : constant Struct_Member_Index := 100;
+      Member_Index_For_Grammar_Rule_Ref_F_Node_Name : constant Struct_Member_Index := 101;
+      Member_Index_For_Grammar_Skip_F_Name : constant Struct_Member_Index := 102;
+      Member_Index_For_Grammar_Stop_Cut_F_Expr : constant Struct_Member_Index := 103;
+      Member_Index_For_Parse_Node_Expr_F_Node_Name : constant Struct_Member_Index := 104;
+      Member_Index_For_Parse_Node_Expr_F_Sub_Exprs : constant Struct_Member_Index := 105;
+      Member_Index_For_Token_No_Case_Lit_F_Lit : constant Struct_Member_Index := 106;
+      Member_Index_For_Token_Pattern_Concat_F_Left : constant Struct_Member_Index := 107;
+      Member_Index_For_Token_Pattern_Concat_F_Right : constant Struct_Member_Index := 108;
+      Member_Index_For_Token_Ref_F_Token_Name : constant Struct_Member_Index := 109;
+      Member_Index_For_Token_Ref_F_Expr : constant Struct_Member_Index := 110;
+      Member_Index_For_If_Expr_F_Cond_Expr : constant Struct_Member_Index := 111;
+      Member_Index_For_If_Expr_F_Then_Expr : constant Struct_Member_Index := 112;
+      Member_Index_For_If_Expr_F_Alternatives : constant Struct_Member_Index := 113;
+      Member_Index_For_If_Expr_F_Else_Expr : constant Struct_Member_Index := 114;
+      Member_Index_For_Isa_F_Expr : constant Struct_Member_Index := 115;
+      Member_Index_For_Isa_F_Pattern : constant Struct_Member_Index := 116;
+      Member_Index_For_Keep_Expr_F_Expr : constant Struct_Member_Index := 117;
+      Member_Index_For_Keep_Expr_F_Null_Cond : constant Struct_Member_Index := 118;
+      Member_Index_For_Keep_Expr_F_Keep_Type : constant Struct_Member_Index := 119;
+      Member_Index_For_Lambda_Expr_F_Params : constant Struct_Member_Index := 120;
+      Member_Index_For_Lambda_Expr_F_Return_Type : constant Struct_Member_Index := 121;
+      Member_Index_For_Lambda_Expr_F_Body : constant Struct_Member_Index := 122;
+      Member_Index_For_Null_Lit_F_Dest_Type : constant Struct_Member_Index := 123;
+      Member_Index_For_Block_String_Lit_F_Lines : constant Struct_Member_Index := 124;
+      Member_Index_For_Module_Doc_String_Lit_F_Lines : constant Struct_Member_Index := 125;
+      Member_Index_For_Logic_Assign_F_Dest_Var : constant Struct_Member_Index := 126;
+      Member_Index_For_Logic_Assign_F_Value : constant Struct_Member_Index := 127;
+      Member_Index_For_Logic_Expr_F_Expr : constant Struct_Member_Index := 128;
+      Member_Index_For_Logic_Propagate_F_Dest_Var : constant Struct_Member_Index := 129;
+      Member_Index_For_Logic_Propagate_F_Call : constant Struct_Member_Index := 130;
+      Member_Index_For_Logic_Unify_F_Lhs : constant Struct_Member_Index := 131;
+      Member_Index_For_Logic_Unify_F_Rhs : constant Struct_Member_Index := 132;
+      Member_Index_For_Match_Expr_F_Match_Expr : constant Struct_Member_Index := 133;
+      Member_Index_For_Match_Expr_F_Branches : constant Struct_Member_Index := 134;
+      Member_Index_For_Not_Expr_F_Expr : constant Struct_Member_Index := 135;
+      Member_Index_For_Paren_Expr_F_Expr : constant Struct_Member_Index := 136;
+      Member_Index_For_Query_F_Source : constant Struct_Member_Index := 137;
+      Member_Index_For_Query_F_Pattern : constant Struct_Member_Index := 138;
+      Member_Index_For_Query_F_Mapping : constant Struct_Member_Index := 139;
+      Member_Index_For_Query_F_Guard : constant Struct_Member_Index := 140;
+      Member_Index_For_Raise_Expr_F_Dest_Type : constant Struct_Member_Index := 141;
+      Member_Index_For_Raise_Expr_F_Except_Expr : constant Struct_Member_Index := 142;
+      Member_Index_For_Subscript_Expr_F_Prefix : constant Struct_Member_Index := 143;
+      Member_Index_For_Subscript_Expr_F_Null_Cond : constant Struct_Member_Index := 144;
+      Member_Index_For_Subscript_Expr_F_Index : constant Struct_Member_Index := 145;
+      Member_Index_For_Try_Expr_F_Try_Expr : constant Struct_Member_Index := 146;
+      Member_Index_For_Try_Expr_F_Or_Expr : constant Struct_Member_Index := 147;
+      Member_Index_For_Un_Op_F_Op : constant Struct_Member_Index := 148;
+      Member_Index_For_Un_Op_F_Expr : constant Struct_Member_Index := 149;
+      Member_Index_For_Full_Decl_F_Doc : constant Struct_Member_Index := 150;
+      Member_Index_For_Full_Decl_F_Decl_Annotations : constant Struct_Member_Index := 151;
+      Member_Index_For_Full_Decl_F_Decl : constant Struct_Member_Index := 152;
+      Member_Index_For_Grammar_List_Sep_F_Token : constant Struct_Member_Index := 153;
+      Member_Index_For_Grammar_List_Sep_F_Extra : constant Struct_Member_Index := 154;
+      Member_Index_For_Imported_Name_F_Original_Name : constant Struct_Member_Index := 155;
+      Member_Index_For_Imported_Name_F_Renaming : constant Struct_Member_Index := 156;
       Member_Index_For_Lexer_Case_Rule_F_Expr : constant Struct_Member_Index := 157;
       Member_Index_For_Lexer_Case_Rule_F_Alts : constant Struct_Member_Index := 158;
       Member_Index_For_Lexer_Case_Rule_Send_F_Sent : constant Struct_Member_Index := 159;
@@ -477,84 +477,84 @@ private package Liblktlang.Generic_Introspection is
       Member_Index_For_Full_Sloc_Image : constant Struct_Member_Index := 193;
       Member_Index_For_Completion_Item_Kind_To_Int : constant Struct_Member_Index := 194;
       Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode : constant Struct_Member_Index := 195;
-      Member_Index_For_Lkt_Node_P_Basic_Trait_Gen : constant Struct_Member_Index := 196;
-      Member_Index_For_Lkt_Node_P_Basic_Trait : constant Struct_Member_Index := 197;
-      Member_Index_For_Lkt_Node_P_Node_Gen_Trait : constant Struct_Member_Index := 198;
-      Member_Index_For_Lkt_Node_P_Node_Trait : constant Struct_Member_Index := 199;
-      Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait : constant Struct_Member_Index := 200;
-      Member_Index_For_Lkt_Node_P_Indexable_Trait : constant Struct_Member_Index := 201;
-      Member_Index_For_Lkt_Node_P_Token_Node_Trait : constant Struct_Member_Index := 202;
-      Member_Index_For_Lkt_Node_P_Error_Node_Trait : constant Struct_Member_Index := 203;
-      Member_Index_For_Lkt_Node_P_Char_Type : constant Struct_Member_Index := 204;
-      Member_Index_For_Lkt_Node_P_Int_Type : constant Struct_Member_Index := 205;
-      Member_Index_For_Lkt_Node_P_Bool_Type : constant Struct_Member_Index := 206;
-      Member_Index_For_Lkt_Node_P_Bigint_Type : constant Struct_Member_Index := 207;
-      Member_Index_For_Lkt_Node_P_String_Type : constant Struct_Member_Index := 208;
-      Member_Index_For_Lkt_Node_P_Symbol_Type : constant Struct_Member_Index := 209;
-      Member_Index_For_Lkt_Node_P_Property_Error_Type : constant Struct_Member_Index := 210;
-      Member_Index_For_Lkt_Node_P_Regexp_Type : constant Struct_Member_Index := 211;
-      Member_Index_For_Lkt_Node_P_Entity_Gen_Type : constant Struct_Member_Index := 212;
-      Member_Index_For_Lkt_Node_P_Entity_Type : constant Struct_Member_Index := 213;
-      Member_Index_For_Lkt_Node_P_Logicvar_Type : constant Struct_Member_Index := 214;
-      Member_Index_For_Lkt_Node_P_Equation_Type : constant Struct_Member_Index := 215;
-      Member_Index_For_Lkt_Node_P_Array_Gen_Type : constant Struct_Member_Index := 216;
-      Member_Index_For_Lkt_Node_P_Array_Type : constant Struct_Member_Index := 217;
-      Member_Index_For_Lkt_Node_P_Astlist_Gen_Type : constant Struct_Member_Index := 218;
-      Member_Index_For_Lkt_Node_P_Astlist_Type : constant Struct_Member_Index := 219;
-      Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type : constant Struct_Member_Index := 220;
-      Member_Index_For_Lkt_Node_P_Node_Builder_Type : constant Struct_Member_Index := 221;
-      Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait : constant Struct_Member_Index := 222;
-      Member_Index_For_Lkt_Node_P_Iterator_Trait : constant Struct_Member_Index := 223;
-      Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : constant Struct_Member_Index := 224;
-      Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait : constant Struct_Member_Index := 225;
-      Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl : constant Struct_Member_Index := 226;
-      Member_Index_For_Lkt_Node_P_Nameres_Diagnostics : constant Struct_Member_Index := 227;
-      Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context : constant Struct_Member_Index := 228;
-      Member_Index_For_Lkt_Node_P_Xref_Entry_Point : constant Struct_Member_Index := 229;
-      Member_Index_For_Lkt_Node_P_Complete : constant Struct_Member_Index := 230;
-      Member_Index_For_Base_Import_P_Referenced_Units : constant Struct_Member_Index := 231;
-      Member_Index_For_Base_Match_Branch_P_Match_Part : constant Struct_Member_Index := 232;
-      Member_Index_For_Class_Qualifier_P_As_Bool : constant Struct_Member_Index := 233;
-      Member_Index_For_Decl_P_Custom_Image : constant Struct_Member_Index := 234;
-      Member_Index_For_Decl_P_Decl_Type_Name : constant Struct_Member_Index := 235;
-      Member_Index_For_Decl_P_Def_Ids : constant Struct_Member_Index := 236;
-      Member_Index_For_Decl_P_As_Bare_Decl : constant Struct_Member_Index := 237;
-      Member_Index_For_Decl_P_Get_Type : constant Struct_Member_Index := 238;
-      Member_Index_For_Decl_P_Get_Cast_Type : constant Struct_Member_Index := 239;
-      Member_Index_For_Decl_P_Get_Keep_Type : constant Struct_Member_Index := 240;
-      Member_Index_For_Decl_P_Get_Suffix_Type : constant Struct_Member_Index := 241;
-      Member_Index_For_Decl_P_Is_Generic : constant Struct_Member_Index := 242;
-      Member_Index_For_Decl_P_Return_Type_Is_Instantiated : constant Struct_Member_Index := 243;
-      Member_Index_For_Decl_P_Is_Instantiated : constant Struct_Member_Index := 244;
-      Member_Index_For_Decl_P_Name : constant Struct_Member_Index := 245;
-      Member_Index_For_Decl_P_Full_Name : constant Struct_Member_Index := 246;
-      Member_Index_For_Fun_Decl_P_Is_Dynamic_Combiner : constant Struct_Member_Index := 247;
-      Member_Index_For_Fun_Decl_P_Find_All_Overrides : constant Struct_Member_Index := 248;
-      Member_Index_For_Type_Decl_P_Def_Id : constant Struct_Member_Index := 249;
-      Member_Index_For_Type_Decl_P_Base_Type : constant Struct_Member_Index := 250;
-      Member_Index_For_Type_Decl_P_Base_Type_If_Entity : constant Struct_Member_Index := 251;
-      Member_Index_For_Excludes_Null_P_As_Bool : constant Struct_Member_Index := 252;
-      Member_Index_For_Expr_P_Get_Type : constant Struct_Member_Index := 253;
-      Member_Index_For_Expr_P_Get_Generic_Type : constant Struct_Member_Index := 254;
-      Member_Index_For_Expr_P_Get_Expected_Type : constant Struct_Member_Index := 255;
-      Member_Index_For_Expr_P_Referenced_Decl : constant Struct_Member_Index := 256;
-      Member_Index_For_Token_Lit_P_Denoted_Value : constant Struct_Member_Index := 257;
-      Member_Index_For_Token_Pattern_Lit_P_Denoted_Value : constant Struct_Member_Index := 258;
-      Member_Index_For_Id_P_Custom_Image : constant Struct_Member_Index := 259;
-      Member_Index_For_Def_Id_P_Name : constant Struct_Member_Index := 260;
-      Member_Index_For_Def_Id_P_Get_Implementatinons : constant Struct_Member_Index := 261;
-      Member_Index_For_Def_Id_P_Decl_Detail : constant Struct_Member_Index := 262;
-      Member_Index_For_Def_Id_P_Completion_Item_Kind : constant Struct_Member_Index := 263;
-      Member_Index_For_Def_Id_P_Doc : constant Struct_Member_Index := 264;
-      Member_Index_For_Def_Id_P_Find_All_References : constant Struct_Member_Index := 265;
-      Member_Index_For_Ref_Id_P_Referenced_Defining_Name : constant Struct_Member_Index := 266;
-      Member_Index_For_Char_Lit_P_Denoted_Value : constant Struct_Member_Index := 267;
-      Member_Index_For_String_Lit_P_Denoted_Value : constant Struct_Member_Index := 268;
-      Member_Index_For_String_Lit_P_Is_Prefixed_String : constant Struct_Member_Index := 269;
-      Member_Index_For_String_Lit_P_Prefix : constant Struct_Member_Index := 270;
-      Member_Index_For_String_Lit_P_Is_Regexp_Literal : constant Struct_Member_Index := 271;
-      Member_Index_For_Full_Decl_P_Has_Annotation : constant Struct_Member_Index := 272;
-      Member_Index_For_Langkit_Root_P_Fetch_Prelude : constant Struct_Member_Index := 273;
+      Member_Index_For_Lkt_Node_P_Prelude_Unit : constant Struct_Member_Index := 196;
+      Member_Index_For_Lkt_Node_P_Basic_Trait_Gen : constant Struct_Member_Index := 197;
+      Member_Index_For_Lkt_Node_P_Basic_Trait : constant Struct_Member_Index := 198;
+      Member_Index_For_Lkt_Node_P_Node_Gen_Trait : constant Struct_Member_Index := 199;
+      Member_Index_For_Lkt_Node_P_Node_Trait : constant Struct_Member_Index := 200;
+      Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait : constant Struct_Member_Index := 201;
+      Member_Index_For_Lkt_Node_P_Indexable_Trait : constant Struct_Member_Index := 202;
+      Member_Index_For_Lkt_Node_P_Token_Node_Trait : constant Struct_Member_Index := 203;
+      Member_Index_For_Lkt_Node_P_Error_Node_Trait : constant Struct_Member_Index := 204;
+      Member_Index_For_Lkt_Node_P_Char_Type : constant Struct_Member_Index := 205;
+      Member_Index_For_Lkt_Node_P_Int_Type : constant Struct_Member_Index := 206;
+      Member_Index_For_Lkt_Node_P_Bool_Type : constant Struct_Member_Index := 207;
+      Member_Index_For_Lkt_Node_P_Bigint_Type : constant Struct_Member_Index := 208;
+      Member_Index_For_Lkt_Node_P_String_Type : constant Struct_Member_Index := 209;
+      Member_Index_For_Lkt_Node_P_Symbol_Type : constant Struct_Member_Index := 210;
+      Member_Index_For_Lkt_Node_P_Property_Error_Type : constant Struct_Member_Index := 211;
+      Member_Index_For_Lkt_Node_P_Regexp_Type : constant Struct_Member_Index := 212;
+      Member_Index_For_Lkt_Node_P_Entity_Gen_Type : constant Struct_Member_Index := 213;
+      Member_Index_For_Lkt_Node_P_Entity_Type : constant Struct_Member_Index := 214;
+      Member_Index_For_Lkt_Node_P_Logicvar_Type : constant Struct_Member_Index := 215;
+      Member_Index_For_Lkt_Node_P_Equation_Type : constant Struct_Member_Index := 216;
+      Member_Index_For_Lkt_Node_P_Array_Gen_Type : constant Struct_Member_Index := 217;
+      Member_Index_For_Lkt_Node_P_Array_Type : constant Struct_Member_Index := 218;
+      Member_Index_For_Lkt_Node_P_Astlist_Gen_Type : constant Struct_Member_Index := 219;
+      Member_Index_For_Lkt_Node_P_Astlist_Type : constant Struct_Member_Index := 220;
+      Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type : constant Struct_Member_Index := 221;
+      Member_Index_For_Lkt_Node_P_Node_Builder_Type : constant Struct_Member_Index := 222;
+      Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait : constant Struct_Member_Index := 223;
+      Member_Index_For_Lkt_Node_P_Iterator_Trait : constant Struct_Member_Index := 224;
+      Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : constant Struct_Member_Index := 225;
+      Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait : constant Struct_Member_Index := 226;
+      Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl : constant Struct_Member_Index := 227;
+      Member_Index_For_Lkt_Node_P_Nameres_Diagnostics : constant Struct_Member_Index := 228;
+      Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context : constant Struct_Member_Index := 229;
+      Member_Index_For_Lkt_Node_P_Xref_Entry_Point : constant Struct_Member_Index := 230;
+      Member_Index_For_Lkt_Node_P_Complete : constant Struct_Member_Index := 231;
+      Member_Index_For_Base_Import_P_Referenced_Units : constant Struct_Member_Index := 232;
+      Member_Index_For_Base_Match_Branch_P_Match_Part : constant Struct_Member_Index := 233;
+      Member_Index_For_Class_Qualifier_P_As_Bool : constant Struct_Member_Index := 234;
+      Member_Index_For_Decl_P_Custom_Image : constant Struct_Member_Index := 235;
+      Member_Index_For_Decl_P_Decl_Type_Name : constant Struct_Member_Index := 236;
+      Member_Index_For_Decl_P_Def_Ids : constant Struct_Member_Index := 237;
+      Member_Index_For_Decl_P_As_Bare_Decl : constant Struct_Member_Index := 238;
+      Member_Index_For_Decl_P_Get_Type : constant Struct_Member_Index := 239;
+      Member_Index_For_Decl_P_Get_Cast_Type : constant Struct_Member_Index := 240;
+      Member_Index_For_Decl_P_Get_Keep_Type : constant Struct_Member_Index := 241;
+      Member_Index_For_Decl_P_Get_Suffix_Type : constant Struct_Member_Index := 242;
+      Member_Index_For_Decl_P_Is_Generic : constant Struct_Member_Index := 243;
+      Member_Index_For_Decl_P_Return_Type_Is_Instantiated : constant Struct_Member_Index := 244;
+      Member_Index_For_Decl_P_Is_Instantiated : constant Struct_Member_Index := 245;
+      Member_Index_For_Decl_P_Name : constant Struct_Member_Index := 246;
+      Member_Index_For_Decl_P_Full_Name : constant Struct_Member_Index := 247;
+      Member_Index_For_Fun_Decl_P_Is_Dynamic_Combiner : constant Struct_Member_Index := 248;
+      Member_Index_For_Fun_Decl_P_Find_All_Overrides : constant Struct_Member_Index := 249;
+      Member_Index_For_Type_Decl_P_Def_Id : constant Struct_Member_Index := 250;
+      Member_Index_For_Type_Decl_P_Base_Type : constant Struct_Member_Index := 251;
+      Member_Index_For_Type_Decl_P_Base_Type_If_Entity : constant Struct_Member_Index := 252;
+      Member_Index_For_Excludes_Null_P_As_Bool : constant Struct_Member_Index := 253;
+      Member_Index_For_Expr_P_Get_Type : constant Struct_Member_Index := 254;
+      Member_Index_For_Expr_P_Get_Generic_Type : constant Struct_Member_Index := 255;
+      Member_Index_For_Expr_P_Get_Expected_Type : constant Struct_Member_Index := 256;
+      Member_Index_For_Expr_P_Referenced_Decl : constant Struct_Member_Index := 257;
+      Member_Index_For_Token_Lit_P_Denoted_Value : constant Struct_Member_Index := 258;
+      Member_Index_For_Token_Pattern_Lit_P_Denoted_Value : constant Struct_Member_Index := 259;
+      Member_Index_For_Id_P_Custom_Image : constant Struct_Member_Index := 260;
+      Member_Index_For_Def_Id_P_Name : constant Struct_Member_Index := 261;
+      Member_Index_For_Def_Id_P_Get_Implementatinons : constant Struct_Member_Index := 262;
+      Member_Index_For_Def_Id_P_Decl_Detail : constant Struct_Member_Index := 263;
+      Member_Index_For_Def_Id_P_Completion_Item_Kind : constant Struct_Member_Index := 264;
+      Member_Index_For_Def_Id_P_Doc : constant Struct_Member_Index := 265;
+      Member_Index_For_Def_Id_P_Find_All_References : constant Struct_Member_Index := 266;
+      Member_Index_For_Ref_Id_P_Referenced_Defining_Name : constant Struct_Member_Index := 267;
+      Member_Index_For_Char_Lit_P_Denoted_Value : constant Struct_Member_Index := 268;
+      Member_Index_For_String_Lit_P_Denoted_Value : constant Struct_Member_Index := 269;
+      Member_Index_For_String_Lit_P_Is_Prefixed_String : constant Struct_Member_Index := 270;
+      Member_Index_For_String_Lit_P_Prefix : constant Struct_Member_Index := 271;
+      Member_Index_For_String_Lit_P_Is_Regexp_Literal : constant Struct_Member_Index := 272;
+      Member_Index_For_Full_Decl_P_Has_Annotation : constant Struct_Member_Index := 273;
       Member_Index_For_Null_Cond_Qualifier_P_As_Bool : constant Struct_Member_Index := 274;
       Member_Index_For_Type_Ref_P_Referenced_Decl : constant Struct_Member_Index := 275;
 
@@ -2465,6 +2465,14 @@ private package Liblktlang.Generic_Introspection is
          Debug_Name    => Debug_Name_For_Internal_Entity_Grammar_Decl'Access,
          Documentation => Type_Doc_For_Internal_Entity_Grammar_Decl'Access);
       
+      Debug_Name_For_Internal_Entity_Langkit_Root : aliased constant String :=
+        "LangkitRoot";
+      Type_Doc_For_Internal_Entity_Langkit_Root        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Langkit_Root       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Langkit_Root'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Langkit_Root'Access);
+      
       Debug_Name_For_Internal_Entity_Lexer_Decl : aliased constant String :=
         "LexerDecl";
       Type_Doc_For_Internal_Entity_Lexer_Decl        : aliased constant Text_Type := "";
@@ -3233,14 +3241,6 @@ private package Liblktlang.Generic_Introspection is
          Debug_Name    => Debug_Name_For_Internal_Entity_Imported_Name'Access,
          Documentation => Type_Doc_For_Internal_Entity_Imported_Name'Access);
       
-      Debug_Name_For_Internal_Entity_Langkit_Root : aliased constant String :=
-        "LangkitRoot";
-      Type_Doc_For_Internal_Entity_Langkit_Root        : aliased constant Text_Type := "";
-      Desc_For_Internal_Entity_Langkit_Root       : aliased constant Type_Descriptor :=
-        (Category      => Struct_Category,
-         Debug_Name    => Debug_Name_For_Internal_Entity_Langkit_Root'Access,
-         Documentation => Type_Doc_For_Internal_Entity_Langkit_Root'Access);
-      
       Debug_Name_For_Internal_Entity_Lexer_Case_Rule : aliased constant String :=
         "LexerCaseRule";
       Type_Doc_For_Internal_Entity_Lexer_Case_Rule        : aliased constant Text_Type := "";
@@ -3969,6 +3969,7 @@ Desc_For_Internal_Entity_Env_Spec_Decl'Access,
 Desc_For_Internal_Entity_Error_Decl'Access,
 Desc_For_Internal_Entity_Generic_Decl'Access,
 Desc_For_Internal_Entity_Grammar_Decl'Access,
+Desc_For_Internal_Entity_Langkit_Root'Access,
 Desc_For_Internal_Entity_Lexer_Decl'Access,
 Desc_For_Internal_Entity_Lexer_Family_Decl'Access,
 Desc_For_Internal_Entity_Synth_Fun_Decl'Access,
@@ -4065,7 +4066,6 @@ Desc_For_Internal_Entity_Un_Op'Access,
 Desc_For_Internal_Entity_Full_Decl'Access,
 Desc_For_Internal_Entity_Grammar_List_Sep'Access,
 Desc_For_Internal_Entity_Imported_Name'Access,
-Desc_For_Internal_Entity_Langkit_Root'Access,
 Desc_For_Internal_Entity_Lexer_Case_Rule'Access,
 Desc_For_Internal_Entity_Lexer_Case_Rule_Send'Access,
 Desc_For_Internal_Entity_List_Kind'Access,
@@ -5783,6 +5783,7 @@ Type_Index_For_Env_Spec_Decl => False,
 Type_Index_For_Error_Decl => True,
 Type_Index_For_Generic_Decl => True,
 Type_Index_For_Grammar_Decl => False,
+Type_Index_For_Langkit_Root => True,
 Type_Index_For_Lexer_Decl => False,
 Type_Index_For_Lexer_Family_Decl => False,
 Type_Index_For_Synth_Fun_Decl => True,
@@ -5825,6 +5826,7 @@ Type_Index_For_Env_Spec_Decl => 1,
 Type_Index_For_Error_Decl => 0,
 Type_Index_For_Generic_Decl => 0,
 Type_Index_For_Grammar_Decl => 1,
+Type_Index_For_Langkit_Root => 0,
 Type_Index_For_Lexer_Decl => 1,
 Type_Index_For_Lexer_Family_Decl => 1,
 Type_Index_For_Synth_Fun_Decl => 0,
@@ -6216,6 +6218,78 @@ Type_Index_For_Lambda_Param_Decl => 3);
          Member_Type   => Type_Index_For_Full_Decl_List,
          Null_For      => null,
          Indexes       => Indexes_For_Grammar_Decl_F_Rules'Access,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+         Indexes_For_Langkit_Root_F_Doc : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Langkit_Root => 1);
+
+      Member_Name_For_Langkit_Root_F_Doc : aliased constant Text_Type :=
+        "F_Doc";
+      Member_Doc_For_Langkit_Root_F_Doc  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Langkit_Root_F_Doc  : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Langkit_Root_F_Doc'Access,
+         Documentation => Member_Doc_For_Langkit_Root_F_Doc'Access,
+         Owner         => Type_Index_For_Langkit_Root,
+         Member_Type   => Type_Index_For_Module_Doc_String_Lit,
+         Null_For      => null,
+         Indexes       => Indexes_For_Langkit_Root_F_Doc'Access,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+         Indexes_For_Langkit_Root_F_Imports : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Langkit_Root => 2);
+
+      Member_Name_For_Langkit_Root_F_Imports : aliased constant Text_Type :=
+        "F_Imports";
+      Member_Doc_For_Langkit_Root_F_Imports  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Langkit_Root_F_Imports  : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Langkit_Root_F_Imports'Access,
+         Documentation => Member_Doc_For_Langkit_Root_F_Imports'Access,
+         Owner         => Type_Index_For_Langkit_Root,
+         Member_Type   => Type_Index_For_Base_Import_List,
+         Null_For      => null,
+         Indexes       => Indexes_For_Langkit_Root_F_Imports'Access,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+         Indexes_For_Langkit_Root_F_Decls : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Langkit_Root => 3);
+
+      Member_Name_For_Langkit_Root_F_Decls : aliased constant Text_Type :=
+        "F_Decls";
+      Member_Doc_For_Langkit_Root_F_Decls  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Langkit_Root_F_Decls  : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Langkit_Root_F_Decls'Access,
+         Documentation => Member_Doc_For_Langkit_Root_F_Decls'Access,
+         Owner         => Type_Index_For_Langkit_Root,
+         Member_Type   => Type_Index_For_Full_Decl_List,
+         Null_For      => null,
+         Indexes       => Indexes_For_Langkit_Root_F_Decls'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -8929,78 +9003,6 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
       
 
       
-         Indexes_For_Langkit_Root_F_Doc : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Langkit_Root => 1);
-
-      Member_Name_For_Langkit_Root_F_Doc : aliased constant Text_Type :=
-        "F_Doc";
-      Member_Doc_For_Langkit_Root_F_Doc  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
-      Member_Desc_For_Langkit_Root_F_Doc  : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Langkit_Root_F_Doc'Access,
-         Documentation => Member_Doc_For_Langkit_Root_F_Doc'Access,
-         Owner         => Type_Index_For_Langkit_Root,
-         Member_Type   => Type_Index_For_Module_Doc_String_Lit,
-         Null_For      => null,
-         Indexes       => Indexes_For_Langkit_Root_F_Doc'Access,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-         Indexes_For_Langkit_Root_F_Imports : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Langkit_Root => 2);
-
-      Member_Name_For_Langkit_Root_F_Imports : aliased constant Text_Type :=
-        "F_Imports";
-      Member_Doc_For_Langkit_Root_F_Imports  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
-      Member_Desc_For_Langkit_Root_F_Imports  : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Langkit_Root_F_Imports'Access,
-         Documentation => Member_Doc_For_Langkit_Root_F_Imports'Access,
-         Owner         => Type_Index_For_Langkit_Root,
-         Member_Type   => Type_Index_For_Base_Import_List,
-         Null_For      => null,
-         Indexes       => Indexes_For_Langkit_Root_F_Imports'Access,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-         Indexes_For_Langkit_Root_F_Decls : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Langkit_Root => 3);
-
-      Member_Name_For_Langkit_Root_F_Decls : aliased constant Text_Type :=
-        "F_Decls";
-      Member_Doc_For_Langkit_Root_F_Decls  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
-      Member_Desc_For_Langkit_Root_F_Decls  : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Langkit_Root_F_Decls'Access,
-         Documentation => Member_Doc_For_Langkit_Root_F_Decls'Access,
-         Owner         => Type_Index_For_Langkit_Root,
-         Member_Type   => Type_Index_For_Full_Decl_List,
-         Null_For      => null,
-         Indexes       => Indexes_For_Langkit_Root_F_Decls'Access,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
          Indexes_For_Lexer_Case_Rule_F_Expr : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Lexer_Case_Rule => 1);
 
@@ -9988,6 +9990,30 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
               (Name          => Arg_Name_3'Access,
                Argument_Type => Type_Index_For_Bool,
                Default_Value => (Kind => None)))
+        );
+
+      
+
+
+      
+
+      
+
+      Member_Name_For_Lkt_Node_P_Prelude_Unit : aliased constant Text_Type :=
+        "P_Prelude_Unit";
+      Member_Doc_For_Lkt_Node_P_Prelude_Unit  : aliased constant Text_Type := "Return the unit that contains the Lkt prelude (predefined types and" & Character_Type'Val (10)
+ & "values)." & Character_Type'Val (10)
+;
+      Member_Desc_For_Lkt_Node_P_Prelude_Unit  : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Lkt_Node_P_Prelude_Unit'Access,
+         Documentation => Member_Doc_For_Lkt_Node_P_Prelude_Unit'Access,
+         Owner         => Type_Index_For_Lkt_Node,
+         Member_Type   => Type_Index_For_Analysis_Unit,
+         Null_For      => null,
+         Indexes       => null,
+         Arguments     =>
+           (1 .. 0 => <>)
         );
 
       
@@ -11833,30 +11859,6 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
 
       
 
-      Member_Name_For_Langkit_Root_P_Fetch_Prelude : aliased constant Text_Type :=
-        "P_Fetch_Prelude";
-      Member_Doc_For_Langkit_Root_P_Fetch_Prelude  : aliased constant Text_Type := "External property that will fetch the prelude unit, containing" & Character_Type'Val (10)
- & "predefined types and values." & Character_Type'Val (10)
-;
-      Member_Desc_For_Langkit_Root_P_Fetch_Prelude  : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Langkit_Root_P_Fetch_Prelude'Access,
-         Documentation => Member_Doc_For_Langkit_Root_P_Fetch_Prelude'Access,
-         Owner         => Type_Index_For_Langkit_Root,
-         Member_Type   => Type_Index_For_Analysis_Unit,
-         Null_For      => null,
-         Indexes       => null,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
-
       Member_Name_For_Null_Cond_Qualifier_P_As_Bool : aliased constant Text_Type :=
         "P_As_Bool";
       Member_Doc_For_Null_Cond_Qualifier_P_As_Bool  : aliased constant Text_Type := "Return whether this node is present";
@@ -11944,6 +11946,9 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
       Member_Index_For_Generic_Decl_F_Generic_Param_Decls => Member_Desc_For_Generic_Decl_F_Generic_Param_Decls'Access,
       Member_Index_For_Generic_Decl_F_Decl => Member_Desc_For_Generic_Decl_F_Decl'Access,
       Member_Index_For_Grammar_Decl_F_Rules => Member_Desc_For_Grammar_Decl_F_Rules'Access,
+      Member_Index_For_Langkit_Root_F_Doc => Member_Desc_For_Langkit_Root_F_Doc'Access,
+      Member_Index_For_Langkit_Root_F_Imports => Member_Desc_For_Langkit_Root_F_Imports'Access,
+      Member_Index_For_Langkit_Root_F_Decls => Member_Desc_For_Langkit_Root_F_Decls'Access,
       Member_Index_For_Lexer_Decl_F_Rules => Member_Desc_For_Lexer_Decl_F_Rules'Access,
       Member_Index_For_Lexer_Family_Decl_F_Rules => Member_Desc_For_Lexer_Family_Decl_F_Rules'Access,
       Member_Index_For_Type_Decl_F_Traits => Member_Desc_For_Type_Decl_F_Traits'Access,
@@ -12050,9 +12055,6 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
       Member_Index_For_Grammar_List_Sep_F_Extra => Member_Desc_For_Grammar_List_Sep_F_Extra'Access,
       Member_Index_For_Imported_Name_F_Original_Name => Member_Desc_For_Imported_Name_F_Original_Name'Access,
       Member_Index_For_Imported_Name_F_Renaming => Member_Desc_For_Imported_Name_F_Renaming'Access,
-      Member_Index_For_Langkit_Root_F_Doc => Member_Desc_For_Langkit_Root_F_Doc'Access,
-      Member_Index_For_Langkit_Root_F_Imports => Member_Desc_For_Langkit_Root_F_Imports'Access,
-      Member_Index_For_Langkit_Root_F_Decls => Member_Desc_For_Langkit_Root_F_Decls'Access,
       Member_Index_For_Lexer_Case_Rule_F_Expr => Member_Desc_For_Lexer_Case_Rule_F_Expr'Access,
       Member_Index_For_Lexer_Case_Rule_F_Alts => Member_Desc_For_Lexer_Case_Rule_F_Alts'Access,
       Member_Index_For_Lexer_Case_Rule_Send_F_Sent => Member_Desc_For_Lexer_Case_Rule_Send_F_Sent'Access,
@@ -12092,6 +12094,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
       Member_Index_For_Full_Sloc_Image => Member_Desc_For_Full_Sloc_Image'Access,
       Member_Index_For_Completion_Item_Kind_To_Int => Member_Desc_For_Completion_Item_Kind_To_Int'Access,
       Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode => Member_Desc_For_Lkt_Node_P_Set_Solver_Debug_Mode'Access,
+      Member_Index_For_Lkt_Node_P_Prelude_Unit => Member_Desc_For_Lkt_Node_P_Prelude_Unit'Access,
       Member_Index_For_Lkt_Node_P_Basic_Trait_Gen => Member_Desc_For_Lkt_Node_P_Basic_Trait_Gen'Access,
       Member_Index_For_Lkt_Node_P_Basic_Trait => Member_Desc_For_Lkt_Node_P_Basic_Trait'Access,
       Member_Index_For_Lkt_Node_P_Node_Gen_Trait => Member_Desc_For_Lkt_Node_P_Node_Gen_Trait'Access,
@@ -12169,7 +12172,6 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
       Member_Index_For_String_Lit_P_Prefix => Member_Desc_For_String_Lit_P_Prefix'Access,
       Member_Index_For_String_Lit_P_Is_Regexp_Literal => Member_Desc_For_String_Lit_P_Is_Regexp_Literal'Access,
       Member_Index_For_Full_Decl_P_Has_Annotation => Member_Desc_For_Full_Decl_P_Has_Annotation'Access,
-      Member_Index_For_Langkit_Root_P_Fetch_Prelude => Member_Desc_For_Langkit_Root_P_Fetch_Prelude'Access,
       Member_Index_For_Null_Cond_Qualifier_P_As_Bool => Member_Desc_For_Null_Cond_Qualifier_P_As_Bool'Access,
       Member_Index_For_Type_Ref_P_Referenced_Decl => Member_Desc_For_Type_Ref_P_Referenced_Decl'Access);
 
@@ -12350,8 +12352,8 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          Node_Repr_Name_For_Lkt_Node : aliased constant Text_Type :=
            "LktNode";
       Node_Desc_For_Lkt_Node : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 30,
-         Member_Count      => 48,
+        (Derivations_Count => 29,
+         Member_Count      => 49,
          Base_Type         => No_Type_Index,
          Is_Abstract       => True,
          Is_Error_Node     => False,
@@ -12361,7 +12363,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lkt_Node'Access,
          Repr_Name         => Node_Repr_Name_For_Lkt_Node'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Argument,
 2 => Type_Index_For_Base_Import,
@@ -12381,18 +12383,17 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
 16 => Type_Index_For_Full_Decl,
 17 => Type_Index_For_Grammar_List_Sep,
 18 => Type_Index_For_Imported_Name,
-19 => Type_Index_For_Langkit_Root,
-20 => Type_Index_For_Lexer_Case_Rule,
-21 => Type_Index_For_Lexer_Case_Rule_Send,
-22 => Type_Index_For_List_Kind,
-23 => Type_Index_For_Lkt_Node_Base_List,
-24 => Type_Index_For_Module_Doc_String_Line,
-25 => Type_Index_For_Null_Cond_Qualifier,
-26 => Type_Index_For_Op,
-27 => Type_Index_For_Pattern,
-28 => Type_Index_For_Pattern_Detail,
-29 => Type_Index_For_Type_Ref,
-30 => Type_Index_For_Var_Bind
+19 => Type_Index_For_Lexer_Case_Rule,
+20 => Type_Index_For_Lexer_Case_Rule_Send,
+21 => Type_Index_For_List_Kind,
+22 => Type_Index_For_Lkt_Node_Base_List,
+23 => Type_Index_For_Module_Doc_String_Line,
+24 => Type_Index_For_Null_Cond_Qualifier,
+25 => Type_Index_For_Op,
+26 => Type_Index_For_Pattern,
+27 => Type_Index_For_Pattern_Detail,
+28 => Type_Index_For_Type_Ref,
+29 => Type_Index_For_Var_Bind
          ),
          Members           => (
               1 => Member_Index_For_Parent,
@@ -12408,41 +12409,42 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
 11 => Member_Index_For_Full_Sloc_Image,
 12 => Member_Index_For_Completion_Item_Kind_To_Int,
 13 => Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode,
-14 => Member_Index_For_Lkt_Node_P_Basic_Trait_Gen,
-15 => Member_Index_For_Lkt_Node_P_Basic_Trait,
-16 => Member_Index_For_Lkt_Node_P_Node_Gen_Trait,
-17 => Member_Index_For_Lkt_Node_P_Node_Trait,
-18 => Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait,
-19 => Member_Index_For_Lkt_Node_P_Indexable_Trait,
-20 => Member_Index_For_Lkt_Node_P_Token_Node_Trait,
-21 => Member_Index_For_Lkt_Node_P_Error_Node_Trait,
-22 => Member_Index_For_Lkt_Node_P_Char_Type,
-23 => Member_Index_For_Lkt_Node_P_Int_Type,
-24 => Member_Index_For_Lkt_Node_P_Bool_Type,
-25 => Member_Index_For_Lkt_Node_P_Bigint_Type,
-26 => Member_Index_For_Lkt_Node_P_String_Type,
-27 => Member_Index_For_Lkt_Node_P_Symbol_Type,
-28 => Member_Index_For_Lkt_Node_P_Property_Error_Type,
-29 => Member_Index_For_Lkt_Node_P_Regexp_Type,
-30 => Member_Index_For_Lkt_Node_P_Entity_Gen_Type,
-31 => Member_Index_For_Lkt_Node_P_Entity_Type,
-32 => Member_Index_For_Lkt_Node_P_Logicvar_Type,
-33 => Member_Index_For_Lkt_Node_P_Equation_Type,
-34 => Member_Index_For_Lkt_Node_P_Array_Gen_Type,
-35 => Member_Index_For_Lkt_Node_P_Array_Type,
-36 => Member_Index_For_Lkt_Node_P_Astlist_Gen_Type,
-37 => Member_Index_For_Lkt_Node_P_Astlist_Type,
-38 => Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type,
-39 => Member_Index_For_Lkt_Node_P_Node_Builder_Type,
-40 => Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait,
-41 => Member_Index_For_Lkt_Node_P_Iterator_Trait,
-42 => Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait,
-43 => Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait,
-44 => Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl,
-45 => Member_Index_For_Lkt_Node_P_Nameres_Diagnostics,
-46 => Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context,
-47 => Member_Index_For_Lkt_Node_P_Xref_Entry_Point,
-48 => Member_Index_For_Lkt_Node_P_Complete
+14 => Member_Index_For_Lkt_Node_P_Prelude_Unit,
+15 => Member_Index_For_Lkt_Node_P_Basic_Trait_Gen,
+16 => Member_Index_For_Lkt_Node_P_Basic_Trait,
+17 => Member_Index_For_Lkt_Node_P_Node_Gen_Trait,
+18 => Member_Index_For_Lkt_Node_P_Node_Trait,
+19 => Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait,
+20 => Member_Index_For_Lkt_Node_P_Indexable_Trait,
+21 => Member_Index_For_Lkt_Node_P_Token_Node_Trait,
+22 => Member_Index_For_Lkt_Node_P_Error_Node_Trait,
+23 => Member_Index_For_Lkt_Node_P_Char_Type,
+24 => Member_Index_For_Lkt_Node_P_Int_Type,
+25 => Member_Index_For_Lkt_Node_P_Bool_Type,
+26 => Member_Index_For_Lkt_Node_P_Bigint_Type,
+27 => Member_Index_For_Lkt_Node_P_String_Type,
+28 => Member_Index_For_Lkt_Node_P_Symbol_Type,
+29 => Member_Index_For_Lkt_Node_P_Property_Error_Type,
+30 => Member_Index_For_Lkt_Node_P_Regexp_Type,
+31 => Member_Index_For_Lkt_Node_P_Entity_Gen_Type,
+32 => Member_Index_For_Lkt_Node_P_Entity_Type,
+33 => Member_Index_For_Lkt_Node_P_Logicvar_Type,
+34 => Member_Index_For_Lkt_Node_P_Equation_Type,
+35 => Member_Index_For_Lkt_Node_P_Array_Gen_Type,
+36 => Member_Index_For_Lkt_Node_P_Array_Type,
+37 => Member_Index_For_Lkt_Node_P_Astlist_Gen_Type,
+38 => Member_Index_For_Lkt_Node_P_Astlist_Type,
+39 => Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type,
+40 => Member_Index_For_Lkt_Node_P_Node_Builder_Type,
+41 => Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait,
+42 => Member_Index_For_Lkt_Node_P_Iterator_Trait,
+43 => Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait,
+44 => Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait,
+45 => Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl,
+46 => Member_Index_For_Lkt_Node_P_Nameres_Diagnostics,
+47 => Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context,
+48 => Member_Index_For_Lkt_Node_P_Xref_Entry_Point,
+49 => Member_Index_For_Lkt_Node_P_Complete
          ));
       
       Node_Name_For_Argument : aliased constant Text_Type :=
@@ -12461,7 +12463,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Argument'Access,
          Repr_Name         => Node_Repr_Name_For_Argument'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12486,7 +12488,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Base_Import'Access,
          Repr_Name         => Node_Repr_Name_For_Base_Import'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 => Type_Index_For_Import,
 2 => Type_Index_For_Import_All_From,
@@ -12512,7 +12514,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Import'Access,
          Repr_Name         => Node_Repr_Name_For_Import'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12536,7 +12538,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Import_All_From'Access,
          Repr_Name         => Node_Repr_Name_For_Import_All_From'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12560,7 +12562,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Import_From'Access,
          Repr_Name         => Node_Repr_Name_For_Import_From'Access,
-         Inherited_Members => 51,
+         Inherited_Members => 52,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12585,7 +12587,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Base_Lexer_Case_Rule_Alt'Access,
          Repr_Name         => Node_Repr_Name_For_Base_Lexer_Case_Rule_Alt'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Error_Lexer_Case_Rule_Alt,
 2 => Type_Index_For_Lexer_Case_Rule_Cond_Alt,
@@ -12611,7 +12613,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Error_Lexer_Case_Rule_Alt'Access,
          Repr_Name         => Node_Repr_Name_For_Error_Lexer_Case_Rule_Alt'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12635,7 +12637,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lexer_Case_Rule_Cond_Alt'Access,
          Repr_Name         => Node_Repr_Name_For_Lexer_Case_Rule_Cond_Alt'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12660,7 +12662,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lexer_Case_Rule_Default_Alt'Access,
          Repr_Name         => Node_Repr_Name_For_Lexer_Case_Rule_Default_Alt'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12684,7 +12686,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Base_Match_Branch'Access,
          Repr_Name         => Node_Repr_Name_For_Base_Match_Branch'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 => Type_Index_For_Match_Branch,
 2 => Type_Index_For_Pattern_Match_Branch
@@ -12710,7 +12712,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Match_Branch'Access,
          Repr_Name         => Node_Repr_Name_For_Match_Branch'Access,
-         Inherited_Members => 51,
+         Inherited_Members => 52,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12735,7 +12737,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Pattern_Match_Branch'Access,
          Repr_Name         => Node_Repr_Name_For_Pattern_Match_Branch'Access,
-         Inherited_Members => 51,
+         Inherited_Members => 52,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12760,7 +12762,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Block_Expr_Clause'Access,
          Repr_Name         => Node_Repr_Name_For_Block_Expr_Clause'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12784,7 +12786,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Block_String_Line'Access,
          Repr_Name         => Node_Repr_Name_For_Block_String_Line'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12808,7 +12810,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Class_Qualifier'Access,
          Repr_Name         => Node_Repr_Name_For_Class_Qualifier'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 => Type_Index_For_Class_Qualifier_Absent,
 2 => Type_Index_For_Class_Qualifier_Present
@@ -12833,7 +12835,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Class_Qualifier_Absent'Access,
          Repr_Name         => Node_Repr_Name_For_Class_Qualifier_Absent'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12857,7 +12859,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Class_Qualifier_Present'Access,
          Repr_Name         => Node_Repr_Name_For_Class_Qualifier_Present'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12870,7 +12872,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          Node_Repr_Name_For_Decl : aliased constant Text_Type :=
            "Decl";
       Node_Desc_For_Decl : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 11,
+        (Derivations_Count => 12,
          Member_Count      => 14,
          Base_Type         => Type_Index_For_Lkt_Node,
          Is_Abstract       => True,
@@ -12881,7 +12883,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 => Type_Index_For_Base_Grammar_Rule_Decl,
 2 => Type_Index_For_Base_Val_Decl,
@@ -12889,11 +12891,12 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
 4 => Type_Index_For_Error_Decl,
 5 => Type_Index_For_Generic_Decl,
 6 => Type_Index_For_Grammar_Decl,
-7 => Type_Index_For_Lexer_Decl,
-8 => Type_Index_For_Lexer_Family_Decl,
-9 => Type_Index_For_Synth_Fun_Decl,
-10 => Type_Index_For_Synth_Param_Decl,
-11 => Type_Index_For_Type_Decl
+7 => Type_Index_For_Langkit_Root,
+8 => Type_Index_For_Lexer_Decl,
+9 => Type_Index_For_Lexer_Family_Decl,
+10 => Type_Index_For_Synth_Fun_Decl,
+11 => Type_Index_For_Synth_Param_Decl,
+12 => Type_Index_For_Type_Decl
          ),
          Members           => (
               1 => Member_Index_For_Decl_F_Syn_Name,
@@ -12928,7 +12931,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Base_Grammar_Rule_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Base_Grammar_Rule_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 => Type_Index_For_Grammar_Rule_Decl,
 2 => Type_Index_For_Synthetic_Lexer_Decl
@@ -12953,7 +12956,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Rule_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Rule_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -12978,7 +12981,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Synthetic_Lexer_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Synthetic_Lexer_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13003,7 +13006,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Base_Val_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Base_Val_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 => Type_Index_For_Node_Decl,
 2 => Type_Index_For_Self_Decl,
@@ -13029,7 +13032,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Node_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Node_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13053,7 +13056,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Self_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Self_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13077,7 +13080,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_User_Val_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_User_Val_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 => Type_Index_For_Binding_Val_Decl,
 2 => Type_Index_For_Enum_Lit_Decl,
@@ -13104,7 +13107,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Binding_Val_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Binding_Val_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13128,7 +13131,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Enum_Lit_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Enum_Lit_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13152,7 +13155,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Explicitly_Typed_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Explicitly_Typed_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 => Type_Index_For_Component_Decl,
 2 => Type_Index_For_Dyn_Var_Decl,
@@ -13179,7 +13182,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Component_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Component_Decl'Access,
-         Inherited_Members => 64,
+         Inherited_Members => 65,
          Derivations       => (
              1 => Type_Index_For_Field_Decl,
 2 => Type_Index_For_Fun_Param_Decl,
@@ -13205,7 +13208,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Field_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Field_Decl'Access,
-         Inherited_Members => 65,
+         Inherited_Members => 66,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13232,7 +13235,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Fun_Param_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Fun_Param_Decl'Access,
-         Inherited_Members => 65,
+         Inherited_Members => 66,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13259,7 +13262,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lambda_Param_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Lambda_Param_Decl'Access,
-         Inherited_Members => 64,
+         Inherited_Members => 65,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13285,7 +13288,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Dyn_Var_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Dyn_Var_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13310,7 +13313,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Match_Val_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Match_Val_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13335,7 +13338,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Val_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Val_Decl'Access,
-         Inherited_Members => 64,
+         Inherited_Members => 65,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13361,7 +13364,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Fun_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Fun_Decl'Access,
-         Inherited_Members => 68,
+         Inherited_Members => 69,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13391,7 +13394,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Env_Spec_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Env_Spec_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13416,7 +13419,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Error_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Error_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13440,7 +13443,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Generic_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Generic_Decl'Access,
-         Inherited_Members => 64,
+         Inherited_Members => 65,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13466,13 +13469,40 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 .. 0 => <>
          ),
          Members           => (
               1 => Member_Index_For_Decl_F_Syn_Name,
 2 => Member_Index_For_Grammar_Decl_F_Rules
+         ));
+      
+      Node_Name_For_Langkit_Root : aliased constant Text_Type :=
+        "Langkit_Root";
+         Node_Repr_Name_For_Langkit_Root : aliased constant Text_Type :=
+           "LangkitRoot";
+      Node_Desc_For_Langkit_Root : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 4,
+         Base_Type         => Type_Index_For_Decl,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Langkit_Root'Access,
+         Repr_Name         => Node_Repr_Name_For_Langkit_Root'Access,
+         Inherited_Members => 66,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 => Member_Index_For_Decl_F_Syn_Name,
+2 => Member_Index_For_Langkit_Root_F_Doc,
+3 => Member_Index_For_Langkit_Root_F_Imports,
+4 => Member_Index_For_Langkit_Root_F_Decls
          ));
       
       Node_Name_For_Lexer_Decl : aliased constant Text_Type :=
@@ -13491,7 +13521,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lexer_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Lexer_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13516,7 +13546,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lexer_Family_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Lexer_Family_Decl'Access,
-         Inherited_Members => 63,
+         Inherited_Members => 64,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13541,7 +13571,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Synth_Fun_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Synth_Fun_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13565,7 +13595,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Synth_Param_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Synth_Param_Decl'Access,
-         Inherited_Members => 62,
+         Inherited_Members => 63,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13589,7 +13619,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Type_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Type_Decl'Access,
-         Inherited_Members => 67,
+         Inherited_Members => 68,
          Derivations       => (
              1 => Type_Index_For_Any_Type_Decl,
 2 => Type_Index_For_Enum_Class_Alt_Decl,
@@ -13621,7 +13651,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Any_Type_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Any_Type_Decl'Access,
-         Inherited_Members => 67,
+         Inherited_Members => 68,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13647,7 +13677,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Enum_Class_Alt_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Enum_Class_Alt_Decl'Access,
-         Inherited_Members => 67,
+         Inherited_Members => 68,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13673,7 +13703,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Function_Type'Access,
          Repr_Name         => Node_Repr_Name_For_Function_Type'Access,
-         Inherited_Members => 67,
+         Inherited_Members => 68,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13699,7 +13729,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Generic_Param_Type_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Generic_Param_Type_Decl'Access,
-         Inherited_Members => 68,
+         Inherited_Members => 69,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13726,7 +13756,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Named_Type_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Named_Type_Decl'Access,
-         Inherited_Members => 68,
+         Inherited_Members => 69,
          Derivations       => (
              1 => Type_Index_For_Basic_Class_Decl,
 2 => Type_Index_For_Enum_Type_Decl,
@@ -13753,7 +13783,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Basic_Class_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Basic_Class_Decl'Access,
-         Inherited_Members => 68,
+         Inherited_Members => 69,
          Derivations       => (
              1 => Type_Index_For_Class_Decl,
 2 => Type_Index_For_Enum_Class_Decl
@@ -13780,7 +13810,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Class_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Class_Decl'Access,
-         Inherited_Members => 68,
+         Inherited_Members => 69,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13804,7 +13834,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Enum_Class_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Enum_Class_Decl'Access,
-         Inherited_Members => 69,
+         Inherited_Members => 70,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13829,7 +13859,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Enum_Type_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Enum_Type_Decl'Access,
-         Inherited_Members => 69,
+         Inherited_Members => 70,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13857,7 +13887,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Struct_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Struct_Decl'Access,
-         Inherited_Members => 68,
+         Inherited_Members => 69,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13884,7 +13914,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Trait_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Trait_Decl'Access,
-         Inherited_Members => 68,
+         Inherited_Members => 69,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13911,7 +13941,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Decl_Annotation'Access,
          Repr_Name         => Node_Repr_Name_For_Decl_Annotation'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13936,7 +13966,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Decl_Annotation_Args'Access,
          Repr_Name         => Node_Repr_Name_For_Decl_Annotation_Args'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13960,7 +13990,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Dyn_Env_Wrapper'Access,
          Repr_Name         => Node_Repr_Name_For_Dyn_Env_Wrapper'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -13984,7 +14014,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Elsif_Branch'Access,
          Repr_Name         => Node_Repr_Name_For_Elsif_Branch'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14009,7 +14039,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Enum_Class_Case'Access,
          Repr_Name         => Node_Repr_Name_For_Enum_Class_Case'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14033,7 +14063,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Excludes_Null'Access,
          Repr_Name         => Node_Repr_Name_For_Excludes_Null'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 => Type_Index_For_Excludes_Null_Absent,
 2 => Type_Index_For_Excludes_Null_Present
@@ -14058,7 +14088,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Excludes_Null_Absent'Access,
          Repr_Name         => Node_Repr_Name_For_Excludes_Null_Absent'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14082,7 +14112,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Excludes_Null_Present'Access,
          Repr_Name         => Node_Repr_Name_For_Excludes_Null_Present'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14106,7 +14136,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Expr'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 => Type_Index_For_Any_Of,
 2 => Type_Index_For_Array_Literal,
@@ -14160,7 +14190,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Any_Of'Access,
          Repr_Name         => Node_Repr_Name_For_Any_Of'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14185,7 +14215,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Array_Literal'Access,
          Repr_Name         => Node_Repr_Name_For_Array_Literal'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14210,7 +14240,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Base_Call_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Base_Call_Expr'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 => Type_Index_For_Call_Expr,
 2 => Type_Index_For_Logic_Call_Expr
@@ -14236,7 +14266,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Call_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Call_Expr'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14260,7 +14290,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Logic_Call_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Logic_Call_Expr'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 => Type_Index_For_Logic_Predicate,
 2 => Type_Index_For_Logic_Propagate_Call
@@ -14285,7 +14315,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Logic_Predicate'Access,
          Repr_Name         => Node_Repr_Name_For_Logic_Predicate'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14309,7 +14339,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Logic_Propagate_Call'Access,
          Repr_Name         => Node_Repr_Name_For_Logic_Propagate_Call'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14333,7 +14363,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Bin_Op'Access,
          Repr_Name         => Node_Repr_Name_For_Bin_Op'Access,
-         Inherited_Members => 55,
+         Inherited_Members => 56,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14359,7 +14389,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Block_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Block_Expr'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14383,7 +14413,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Cast_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Cast_Expr'Access,
-         Inherited_Members => 56,
+         Inherited_Members => 57,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14410,7 +14440,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Dot_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Dot_Expr'Access,
-         Inherited_Members => 55,
+         Inherited_Members => 56,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14436,7 +14466,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Error_On_Null'Access,
          Repr_Name         => Node_Repr_Name_For_Error_On_Null'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14460,7 +14490,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Generic_Instantiation'Access,
          Repr_Name         => Node_Repr_Name_For_Generic_Instantiation'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14485,7 +14515,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Expr'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 => Type_Index_For_Error_Grammar_Expr,
 2 => Type_Index_For_Grammar_Cut,
@@ -14530,7 +14560,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Error_Grammar_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Error_Grammar_Expr'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14554,7 +14584,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Cut'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Cut'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14578,7 +14608,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Discard'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Discard'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14602,7 +14632,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Dont_Skip'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Dont_Skip'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14627,7 +14657,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_List'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_List'Access,
-         Inherited_Members => 56,
+         Inherited_Members => 57,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14654,7 +14684,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Null'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Null'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14678,7 +14708,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Opt'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Opt'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14702,7 +14732,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Opt_Error'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Opt_Error'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14726,7 +14756,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Opt_Error_Group'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Opt_Error_Group'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14750,7 +14780,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Opt_Group'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Opt_Group'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14774,7 +14804,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Or_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Or_Expr'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14798,7 +14828,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Pick'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Pick'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 => Type_Index_For_Grammar_Implicit_Pick
          ),
@@ -14822,7 +14852,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Implicit_Pick'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Implicit_Pick'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14846,7 +14876,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Predicate'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Predicate'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14871,7 +14901,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Rule_Ref'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Rule_Ref'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14895,7 +14925,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Skip'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Skip'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14919,7 +14949,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_Stop_Cut'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Stop_Cut'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14943,7 +14973,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Parse_Node_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Parse_Node_Expr'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14968,7 +14998,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Token_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Token_Lit'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -14992,7 +15022,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Token_No_Case_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Token_No_Case_Lit'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15016,7 +15046,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Token_Pattern_Concat'Access,
          Repr_Name         => Node_Repr_Name_For_Token_Pattern_Concat'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15041,7 +15071,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Token_Pattern_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Token_Pattern_Lit'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15065,7 +15095,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Token_Ref'Access,
          Repr_Name         => Node_Repr_Name_For_Token_Ref'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15090,7 +15120,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Id'Access,
          Repr_Name         => Node_Repr_Name_For_Id'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 => Type_Index_For_Def_Id,
 2 => Type_Index_For_Imported_Id,
@@ -15117,7 +15147,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Def_Id'Access,
          Repr_Name         => Node_Repr_Name_For_Def_Id'Access,
-         Inherited_Members => 59,
+         Inherited_Members => 60,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15146,7 +15176,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Imported_Id'Access,
          Repr_Name         => Node_Repr_Name_For_Imported_Id'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15170,7 +15200,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Module_Id'Access,
          Repr_Name         => Node_Repr_Name_For_Module_Id'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15194,7 +15224,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Ref_Id'Access,
          Repr_Name         => Node_Repr_Name_For_Ref_Id'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15218,7 +15248,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_If_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_If_Expr'Access,
-         Inherited_Members => 56,
+         Inherited_Members => 57,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15245,7 +15275,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Isa'Access,
          Repr_Name         => Node_Repr_Name_For_Isa'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15270,7 +15300,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Keep_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Keep_Expr'Access,
-         Inherited_Members => 55,
+         Inherited_Members => 56,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15296,7 +15326,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lambda_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Lambda_Expr'Access,
-         Inherited_Members => 55,
+         Inherited_Members => 56,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15322,7 +15352,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Lit'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 => Type_Index_For_Big_Num_Lit,
 2 => Type_Index_For_Char_Lit,
@@ -15350,7 +15380,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Big_Num_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Big_Num_Lit'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15374,7 +15404,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Char_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Char_Lit'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15398,7 +15428,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Null_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Null_Lit'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15422,7 +15452,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Num_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Num_Lit'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15446,7 +15476,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_String_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_String_Lit'Access,
-         Inherited_Members => 56,
+         Inherited_Members => 57,
          Derivations       => (
              1 => Type_Index_For_Block_String_Lit,
 2 => Type_Index_For_Module_Doc_String_Lit,
@@ -15475,7 +15505,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Block_String_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Block_String_Lit'Access,
-         Inherited_Members => 57,
+         Inherited_Members => 58,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15499,7 +15529,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Module_Doc_String_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Module_Doc_String_Lit'Access,
-         Inherited_Members => 57,
+         Inherited_Members => 58,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15523,7 +15553,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Single_Line_String_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Single_Line_String_Lit'Access,
-         Inherited_Members => 56,
+         Inherited_Members => 57,
          Derivations       => (
              1 => Type_Index_For_Pattern_Single_Line_String_Lit
          ),
@@ -15547,7 +15577,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Pattern_Single_Line_String_Lit'Access,
          Repr_Name         => Node_Repr_Name_For_Pattern_Single_Line_String_Lit'Access,
-         Inherited_Members => 56,
+         Inherited_Members => 57,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15571,7 +15601,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Logic_Assign'Access,
          Repr_Name         => Node_Repr_Name_For_Logic_Assign'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15596,7 +15626,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Logic_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Logic_Expr'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15620,7 +15650,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Logic_Propagate'Access,
          Repr_Name         => Node_Repr_Name_For_Logic_Propagate'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15645,7 +15675,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Logic_Unify'Access,
          Repr_Name         => Node_Repr_Name_For_Logic_Unify'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15670,7 +15700,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Match_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Match_Expr'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15695,7 +15725,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Not_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Not_Expr'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15719,7 +15749,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Paren_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Paren_Expr'Access,
-         Inherited_Members => 53,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15743,7 +15773,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Query'Access,
          Repr_Name         => Node_Repr_Name_For_Query'Access,
-         Inherited_Members => 56,
+         Inherited_Members => 57,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15770,7 +15800,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Raise_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Raise_Expr'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15795,7 +15825,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Subscript_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Subscript_Expr'Access,
-         Inherited_Members => 55,
+         Inherited_Members => 56,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15821,7 +15851,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Try_Expr'Access,
          Repr_Name         => Node_Repr_Name_For_Try_Expr'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15846,7 +15876,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Un_Op'Access,
          Repr_Name         => Node_Repr_Name_For_Un_Op'Access,
-         Inherited_Members => 54,
+         Inherited_Members => 55,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15871,7 +15901,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Full_Decl'Access,
          Repr_Name         => Node_Repr_Name_For_Full_Decl'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15898,7 +15928,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Grammar_List_Sep'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_List_Sep'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -15923,40 +15953,13 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Imported_Name'Access,
          Repr_Name         => Node_Repr_Name_For_Imported_Name'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
          Members           => (
               1 => Member_Index_For_Imported_Name_F_Original_Name,
 2 => Member_Index_For_Imported_Name_F_Renaming
-         ));
-      
-      Node_Name_For_Langkit_Root : aliased constant Text_Type :=
-        "Langkit_Root";
-         Node_Repr_Name_For_Langkit_Root : aliased constant Text_Type :=
-           "LangkitRoot";
-      Node_Desc_For_Langkit_Root : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 0,
-         Member_Count      => 4,
-         Base_Type         => Type_Index_For_Lkt_Node,
-         Is_Abstract       => False,
-         Is_Error_Node     => False,
-         Is_Synthetic      => False,
-         Is_Token_Node     => False,
-         Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Langkit_Root'Access,
-         Repr_Name         => Node_Repr_Name_For_Langkit_Root'Access,
-         Inherited_Members => 52,
-         Derivations       => (
-             1 .. 0 => <>
-         ),
-         Members           => (
-              1 => Member_Index_For_Langkit_Root_F_Doc,
-2 => Member_Index_For_Langkit_Root_F_Imports,
-3 => Member_Index_For_Langkit_Root_F_Decls,
-4 => Member_Index_For_Langkit_Root_P_Fetch_Prelude
          ));
       
       Node_Name_For_Lexer_Case_Rule : aliased constant Text_Type :=
@@ -15975,7 +15978,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lexer_Case_Rule'Access,
          Repr_Name         => Node_Repr_Name_For_Lexer_Case_Rule'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16000,7 +16003,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lexer_Case_Rule_Send'Access,
          Repr_Name         => Node_Repr_Name_For_Lexer_Case_Rule_Send'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16025,7 +16028,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_List_Kind'Access,
          Repr_Name         => Node_Repr_Name_For_List_Kind'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_List_Kind_One,
 2 => Type_Index_For_List_Kind_Zero
@@ -16050,7 +16053,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_List_Kind_One'Access,
          Repr_Name         => Node_Repr_Name_For_List_Kind_One'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16074,7 +16077,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_List_Kind_Zero'Access,
          Repr_Name         => Node_Repr_Name_For_List_Kind_Zero'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16098,7 +16101,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Lkt_Node_Base_List'Access,
          Repr_Name         => Node_Repr_Name_For_Lkt_Node_Base_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Argument_List,
 2 => Type_Index_For_Base_Import_List,
@@ -16145,7 +16148,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Argument,
          Name              => Node_Name_For_Argument_List'Access,
          Repr_Name         => Node_Repr_Name_For_Argument_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16169,7 +16172,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Base_Import,
          Name              => Node_Name_For_Base_Import_List'Access,
          Repr_Name         => Node_Repr_Name_For_Base_Import_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16193,7 +16196,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Base_Lexer_Case_Rule_Alt,
          Name              => Node_Name_For_Base_Lexer_Case_Rule_Alt_List'Access,
          Repr_Name         => Node_Repr_Name_For_Base_Lexer_Case_Rule_Alt_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16217,7 +16220,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Base_Match_Branch,
          Name              => Node_Name_For_Base_Match_Branch_List'Access,
          Repr_Name         => Node_Repr_Name_For_Base_Match_Branch_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16241,7 +16244,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Block_String_Line,
          Name              => Node_Name_For_Block_String_Line_List'Access,
          Repr_Name         => Node_Repr_Name_For_Block_String_Line_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16265,7 +16268,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Call_Expr,
          Name              => Node_Name_For_Call_Expr_List'Access,
          Repr_Name         => Node_Repr_Name_For_Call_Expr_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16289,7 +16292,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Decl_Annotation,
          Name              => Node_Name_For_Decl_Annotation_List'Access,
          Repr_Name         => Node_Repr_Name_For_Decl_Annotation_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16313,7 +16316,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Elsif_Branch,
          Name              => Node_Name_For_Elsif_Branch_List'Access,
          Repr_Name         => Node_Repr_Name_For_Elsif_Branch_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16337,7 +16340,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Enum_Class_Alt_Decl,
          Name              => Node_Name_For_Enum_Class_Alt_Decl_List'Access,
          Repr_Name         => Node_Repr_Name_For_Enum_Class_Alt_Decl_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16361,7 +16364,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Enum_Class_Case,
          Name              => Node_Name_For_Enum_Class_Case_List'Access,
          Repr_Name         => Node_Repr_Name_For_Enum_Class_Case_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16385,7 +16388,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Enum_Lit_Decl,
          Name              => Node_Name_For_Enum_Lit_Decl_List'Access,
          Repr_Name         => Node_Repr_Name_For_Enum_Lit_Decl_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16409,7 +16412,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Expr,
          Name              => Node_Name_For_Expr_List'Access,
          Repr_Name         => Node_Repr_Name_For_Expr_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Any_Of_List
          ),
@@ -16433,7 +16436,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Expr,
          Name              => Node_Name_For_Any_Of_List'Access,
          Repr_Name         => Node_Repr_Name_For_Any_Of_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16457,7 +16460,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Full_Decl,
          Name              => Node_Name_For_Full_Decl_List'Access,
          Repr_Name         => Node_Repr_Name_For_Full_Decl_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Decl_Block,
 2 => Type_Index_For_Generic_Param_Decl_List
@@ -16482,7 +16485,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Full_Decl,
          Name              => Node_Name_For_Decl_Block'Access,
          Repr_Name         => Node_Repr_Name_For_Decl_Block'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16506,7 +16509,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Full_Decl,
          Name              => Node_Name_For_Generic_Param_Decl_List'Access,
          Repr_Name         => Node_Repr_Name_For_Generic_Param_Decl_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16530,7 +16533,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Fun_Param_Decl,
          Name              => Node_Name_For_Fun_Param_Decl_List'Access,
          Repr_Name         => Node_Repr_Name_For_Fun_Param_Decl_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16554,7 +16557,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Grammar_Expr,
          Name              => Node_Name_For_Grammar_Expr_List'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Expr_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16578,7 +16581,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Grammar_Expr_List,
          Name              => Node_Name_For_Grammar_Expr_List_List'Access,
          Repr_Name         => Node_Repr_Name_For_Grammar_Expr_List_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16602,7 +16605,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Imported_Name,
          Name              => Node_Name_For_Imported_Name_List'Access,
          Repr_Name         => Node_Repr_Name_For_Imported_Name_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16626,7 +16629,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Lambda_Param_Decl,
          Name              => Node_Name_For_Lambda_Param_Decl_List'Access,
          Repr_Name         => Node_Repr_Name_For_Lambda_Param_Decl_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16650,7 +16653,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Lkt_Node,
          Name              => Node_Name_For_Lkt_Node_List'Access,
          Repr_Name         => Node_Repr_Name_For_Lkt_Node_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16674,7 +16677,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Module_Doc_String_Line,
          Name              => Node_Name_For_Module_Doc_String_Line_List'Access,
          Repr_Name         => Node_Repr_Name_For_Module_Doc_String_Line_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16698,7 +16701,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Pattern_Detail,
          Name              => Node_Name_For_Pattern_Detail_List'Access,
          Repr_Name         => Node_Repr_Name_For_Pattern_Detail_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16722,7 +16725,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Pattern,
          Name              => Node_Name_For_Pattern_List'Access,
          Repr_Name         => Node_Repr_Name_For_Pattern_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16746,7 +16749,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Ref_Id,
          Name              => Node_Name_For_Ref_Id_List'Access,
          Repr_Name         => Node_Repr_Name_For_Ref_Id_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16770,7 +16773,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Type_Ref,
          Name              => Node_Name_For_Type_Ref_List'Access,
          Repr_Name         => Node_Repr_Name_For_Type_Ref_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Synthetic_Type_Ref_List
          ),
@@ -16794,7 +16797,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => Type_Index_For_Type_Ref,
          Name              => Node_Name_For_Synthetic_Type_Ref_List'Access,
          Repr_Name         => Node_Repr_Name_For_Synthetic_Type_Ref_List'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16818,7 +16821,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Module_Doc_String_Line'Access,
          Repr_Name         => Node_Repr_Name_For_Module_Doc_String_Line'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16842,7 +16845,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Null_Cond_Qualifier'Access,
          Repr_Name         => Node_Repr_Name_For_Null_Cond_Qualifier'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 => Type_Index_For_Null_Cond_Qualifier_Absent,
 2 => Type_Index_For_Null_Cond_Qualifier_Present
@@ -16867,7 +16870,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Null_Cond_Qualifier_Absent'Access,
          Repr_Name         => Node_Repr_Name_For_Null_Cond_Qualifier_Absent'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16891,7 +16894,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Null_Cond_Qualifier_Present'Access,
          Repr_Name         => Node_Repr_Name_For_Null_Cond_Qualifier_Present'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16915,7 +16918,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op'Access,
          Repr_Name         => Node_Repr_Name_For_Op'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Op_Amp,
 2 => Type_Index_For_Op_And,
@@ -16956,7 +16959,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Amp'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Amp'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -16980,7 +16983,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_And'Access,
          Repr_Name         => Node_Repr_Name_For_Op_And'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17004,7 +17007,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Div'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Div'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17028,7 +17031,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Eq'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Eq'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17052,7 +17055,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Gt'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Gt'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17076,7 +17079,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Gte'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Gte'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17100,7 +17103,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Logic_And'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Logic_And'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17124,7 +17127,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Logic_Or'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Logic_Or'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17148,7 +17151,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Lt'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Lt'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17172,7 +17175,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Lte'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Lte'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17196,7 +17199,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Minus'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Minus'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17220,7 +17223,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Mult'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Mult'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17244,7 +17247,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Ne'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Ne'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17268,7 +17271,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Or'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Or'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17292,7 +17295,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Or_Int'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Or_Int'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17316,7 +17319,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Plus'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Plus'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17340,7 +17343,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Stream_Concat'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Stream_Concat'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17364,7 +17367,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Op_Stream_Cons'Access,
          Repr_Name         => Node_Repr_Name_For_Op_Stream_Cons'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17388,7 +17391,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Pattern'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Any_Type_Pattern,
 2 => Type_Index_For_Bool_Pattern,
@@ -17423,7 +17426,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Any_Type_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Any_Type_Pattern'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17447,7 +17450,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Bool_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Bool_Pattern'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Bool_Pattern_False,
 2 => Type_Index_For_Bool_Pattern_True
@@ -17472,7 +17475,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Bool_Pattern_False'Access,
          Repr_Name         => Node_Repr_Name_For_Bool_Pattern_False'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17496,7 +17499,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Bool_Pattern_True'Access,
          Repr_Name         => Node_Repr_Name_For_Bool_Pattern_True'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17520,7 +17523,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Complex_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Complex_Pattern'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 => Type_Index_For_Renaming_Complex_Pattern
          ),
@@ -17547,7 +17550,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Renaming_Complex_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Renaming_Complex_Pattern'Access,
-         Inherited_Members => 52,
+         Inherited_Members => 53,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17571,7 +17574,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Ellipsis_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Ellipsis_Pattern'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17595,7 +17598,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Integer_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Integer_Pattern'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17619,7 +17622,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_List_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_List_Pattern'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17643,7 +17646,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Not_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Not_Pattern'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17667,7 +17670,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Null_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Null_Pattern'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17691,7 +17694,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Or_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Or_Pattern'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17716,7 +17719,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Paren_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Paren_Pattern'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17740,7 +17743,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Regex_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Regex_Pattern'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17764,7 +17767,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Type_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Type_Pattern'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17788,7 +17791,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Pattern_Detail'Access,
          Repr_Name         => Node_Repr_Name_For_Pattern_Detail'Access,
-         Inherited_Members => 48,
+         Inherited_Members => 49,
          Derivations       => (
              1 => Type_Index_For_Field_Pattern_Detail,
 2 => Type_Index_For_Property_Pattern_Detail
@@ -17813,7 +17816,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Field_Pattern_Detail'Access,
          Repr_Name         => Node_Repr_Name_For_Field_Pattern_Detail'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17838,7 +17841,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Property_Pattern_Detail'Access,
          Repr_Name         => Node_Repr_Name_For_Property_Pattern_Detail'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17863,7 +17866,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Type_Ref'Access,
          Repr_Name         => Node_Repr_Name_For_Type_Ref'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 => Type_Index_For_Default_List_Type_Ref,
 2 => Type_Index_For_Function_Type_Ref,
@@ -17890,7 +17893,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Default_List_Type_Ref'Access,
          Repr_Name         => Node_Repr_Name_For_Default_List_Type_Ref'Access,
-         Inherited_Members => 49,
+         Inherited_Members => 50,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17914,7 +17917,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Function_Type_Ref'Access,
          Repr_Name         => Node_Repr_Name_For_Function_Type_Ref'Access,
-         Inherited_Members => 51,
+         Inherited_Members => 52,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17939,7 +17942,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Generic_Type_Ref'Access,
          Repr_Name         => Node_Repr_Name_For_Generic_Type_Ref'Access,
-         Inherited_Members => 51,
+         Inherited_Members => 52,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17964,7 +17967,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Simple_Type_Ref'Access,
          Repr_Name         => Node_Repr_Name_For_Simple_Type_Ref'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17988,7 +17991,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          List_Element_Type => No_Type_Index,
          Name              => Node_Name_For_Var_Bind'Access,
          Repr_Name         => Node_Repr_Name_For_Var_Bind'Access,
-         Inherited_Members => 50,
+         Inherited_Members => 51,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -18046,6 +18049,7 @@ Type_Index_For_Env_Spec_Decl => Node_Desc_For_Env_Spec_Decl'Access,
 Type_Index_For_Error_Decl => Node_Desc_For_Error_Decl'Access,
 Type_Index_For_Generic_Decl => Node_Desc_For_Generic_Decl'Access,
 Type_Index_For_Grammar_Decl => Node_Desc_For_Grammar_Decl'Access,
+Type_Index_For_Langkit_Root => Node_Desc_For_Langkit_Root'Access,
 Type_Index_For_Lexer_Decl => Node_Desc_For_Lexer_Decl'Access,
 Type_Index_For_Lexer_Family_Decl => Node_Desc_For_Lexer_Family_Decl'Access,
 Type_Index_For_Synth_Fun_Decl => Node_Desc_For_Synth_Fun_Decl'Access,
@@ -18142,7 +18146,6 @@ Type_Index_For_Un_Op => Node_Desc_For_Un_Op'Access,
 Type_Index_For_Full_Decl => Node_Desc_For_Full_Decl'Access,
 Type_Index_For_Grammar_List_Sep => Node_Desc_For_Grammar_List_Sep'Access,
 Type_Index_For_Imported_Name => Node_Desc_For_Imported_Name'Access,
-Type_Index_For_Langkit_Root => Node_Desc_For_Langkit_Root'Access,
 Type_Index_For_Lexer_Case_Rule => Node_Desc_For_Lexer_Case_Rule'Access,
 Type_Index_For_Lexer_Case_Rule_Send => Node_Desc_For_Lexer_Case_Rule_Send'Access,
 Type_Index_For_List_Kind => Node_Desc_For_List_Kind'Access,
@@ -18281,6 +18284,7 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Error_Decl => Type_Index_For_Error_Decl,
       Lkt_Generic_Decl => Type_Index_For_Generic_Decl,
       Lkt_Grammar_Decl => Type_Index_For_Grammar_Decl,
+      Lkt_Langkit_Root => Type_Index_For_Langkit_Root,
       Lkt_Lexer_Decl => Type_Index_For_Lexer_Decl,
       Lkt_Lexer_Family_Decl => Type_Index_For_Lexer_Family_Decl,
       Lkt_Synth_Fun_Decl => Type_Index_For_Synth_Fun_Decl,
@@ -18367,7 +18371,6 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Full_Decl => Type_Index_For_Full_Decl,
       Lkt_Grammar_List_Sep => Type_Index_For_Grammar_List_Sep,
       Lkt_Imported_Name => Type_Index_For_Imported_Name,
-      Lkt_Langkit_Root => Type_Index_For_Langkit_Root,
       Lkt_Lexer_Case_Rule => Type_Index_For_Lexer_Case_Rule,
       Lkt_Lexer_Case_Rule_Send => Type_Index_For_Lexer_Case_Rule_Send,
       Lkt_List_Kind_One => Type_Index_For_List_Kind_One,

@@ -827,6 +827,32 @@ package body Liblktlang.Parsers_Impl is
          end Allocate_Grammar_Decl;
 
          
+         subtype Subtype_For_Langkit_Root is
+            Root_Node_Record (Lkt_Langkit_Root);
+         type Access_To_Subtype_For_Langkit_Root is access all Subtype_For_Langkit_Root;
+         pragma No_Strict_Aliasing (Access_To_Subtype_For_Langkit_Root);
+         package Bare_Langkit_Root_Alloc is new Alloc
+           (Subtype_For_Langkit_Root, Access_To_Subtype_For_Langkit_Root);
+
+         function Allocate_Langkit_Root
+           (Pool : Bump_Ptr_Pool) return Bare_Langkit_Root;
+
+         function Allocate_Langkit_Root
+           (Pool : Bump_Ptr_Pool) return Bare_Langkit_Root
+         is
+            Result      : constant Access_To_Subtype_For_Langkit_Root := Bare_Langkit_Root_Alloc.Alloc (Pool);
+            Result_Kind : Lkt_Node_Kind_Type
+               with Import, Address => Result.Kind'Address;
+            --  Result.Kind is a discriminant, so we can't modify it directly.
+            --  We need to initialize it manually, though, as we don't use a
+            --  standard Ada allocator for nodes. Use an overlay to workaround
+            --  Ada's restrictions.
+         begin
+            Result_Kind := Lkt_Langkit_Root;
+            return Bare_Langkit_Root (Result);
+         end Allocate_Langkit_Root;
+
+         
          subtype Subtype_For_Lexer_Decl is
             Root_Node_Record (Lkt_Lexer_Decl);
          type Access_To_Subtype_For_Lexer_Decl is access all Subtype_For_Lexer_Decl;
@@ -3061,32 +3087,6 @@ package body Liblktlang.Parsers_Impl is
             Result_Kind := Lkt_Imported_Name;
             return Bare_Imported_Name (Result);
          end Allocate_Imported_Name;
-
-         
-         subtype Subtype_For_Langkit_Root is
-            Root_Node_Record (Lkt_Langkit_Root);
-         type Access_To_Subtype_For_Langkit_Root is access all Subtype_For_Langkit_Root;
-         pragma No_Strict_Aliasing (Access_To_Subtype_For_Langkit_Root);
-         package Bare_Langkit_Root_Alloc is new Alloc
-           (Subtype_For_Langkit_Root, Access_To_Subtype_For_Langkit_Root);
-
-         function Allocate_Langkit_Root
-           (Pool : Bump_Ptr_Pool) return Bare_Langkit_Root;
-
-         function Allocate_Langkit_Root
-           (Pool : Bump_Ptr_Pool) return Bare_Langkit_Root
-         is
-            Result      : constant Access_To_Subtype_For_Langkit_Root := Bare_Langkit_Root_Alloc.Alloc (Pool);
-            Result_Kind : Lkt_Node_Kind_Type
-               with Import, Address => Result.Kind'Address;
-            --  Result.Kind is a discriminant, so we can't modify it directly.
-            --  We need to initialize it manually, though, as we don't use a
-            --  standard Ada allocator for nodes. Use an overlay to workaround
-            --  Ada's restrictions.
-         begin
-            Result_Kind := Lkt_Langkit_Root;
-            return Bare_Langkit_Root (Result);
-         end Allocate_Langkit_Root;
 
          
          subtype Subtype_For_Lexer_Case_Rule is

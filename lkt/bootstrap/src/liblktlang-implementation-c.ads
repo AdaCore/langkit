@@ -1627,6 +1627,24 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
+   function lkt_lkt_node_p_prelude_unit
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_analysis_unit) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_p_prelude_unit";
+   --  Return the unit that contains the Lkt prelude (predefined types and
+   --  values).
+
+           
+   
+
+   
+   
+
    function lkt_lkt_node_p_basic_trait_gen
      (Node : lkt_node_Ptr;
 
@@ -3122,6 +3140,57 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_grammar_decl_f_rules";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_langkit_root_f_doc
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_langkit_root_f_doc";
+   --  This field may be null even when there are no parsing errors.
+
+           
+   
+
+   
+   
+
+   function lkt_langkit_root_f_imports
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_langkit_root_f_imports";
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_langkit_root_f_decls
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_langkit_root_f_decls";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -5908,75 +5977,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_imported_name_f_renaming";
    --  This field may be null even when there are no parsing errors.
-
-           
-   
-
-   
-   
-
-   function lkt_langkit_root_f_doc
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_langkit_root_f_doc";
-   --  This field may be null even when there are no parsing errors.
-
-           
-   
-
-   
-   
-
-   function lkt_langkit_root_f_imports
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_langkit_root_f_imports";
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_langkit_root_f_decls
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_langkit_root_f_decls";
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_langkit_root_p_fetch_prelude
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_analysis_unit) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_langkit_root_p_fetch_prelude";
-   --  External property that will fetch the prelude unit, containing
-   --  predefined types and values.
 
            
    

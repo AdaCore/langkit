@@ -8319,6 +8319,36 @@ package body Liblktlang.Analysis is
    end;
 
          
+   function P_Prelude_Unit
+     (Node : Lkt_Node'Class) return Analysis_Unit is
+      
+
+
+      Property_Result : Internal_Unit;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Extensions.Lkt_Node_P_Prelude_Unit
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
+
+
+            null;
+      end return;
+
+   end;
+
+         
    function P_Basic_Trait_Gen
      (Node : Lkt_Node'Class) return Generic_Decl is
       
@@ -15089,36 +15119,6 @@ package body Liblktlang.Analysis is
    end F_Decls;
 
 
-
-         
-   function P_Fetch_Prelude
-     (Node : Langkit_Root'Class) return Analysis_Unit is
-      
-
-
-      Property_Result : Internal_Unit;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Extensions.Langkit_Root_P_Fetch_Prelude
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
-
-
-            null;
-      end return;
-
-   end;
 
 
 

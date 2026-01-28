@@ -122,17 +122,18 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_List_Elements, --  list_elements
                Precomputed_Sym_Logicvar, --  LogicVar
                Precomputed_Sym_Metadata, --  Metadata
-               Precomputed_Sym_Metadata_46, --  metadata
+               Precomputed_Sym_Metadata_47, --  metadata
                Precomputed_Sym_Newline, --  newline
                Precomputed_Sym_No_Case, --  no_case
                Precomputed_Sym_Node, --  Node
-               Precomputed_Sym_Node_49, --  node
+               Precomputed_Sym_Node_50, --  node
                Precomputed_Sym_Nodebuilder, --  NodeBuilder
                Precomputed_Sym_Null_Field, --  null_field
                Precomputed_Sym_Nullable, --  nullable
                Precomputed_Sym_Open, --  open
                Precomputed_Sym_Parse_Field, --  parse_field
                Precomputed_Sym_Pick, --  pick
+               Precomputed_Sym_Prelude, --  <prelude>
                Precomputed_Sym_Previous_Token, --  previous_token
                Precomputed_Sym_Property, --  property
                Precomputed_Sym_Propertyerror, --  PropertyError
@@ -353,6 +354,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Grammar_Decl)
                or else Kind (Bare_Grammar_Decl) in Lkt_Grammar_Decl_Range;
+         subtype Bare_Langkit_Root is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Langkit_Root)
+               or else Kind (Bare_Langkit_Root) in Lkt_Langkit_Root_Range;
          subtype Bare_Lexer_Decl is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Lexer_Decl)
@@ -737,10 +742,6 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Imported_Name)
                or else Kind (Bare_Imported_Name) in Lkt_Imported_Name_Range;
-         subtype Bare_Langkit_Root is Bare_Lkt_Node
-            with Dynamic_Predicate =>
-               Is_Null (Bare_Langkit_Root)
-               or else Kind (Bare_Langkit_Root) in Lkt_Langkit_Root_Range;
          subtype Bare_Lexer_Case_Rule is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Lexer_Case_Rule)
@@ -11321,6 +11322,7 @@ Lkt_Env_Spec_Decl => 2,
 Lkt_Error_Decl => 0, 
 Lkt_Generic_Decl => 2, 
 Lkt_Grammar_Decl => 2, 
+Lkt_Langkit_Root => 3, 
 Lkt_Lexer_Decl => 2, 
 Lkt_Lexer_Family_Decl => 2, 
 Lkt_Synth_Fun_Decl => 0, 
@@ -11407,7 +11409,6 @@ Lkt_Un_Op => 2,
 Lkt_Full_Decl => 3, 
 Lkt_Grammar_List_Sep => 2, 
 Lkt_Imported_Name => 2, 
-Lkt_Langkit_Root => 3, 
 Lkt_Lexer_Case_Rule => 2, 
 Lkt_Lexer_Case_Rule_Send => 2, 
 Lkt_List_Kind_One => 0, 
@@ -12271,6 +12272,27 @@ Lkt_Var_Bind => 2);
 
 
       
+                  when Lkt_Langkit_Root_Range =>
+                     
+         
+
+
+            Langkit_Root_F_Doc : aliased Bare_Module_Doc_String_Lit :=
+               No_Bare_Lkt_Node;
+            Langkit_Root_F_Imports : aliased Bare_Base_Import_List :=
+               No_Bare_Lkt_Node;
+            Langkit_Root_F_Decls : aliased Bare_Full_Decl_List :=
+               No_Bare_Lkt_Node;
+            Internal_Bare_Langkit_Root_Lf_State_Empty_Type_Ref_List_26 : aliased Initialization_State :=
+               Uninitialized;
+            Internal_Bare_Langkit_Root_Lf_Stg_Empty_Type_Ref_List_27 : aliased Bare_Synthetic_Type_Ref_List :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
                   when Lkt_Lexer_Decl_Range =>
                      
          
@@ -12562,9 +12584,9 @@ Lkt_Var_Bind => 2);
                No_Symbol_Type_Array_Type;
             Dyn_Env_Wrapper_F_Types : aliased Internal_Entity_Type_Decl_Array_Access :=
                No_Internal_Entity_Type_Decl_Array_Type;
-            Internal_Bare_Dyn_Env_Wrapper_Lf_State_Dynenvwrapper_Instantiation_Env_20 : aliased Initialization_State :=
+            Internal_Bare_Dyn_Env_Wrapper_Lf_State_Dynenvwrapper_Instantiation_Env_28 : aliased Initialization_State :=
                Uninitialized;
-            Internal_Bare_Dyn_Env_Wrapper_Lf_Stg_Dynenvwrapper_Instantiation_Env_21 : aliased Lexical_Env :=
+            Internal_Bare_Dyn_Env_Wrapper_Lf_Stg_Dynenvwrapper_Instantiation_Env_29 : aliased Lexical_Env :=
                Empty_Env;
 
          
@@ -13671,27 +13693,6 @@ Lkt_Var_Bind => 2);
             Imported_Name_F_Original_Name : aliased Bare_Imported_Id :=
                No_Bare_Lkt_Node;
             Imported_Name_F_Renaming : aliased Bare_Def_Id :=
-               No_Bare_Lkt_Node;
-
-         
-
-
-
-      
-                  when Lkt_Langkit_Root_Range =>
-                     
-         
-
-
-            Langkit_Root_F_Doc : aliased Bare_Module_Doc_String_Lit :=
-               No_Bare_Lkt_Node;
-            Langkit_Root_F_Imports : aliased Bare_Base_Import_List :=
-               No_Bare_Lkt_Node;
-            Langkit_Root_F_Decls : aliased Bare_Full_Decl_List :=
-               No_Bare_Lkt_Node;
-            Internal_Bare_Langkit_Root_Lf_State_Empty_Type_Ref_List_22 : aliased Initialization_State :=
-               Uninitialized;
-            Internal_Bare_Langkit_Root_Lf_Stg_Empty_Type_Ref_List_23 : aliased Bare_Synthetic_Type_Ref_List :=
                No_Bare_Lkt_Node;
 
          
@@ -15280,6 +15281,48 @@ function Completion_Item_Kind_To_Int
 
 
 
+function Lkt_Node_P_Prelude_Env
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Lexical_Env
+   ;
+--  Return the lexical env that contains all definitions from the prelude.
+
+         
+
+
+
+
+function Lkt_Node_P_Is_From_Prelude
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Boolean
+   ;
+--  Return wether this node belongs to the Lkt prelude unit.
+
+         
+
+
+
+
+function Lkt_Node_P_Root_Env
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Lexical_Env
+   ;
+
+
+         
+
+
+
+
 function Lkt_Node_P_Root_Get
    
   (Node : Bare_Lkt_Node
@@ -15770,6 +15813,23 @@ function Lkt_Node_P_Any_Type
    return Internal_Entity_Type_Decl
    ;
 --  Create a AnyTypeDecl.
+
+         
+
+
+
+
+function Lkt_Node_P_Referenced_Module
+   
+  (Node : Bare_Lkt_Node
+      ; Module_Name : Bare_Id
+  )
+
+   return Internal_Entity
+   ;
+--  Static method. Convenience wrapper around
+--  ``internal_fetch_referenced_unit`` to get the ``LangkitRoot`` as an entity
+--  for a given module. Used to write lexical env resolvers.
 
          
 
@@ -16279,8 +16339,29 @@ function Import_P_Referenced_Modules
    ;
 
 
+         
+
+
+
+
+function Internal_Env_Mappings_17
+   
+  (Node : Bare_Import
+  )
+
+   return Internal_Env_Assoc_Array_Access
+   ;
+
+
 
    
+
+
+
+         procedure Import_Pre_Env_Actions
+           (Self            : Bare_Import;
+            State           : in out PLE_Node_State;
+            Add_To_Env_Only : Boolean := False);
 
 
 
@@ -16314,8 +16395,43 @@ function Import_All_From_P_Referenced_Modules
    ;
 
 
+         
+
+
+
+
+function Import_All_From_P_Referenced_Scope
+   
+  (Node : Bare_Import_All_From
+  )
+
+   return Lexical_Env
+   ;
+--  Return the module scope for the module that this clause designates.
+
+         
+
+
+
+
+function Internal_Ref_Env_Nodes_19
+   
+  (Node : Bare_Import_All_From
+  )
+
+   return Bare_Lkt_Node_Array_Access
+   ;
+
+
 
    
+
+
+
+         procedure Import_All_From_Pre_Env_Actions
+           (Self            : Bare_Import_All_From;
+            State           : in out PLE_Node_State;
+            Add_To_Env_Only : Boolean := False);
 
 
 
@@ -16354,8 +16470,29 @@ function Import_From_P_Referenced_Modules
    ;
 
 
+         
+
+
+
+
+function Internal_Env_Mappings_18
+   
+  (Node : Bare_Import_From
+  )
+
+   return Internal_Env_Assoc_Array_Access
+   ;
+
+
 
    
+
+
+
+         procedure Import_From_Pre_Env_Actions
+           (Self            : Bare_Import_From;
+            State           : in out PLE_Node_State;
+            Add_To_Env_Only : Boolean := False);
 
 
 
@@ -18779,6 +18916,211 @@ function Internal_Env_Mappings_8
             State           : in out PLE_Node_State;
             Add_To_Env_Only : Boolean := False);
 
+
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Langkit_Root
+        (Self : Bare_Langkit_Root
+         ; Langkit_Root_F_Doc : Bare_Module_Doc_String_Lit
+         ; Langkit_Root_F_Imports : Bare_Base_Import_List
+         ; Langkit_Root_F_Decls : Bare_Full_Decl_List
+        );
+
+      
+   function Langkit_Root_F_Doc
+     (Node : Bare_Langkit_Root) return Bare_Module_Doc_String_Lit;
+
+      
+   function Langkit_Root_F_Imports
+     (Node : Bare_Langkit_Root) return Bare_Base_Import_List;
+
+      
+   function Langkit_Root_F_Decls
+     (Node : Bare_Langkit_Root) return Bare_Full_Decl_List;
+
+
+         
+
+
+
+
+function Langkit_Root_P_Decl_Type_Name
+   
+  (Node : Bare_Langkit_Root
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return String_Type
+   ;
+
+
+         
+
+
+
+
+function Langkit_Root_P_Name
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Symbol_Type
+   ;
+
+
+         
+
+
+
+
+function Langkit_Root_P_Defined_Scope
+   
+  (Node : Bare_Langkit_Root
+      ; Origin : Internal_Entity
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Lexical_Env
+   ;
+--  ``Origin``: Origin node of the request.
+
+         
+
+
+
+
+function Langkit_Root_P_Internal_Env
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Lexical_Env
+   ;
+--  Get the hidden environment in the prelude containing a default declaration
+--  of the Metadata type, for when it is not defined by the specification.
+
+         
+
+
+
+
+function Langkit_Root_F_Empty_Type_Ref_List
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Bare_Synthetic_Type_Ref_List
+   ;
+--  An empty synthetic TypeRef list node. Used to generate synthetic type
+--  declarations.
+--
+--  This lazy field is on ``LangkitRoot`` so that at most a single synthetic
+--  node is created by Lkt unit. Use ``LktNode.get_empty_type_ref_list`` for
+--  convenience.
+
+         
+
+
+
+
+function Internal_Env_Do_20
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Internal_Unit
+   ;
+
+
+         
+
+
+
+
+function Internal_Env_Mappings_21
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Internal_Env_Assoc
+   ;
+
+
+         
+
+
+
+
+function Internal_Ref_Env_Nodes_22
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Bare_Lkt_Node_Array_Access
+   ;
+
+
+         
+
+
+
+
+function Internal_Ref_Cond_23
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Boolean
+   ;
+
+
+         
+
+
+
+
+function Internal_Ref_Env_Nodes_24
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Bare_Lkt_Node_Array_Access
+   ;
+
+
+         
+
+
+
+
+function Internal_Ref_Cond_25
+   
+  (Node : Bare_Langkit_Root
+  )
+
+   return Boolean
+   ;
+
+
+
+   
+
+
+
+         procedure Langkit_Root_Pre_Env_Actions
+           (Self            : Bare_Langkit_Root;
+            State           : in out PLE_Node_State;
+            Add_To_Env_Only : Boolean := False);
+
+         procedure Langkit_Root_Post_Env_Actions
+           (Self : Bare_Langkit_Root; State : in out PLE_Node_State);
 
 
 
@@ -24551,125 +24893,51 @@ function Full_Decl_P_Get_Annotation
      (Node : Bare_Imported_Name) return Bare_Def_Id;
 
 
+         
 
+
+
+
+function Imported_Name_P_Resolve_Simple_Import
    
+  (Node : Bare_Imported_Name
+  )
 
-
-
-
-      
-
-   
-
-      
-      procedure Initialize_Fields_For_Langkit_Root
-        (Self : Bare_Langkit_Root
-         ; Langkit_Root_F_Doc : Bare_Module_Doc_String_Lit
-         ; Langkit_Root_F_Imports : Bare_Base_Import_List
-         ; Langkit_Root_F_Decls : Bare_Full_Decl_List
-        );
-
-      
-   function Langkit_Root_F_Doc
-     (Node : Bare_Langkit_Root) return Bare_Module_Doc_String_Lit;
-
-      
-   function Langkit_Root_F_Imports
-     (Node : Bare_Langkit_Root) return Bare_Base_Import_List;
-
-      
-   function Langkit_Root_F_Decls
-     (Node : Bare_Langkit_Root) return Bare_Full_Decl_List;
-
+   return Internal_Entity
+   ;
+--  Lexical env resolver for imported names from ``import`` nodes.
 
          
 
 
 
 
-function Langkit_Root_P_Internal_Env
+function Imported_Name_P_Resolve_Import_From
    
-  (Node : Bare_Langkit_Root
+  (Node : Bare_Imported_Name
   )
 
-   return Lexical_Env
+   return Internal_Entity
    ;
---  Get the hidden environment in the prelude containing a default declaration
---  of the Metadata type, for when it is not defined by the specification.
+--  Lexical env resolver for imported names from ``from M import ...`` nodes.
 
          
 
 
 
 
-function Langkit_Root_F_Empty_Type_Ref_List
+function Imported_Name_P_Env_Assoc
    
-  (Node : Bare_Langkit_Root
+  (Node : Bare_Imported_Name
   )
 
-   return Bare_Synthetic_Type_Ref_List
+   return Internal_Env_Assoc
    ;
---  An empty synthetic TypeRef list node. Used to generate synthetic type
---  declarations.
---
---  This lazy field is on ``LangkitRoot`` so that at most a single synthetic
---  node is created by Lkt unit. Use ``LktNode.get_empty_type_ref_list`` for
---  convenience.
-
-         
-
-
-
-
-function Internal_Env_Do_17
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Internal_Unit
-   ;
-
-
-         
-
-
-
-
-function Internal_Ref_Env_Nodes_18
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Bare_Lkt_Node_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Internal_Ref_Cond_19
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Boolean
-   ;
-
+--  Helper for env specs: return an env association for this imported name.
 
 
    
 
-
-
-         procedure Langkit_Root_Pre_Env_Actions
-           (Self            : Bare_Langkit_Root;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
-         procedure Langkit_Root_Post_Env_Actions
-           (Self : Bare_Langkit_Root; State : in out PLE_Node_State);
 
 
 

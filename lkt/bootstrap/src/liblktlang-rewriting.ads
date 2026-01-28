@@ -532,6 +532,15 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
+         function Create_Langkit_Root
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+               ; F_Doc : Node_Rewriting_Handle
+               ; F_Imports : Node_Rewriting_Handle
+               ; F_Decls : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Lexer_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -1018,14 +1027,6 @@ package Liblktlang.Rewriting is
            (Handle : Rewriting_Handle
                ; F_Original_Name : Node_Rewriting_Handle
                ; F_Renaming : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Langkit_Root
-           (Handle : Rewriting_Handle
-               ; F_Doc : Node_Rewriting_Handle
-               ; F_Imports : Node_Rewriting_Handle
-               ; F_Decls : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 

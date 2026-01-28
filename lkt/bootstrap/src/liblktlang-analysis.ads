@@ -129,12 +129,12 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
       --  :ada:ref:`Enum_Class_Case`, :ada:ref:`Excludes_Null`,
       --  :ada:ref:`Expr`, :ada:ref:`Full_Decl`, :ada:ref:`Grammar_List_Sep`,
-      --  :ada:ref:`Imported_Name`, :ada:ref:`Langkit_Root`,
-      --  :ada:ref:`Lexer_Case_Rule_Send`, :ada:ref:`Lexer_Case_Rule`,
-      --  :ada:ref:`List_Kind`, :ada:ref:`Lkt_Node_Base_List`,
-      --  :ada:ref:`Module_Doc_String_Line`, :ada:ref:`Null_Cond_Qualifier`,
-      --  :ada:ref:`Op`, :ada:ref:`Pattern_Detail`, :ada:ref:`Pattern`,
-      --  :ada:ref:`Type_Ref`, :ada:ref:`Var_Bind`
+      --  :ada:ref:`Imported_Name`, :ada:ref:`Lexer_Case_Rule_Send`,
+      --  :ada:ref:`Lexer_Case_Rule`, :ada:ref:`List_Kind`,
+      --  :ada:ref:`Lkt_Node_Base_List`, :ada:ref:`Module_Doc_String_Line`,
+      --  :ada:ref:`Null_Cond_Qualifier`, :ada:ref:`Op`,
+      --  :ada:ref:`Pattern_Detail`, :ada:ref:`Pattern`, :ada:ref:`Type_Ref`,
+      --  :ada:ref:`Var_Bind`
 
       function Equals (L, R : Lkt_Node) return Boolean;
       --  Comparison function, meant to compare two nodes.
@@ -151,9 +151,10 @@ package Liblktlang.Analysis is
       --  Derived nodes: :ada:ref:`Base_Grammar_Rule_Decl`,
       --  :ada:ref:`Base_Val_Decl`, :ada:ref:`Env_Spec_Decl`,
       --  :ada:ref:`Error_Decl`, :ada:ref:`Generic_Decl`,
-      --  :ada:ref:`Grammar_Decl`, :ada:ref:`Lexer_Decl`,
-      --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Synth_Fun_Decl`,
-      --  :ada:ref:`Synth_Param_Decl`, :ada:ref:`Type_Decl`
+      --  :ada:ref:`Grammar_Decl`, :ada:ref:`Langkit_Root`,
+      --  :ada:ref:`Lexer_Decl`, :ada:ref:`Lexer_Family_Decl`,
+      --  :ada:ref:`Synth_Fun_Decl`, :ada:ref:`Synth_Param_Decl`,
+      --  :ada:ref:`Type_Decl`
 
       type Expr is new Lkt_Node with private
          with First_Controlling_Parameter
@@ -1272,7 +1273,7 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Langkit_Root is new Lkt_Node with private
+      type Langkit_Root is new Decl with private
          with First_Controlling_Parameter
       ;
       --  For the moment, root node of a lkt compilation unit.
@@ -3314,6 +3315,13 @@ package Liblktlang.Analysis is
      (Node : Lkt_Node'Class;
       Enable : Boolean) return Boolean;
    --  Enable or disable the solver traces for debugging purposes.
+   --% belongs-to: Lkt_Node
+
+         
+   function P_Prelude_Unit
+     (Node : Lkt_Node'Class) return Analysis_Unit;
+   --  Return the unit that contains the Lkt prelude (predefined types and
+   --  values).
    --% belongs-to: Lkt_Node
 
          
@@ -6205,13 +6213,6 @@ package Liblktlang.Analysis is
 
 
 
-         
-   function P_Fetch_Prelude
-     (Node : Langkit_Root'Class) return Analysis_Unit;
-   --  External property that will fetch the prelude unit, containing
-   --  predefined types and values.
-   --% belongs-to: Langkit_Root
-
 
 
 
@@ -9032,7 +9033,7 @@ private
       No_Lambda_Param_Decl_List : constant Lambda_Param_Decl_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Langkit_Root is new Lkt_Node with null record;
+         type Langkit_Root is new Decl with null record;
       No_Langkit_Root : constant Langkit_Root :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
