@@ -61,6 +61,18 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     @external()
     fun set_solver_debug_mode(enable: Bool): Bool
 
+    |" Return the unit that contains the Lkt prelude (predefined types and
+    |" values).
+    @exported
+    @external()
+    fun prelude_unit(): AnalysisUnit
+
+    |" Return the lexical env that contains all definitions from the prelude.
+    fun prelude_env(): LexicalEnv = node.prelude_unit().root.children_env
+
+    |" Return wether this node belongs to the Lkt prelude unit.
+    fun is_from_prelude(): Bool = node.unit == node.prelude_unit()
+
     fun root_env(): LexicalEnv = node.unit.root.node_env
 
     fun root_get(entity_name: Symbol): Entity[Decl] =
@@ -5365,14 +5377,6 @@ class LangkitRoot: Decl {
 
     fun defined_scope(): LexicalEnv = node.children_env
 
-    |" External property that will fetch the prelude unit, containing
-    |" predefined types and values.
-    @exported
-    @external()
-    fun fetch_prelude(): AnalysisUnit
-
-    fun prelude_env(): LexicalEnv = node.fetch_prelude().root.children_env
-
     |" Get the hidden environment in the prelude containing a default
     |" declaration of the Metadata type, for when it is not defined by the
     |" specification.
@@ -5398,7 +5402,7 @@ class LangkitRoot: Decl {
 
     env_spec {
         # Make sure the prelude unit is loaded and has its env populated
-        do(node.fetch_prelude())
+        do(node.prelude_unit())
 
         # Register this module in the root env and create an env to hold
         # top-level declarations for this module.
@@ -5410,7 +5414,7 @@ class LangkitRoot: Decl {
         reference(
             [node.as[LktNode]],
             LangkitRoot.prelude_env,
-            cond=node.unit != node.fetch_prelude()
+            cond=not node.is_from_prelude()
         )
 
         handle_children()
@@ -5419,7 +5423,7 @@ class LangkitRoot: Decl {
         reference(
             [node.as[LktNode]],
             LangkitRoot.internal_env,
-            cond=node.unit == node.fetch_prelude()
+            cond=node.is_from_prelude()
         )
     }
 }

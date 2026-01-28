@@ -343,12 +343,44 @@ package body Liblktlang.Implementation.Extensions is
       end if;
    end Read_Denoted_Char;
 
-   ----------------------------------
-   -- Langkit_Root_P_Fetch_Prelude --
-   ----------------------------------
+   --------------------------------
+   -- Langkit_Root_P_Module_Name --
+   --------------------------------
 
-   function Langkit_Root_P_Fetch_Prelude
-     (Node : Bare_Langkit_Root) return Internal_Unit
+   function Langkit_Root_P_Module_Name
+     (Node : Bare_Langkit_Root) return Symbol_Type
+   is
+      Filename : constant String :=
+        Ada.Directories.Simple_Name (Node.Unit.Get_Filename);
+   begin
+      --  If ``Node`` belongs to the prelude, which is not a regular module,
+      --  return the empty symbol, as documented.
+
+      if Lkt_Node_P_Is_From_Prelude (Node) then
+         return No_Symbol;
+
+      --  Otherwise, make sure the unit has a valid Lkt filename
+
+      elsif not GNAT.Regexp.Match (Filename, Lkt_Filename_Regexp) then
+         Raise_Property_Exception
+           (Node, Property_Error'Identity, "invalid Lkt filename");
+      end if;
+
+      --  From there, just strip the extension and we have the module name
+
+      declare
+         Module_Name : String renames
+           Filename (Filename'First .. Filename'Last - 4);
+      begin
+         return Find (Node.Unit.Context.Symbols, To_Text (Module_Name));
+      end;
+   end Langkit_Root_P_Module_Name;
+
+   -----------------------------
+   -- Lkt_Node_P_Prelude_Unit --
+   -----------------------------
+
+   function Lkt_Node_P_Prelude_Unit (Node : Bare_Lkt_Node) return Internal_Unit
    is
       Ctx     : constant Analysis_Context := Wrap_Context (Node.Unit.Context);
       Prelude : Analysis_Unit;
@@ -371,40 +403,7 @@ package body Liblktlang.Implementation.Extensions is
          Populate_Lexical_Env (Prelude);
       end if;
       return Unwrap_Unit (Prelude);
-   end Langkit_Root_P_Fetch_Prelude;
-
-   --------------------------------
-   -- Langkit_Root_P_Module_Name --
-   --------------------------------
-
-   function Langkit_Root_P_Module_Name
-     (Node : Bare_Langkit_Root) return Symbol_Type
-   is
-      Filename : constant String :=
-        Ada.Directories.Simple_Name (Node.Unit.Get_Filename);
-   begin
-      --  If ``Node`` belongs to the prelude, which is not a regular module,
-      --  return the empty symbol, as documented.
-
-      if Node.Unit = Langkit_Root_P_Fetch_Prelude (Node) then
-         return No_Symbol;
-
-      --  Otherwise, make sure the unit has a valid Lkt filename
-
-      elsif not GNAT.Regexp.Match (Filename, Lkt_Filename_Regexp) then
-         Raise_Property_Exception
-           (Node, Property_Error'Identity, "invalid Lkt filename");
-      end if;
-
-      --  From there, just strip the extension and we have the module name
-
-      declare
-         Module_Name : String renames
-           Filename (Filename'First .. Filename'Last - 4);
-      begin
-         return Find (Node.Unit.Context.Symbols, To_Text (Module_Name));
-      end;
-   end Langkit_Root_P_Module_Name;
+   end Lkt_Node_P_Prelude_Unit;
 
    --------------------------------------
    -- Lkt_Node_P_Set_Solver_Debug_Mode --
