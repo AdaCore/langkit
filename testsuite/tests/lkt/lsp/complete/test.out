@@ -84,6 +84,8 @@ Completing <RefId "Stru" test.lkt:8:9-8:13> ('Stru')
  - LogicVar: struct_kind
  - LookupKind: enum_kind
  - LspNodeInterface: interface_kind
+ - Metadata: struct_kind
+ - Metadata: struct_kind
  - NodeInterface: interface_kind
  - PreconditionFailure: struct_kind
  - PropertyError: struct_kind
@@ -104,8 +106,7 @@ Completing <RefId "Stru" test.lkt:8:9-8:13> ('Stru')
  - TokenNode: interface_kind
  - TypableNodeInterface: interface_kind
  - TypeInterface: interface_kind
- - __EmptyMetadata: struct_kind
- - __internal: struct_kind
+ - __default_metadata: struct_kind
 Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - Address: struct_kind
  - AnalysisUnit: interface_kind
@@ -138,6 +139,8 @@ Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - LogicVar: struct_kind
  - LookupKind: enum_kind
  - LspNodeInterface: interface_kind
+ - Metadata: struct_kind
+ - Metadata: struct_kind
  - NodeInterface: interface_kind
  - PreconditionFailure: struct_kind
  - PropertyError: struct_kind
@@ -160,8 +163,7 @@ Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - TypeInterface: interface_kind
  - _: variable_kind
  - _: variable_kind
- - __EmptyMetadata: struct_kind
- - __internal: struct_kind
+ - __default_metadata: struct_kind
  - add_all_to_env: function_kind
  - add_env: function_kind
  - add_single_to_env: function_kind

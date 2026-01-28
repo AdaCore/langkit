@@ -1,0 +1,7 @@
+@metadata
+struct Metadata {
+}
+
+class FooNode implements Node[FooNode] {
+    fun get_md(): Metadata = self.info.md
+}

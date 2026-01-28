@@ -1076,77 +1076,72 @@ class Decl: LktNode implements DeclarationInterface {
 
     env_spec {
         add_all_to_env(
-            # If the type explicitly implements the ``Node`` trait, or it
-            # is annotated with "@root_node", consider it the root node of
-            # the language specification.
-            if
-                (
-                    self.full_decl()?.has_annotation(s"root_node")
-                    or self.implements_node()
-                )
-                and self.name() != s"RootNode__"
-            then
-                [
-                    EnvAssoc(
-                        key=s"RootNode__",
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.direct_env,
-                            env_name=null[Symbol],
-                            direct_env=node.root_env()
-                        ),
-                        metadata=null[Metadata]
+            {
+                # Regular env entry, so that this declaration is available
+                # using its name in this module.
+                val regular_entry = EnvAssoc(
+                    key=self.name(),
+                    value=node,
+                    dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.current_env,
+                        env_name=null[Symbol],
+                        direct_env=null[LexicalEnv]
                     ),
-                    EnvAssoc(
-                        key=self.name(),
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
-                            env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
-                        ),
-                        metadata=null[Metadata]
-                    )
-                ]
-            elif
-                self.full_decl()?.has_annotation(s"metadata")
-                and self.name() != s"Metadata"
-            then
-                [
-                    EnvAssoc(
-                        key=s"Metadata",
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.direct_env,
-                            env_name=null[Symbol],
-                            direct_env=node.root_env()
-                        ),
-                        metadata=null[Metadata]
-                    ),
-                    EnvAssoc(
-                        key=self.name(),
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
-                            env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
-                        ),
-                        metadata=null[Metadata]
-                    )
-                ]
-            else
-                [
-                    EnvAssoc(
-                        key=self.name(),
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
-                            env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
-                        ),
-                        metadata=null[Metadata]
-                    )
-                ]
+                    metadata=null[Metadata]
+                );
+
+                # If the type explicitly implements the ``Node`` trait, or it
+                # is annotated with "@root_node", consider it the root node of
+                # the language specification.
+                val root_node_entry =
+                    if
+                        (
+                            self.full_decl()?.has_annotation(s"root_node")
+                            or self.implements_node()
+                        )
+                        and self.name() != s"RootNode__"
+                    then
+                        [
+                            EnvAssoc(
+                                key=s"RootNode__",
+                                value=node,
+                                dest_env=DesignatedEnv(
+                                    kind=DesignatedEnvKind.direct_env,
+                                    env_name=null[Symbol],
+                                    direct_env=node.root_env()
+                                ),
+                                metadata=null[Metadata]
+                            )
+                        ]
+                    else
+                        []: EnvAssoc;
+
+                # If the type is a metadata struct declaration, register it in
+                # the root scope under the appropriate symbol: see the doc for
+                # __default_metadata in the prelude unit.
+                val metadata_entry =
+                    if self.full_decl()?.has_annotation(s"metadata") then
+                        [
+                            EnvAssoc(
+                                key=(
+                                    if node.is_from_prelude()
+                                    then s"__default_metadata"
+                                    else s"__user_metadata"
+                                ),
+                                value=node,
+                                dest_env=DesignatedEnv(
+                                    kind=DesignatedEnvKind.direct_env,
+                                    env_name=null[Symbol],
+                                    direct_env=node.root_env()
+                                ),
+                                metadata=null[Metadata]
+                            )
+                        ]
+                    else
+                        []: EnvAssoc;
+
+                [regular_entry] & root_node_entry & metadata_entry
+            }
         )
     }
 }
@@ -5377,18 +5372,15 @@ class LangkitRoot: Decl {
 
     fun defined_scope(): LexicalEnv = node.children_env
 
-    |" Get the hidden environment in the prelude containing a default
-    |" declaration of the Metadata type, for when it is not defined by the
-    |" specification.
-    fun internal_env(): LexicalEnv = {
-        bind origin = null[Entity[LktNode]];
-
-        node.children_env.get_first(s"__internal").as[Decl].defined_scope()
-    }
-
     |" Return the name of this Lkt module, or the empty symbol for the prelude.
     @external()
     fun module_name(): Symbol
+
+    |" Return the Metadata type: see the doc for __default_metadata in the
+    |" prelude unit.
+    fun resolve_metadata(): Entity[LktNode] =
+        node.root_env().get_first(s"__user_metadata")
+        or? node.root_env().get_first(s"__default_metadata")
 
     |" An empty synthetic TypeRef list node. Used to generate synthetic type
     |" declarations.
@@ -5417,14 +5409,21 @@ class LangkitRoot: Decl {
             cond=not node.is_from_prelude()
         )
 
-        handle_children()
-
-        # Make default declarations (Metadata) available in the prelude
-        reference(
-            [node.as[LktNode]],
-            LangkitRoot.internal_env,
-            cond=node.is_from_prelude()
+        # Add a dynamic entry to resolve to the right Metadata type
+        add_to_env_kv(
+            key=s"Metadata",
+            value=(
+                if node.is_from_prelude() then node else null[LktNode]
+            ),
+            dest_env=DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env,
+                env_name=null[Symbol],
+                direct_env=node.root_env()
+            ),
+            resolver=LangkitRoot.resolve_metadata
         )
+
+        handle_children()
     }
 }
 

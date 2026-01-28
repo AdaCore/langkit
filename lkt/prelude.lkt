@@ -831,15 +831,21 @@ struct Token {
 struct SourceLocation {
 }
 
-struct __internal {
-    |" Placeholder type when the Langkit specification does not have a type
-    |" annotated with ``@metadata``.
+struct __default_metadata {
+    |" Default Metadata type, to be used when the Langkit specification does
+    |" not have a type annotated with ``@metadata``.
     |"
-    |" This is hidden in its own scope and later has a reference in the
-    |" global lexical environemnt so that if no type is designated as metadata,
-    |" this types serves as fallback.
+    |" 1. This is hidden in a scope so that by default it is unreachable from
+    |"    user code. It is still registered in the root scope as
+    |"    ``__default_metadata`` (for convenient access to it).
+    |"
+    |" 2. If user code defines a Metadata struct, it is registered in the root
+    |"    scope as ``__user_metadata``.
+    |"
+    |" 3. A dynamic entity resolver inserted in the root scope will resolve to
+    |"    the user Metadata (if available) or the default one (if not).
     @metadata
-    struct __EmptyMetadata {
+    struct Metadata {
     }
 }
 

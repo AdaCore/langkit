@@ -234,7 +234,7 @@ Expr <CallExpr test.lkt:28:9-28:36>
      has_type <StructDecl prelude: "EnvAction">
 
    Id   <RefId "add_to_env_kv" test.lkt:28:9-28:22>
-        has_type <FunctionType prelude: "(Symbol, FooNode, DesignatedEnv, __EmptyMetadata, () -> Entity[FooNode]) -> EnvAction">
+        has_type <FunctionType prelude: "(Symbol, FooNode, DesignatedEnv, Metadata, () -> Entity[FooNode]) -> EnvAction">
         references <FunDecl prelude: "add_to_env_kv">
 
    Expr <PatternSingleLineStringLit test.lkt:28:23-28:29>
@@ -248,7 +248,7 @@ Expr <CallExpr test.lkt:29:9-35:10>
      has_type <StructDecl prelude: "EnvAction">
 
    Id   <RefId "add_to_env_kv" test.lkt:29:9-29:22>
-        has_type <FunctionType prelude: "(Symbol, FooNode, DesignatedEnv, __EmptyMetadata, () -> Entity[FooNode]) -> EnvAction">
+        has_type <FunctionType prelude: "(Symbol, FooNode, DesignatedEnv, Metadata, () -> Entity[FooNode]) -> EnvAction">
         references <FunDecl prelude: "add_to_env_kv">
 
    Id   <RefId "key" test.lkt:30:13-30:16>
@@ -282,11 +282,11 @@ Expr <CallExpr test.lkt:29:9-35:10>
         references <FunParamDecl prelude: "metadata">
 
    Expr <NullLit test.lkt:33:22-33:36>
-        has_type <StructDecl prelude: "__EmptyMetadata">
+        has_type <StructDecl prelude: "Metadata">
 
       Id   <RefId "Metadata" test.lkt:33:27-33:35>
            has_type None
-           references <StructDecl prelude: "__EmptyMetadata">
+           references <StructDecl prelude: "Metadata">
 
    Id   <RefId "resolver" test.lkt:34:13-34:21>
         has_type None
