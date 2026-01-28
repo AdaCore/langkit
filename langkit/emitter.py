@@ -71,13 +71,12 @@ class Emitter:
 
         # Also keep track of the list of extension files, as any change here
         # should invalidate the code generation cache.
-        cache_extension_files = set()
+        self.cache_extension_files = set()
         if os.path.isdir(self.context.extensions_dir):
             for path, _, filenames in os.walk(self.context.extensions_dir):
                 for f in filenames:
                     if not f.startswith("."):
-                        cache_extension_files.add(os.path.join(path, f))
-        self.cache_extension_files = sorted(cache_extension_files)
+                        self.cache_extension_files.add(os.path.join(path, f))
 
         self.main_programs: set[str]
 
@@ -1196,7 +1195,7 @@ class Emitter:
 
         # Likewise for the set of extension files
         if not self.cache.has_same_value(
-            "extension_files", self.cache_extension_files
+            "extension_files", sorted(self.cache_extension_files)
         ):
             log_reason("Extension source/template files changed")
             return True
@@ -1247,7 +1246,9 @@ class Emitter:
         # Keep track of extension files
         for filename in self.cache_extension_files:
             add(filename)
-        self.cache.set_entry("extension_files", self.cache_extension_files)
+        self.cache.set_entry(
+            "extension_files", sorted(self.cache_extension_files)
+        )
 
         # Keep track of all Langkit modules used so far
         for module_name, module_obj in list(sys.modules.items()):
