@@ -573,7 +573,7 @@ class LktTypesLoader:
 
         # Look for generic interfaces defined in the prelude
         assert isinstance(resolver.lkt_units[0].root, L.LangkitRoot)
-        prelude = resolver.lkt_units[0].root.p_fetch_prelude
+        prelude = resolver.lkt_units[0].root.p_prelude_unit
         assert isinstance(prelude.root, L.LangkitRoot)
         for full_decl in prelude.root.f_decls:
             if isinstance(full_decl.f_decl, L.TraitDecl):
