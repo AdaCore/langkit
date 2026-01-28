@@ -22,3 +22,4 @@ post_scripts:
     - check_control_flow.py
     - check_recursive_cf.py
     - check_state.py
+    - check_break.py
