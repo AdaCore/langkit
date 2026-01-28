@@ -12,10 +12,7 @@ def print_details(decl: lkt.Decl):
     print(f" - {decl.f_syn_name.p_doc or '<no doc>'}")
 
 
-# Test all declarations of test.lkt
-for decl in unit.root.findall(lkt.Decl):
-    print_details(decl.cast(lkt.Decl))
-
-# Test all declarations of test.lkt
-for decl in common.root.findall(lkt.Decl):
-    print_details(decl.cast(lkt.Decl))
+# Test all declarations of test.lkt and common.lkt
+for u in (unit, common):
+    for decl in u.root.findall(lkt.Decl):
+        print_details(decl.cast(lkt.Decl))
