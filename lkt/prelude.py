@@ -6,13 +6,15 @@ from langkit.emitter import Emitter
 from langkit.passes import EmitterPass
 
 
+prelude_filename = os.path.join(os.path.dirname(__file__), "prelude.lkt")
+
+
 def generate_prelude(emitter: Emitter, context: CompileCtx) -> None:
     """
     Generate the liblktlang-prelude.ads source file from prelude.lkt.
     """
     # Read the prelude as a sequence of bytes, to match the destination
     # String value.
-    prelude_filename = os.path.join(os.path.dirname(__file__), "prelude.lkt")
     with open(prelude_filename, "rb") as f:
         content = f.read()
 
@@ -41,4 +43,8 @@ def generate_prelude(emitter: Emitter, context: CompileCtx) -> None:
 
 
 def generate_prelude_pass() -> EmitterPass:
-    return EmitterPass("generate prelude inline sources", generate_prelude)
+    return EmitterPass(
+        "generate prelude inline sources",
+        generate_prelude,
+        extra_inputs={prelude_filename, __file__},
+    )

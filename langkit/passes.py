@@ -204,6 +204,15 @@ class AbstractPass(abc.ABC):
     def __repr__(self) -> str:
         return f"<{type(self).__name__}: {self.name}>"
 
+    def extra_inputs(self, context: CompileCtx) -> set[str]:
+        """
+        Return the list of files that this passes uses as inputs to do its job.
+
+        This is used to invalidate the cache if any file has changeed between
+        two compilations.
+        """
+        return set()
+
     @abc.abstractmethod
     def run(self, context: CompileCtx) -> None: ...
 
@@ -281,10 +290,15 @@ class EmitterPass(AbstractPass):
         self,
         name: str,
         pass_fn: Callable[[Emitter, CompileCtx], None],
+        extra_inputs: set[str] | None = None,
         disabled: bool = False,
     ) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
+        self._extra_inputs = extra_inputs or set()
+
+    def extra_inputs(self, context: CompileCtx) -> set[str]:
+        return self._extra_inputs
 
     def run(self, context: CompileCtx) -> None:
         assert context.emission_started

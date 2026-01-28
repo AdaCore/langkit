@@ -1880,6 +1880,14 @@ class CompileCtx:
         for n in pass_activations:
             error(f"No optional pass with name {n}", location=Location.nowhere)
 
+        # Allow each pass to register additional input sources, for cache
+        # invalidation purposes.
+        for p in self.all_passes:
+            if not p.disabled:
+                self.emitter.cache_extension_files.update(
+                    os.path.abspath(f) for f in p.extra_inputs(self)
+                )
+
     def emit(self, force: bool = False) -> None:
         """
         Compile the DSL and emit sources for the generated library.
