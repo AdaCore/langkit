@@ -264,7 +264,10 @@ procedure Lkt_Toolbox is
             end;
          end if;
          begin
-            if Node.Kind in Common.Lkt_Module_Id | Common.Lkt_Ref_Id then
+            if Node.Kind in Common.Lkt_Imported_Id
+                          | Common.Lkt_Module_Id
+                          | Common.Lkt_Ref_Id
+            then
                Print_Id_Nameres (Node.As_Id);
                Indented := True;
                Indent := Indent + 1;

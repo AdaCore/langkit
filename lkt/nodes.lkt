@@ -4288,6 +4288,39 @@ class ModuleId: Id implements TokenNode {
 
 |" Id referencing a declaration imported from an Lkt module.
 class ImportedId: Id implements TokenNode {
+    |" Helper for ``referenced_decl``. Return the declaration that corresponds
+    |" to this imported id, assuming that it was imported from ``module_name``.
+    fun referenced_decl_from_module(module_name: ModuleId): Entity[Decl] = {
+        val decl_name = node.symbol;
+        val module = node.referenced_module(module_name);
+        val scope = module.children_env;
+        scope.get_first(decl_name).as![Decl]
+    }
+
+    fun referenced_decl(): Entity[Decl] = {
+        val imp_clause = node.parents().find((n) => n is BaseImport);
+        # Imported ids can appear in two kinds of contexts
+        match imp_clause.as![BaseImport] {
+            # In ``import X`` clauses: they encode the module that is imported
+            case _: Import => node.referenced_module(node)
+
+            # In ``from X import ...``, they encode the name of the declaration
+            # that is imported.
+            case c: ImportFrom =>
+                node.referenced_decl_from_module(c.module_name)
+            case c: ImportAllFrom =>
+                node.referenced_decl_from_module(c.module_name)
+        }
+    }
+
+    fun get_type(): Entity[TypeDecl] =
+        # Only values have a type
+        self.referenced_decl().do(
+            (d) =>
+                if d is BaseValDecl
+                then d.get_type()
+                else null[Entity[TypeDecl]]
+        )
 }
 
 |" Reference identifier.

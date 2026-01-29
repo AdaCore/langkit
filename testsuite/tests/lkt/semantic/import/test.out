@@ -1,26 +1,32 @@
 Resolving test.lkt
 ==================
-Expr <ImportedId "module_a" test.lkt:1:8-1:16>
+Id   <ImportedId "module_a" test.lkt:1:8-1:16>
      has_type None
+     references <LangkitRoot "module_a" module_a.lkt:1:1-3:11>
 
-Expr <ImportedId "module_b" test.lkt:2:8-2:16>
+Id   <ImportedId "module_b" test.lkt:2:8-2:16>
      has_type None
+     references <LangkitRoot "module_b" module_b.lkt:1:1-3:11>
 
 Id   <ModuleId "module_c" test.lkt:3:6-3:14>
      has_type None
      references None
 
-Expr <ImportedId "var_c1" test.lkt:3:22-3:28>
-     has_type None
+Id   <ImportedId "var_c1" test.lkt:3:22-3:28>
+     has_type <StructDecl prelude: "Int">
+     references <ValDecl "var_c1" module_c.lkt:1:1-1:15>
 
-Expr <ImportedId "var_c2" test.lkt:3:30-3:36>
-     has_type None
+Id   <ImportedId "var_c2" test.lkt:3:30-3:36>
+     has_type <StructDecl prelude: "Int">
+     references <ValDecl "var_c2" module_c.lkt:2:1-2:15>
 
-Expr <ImportedId "C1" test.lkt:3:53-3:55>
+Id   <ImportedId "C1" test.lkt:3:53-3:55>
      has_type None
+     references <ClassDecl "C1" module_c.lkt:4:1-4:12>
 
-Expr <ImportedId "C2" test.lkt:3:57-3:59>
+Id   <ImportedId "C2" test.lkt:3:57-3:59>
      has_type None
+     references <ClassDecl "C2" module_c.lkt:5:1-5:12>
 
 Id   <ModuleId "module_d" test.lkt:4:6-4:14>
      has_type None
