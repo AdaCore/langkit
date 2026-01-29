@@ -231,7 +231,7 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     |" Return an empty synthetic TypeRef list node. Used to generate synthetic
     |" type declarations.
     fun get_empty_type_ref_list(): SyntheticTypeRefList =
-        node.unit.root.as[LangkitRoot].empty_type_ref_list
+        node.self_root().empty_type_ref_list
 
     |" Create a AnyTypeDecl.
     @memoized
@@ -242,10 +242,13 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     @external()
     fun internal_fetch_referenced_unit(name: String): AnalysisUnit
 
+    |" Return the ``LangkitRoot`` node that is the root of the current unit.
+    fun self_root(): LangkitRoot = node.unit.root.as![LangkitRoot]
+
     |" Static method. Convenience wrapper around
     |" ``internal_fetch_referenced_unit`` to get the ``LangkitRoot`` as an
     |" entity for a given module. Used to write lexical env resolvers.
-    fun referenced_module(module_name: Id): Entity[LktNode] = {
+    fun referenced_module(module_name: Id): Entity[LangkitRoot] = {
         val unit = node.internal_fetch_referenced_unit(module_name.text);
         unit.root.as![LangkitRoot].as_bare_entity
     }
@@ -3622,7 +3625,7 @@ class DotExpr: Expr {
     |" its prefix(Self).
     @memoized
     fun first_var_in_prefix_env(): Entity[Decl] = match self.prefix {
-        case rid: RefId =>
+        case id: Id =>
             if self.is_call_to_super()
             then (
                 # Look for the function with the same name in the scope of
@@ -3635,8 +3638,8 @@ class DotExpr: Expr {
                 }
             )
             else
-                rid.referenced_decl()?.ref_var_suffix_ref(
-                    rid.get_type(),
+                id.referenced_decl()?.ref_var_suffix_ref(
+                    id.get_type(),
                     self.suffix
                 )
         case de: DotExpr =>
@@ -4262,9 +4265,25 @@ class DefId: Id implements TokenNode, DefiningNameInterface {
 |" depending on the context, module Ids can be either considered as defining
 |" names or references.
 class ModuleId: Id implements TokenNode {
-    # TODO: Being able to cross-reference modules seems like a good ability,
-    # but for the moment they don't fit in the framework, because they're not
-    # decls.
+
+    # Only import clauses can make modules visible (registered in lexical
+    # envs), and do so in unit root scopes only. So to resolve references to
+    # modules, a simple lookup in these scopes is enough.
+
+    @memoized
+    @call_memoizable
+    fun referenced_decl(): Entity[Decl] =
+        # Note that using LktNode.referenced_module here would be invalid, as
+        # this may be a reference to a renamed module: we need to go through
+        # the lexical environment to correctly resolve renamings.
+        node.self_root().children_env.get_first(node.symbol).as![LangkitRoot]
+
+    fun xref_equation(): Equation = %true
+
+    # Module references are not expressions that compute values, so there is
+    # no associated type.
+
+    fun get_type(): Entity[TypeDecl] = null[Entity[TypeDecl]]
 }
 
 |" Id referencing a declaration imported from an Lkt module.

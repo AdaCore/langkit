@@ -15,55 +15,155 @@ Expr <ImportedId "var_c1" test.lkt:3:22-3:28>
 Expr <ImportedId "var_c2" test.lkt:3:30-3:36>
      has_type None
 
+Expr <ImportedId "C1" test.lkt:3:53-3:55>
+     has_type None
+
+Expr <ImportedId "C2" test.lkt:3:57-3:59>
+     has_type None
+
 Expr <ModuleId "module_d" test.lkt:4:6-4:14>
      has_type None
 
-Decl <ValDecl "v1" test.lkt:6:1-6:27>
+Decl <ValDecl "v1" test.lkt:7:1-7:27>
      has_type <StructDecl prelude: "Int">
 
-   Expr <DotExpr test.lkt:6:10-6:27>
+   Expr <DotExpr test.lkt:7:10-7:27>
         has_type <StructDecl prelude: "Int">
 
-      Id   <RefId "renamed_mod" test.lkt:6:10-6:21>
+      Id   <RefId "renamed_mod" test.lkt:7:10-7:21>
            has_type None
-           references <LangkitRoot "module_a" module_a.lkt:1:1-1:14>
+           references <LangkitRoot "module_a" module_a.lkt:1:1-3:11>
 
-      Id   <RefId "var_a" test.lkt:6:22-6:27>
+      Id   <RefId "var_a" test.lkt:7:22-7:27>
            has_type <StructDecl prelude: "Int">
            references <ValDecl "var_a" module_a.lkt:1:1-1:14>
 
-Decl <ValDecl "v2" test.lkt:7:1-7:24>
+Decl <ValDecl "v2" test.lkt:8:1-8:24>
      has_type <StructDecl prelude: "Int">
 
-   Expr <DotExpr test.lkt:7:10-7:24>
+   Expr <DotExpr test.lkt:8:10-8:24>
         has_type <StructDecl prelude: "Int">
 
-      Id   <RefId "module_b" test.lkt:7:10-7:18>
+      Id   <RefId "module_b" test.lkt:8:10-8:18>
            has_type None
-           references <LangkitRoot "module_b" module_b.lkt:1:1-1:14>
+           references <LangkitRoot "module_b" module_b.lkt:1:1-3:11>
 
-      Id   <RefId "var_b" test.lkt:7:19-7:24>
+      Id   <RefId "var_b" test.lkt:8:19-8:24>
            has_type <StructDecl prelude: "Int">
            references <ValDecl "var_b" module_b.lkt:1:1-1:14>
 
-Decl <ValDecl "v3" test.lkt:8:1-8:16>
+Decl <ValDecl "v3" test.lkt:9:1-9:16>
      has_type <StructDecl prelude: "Int">
 
-   Id   <RefId "var_c1" test.lkt:8:10-8:16>
+   Id   <RefId "var_c1" test.lkt:9:10-9:16>
         has_type <StructDecl prelude: "Int">
         references <ValDecl "var_c1" module_c.lkt:1:1-1:15>
 
-Decl <ValDecl "v4" test.lkt:9:1-9:21>
+Decl <ValDecl "v4" test.lkt:10:1-10:21>
      has_type <StructDecl prelude: "Int">
 
-   Id   <RefId "var2_from_c" test.lkt:9:10-9:21>
+   Id   <RefId "var2_from_c" test.lkt:10:10-10:21>
         has_type <StructDecl prelude: "Int">
         references <ValDecl "var_c2" module_c.lkt:2:1-2:15>
 
-Decl <ValDecl "v5" test.lkt:10:1-10:15>
+Decl <ValDecl "v5" test.lkt:11:1-11:15>
      has_type <StructDecl prelude: "Int">
 
-   Id   <RefId "var_d" test.lkt:10:10-10:15>
+   Id   <RefId "var_d" test.lkt:11:10-11:15>
         has_type <StructDecl prelude: "Int">
         references <ValDecl "var_d" module_d.lkt:6:1-6:23>
+
+Decl <ValDecl "t1" test.lkt:14:1-14:44>
+     has_type <ClassDecl "A" module_a.lkt:3:1-3:11>
+
+   Expr <DotExpr test.lkt:14:9-14:22>
+        has_type None
+
+      Expr <ModuleId "renamed_mod" test.lkt:14:9-14:20>
+           has_type None
+
+      Id   <RefId "A" test.lkt:14:21-14:22>
+           has_type None
+           references <ClassDecl "A" module_a.lkt:3:1-3:11>
+
+   Expr <NullLit test.lkt:14:25-14:44>
+        has_type <ClassDecl "A" module_a.lkt:3:1-3:11>
+
+      Expr <DotExpr test.lkt:14:30-14:43>
+           has_type None
+
+         Expr <ModuleId "renamed_mod" test.lkt:14:30-14:41>
+              has_type None
+
+         Id   <RefId "A" test.lkt:14:42-14:43>
+              has_type None
+              references <ClassDecl "A" module_a.lkt:3:1-3:11>
+
+Decl <ValDecl "t2" test.lkt:15:1-15:38>
+     has_type <ClassDecl "B" module_b.lkt:3:1-3:11>
+
+   Expr <DotExpr test.lkt:15:9-15:19>
+        has_type None
+
+      Expr <ModuleId "module_b" test.lkt:15:9-15:17>
+           has_type None
+
+      Id   <RefId "B" test.lkt:15:18-15:19>
+           has_type None
+           references <ClassDecl "B" module_b.lkt:3:1-3:11>
+
+   Expr <NullLit test.lkt:15:22-15:38>
+        has_type <ClassDecl "B" module_b.lkt:3:1-3:11>
+
+      Expr <DotExpr test.lkt:15:27-15:37>
+           has_type None
+
+         Expr <ModuleId "module_b" test.lkt:15:27-15:35>
+              has_type None
+
+         Id   <RefId "B" test.lkt:15:36-15:37>
+              has_type None
+              references <ClassDecl "B" module_b.lkt:3:1-3:11>
+
+Decl <ValDecl "t3" test.lkt:16:1-16:22>
+     has_type <ClassDecl "C1" module_c.lkt:4:1-4:12>
+
+   Id   <RefId "C1" test.lkt:16:9-16:11>
+        has_type None
+        references <ClassDecl "C1" module_c.lkt:4:1-4:12>
+
+   Expr <NullLit test.lkt:16:14-16:22>
+        has_type <ClassDecl "C1" module_c.lkt:4:1-4:12>
+
+      Id   <RefId "C1" test.lkt:16:19-16:21>
+           has_type None
+           references <ClassDecl "C1" module_c.lkt:4:1-4:12>
+
+Decl <ValDecl "t4" test.lkt:17:1-17:24>
+     has_type <ClassDecl "C2" module_c.lkt:5:1-5:12>
+
+   Id   <RefId "C_2" test.lkt:17:9-17:12>
+        has_type None
+        references <ClassDecl "C2" module_c.lkt:5:1-5:12>
+
+   Expr <NullLit test.lkt:17:15-17:24>
+        has_type <ClassDecl "C2" module_c.lkt:5:1-5:12>
+
+      Id   <RefId "C_2" test.lkt:17:20-17:23>
+           has_type None
+           references <ClassDecl "C2" module_c.lkt:5:1-5:12>
+
+Decl <ValDecl "t5" test.lkt:18:1-18:20>
+     has_type <ClassDecl "D" module_d.lkt:8:1-8:15>
+
+   Id   <RefId "D" test.lkt:18:9-18:10>
+        has_type None
+        references <ClassDecl "D" module_d.lkt:8:1-8:15>
+
+   Expr <NullLit test.lkt:18:13-18:20>
+        has_type <ClassDecl "D" module_d.lkt:8:1-8:15>
+
+      Id   <RefId "D" test.lkt:18:18-18:19>
+           has_type None
+           references <ClassDecl "D" module_d.lkt:8:1-8:15>
 

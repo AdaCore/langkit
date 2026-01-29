@@ -1,10 +1,18 @@
 import module_a as renamed_mod
 import module_b
-from module_c import var_c1, var_c2 as var2_from_c
+from module_c import var_c1, var_c2 as var2_from_c, C1, C2 as C_2
 from module_d import *
 
+# Referencing values
 val v1 = renamed_mod.var_a
 val v2 = module_b.var_b
 val v3 = var_c1
 val v4 = var2_from_c
 val v5 = var_d
+
+# Referencing types
+val t1: renamed_mod.A = null[renamed_mod.A]
+val t2: module_b.B = null[module_b.B]
+val t3: C1 = null[C1]
+val t4: C_2 = null[C_2]
+val t5: D = null[D]
