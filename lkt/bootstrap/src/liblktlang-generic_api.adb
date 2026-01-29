@@ -541,18 +541,16 @@ package body Liblktlang.Generic_API is
                      return Lkt_Op_Stream_Cons;
                   when Type_Index_For_Any_Type_Pattern =>
                      return Lkt_Any_Type_Pattern;
-                  when Type_Index_For_Binding_Pattern =>
-                     return Lkt_Binding_Pattern;
                   when Type_Index_For_Bool_Pattern_False =>
                      return Lkt_Bool_Pattern_False;
                   when Type_Index_For_Bool_Pattern_True =>
                      return Lkt_Bool_Pattern_True;
+                  when Type_Index_For_Complex_Pattern =>
+                     return Lkt_Complex_Pattern;
+                  when Type_Index_For_Renaming_Complex_Pattern =>
+                     return Lkt_Renaming_Complex_Pattern;
                   when Type_Index_For_Ellipsis_Pattern =>
                      return Lkt_Ellipsis_Pattern;
-                  when Type_Index_For_Extended_Pattern =>
-                     return Lkt_Extended_Pattern;
-                  when Type_Index_For_Filtered_Pattern =>
-                     return Lkt_Filtered_Pattern;
                   when Type_Index_For_Integer_Pattern =>
                      return Lkt_Integer_Pattern;
                   when Type_Index_For_List_Pattern =>
@@ -567,18 +565,12 @@ package body Liblktlang.Generic_API is
                      return Lkt_Paren_Pattern;
                   when Type_Index_For_Regex_Pattern =>
                      return Lkt_Regex_Pattern;
-                  when Type_Index_For_Tuple_Pattern =>
-                     return Lkt_Tuple_Pattern;
                   when Type_Index_For_Type_Pattern =>
                      return Lkt_Type_Pattern;
                   when Type_Index_For_Field_Pattern_Detail =>
                      return Lkt_Field_Pattern_Detail;
                   when Type_Index_For_Property_Pattern_Detail =>
                      return Lkt_Property_Pattern_Detail;
-                  when Type_Index_For_Selector_Pattern_Detail =>
-                     return Lkt_Selector_Pattern_Detail;
-                  when Type_Index_For_Selector_Call =>
-                     return Lkt_Selector_Call;
                   when Type_Index_For_Default_List_Type_Ref =>
                      return Lkt_Default_List_Type_Ref;
                   when Type_Index_For_Function_Type_Ref =>

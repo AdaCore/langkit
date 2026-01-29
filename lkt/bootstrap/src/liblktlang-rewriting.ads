@@ -1044,30 +1044,27 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Binding_Pattern
+         function Create_Complex_Pattern
            (Handle : Rewriting_Handle
                ; F_Decl : Node_Rewriting_Handle
-               ; F_Sub_Pattern : Node_Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Details : Node_Rewriting_Handle
+               ; F_Predicate : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Renaming_Complex_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
+               ; F_Pattern : Node_Rewriting_Handle
+               ; F_Details : Node_Rewriting_Handle
+               ; F_Predicate : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
          function Create_Ellipsis_Pattern
            (Handle : Rewriting_Handle
                ; F_Binding : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Extended_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Sub_Pattern : Node_Rewriting_Handle
-               ; F_Details : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Filtered_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Sub_Pattern : Node_Rewriting_Handle
-               ; F_Predicate : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
@@ -1096,12 +1093,6 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
-         function Create_Tuple_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Sub_Patterns : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
          function Create_Type_Pattern
            (Handle : Rewriting_Handle
                ; F_Type_Name : Node_Rewriting_Handle
@@ -1119,21 +1110,6 @@ package Liblktlang.Rewriting is
            (Handle : Rewriting_Handle
                ; F_Call : Node_Rewriting_Handle
                ; F_Expected_Value : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Selector_Pattern_Detail
-           (Handle : Rewriting_Handle
-               ; F_Call : Node_Rewriting_Handle
-               ; F_Sub_Pattern : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Selector_Call
-           (Handle : Rewriting_Handle
-               ; F_Quantifier : Node_Rewriting_Handle
-               ; F_Binding : Node_Rewriting_Handle
-               ; F_Selector_Call : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 

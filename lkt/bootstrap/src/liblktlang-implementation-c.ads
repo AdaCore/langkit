@@ -2473,12 +2473,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_pattern_match_branch_f_pattern";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -4807,12 +4803,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_isa_f_pattern";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -5438,12 +5430,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_query_f_pattern";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6076,7 +6064,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
-   function lkt_binding_pattern_f_decl
+   function lkt_complex_pattern_f_decl
      (Node : lkt_node_Ptr;
 
 
@@ -6084,7 +6072,47 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_binding_pattern_f_decl";
+           External_name => "lkt_complex_pattern_f_decl";
+   --  This field may be null even when there are no parsing errors.
+
+           
+   
+
+   
+   
+
+   function lkt_complex_pattern_f_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_complex_pattern_f_pattern";
+   --  This field can contain one of the following nodes:
+   --  :ada:ref:`Any_Type_Pattern`, :ada:ref:`Bool_Pattern`,
+   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
+   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
+   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Type_Pattern`
+   --
+   --  This field may be null even when there are no parsing errors.
+
+           
+   
+
+   
+   
+
+   function lkt_complex_pattern_f_details
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_complex_pattern_f_details";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -6093,7 +6121,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
-   function lkt_binding_pattern_f_sub_pattern
+   function lkt_complex_pattern_f_predicate
      (Node : lkt_node_Ptr;
 
 
@@ -6101,14 +6129,21 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_binding_pattern_f_sub_pattern";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Integer_Pattern`,
-   --  :ada:ref:`List_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Tuple_Pattern`,
-   --  :ada:ref:`Type_Pattern`
+           External_name => "lkt_complex_pattern_f_predicate";
+   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
+   --  :ada:ref:`Array_Literal`, :ada:ref:`Big_Num_Lit`, :ada:ref:`Bin_Op`,
+   --  :ada:ref:`Block_Expr`, :ada:ref:`Block_String_Lit`,
+   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Char_Lit`,
+   --  :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
+   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
+   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Logic_Assign`,
+   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
+   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
+   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Null_Lit`,
+   --  :ada:ref:`Num_Lit`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
+   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
+   --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`,
+   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
 
@@ -6135,101 +6170,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
-   function lkt_extended_pattern_f_sub_pattern
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_extended_pattern_f_sub_pattern";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Any_Type_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Type_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_extended_pattern_f_details
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_extended_pattern_f_details";
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_filtered_pattern_f_sub_pattern
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_filtered_pattern_f_sub_pattern";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Integer_Pattern`,
-   --  :ada:ref:`List_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Tuple_Pattern`,
-   --  :ada:ref:`Type_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_filtered_pattern_f_predicate
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_filtered_pattern_f_predicate";
-   --  This field can contain one of the following nodes: :ada:ref:`Any_Of`,
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Big_Num_Lit`, :ada:ref:`Bin_Op`,
-   --  :ada:ref:`Block_Expr`, :ada:ref:`Block_String_Lit`,
-   --  :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`, :ada:ref:`Char_Lit`,
-   --  :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
-   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`If_Expr`, :ada:ref:`Isa`,
-   --  :ada:ref:`Keep_Expr`, :ada:ref:`Lambda_Expr`, :ada:ref:`Logic_Assign`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Logic_Propagate`, :ada:ref:`Logic_Unify`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Not_Expr`, :ada:ref:`Null_Lit`,
-   --  :ada:ref:`Num_Lit`, :ada:ref:`Paren_Expr`, :ada:ref:`Query`,
-   --  :ada:ref:`Raise_Expr`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`,
-   --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
-   --
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
    function lkt_list_pattern_f_sub_patterns
      (Node : lkt_node_Ptr;
 
@@ -6240,12 +6180,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_list_pattern_f_sub_patterns";
    --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Ellipsis_Pattern`, :ada:ref:`Extended_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  nodes: :ada:ref:`Complex_Pattern`, :ada:ref:`Ellipsis_Pattern`,
+   --  :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6265,12 +6201,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_not_pattern_f_sub_pattern";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Integer_Pattern`,
-   --  :ada:ref:`List_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Tuple_Pattern`,
-   --  :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6290,12 +6221,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_or_pattern_f_left_sub_pattern";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6315,12 +6241,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_or_pattern_f_right_sub_pattern";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6340,37 +6262,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_paren_pattern_f_sub_pattern";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_tuple_pattern_f_sub_patterns
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_tuple_pattern_f_sub_patterns";
-   --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Integer_Pattern`,
-   --  :ada:ref:`List_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Null_Pattern`, :ada:ref:`Paren_Pattern`,
-   --  :ada:ref:`Regex_Pattern`, :ada:ref:`Tuple_Pattern`,
-   --  :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6428,12 +6321,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_field_pattern_detail_f_expected_value";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6480,115 +6369,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_property_pattern_detail_f_expected_value";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_selector_pattern_detail_f_call
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_selector_pattern_detail_f_call";
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_selector_pattern_detail_f_sub_pattern
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_selector_pattern_detail_f_sub_pattern";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
-   --  :ada:ref:`Extended_Pattern`, :ada:ref:`Filtered_Pattern`,
-   --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-   --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
-   --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
-   --  :ada:ref:`Tuple_Pattern`, :ada:ref:`Type_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_selector_call_f_quantifier
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_selector_call_f_quantifier";
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_selector_call_f_binding
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_selector_call_f_binding";
-   --  This field may be null even when there are no parsing errors.
-
-           
-   
-
-   
-   
-
-   function lkt_selector_call_f_selector_call
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_selector_call_f_selector_call";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Big_Num_Lit`, :ada:ref:`Block_Expr`,
-   --  :ada:ref:`Block_String_Lit`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Char_Lit`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
-   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Null_Lit`, :ada:ref:`Num_Lit`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 

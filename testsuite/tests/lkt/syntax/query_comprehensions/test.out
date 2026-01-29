@@ -40,12 +40,15 @@ LangkitRoot[1:1-2:45]
 |  |  |  |  |  |  |  NumLit[2:15-2:16]: 3
 |  |  |  |  |  |f_element_type: <null>
 |  |  |  |  |f_pattern:
-|  |  |  |  |  BindingPattern[2:24-2:25]
+|  |  |  |  |  RenamingComplexPattern[2:24-2:25]
 |  |  |  |  |  |f_decl:
 |  |  |  |  |  |  BindingValDecl[2:24-2:25]
 |  |  |  |  |  |  |f_syn_name:
 |  |  |  |  |  |  |  DefId[2:24-2:25]: i
-|  |  |  |  |  |f_sub_pattern: <null>
+|  |  |  |  |  |f_pattern: <null>
+|  |  |  |  |  |f_details:
+|  |  |  |  |  |  PatternDetailList[2:25-2:25]: <empty list>
+|  |  |  |  |  |f_predicate: <null>
 |  |  |  |  |f_mapping:
 |  |  |  |  |  BinOp[2:33-2:36]
 |  |  |  |  |  |f_left:

@@ -2966,33 +2966,6 @@ enum class ExcludesNull: LktNode {
 class Pattern: LktNode {
 }
 
-|" Pattern comprising a binding name and a value pattern.
-|"
-|" For instance::
-|"
-|"    o@ObjectDecl
-class BindingPattern: Pattern {
-    @parse_field
-    decl: BindingValDecl
-
-    @parse_field
-    @nullable
-    sub_pattern: Pattern
-}
-
-|" Pattern with a filtering predicate, of the form:
-|" ``<pattern> when <predicate>``
-|"
-|" For instance::
-|"
-|"    o@ObjectDecl when o.children.length == 3
-class FilteredPattern: Pattern {
-    @parse_field
-    sub_pattern: Pattern
-    @parse_field
-    predicate: Expr
-}
-
 |" Pattern to match on booleans.
 enum class BoolPattern: Pattern {
     case True, False
@@ -3008,20 +2981,37 @@ class ListPattern: Pattern {
     sub_patterns: ASTList[Pattern]
 }
 
-|" Pattern that takes a base pattern, and adds details to match on the shape of
-|" what is being matched. The syntactic form is::
+|" Composition of any of the following components:
 |"
-|"     <sub_pattern>(<detail>, <detail>, ...)
+|" * a binding name
+|" * a value pattern
+|" * pattern details 
+|" * a when clause
 |"
 |" For instance::
 |"
-|"     ObjectDecl(any children: AspectAssoc)
-class ExtendedPattern: Pattern {
+|"    o@ObjectDecl(field: Pattern, prop(): Pattern)
+|"    when foo(o) == 42
+class ComplexPattern: Pattern {
+    @nullable
     @parse_field
-    sub_pattern: Pattern
+    decl: BindingValDecl
+
+    @nullable
+    @parse_field
+    pattern: Pattern
 
     @parse_field
     details: ASTList[PatternDetail]
+
+    @nullable
+    @parse_field
+    predicate: Expr
+}
+
+|" Special case of a complex pattern with no pattern part. This subclass exists
+|" only to facilitate the unparsing.
+class RenamingComplexPattern: ComplexPattern {
 }
 
 |" Pattern matching on a specific type.
@@ -3075,13 +3065,7 @@ class EllipsisPattern: Pattern {
     binding: Id
 }
 
-|" Pattern to match on tuples.
-class TuplePattern: Pattern {
-    @parse_field
-    sub_patterns: ASTList[Pattern]
-}
-
-|" Pattern that allows to match any type. Only usable as an ExtendedPattern's
+|" Pattern that allows to match any type. Only usable as a ComplexPattern's
 |" left side pattern::
 |"
 |" *(f_field: BasicDecl(...))
@@ -3093,7 +3077,7 @@ class TuplePattern: Pattern {
 class AnyTypePattern: Pattern {
 }
 
-|" Base class for a detail in an ExtendedPattern.
+|" Base class for a detail in a ComplexPattern.
 @abstract
 class PatternDetail: LktNode {
 }
@@ -3112,24 +3096,6 @@ class PropertyPatternDetail: PatternDetail {
     call: Expr
     @parse_field
     expected_value: Pattern
-}
-
-|" Pattern detail denoting the use of a selector in a node pattern
-class SelectorPatternDetail: PatternDetail {
-    @parse_field
-    call: SelectorCall
-    @parse_field
-    sub_pattern: Pattern
-}
-
-|" Root node for selector patterns
-class SelectorCall: LktNode {
-    @parse_field
-    quantifier: Id
-
-    @parse_field @nullable
-    binding: Id
-    @parse_field selector_call: Expr
 }
 
 |" Base class for expressions. Encompasses regular expressions as well as

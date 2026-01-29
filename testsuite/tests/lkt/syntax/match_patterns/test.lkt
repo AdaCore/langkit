@@ -1,5 +1,5 @@
 fun foo(n: AdaNode): Any = match n {
-    case b@BasicDecl(any parent: PackageDecl) => 12
+    case b@BasicDecl(f_somefield: PackageDecl) => 12
 
     # We can mix both styles of branches
     case b: BasicDecl => "lol"
