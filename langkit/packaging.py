@@ -1,15 +1,49 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import glob
 import os
+import shutil
 import subprocess
 import sys
 
-from e3.env import Env
-from e3.fs import cp, mkdir, sync_tree
-
 from langkit.utils import LibraryType
+
+
+@dataclasses.dataclass(frozen=True)
+class Platform:
+
+    os: str
+    """
+    Name of the OS.
+    """
+
+    is_64bits: bool
+    """
+    Whether the platform is a 64-bits one.
+    """
+
+    @staticmethod
+    def add_options(parser: argparse.ArgumentParser) -> None:
+        """
+        Helper to add command-line option to represent the platform.
+        """
+        parser.add_argument(
+            "--platform-os", help="Name of the OS for the target platform."
+        )
+        parser.add_argument(
+            "--platform-is-64bits",
+            action="store_true",
+            help="Whether the target platform is a 64-bits one.",
+        )
+
+    @staticmethod
+    def args_to_env(args: argparse.Namespace) -> Platform:
+        """
+        Return a ``Platform`` instance according to options in ``args``.
+        """
+        return Platform(args.platform_os, args.platform_is_64bits)
 
 
 class BasePackager:
@@ -19,14 +53,14 @@ class BasePackager:
 
     def __init__(
         self,
-        env: Env,
+        platform: Platform,
         library_types: list[LibraryType],
     ):
         """
-        :param env: Platform for the libraries to package.
+        :param platform: Platform for the libraries to package.
         :param library_types: Set of library types the packages must cover.
         """
-        self.env = env
+        self.platform = platform
         self.library_types = library_types
 
         self.with_static = (
@@ -36,21 +70,18 @@ class BasePackager:
         self.with_relocatable = LibraryType.relocatable in library_types
 
         if self.with_static:
-            if (
-                self.env.target.os.name == "linux"
-                and self.env.target.cpu.bits == 64
-            ):
+            if self.platform.os == "linux" and self.platform.is_64bits:
                 self._static_libdir_name = "lib64"
             else:
                 self._static_libdir_name = "lib"
 
         if self.with_relocatable:
             self._dyn_libdir_name = (
-                "bin" if self.env.target.os.name == "windows" else "lib"
+                "bin" if self.platform.os == "windows" else "lib"
             )
 
-        self.is_windows = self.env.build.os.name == "windows"
-        self.dllext = self.env.build.os.dllext
+        self.is_windows = self.platform.os == "windows"
+        self.dllext = ".dll" if self.is_windows else ".so"
 
     @property
     def static_libdir_name(self) -> str:
@@ -67,27 +98,6 @@ class BasePackager:
             LibraryType.relocatable in self.library_types
         ), "Shared libraries support is disabled"
 
-    @staticmethod
-    def add_platform_options(parser: argparse.ArgumentParser) -> None:
-        """
-        Helper to add the --build/--host/--target options to "parser".
-        """
-        for name in ("build", "host", "target"):
-            parser.add_argument(
-                "--{}".format(name),
-                help="{} platform".format(name.capitalize()),
-            )
-
-    @staticmethod
-    def args_to_env(args: argparse.Namespace) -> Env:
-        """
-        Create a e3.env.Env instance according to the platform optiong in
-        ``args``.
-        """
-        result = Env()
-        result.set_env(args.build, args.host, args.target)
-        return result
-
     def copy_shared_lib(self, pattern: str, dest: str) -> None:
         """
         Copy the shared library (or libraries) matched by "pattern" to the
@@ -98,9 +108,12 @@ class BasePackager:
         # to) be followed by a version number. If both flavors are present,
         # chose the ones with a version number first, as these will be the
         # one the linker will chose.
-        if self.env.build.os.name == "linux" and glob.glob(pattern + ".*"):
+        if self.platform.os == "linux" and glob.glob(pattern + ".*"):
             pattern += ".*"
-        cp(pattern, dest)
+        src_files = glob.glob(pattern)
+        assert src_files, f"No shared lib found for {pattern}"
+        for f in src_files:
+            shutil.copy2(f, os.path.join(dest, os.path.basename(f)))
 
     def std_path(self, prefix: str, lib_subdir: str, libname: str) -> str:
         """
@@ -185,16 +198,16 @@ class WheelPackager(BasePackager):
 
         # Copy Python bindings for the Langkit-generated library and its
         # pyproject.toml configuration file.
-        sync_tree(
-            os.path.join(langlib_prefix, "python"), build_dir, delete=True
-        )
+        if os.path.exists(build_dir):
+            shutil.rmtree(build_dir)
+        shutil.copytree(os.path.join(langlib_prefix, "python"), build_dir)
 
         # Import all required dynamic libraries in the Python package
         package_dir = os.path.join(build_dir, project_name)
         self.package_std_dyn(
             langlib_prefix, project_name, lib_name, package_dir
         )
-        sync_tree(dyn_deps_dir, package_dir, delete=False)
+        shutil.copytree(dyn_deps_dir, package_dir, dirs_exist_ok=True)
 
         # Finally create the wheel. Make the wheel directory absolute since
         # the build command is run from the build directory.
@@ -227,7 +240,7 @@ class NativeLibPackager(BasePackager):
 
     def __init__(
         self,
-        env: Env,
+        platform: Platform,
         library_types: list[LibraryType],
         gnat_prefix: str,
         gmp_prefix: str | None = None,
@@ -243,7 +256,7 @@ class NativeLibPackager(BasePackager):
         langkit_support_prefix: str | None = None,
     ):
         """
-        :param env: Platform for the libraries to package.
+        :param platform: Platform for the libraries to package.
         :param library_types: Set of library types the packages must cover.
         :param gnat_prefix: Directory in which GNAT is installed.
         :param gmp_prefix: Directory in which GMP is installed. By default, use
@@ -270,7 +283,7 @@ class NativeLibPackager(BasePackager):
         :param langkit_support_prefix: Directory in which Langkit_Support is
             installed. By default, use ``gnat prefix``.
         """
-        super().__init__(env, library_types)
+        super().__init__(platform, library_types)
         self.library_types = library_types
         self.gnat_prefix = gnat_prefix
         self.gmp_prefix = gmp_prefix or gnat_prefix
@@ -318,7 +331,7 @@ class NativeLibPackager(BasePackager):
         Instantiate Packager from command-line arguments.
         """
         return cls(
-            cls.args_to_env(args),
+            Platform.args_to_env(args),
             args.library_types,
             args.with_gnat,
             args.with_gmp,
@@ -348,16 +361,18 @@ class NativeLibPackager(BasePackager):
         # Destination directory for copies of static libs. Make sure it exists.
         if self.with_static:
             static_libdir = os.path.join(package_dir, self.static_libdir_name)
-            mkdir(static_libdir)
+            os.makedirs(static_libdir, exist_ok=True)
 
         # Likewise for the destination directory for copies of dynamic libs
         if self.with_relocatable:
             dyn_libdir = os.path.join(package_dir, self.dyn_libdir_name)
-            mkdir(dyn_libdir)
+            os.makedirs(dyn_libdir, exist_ok=True)
 
         def copy_in(filename: str, dirname: str) -> None:
             """Copy the "filename" to the "dirname" directory."""
-            cp(filename, os.path.join(dirname, os.path.basename(filename)))
+            shutil.copy2(
+                filename, os.path.join(dirname, os.path.basename(filename))
+            )
 
         # Ship non-GNAT libraries. Copy all files that gprinstall created:
         # shared libs, static libs, manifests, sources, etc.
@@ -380,9 +395,11 @@ class NativeLibPackager(BasePackager):
                 to_copy = glob.glob(os.path.join(prefix, d, f"*{name}*"))
                 for item in to_copy:
                     rel_item = os.path.relpath(item, prefix)
-                    sync_tree(
-                        item, os.path.join(package_dir, rel_item), delete=False
-                    )
+                    dest = os.path.join(package_dir, rel_item)
+                    if os.path.isfile(item):
+                        shutil.copy2(item, dest)
+                    else:
+                        shutil.copytree(item, dest, dirs_exist_ok=True)
 
         # TODO??? For some reason, gnatcoll_gmp's project file tells the linker
         # to always put "-lgmp" although it's not needed when linking with
@@ -419,8 +436,8 @@ class NativeLibPackager(BasePackager):
             ):
                 copy_in(item, dyn_libdir)
 
-        # Ship AdaSAT as well. We can simply copy the whole package
-        sync_tree(self.adasat_prefix, package_dir, delete=False)
+        # Ship AdaSAT as well. We can simply copy the whole package.
+        shutil.copytree(self.adasat_prefix, package_dir, dirs_exist_ok=True)
 
     def xmlada_path(self, name: str, dirname: str | None = None) -> str:
         """

@@ -13,7 +13,7 @@ from typing import Callable, Dict, List
 
 from e3.fs import rm, sync_tree
 
-from langkit.packaging import NativeLibPackager
+from langkit.packaging import NativeLibPackager, Platform
 import langkit.scripts.lkm as lkm
 from langkit.utils import (
     LibraryType,
@@ -580,7 +580,7 @@ if __name__ == "__main__":
     for p in (package_deps_parser, package_std_dyn_parser):
         p.add_argument("package-dir", help="Destination directory")
         NativeLibPackager.add_prefix_options(p)
-        NativeLibPackager.add_platform_options(p)
+        Platform.add_options(p)
 
     create_subparser(
         subparsers,
