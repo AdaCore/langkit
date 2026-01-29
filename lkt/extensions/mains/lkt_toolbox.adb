@@ -153,8 +153,8 @@ procedure Lkt_Toolbox is
       procedure Print_Expr_Nameres (Node : Expr'Class);
       --  Print the type and name resolution of an Expr
 
-      procedure Print_Ref_Id_Nameres (Node : Ref_Id'Class);
-      --  Print the type and name resolution of a Ref_Id
+      procedure Print_Id_Nameres (Node : Id'Class);
+      --  Print the type and name resolution of an Id
 
       procedure Print_Base_Val_Decl_Nameres (Node : Base_Val_Decl'Class);
       --  Print the type and name resolution of an Base_Val_Decl
@@ -202,11 +202,11 @@ procedure Lkt_Toolbox is
          New_Line;
       end Print_Expr_Nameres;
 
-      --------------------------
-      -- Print_Ref_Id_Nameres --
-      --------------------------
+      ----------------------
+      -- Print_Id_Nameres --
+      ----------------------
 
-      procedure Print_Ref_Id_Nameres (Node : Ref_Id'Class) is
+      procedure Print_Id_Nameres (Node : Id'Class) is
       begin
          Put_Line_Indent ("Id   " & Get_Custom_Image (Node));
          Put_Line_Indent
@@ -214,7 +214,7 @@ procedure Lkt_Toolbox is
          Put_Line_Indent
            ("     references " & Get_Custom_Image (Node.P_Referenced_Decl));
          New_Line;
-      end Print_Ref_Id_Nameres;
+      end Print_Id_Nameres;
 
       ---------------------------------
       -- Print_Base_Val_Decl_Nameres --
@@ -264,8 +264,8 @@ procedure Lkt_Toolbox is
             end;
          end if;
          begin
-            if Node.Kind = Common.Lkt_Ref_Id then
-               Print_Ref_Id_Nameres (Node.As_Ref_Id);
+            if Node.Kind in Common.Lkt_Module_Id | Common.Lkt_Ref_Id then
+               Print_Id_Nameres (Node.As_Id);
                Indented := True;
                Indent := Indent + 1;
             elsif Node.Kind = Common.Lkt_Def_Id then
