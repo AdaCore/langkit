@@ -1,3 +1,7 @@
+from common import FooNode
+
 val var_b = 0
 
-class B {}
+class B: FooNode {
+    fun dynenv_getter(): Array[InnerEnvAssoc]
+}

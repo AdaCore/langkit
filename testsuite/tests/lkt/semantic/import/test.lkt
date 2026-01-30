@@ -16,3 +16,10 @@ val t2: module_b.B = null[module_b.B]
 val t3: C1 = null[C1]
 val t4: C_2 = null[C_2]
 val t5: D = null[D]
+
+# Referencing properties
+val de1 = dynamic_lexical_env(renamed_mod.A.dynenv_getter)
+val de2 = dynamic_lexical_env(module_b.B.dynenv_getter)
+val de3 = dynamic_lexical_env(C1.dynenv_getter)
+val de4 = dynamic_lexical_env(C_2.dynenv_getter)
+val de5 = dynamic_lexical_env(D.dynenv_getter)
