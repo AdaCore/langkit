@@ -207,12 +207,24 @@ procedure Lkt_Toolbox is
       ----------------------
 
       procedure Print_Id_Nameres (Node : Id'Class) is
+         T : Type_Decl;
+         D : Decl;
       begin
          Put_Line_Indent ("Id   " & Get_Custom_Image (Node));
-         Put_Line_Indent
-           ("     has_type " & Get_Custom_Image (Node.P_Get_Type));
-         Put_Line_Indent
-           ("     references " & Get_Custom_Image (Node.P_Referenced_Decl));
+
+         --  To keep output terse, do not output the type for modules, expected
+         --  to be null.
+
+         T := Node.P_Get_Type;
+         D := Node.P_Referenced_Decl;
+         if Node.Kind in Common.Lkt_Module_Id
+            or else (not D.Is_Null and then D.Kind in Common.Lkt_Langkit_Root)
+         then
+            pragma Assert (T.Is_Null);
+         else
+            Put_Line_Indent ("     has_type " & Get_Custom_Image (T));
+         end if;
+         Put_Line_Indent ("     references " & Get_Custom_Image (D));
          New_Line;
       end Print_Id_Nameres;
 
