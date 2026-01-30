@@ -1,6 +1,7 @@
 import glob
 import os
 import os.path
+import sys
 
 from e3.fs import sync_tree
 from e3.testsuite.control import YAMLTestControlCreator
@@ -185,7 +186,17 @@ class BaseDriver(DiffTestDriver):
     #
 
     @property
+    def langkit_python_interpreter(self):
+        """
+        See the documentation for --with-langkit-python.
+        """
+        return self.env.options.with_langkit_python or sys.executable
+
+    @property
     def python_interpreter(self):
+        """
+        See the documentation for --with-python.
+        """
         return self.env.options.with_python or "python"
 
     def check_file(self, filename):

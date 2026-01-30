@@ -54,6 +54,11 @@ class LangkitTestsuite(Testsuite):
 
     def add_options(self, parser):
         parser.add_argument(
+            "--with-langkit-python",
+            help="If provided, use as the Python interpreter in scripts that"
+            " use Langkit modules.",
+        )
+        parser.add_argument(
             "--with-python",
             help="If provided, use as the Python interpreter in testcases.",
         )

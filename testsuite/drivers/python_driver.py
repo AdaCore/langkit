@@ -38,6 +38,10 @@ class PythonDriver(BaseDriver):
         # another spawned script could: provide the path to the interpreter in
         # the environment so it can use it.
         derived_env = dict(os.environ)
+        derived_env["E3_PYTHON_INTERPRETER"] = sys.executable
+        derived_env["LANGKIT_PYTHON_INTERPRETER"] = (
+            self.langkit_python_interpreter
+        )
         derived_env["PYTHON_INTERPRETER"] = self.python_interpreter
         derived_env["LANGKIT_ROOT_DIR"] = self.langkit_root_dir
         derived_env["LANGKIT_PRETTY_PRINT"] = str(
@@ -70,7 +74,7 @@ class PythonDriver(BaseDriver):
             ]
             derived_env["COVERAGE_FILE"] = self.coverage_file("coverage")
         else:
-            argv = [sys.executable]
+            argv = [self.langkit_python_interpreter]
 
         if self.valgrind_enabled:
             derived_env["VALGRIND_ENABLED"] = "1"

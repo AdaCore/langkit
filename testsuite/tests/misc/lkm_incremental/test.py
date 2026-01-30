@@ -8,8 +8,7 @@ Langkit/Langkit_Support/AdaSAT changes.
 
 from contextlib import contextmanager
 import os.path
-
-from e3.fs import mkdir, rm
+import shutil
 
 import langkit.scripts.create_project as create_project
 import langkit.scripts.lkm as lkm
@@ -21,8 +20,10 @@ def run(label, *argv):
 
     # Clean up files from previous tests
     for f in ["build", "extensions", "langkit.yaml", "mylang"]:
-        if os.path.exists(f):
-            rm(f, recursive=True)
+        if os.path.isfile(f):
+            os.remove(f)
+        elif os.path.isdir(f):
+            shutil.rmtree(f)
 
     # Create the test project and build it a first time (to create the cache).
     # Disable all outputs to avoid cluttering the test output.
@@ -84,12 +85,12 @@ with run("Build with Lkt source change"):
         f.write("\n\n# Some additional comment\n")
 
 with run("Build with new extension sources"):
-    mkdir("extensions/src")
+    os.makedirs("extensions/src")
     with open("extensions/src/pkg.ads", "w") as f:
         f.write("package Pkg is\nend Pkg;\n")
 
 with run("Build with new extension templates"):
-    mkdir("extensions")
+    os.makedirs("extensions")
     with open("extensions/withed_projects", "w") as f:
         f.write('with "gnatcoll";\n')
 

@@ -12,6 +12,7 @@ control:
     - [SKIP, "not has_gdb", "GDB required"]
 gpr_mains:
     - main.adb
+post_scripts_use_e3: true
 
 # Run the test program (main.adb) under GDB to check the helpers. We keep this
 # part in separate scripts to make it convenient, for debugging purposes, to

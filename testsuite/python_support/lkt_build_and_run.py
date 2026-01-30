@@ -4,6 +4,7 @@ current directory and optionally build and run test programs
 (Ada/C/Python/OCaml/Java) with the generated library.
 """
 
+import os
 import shlex
 import subprocess
 import sys
@@ -40,6 +41,17 @@ ocaml_main = decode_main("ocaml_main")
 java_main = decode_main("java_main")
 ni_main = decode_main("ni_main")
 
+# lkt_build_and_run.py, like all scripts executed by the Python test driver
+# (python_driver.py), is run with the Python interpreter that has Langkit
+# installed (LANGKIT_PYTHON_INTERPRETER in python_driver.py).
+#
+# Some Python post-scripts actually require the e3-powered interpreter: use it
+# if requested.
+post_scripts_python = (
+    os.environ["E3_PYTHON_INTERPRETER"]
+    if test_env.get("post_scripts_use_e3")
+    else sys.executable
+)
 post_scripts = test_env.get("post_scripts", [])
 
 build_and_run(
@@ -54,6 +66,6 @@ build_and_run(
 
 # Run post scripts before exitting
 for filename in post_scripts:
-    subprocess.check_call([sys.executable, filename])
+    subprocess.check_call([post_scripts_python, filename])
 
 print("Done")

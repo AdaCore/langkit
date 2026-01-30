@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os.path
 import re
+import subprocess
 
 from e3.env import Env
 
@@ -10,6 +11,20 @@ from gdb_session import GDBSession
 
 env = Env()
 gdb: GDBSession = None
+
+
+def langkit_path():
+    """
+    Return the path to import the "langkit" Python modules.
+    """
+    root_file = subprocess.check_output(
+        [
+            os.environ["LANGKIT_PYTHON_INTERPRETER"],
+            "-c",
+            "import langkit; print(langkit.__file__)",
+        ]
+    )
+    return os.path.dirname(os.path.abspath(root_file.strip()))
 
 
 def start_gdb(mode_arg: str) -> GDBSession:
@@ -21,6 +36,9 @@ def start_gdb(mode_arg: str) -> GDBSession:
     global gdb
     gdb = GDBSession(os.path.join("obj", f"main{env.build.os.exeext}"))
     gdb.test(f"start {mode_arg}", None)
+
+    # Make Langkit modules available from GBD's Python interpreter
+    gdb.test(f"pi import sys; sys.path.append({langkit_path()!r})", "")
 
     # Load the GDB helpers
     gdbinit_script = os.path.join("build", "gdbinit.py")
