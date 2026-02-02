@@ -25,8 +25,6 @@ from typing import (
     cast,
 )
 
-from e3.fs import sync_tree
-
 from langkit.compile_context import Verbosity
 import langkit.config as C
 from langkit.diagnostics import (
@@ -35,7 +33,7 @@ from langkit.diagnostics import (
     Diagnostics,
     WarningSet,
 )
-from langkit.packaging import WheelPackager
+from langkit.packaging import Platform, WheelPackager
 from langkit.utils import (
     BuildMode,
     Colors,
@@ -254,7 +252,7 @@ class ManageScript(abc.ABC):
         #######################
 
         self.create_wheel_parser = self.add_subcommand(self.do_create_wheel)
-        WheelPackager.add_platform_options(self.create_wheel_parser)
+        Platform.add_options(self.create_wheel_parser)
         self.create_wheel_parser.add_argument(
             "--with-python",
             help="Python intererpter to use in order to build the wheel. If"
@@ -1390,11 +1388,11 @@ class ManageScript(abc.ABC):
                 os.makedirs(install_path)
 
             for f in files:
-                sync_tree(
-                    f,
-                    os.path.join(install_path, os.path.basename(f)),
-                    delete=False,
-                )
+                dest = os.path.join(install_path, os.path.basename(f))
+                if os.path.isfile(f):
+                    shutil.copy2(f, dest)
+                else:
+                    shutil.copytree(f, dest, dirs_exist_ok=True)
 
     def do_printenv(self, args: argparse.Namespace) -> None:
         """
@@ -1438,7 +1436,7 @@ class ManageScript(abc.ABC):
         Create a standalone Python wheel for the Python bindings.
         """
         packager = WheelPackager(
-            WheelPackager.args_to_env(args), args.library_types
+            Platform.args_to_env(args), args.library_types
         )
         packager.create_python_wheel(
             args.plat_name,
