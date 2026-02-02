@@ -27,6 +27,9 @@ def run(label, *argv):
     # Create the test project and build it a first time (to create the cache).
     # Disable all outputs to avoid cluttering the test output.
     create_project.main(["Mylang"])
+    with open("langkit.yaml", "a") as f:
+        print("plugin_passes: [my_plugin.create_pass]", file=f)
+
     lkm.main(["generate", "-vnone"])
 
     # Let the caller change something
@@ -97,6 +100,14 @@ with run("Build with innocuous langkit.yaml change"):
 with run("Build with significant langkit.yaml change"):
     with open("langkit.yaml", "a") as f:
         f.write("\nemission:\n  portable_project: true\n")
+
+with run("Build with plugin data change"):
+    with open("my_plugin_data.txt", "w") as f:
+        f.write("Modified data\n")
+
+with run("Build with plugin script change"):
+    with open("my_plugin.py", "a") as f:
+        f.write("\n# Additional comment\n")
 
 
 print("Done")
