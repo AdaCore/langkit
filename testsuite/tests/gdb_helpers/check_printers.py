@@ -62,6 +62,14 @@ check_var_state("null_var", "<Rebindings null>")
 check_var_state("r1", "<Rebindings [main.txt:1:9]>")
 check_var_state("r2", "<Rebindings [main.txt:1:17]>")
 check_var_state("concat", "<Rebindings [main.txt:1:9, main.txt:1:17]>")
+gdb.print_expr(
+    "local_r1.all",
+    "(version => 0, parent => <Rebindings null>,"
+    " old_env => <LexicalEnv (primary) for <Example main.txt:1:17-1:23>>,"
+    " new_env => <LexicalEnv (primary) for <Example main.txt:1:9-1:16>>,"
+    " children => Langkit_Support.Lexical_Envs.Env_Rebindings vector of length"
+    " 1 = {<Rebindings [main.txt:1:9, main.txt:1:17]>})",
+)
 
 # Check pretty-printing for lexical envs
 break_lkt("test_envs")
