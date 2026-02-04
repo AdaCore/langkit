@@ -1,7 +1,9 @@
 ## vim: filetype=makoada
 
-<%namespace name="exts"         file="extensions.mako" />
-<%namespace name="prop_helpers" file="properties/helpers.mako" />
+<%namespace name="exts"             file="extensions.mako" />
+<%namespace name="prop_helpers"     file="properties/helpers.mako" />
+<%namespace name="logic_predicates" file="logic_predicates_ada.mako" />
+<%namespace name="logic_functors"   file="logic_functors_ada.mako" />
 
 
 <%def name="logic_helpers()">
@@ -12,8 +14,15 @@
    ## they'll be used in the bodies.
    % for cls in ctx.node_types:
       % for prop in cls.get_properties(include_inherited=False):
-         ${prop_helpers.logic_predicates(prop)}
-         ${prop_helpers.logic_functors(prop)}
+         % for pred in prop.logic_predicates:
+            ${logic_predicates.decl(pred)}
+            ${logic_predicates.body(pred)}
+         % endfor
+
+         % for functor in prop.logic_functors:
+            ${logic_functors.decl(functor)}
+            ${logic_functors.body(functor)}
+         % endfor
       % endfor
    % endfor
 </%def>
