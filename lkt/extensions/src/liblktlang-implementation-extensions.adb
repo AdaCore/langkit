@@ -430,7 +430,7 @@ package body Liblktlang.Implementation.Extensions is
    -----------------------
 
    function Id_P_Custom_Image
-     (Node : Bare_Id; E_Info : Entity_Info) return String_Type
+     (Node : Bare_Id; E_Info : Internal_Entity_Info) return String_Type
    is
       pragma Unreferenced (E_Info);
    begin
@@ -446,7 +446,7 @@ package body Liblktlang.Implementation.Extensions is
    -------------------------
 
    function Decl_P_Custom_Image
-      (Node : Bare_Decl; E_Info : Entity_Info) return String_Type
+      (Node : Bare_Decl; E_Info : Internal_Entity_Info) return String_Type
    is
       Full_Name_Acc : String_Type :=
          Dispatcher_Decl_P_Full_Name_Internal (Node, E_Info);

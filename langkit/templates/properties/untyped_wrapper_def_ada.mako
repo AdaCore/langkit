@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 function ${property.names.codegen}
-  (E : Entity
+  (E : Internal_Entity
    % for arg in property.natural_arguments:
       ; ${arg.name} : ${arg.type.name}
    % endfor
@@ -15,7 +15,7 @@ is
 
    % if uses_einfo:
       E_Info : ${T.EntityInfo.name} :=
-         Shed_Rebindings (E.Info, Children_Env (E.Node));
+         AST_Envs.Shed_Rebindings (E.Info, Children_Env (E.Node));
       <% args.append('E_Info') %>
    % endif
 begin

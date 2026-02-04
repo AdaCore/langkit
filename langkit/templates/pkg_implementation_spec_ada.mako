@@ -396,9 +396,32 @@ private package ${ada_lib_name}.Implementation is
       Inner_Env_Assoc_Array    => ${T.InnerEnvAssoc.array.name},
       Get                      => Inner_Env_Assoc_Get);
 
-   use AST_Envs;
+   subtype Entity_Resolver is AST_Envs.Entity_Resolver;
+   subtype Inner_Env_Assocs_Resolver is AST_Envs.Inner_Env_Assocs_Resolver;
    subtype Internal_Entity is AST_Envs.Entity;
    subtype Internal_Entity_Info is AST_Envs.Entity_Info;
+   subtype Lexical_Env_Access is AST_Envs.Lexical_Env_Access;
+   subtype Lexical_Env_Resolver is AST_Envs.Lexical_Env_Resolver;
+
+   package Internal_Map_Node_Vectors
+     renames AST_Envs.Internal_Map_Node_Vectors;
+
+   function "=" (Left, Right : Internal_Entity) return Boolean
+     renames AST_Envs."=";
+   function Equivalent (Left, Right : Internal_Entity) return Boolean
+     renames AST_Envs.Equivalent;
+
+   function "=" (Left, Right : Internal_Entity_Info) return Boolean
+     renames AST_Envs."=";
+   function Equivalent (Left, Right : Internal_Entity_Info) return Boolean
+     renames AST_Envs.Equivalent;
+
+   procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
+   procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
+   function Equivalent (Left, Right : Lexical_Env) return Boolean
+     renames AST_Envs.Equivalent;
+
+   Empty_Env : Lexical_Env renames AST_Envs.Empty_Env;
 
    ${T.EntityInfo.nullexpr} : constant ${T.EntityInfo.name} :=
      (No_Metadata, null, False);

@@ -150,11 +150,8 @@ package Langkit_Support.Lexical_Envs is
    Null_Lexical_Env : constant Lexical_Env :=
      (No_Lexical_Env, 0, Static_Primary, No_Generic_Unit, 0);
 
-   type Lexical_Env_Array is array (Positive range <>) of Lexical_Env;
-   type Lexical_Env_Array_Access is access all Lexical_Env_Array;
-
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (Lexical_Env_Array, Lexical_Env_Array_Access);
+   function Is_Null (Self : Lexical_Env) return Boolean
+   is (Self.Env = null);
 
    function Is_Primary (Self : Lexical_Env) return Boolean
    is (Self.Kind in Primary_Kind);

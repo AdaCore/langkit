@@ -365,7 +365,7 @@
          pragma Warnings (On, "referenced");
       begin
          % if cls.is_entity_type:
-            return Image (Entity'(Node => R.Node, Info => R.Info));
+            return Image (Internal_Entity'(Node => R.Node, Info => R.Info));
          % else:
             return
               ("("
