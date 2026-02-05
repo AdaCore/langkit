@@ -93,6 +93,22 @@ check_var_state(
     " = {[rebindings] = <Rebindings [main.txt:1:9]>,"
     f" [rebound_env] = <LexicalEnv (primary) for {node_img}>}}",
 )
+gdb.test("pi import langkit.gdb.printers", "")
+gdb.test("pi ctx = langkit.gdb.global_context", "")
+
+gdb.test("pi value = gdb.parse_and_eval('local_null_var.env')", "")
+gdb.test(
+    "pi str(langkit.gdb.printers.LexicalEnv(value, ctx).kind)",
+    "'static_primary'",
+)
+
+gdb.test(
+    "pi value = gdb.parse_and_eval('local_null_var.env.all\\'access')", ""
+)
+gdb.test(
+    "pi str(langkit.gdb.printers.LexicalEnv(value, ctx).kind)",
+    "'static_primary'",
+)
 
 # Check pretty-printing for entities
 break_lkt("test_entities")

@@ -249,26 +249,44 @@ class LexicalEnv:
     Wrapper for Lexical_Env/Lexical_Env_Access values.
     """
 
+    # Type name for the lexical env wrappers (generic: defined in
+    # Langkit_Support outside of generics).
     wrapper_type_name = "langkit_support.lexical_envs.lexical_env"
-    internal_matcher = RecordAccessMatcher(
-        "ast_envs.lexical_env_record", "ast_envs.lexical_env_access"
+
+    # Names for lexical env access types, still generic
+    generic_record_type_name = (
+        "langkit_support.lexical_envs.base_lexical_env_record"
     )
+
+    # Names for specific lexical env access/record types, i.e. from
+    # instantiations of Langkit_Support.Lexical_Env_Impl.
+
+    @classmethod
+    def specific_access_type_name(cls, context: Context) -> str:
+        return context.implname("ast_envs.lexical_env_access")
+
+    @classmethod
+    def specific_record_type_name(cls, context: Context) -> str:
+        return context.implname("ast_envs.lexical_env_record")
 
     def __init__(self, value: gdb.Value, context: Context):
         self.context = context
 
+        # If this is a lexical env wrapper, unwrap it
         if self.matches_wrapper(value, context):
-            inner_record_name = context.implname(
-                self.internal_matcher.record_type_name
-            )
-            inner_record_ptr = gdb.lookup_type(inner_record_name).pointer()
-            self.value = value["env"].cast(inner_record_ptr)
+            value = value["env"]
 
-        elif not self.matches_access(self.value, context):
-            raise ValueError("Invalid lexical env: {}".format(self.value))
+        # Make sure we get an access value to either the generic or the
+        # specific lexical env record.
+        if not self.matches_access(value, context):
+            raise ValueError("Invalid lexical env")
 
-        else:
-            self.value = value
+        # Reinterpret it as a specific lexical env record access, so that we
+        # have access to all its actual attributes.
+        inner_record_ptr = gdb.lookup_type(
+            self.specific_access_type_name(context)
+        )
+        self.value = value.cast(inner_record_ptr)
 
     @classmethod
     def matches_wrapper(cls, value: gdb.Value, context: Context) -> bool:
@@ -283,11 +301,15 @@ class LexicalEnv:
     @classmethod
     def matches_access(cls, value: gdb.Value, context: Context) -> bool:
         """
-        Return whether `value` is a Lexical_Env_Access value.
-
-        :rtype: bool
+        Return whether `value` is an access to a Lexical_Env_Record.
         """
-        return cls.internal_matcher.matches_access(value, context)
+        return any(
+            match_struct_ptr(value, type_name)
+            for type_name in [
+                cls.generic_record_type_name,
+                cls.specific_record_type_name(context),
+            ]
+        )
 
     @property
     def kind(self) -> str:
