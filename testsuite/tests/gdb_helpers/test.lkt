@@ -160,16 +160,25 @@ class FooNode implements Node[FooNode] {
 
         result.a  # BREAK:test_struct
     }
+
+    @exported
+    fun overriding_prop(base: Int): Int = base
 }
 
 class Example: FooNode implements TokenNode {
     env_spec {
         add_env()
     }
+
+    @exported
+    fun overriding_prop(base: Int): Int = base + 1
 }
 
 class Parens: FooNode {
     @parse_field items: ASTList[FooNode]
+
+    @exported
+    fun overriding_prop(base: Int): Int = base + 2
 }
 
 struct MyStruct {

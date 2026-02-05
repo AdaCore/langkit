@@ -2194,11 +2194,20 @@ class PropertyDef(AbstractNodeData):
         """
         Return the name for this property to use in debug info.
         """
-        return (
-            "[dispatcher]{}".format(self.qualname)
-            if self.is_dispatcher
-            else self.qualname
+        # To avoid name conflicts between a dispatcher and the corresponding
+        # static root property, add a prefix to the name of the former.
+        prefix = "[dispatcher]" if self.is_dispatcher else ""
+
+        owner = self.owner.lkt_name
+
+        # Whenever available, use the Lkt name for this property. Fallback to
+        # the index name, supposedly clash-free.
+        name = (
+            self.names.index
+            if self.names.spec is None
+            else self.names.spec.lower
         )
+        return f"{prefix}{owner}.{name}"
 
     @property
     def warn_on_unused(self) -> bool:

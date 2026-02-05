@@ -60,6 +60,22 @@ begin
 
       Dummy_Int := U.Root.P_Test_Recursive_Cf;
 
+   elsif Mode = "break" then
+
+      --  Run the various "P_Overriding_Prop" overloadings (Parens, Example and
+      --  ASTList[FooNode]).
+
+      U.Reparse (Buffer => "(example example) example");
+      declare
+         Call_Index : Positive := 1;
+      begin
+         for N of Foo_Node_Array'(U.Root.Child (1), U.Root.Child (2), U.Root)
+         loop
+            Dummy_Int := N.P_Overriding_Prop (10 * Call_Index);
+            Call_Index := Call_Index + 1;
+         end loop;
+      end;
+
    else
       Put_Line ("Invalid mode argument");
    end if;
