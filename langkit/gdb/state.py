@@ -22,9 +22,6 @@ def analysis_line_no(context: Context, frame: gdb.Frame) -> int | None:
     """
     If the given frame is in the $-implementation.adb file, return its
     currently executed line number. Return None otherwise.
-
-    :type frame: gdb.Frame
-    :rtype: int|None
     """
     current_func = frame.function()
     if current_func is None:
