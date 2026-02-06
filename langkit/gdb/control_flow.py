@@ -229,12 +229,6 @@ def go_step_inside(context: Context) -> None:
     If execution is about to call a property, step inside it. Traverse
     dispatch properties in order to land directly in the dispatched property.
     """
-
-    def continue_until(line_no: int, hide_output: bool) -> None:
-        dest_spec = "{}:{}".format(context.debug_info.filename, line_no)
-        gdb.Breakpoint(dest_spec, internal=True, temporary=True)
-        gdb.execute("continue", to_string=hide_output)
-
     # First, look for a property call in the current execution state
     state = context.decode_state()
     if not state:
