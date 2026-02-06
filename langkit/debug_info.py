@@ -110,10 +110,9 @@ class DebugInfo:
         file and fill self according to it. Raise a ParseError if anything goes
         wrong.
 
-        :param iter[str] lines: Iterable that yields all the lines to parse.
-            This can be any iterator: a read file, a list of strings in memory,
-            a custom iterator, ...
-        :rtype: None
+        :param lines: Iterable that yields all the lines to parse.  This can be
+            any iterator: a read file, a list of strings in memory, a custom
+            iterator, ...
         """
         self.properties = []
         self.properties_dict = {}
@@ -274,8 +273,7 @@ class DebugInfo:
         """
         Fetch the property called `name`. Raise an error if not found.
 
-        :param str name: Name of the property to fetch.
-        :rtype: Property
+        :param name: Name of the property to fetch.
         """
         return self.properties_dict[name]
 
@@ -510,8 +508,6 @@ class ExprStart(Event):
     def done_event(self) -> ExprDone:
         """
         Return the ExprDone event that corresponds to `self`.
-
-        :rtype: ExprDone
         """
         assert self._done_event
         return self._done_event
@@ -521,8 +517,6 @@ class ExprStart(Event):
         """
         Return the line range that spans from this ExprStart event to the
         corresponding ExprDone one.
-
-        :rtype: LineRange
         """
         return LineRange(self.line_no, self.done_event.line_no)
 
