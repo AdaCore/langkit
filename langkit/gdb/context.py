@@ -18,6 +18,7 @@ class Context:
         astnode_names: list[str],
         astnode_kinds: dict[int, str],
         prefix: str,
+        standalone: bool,
     ):
         """
         :param str lib_name: Lower-case name for the generated library.
@@ -29,6 +30,9 @@ class Context:
             camel-with-mixed-case node names.
 
         :param prefix: Prefix to use for command names.
+
+        :param standalone: Whether this is a standalone Langkit-generated
+            library.
         """
         self.lib_name = lib_name
         self.astnode_names = [Name(name) for name in astnode_names]
@@ -36,6 +40,7 @@ class Context:
             kind: Name(name) for kind, name in astnode_kinds.items()
         }
         self.prefix = prefix
+        self.standalone = standalone
 
         self.node_record = "{}.implementation.root_node_record".format(
             self.lib_name
@@ -46,7 +51,17 @@ class Context:
 
         self.entity_struct_names = self._entity_struct_names()
 
+        self.support_pkg = (
+            f"{lib_name}_support" if self.standalone else "langkit_support"
+        )
+
         self.reparse_debug_info()
+
+    def in_support_pkg(self, entity: str) -> str:
+        """
+        Return the fully qualified name of an entity under the support package.
+        """
+        return f"{self.support_pkg}.{entity}"
 
     def _entity_struct_names(self) -> set[str]:
         """

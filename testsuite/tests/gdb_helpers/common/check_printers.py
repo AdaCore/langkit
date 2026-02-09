@@ -25,7 +25,7 @@ gdb.print_expr("u", "null")
 run_continue()
 gdb.print_expr(
     "u.diagnostics",
-    "langkit_support.diagnostics.diagnostics_vectors.vector of length 1 = {"
+    "@..._support.diagnostics.diagnostics_vectors.vector of length 1 = {"
     " Diagnostic(1:1-1:4: \"Expected '(', got Identifier\")}",
 )
 
@@ -67,7 +67,7 @@ gdb.print_expr(
     "(version => 0, parent => <Rebindings null>,"
     " old_env => <LexicalEnv (primary) for <Example main.txt:1:17-1:23>>,"
     " new_env => <LexicalEnv (primary) for <Example main.txt:1:9-1:16>>,"
-    " children => Langkit_Support.Lexical_Envs.Env_Rebindings vector of length"
+    " children => @..._Support.Lexical_Envs.Env_Rebindings vector of length"
     " 1 = {<Rebindings [main.txt:1:9, main.txt:1:17]>})",
 )
 
