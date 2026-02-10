@@ -708,7 +708,9 @@ class CompileCtx:
         has completed.
         """
 
-        self.gnatcov: GNATcov | None = None
+        self.gnatcov: GNATcov | None = (
+            GNATcov(self) if self.config.emission.coverage else None
+        )
         """
         During code emission, GNATcov instance if coverage is enabled. None
         otherwise.
@@ -1903,8 +1905,6 @@ class CompileCtx:
             code emission. This is useful for IDE hooks. False by default.
         """
         self.check_only = check_only
-        if self.config.emission.coverage:
-            self.gnatcov = GNATcov(self)
 
         # Compute the list of passes to run:
 
