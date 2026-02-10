@@ -5,17 +5,21 @@ Generation of code coverage reports for generated libraries.
 from __future__ import annotations
 
 from collections import OrderedDict
-import glob
 import json
 import os.path
-import shutil
 import subprocess
 from typing import TYPE_CHECKING
 import xml.etree.ElementTree as etree
 
 from langkit.debug_info import DebugInfo, ExprStart
 from langkit.template_utils import Renderer
-from langkit.utils import copy_to_dir, ensure_clean_dir
+from langkit.utils import (
+    BuildMode,
+    LibraryType,
+    copy_to_dir,
+    ensure_clean_dir,
+    gpr_scenario_vars,
+)
 
 
 if TYPE_CHECKING:
@@ -63,13 +67,18 @@ class InstrumentationMetadata:
     Magic string to identify the metadata file format.
     """
 
-    CURRENT_VERSION = 1
+    CURRENT_VERSION = 2
     """
     Version number for the metadata file format. Used to clearly reject
     obsolete metadata files instead of waiting for obscure errors happening.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, project_file: str) -> None:
+        """
+        :param project_file: Basename for the project file of the generated
+            library.
+        """
+        self.project_file = project_file
         self.additional_sources: set[str] = set()
         self.generated_sources: set[str] = set()
 
@@ -83,6 +92,7 @@ class InstrumentationMetadata:
                 {
                     "version": self.CURRENT_VERSION,
                     "type": self.MAGIC,
+                    "project_file": self.project_file,
                     "additional_sources": list(self.additional_sources),
                     "generated_sources": list(self.generated_sources),
                 },
@@ -92,7 +102,6 @@ class InstrumentationMetadata:
 
     @classmethod
     def load(cls, instr_dir: str) -> InstrumentationMetadata:
-        result = cls()
 
         with open(cls._filename(instr_dir), "r") as f:
             md = json.load(f)
@@ -109,6 +118,7 @@ class InstrumentationMetadata:
                 )
             )
 
+        result = cls(md["project_file"])
         result.additional_sources.update(md["additional_sources"])
         result.generated_sources.update(md["generated_sources"])
         return result
@@ -527,14 +537,28 @@ class GNATcov:
     # Only do statement coverage
     covlevel = "stmt"
 
-    def __init__(self, context: CompileCtx | None = None) -> None:
+    instr_md: InstrumentationMetadata
+    """
+    Instrumentation metadata for the generated library.
+
+    This attribute is set before computing the coverage report.
+    """
+
+    def __init__(
+        self,
+        context: CompileCtx | None = None,
+        build_mode: BuildMode | None = None,
+    ) -> None:
         """
         :param context: CompileCtx instance for the instrumented library. Note
             that this argument is mandatory in order to run the
             instrumentation, but it not needed in order to generate the
             coverage report.
+        :param build_mode: Build mode to use. Necessary to produce instrumented
+            sources in the right object directory.
         """
         self.context = context
+        self.build_mode = build_mode
 
     def instrument(self, emitter: Emitter, instr_dir: str) -> None:
         """
@@ -548,6 +572,7 @@ class GNATcov:
         (removed and created if needed).
         """
         assert self.context is not None
+        assert self.build_mode is not None
         ensure_clean_dir(instr_dir)
 
         subprocess.check_call(
@@ -559,60 +584,15 @@ class GNATcov:
                 "-P",
                 emitter.main_project_file,
                 "--no-subprojects",
-                "-X{}_COVINSTR=true".format(emitter.lib_name_up),
                 f"-j{self.context.jobs}",
+                *gpr_scenario_vars(
+                    lib_name=self.context.ada_api_settings.lib_name,
+                    library_type=LibraryType.relocatable,
+                    build_mode=self.build_mode,
+                    enable_build_warnings=False,
+                ),
             ]
         )
-
-        default_build_mode = "dev"
-        project_instr_dir = "{}-gnatcov-instr".format(emitter.lib_name_low)
-
-        # At this point, instrumented sources are located in the object
-        # directory, which depends on the build mode: relocate it somewhere
-        # else (i.e. rename to instr_src_dir) so that the same set of
-        # instrumented sources applies to all builds.
-        lib_obj_dir = os.path.join(emitter.lib_root, "obj", default_build_mode)
-        instr_src_dir = os.path.join(
-            emitter.lib_root, "obj", project_instr_dir
-        )
-        if os.path.exists(instr_src_dir):
-            shutil.rmtree(instr_src_dir)
-        os.rename(os.path.join(lib_obj_dir, project_instr_dir), instr_src_dir)
-
-        # "gnatcov instrument" instruments only Ada sources, so we need to
-        # manually copy the C sources (if any).
-        lib_src_dir = os.path.join(
-            emitter.lib_root, "include", emitter.lib_name_low
-        )
-        for pattern in ("*.c", "*.h"):
-            for filename in glob.glob(os.path.join(lib_src_dir, pattern)):
-                copy_to_dir(filename, instr_src_dir)
-
-        # Create a directory to gather all SID files
-        sid_dir = os.path.join(instr_dir, "sids")
-        ensure_clean_dir(sid_dir)
-        for filename in glob.glob(os.path.join(lib_obj_dir, "*.sid")):
-            copy_to_dir(filename, sid_dir)
-
-        # Create a directory to gather all non-instrumented sources (generated
-        # and additional ones). "gnatcov
-        # coverage" will use this project to generate its coverage report.
-        src_dir = os.path.join(instr_dir, "src")
-        ensure_clean_dir(src_dir)
-        for filename in emitter.context.additional_source_files:
-            copy_to_dir(filename, src_dir)
-        for pattern in ("*.adb", "*.ads"):
-            for filename in glob.glob(os.path.join(emitter.src_dir, pattern)):
-                copy_to_dir(filename, src_dir)
-
-        # Also generate a dummy project file to give easy access to these
-        # sources.
-        with open(os.path.join(instr_dir, "to_cover.gpr"), "w") as f:
-            f.write(
-                "project To_Cover is"
-                '\n  for Source_Dirs use ("src");'
-                "\nend To_Cover;"
-            )
 
         # Create instrumentation metadata
         emitter.instr_md.save(instr_dir)
@@ -625,13 +605,6 @@ class GNATcov:
 
         :return: Output directory for the XML report.
         """
-        # Compute the list of SID files
-        sid_dir = os.path.join(instr_dir, "sids")
-        sid_list = os.path.join(working_dir, "sids.txt")
-        with open(sid_list, "w") as f:
-            for t in glob.glob(os.path.join(sid_dir, "*.sid")):
-                f.write(t + "\n")
-
         # Compute the list of traces files
         trace_list = os.path.join(working_dir, "traces.txt")
         with open(trace_list, "w") as f:
@@ -646,16 +619,15 @@ class GNATcov:
                 "gnatcov",
                 "coverage",
                 "-P",
-                os.path.join(instr_dir, "to_cover.gpr"),
+                self.instr_md.project_file,
                 "--no-subprojects",
+                "--externally-built-projects",
                 "--level",
                 self.covlevel,
                 "--annotate",
                 "xml",
                 "--output-dir",
                 xml_dir,
-                "--sid",
-                "@" + sid_list,
                 "@" + trace_list,
             ]
         )
@@ -668,17 +640,14 @@ class GNATcov:
         Helper for generate_report. Load GNATcoverage's XML report and produce
         our final coverage report.
         """
-        # Read instrumentation metadata
-        instr_md = InstrumentationMetadata.load(instr_dir)
-
         # Load the XML report
         report = CoverageReport(title)
         orig_sources = report.get_or_create("orig", "Original sources")
         gen_sources = report.get_or_create("gen", "Generated sources")
         for f in report.import_gnatcov_xml(xml_dir):
-            if f.name in instr_md.additional_sources:
+            if f.name in self.instr_md.additional_sources:
                 group = orig_sources
-            elif f.name in instr_md.generated_sources:
+            elif f.name in self.instr_md.generated_sources:
                 group = gen_sources
             else:
                 group = report.get_or_create("unknown", "Unknown sources")
@@ -715,6 +684,9 @@ class GNATcov:
             coverage report. Beware, this removes this directory if it exists.
         :param working_dir: Temporary directory.
         """
+        # Read instrumentation metadata
+        self.instr_md = InstrumentationMetadata.load(instr_dir)
+
         # Make sure we start with a clean output directory
         ensure_clean_dir(output_dir)
 

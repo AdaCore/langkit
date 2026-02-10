@@ -256,7 +256,8 @@ class Emitter:
         "Interfaces" attribute of the generated library project file.
         """
 
-        self.instr_md = InstrumentationMetadata()
+        project_file_basename = f"{self.lib_name_low}.gpr"
+        self.instr_md = InstrumentationMetadata(project_file_basename)
 
         # Add all additional source files to the list of library interfaces and
         # declare them as such in instrumentation metadata.
@@ -265,7 +266,7 @@ class Emitter:
             self.instr_md.additional_sources.add(os.path.basename(f))
 
         self.main_project_file = os.path.join(
-            self.lib_root, f"{self.lib_name_low}.gpr"
+            self.lib_root, project_file_basename
         )
 
         if self.standalone:
