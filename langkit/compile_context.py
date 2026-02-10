@@ -355,11 +355,13 @@ class CompileCtx:
         self,
         config: CompilationConfig,
         plugin_loader: PluginLoader,
+        jobs: int = 1,
         verbosity: Verbosity = Verbosity.none,
     ):
         """Create a new context for code emission.
 
         :param config: Configuration for the language to compile.
+        :param jobs: Number of jobs to spawn in parallel for calls to builders.
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
@@ -372,6 +374,7 @@ class CompileCtx:
 
         self.plugin_loader = plugin_loader
         self.config = config
+        self.jobs = jobs
 
         # Make sure all paths mentionned in the configuration are resolved to
         # absolute paths. This is a no-op if these paths were already resolved.

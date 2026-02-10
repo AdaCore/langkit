@@ -543,6 +543,7 @@ class GNATcov:
         Put SID files in the ``$BUILD_DIR/obj/$LIBNAME/sids`` directory
         (removed and created if needed).
         """
+        assert self.context is not None
         ensure_clean_dir(instr_dir)
 
         subprocess.check_call(
@@ -555,6 +556,7 @@ class GNATcov:
                 emitter.main_project_file,
                 "--no-subprojects",
                 "-X{}_COVINSTR=true".format(emitter.lib_name_up),
+                f"-j{self.context.jobs}",
             ]
         )
 
