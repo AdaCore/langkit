@@ -233,7 +233,7 @@ class Emitter:
         The core library is made of Ada and C sources, so always include them.
         """
 
-        self.library_interfaces = set()
+        self.library_interfaces: set[str] = set()
         """
         Set of source file base names for all sources that must appear in the
         "Interfaces" attribute of the generated library project file.
@@ -245,13 +245,6 @@ class Emitter:
         # declare them as such in instrumentation metadata.
         for f in context.additional_source_files:
             self.add_library_interface(f, generated=False)
-
-        if self.coverage:
-            assert self.gnatcov
-            # Add the buffer-list unit from GNATcoverage's instrumentation to
-            # the list of library interfaces. TODO: hopefully, we should not
-            # have to do this anymore after S916-064 is addressed.
-            self.library_interfaces.add(self.gnatcov.buffer_list_file(self))
 
         self.main_project_file = os.path.join(
             self.lib_root, f"{self.lib_name_low}.gpr"
@@ -481,14 +474,6 @@ class Emitter:
                 else self.instr_md.additional_sources
             )
             source_set.add(filename)
-
-            # Add GNATcoverage's additional buffer units to the library
-            # interface.  TODO: hopefully, we should not have to do this
-            # anymore after S916-064 is addressed.
-            if self.coverage:
-                assert self.gnatcov
-                for f in self.gnatcov.buffer_files(filename):
-                    self.library_interfaces.add(f)
 
         self.library_interfaces.add(filename)
 
