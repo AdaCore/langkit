@@ -2,10 +2,16 @@
 
 <%namespace name="exts" file="extensions.mako" />
 
-<%def name="format_str_set(strings)">
-   ${'({})'.format(', '.join('"{}"'.format(s)
-                             for s in sorted(strings)))}
-</%def>
+<%def name="format_str_set(strings, indent)">${ada_block_with_parens(
+   [
+      ## GPR tools expect UTF-8 project files (i.e. the default encoding for
+      ## rendered template in Langkit), and we cannot use bytes_repr to format
+      ## the corresponding string literals, as bytes_repr assumes Ada
+      ## (``Character'Val (1)`` is invalid in the GPR world).
+      '"{}"'.format(s.replace('"', '""')) for s in sorted(strings)
+   ],
+   indent
+)}</%def>
 
 with "gnatcoll_core";
 with "gnatcoll_gmp";
@@ -87,14 +93,10 @@ library project ${lib_name} is
    ## no simple setup is possible, and this reduces the number of places that
    ## have to worry about these things to this Mako template and to the
    ## langkit.coverage module.
-   Primary_Source_Dirs := (${', '.join(
-       ## GPR tools expect UTF-8 project files (i.e. the default encoding for
-       ## rendered template in Langkit), and we cannot use bytes_repr to format
-       ## the corresponding string literals, as bytes_repr assumes Ada
-       ## (``Character'Val (1)`` is invalid in the GPR world).
-       '"{}"'.format(emitter.path_to(d, project_path).replace('"', '""'))
-       for d in source_dirs if d
-   )});
+   Primary_Source_Dirs :=
+   ${format_str_set(
+      [emitter.path_to(d, project_path) for d in source_dirs if d], 3
+   )};
 
    % if emitter.coverage:
       Secondary_Source_Dirs :=
@@ -109,9 +111,11 @@ library project ${lib_name} is
       for Source_Dirs use Primary_Source_Dirs;
    % endif
 
-   for Languages use ${format_str_set(emitter.project_languages)};
+   for Languages use
+   ${format_str_set(emitter.project_languages, 3)};
 
-   Interfaces := ${format_str_set(emitter.library_interfaces)};
+   Interfaces :=
+   ${format_str_set(emitter.library_interfaces, 3)};
    case Library_Standalone is
       when "no" =>
          null;
