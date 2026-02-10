@@ -2,7 +2,6 @@
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
-
 with System;
 
 with GNATCOLL.Iconv;
@@ -24,8 +23,9 @@ with ${ada_lib_name}.Private_Converters;
 with Ada.Environment_Variables;
 
 with Interfaces.C;
+with Interfaces.C.Strings; use Interfaces.C.Strings;
 
-with GNATcov_RTS.Buffers.Lists.${ada_lib_name};
+with GCVRT.${ada_lib_name};
 with GNATcov_RTS.Traces.Output.Files;
 % endif
 
@@ -688,14 +688,15 @@ package body ${ada_lib_name}.Common is
          --  GNATcov_RTS.Traces.Output's naming scheme.
 
          <% env_var = '{}_TRACE_FILE'.format(emitter.lib_name_up) %>
-         Filename : constant String :=
+         Filename : chars_ptr :=
            (if Env.Exists ("${env_var}")
-            then Env.Value ("${env_var}")
-            else "");
+            then New_String (Env.Value ("${env_var}"))
+            else GNATcov_RTS.Traces.Output.Files.Default_Trace_Filename);
       begin
          GNATcov_RTS.Traces.Output.Files.Write_Trace_File
-           (Buffers  => GNATcov_RTS.Buffers.Lists.${ada_lib_name}.List,
-            Filename => Filename);
+           (Buffers_Groups => GCVRT.${ada_lib_name}.List,
+            Filename       => Filename);
+         Free (Filename);
       end Dump_Source_Trace;
 
    % endif
