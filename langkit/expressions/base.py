@@ -1894,10 +1894,10 @@ class PropertyDef(AbstractNodeData):
 
         :param expr: The expression for the property, if available.
 
-        :param str|None doc: User documentation for this property.
-        :param bool|None public: See AbstractNodeData's constructor.
-        :param bool abstract: Whether this property is abstract or not. If this
-            is True, then expr can be None.
+        :param doc: User documentation for this property.
+        :param public: See AbstractNodeData's constructor.
+        :param abstract: Whether this property is abstract or not. If this is
+            True, then expr can be None.
 
         :param arguments: List of natural arguments for this property, if known
             when creating this property.
@@ -1909,7 +1909,6 @@ class PropertyDef(AbstractNodeData):
             and for properties that take parameters. If the type itself is not
             available when creating the property, a lambda function that
             returns it is available.
-        :type type: CompiledType|langkit.compiled_types.TypeRepo.Defer|None
 
         :param dynamic_vars: List of dynamic variables that must be bound
             before calling this property, i.e. used as arguments in this
@@ -1919,58 +1918,57 @@ class PropertyDef(AbstractNodeData):
             list if these is no property to override. Just like `public`, it
             must always be consistent with base classes.
 
-        :param bool memoized: Whether this property must be memoized. Disabled
-            by default.
+        :param memoized: Whether this property must be memoized. Disabled by
+            default.
 
-        :param bool call_memoizable: If true, allow memoization for this
-            property or its callers even when it is unsafe to do so, for
-            instance when using equation resolution constructs, which are
+        :param call_memoizable: If true, allow memoization for this property or
+            its callers even when it is unsafe to do so, for instance when
+            using equation resolution constructs, which are
             memoization-unfriendly as they use side-effects. This should be
             used when the side-effect is contained inside the call to this
             property (i.e. when the property is pure from the point of view of
             callers).
 
-        :param bool external: Whether this property's implementation is
-            provided by the language specification. If true, `expr` must be
-            None and the implementation must be provided in the
+        :param external: Whether this property's implementation is provided by
+            the language specification. If true, `expr` must be None and the
+            implementation must be provided in the
             extensions/nodes/{node_name}/bodies extension file. Note that the
             engines always generate the public declaration part.
 
-        :param bool uses_entity_info: Whether this property requires entity
+        :param uses_entity_info: Whether this property requires entity
             information to be passed for Self. If left to None, this will be
             computed using the properties call graph. If false, uses of entity
             info will be rejected. Note that this must be non-None for external
             property, as they escape call graph analysis.
 
-        :param bool|None uses_envs: Whether this property makes a lexical
-            environment lookup, or calls a property that does one
-            (transitively). If left to None, this will be computed using the
-            properties call graph. If false, lookups will be rejected. Note
-            that this must be non-None for external property, as they escape
-            call graph analysis.
+        :param uses_envs: Whether this property makes a lexical environment
+            lookup, or calls a property that does one (transitively). If left
+            to None, this will be computed using the properties call graph. If
+            false, lookups will be rejected. Note that this must be non-None
+            for external property, as they escape call graph analysis.
 
-        :param bool optional_entity_info: If `uses_entity_info` is True,
-            whether the entity info is optional. This allows properties to be
-            called on 1) bare AST nodes, in which case the default entity info
-            is passed, and 2) on entities, in which case the entity info from
-            the prefix is passed.
+        :param optional_entity_info: If `uses_entity_info` is True, whether the
+            entity info is optional. This allows properties to be called on 1)
+            bare AST nodes, in which case the default entity info is passed,
+            and 2) on entities, in which case the entity info from the prefix
+            is passed.
 
-        :param bool|None warn_on_unused: Whether to warn on unused or not.
-            Defaults to None, which means "unspecified by the user".
+        :param warn_on_unused: Whether to warn on unused or not.  Defaults to
+            None, which means "unspecified by the user".
 
-        :param bool artificial: Whether this property is artificial: not
-            created in the language spec, but still visible for users (unlike
-            internal properties).
+        :param artificial: Whether this property is artificial: not created in
+            the language spec, but still visible for users (unlike internal
+            properties).
 
-        :param str|None call_non_memoizable_because: If not-None, makes the use
-            of this property in a memoized context impossible. Must be used for
+        :param call_non_memoizable_because: If not-None, makes the use of this
+            property in a memoized context impossible. Must be used for
             external properties that do side effects (such as loading an
             analysis unit), as this conflicts with the memoization machinery.
 
-        :param bool activate_tracing: Whether we want to activate tracing for
-            this property's execution.
+        :param activate_tracing: Whether we want to activate tracing for this
+            property's execution.
 
-        :param bool dump_ir: If true, dump the body expression tree for this
+        :param dump_ir: If true, dump the body expression tree for this
             property.
 
         :param lazy_field: Whether the goal of this property is to initialize a
@@ -2015,8 +2013,6 @@ class PropertyDef(AbstractNodeData):
         """
         Whether this property is just a wrapper that, based on the kind of
         Self, dispatches to specific properties.
-
-        :type: bool
         """
 
         self.is_artificial_dispatcher = False
@@ -2333,8 +2329,6 @@ class PropertyDef(AbstractNodeData):
           type or privacy, consistency of annotations between base property
           and inherited properties.
         * Property overriding completeness checking.
-
-        :type context: langkit.compile_context.CompileCtx
         """
         diag_ctx = DiagnosticContext(self.location)
 
@@ -3316,8 +3310,6 @@ class LocalVars:
             Set the current scope to the parent of the current scope. Return
             this parent scope. Doing so when the current scope is the root one
             is an error.
-
-            :rtype: LocalVars.Scope
             """
             parent = self.vars.current_scope.parent
             assert parent, "Trying to pop the root scope"

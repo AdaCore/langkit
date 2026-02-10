@@ -11,8 +11,6 @@ def get_current_gdb_context() -> Context:
     """
     This function is meant to be called from a running gdb instance. It will
     return the relevant Context instance depending on the code being executed.
-
-    :rtype: Context
     """
     assert langkit.gdb.global_context
     return langkit.gdb.global_context

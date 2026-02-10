@@ -72,9 +72,8 @@ def assert_type(obj: object, typ: Type[_T]) -> _T:
 
     3. Provides a relatively informative error message by default.
 
-    :param Any obj: The object to check.
-    :param T typ: Type parameter. The expected type of obj.
-    :rtype: T
+    :param obj: The object to check.
+    :param typ: Type parameter. The expected type of obj.
     """
     if issubclass(type(obj), type):
         assert isinstance(obj, type)
@@ -261,7 +260,7 @@ def issubtype(type: object, parent_type: Type) -> bool:
     us in langkit.
 
     :param type: The object or type to check against parent_type.
-    :param type parent_type: The supposed parent_type of type.
+    :param parent_type: The supposed parent_type of type.
     """
     return inspect.isclass(type) and issubclass(type, parent_type)
 
@@ -299,10 +298,8 @@ def astnode_kind_set(context: CompileCtx, nodes: Iterable[ASTNodeType]) -> str:
 
     The result is suitable to use in Ada's `X in Y | Z` construct.
 
-    :param set[langkit.compiled_types.ASTNodeType] nodes: Set of AST
-        nodes to process. Abstract AST nodes are expanded into the set of
-        their concrete subclasses.
-    :rtype: str
+    :param nodes: Set of AST nodes to process. Abstract AST nodes are expanded
+        into the set of their concrete subclasses.
     """
     # Compute the set of concrete AST nodes that is covered by `nodes`
     concrete_nodes = set()

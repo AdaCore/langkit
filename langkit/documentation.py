@@ -1348,8 +1348,8 @@ base_langkit_docs = {
     "langkit.python.root_node.dump": """
         Dump the sub-tree in a human-readable format on the given file.
 
-        :param str indent: Prefix printed on each line during the dump.
-        :param file file: File in which the dump must occur.
+        :param indent: Prefix printed on each line during the dump.
+        :param file: File in which the dump must occur.
     """,
     "langkit.python.root_node.findall": """
         Helper for finditer that will return all results as a list. See
@@ -1391,7 +1391,6 @@ base_langkit_docs = {
     """,
     "langkit.python.root_node.is_a": """
         Shortcut for isinstance(self, types).
-        :rtype: bool
     """,
     "langkit.python.root_node.cast": """
         Fluent interface style method. Return ``self``, raise an error if self

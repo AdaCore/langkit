@@ -213,8 +213,7 @@ class OCamlAPISettings(AbstractAPISettings):
         """
         Return the list of all properties that should be exposed to the user.
 
-        :param ct.ASTNodeType node: The node for which we want to get the
-            properties.
+        :param node: The node for which we want to get the properties.
         """
         return [
             field
@@ -795,7 +794,7 @@ class OCamlAPISettings(AbstractAPISettings):
         Register an array type in the graph of dependency, adding a dependency
         between the array type and the element type.
 
-        :param CompiledType typ: The type we want to register in the graph.
+        :param typ: The type we want to register in the graph.
         """
         self.add_dep(typ, typ.element_type)
 

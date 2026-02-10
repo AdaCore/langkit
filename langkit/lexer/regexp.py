@@ -632,7 +632,7 @@ class RegexpCollection:
         """
         Parse a regular expression for a character range.
 
-        :param file stream: Input regexp stream.
+        :param stream: Input regexp stream.
         """
         assert stream.read() == "["
         ranges: list[tuple[int, int]] = []

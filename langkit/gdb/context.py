@@ -85,8 +85,6 @@ class Context:
             State.decode(self, frame)
 
         If `frame` is None, use the selected frame.
-
-        :rtype: State
         """
         if frame is None:
             frame = gdb.selected_frame()
@@ -97,8 +95,6 @@ class Context:
         """
         Return the prefix for symbols defined in the $.Implementation unit. For
         instance: "libfoolang.implementation.".
-
-        :rtype: str
         """
         return "{}.implementation.".format(self.lib_name)
 
@@ -113,8 +109,7 @@ class Context:
         Return the C-style symbol name to use for an Ada entity in the
         $.Implementation package.
 
-        :param str suffix: Name suffix. For instance: "my_type_name".
-        :rtype: str
+        :param suffix: Name suffix. For instance: "my_type_name".
         """
         return "{}.implementation.{}".format(self.lib_name, suffix)
 
@@ -123,7 +118,6 @@ class Context:
         Return the C-style symbol name to use for an Ada entity in the
         $.Common package.
 
-        :param str suffix: Name suffix. For instance: "my_type_name".
-        :rtype: str
+        :param suffix: Name suffix. For instance: "my_type_name".
         """
         return "{}.common.{}".format(self.lib_name, suffix)
