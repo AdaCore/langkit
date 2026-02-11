@@ -73,12 +73,14 @@ class InstrumentationMetadata:
     obsolete metadata files instead of waiting for obscure errors happening.
     """
 
-    def __init__(self, project_file: str) -> None:
+    def __init__(self, project_file: str, lkt_units: list[str]) -> None:
         """
         :param project_file: Basename for the project file of the generated
             library.
+        :param lkt_units: Filenames for all Lkt units.
         """
         self.project_file = project_file
+        self.lkt_units = lkt_units
         self.additional_sources: set[str] = set()
         self.generated_sources: set[str] = set()
 
@@ -93,6 +95,7 @@ class InstrumentationMetadata:
                     "version": self.CURRENT_VERSION,
                     "type": self.MAGIC,
                     "project_file": self.project_file,
+                    "lkt_units": self.lkt_units,
                     "additional_sources": list(self.additional_sources),
                     "generated_sources": list(self.generated_sources),
                 },
@@ -118,7 +121,7 @@ class InstrumentationMetadata:
                 )
             )
 
-        result = cls(md["project_file"])
+        result = cls(md["project_file"], md["lkt_units"])
         result.additional_sources.update(md["additional_sources"])
         result.generated_sources.update(md["generated_sources"])
         return result
@@ -333,14 +336,15 @@ class CoverageReport:
                     f.write(r.render("coverage/file_html", src_file=src_file))
 
 
-class PropertyDSLCoverage:
+class LktCoverage:
     """
-    Helper to compute the coverage of the property DSL.
+    Helper to compute the coverage of Lkt source code from the coverage of
+    generated Ada code.
     """
 
     class Data:
         """
-        Coverage data for a DSL expression.
+        Coverage data for a Lkt expression.
         """
 
         def __init__(self, expr: ExprStart):
@@ -357,18 +361,21 @@ class PropertyDSLCoverage:
 
     def __init__(
         self,
+        lkt_units: list[str],
         input_file: CoverageReport.File,
         report_group: CoverageReport.Group,
     ) -> None:
         """
         Parse GDB helpers directives in the ``input_file`` coverage
-        report, decode property DSL-level coverage from it and add this
-        coverage information to ``report_group``.
+        report, decode Lkt coverage from it and add this coverage information
+        to ``report_group``.
 
+        :param lkt_units: List of Lkt source files for the Lkt project.
         :param file_report: File coverage report to read.
-        :param report_group: Group of coverage reports under which DSL files
+        :param report_group: Group of coverage reports under which Lkt files
             should go.
         """
+        self.lkt_unit_map = {os.path.basename(f): f for f in lkt_units}
         self.input_file = input_file
         self.report_group = report_group
         self.debug_info = DebugInfo.parse_from_iterable(
@@ -376,7 +383,7 @@ class PropertyDSLCoverage:
             lines=(line.content for line in input_file.lines),
         )
 
-        self.gen_to_cov: list[list[PropertyDSLCoverage.Data]] = [
+        self.gen_to_cov: list[list[LktCoverage.Data]] = [
             [] for _ in self.input_file.lines
         ]
         """
@@ -384,7 +391,7 @@ class PropertyDSLCoverage:
         coverage data for expressions that apply to this line.
         """
 
-        self.orig_to_cov: dict[str, list[list[PropertyDSLCoverage.Data]]] = {}
+        self.orig_to_cov: dict[str, list[list[LktCoverage.Data]]] = {}
         """
         For each line in each original source files (source file names are dict
         keys), list of coverage data for scopes that apply to this line.
@@ -394,9 +401,7 @@ class PropertyDSLCoverage:
         self.annotate()
         self.propagate()
 
-    def open_orig_file(
-        self, filename: str
-    ) -> list[list[PropertyDSLCoverage.Data]]:
+    def open_orig_file(self, filename: str) -> list[list[LktCoverage.Data]]:
         """
         Consider that ``filename`` is an original source file: if this file is
         unknown so far, create a coverage report for it and start mapping its
@@ -414,13 +419,13 @@ class PropertyDSLCoverage:
 
             # Load the content of the file and consider for starters that no
             # line has associated code.
-            with open(filename, "r") as f:
+            with open(self.lkt_unit_map[filename], "r") as f:
                 for lineno, line in enumerate(f, 1):
                     file_report.lines.append(
                         CoverageReport.Line(lineno, line, ".")
                     )
 
-        # If this is the first time we see this filename, map its line to DSL
+        # If this is the first time we see this filename, map its line to Lkt
         # expressions. This can be the first time even though we already had a
         # coverage report for this file, as in theory several generated file
         # can refer to the same original file.
@@ -433,7 +438,7 @@ class PropertyDSLCoverage:
 
     def map_lines(self) -> None:
         """
-        Map lines in original and generated sources to abstract DSL constructs
+        Map lines in original and generated sources to abstract Lkt constructs
         (scopes).
         """
         for prop in self.debug_info.properties:
@@ -447,13 +452,13 @@ class PropertyDSLCoverage:
                 if not expr.lkt_sloc:
                     continue
 
-                data = PropertyDSLCoverage.Data(expr)
+                data = LktCoverage.Data(expr)
 
-                # Map DSL linenos to DSL coverage data
+                # Map Lkt linenos to coverage data
                 orig_to_cov = self.open_orig_file(expr.lkt_sloc.filename)
                 orig_to_cov[expr.lkt_sloc.line_no - 1].append(data)
 
-                # Map generated code linenos to DSL coverage data
+                # Map generated code linenos to coverage data
                 line_range = expr.line_range
                 assert isinstance(line_range.last_line, int)
                 for lineno in range(
@@ -464,7 +469,7 @@ class PropertyDSLCoverage:
     def annotate(self) -> None:
         """
         Use mappings to to convert coverage of generated sources to coverage of
-        DSL expressions.
+        Lkt sources.
         """
         for lineno, line in enumerate(self.input_file.lines, 1):
             has_code, covered = {
@@ -485,7 +490,7 @@ class PropertyDSLCoverage:
 
     def propagate(self) -> None:
         """
-        Propagate coverage of DSL expressions to original source report.
+        Propagate coverage of Lkt expressions to original source report.
         """
         # Set of expression for which we emitted a violation. Expressions can
         # span over multiple lines, so we don't want to emit one violation per
@@ -653,10 +658,10 @@ class GNATcov:
                 group = report.get_or_create("unknown", "Unknown sources")
             group.files[f.name] = f
 
-        # Create property DSL-level coverage info from the coverage reports of
-        # generated sources.
+        # Create Lkt-level coverage info from the coverage reports of generated
+        # sources.
         for f in gen_sources.files.values():
-            PropertyDSLCoverage(f, orig_sources)
+            LktCoverage(self.instr_md.lkt_units, f, orig_sources)
 
         # Remove code coverage for generated files (irrelevant)
         report.groups.pop("gen")

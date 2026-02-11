@@ -257,7 +257,9 @@ class Emitter:
         """
 
         project_file_basename = f"{self.lib_name_low}.gpr"
-        self.instr_md = InstrumentationMetadata(project_file_basename)
+        self.instr_md = InstrumentationMetadata(
+            project_file_basename, [u.filename for u in context.lkt_units]
+        )
 
         # Add all additional source files to the list of library interfaces and
         # declare them as such in instrumentation metadata.
