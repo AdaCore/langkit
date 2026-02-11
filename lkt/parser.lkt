@@ -362,7 +362,7 @@ grammar lkt_grammar {
     pattern_arg <- or(
         | FieldPatternDetail(id ":" / pattern)
         | PropertyPatternDetail(
-            basic_expr |> when (Expr.is_simple_call_expr) ":" / pattern
+            CallExpr(ref_id "(" / args ")") ":" / pattern
         )
     )
     expr <- or(
