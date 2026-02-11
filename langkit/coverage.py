@@ -272,10 +272,13 @@ class CoverageReport:
 
         # Read the coverage report for each file
         for f in files:
+            f = os.path.basename(f)
             file_report = CoverageReport.File(f)
 
             # Parse all lines
             for src_mapping in load_xml(f + ".xml"):
+                if src_mapping.tag != "src_mapping":
+                    continue
                 xml_line = get_child(get_child(src_mapping, "src"), "line")
                 line = CoverageReport.Line(
                     int(xml_line.attrib["num"]),
