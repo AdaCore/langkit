@@ -410,6 +410,7 @@ def build_and_run(
         run(
             "dune",
             "build",
+            "--cache=disabled",
             "--display",
             "quiet",
             "--root",
