@@ -689,6 +689,9 @@ class GNATcov:
         for f in gen_sources.files.values():
             PropertyDSLCoverage(f, orig_sources)
 
+        # Remove code coverage for generated files (irrelevant)
+        report.groups.pop("gen")
+
         # Output the final report
         report.render(output_dir)
 
