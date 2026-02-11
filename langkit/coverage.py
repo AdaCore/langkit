@@ -87,6 +87,7 @@ class InstrumentationMetadata:
                     "generated_sources": list(self.generated_sources),
                 },
                 f,
+                indent=2,
             )
 
     @classmethod
