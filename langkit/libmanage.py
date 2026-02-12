@@ -292,6 +292,11 @@ class ManageScript(abc.ABC):
 
         self.coverage_parser = self.add_subcommand(self.do_coverage)
         self.coverage_parser.add_argument(
+            "--cobertura-root",
+            help="Root direcotry for the Cobertura report. If not passed,"
+            " Cobertura reports are not generated.",
+        )
+        self.coverage_parser.add_argument(
             "--instr-dir",
             help="Directory that contains Langkit-generated instrumentation"
             " metadata.",
@@ -1546,6 +1551,7 @@ class ManageScript(abc.ABC):
                 traces=args.traces,
                 output_dir=args.output_dir,
                 working_dir=working_dir,
+                cobertura_root=args.cobertura_root,
             )
 
         if args.working_dir:

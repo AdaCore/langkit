@@ -77,11 +77,17 @@ class InstrumentationMetadata:
         """
         :param project_file: Basename for the project file of the generated
             library.
-        :param lkt_units: Filenames for all Lkt units.
+        :param lkt_units: Absolute filenames for all Lkt units.
         """
         self.project_file = project_file
         self.lkt_units = lkt_units
+
+        # Set of basenames for all non-Lkt sources that must be included in the
+        # report (typically sources from extensions).
         self.additional_sources: set[str] = set()
+
+        # Set of basenames for all source files that were generated in the
+        # generated library.
         self.generated_sources: set[str] = set()
 
     @staticmethod
@@ -140,6 +146,9 @@ class CoverageReport:
         def __init__(self, name: str, label: str):
             self.name = name
             self.label = label
+
+            # Mapping of source file basenames to the corresponding coverage
+            # data.
             self.files: dict[str, CoverageReport.File] = {}
 
     class File:
@@ -149,8 +158,11 @@ class CoverageReport:
         This just contain one coverage entry for each source line.
         """
 
-        def __init__(self, name: str):
-            self.name = name
+        def __init__(self, fullname: str):
+            """
+            :param name: Absolute name for this file.
+            """
+            self.fullname = fullname
             self.lines: list[CoverageReport.Line] = []
 
             self._summary: dict[str, float] | None = None
@@ -188,12 +200,19 @@ class CoverageReport:
             return self._summary
 
         @property
+        def basename(self) -> str:
+            """
+            Basename for this file.
+            """
+            return os.path.basename(self.fullname)
+
+        @property
         def html_file(self) -> str:
             """
-            Name of the HTML file to hold the coverage report for this source
-            file.
+            Basename of the HTML file to hold the coverage report for this
+            source file.
             """
-            return self.name + ".html"
+            return self.basename + ".html"
 
     class Line:
         """
@@ -286,11 +305,10 @@ class CoverageReport:
 
         # Read the coverage report for each file
         for f in files:
-            f = os.path.basename(f)
             file_report = CoverageReport.File(f)
 
             # Parse all lines
-            for src_mapping in load_xml(f + ".xml"):
+            for src_mapping in load_xml(file_report.basename + ".xml"):
                 if src_mapping.tag != "src_mapping":
                     continue
                 xml_line = get_child(get_child(src_mapping, "src"), "line")
@@ -314,10 +332,12 @@ class CoverageReport:
 
         return result
 
-    def render(self, output_dir: str) -> None:
-        def out_path(filename: str) -> str:
-            return os.path.join(output_dir, os.path.basename(filename))
-
+    def render(
+        self,
+        output_dir: str,
+        cobertura_root: str | None = None,
+    ) -> None:
+        # Generate the HTML report
         copy_to_dir(css_file, output_dir)
 
         r = Renderer(
@@ -325,15 +345,91 @@ class CoverageReport:
         )
 
         # Output the index
-        with open(out_path("index.html"), "w") as f:
+        with open(os.path.join(output_dir, "index.html"), "w") as f:
             f.write(r.render("coverage/index_html"))
 
         # Output one page per reported file
         for group in self.groups.values():
             for src_file in group.files.values():
-                report_filename = out_path(src_file.html_file)
+                report_filename = os.path.join(output_dir, src_file.html_file)
                 with open(report_filename, "w") as f:
                     f.write(r.render("coverage/file_html", src_file=src_file))
+
+        # If requested, generate the Cobertura report
+        if cobertura_root is not None:
+            cobertura_out_dir = os.path.join(output_dir, "cobertura")
+            os.makedirs(cobertura_out_dir, exist_ok=True)
+            version = "0.1"
+            timestamp = "0"
+            for group in self.groups.values():
+                for src_file in group.files.values():
+                    report_filename = os.path.join(
+                        cobertura_out_dir, src_file.basename + ".xml"
+                    )
+
+                    elt_coverage = etree.Element(
+                        "coverage", version=version, timestamp=timestamp
+                    )
+                    elt_packages = etree.SubElement(elt_coverage, "packages")
+                    elt_package = etree.SubElement(
+                        elt_packages, "package", name=src_file.basename
+                    )
+                    elt_classes = etree.SubElement(elt_package, "classes")
+                    elt_class = etree.SubElement(
+                        elt_classes,
+                        "class",
+                        name=src_file.basename,
+                        filename=os.path.relpath(
+                            src_file.fullname, cobertura_root
+                        ),
+                    )
+
+                    elt_methods = etree.SubElement(elt_class, "methods")
+                    elt_lines = etree.SubElement(elt_class, "lines")
+
+                    lines_valid = 0
+                    lines_covered = 0
+
+                    for line in src_file.lines:
+                        if line.state == ".":
+                            continue
+
+                        lines_valid += 1
+                        hits = 0
+                        if line.state == "+":
+                            lines_covered += 1
+                            hits = 1
+
+                        etree.SubElement(
+                            elt_lines,
+                            "line",
+                            number=str(line.lineno),
+                            hits=str(hits),
+                            branch="false",
+                        )
+
+                    line_rate = (
+                        "0.0"
+                        if lines_valid == 0
+                        else str(lines_covered / lines_valid)
+                    )
+
+                    for elt in [elt_coverage, elt_package, elt_class]:
+                        elt.set("line-rate", line_rate)
+                        elt.set("branch-rate", "0.0")
+                        elt.set("complexity", "-1")
+
+                    elt_coverage.set("lines-covered", str(lines_covered))
+                    elt_coverage.set("lines-valid", str(lines_valid))
+
+                    elt_coverage.set("branches-covered", "0")
+                    elt_coverage.set("branches-valid", "0")
+
+                    etree.indent(elt_coverage)
+                    with open(report_filename, "wb") as f:
+                        etree.ElementTree(elt_coverage).write(
+                            f, encoding="utf-8", xml_declaration=True
+                        )
 
 
 class LktCoverage:
@@ -379,7 +475,7 @@ class LktCoverage:
         self.input_file = input_file
         self.report_group = report_group
         self.debug_info = DebugInfo.parse_from_iterable(
-            filename=input_file.name,
+            filename=input_file.fullname,
             lines=(line.content for line in input_file.lines),
         )
 
@@ -408,18 +504,19 @@ class LktCoverage:
         lines to expressions. Return this mapping (it's an item in
         self.orig_to_cov).
         """
-        name = os.path.basename(filename)
+        basename = os.path.basename(filename)
 
         # Create a coverage report for filename if there is none
         try:
-            file_report = self.report_group.files[name]
+            file_report = self.report_group.files[basename]
         except KeyError:
-            file_report = CoverageReport.File(name)
-            self.report_group.files[name] = file_report
+            fullname = self.lkt_unit_map[filename]
+            file_report = CoverageReport.File(fullname)
+            self.report_group.files[basename] = file_report
 
             # Load the content of the file and consider for starters that no
             # line has associated code.
-            with open(self.lkt_unit_map[filename], "r") as f:
+            with open(fullname, "r") as f:
                 for lineno, line in enumerate(f, 1):
                     file_report.lines.append(
                         CoverageReport.Line(lineno, line, ".")
@@ -430,10 +527,10 @@ class LktCoverage:
         # coverage report for this file, as in theory several generated file
         # can refer to the same original file.
         try:
-            result = self.orig_to_cov[name]
+            result = self.orig_to_cov[basename]
         except KeyError:
             result = [[] for _ in file_report.lines]
-            self.orig_to_cov[name] = result
+            self.orig_to_cov[basename] = result
         return result
 
     def map_lines(self) -> None:
@@ -497,8 +594,8 @@ class LktCoverage:
         # line.
         violation_emitted = set()
 
-        for name, orig_to_cov in self.orig_to_cov.items():
-            file_report = self.report_group.files[name]
+        for basename, orig_to_cov in self.orig_to_cov.items():
+            file_report = self.report_group.files[basename]
             for lineno, line in enumerate(file_report.lines, 1):
                 for data in orig_to_cov[lineno - 1]:
                     # Transition the coverage state for this line to account
@@ -639,7 +736,12 @@ class GNATcov:
         return xml_dir
 
     def _generate_final_report(
-        self, title: str, instr_dir: str, xml_dir: str, output_dir: str
+        self,
+        title: str,
+        instr_dir: str,
+        xml_dir: str,
+        output_dir: str,
+        cobertura_root: str | None = None,
     ) -> None:
         """
         Helper for generate_report. Load GNATcoverage's XML report and produce
@@ -650,13 +752,13 @@ class GNATcov:
         orig_sources = report.get_or_create("orig", "Original sources")
         gen_sources = report.get_or_create("gen", "Generated sources")
         for f in report.import_gnatcov_xml(xml_dir):
-            if f.name in self.instr_md.additional_sources:
+            if f.basename in self.instr_md.additional_sources:
                 group = orig_sources
-            elif f.name in self.instr_md.generated_sources:
+            elif f.basename in self.instr_md.generated_sources:
                 group = gen_sources
             else:
                 group = report.get_or_create("unknown", "Unknown sources")
-            group.files[f.name] = f
+            group.files[f.basename] = f
 
         # Create Lkt-level coverage info from the coverage reports of generated
         # sources.
@@ -667,7 +769,7 @@ class GNATcov:
         report.groups.pop("gen")
 
         # Output the final report
-        report.render(output_dir)
+        report.render(output_dir, cobertura_root)
 
     def generate_report(
         self,
@@ -676,6 +778,7 @@ class GNATcov:
         traces: list[str],
         output_dir: str,
         working_dir: str,
+        cobertura_root: str | None = None,
     ) -> None:
         """
         Generate a HTML coverage report.
@@ -688,6 +791,8 @@ class GNATcov:
         :param output_dir: Path to the directory where gnatcov will output the
             coverage report. Beware, this removes this directory if it exists.
         :param working_dir: Temporary directory.
+        :param cobertura_root: Root direcotry for the Cobertura report. If left
+            to None, Cobertura reports are not generated.
         """
         # Read instrumentation metadata
         self.instr_md = InstrumentationMetadata.load(instr_dir)
@@ -696,4 +801,6 @@ class GNATcov:
         ensure_clean_dir(output_dir)
 
         xml_dir = self._generate_xml_report(instr_dir, traces, working_dir)
-        self._generate_final_report(title, instr_dir, xml_dir, output_dir)
+        self._generate_final_report(
+            title, instr_dir, xml_dir, output_dir, cobertura_root
+        )
