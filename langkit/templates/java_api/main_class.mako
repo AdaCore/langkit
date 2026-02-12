@@ -3699,6 +3699,7 @@ public final class ${ctx.lib_name.camel} {
          * hasn't started a rewriting session yet.
          * @see AnalysisContext#startRewriting()
          */
+        @Override
         public RewritingContext getRewritingContext() {
             return this.rewritingContext;
         }

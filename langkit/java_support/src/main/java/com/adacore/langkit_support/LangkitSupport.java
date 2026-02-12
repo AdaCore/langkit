@@ -456,6 +456,15 @@ public class LangkitSupport {
         }
 
         /**
+         * Get the current rewriting session for the context. This may return
+         * null if no rewriting session has been started for now.
+         */
+        @CompilerDirectives.TruffleBoundary
+        public default RewritingContextInterface getRewritingContext() {
+            throw new NotImplementedException();
+        }
+
+        /**
          * Create an analysis context with its parameters.
          *
          * @param charset The charset for the analysis context, it can be null.
