@@ -23,6 +23,7 @@ def setup(
     astnode_names: list[str],
     astnode_kinds: dict[int, str],
     prefix: str,
+    standalone: bool,
 ) -> None:
     """
     Register helpers in GDB internals. This should be run when the generated
@@ -30,7 +31,9 @@ def setup(
     """
     langkit.gdb.setup_done = True
 
-    context = Context(lib_name, astnode_names, astnode_kinds, prefix)
+    context = Context(
+        lib_name, astnode_names, astnode_kinds, prefix, standalone
+    )
     langkit.gdb.global_context = context
 
     langkit.gdb.gdb_printers = printers.GDBPrettyPrinters(context)

@@ -34,5 +34,6 @@ else:
         lib_name=${repr(lib_name)},
         astnode_names=${repr(astnode_names)},
         astnode_kinds=${repr(astnode_kinds)},
-        prefix=${repr(prefix)}
+        prefix=${repr(prefix)},
+        standalone=${ctx.config.library.standalone},
     )

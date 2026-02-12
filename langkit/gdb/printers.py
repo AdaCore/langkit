@@ -249,14 +249,20 @@ class LexicalEnv:
     Wrapper for Lexical_Env/Lexical_Env_Access values.
     """
 
-    # Type name for the lexical env wrappers (generic: defined in
-    # Langkit_Support outside of generics).
-    wrapper_type_name = "langkit_support.lexical_envs.lexical_env"
+    @staticmethod
+    def wrapper_type_name(context: Context) -> str:
+        """
+        Type name for the lexical env wrappers (generic: defined in
+        Langkit_Support outside of generics).
+        """
+        return context.in_support_pkg("lexical_envs.lexical_env")
 
-    # Names for lexical env access types, still generic
-    generic_record_type_name = (
-        "langkit_support.lexical_envs.base_lexical_env_record"
-    )
+    @staticmethod
+    def generic_record_type_name(context: Context) -> str:
+        """
+        Names for lexical env access types, still generic.
+        """
+        return context.in_support_pkg("lexical_envs.base_lexical_env_record")
 
     # Names for specific lexical env access/record types, i.e. from
     # instantiations of Langkit_Support.Lexical_Env_Impl.
@@ -295,7 +301,7 @@ class LexicalEnv:
         """
         return (
             value.type.code == gdb.TYPE_CODE_STRUCT
-            and value.type.name == cls.wrapper_type_name
+            and value.type.name == cls.wrapper_type_name(context)
         )
 
     @classmethod
@@ -306,7 +312,7 @@ class LexicalEnv:
         return any(
             match_struct_ptr(value, type_name)
             for type_name in [
-                cls.generic_record_type_name,
+                cls.generic_record_type_name(context),
                 cls.specific_record_type_name(context),
             ]
         )
@@ -560,7 +566,7 @@ class RebindingsPrinter(BasePrinter):
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
         return match_struct_ptr(
-            value, "langkit_support.lexical_envs.env_rebindings_type"
+            value, context.in_support_pkg("lexical_envs.env_rebindings_type")
         )
 
     @property
@@ -631,7 +637,8 @@ class SymbolPrettyPrinter(BasePrinter):
     def matches(cls, value: gdb.Value, context: Context) -> bool:
         return (
             value.type.code == gdb.TYPE_CODE_STRUCT
-            and value.type.name == "langkit_support.symbols.symbol_type"
+            and value.type.name
+            == context.in_support_pkg("symbols.symbol_type")
         )
 
     def to_string(self) -> str:
@@ -866,8 +873,8 @@ class DiagnosticPrinter(BasePrinter):
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
         return value.type.code == gdb.TYPE_CODE_STRUCT and value.type.name in (
-            "langkit_support.diagnostics.diagnostic",
-            "langkit_support.packrat.diagnostic_entry",
+            context.in_support_pkg("diagnostics.diagnostic"),
+            context.in_support_pkg("packrat.diagnostic_entry"),
         )
 
     def to_string(self) -> str:
