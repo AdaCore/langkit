@@ -12,6 +12,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import textwrap
 import traceback
 from typing import (
@@ -27,6 +28,7 @@ from typing import (
 
 from langkit.compile_context import Verbosity
 import langkit.config as C
+from langkit.coverage import GNATcov
 from langkit.diagnostics import (
     DiagnosticError,
     DiagnosticStyle,
@@ -281,6 +283,35 @@ class ManageScript(abc.ABC):
         )
         self.create_wheel_parser.add_argument(
             "install-dir", help="Directory in which the library is installed."
+        )
+
+        #############################
+        # Compute a coverage report #
+        #############################
+
+        self.coverage_parser = self.add_subcommand(self.do_coverage)
+        self.coverage_parser.add_argument(
+            "--instr-dir",
+            help="Directory that contains Langkit-generated instrumentation"
+            " metadata.",
+        )
+        self.coverage_parser.add_argument(
+            "-o",
+            "--output-dir",
+            default="coverage-report",
+            help="Directory in which to produce the coverage report.",
+        )
+        self.coverage_parser.add_argument(
+            "--title",
+            help="HTML title for the coverage report.",
+        )
+        self.coverage_parser.add_argument(
+            "--working-dir",
+            help="Working directory to use for covearge analysis. Create a"
+            " temporary one if not provided.",
+        )
+        self.coverage_parser.add_argument(
+            "traces", nargs="+", help="Trace files used to compute coverage."
         )
 
         self.add_extra_subcommands()
@@ -1478,6 +1509,35 @@ class ManageScript(abc.ABC):
                     subsequent_indent="  ",
                 ):
                     print(line)
+
+    def do_coverage(self, args: argparse.Namespace) -> None:
+        """
+        Compute a coverage report from trace files.
+
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
+        """
+        os.environ.update(self.derived_env())
+
+        def run(working_dir: str) -> None:
+            GNATcov().generate_report(
+                title=(
+                    args.title
+                    or f"{self.context.lib_name.camel} Coverage Report"
+                ),
+                instr_dir=args.instr_dir
+                or self.dirs.build_dir("obj", "instr"),
+                traces=args.traces,
+                output_dir=args.output_dir,
+                working_dir=working_dir,
+            )
+
+        if args.working_dir:
+            os.makedirs(args.working_dir, exist_ok=True)
+            run(args.working_dir)
+        else:
+            with tempfile.TemporaryDirectory(prefix="lkm-cov") as temp_dir:
+                run(temp_dir)
 
     def setup_environment(self, add_path: Callable[[str, str], None]) -> None:
         """
