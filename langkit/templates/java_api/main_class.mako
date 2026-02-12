@@ -3447,9 +3447,9 @@ public final class ${ctx.lib_name.camel} {
         % if ctx.generate_unparsers:
         /**
          * The rewriting context associated with this analysis context.
-         * It can be the none value.
+         * If there is no opened rewriting session, this is null.
          */
-        RewritingContext rewritingContext = RewritingContext.NONE;
+        RewritingContext rewritingContext = null;
         % endif
 
         // ----- Constructors -----
@@ -3695,8 +3695,8 @@ public final class ${ctx.lib_name.camel} {
         % if ctx.generate_unparsers:
         /**
          * Get the currently open rewriting context associated to this
-         * analysis context. The None rewriting context is returned if the
-         * current context hasn't started a rewriting session.
+         * analysis context. The null value is returned if the current context
+         * hasn't started a rewriting session yet.
          * @see AnalysisContext#startRewriting()
          */
         public RewritingContext getRewritingContext() {

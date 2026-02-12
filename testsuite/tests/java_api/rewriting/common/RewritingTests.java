@@ -66,8 +66,8 @@ public class RewritingTests {
             AnalysisContext context = AnalysisContext.create();
         ) {
             assertTrue(
-                "Rewriting context is None",
-                context.getRewritingContext() == RewritingContext.NONE
+                "Rewriting context reference is null",
+                context.getRewritingContext() == null
             );
 
             // Open a context and close it manually
