@@ -3975,12 +3975,12 @@ public final class ${ctx.lib_name.camel} {
                     NI_LIB.${nat("rewriting_start_rewriting")}(
                         this.reference.ni()
                     );
+                checkException();
                 res = RewritingContext.wrap(resNative);
             } else {
                 res = JNI_LIB.${nat("rewriting_start_rewriting")}(this);
             }
 
-            checkException();
             this.rewritingContext = res;
             return this.rewritingContext;
         }
@@ -4346,15 +4346,9 @@ public final class ${ctx.lib_name.camel} {
 
         /** Singleton representing the none rewriting context */
         public static final RewritingContext NONE = new RewritingContext(
-            PointerWrapper.nullPointer()
+            PointerWrapper.nullPointer(),
+            null
         );
-
-        /**
-         * This map contains all wrapped rewriting context associated to their
-         * address.
-         */
-        private static final Map<PointerWrapper, RewritingContext> contextCache
-            = new ConcurrentHashMap<>();
 
         // ----- Instance attributes -----
 
@@ -4365,7 +4359,7 @@ public final class ${ctx.lib_name.camel} {
          * Cache for the analysis context associated with this rewriting
          * context.
          */
-        private AnalysisContext analysisContext;
+        private final AnalysisContext analysisContext;
 
         /** Whether the rewriting context has already been closed. */
         private boolean closed;
@@ -4374,10 +4368,32 @@ public final class ${ctx.lib_name.camel} {
 
         /** Create a new rewriting context with its native reference. */
         private RewritingContext(
-            final PointerWrapper reference
+            final PointerWrapper reference,
+            final AnalysisContext analysisContext
         ) {
             this.reference = reference;
             this.closed = false;
+            this.analysisContext = analysisContext;
+        }
+
+        /**
+         * Internal helper to get an analysis context from a rewriting context
+         * reference.
+         */
+        private static AnalysisContext getAnalysisContextFromRef(
+            PointerWrapper reference
+        ) {
+            if(ImageInfo.inImageCode()) {
+                return AnalysisContext.wrap(
+                    NI_LIB.${nat("rewriting_handle_to_context")}(
+                        reference.ni()
+                    )
+                );
+            } else {
+                return JNI_LIB.${nat("rewriting_handle_to_context")}(
+                    reference.jni()
+                );
+            }
         }
 
         /**
@@ -4389,15 +4405,10 @@ public final class ${ctx.lib_name.camel} {
         static RewritingContext fromReference(
             final PointerWrapper reference
         ) {
-            if(!contextCache.containsKey(reference)) {
-                contextCache.put(
-                    reference,
-                    new RewritingContext(reference)
-                );
-            }
-            final RewritingContext res = contextCache.get(reference);
-            res.closed = false;
-            return res;
+            return new RewritingContext(
+                reference,
+                getAnalysisContextFromRef(reference)
+            );
         }
 
         // ----- Graal C API methods -----
@@ -4437,20 +4448,6 @@ public final class ${ctx.lib_name.camel} {
 
         ${java_doc('langkit.rewriting.handle_context', 8)}
         public AnalysisContext getAnalysisContext() {
-            if(this.analysisContext == null) {
-
-                if(ImageInfo.inImageCode()) {
-                    this.analysisContext = AnalysisContext.wrap(
-                        NI_LIB.${nat("rewriting_handle_to_context")}(
-                            this.unwrap()
-                        )
-                    );
-                } else {
-                    this.analysisContext =
-                        JNI_LIB.${nat("rewriting_handle_to_context")}(this);
-                }
-
-            }
             return this.analysisContext;
         }
 
@@ -4651,27 +4648,46 @@ public final class ${ctx.lib_name.camel} {
                 res = JNI_LIB.${nat("rewriting_apply")}(this);
             }
 
-            this.closed = res.success;
+            if (res.success) this.tearDown();
             return res;
+        }
+
+        /**
+         * Helper to perform cleanup actions when this rewriting context is
+         * closed.
+         */
+        private void tearDown() {
+            // Cleanup the related analysis context
+            if (this.analysisContext != null) {
+                this.analysisContext.rewritingContext = null;
+                this.analysisContext.close();
+            }
+
+            // Flag the rewriting context as closed
+            this.closed = true;
         }
 
         ${java_doc('langkit.rewriting.abort_rewriting', 8)}
         public void close() {
             if(!this.closed) {
-                if(this.analysisContext != null) {
-                    this.analysisContext.close();
-                    this.analysisContext = null;
-                }
-
                 if(ImageInfo.inImageCode()) {
                     NI_LIB.${nat("rewriting_abort_rewriting")}(this.unwrap());
                 } else {
                     JNI_LIB.${nat("rewriting_abort_rewriting")}(this);
                 }
-
                 checkException();
-                this.closed = true;
+                this.tearDown();
             }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            // Two rewriting contexts are considered equal if their wrapped
+            // external C value are the same.
+            return o == this || (
+                (o instanceof RewritingContext other)
+                && this.reference.equals(other.reference)
+            );
         }
 
     }

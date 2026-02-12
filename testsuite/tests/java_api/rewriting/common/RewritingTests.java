@@ -82,6 +82,10 @@ public class RewritingTests {
             System.out.println("Closing the rewriting context");
             rcontext1.close();
             assertTrue("Rewriting context is closed", rcontext1.isClosed());
+            assertTrue(
+                "Rewriting context reference is null",
+                context.getRewritingContext() == null
+            );
 
             // Open a new context and apply it empty
             System.out.println("\nCreating an other rewriting context");
@@ -95,6 +99,10 @@ public class RewritingTests {
                        applyResult.unit == AnalysisUnit.NONE);
             assertTrue("Other rewriting context is closed",
                        rcontext2.isClosed());
+            assertTrue(
+                "Rewriting context reference is null",
+                context.getRewritingContext() == null
+            );
 
             System.out.println("Free the apply result");
             applyResult.close();

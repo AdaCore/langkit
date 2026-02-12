@@ -2996,25 +2996,26 @@ ${api.jni_func_sig("rewriting_start_rewriting", "jobject")}(
 ) {
     // Call the native function to create a rewriting context and return the
     // wrapped result.
-    return RewritingContext_wrap(
-        env,
-        ${nat("rewriting_start_rewriting")}(AnalysisContext_unwrap(
+    ${rewriting_handle_type} rctx = ${nat("rewriting_start_rewriting")}(
+        AnalysisContext_unwrap(
             env,
             analysis_context
-        ))
+        )
     );
+    check_exception(env);
+    return RewritingContext_wrap(env, rctx);
 }
 
 // Get the analysis context
 ${api.jni_func_sig("rewriting_handle_to_context", "jobject")}(
     JNIEnv *env,
     jclass jni_lib,
-    jobject rewriting_context
+    jlong rewriting_context_pointer
 ) {
     return AnalysisContext_wrap(
         env,
         ${nat("rewriting_handle_to_context")}(
-            RewritingContext_unwrap(env, rewriting_context)
+            (${rewriting_handle_type}) rewriting_context_pointer
         )
     );
 }

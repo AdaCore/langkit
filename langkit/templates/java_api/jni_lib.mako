@@ -299,7 +299,7 @@
         @CompilerDirectives.TruffleBoundary
         public static native AnalysisContext
         ${nat("rewriting_handle_to_context")}(
-            RewritingContext rewritingContext
+            long rewritingContextPointer
         );
 
         /** Get a pointer to the rewriting units owned by the context */
