@@ -299,7 +299,8 @@ public class LangkitSupport {
     }
 
     /** Handle for an analysis context rewriting session. */
-    public interface RewritingContextInterface extends AutoCloseable {
+    public interface RewritingContextInterface extends
+        AutoCloseable, TruffleObject {
         /** Return whether the rewriting context is closed. */
         public abstract boolean isClosed();
 
