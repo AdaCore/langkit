@@ -1,6 +1,6 @@
 == basic.lkt ==
 
-LangkitRoot basic.lkt:1:1-2:17
+LangkitRoot "basic" basic.lkt:1:1-2:17
 |f_doc:
 |  ModuleDocStringLit basic.lkt:1:1-1:32
 |  |f_lines:
@@ -38,7 +38,7 @@ invalid_kind.lkt:3:1: Skipped token |"" Module doc in the wrong place.
 
 == multiline.lkt ==
 
-LangkitRoot multiline.lkt:1:1-6:17
+LangkitRoot "multiline" multiline.lkt:1:1-6:17
 |f_doc:
 |  ModuleDocStringLit multiline.lkt:1:1-5:11
 |  |f_lines:
@@ -80,7 +80,7 @@ doc = 'Module-level documentation.\n\nIt spans\nmultiple\nlines.\n'
 
 == no_doc.lkt ==
 
-LangkitRoot no_doc.lkt:1:1-2:17
+LangkitRoot "no_doc" no_doc.lkt:1:1-2:17
 |f_doc: None
 |f_imports:
 |  BaseImportList no_doc.lkt:1:1-1:1
@@ -114,7 +114,7 @@ No module-level documentation
 
 == with_decl_doc.lkt ==
 
-LangkitRoot with_decl_doc.lkt:1:1-3:17
+LangkitRoot "with_decl_doc" with_decl_doc.lkt:1:1-3:17
 |f_doc:
 |  ModuleDocStringLit with_decl_doc.lkt:1:1-1:32
 |  |f_lines:

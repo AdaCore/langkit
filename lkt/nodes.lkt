@@ -61,8 +61,22 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     @external()
     fun set_solver_debug_mode(enable: Bool): Bool
 
+    |" Return the unit that contains the Lkt prelude (predefined types and
+    |" values).
+    @exported
+    @external()
+    fun prelude_unit(): AnalysisUnit
+
+    |" Return the lexical env that contains all definitions from the prelude.
+    fun prelude_env(): LexicalEnv = node.prelude_unit().root.children_env
+
+    |" Return wether this node belongs to the Lkt prelude unit.
+    fun is_from_prelude(): Bool = node.unit == node.prelude_unit()
+
+    fun root_env(): LexicalEnv = node.unit.root.node_env
+
     fun root_get(entity_name: Symbol): Entity[Decl] =
-        node.unit.root.node_env.get_first(entity_name).as![Decl]
+        node.unit.root.children_env.get_first(entity_name).as![Decl]
 
     @memoized
     fun get_builtin_type(entity_name: Symbol): Entity[NamedTypeDecl] =
@@ -217,7 +231,7 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     |" Return an empty synthetic TypeRef list node. Used to generate synthetic
     |" type declarations.
     fun get_empty_type_ref_list(): SyntheticTypeRefList =
-        node.unit.root.as[LangkitRoot].empty_type_ref_list
+        node.self_root().empty_type_ref_list
 
     |" Create a AnyTypeDecl.
     @memoized
@@ -227,6 +241,17 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     |" Return the unit that this unit name designates. Load it if needed.
     @external()
     fun internal_fetch_referenced_unit(name: String): AnalysisUnit
+
+    |" Return the ``LangkitRoot`` node that is the root of the current unit.
+    fun self_root(): LangkitRoot = node.unit.root.as![LangkitRoot]
+
+    |" Static method. Convenience wrapper around
+    |" ``internal_fetch_referenced_unit`` to get the ``LangkitRoot`` as an
+    |" entity for a given module. Used to write lexical env resolvers.
+    fun referenced_module(module_name: Id): Entity[LangkitRoot] = {
+        val unit = node.internal_fetch_referenced_unit(module_name.text);
+        unit.root.as![LangkitRoot].as_bare_entity
+    }
 
     |" Return the topmost (from ``Self`` to the root node) FullDecl annotated
     |" with ``@invalid``, null otherwise.
@@ -341,7 +366,7 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     @exported
     fun complete(): Array[CompleteItem]
             implements LspNodeInterface.complete_items = {
-        val items = self.unit.root.node_env.get(null[Symbol]);
+        val items = self.unit.root.children_env.get(null[Symbol]);
         # When the completing a type expression, we only care about types
         if self.parents().any((p) => p is TypeRef)
         then items.filtermap(
@@ -810,7 +835,9 @@ class Decl: LktNode implements DeclarationInterface {
                     )
                 case _ =>
                     (
-                        if self.xref_entry_point() and type_var.is_null
+                        if
+                            self is LangkitRoot
+                            or (self.xref_entry_point() and type_var.is_null)
                         then self
                         else type_var
                     )
@@ -1052,77 +1079,72 @@ class Decl: LktNode implements DeclarationInterface {
 
     env_spec {
         add_all_to_env(
-            # If the type explicitly implements the ``Node`` trait, or it
-            # is annotated with "@root_node", consider it the root node of
-            # the language specification.
-            if
-                (
-                    self.full_decl()?.has_annotation(s"root_node")
-                    or self.implements_node()
-                )
-                and self.name() != s"RootNode__"
-            then
-                [
-                    EnvAssoc(
-                        key=s"RootNode__",
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
-                            env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
-                        ),
-                        metadata=null[Metadata]
+            {
+                # Regular env entry, so that this declaration is available
+                # using its name in this module.
+                val regular_entry = EnvAssoc(
+                    key=self.name(),
+                    value=node,
+                    dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.current_env,
+                        env_name=null[Symbol],
+                        direct_env=null[LexicalEnv]
                     ),
-                    EnvAssoc(
-                        key=self.name(),
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
-                            env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
-                        ),
-                        metadata=null[Metadata]
-                    )
-                ]
-            elif
-                self.full_decl()?.has_annotation(s"metadata")
-                and self.name() != s"Metadata"
-            then
-                [
-                    EnvAssoc(
-                        key=s"Metadata",
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
-                            env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
-                        ),
-                        metadata=null[Metadata]
-                    ),
-                    EnvAssoc(
-                        key=self.name(),
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
-                            env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
-                        ),
-                        metadata=null[Metadata]
-                    )
-                ]
-            else
-                [
-                    EnvAssoc(
-                        key=self.name(),
-                        value=node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
-                            env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
-                        ),
-                        metadata=null[Metadata]
-                    )
-                ]
+                    metadata=null[Metadata]
+                );
+
+                # If the type explicitly implements the ``Node`` trait, or it
+                # is annotated with "@root_node", consider it the root node of
+                # the language specification.
+                val root_node_entry =
+                    if
+                        (
+                            self.full_decl()?.has_annotation(s"root_node")
+                            or self.implements_node()
+                        )
+                        and self.name() != s"RootNode__"
+                    then
+                        [
+                            EnvAssoc(
+                                key=s"RootNode__",
+                                value=node,
+                                dest_env=DesignatedEnv(
+                                    kind=DesignatedEnvKind.direct_env,
+                                    env_name=null[Symbol],
+                                    direct_env=node.root_env()
+                                ),
+                                metadata=null[Metadata]
+                            )
+                        ]
+                    else
+                        []: EnvAssoc;
+
+                # If the type is a metadata struct declaration, register it in
+                # the root scope under the appropriate symbol: see the doc for
+                # __default_metadata in the prelude unit.
+                val metadata_entry =
+                    if self.full_decl()?.has_annotation(s"metadata") then
+                        [
+                            EnvAssoc(
+                                key=(
+                                    if node.is_from_prelude()
+                                    then s"__default_metadata"
+                                    else s"__user_metadata"
+                                ),
+                                value=node,
+                                dest_env=DesignatedEnv(
+                                    kind=DesignatedEnvKind.direct_env,
+                                    env_name=null[Symbol],
+                                    direct_env=node.root_env()
+                                ),
+                                metadata=null[Metadata]
+                            )
+                        ]
+                    else
+                        []: EnvAssoc;
+
+                [regular_entry] & root_node_entry & metadata_entry
+            }
         )
     }
 }
@@ -3603,7 +3625,7 @@ class DotExpr: Expr {
     |" its prefix(Self).
     @memoized
     fun first_var_in_prefix_env(): Entity[Decl] = match self.prefix {
-        case rid: RefId =>
+        case id: Id =>
             if self.is_call_to_super()
             then (
                 # Look for the function with the same name in the scope of
@@ -3616,8 +3638,8 @@ class DotExpr: Expr {
                 }
             )
             else
-                rid.referenced_decl()?.ref_var_suffix_ref(
-                    rid.get_type(),
+                id.referenced_decl()?.ref_var_suffix_ref(
+                    id.get_type(),
                     self.suffix
                 )
         case de: DotExpr =>
@@ -4243,13 +4265,62 @@ class DefId: Id implements TokenNode, DefiningNameInterface {
 |" depending on the context, module Ids can be either considered as defining
 |" names or references.
 class ModuleId: Id implements TokenNode {
-    # TODO: Being able to cross-reference modules seems like a good ability,
-    # but for the moment they don't fit in the framework, because they're not
-    # decls.
+
+    # Only import clauses can make modules visible (registered in lexical
+    # envs), and do so in unit root scopes only. So to resolve references to
+    # modules, a simple lookup in these scopes is enough.
+
+    @memoized
+    @call_memoizable
+    fun referenced_decl(): Entity[Decl] =
+        # Note that using LktNode.referenced_module here would be invalid, as
+        # this may be a reference to a renamed module: we need to go through
+        # the lexical environment to correctly resolve renamings.
+        node.self_root().children_env.get_first(node.symbol).as![LangkitRoot]
+
+    fun xref_equation(): Equation = %true
+
+    # Module references are not expressions that compute values, so there is
+    # no associated type.
+
+    fun get_type(): Entity[TypeDecl] = null[Entity[TypeDecl]]
 }
 
 |" Id referencing a declaration imported from an Lkt module.
 class ImportedId: Id implements TokenNode {
+    |" Helper for ``referenced_decl``. Return the declaration that corresponds
+    |" to this imported id, assuming that it was imported from ``module_name``.
+    fun referenced_decl_from_module(module_name: ModuleId): Entity[Decl] = {
+        val decl_name = node.symbol;
+        val module = node.referenced_module(module_name);
+        val scope = module.children_env;
+        scope.get_first(decl_name).as![Decl]
+    }
+
+    fun referenced_decl(): Entity[Decl] = {
+        val imp_clause = node.parents().find((n) => n is BaseImport);
+        # Imported ids can appear in two kinds of contexts
+        match imp_clause.as![BaseImport] {
+            # In ``import X`` clauses: they encode the module that is imported
+            case _: Import => node.referenced_module(node)
+
+            # In ``from X import ...``, they encode the name of the declaration
+            # that is imported.
+            case c: ImportFrom =>
+                node.referenced_decl_from_module(c.module_name)
+            case c: ImportAllFrom =>
+                node.referenced_decl_from_module(c.module_name)
+        }
+    }
+
+    fun get_type(): Entity[TypeDecl] =
+        # Only values have a type
+        self.referenced_decl().do(
+            (d) =>
+                if d is BaseValDecl
+                then d.get_type()
+                else null[Entity[TypeDecl]]
+        )
 }
 
 |" Reference identifier.
@@ -4360,18 +4431,13 @@ class RefId: Id implements TokenNode, ReferenceInterface{
             )
         )
         else
-            match first_var {
-                case _ =>
-                    self.actual_type_var
-                    <- match first_var {
-                        case _: TypeDecl => null[Entity[TypeDecl]]
-                        case etd: BaseValDecl => etd.get_type()
-                        case gd: GenericDecl => gd.decl
-                        case _ =>
-                            raise[Entity[TypeDecl]] PropertyError(
-                                "Unreachable"
-                            )
-                    }
+            self.actual_type_var
+            <- match first_var {
+                case _: LangkitRoot => null[Entity[TypeDecl]]
+                case _: TypeDecl => null[Entity[TypeDecl]]
+                case etd: BaseValDecl => etd.get_type()
+                case gd: GenericDecl => gd.decl
+                case _ => raise[Entity[TypeDecl]] PropertyError("Unreachable")
             }
 
     fun xref_equation(): Equation = {
@@ -5228,25 +5294,17 @@ class GrammarListSep: LktNode {
 |" Base node for all import clauses.
 @abstract
 class BaseImport: LktNode {
-    @parse_field
-    module_name: ModuleId
-
-    |" Return the unit that contains the module this import clause designates.
-    |" Load it if needed.
+    |" Return the list of units that contain the modules that this clause
+    |" imports. Load them if needed.
     @exported
-    fun referenced_unit(): AnalysisUnit =
-        node.internal_fetch_referenced_unit(node.module_name.text)
+    fun referenced_units(): Array[AnalysisUnit] =
+        node.referenced_modules().map(
+            (m) => node.internal_fetch_referenced_unit(m.text)
+        )
 
-    env_spec {
-        do(node.referenced_unit())
-    }
-}
-
-|" Clause to import a module.
-class Import: BaseImport {
-    @nullable
-    @parse_field
-    renaming: DefId
+    |" Return identifiers for the list of modules that this clause imports.
+    @abstract
+    fun referenced_modules(): Array[Id]
 }
 
 |" Couple of imported entity name and renaming identifier.
@@ -5257,20 +5315,103 @@ class ImportedName: LktNode {
     @nullable
     @parse_field
     renaming: DefId
+
+    |" Lexical env resolver for imported names from ``import`` nodes.
+    fun resolve_simple_import(): Entity[LktNode] =
+        node.referenced_module(node.original_name)
+
+    |" Lexical env resolver for imported names from ``from M import ...``
+    |" nodes.
+    fun resolve_import_from(): Entity[LktNode] = {
+        val module = node.referenced_module(
+            node.parent.parent.as![ImportFrom].module_name
+        );
+        val module_scope = module.children_env;
+        module_scope.get_first(node.original_name.symbol).as![Decl]
+    }
+
+    |" Helper for env specs: return an env association for this imported name.
+    fun env_assoc(): EnvAssoc = EnvAssoc(
+        # The imported entity is reachable through its renaming name (if
+        # present), or its original name.
+        key=(node.renaming or? node.original_name).symbol,
+        # The imported entity belongs to another unit, so we need to go through
+        # a resolver to fetch it: add the imported name itself to the env.
+        value=node,
+        dest_env=DesignatedEnv(
+            kind=DesignatedEnvKind.current_env,
+            env_name=null[Symbol],
+            direct_env=null[LexicalEnv]
+        ),
+        metadata=null[Metadata]
+    )
+}
+
+|" Clause to import modules.
+class Import: BaseImport {
+    @parse_field
+    imported_names: ASTList[ImportedName]
+
+    fun referenced_modules(): Array[Id] =
+        node.imported_names.map((n) => n.original_name.as[Id])
+
+    env_spec {
+        do(node.referenced_units())
+
+        # Imported entities belong to other units, so we need to go through a
+        # resolver to fetch them.
+        add_all_to_env(
+            mappings=node.imported_names.map((n) => n.env_assoc()),
+            resolver=ImportedName.resolve_simple_import
+        )
+    }
 }
 
 |" Clause to import declarations from another module.
 class ImportFrom: BaseImport {
     @parse_field
+    module_name: ModuleId
+
+    @parse_field
     imported_names: ASTList[ImportedName]
+
+    fun referenced_modules(): Array[Id] = [node.module_name.as[Id]]
+
+    env_spec {
+        do(node.referenced_units())
+
+        # See the equivalent add_all_to_env in Import's env spec
+        add_all_to_env(
+            mappings=node.imported_names.map((n) => n.env_assoc()),
+            resolver=ImportedName.resolve_import_from
+        )
+    }
 }
 
 |" Clause to import all declarations from another module.
 class ImportAllFrom: BaseImport {
+    @parse_field
+    module_name: ModuleId
+
+    fun referenced_modules(): Array[Id] = [node.module_name.as[Id]]
+
+    |" Return the module scope for the module that this clause designates.
+    fun referenced_scope(): LexicalEnv =
+        node.referenced_module(node.module_name).children_env
+
+    env_spec {
+        do(node.referenced_units())
+
+        reference([node.as[LktNode]], ImportAllFrom.referenced_scope)
+    }
 }
 
 |" For the moment, root node of a lkt compilation unit.
-class LangkitRoot: LktNode {
+class LangkitRoot: Decl {
+    @null_field
+    @parse_field
+    syn_name: DefId
+
     @nullable
     @parse_field
     doc: ModuleDocStringLit
@@ -5279,20 +5420,21 @@ class LangkitRoot: LktNode {
     @parse_field
     decls: ASTList[FullDecl]
 
-    |" External property that will fetch the prelude unit, containing
-    |" predefined types and values.
-    @exported
+    fun decl_type_name(): String = "module declaration"
+
+    fun name(): Symbol = node.module_name() or? s"<prelude>"
+
+    fun defined_scope(): LexicalEnv = node.children_env
+
+    |" Return the name of this Lkt module, or the empty symbol for the prelude.
     @external()
-    fun fetch_prelude(): AnalysisUnit
+    fun module_name(): Symbol
 
-    |" Get the hidden environment in the prelude containing a default
-    |" declaration of the Metadata type, for when it is not defined by the
-    |" specification.
-    fun internal_env(): LexicalEnv = {
-        bind origin = null[Entity[LktNode]];
-
-        node.children_env.get_first(s"__internal").as[Decl].defined_scope()
-    }
+    |" Return the Metadata type: see the doc for __default_metadata in the
+    |" prelude unit.
+    fun resolve_metadata(): Entity[LktNode] =
+        node.root_env().get_first(s"__user_metadata")
+        or? node.root_env().get_first(s"__default_metadata")
 
     |" An empty synthetic TypeRef list node. Used to generate synthetic type
     |" declarations.
@@ -5305,13 +5447,37 @@ class LangkitRoot: LktNode {
         SyntheticTypeRefList.builder([]: NodeBuilder[TypeRef]).build()
 
     env_spec {
-        do(node.fetch_prelude())
-        handle_children()
+        # Make sure the prelude unit is loaded and has its env populated
+        do(node.prelude_unit())
+
+        # Register this module in the root env and create an env to hold
+        # top-level declarations for this module.
+        add_to_env_kv(node.module_name(), node)
+        add_env()
+
+        # Make prelude declarations available in all modules other than the
+        # prelude automatically.
         reference(
             [node.as[LktNode]],
-            LangkitRoot.internal_env,
-            cond=node.unit == node.fetch_prelude()
+            LangkitRoot.prelude_env,
+            cond=not node.is_from_prelude()
         )
+
+        # Add a dynamic entry to resolve to the right Metadata type
+        add_to_env_kv(
+            key=s"Metadata",
+            value=(
+                if node.is_from_prelude() then node else null[LktNode]
+            ),
+            dest_env=DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env,
+                env_name=null[Symbol],
+                direct_env=node.root_env()
+            ),
+            resolver=LangkitRoot.resolve_metadata
+        )
+
+        handle_children()
     }
 }
 

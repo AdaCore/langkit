@@ -1926,6 +1926,21 @@ end if;
 raise;
 end;
 end;
+when Member_Index_For_Lkt_Node_P_Prelude_Unit =>
+declare
+R : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
+begin
+Set_Unit (R, N.P_Prelude_Unit);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Lkt_Node_P_Basic_Trait_Gen =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
@@ -2497,26 +2512,11 @@ declare
 N_Bare_Base_Import : constant Analysis.Base_Import := N.As_Base_Import;
 begin
 case Member is
-when Member_Index_For_Base_Import_F_Module_Name =>
+when Member_Index_For_Base_Import_P_Referenced_Units =>
 declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
+R : Internal_Acc_Analysis_Unit_Array :=  new Internal_Rec_Analysis_Unit_Array;
 begin
-Set_Node (R, N_Bare_Base_Import.F_Module_Name);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Base_Import_P_Referenced_Unit =>
-declare
-R : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
-begin
-Set_Unit (R, N_Bare_Base_Import.P_Referenced_Unit);
+R.Value := new Analysis.Analysis_Unit_Array'(N_Bare_Base_Import.P_Referenced_Units);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -2535,11 +2535,34 @@ declare
 N_Bare_Import : constant Analysis.Import := N_Bare_Base_Import.As_Import;
 begin
 case Member is
-when Member_Index_For_Import_F_Renaming =>
+when Member_Index_For_Import_F_Imported_Names =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Import.F_Renaming);
+Set_Node (R, N_Bare_Import.F_Imported_Names);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Import_All_From_Range =>
+declare
+N_Bare_Import_All_From : constant Analysis.Import_All_From := N_Bare_Base_Import.As_Import_All_From;
+begin
+case Member is
+when Member_Index_For_Import_All_From_F_Module_Name =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Import_All_From.F_Module_Name);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -2558,6 +2581,21 @@ declare
 N_Bare_Import_From : constant Analysis.Import_From := N_Bare_Base_Import.As_Import_From;
 begin
 case Member is
+when Member_Index_For_Import_From_F_Module_Name =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Import_From.F_Module_Name);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Import_From_F_Imported_Names =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
@@ -3320,6 +3358,59 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Grammar_Decl.F_Rules);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Langkit_Root_Range =>
+declare
+N_Bare_Langkit_Root : constant Analysis.Langkit_Root := N_Bare_Decl.As_Langkit_Root;
+begin
+case Member is
+when Member_Index_For_Langkit_Root_F_Doc =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Langkit_Root.F_Doc);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Langkit_Root_F_Imports =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Langkit_Root.F_Imports);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Langkit_Root_F_Decls =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Langkit_Root.F_Decls);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -5852,74 +5943,6 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Imported_Name.F_Renaming);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when others => null;
-end case;
-end;
-when Lkt_Langkit_Root_Range =>
-declare
-N_Bare_Langkit_Root : constant Analysis.Langkit_Root := N.As_Langkit_Root;
-begin
-case Member is
-when Member_Index_For_Langkit_Root_F_Doc =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Langkit_Root.F_Doc);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Langkit_Root_F_Imports =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Langkit_Root.F_Imports);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Langkit_Root_F_Decls =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Langkit_Root.F_Decls);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Langkit_Root_P_Fetch_Prelude =>
-declare
-R : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
-begin
-Set_Unit (R, N_Bare_Langkit_Root.P_Fetch_Prelude);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

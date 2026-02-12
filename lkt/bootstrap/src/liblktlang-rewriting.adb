@@ -513,15 +513,13 @@ package body Liblktlang.Rewriting is
 
          function Create_Import
            (Handle : Rewriting_Handle
-               ; F_Module_Name : Node_Rewriting_Handle
-               ; F_Renaming : Node_Rewriting_Handle
+               ; F_Imported_Names : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             return Create_Regular_Node
               (Handle,
                Lkt_Import,
-                 (1 => F_Module_Name,
-                  2 => F_Renaming));
+                 (1 => F_Imported_Names));
          end;
 
 
@@ -862,6 +860,24 @@ package body Liblktlang.Rewriting is
                Lkt_Grammar_Decl,
                  (1 => F_Syn_Name,
                   2 => F_Rules));
+         end;
+
+
+         function Create_Langkit_Root
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+               ; F_Doc : Node_Rewriting_Handle
+               ; F_Imports : Node_Rewriting_Handle
+               ; F_Decls : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Langkit_Root,
+                 (1 => F_Syn_Name,
+                  2 => F_Doc,
+                  3 => F_Imports,
+                  4 => F_Decls));
          end;
 
 
@@ -1840,22 +1856,6 @@ package body Liblktlang.Rewriting is
                Lkt_Imported_Name,
                  (1 => F_Original_Name,
                   2 => F_Renaming));
-         end;
-
-
-         function Create_Langkit_Root
-           (Handle : Rewriting_Handle
-               ; F_Doc : Node_Rewriting_Handle
-               ; F_Imports : Node_Rewriting_Handle
-               ; F_Decls : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Langkit_Root,
-                 (1 => F_Doc,
-                  2 => F_Imports,
-                  3 => F_Decls));
          end;
 
 

@@ -129,12 +129,12 @@ package Liblktlang.Analysis is
       --  :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
       --  :ada:ref:`Enum_Class_Case`, :ada:ref:`Excludes_Null`,
       --  :ada:ref:`Expr`, :ada:ref:`Full_Decl`, :ada:ref:`Grammar_List_Sep`,
-      --  :ada:ref:`Imported_Name`, :ada:ref:`Langkit_Root`,
-      --  :ada:ref:`Lexer_Case_Rule_Send`, :ada:ref:`Lexer_Case_Rule`,
-      --  :ada:ref:`List_Kind`, :ada:ref:`Lkt_Node_Base_List`,
-      --  :ada:ref:`Module_Doc_String_Line`, :ada:ref:`Null_Cond_Qualifier`,
-      --  :ada:ref:`Op`, :ada:ref:`Pattern_Detail`, :ada:ref:`Pattern`,
-      --  :ada:ref:`Type_Ref`, :ada:ref:`Var_Bind`
+      --  :ada:ref:`Imported_Name`, :ada:ref:`Lexer_Case_Rule_Send`,
+      --  :ada:ref:`Lexer_Case_Rule`, :ada:ref:`List_Kind`,
+      --  :ada:ref:`Lkt_Node_Base_List`, :ada:ref:`Module_Doc_String_Line`,
+      --  :ada:ref:`Null_Cond_Qualifier`, :ada:ref:`Op`,
+      --  :ada:ref:`Pattern_Detail`, :ada:ref:`Pattern`, :ada:ref:`Type_Ref`,
+      --  :ada:ref:`Var_Bind`
 
       function Equals (L, R : Lkt_Node) return Boolean;
       --  Comparison function, meant to compare two nodes.
@@ -151,9 +151,10 @@ package Liblktlang.Analysis is
       --  Derived nodes: :ada:ref:`Base_Grammar_Rule_Decl`,
       --  :ada:ref:`Base_Val_Decl`, :ada:ref:`Env_Spec_Decl`,
       --  :ada:ref:`Error_Decl`, :ada:ref:`Generic_Decl`,
-      --  :ada:ref:`Grammar_Decl`, :ada:ref:`Lexer_Decl`,
-      --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Synth_Fun_Decl`,
-      --  :ada:ref:`Synth_Param_Decl`, :ada:ref:`Type_Decl`
+      --  :ada:ref:`Grammar_Decl`, :ada:ref:`Langkit_Root`,
+      --  :ada:ref:`Lexer_Decl`, :ada:ref:`Lexer_Family_Decl`,
+      --  :ada:ref:`Synth_Fun_Decl`, :ada:ref:`Synth_Param_Decl`,
+      --  :ada:ref:`Type_Decl`
 
       type Expr is new Lkt_Node with private
          with First_Controlling_Parameter
@@ -1183,7 +1184,7 @@ package Liblktlang.Analysis is
       type Import is new Base_Import with private
          with First_Controlling_Parameter
       ;
-      --  Clause to import a module.
+      --  Clause to import modules.
       --
       --  This node type has no derivation.
 
@@ -1272,7 +1273,7 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Langkit_Root is new Lkt_Node with private
+      type Langkit_Root is new Decl with private
          with First_Controlling_Parameter
       ;
       --  For the moment, root node of a lkt compilation unit.
@@ -3317,6 +3318,13 @@ package Liblktlang.Analysis is
    --% belongs-to: Lkt_Node
 
          
+   function P_Prelude_Unit
+     (Node : Lkt_Node'Class) return Analysis_Unit;
+   --  Return the unit that contains the Lkt prelude (predefined types and
+   --  values).
+   --% belongs-to: Lkt_Node
+
+         
    function P_Basic_Trait_Gen
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the ``BasicTrait`` builtin generic trait.
@@ -3962,21 +3970,12 @@ package Liblktlang.Analysis is
 
 
 
-         
-   
-
-   function F_Module_Name
-     (Node : Base_Import'Class) return Module_Id;
-   --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Base_Import
-
-
 
          
-   function P_Referenced_Unit
-     (Node : Base_Import'Class) return Analysis_Unit;
-   --  Return the unit that contains the module this import clause designates.
-   --  Load it if needed.
+   function P_Referenced_Units
+     (Node : Base_Import'Class) return Analysis_Unit_Array;
+   --  Return the list of units that contain the modules that this clause
+   --  imports. Load them if needed.
    --% belongs-to: Base_Import
 
 
@@ -5911,9 +5910,9 @@ package Liblktlang.Analysis is
          
    
 
-   function F_Renaming
-     (Node : Import'Class) return Def_Id;
-   --  This field may be null even when there are no parsing errors.
+   function F_Imported_Names
+     (Node : Import'Class) return Imported_Name_List;
+   --  When there are no parsing errors, this field is never null.
    --% belongs-to: Import
 
 
@@ -5922,9 +5921,27 @@ package Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Module_Name
+     (Node : Import_All_From'Class) return Module_Id;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Import_All_From
 
 
 
+
+
+
+
+         
+   
+
+   function F_Module_Name
+     (Node : Import_From'Class) return Module_Id;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Import_From
 
 
          
@@ -6195,13 +6212,6 @@ package Liblktlang.Analysis is
    --% belongs-to: Langkit_Root
 
 
-
-         
-   function P_Fetch_Prelude
-     (Node : Langkit_Root'Class) return Analysis_Unit;
-   --  External property that will fetch the prelude unit, containing
-   --  predefined types and values.
-   --% belongs-to: Langkit_Root
 
 
 
@@ -9023,7 +9033,7 @@ private
       No_Lambda_Param_Decl_List : constant Lambda_Param_Decl_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Langkit_Root is new Lkt_Node with null record;
+         type Langkit_Root is new Decl with null record;
       No_Langkit_Root : constant Langkit_Root :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);

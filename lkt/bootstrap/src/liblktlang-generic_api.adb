@@ -259,6 +259,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Generic_Decl;
                   when Type_Index_For_Grammar_Decl =>
                      return Lkt_Grammar_Decl;
+                  when Type_Index_For_Langkit_Root =>
+                     return Lkt_Langkit_Root;
                   when Type_Index_For_Lexer_Decl =>
                      return Lkt_Lexer_Decl;
                   when Type_Index_For_Lexer_Family_Decl =>
@@ -431,8 +433,6 @@ package body Liblktlang.Generic_API is
                      return Lkt_Grammar_List_Sep;
                   when Type_Index_For_Imported_Name =>
                      return Lkt_Imported_Name;
-                  when Type_Index_For_Langkit_Root =>
-                     return Lkt_Langkit_Root;
                   when Type_Index_For_Lexer_Case_Rule =>
                      return Lkt_Lexer_Case_Rule;
                   when Type_Index_For_Lexer_Case_Rule_Send =>

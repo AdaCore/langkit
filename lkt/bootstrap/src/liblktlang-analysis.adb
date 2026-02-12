@@ -88,6 +88,8 @@ package body Liblktlang.Analysis is
         
 
         
+      function To_Public_Analysis_Unit_Array
+         (Value : Internal_Unit_Array_Access) return Analysis_Unit_Array;
 
       function To_Internal_Analysis_Unit_Array
          (Value : Analysis_Unit_Array
@@ -7010,6 +7012,9 @@ package body Liblktlang.Analysis is
 
 
       
+
+
+      
       function To_Public_Complete_Item_Array
          (Value : Internal_Complete_Item_Array_Access) return Complete_Item_Array is
       begin
@@ -7154,6 +7159,18 @@ package body Liblktlang.Analysis is
 
 
       
+      function To_Public_Analysis_Unit_Array
+         (Value : Internal_Unit_Array_Access) return Analysis_Unit_Array is
+      begin
+         return Result : Analysis_Unit_Array (1 .. Value.N) do
+            for I in Result'Range loop
+               
+               Result (I - Value.Items'First + Result'First)
+                     := Wrap_Unit (Value.Items (I))
+               ;
+            end loop;
+         end return;
+      end;
 
       function To_Internal_Analysis_Unit_Array
          (Value : Analysis_Unit_Array
@@ -8294,6 +8311,36 @@ package body Liblktlang.Analysis is
             (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Enable);
 
       return Result : Boolean := Property_Result do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function P_Prelude_Unit
+     (Node : Lkt_Node'Class) return Analysis_Unit is
+      
+
+
+      Property_Result : Internal_Unit;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Extensions.Lkt_Node_P_Prelude_Unit
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
 
 
             null;
@@ -10552,38 +10599,27 @@ package body Liblktlang.Analysis is
 
 
 
-         
-   
-
-   function F_Module_Name
-     (Node : Base_Import'Class) return Module_Id
-   is
-      Result : Bare_Module_Id;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Base_Import_F_Module_Name (Node.Internal.Node);
-         if Result = null then
-            return No_Module_Id;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Module_Name;
-
-
 
          
-   function P_Referenced_Unit
-     (Node : Base_Import'Class) return Analysis_Unit is
+   function P_Referenced_Units
+     (Node : Base_Import'Class) return Analysis_Unit_Array is
       
 
 
-      Property_Result : Internal_Unit;
+      Property_Result : Internal_Unit_Array_Access;
 
+         procedure Free_Internal;
+         --  Dec-ref all internal arguments and the property result, when
+         --  applicable.
+
+         -------------------
+         -- Free_Internal --
+         -------------------
+
+         procedure Free_Internal is
+         begin
+               Dec_Ref (Property_Result);
+         end Free_Internal;
 
    begin
       if Node.Internal.Node = null then
@@ -10595,15 +10631,19 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Base_Import_P_Referenced_Unit
+         Liblktlang.Implementation.Base_Import_P_Referenced_Units
             (Bare_Lkt_Node (Node.Internal.Node));
 
-      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
+      return Result : Analysis_Unit_Array := To_Public_Analysis_Unit_Array (Property_Result) do
 
+            Free_Internal;
 
-            null;
       end return;
 
+      exception
+         when Property_Error =>
+            Free_Internal;
+            raise;
    end;
 
 
@@ -14507,24 +14547,24 @@ package body Liblktlang.Analysis is
          
    
 
-   function F_Renaming
-     (Node : Import'Class) return Def_Id
+   function F_Imported_Names
+     (Node : Import'Class) return Imported_Name_List
    is
-      Result : Bare_Def_Id;
+      Result : Bare_Imported_Name_List;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Import_F_Renaming (Node.Internal.Node);
+      Result := Implementation.Import_F_Imported_Names (Node.Internal.Node);
          if Result = null then
-            return No_Def_Id;
+            return No_Imported_Name_List;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          end if;
-   end F_Renaming;
+   end F_Imported_Names;
 
 
 
@@ -14532,9 +14572,55 @@ package body Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Module_Name
+     (Node : Import_All_From'Class) return Module_Id
+   is
+      Result : Bare_Module_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Import_All_From_F_Module_Name (Node.Internal.Node);
+         if Result = null then
+            return No_Module_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Module_Name;
 
 
 
+
+
+
+
+         
+   
+
+   function F_Module_Name
+     (Node : Import_From'Class) return Module_Id
+   is
+      Result : Bare_Module_Id;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Import_From_F_Module_Name (Node.Internal.Node);
+         if Result = null then
+            return No_Module_Id;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Module_Name;
 
 
          
@@ -15033,36 +15119,6 @@ package body Liblktlang.Analysis is
    end F_Decls;
 
 
-
-         
-   function P_Fetch_Prelude
-     (Node : Langkit_Root'Class) return Analysis_Unit is
-      
-
-
-      Property_Result : Internal_Unit;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Extensions.Langkit_Root_P_Fetch_Prelude
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Analysis_Unit := Wrap_Unit (Property_Result) do
-
-
-            null;
-      end return;
-
-   end;
 
 
 

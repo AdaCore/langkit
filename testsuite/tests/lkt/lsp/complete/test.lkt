@@ -1,4 +1,4 @@
-import common
+from common import *
 
 class Example : FooNode {
     fun example_prop(): Int = self.p

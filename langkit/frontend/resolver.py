@@ -264,7 +264,7 @@ class Resolver:
         """
         return scope.resolve(name)
 
-    def resolve_module(self, name: L.ModuleId) -> Scope.Module:
+    def resolve_module(self, name: L.Id) -> Scope.Module:
         """
         Resolve the module designated by ``name``.
         """

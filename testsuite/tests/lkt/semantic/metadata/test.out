@@ -1,0 +1,38 @@
+Resolving test.lkt
+==================
+Expr <Id "metadata" test.lkt:1:2-1:10>
+     has_type None
+
+Id   <RefId "Node" test.lkt:5:26-5:30>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "FooNode" test.lkt:5:31-5:38>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:5:1-7:2>
+
+Decl <FunDecl "get_md" test.lkt:6:5-6:42>
+     has_type <FunctionType "() -> Metadata" test.lkt>
+
+   Id   <RefId "Metadata" test.lkt:6:19-6:27>
+        has_type None
+        references <StructDecl "Metadata" test.lkt:2:1-3:2>
+
+   Expr <DotExpr test.lkt:6:30-6:42>
+        has_type <StructDecl "Metadata" test.lkt:2:1-3:2>
+
+      Expr <DotExpr test.lkt:6:30-6:39>
+           has_type <StructDecl prelude: "EntityInfo">
+
+         Id   <RefId "self" test.lkt:6:30-6:34>
+              has_type <StructDecl prelude: "Entity[FooNode]">
+              references <SelfDecl "self" test.lkt:5:1-7:2>
+
+         Id   <RefId "info" test.lkt:6:35-6:39>
+              has_type <StructDecl prelude: "EntityInfo">
+              references <FieldDecl prelude: "info">
+
+      Id   <RefId "md" test.lkt:6:40-6:42>
+           has_type <StructDecl "Metadata" test.lkt:2:1-3:2>
+           references <FieldDecl prelude: "md">
+

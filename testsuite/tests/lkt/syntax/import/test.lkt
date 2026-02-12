@@ -1,5 +1,4 @@
-import m1
-import m1 as m1_1
+import m1_1, m1_2 as m1_3, m1_4
 from m2 import d1
 from m2 import d1 as d1_1
 from m3 import d2, d3

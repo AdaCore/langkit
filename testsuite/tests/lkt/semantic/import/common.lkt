@@ -1,0 +1,2 @@
+class FooNode implements Node[FooNode] {
+}

@@ -1,0 +1,288 @@
+Resolving test.lkt
+==================
+Id   <ImportedId "module_a" test.lkt:1:8-1:16>
+     references <LangkitRoot "module_a" module_a.lkt:1:1-7:2>
+
+Id   <ImportedId "module_b" test.lkt:2:8-2:16>
+     references <LangkitRoot "module_b" module_b.lkt:1:1-7:2>
+
+Id   <ModuleId "module_c" test.lkt:3:6-3:14>
+     references <LangkitRoot "module_c" module_c.lkt:1:1-11:2>
+
+Id   <ImportedId "var_c1" test.lkt:3:22-3:28>
+     has_type <StructDecl prelude: "Int">
+     references <ValDecl "var_c1" module_c.lkt:3:1-3:15>
+
+Id   <ImportedId "var_c2" test.lkt:3:30-3:36>
+     has_type <StructDecl prelude: "Int">
+     references <ValDecl "var_c2" module_c.lkt:4:1-4:15>
+
+Id   <ImportedId "C1" test.lkt:3:53-3:55>
+     has_type None
+     references <ClassDecl "C1" module_c.lkt:6:1-8:2>
+
+Id   <ImportedId "C2" test.lkt:3:57-3:59>
+     has_type None
+     references <ClassDecl "C2" module_c.lkt:9:1-11:2>
+
+Id   <ModuleId "module_d" test.lkt:4:6-4:14>
+     references <LangkitRoot "module_d" module_d.lkt:1:1-12:2>
+
+Decl <ValDecl "v1" test.lkt:7:1-7:27>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:7:10-7:27>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "renamed_mod" test.lkt:7:10-7:21>
+           references <LangkitRoot "module_a" module_a.lkt:1:1-7:2>
+
+      Id   <RefId "var_a" test.lkt:7:22-7:27>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "var_a" module_a.lkt:3:1-3:14>
+
+Decl <ValDecl "v2" test.lkt:8:1-8:24>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:8:10-8:24>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "module_b" test.lkt:8:10-8:18>
+           references <LangkitRoot "module_b" module_b.lkt:1:1-7:2>
+
+      Id   <RefId "var_b" test.lkt:8:19-8:24>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "var_b" module_b.lkt:3:1-3:14>
+
+Decl <ValDecl "v3" test.lkt:9:1-9:16>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "var_c1" test.lkt:9:10-9:16>
+        has_type <StructDecl prelude: "Int">
+        references <ValDecl "var_c1" module_c.lkt:3:1-3:15>
+
+Decl <ValDecl "v4" test.lkt:10:1-10:21>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "var2_from_c" test.lkt:10:10-10:21>
+        has_type <StructDecl prelude: "Int">
+        references <ValDecl "var_c2" module_c.lkt:4:1-4:15>
+
+Decl <ValDecl "v5" test.lkt:11:1-11:15>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "var_d" test.lkt:11:10-11:15>
+        has_type <StructDecl prelude: "Int">
+        references <ValDecl "var_d" module_d.lkt:8:1-8:23>
+
+Decl <ValDecl "t1" test.lkt:14:1-14:44>
+     has_type <ClassDecl "A" module_a.lkt:5:1-7:2>
+
+   Expr <DotExpr test.lkt:14:9-14:22>
+        has_type None
+
+      Id   <ModuleId "renamed_mod" test.lkt:14:9-14:20>
+           references <LangkitRoot "module_a" module_a.lkt:1:1-7:2>
+
+      Id   <RefId "A" test.lkt:14:21-14:22>
+           has_type None
+           references <ClassDecl "A" module_a.lkt:5:1-7:2>
+
+   Expr <NullLit test.lkt:14:25-14:44>
+        has_type <ClassDecl "A" module_a.lkt:5:1-7:2>
+
+      Expr <DotExpr test.lkt:14:30-14:43>
+           has_type None
+
+         Id   <ModuleId "renamed_mod" test.lkt:14:30-14:41>
+              references <LangkitRoot "module_a" module_a.lkt:1:1-7:2>
+
+         Id   <RefId "A" test.lkt:14:42-14:43>
+              has_type None
+              references <ClassDecl "A" module_a.lkt:5:1-7:2>
+
+Decl <ValDecl "t2" test.lkt:15:1-15:38>
+     has_type <ClassDecl "B" module_b.lkt:5:1-7:2>
+
+   Expr <DotExpr test.lkt:15:9-15:19>
+        has_type None
+
+      Id   <ModuleId "module_b" test.lkt:15:9-15:17>
+           references <LangkitRoot "module_b" module_b.lkt:1:1-7:2>
+
+      Id   <RefId "B" test.lkt:15:18-15:19>
+           has_type None
+           references <ClassDecl "B" module_b.lkt:5:1-7:2>
+
+   Expr <NullLit test.lkt:15:22-15:38>
+        has_type <ClassDecl "B" module_b.lkt:5:1-7:2>
+
+      Expr <DotExpr test.lkt:15:27-15:37>
+           has_type None
+
+         Id   <ModuleId "module_b" test.lkt:15:27-15:35>
+              references <LangkitRoot "module_b" module_b.lkt:1:1-7:2>
+
+         Id   <RefId "B" test.lkt:15:36-15:37>
+              has_type None
+              references <ClassDecl "B" module_b.lkt:5:1-7:2>
+
+Decl <ValDecl "t3" test.lkt:16:1-16:22>
+     has_type <ClassDecl "C1" module_c.lkt:6:1-8:2>
+
+   Id   <RefId "C1" test.lkt:16:9-16:11>
+        has_type None
+        references <ClassDecl "C1" module_c.lkt:6:1-8:2>
+
+   Expr <NullLit test.lkt:16:14-16:22>
+        has_type <ClassDecl "C1" module_c.lkt:6:1-8:2>
+
+      Id   <RefId "C1" test.lkt:16:19-16:21>
+           has_type None
+           references <ClassDecl "C1" module_c.lkt:6:1-8:2>
+
+Decl <ValDecl "t4" test.lkt:17:1-17:24>
+     has_type <ClassDecl "C2" module_c.lkt:9:1-11:2>
+
+   Id   <RefId "C_2" test.lkt:17:9-17:12>
+        has_type None
+        references <ClassDecl "C2" module_c.lkt:9:1-11:2>
+
+   Expr <NullLit test.lkt:17:15-17:24>
+        has_type <ClassDecl "C2" module_c.lkt:9:1-11:2>
+
+      Id   <RefId "C_2" test.lkt:17:20-17:23>
+           has_type None
+           references <ClassDecl "C2" module_c.lkt:9:1-11:2>
+
+Decl <ValDecl "t5" test.lkt:18:1-18:20>
+     has_type <ClassDecl "D" module_d.lkt:10:1-12:2>
+
+   Id   <RefId "D" test.lkt:18:9-18:10>
+        has_type None
+        references <ClassDecl "D" module_d.lkt:10:1-12:2>
+
+   Expr <NullLit test.lkt:18:13-18:20>
+        has_type <ClassDecl "D" module_d.lkt:10:1-12:2>
+
+      Id   <RefId "D" test.lkt:18:18-18:19>
+           has_type None
+           references <ClassDecl "D" module_d.lkt:10:1-12:2>
+
+Decl <ValDecl "de1" test.lkt:21:1-21:59>
+     has_type <StructDecl prelude: "LexicalEnv">
+
+   Expr <CallExpr test.lkt:21:11-21:59>
+        has_type <StructDecl prelude: "LexicalEnv">
+
+      Id   <RefId "dynamic_lexical_env" test.lkt:21:11-21:30>
+           has_type <FunctionType prelude: "(() -> Array[InnerEnvAssoc], () -> Entity[FooNode], Bool) -> LexicalEnv">
+           references <FunDecl prelude: "dynamic_lexical_env">
+
+      Expr <DotExpr test.lkt:21:31-21:58>
+           has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_a.lkt>
+
+         Expr <DotExpr test.lkt:21:31-21:44>
+              has_type <ClassDecl "A" module_a.lkt:5:1-7:2>
+
+            Id   <RefId "renamed_mod" test.lkt:21:31-21:42>
+                 references <LangkitRoot "module_a" module_a.lkt:1:1-7:2>
+
+            Id   <RefId "A" test.lkt:21:43-21:44>
+                 has_type <ClassDecl "A" module_a.lkt:5:1-7:2>
+                 references <ClassDecl "A" module_a.lkt:5:1-7:2>
+
+         Id   <RefId "dynenv_getter" test.lkt:21:45-21:58>
+              has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_a.lkt>
+              references <FunDecl "dynenv_getter" module_a.lkt:6:5-6:46>
+
+Decl <ValDecl "de2" test.lkt:22:1-22:56>
+     has_type <StructDecl prelude: "LexicalEnv">
+
+   Expr <CallExpr test.lkt:22:11-22:56>
+        has_type <StructDecl prelude: "LexicalEnv">
+
+      Id   <RefId "dynamic_lexical_env" test.lkt:22:11-22:30>
+           has_type <FunctionType prelude: "(() -> Array[InnerEnvAssoc], () -> Entity[FooNode], Bool) -> LexicalEnv">
+           references <FunDecl prelude: "dynamic_lexical_env">
+
+      Expr <DotExpr test.lkt:22:31-22:55>
+           has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_b.lkt>
+
+         Expr <DotExpr test.lkt:22:31-22:41>
+              has_type <ClassDecl "B" module_b.lkt:5:1-7:2>
+
+            Id   <RefId "module_b" test.lkt:22:31-22:39>
+                 references <LangkitRoot "module_b" module_b.lkt:1:1-7:2>
+
+            Id   <RefId "B" test.lkt:22:40-22:41>
+                 has_type <ClassDecl "B" module_b.lkt:5:1-7:2>
+                 references <ClassDecl "B" module_b.lkt:5:1-7:2>
+
+         Id   <RefId "dynenv_getter" test.lkt:22:42-22:55>
+              has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_b.lkt>
+              references <FunDecl "dynenv_getter" module_b.lkt:6:5-6:46>
+
+Decl <ValDecl "de3" test.lkt:23:1-23:48>
+     has_type <StructDecl prelude: "LexicalEnv">
+
+   Expr <CallExpr test.lkt:23:11-23:48>
+        has_type <StructDecl prelude: "LexicalEnv">
+
+      Id   <RefId "dynamic_lexical_env" test.lkt:23:11-23:30>
+           has_type <FunctionType prelude: "(() -> Array[InnerEnvAssoc], () -> Entity[FooNode], Bool) -> LexicalEnv">
+           references <FunDecl prelude: "dynamic_lexical_env">
+
+      Expr <DotExpr test.lkt:23:31-23:47>
+           has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_c.lkt>
+
+         Id   <RefId "C1" test.lkt:23:31-23:33>
+              has_type None
+              references <ClassDecl "C1" module_c.lkt:6:1-8:2>
+
+         Id   <RefId "dynenv_getter" test.lkt:23:34-23:47>
+              has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_c.lkt>
+              references <FunDecl "dynenv_getter" module_c.lkt:7:5-7:46>
+
+Decl <ValDecl "de4" test.lkt:24:1-24:49>
+     has_type <StructDecl prelude: "LexicalEnv">
+
+   Expr <CallExpr test.lkt:24:11-24:49>
+        has_type <StructDecl prelude: "LexicalEnv">
+
+      Id   <RefId "dynamic_lexical_env" test.lkt:24:11-24:30>
+           has_type <FunctionType prelude: "(() -> Array[InnerEnvAssoc], () -> Entity[FooNode], Bool) -> LexicalEnv">
+           references <FunDecl prelude: "dynamic_lexical_env">
+
+      Expr <DotExpr test.lkt:24:31-24:48>
+           has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_c.lkt>
+
+         Id   <RefId "C_2" test.lkt:24:31-24:34>
+              has_type None
+              references <ClassDecl "C2" module_c.lkt:9:1-11:2>
+
+         Id   <RefId "dynenv_getter" test.lkt:24:35-24:48>
+              has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_c.lkt>
+              references <FunDecl "dynenv_getter" module_c.lkt:10:5-10:46>
+
+Decl <ValDecl "de5" test.lkt:25:1-25:47>
+     has_type <StructDecl prelude: "LexicalEnv">
+
+   Expr <CallExpr test.lkt:25:11-25:47>
+        has_type <StructDecl prelude: "LexicalEnv">
+
+      Id   <RefId "dynamic_lexical_env" test.lkt:25:11-25:30>
+           has_type <FunctionType prelude: "(() -> Array[InnerEnvAssoc], () -> Entity[FooNode], Bool) -> LexicalEnv">
+           references <FunDecl prelude: "dynamic_lexical_env">
+
+      Expr <DotExpr test.lkt:25:31-25:46>
+           has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_d.lkt>
+
+         Id   <RefId "D" test.lkt:25:31-25:32>
+              has_type None
+              references <ClassDecl "D" module_d.lkt:10:1-12:2>
+
+         Id   <RefId "dynenv_getter" test.lkt:25:33-25:46>
+              has_type <FunctionType "() -> Array[InnerEnvAssoc]" module_d.lkt>
+              references <FunDecl "dynenv_getter" module_d.lkt:11:5-11:46>
+

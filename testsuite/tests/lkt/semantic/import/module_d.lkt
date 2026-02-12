@@ -1,0 +1,12 @@
+from common import FooNode
+
+# The "from module_d import *" should not import the var_c1 entity defined
+# here, and so it should not hide the "var_c1" directly imported from module_c
+# in "test.lkt".
+from module_c import var_c2 as var_c1, C2 as C1
+
+val var_d = var_c1 + 1
+
+class D: C1 {
+    fun dynenv_getter(): Array[InnerEnvAssoc]
+}
