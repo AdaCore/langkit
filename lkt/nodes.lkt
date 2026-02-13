@@ -5452,7 +5452,7 @@ class LangkitRoot: Decl {
 
         # Register this module in the root env and create an env to hold
         # top-level declarations for this module.
-        add_to_env_kv(node.module_name(), node)
+        add_to_env_kv(try node.module_name(), node)
         add_env()
 
         # Make prelude declarations available in all modules other than the
