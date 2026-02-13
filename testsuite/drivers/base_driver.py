@@ -260,6 +260,7 @@ class BaseDriver(DiffTestDriver):
         env=None,
         for_coverage=False,
         memcheck=False,
+        valgrind_suppressions=None,
         analyze_output=True,
     ):
         """
@@ -277,6 +278,8 @@ class BaseDriver(DiffTestDriver):
             this process under Valgrind. If there are memory issues, they be
             reported on the testcase output and the process will return
             non-zero.
+        :param suppressions: List of names for suppression files to pass to
+            Valgrind (see drivers.valgrind.suppression_file).
         :param bool analyze_output: See
             e3.testsuite.driver.classic.ClassicTestDriver.shell.
         """
@@ -285,7 +288,7 @@ class BaseDriver(DiffTestDriver):
             argv = ["gnatcov", "run", "-o", trace_file] + argv
 
         if memcheck and self.valgrind_enabled:
-            argv = valgrind_cmd(argv)
+            argv = valgrind_cmd(argv, suppressions=valgrind_suppressions)
 
         self.shell(argv, env=env, analyze_output=analyze_output)
 
