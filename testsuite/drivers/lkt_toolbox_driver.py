@@ -11,5 +11,6 @@ class LktToolboxDriver(BaseDriver):
         self.run_and_check(
             ["lkt_toolbox", "--check-invalid-decls", "test.lkt"],
             memcheck=self.memcheck_for_lkt,
+            valgrind_suppressions=["gnat"],
             for_coverage=True,
         )

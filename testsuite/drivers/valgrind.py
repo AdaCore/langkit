@@ -14,11 +14,15 @@ def suppression_file(name):
     return os.path.join(suppression_dir, "{}.supp".format(name))
 
 
-def valgrind_cmd(argv, suppressions=[]):
+def valgrind_cmd(argv, suppressions=None):
     """
     Wrap a command-line to run the program under Valgrind.
+
+    :param argv: Command line to wrap.
+    :param suppressions: List of names for suppression files to pass to
+        Valgrind (see drivers.valgrind.suppression_file).
     """
     result = ["valgrind", "-q", "--leak-check=full", "--error-exitcode=2"]
-    for s in suppressions:
+    for s in suppressions or []:
         result.append("--suppressions={}".format(suppression_file(s)))
     return result + argv
