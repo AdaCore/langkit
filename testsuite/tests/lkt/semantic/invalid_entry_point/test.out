@@ -1,0 +1,18 @@
+Resolving bar.lkql
+==================
+Id   <ImportedId "foo" bar.lkql:1:8-1:11>
+     references <LangkitRoot "foo" foo.lkt:1:1-1:10>
+
+Decl <ValDecl "i" bar.lkql:3:1-3:14>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <DotExpr bar.lkql:3:9-3:14>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "foo" bar.lkql:3:9-3:12>
+           references <LangkitRoot "foo" foo.lkt:1:1-1:10>
+
+      Id   <RefId "i" bar.lkql:3:13-3:14>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "i" foo.lkt:1:1-1:10>
+

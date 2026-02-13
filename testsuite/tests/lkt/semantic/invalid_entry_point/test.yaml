@@ -1,0 +1,2 @@
+driver: lkt
+entry_point: bar.lkql
