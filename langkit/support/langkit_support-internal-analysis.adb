@@ -95,9 +95,8 @@ package body Langkit_Support.Internal.Analysis is
 
    function Normalized_Unit_Filename
      (Cache : in out Virtual_File_Cache; Filename : String)
-      return GNATCOLL.VFS.Virtual_File
+      return Virtual_File
    is
-      use GNATCOLL.VFS;
       use Virtual_File_Maps;
       Key      : constant Unbounded_String := To_Unbounded_String (Filename);
       Cur      : Cursor;

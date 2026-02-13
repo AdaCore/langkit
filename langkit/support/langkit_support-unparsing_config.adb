@@ -13,6 +13,14 @@ with Langkit_Support.Slocs;  use Langkit_Support.Slocs;
 
 package body Langkit_Support.Unparsing_Config is
 
+   function Read_JSON
+     (Buffer      : Memory_Buffer_And_Access;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+      return JSON_Value;
+   --  Decode the JSON document in the given memory buffer and return it. In
+   --  case of parsing error, append messages to ``Diagnostics`` raise the
+   --  ``Invalid_Input`` exception.
+
    procedure Expand_Regular_Node_Template
      (Pool     : in out Document_Pool;
       Node     : Type_Ref;
@@ -24,6 +32,37 @@ package body Langkit_Support.Unparsing_Config is
    Linear_Template_For_Join : constant Linear_Template_Vectors.Vector :=
      [(Kind => Recurse_Left), (Kind => Recurse_Right)];
    --  Linear template for table row join templates
+
+   ---------------
+   -- Read_JSON --
+   ---------------
+
+   function Read_JSON
+     (Buffer      : Memory_Buffer_And_Access;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+      return JSON_Value
+   is
+      S : String (1 .. Buffer.Buffer.Byte_Size)
+        with Import, Address => Buffer.Buffer.Address;
+      R : constant Read_Result := Read (S);
+   begin
+      if R.Success then
+         return R.Value;
+      else
+         declare
+            Sloc       : constant Source_Location :=
+              (Line_Number (R.Error.Line), Column_Number (R.Error.Column));
+            Sloc_Range : constant Source_Location_Range :=
+              Make_Range (Sloc, Sloc);
+         begin
+            Append
+              (Diagnostics,
+               Sloc_Range,
+               To_Text (To_String (R.Error.Message)));
+            raise Invalid_Input;
+         end;
+      end if;
+   end Read_JSON;
 
    ----------------------------------
    -- Expand_Regular_Node_Template --
@@ -392,7 +431,7 @@ package body Langkit_Support.Unparsing_Config is
 
    function Load_Unparsing_Config_From_Buffer
      (Language        : Language_Id;
-      Buffer          : String;
+      Buffer          : Memory_Buffer_And_Access;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
       Check_All_Nodes : Boolean)
       return Unparsing_Configuration_Access
@@ -2022,32 +2061,15 @@ package body Langkit_Support.Unparsing_Config is
       --  For each node type described in the unparsing configuration,
       --  reference to the corresponding node configuration.
 
-      --  First, parse the JSON document
-
-      JSON_Result : constant Read_Result := Read (Buffer);
-      JSON        : JSON_Value;
+      JSON : JSON_Value;
    begin
       Result.Ref_Count := 1;
       Result.Language := Language;
       Result.Symbols := Symbols;
 
-      if JSON_Result.Success then
-         JSON := JSON_Result.Value;
-      else
-         declare
-            Sloc       : constant Source_Location :=
-              (Line_Number (JSON_Result.Error.Line),
-               Column_Number (JSON_Result.Error.Column));
-            Sloc_Range : constant Source_Location_Range :=
-              Make_Range (Sloc, Sloc);
-         begin
-            Append
-              (Diagnostics,
-               Sloc_Range,
-               To_Text (To_String (JSON_Result.Error.Message)));
-            raise Invalid_Input;
-         end;
-      end if;
+      --  First, parse the JSON document
+
+      JSON := Read_JSON (Buffer, Diagnostics);
 
       --  Then load the unparsing configuration from it
 

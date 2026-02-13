@@ -174,11 +174,8 @@ private package ${ada_lib_name}.Unparsers is
       % endfor
    );
 
-   ## TODO (eng/toolchain/gnat#600): use the External_Initialization aspect
-   ## once it is generally available.
-
-   Default_Config : aliased constant String :=
-     ${bytes_repr(ctx.emitter.default_unparsing_config, " " * 5)};
+   Default_Config_Filename : aliased constant String :=
+     ${ascii_repr(emitter.default_unparsing_config_filename)};
 
    ## Render language-defined format options
    <%
@@ -197,7 +194,7 @@ private package ${ada_lib_name}.Unparsers is
      (Token_Spacings'Access,
       Token_Newlines'Access,
       Node_Unparsers'Access,
-      Default_Config'Access,
+      Default_Config_Filename'Access,
       Format_Options'Access);
 
 end ${ada_lib_name}.Unparsers;

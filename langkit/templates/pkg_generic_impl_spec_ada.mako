@@ -109,6 +109,8 @@ private package ${ada_lib_name}.Generic_Impl is
 
    --  Implementations for generic operations on analysis types
 
+   function Get_Builtin_File (Filename : String) return Memory_Buffer;
+
    function Create_Context
      (Charset     : String;
       File_Reader : File_Reader_Reference;
@@ -248,6 +250,8 @@ private package ${ada_lib_name}.Generic_Impl is
          if ctx.generate_unparsers else
          "null"
       )},
+
+      Get_Builtin_File => Get_Builtin_File'Access,
 
       Create_Context          => Create_Context'Access,
       Context_Inc_Ref         => Context_Inc_Ref'Access,

@@ -6,7 +6,6 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Unchecked_Conversion;
 
-with Langkit_Support.Diagnostics;       use Langkit_Support.Diagnostics;
 with Langkit_Support.File_Readers;      use Langkit_Support.File_Readers;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
@@ -34,6 +33,8 @@ package Langkit_Support.Internal.Descriptor is
    --  trivial to use, but all expect non-null arguments. All operations expect
    --  safe arguments (no stale reference) and non-null ones.
 
+   type Get_Builtin_File_Type is access function
+     (Filename : String) return Memory_Buffer;
    type Create_Context_Type is access function
      (Charset     : String := "";
       File_Reader : File_Reader_Reference := No_File_Reader_Reference;
@@ -204,6 +205,10 @@ package Langkit_Support.Internal.Descriptor is
       --  unparsers. Null otherwise.
 
       --  Implementation for generic operations
+
+      Get_Builtin_File : Get_Builtin_File_Type;
+      --  Return the bytes buffer for the builtin file identified by the given
+      --  filename. Return null if there is no such builtin file.
 
       Create_Context          : Create_Context_Type;
       Context_Inc_Ref         : Context_Inc_Ref_Type;

@@ -10,10 +10,7 @@ with Ada.Strings.Unbounded.Hash;
 with Ada.Unchecked_Deallocation;
 with System;
 
-with GNATCOLL.VFS;
-
 with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
-with Langkit_Support.Diagnostics;  use Langkit_Support.Diagnostics;
 with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Token_Data_Handlers;
@@ -209,9 +206,9 @@ package Langkit_Support.Internal.Analysis is
 
    package Virtual_File_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Unbounded_String,
-      Element_Type    => GNATCOLL.VFS.Virtual_File,
+      Element_Type    => Virtual_File,
       Equivalent_Keys => "=",
-      "="             => GNATCOLL.VFS."=",
+      "="             => "=",
       Hash            => Ada.Strings.Unbounded.Hash);
 
    subtype Virtual_File_Cache is Virtual_File_Maps.Map;
@@ -221,7 +218,7 @@ package Langkit_Support.Internal.Analysis is
 
    function Normalized_Unit_Filename
      (Cache : in out Virtual_File_Cache; Filename : String)
-      return GNATCOLL.VFS.Virtual_File;
+      return Virtual_File;
    --  Try to return a canonical filename. This is used to have an
    --  as-unique-as-possible analysis unit identifier.
 
@@ -240,7 +237,7 @@ package Langkit_Support.Internal.Analysis is
 
             case Kind is
                when File =>
-                  Filename : GNATCOLL.VFS.Virtual_File;
+                  Filename : Virtual_File;
                   --  Name of the file to read
 
                when Bytes_Buffer =>

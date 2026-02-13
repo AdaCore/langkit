@@ -4,13 +4,16 @@ Code emission for Langkit-generated libraries.
 
 from __future__ import annotations
 
+import dataclasses
 import glob
+import hashlib
 import json
 import os
 import sys
 from typing import Any
 
 from langkit.caching import Cache
+from langkit.common import ada_printable_bytes
 from langkit.compile_context import AdaSourceKind, CompileCtx, Verbosity
 from langkit.config import cache_summary
 from langkit.coverage import InstrumentationMetadata
@@ -27,9 +30,73 @@ def template_extensions(ctx: CompileCtx) -> dict[str, Any]:
     return {"generic_api": GenericAPI(ctx)}
 
 
+@dataclasses.dataclass
+class BuiltinFile:
+    """
+    File that will be considered as a builtin in the generated library.
+
+    This mechanism allows language specs to embed file contents in the
+    generated library to avoid the logistic burden of shipping actual files
+    alongside the generated library.
+
+    Currently, its only use is to store the default unparsing configuration,
+    but the mechanism is generic enough to be reused in other contexts if need
+    be.
+
+    Builtin files are known inside the generated library with a special name
+    (anything starting with the ``builtin://`` prefix), and relevant file
+    reading logic is then supposed to first check if there is a corresponding
+    builtin file (using generic API internals: see
+    ``Langkit_Support.Internal.Read_File``) before using the host file system
+    to read an actual file.
+
+    In order to register a new file, code emission logic is responsible for
+    calling the ``Emitter.register_builtin_file`` method.
+    """
+
+    filename: str
+    """
+    Filename for the ``builtin://`` namespace.
+    """
+
+    contents: bytes
+    """
+    File contents.
+    """
+
+    digest: str = dataclasses.field(init=False)
+    """
+    MD5 digest for the file contents. Used to generate unique symbols to store
+    the file contents in generated code.
+    """
+
+    def __post_init__(self) -> None:
+        m = hashlib.md5()
+        m.update(self.contents)
+        self.digest = m.hexdigest()
+
+    def contents_c_symbol(self, context: CompileCtx) -> str:
+        """
+        Return the name of the C symbol that stores this file contents.
+        """
+        return context.c_api_settings.get_name(f"builtin_file_{self.digest}")
+
+    @property
+    def size(self) -> int:
+        """
+        Return the number of bytes contained in this file.
+        """
+        return len(self.contents)
+
+
 class Emitter:
     """
     Code and data holder for code emission.
+    """
+
+    default_unparsing_config_filename: str
+    """
+    Filename (in the builtin namespace) of the default unparsing configuration.
     """
 
     def __init__(self, context: CompileCtx):
@@ -92,6 +159,9 @@ class Emitter:
 
         # Paths for the various directories in which code is generated
         self.src_dir = os.path.join(self.lib_root, "src")
+        self.src_builtin_files_dir = os.path.join(
+            self.src_dir, "builtin_files"
+        )
         self.src_mains_dir = os.path.join(self.lib_root, "src-mains")
         self.scripts_dir = os.path.join(self.lib_root, "scripts")
         self.python_dir = os.path.join(self.lib_root, "python")
@@ -204,6 +274,95 @@ class Emitter:
             self.standalone_adasat_files = self.list_library_sources(
                 adasat_dir
             )
+
+        self.builtin_files: dict[str, BuiltinFile] = {}
+        """
+        Collection of builtin files for the generated library.
+
+        This maps filenames for the ``builtin://`` namespace in the generated
+        library to the builtin file details.
+        """
+
+    def register_builtin_file(self, filename: str, contents: bytes) -> str:
+        """
+        Register a new builtin file for the generated library.
+
+        :param filename: Filename in the ``builtin://`` namespace.
+        :param contents: File contents.
+        :return: The filename with the ``builtin://`` prefix.
+        """
+        assert filename not in self.builtin_files
+        self.builtin_files[filename] = BuiltinFile(filename, contents)
+        return "builtin://" + filename
+
+    def register_default_unparsing_config(self, ctx: CompileCtx) -> None:
+        """
+        Register the builtin file for the default unparsing configuration.
+        """
+        unparsing_cfg_filename = ctx.config.library.defaults.unparsing_config
+        if unparsing_cfg_filename is None:
+            unparsing_cfg = b'{"node_configs": {}}'
+        else:
+            with open(
+                os.path.join(ctx.extensions_dir, unparsing_cfg_filename), "rb"
+            ) as fp:
+                unparsing_cfg = fp.read()
+
+        self.default_unparsing_config_filename = self.register_builtin_file(
+            "unparsing/default_config.json", unparsing_cfg
+        )
+
+    def emit_builtin_files(self, ctx: CompileCtx) -> None:
+        """
+        Generate source files that provide the contents of builtin files.
+
+        These are emitted as C sources so that:
+
+        * they are automatically included in the link of the generated library
+          (no need to be in the Ada closure of the library interface),
+        * they are not in any Ada closure (these sources can be big, so having
+          them visible when compiling other source files would slow down
+          their compilation).
+        * they are super fast to compile.
+        """
+        # Write the C sources
+        output_dir = self.src_builtin_files_dir
+        gen_files: set[str] = set()
+        for i, (_, file) in enumerate(sorted(self.builtin_files.items())):
+            filename = f"f_{len(gen_files)}.c"
+            symbol = file.contents_c_symbol(ctx)
+
+            # Turn the file contents into the corresponding C string literal
+            string_lit = '"'
+            for c in file.contents:
+                # For readablity, but an actual line break just after an
+                # encoded line break.
+                if c == ord("\n"):
+                    string_lit += '\\n"\n"'
+
+                # Use the natural escape sequences for backslash and double
+                # quote.
+                elif c in (ord("\\"), ord('"')):
+                    string_lit += "\\" + chr(c)
+
+                # Escape anything that could not appear in Ada (more strict
+                # than what C allows, but it's simpler this way).
+                elif c in ada_printable_bytes:
+                    string_lit += chr(c)
+                else:
+                    string_lit += f"\\x{c:02x}"
+            string_lit += '"'
+
+            self.write_cpp_file(
+                os.path.join(output_dir, filename),
+                f"const char {symbol}[] =\n{string_lit};\n",
+            )
+            gen_files.add(filename)
+
+        # Remove obsolete C sources, so that they are not included in the link
+        # by mistake.
+        for filename in set(os.listdir(output_dir)) - gen_files:
+            os.remove(os.path.join(output_dir, filename))
 
     @property
     def generate_unparsers(self) -> bool:
@@ -323,6 +482,7 @@ class Emitter:
 
         for d in [
             self.src_dir,
+            self.src_builtin_files_dir,
             self.src_mains_dir,
             self.scripts_dir,
             os.path.join(self.lib_root, "obj"),

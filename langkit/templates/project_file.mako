@@ -32,7 +32,7 @@ ${exts.include_extension(ctx.ext('withed_projects'))}
    extra_source_files = sorted(os_path.basename(p)
                                for p in ctx.additional_source_files)
 
-   source_dirs = ["src", emitter.extensions_src_dir]
+   source_dirs = ["src", "src/builtin_files", emitter.extensions_src_dir]
 
    upper_lib_name = lib_name.upper()
 %>

@@ -2231,6 +2231,10 @@ class CompileCtx:
         return [
             MajorStepPass("Prepare code emission", start_code_emission),
             EmitterPass(
+                "register the default unparsing configuration",
+                Emitter.register_default_unparsing_config,
+            ),
+            EmitterPass(
                 "add with clauses from Lkt", Emitter.add_with_clauses_from_lkt
             ),
             EmitterPass(
@@ -2272,6 +2276,9 @@ class CompileCtx:
             EmitterPass("emit OCaml API", Emitter.emit_ocaml_api),
             EmitterPass("emit Java API", Emitter.emit_java_api),
             EmitterPass("emit Language Server", Emitter.emit_language_server),
+            EmitterPass(
+                "emit units for builtin files", Emitter.emit_builtin_files
+            ),
             EmitterPass(
                 "emit library project file", Emitter.emit_lib_project_file
             ),
