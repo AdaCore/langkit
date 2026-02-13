@@ -1850,6 +1850,7 @@ class CompileCtx:
             "java_doc": documentation.java_doc(self),
             "ocaml_doc": documentation.ocaml_doc(self),
             "ada_c_doc": documentation.ada_c_doc(self),
+            "format_ada_doc": documentation.format_ada,
             "emitter": self.emitter,
         }
         for fn in CompileCtx._template_extensions_fns:
@@ -2231,8 +2232,8 @@ class CompileCtx:
         return [
             MajorStepPass("Prepare code emission", start_code_emission),
             EmitterPass(
-                "register the default unparsing configuration",
-                Emitter.register_default_unparsing_config,
+                "register builtin unparsing configurations",
+                Emitter.register_builtin_unparsing_configs,
             ),
             EmitterPass(
                 "add with clauses from Lkt", Emitter.add_with_clauses_from_lkt

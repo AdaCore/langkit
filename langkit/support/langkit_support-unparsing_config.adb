@@ -433,7 +433,8 @@ package body Langkit_Support.Unparsing_Config is
      (Language        : Language_Id;
       Buffer          : Memory_Buffer_And_Access;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean)
+      Check_All_Nodes : Boolean;
+      Overridings     : Memory_Buffer_And_Access_Array)
       return Unparsing_Configuration_Access
    is
       Desc      : constant Language_Descriptor_Access := +Language;
@@ -2061,19 +2062,26 @@ package body Langkit_Support.Unparsing_Config is
       --  For each node type described in the unparsing configuration,
       --  reference to the corresponding node configuration.
 
-      JSON : JSON_Value;
+      JSON             : JSON_Value;
+      JSON_Overridings : array (Overridings'Range) of JSON_Value;
    begin
       Result.Ref_Count := 1;
       Result.Language := Language;
       Result.Symbols := Symbols;
 
-      --  First, parse the JSON document
+      --  First, parse the main JSON document and the overridings
 
       JSON := Read_JSON (Buffer, Diagnostics);
+      for I in Overridings'Range loop
+         JSON_Overridings (I) := Read_JSON (Overridings (I), Diagnostics);
+      end loop;
 
-      --  Then load the unparsing configuration from it
+      --  Then load the unparsing configuration from them
 
       Add_Node_Entries (JSON, Node_JSON_Map);
+      for O of JSON_Overridings loop
+         Add_Node_Entries (O, Node_JSON_Map);
+      end loop;
 
       --  Now, go through all node types: parse JSON configurations for nodes
       --  that have one, and implement configuration inheritance in general.

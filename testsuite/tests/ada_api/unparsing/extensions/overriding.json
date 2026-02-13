@@ -1,0 +1,7 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "sep": ["recurse", "hardline", "hardline"]
+    }
+  }
+}

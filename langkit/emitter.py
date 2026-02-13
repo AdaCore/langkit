@@ -30,7 +30,7 @@ def template_extensions(ctx: CompileCtx) -> dict[str, Any]:
     return {"generic_api": GenericAPI(ctx)}
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(order=True)
 class BuiltinFile:
     """
     File that will be considered as a builtin in the generated library.
@@ -39,9 +39,9 @@ class BuiltinFile:
     generated library to avoid the logistic burden of shipping actual files
     alongside the generated library.
 
-    Currently, its only use is to store the default unparsing configuration,
-    but the mechanism is generic enough to be reused in other contexts if need
-    be.
+    Currently, its only use is to store the default unparsing configuration as
+    well as builtin unparsing configuration overridings, but the mechanism is
+    generic enough to be reused in other contexts if need be.
 
     Builtin files are known inside the generated library with a special name
     (anything starting with the ``builtin://`` prefix), and relevant file
@@ -283,6 +283,8 @@ class Emitter:
         library to the builtin file details.
         """
 
+        self.builtin_unparsing_overridings: dict[names.Name, str] = {}
+
     def register_builtin_file(self, filename: str, contents: bytes) -> str:
         """
         Register a new builtin file for the generated library.
@@ -295,10 +297,11 @@ class Emitter:
         self.builtin_files[filename] = BuiltinFile(filename, contents)
         return "builtin://" + filename
 
-    def register_default_unparsing_config(self, ctx: CompileCtx) -> None:
+    def register_builtin_unparsing_configs(self, ctx: CompileCtx) -> None:
         """
-        Register the builtin file for the default unparsing configuration.
+        Register the builtin files for unparsing configuration and overridings.
         """
+        # First register a builtin file for the default unparsing configuration
         unparsing_cfg_filename = ctx.config.library.defaults.unparsing_config
         if unparsing_cfg_filename is None:
             unparsing_cfg = b'{"node_configs": {}}'
@@ -311,6 +314,22 @@ class Emitter:
         self.default_unparsing_config_filename = self.register_builtin_file(
             "unparsing/default_config.json", unparsing_cfg
         )
+
+        # Then register builtin files for each built-in unparsing configuration
+        # overridings.
+        for (
+            name,
+            info,
+        ) in ctx.config.library.builtin_unparsing_overridings.items():
+            with open(
+                os.path.join(ctx.extensions_dir, info.filename), "rb"
+            ) as fp:
+                cfg = fp.read()
+            self.builtin_unparsing_overridings[name] = (
+                self.register_builtin_file(
+                    f"unparsing/overriding_{name.lower}", cfg
+                )
+            )
 
     def emit_builtin_files(self, ctx: CompileCtx) -> None:
         """
@@ -788,6 +807,11 @@ class Emitter:
             Unit(
                 "pkg_generic_api_introspection",
                 "Generic_API.Introspection",
+                has_body=False,
+            ),
+            Unit(
+                "pkg_generic_api_unparsing",
+                "Generic_API.Unparsing",
                 has_body=False,
             ),
             Unit("pkg_generic_impl", "Generic_Impl", is_interface=False),

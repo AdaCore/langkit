@@ -358,7 +358,8 @@ private package Langkit_Support.Unparsing_Config is
      (Language        : Language_Id;
       Buffer          : Memory_Buffer_And_Access;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean)
+      Check_All_Nodes : Boolean;
+      Overridings     : Memory_Buffer_And_Access_Array)
       return Unparsing_Configuration_Access;
    --  Implementation for
    --  ``Langkit_Support.Generic_API.Unparsing.Load_Unparsing_Config``, but
