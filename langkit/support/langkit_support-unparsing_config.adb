@@ -410,9 +410,11 @@ package body Langkit_Support.Unparsing_Config is
          Hash            => Hash,
          Equivalent_Keys => "=");
 
-      function Node_Entries (JSON : JSON_Value) return Node_JSON_Maps.Map;
-      --  Assuming that ``JSON`` is an object whose keys are node type names,
-      --  compute the corresponding map where keys are converted to node types.
+      procedure Add_Node_Entries
+        (JSON : JSON_Value; Map : in out Node_JSON_Maps.Map);
+      --  Check that ``JSON`` (assumed to be an object) has a ``node_configs``
+      --  key and that is is an object, then update ``Map`` to include its
+      --  entries (string keys are converted to the  corresponding node types).
 
       package Field_JSON_Maps is new Ada.Containers.Hashed_Maps
         (Key_Type        => Struct_Member_Index,
@@ -652,25 +654,43 @@ package body Langkit_Support.Unparsing_Config is
         new Unparsing_Configuration_Record;
       Pool   : Document_Pool renames Result.Pool;
 
-      ------------------
-      -- Node_Entries --
-      ------------------
+      ----------------------
+      -- Add_Node_Entries --
+      ----------------------
 
-      function Node_Entries (JSON : JSON_Value) return Node_JSON_Maps.Map is
-         Result : Node_JSON_Maps.Map;
+      procedure Add_Node_Entries
+        (JSON : JSON_Value; Map : in out Node_JSON_Maps.Map)
+      is
+         Node_Configs : JSON_Value;
 
          procedure Process (Name : String; Value : JSON_Value);
-         --  Add Value to Result
+         --  Add Value to Map
+
+         -------------
+         -- Process --
+         -------------
 
          procedure Process (Name : String; Value : JSON_Value) is
             Key : constant Type_Index := To_Type_Index (Name);
          begin
-            Result.Insert (Key, Value);
+            Map.Include (Key, Value);
          end Process;
       begin
-         JSON.Map_JSON_Object (Process'Access);
-         return Result;
-      end Node_Entries;
+         --  Check that JSON has a "node_configs" entry and that its value is
+         --  an object.
+
+         if not JSON.Has_Field ("node_configs") then
+            Abort_Parsing ("missing ""node_configs"" key");
+         end if;
+         Node_Configs := JSON.Get ("node_configs");
+         if Node_Configs.Kind /= JSON_Object_Type then
+            Abort_Parsing ("invalid ""node_configs"" entry: object expected");
+         end if;
+
+         --  Iterate on that object to update Map
+
+         Node_Configs.Map_JSON_Object (Process'Access);
+      end Add_Node_Entries;
 
       -------------------
       -- Field_Entries --
@@ -2029,16 +2049,9 @@ package body Langkit_Support.Unparsing_Config is
          end;
       end if;
 
-      --  Then load the unparsing configuration from it. Require a
-      --  "node_configs" key.
+      --  Then load the unparsing configuration from it
 
-      if not JSON.Has_Field ("node_configs") then
-         Abort_Parsing ("missing ""node_configs"" key");
-      end if;
-
-      --  Register all node configurations in Node_JSON_Map
-
-      Node_JSON_Map := Node_Entries (JSON.Get ("node_configs"));
+      Add_Node_Entries (JSON, Node_JSON_Map);
 
       --  Now, go through all node types: parse JSON configurations for nodes
       --  that have one, and implement configuration inheritance in general.

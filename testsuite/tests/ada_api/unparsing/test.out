@@ -37,6 +37,8 @@ a: Int=2
     1:2: string expected
 # missing_node_configs.json
     missing "node_configs" key
+# invalid_node_configs.json
+    invalid "node_configs" entry: object expected
 # invalid_type_name.json
     invalid node name: NoSuchNode
 # invalid_node_name.json

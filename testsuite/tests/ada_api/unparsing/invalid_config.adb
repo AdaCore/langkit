@@ -44,6 +44,7 @@ begin
    Check ("no_such_file.json");
    Check ("invalid_syntax.json");
    Check ("missing_node_configs.json");
+   Check ("invalid_node_configs.json");
    Check ("invalid_type_name.json");
    Check ("invalid_node_name.json");
    Check ("invalid_error_node.json");
