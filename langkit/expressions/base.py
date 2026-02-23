@@ -1778,6 +1778,11 @@ class PropertyClosure:
     Identifier for the logic predicate.
     """
 
+    prop: PropertyDef
+    """
+    Property that owns this closure.
+    """
+
     partial_args: tuple[PartialArgument, ...]
     """
     Arguments passed to the property for partial evaluation.
@@ -1787,6 +1792,98 @@ class PropertyClosure:
     """
     Number of arguments passed by default value.
     """
+
+    formal_node_types: list[CompiledType] = dataclasses.field(init=False)
+    """
+    See PropertyDef.get_concrete_node_types.
+    """
+
+    def __post_init__(self) -> None:
+        self.formal_node_types = self.prop.get_concrete_node_types(self)
+
+    @property
+    def constructor_name(self) -> str:
+        """
+        Return the name of the function used to create closures.
+        """
+        return f"Create_{self.type_name}"
+
+    @property
+    def arity(self) -> int:
+        """
+        Number of arguments remaining after partial evaluation.
+        """
+        return len(self.formal_node_types)
+
+    @property
+    def is_variadic(self) -> bool:
+        """
+        Whether this property takes a variable number of entity arguments.
+        """
+        return self.arity > 1 and self.formal_node_types[1].is_array_type
+
+    @abc.abstractproperty
+    def type_name(self) -> str:
+        """
+        Return the name of the generated Ada type that encodes this closure.
+        """
+        pass
+
+    @abc.abstractproperty
+    def base_type(self) -> str:
+        """
+        Type name in the Solver_Ifc package for the base type of the generated
+        Ada type.
+        """
+        pass
+
+    @property
+    def has_refcounted_args(self) -> bool:
+        """
+        Return whether at least one partial argument is refcounted.
+        """
+        return any(pa.type.is_refcounted for pa in self.partial_args)
+
+
+@dataclasses.dataclass
+class LogicPredicateClosure(PropertyClosure):
+    """
+    Property closure used as a logic predicate.
+    """
+
+    @property
+    def type_name(self) -> str:
+        return f"{self.id}_Predicate"
+
+    @property
+    def base_type(self) -> str:
+        return "Predicate_Type" if self.arity == 1 else "N_Predicate_Type"
+
+
+@dataclasses.dataclass
+class LogicFunctorClosure(PropertyClosure):
+    """
+    Property closure used as a logic functor.
+    """
+
+    @property
+    def type_name(self) -> str:
+        return f"{self.id}_Functor"
+
+    @property
+    def base_type(self) -> str:
+        return "Converter_Type" if self.is_converter else "Combiner_Type"
+
+    @property
+    def is_converter(self) -> bool:
+        """
+        Whether this functor takes exactly one argument (an entity type).
+        """
+        return self.arity == 1
+
+    @property
+    def subp_name(self) -> str:
+        return "Convert" if self.is_converter else "Combine"
 
 
 class PropertyDef(AbstractNodeData):
@@ -2044,12 +2141,12 @@ class PropertyDef(AbstractNodeData):
         lower_properties_dispatching pass).
         """
 
-        self.logic_predicates: list[PropertyClosure] = []
+        self.logic_predicates: list[LogicPredicateClosure] = []
         """
         The list of logic predicates to generate.
         """
 
-        self.logic_functors: list[PropertyClosure] = []
+        self.logic_functors: list[LogicFunctorClosure] = []
         """
         The list of logic functors to generate.
         """
@@ -2862,12 +2959,14 @@ class PropertyDef(AbstractNodeData):
         # This id will uniquely identify both the generic package and the
         # closure data structure.
         with names.camel_with_underscores:
-            pred_id = "{}_{}".format(self.names.codegen, pred_num)
+            pred_id = f"{self.names.codegen}_{pred_num}"
 
         # We can use a list because the method is memoized, eg. this won't
         # be executed twice for the same partial_args_types tuple.
         self.logic_predicates.append(
-            PropertyClosure(pred_id, partial_args, default_passed_args)
+            LogicPredicateClosure(
+                pred_id, self, partial_args, default_passed_args
+            )
         )
 
         return pred_id
@@ -2895,12 +2994,14 @@ class PropertyDef(AbstractNodeData):
         # This id will uniquely identify both the generic package and the
         # closure data structure.
         with names.camel_with_underscores:
-            functor_id = "{}_{}".format(self.names.codegen, functor_num)
+            functor_id = f"{self.names.codegen}_{functor_num}"
 
         # Thanks to memoization, we will generate at most one functor for the
         # given arguments, so storing them in a list is fine.
         self.logic_functors.append(
-            PropertyClosure(functor_id, partial_args, default_passed_args)
+            LogicFunctorClosure(
+                functor_id, self, partial_args, default_passed_args
+            )
         )
 
         return functor_id
