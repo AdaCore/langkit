@@ -20,7 +20,7 @@
 ## Note that we could, in principle, register this synthetized node so that the
 ## relocation mechanism takes care of it, but this incurs extra complexity for
 ## a use case that is not yet proven useful. So just forbid this situation.
-if Is_Foreign_Strict (Self.Self_Env, Self) then
+if AST_Envs.Is_Foreign_Strict (Self.Self_Env, Self) then
    Raise_Property_Exception
      (Self,
       Property_Error'Identity,

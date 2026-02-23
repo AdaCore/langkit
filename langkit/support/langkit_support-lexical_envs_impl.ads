@@ -340,6 +340,11 @@ package Langkit_Support.Lexical_Envs_Impl is
    -- Lexical environment public API --
    ------------------------------------
 
+   type Lexical_Env_Array is array (Positive range <>) of Lexical_Env;
+   type Lexical_Env_Array_Access is access all Lexical_Env_Array;
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Lexical_Env_Array, Lexical_Env_Array_Access);
+
    type Entity_Resolver is access function (Ref : Entity) return Entity;
    --  Callback type for the lazy entity resolution mechanism. Such functions
    --  must take a "reference" entity (e.g. a name) and return the referenced
@@ -689,10 +694,6 @@ package Langkit_Support.Lexical_Envs_Impl is
 
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Internal_Envs.Map, Internal_Map);
-
-   type Lexical_Env_Array_Access is access all Lexical_Env_Array;
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (Lexical_Env_Array, Lexical_Env_Array_Access);
 
    type Lexical_Env_Record (Kind : Lexical_Env_Kind) is
       new Base_Lexical_Env_Record

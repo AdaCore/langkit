@@ -264,7 +264,7 @@ def make_rebind_env(
     return CallExpr(
         debug_info,
         "Rebound_Env",
-        "Rebind_Env",
+        "AST_Envs.Rebind_Env",
         T.LexicalEnv,
         [env, rebindings],
     )

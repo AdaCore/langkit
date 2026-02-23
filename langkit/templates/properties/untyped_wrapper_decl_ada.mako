@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 function ${property.names.codegen}
-  (E : Entity
+  (E : Internal_Entity
    % for arg in property.natural_arguments:
       ; ${arg.name} : ${arg.type.name}
    % endfor

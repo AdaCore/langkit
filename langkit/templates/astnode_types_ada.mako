@@ -326,7 +326,7 @@
                ## Adding a reference on a foreign environment is unsound, but
                ## it's fine for the empty/root environments, as they don't
                ## trigger relocations.
-               if Is_Foreign_Strict (Env, Self) then
+               if AST_Envs.Is_Foreign_Strict (Env, Self) then
                   Raise_Property_Exception
                     (Self,
                      Property_Error'Identity,
@@ -343,7 +343,7 @@
                ${ref_env.kind.value},
                ${("({} => True, others => False)"
                   .format(ref_env.category.camel_with_underscores)
-                  if ref_env.category else "All_Cats")},
+                  if ref_env.category else "AST_Envs.All_Cats")},
                ${ref_env.shed_rebindings});
             Dec_Ref (Ref_Env_Nodes);
          end;
