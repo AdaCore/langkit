@@ -183,8 +183,6 @@ class StatePrinter:
     def render(self) -> str:
         """
         Return the state as a string.
-
-        :rtype: str
         """
         with no_colors():
             self._render()
@@ -194,8 +192,6 @@ class StatePrinter:
         """
         If `self.with_locs`, return the name of the Ada variable that holds the
         DSL value.
-
-        :rtype: str
         """
         return " ({})".format(var_name) if self.with_locs else ""
 

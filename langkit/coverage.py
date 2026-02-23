@@ -190,7 +190,7 @@ class CoverageReport:
             """
             :param lineno: 1-based line number for this line coverage report.
             :param content: Text for this line in the source file.
-            :param str state: State for this line: see CoverageReport.STATES.
+            :param state: State for this line: see CoverageReport.STATES.
             """
             self.lineno = lineno
             self.content = content
@@ -738,15 +738,14 @@ class GNATcov:
         """
         Generate a HTML coverage report.
 
-        :param str title: Title for the coverage report.
-        :param str instr_dir: Directory that contains instrumentation data (see
-            the corresponding argument in the "instrument" method).
-        :param listr[str] traces: List of source trace files to discharge
-            coverage obligations. Typically: execution traces from a testsuite.
-        :param str output_dir: Path to the directory where gnatcov will
-            output the coverage report. Beware, this removes this directory if
-            it exists.
-        :param str working_dir: Temporary directory.
+        :param title: Title for the coverage report.
+        :param instr_dir: Directory that contains instrumentation data (see the
+            corresponding argument in the "instrument" method).
+        :param traces: List of source trace files to discharge coverage
+            obligations. Typically: execution traces from a testsuite.
+        :param output_dir: Path to the directory where gnatcov will output the
+            coverage report. Beware, this removes this directory if it exists.
+        :param working_dir: Temporary directory.
         """
         # Make sure we start with a clean output directory
         ensure_clean_dir(output_dir)

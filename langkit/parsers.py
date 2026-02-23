@@ -780,7 +780,7 @@ class Parser(abc.ABC):
         """
         Associate `grammar` to this parser and to all its children.
 
-        :param Grammar grammar: The grammar instance.
+        :param grammar: The grammar instance.
         """
         for c in self.children:
             c.set_grammar(grammar)
@@ -818,8 +818,6 @@ class Parser(abc.ABC):
         """
         Return whether this parser can be used as a sub-parser to build token
         nodes.
-
-        :rtype: bool
         """
         return False
 
@@ -881,7 +879,7 @@ class Parser(abc.ABC):
         """
         Emit code for this parser as a function into the global context.
 
-        :param langkit.compile_context.CompileCtx context: Global context.
+        :param context: Global context.
         """
         assert self not in context.fns
         context.fns.add(self)
@@ -1186,8 +1184,6 @@ class _Token(Parser):
     def matches_symbol(self) -> bool:
         """
         Return whether this parser matches over a symbol's text.
-
-        :rtype: bool
         """
         return bool(self.match_text) and isinstance(self.val, WithSymbol)
 
@@ -1258,7 +1254,7 @@ class Skip(Parser):
         dest_node: ASTNodeType,
     ):
         """
-        :param CompiledType dest_node: The error node to create.
+        :param dest_node: The error node to create.
         """
         super().__init__(context, location)
         self.dest_node = dest_node
@@ -2087,10 +2083,10 @@ class Defer(Parser):
         """
         Create a stub parser.
 
-        :param str rule_name: the name of the deferred parser (used for
+        :param rule_name: the name of the deferred parser (used for
             pretty-printing).
-        :param callable parser_fn: must be a callable that returns the
-            referenced parser.
+        :param parser_fn: must be a callable that returns the referenced
+            parser.
         """
         super().__init__(context, location)
         self.rule_name = rule_name

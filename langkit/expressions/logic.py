@@ -62,9 +62,8 @@ def untyped_literal_expr(
     capabilities, in particular temporary creation for the result.  We can do
     this because CallExpr does not need its operands' types to be valid.
 
-    :param str expr_str: Template code for this literal expression.
-    :param list[Expr] operands: Operand for this literal expression.
-    :rtype: LiteralExpr
+    :param expr_str: Template code for this literal expression.
+    :param operands: Operand for this literal expression.
     """
     return LiteralExpr(None, expr_str, T.NoCompiledType, operands)
 

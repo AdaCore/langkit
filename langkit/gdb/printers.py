@@ -158,8 +158,6 @@ class ASTNodePrinter(BasePrinter):
     def synthetic(self) -> bool:
         """
         Return whether this node is synthetic.
-
-        :rtype: bool
         """
         return int(self.value["token_start_index"]) == 0
 
@@ -168,8 +166,6 @@ class ASTNodePrinter(BasePrinter):
         Return the source location for this node as a string.
 
         This must not be called if the node is synthetic.
-
-        :rtype: str
         """
         filename = self.unit.filename
         if filename:
@@ -192,8 +188,6 @@ class ASTNodePrinter(BasePrinter):
     def parent(self) -> gdb.Value:
         """
         Return the parent node, or None if it's the root one.
-
-        :rtype: gdb.Value
         """
         return self.value["parent"]
 

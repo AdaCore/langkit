@@ -333,12 +333,9 @@ class LexerPass(AbstractPass):
         disabled: bool = False,
     ) -> None:
         """
-        :param str name: See AbstractPass.
-
+        :param name: See AbstractPass.
         :param pass_fn: Function to be run when executing the pass.
-        :type (langkit.lexer.Lexer, langkit.compile_context.CompileCtx) -> None
-
-        :param bool disabled: See AbstractPass.
+        :param disabled: See AbstractPass.
         """
         super().__init__(name, disabled)
         self.pass_fn = pass_fn

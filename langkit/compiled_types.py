@@ -62,7 +62,7 @@ def gdb_helper(*args: str) -> str:
     """
     Format given arguments into a special Ada comment for GDB helpers.
 
-    :param list[str] args: Elements of the special comment.
+    :param args: Elements of the special comment.
     """
     return "--# {}".format(shlex.join(args))
 
@@ -881,7 +881,7 @@ class CompiledType:
 
         :param location: Location of the declaration of this compiled type.
 
-        :param str doc: User documentation for this type.
+        :param doc: User documentation for this type.
 
         :param base: If this type derives from another type T, this is T.
 
@@ -1460,7 +1460,7 @@ class CompiledType:
         Turn a public value into a storage value. See documentation for
         has_special_storage.
 
-        :param str node_expr: Expression that yields the node that will own the
+        :param node_expr: Expression that yields the node that will own the
             resulting storage value.
         :param base_expr: Expression that yields the public value:
         :return: An expression that yields the storage value.
@@ -5940,7 +5940,7 @@ class TypeRepo:
         """
         Look for a type by name.
 
-        :param str type_name: The name of the rule.
+        :param type_name: The name of the rule.
         """
         return CompiledTypeRepo.type_dict[type_name]
 

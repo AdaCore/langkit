@@ -126,7 +126,7 @@ def global_context(ctx: CompileCtx) -> Iterator[None]:
     """
     Context manager that temporarily make "ctx" global.
 
-    :param CompileContext ctx: Context to make global.
+    :param ctx: Context to make global.
     """
     global compile_ctx
     old_ctx = compile_ctx
@@ -187,8 +187,6 @@ class GeneratedException:
     def doc_entity(self) -> str:
         """
         Name of the documentation entry for this exception.
-
-        :rtype: str
         """
         return "{}.{}".format(self.doc_section, self.name.lower)
 
@@ -196,8 +194,6 @@ class GeneratedException:
     def qualname(self) -> str:
         """
         Fully qualified name to the exception declaration (in Ada).
-
-        :rtype: str
         """
         return "{}.{}".format(".".join(self.package), self.name)
 
@@ -205,8 +201,6 @@ class GeneratedException:
     def kind_name(self) -> names.Name:
         """
         Return the enumeration name corresponding to an exception.
-
-        :rtype: names.Name
         """
         return names.Name("Exception") + self.name
 
@@ -400,8 +394,6 @@ class CompileCtx:
         """
         Whether the language specification was compiled. This is used to avoid
         doing it multiple times.
-
-        :type: bool
         """
 
         self.lkt_units: list[L.AnalysisUnit] = []
@@ -709,9 +701,6 @@ class CompileCtx:
         """
 
         self.unparsers: Unparsers = Unparsers(self)
-        """
-        :type: langkit.unparsers.Unparsers
-        """
 
         self.lkt_types_loader: LktTypesLoader
         """
@@ -723,8 +712,6 @@ class CompileCtx:
         """
         During code emission, GNATcov instance if coverage is enabled. None
         otherwise.
-
-        :type: None|langkit.coverage.GNATcov
         """
 
         # Register builtin exception types
@@ -1847,8 +1834,6 @@ class CompileCtx:
     def template_extensions(self) -> dict[str, object]:
         """
         Return the set of template extensions evaluated for this context.
-
-        :rtype: dict[str, object]
         """
         CompileCtx._template_extensions_frozen = True
 
@@ -3213,8 +3198,6 @@ class CompileCtx:
     def has_memoization(self) -> bool:
         """
         Return whether one property is memoized.
-
-        :rtype: bool
         """
         has_keys = bool(self.memoization_keys)
         has_values = bool(self.memoization_values)

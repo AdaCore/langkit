@@ -57,8 +57,6 @@ class Diagnostics:
     style = DiagnosticStyle.default
     """
     DiagnosticStyle instance to select the diagnostic representation format.
-
-    :type: DiagnosticStyle
     """
 
     @classmethod
@@ -88,8 +86,6 @@ class Location:
     column: int = field(default=0)
     """
     Column number (1-based). Zero if unspecified.
-
-    :type: int
     """
 
     end_line: int = field(default=0)

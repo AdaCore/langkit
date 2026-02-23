@@ -156,8 +156,6 @@ class CharSet:
         """
         Return a character set that contains everything that is not in
         ``self``.
-
-        :rtype: CharSet
         """
         result = CharSet()
 
