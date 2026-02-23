@@ -308,9 +308,7 @@ class BreakCommand(BaseCommand):
 
         # Break on the first line of the property's first inner scope so that
         # we skip the prologue (all variable declarations).
-        return gdb.Breakpoint(
-            "{}:{}".format(self.context.debug_info.filename, prop.body_start)
-        )
+        return gdb.Breakpoint(prop.body_start.gdb_spec)
 
     def break_on_lkt_sloc(self, lkt_sloc: str) -> gdb.Breakpoint | None:
         """
@@ -322,7 +320,7 @@ class BreakCommand(BaseCommand):
             print("Nothing to match")
             return None
 
-        Match = namedtuple("Match", "prop lkt_sloc line_no")
+        Match = namedtuple("Match", "prop lkt_sloc ada_loc")
         matches = []
 
         def process_scope(prop: Property, scope: Scope) -> None:
@@ -335,7 +333,7 @@ class BreakCommand(BaseCommand):
                     and e.lkt_sloc
                     and e.lkt_sloc.matches(sloc_spec)
                 ):
-                    matches.append(Match(prop, e.lkt_sloc, e.line_no))
+                    matches.append(Match(prop, e.lkt_sloc, e.loc))
 
         for prop in self.context.debug_info.properties:
             process_scope(prop, prop)
@@ -360,13 +358,7 @@ class BreakCommand(BaseCommand):
                         idx_fmt(i).rjust(idx_width), m.prop.name, m.lkt_sloc
                     )
                 )
-                print(
-                    "{}at {}:{}".format(
-                        " " * idx_width,
-                        self.context.debug_info.filename,
-                        m.line_no,
-                    )
-                )
+                print("{}at {}".format(" " * idx_width, m.ada_loc))
 
             print("Please chose one of the above locations [default=1]:")
             try:
@@ -392,9 +384,7 @@ class BreakCommand(BaseCommand):
 
             m = matches[choice]
 
-        return gdb.Breakpoint(
-            "{}:{}".format(self.context.debug_info.filename, m.line_no)
-        )
+        return gdb.Breakpoint(m.ada_loc.gdb_spec)
 
 
 class NextCommand(BaseCommand):

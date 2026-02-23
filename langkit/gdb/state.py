@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     import gdb
 
     from langkit.debug_info import (
+        AdaLocation,
         ExprDone,
         ExprStart,
         LktLocation,
@@ -18,14 +19,13 @@ if TYPE_CHECKING:
     from langkit.gdb.context import Context
 
 
-def analysis_line_no(context: Context, frame: gdb.Frame) -> int | None:
+def gen_code_loc(context: Context, frame: gdb.Frame) -> AdaLocation | None:
     """
-    If the given frame is in the $-implementation.adb file, return its
-    currently executed line number. Return None otherwise.
+    If the given frame is in generated Ada code covered by GDB directives,
+    rturn currently executed location. Return None otherwise.
+    """
+    from langkit.debug_info import AdaLocation
 
-    :type frame: gdb.Frame
-    :rtype: int|None
-    """
     current_func = frame.function()
     if current_func is None:
         return None
@@ -35,10 +35,10 @@ def analysis_line_no(context: Context, frame: gdb.Frame) -> int | None:
         return None
 
     current_file = current_symtab.fullname()
-    if current_file != context.debug_info.filename:
+    if current_file not in context.debug_info.filenames:
         return None
 
-    return frame.find_sal().line
+    return AdaLocation(current_file, frame.find_sal().line)
 
 
 class State:
@@ -46,7 +46,7 @@ class State:
     Holder for the execution state of a property.
     """
 
-    def __init__(self, frame: gdb.Frame, line_no: int, prop: Property):
+    def __init__(self, frame: gdb.Frame, loc: AdaLocation, prop: Property):
         self.frame = frame
         """
         The GDB frame from which this state was decoded.
@@ -70,10 +70,10 @@ class State:
         Stack of expressions that are being evaluated.
         """
 
-        self.line_no = line_no
+        self.loc = loc
         """
-        The line number in the generated source code where execution was when
-        this state was decoded.
+        The location in the generated source code where execution was when this
+        state was decoded.
         """
 
     @property
@@ -135,32 +135,32 @@ class State:
         """
         from langkit.debug_info import Event, PropertyCall, Scope
 
-        line_no = analysis_line_no(context, frame)
+        loc = gen_code_loc(context, frame)
 
         # First, look for the currently running property
-        prop = context.debug_info.lookup_property(line_no) if line_no else None
+        prop = context.debug_info.lookup_property(loc) if loc else None
         if prop is None:
             return None
-        assert line_no is not None
+        assert loc is not None
 
         # Create the result, add the property root scope
-        result = cls(frame, line_no, prop)
+        result = cls(frame, loc, prop)
         root_scope_state = ScopeState(result, None, prop)
         result.scopes.append(root_scope_state)
 
         def build_scope_state(scope_state: ScopeState) -> None:
-            assert line_no is not None
+            assert loc is not None
             for event in scope_state.scope.events:
 
                 if isinstance(event, Event):
-                    if event.line_no > line_no:
+                    if event.loc.is_after(loc):
                         break
                     event.apply_on_state(scope_state)
 
                 elif isinstance(event, Scope):
-                    if event.line_range.first_line > line_no:
+                    if event.line_range.first_loc.is_after(loc):
                         break
-                    elif line_no in event.line_range:
+                    elif loc in event.line_range:
                         sub_scope_state = ScopeState(
                             result, scope_state, event
                         )
@@ -169,7 +169,7 @@ class State:
                         break
 
                 elif isinstance(event, PropertyCall):
-                    if line_no in event.line_range:
+                    if loc in event.line_range:
                         scope_state.called_property = event.property(context)
 
         build_scope_state(root_scope_state)
@@ -304,9 +304,10 @@ class ExpressionEvaluation:
     def done_event(self) -> ExprDone:
         return self.start_event.done_event
 
-    def set_done(self, line_no: int) -> None:
+    def set_done(self, loc: AdaLocation) -> None:
+        assert loc.filename == self.start_event.loc.filename
         self.state = EvalState.done
-        self.done_at_line = line_no
+        self.done_at_line = loc.line_no
 
     @property
     def is_started(self) -> bool:

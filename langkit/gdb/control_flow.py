@@ -5,6 +5,7 @@ from typing import Iterable, cast
 import gdb
 
 from langkit.debug_info import (
+    AdaLocation,
     BaseEvent,
     ExprDone,
     ExprStart,
@@ -17,40 +18,41 @@ from langkit.gdb.context import Context
 from langkit.gdb.utils import expr_repr
 
 
-def scope_start_line_nos(
+def scope_start_locs(
     scope: Scope, from_line_no: int | None = None
-) -> list[int]:
+) -> list[AdaLocation]:
     """
-    Return line numbers for all entry points that are relevant (for users) for
+    Return locations for all entry points that are relevant (for users) for
     the given `scope`. Return an empty list if we could find no relevant
     location to break on.
 
     :param from_line_no: If given, don't consider line numbers lower than or
-        equal to `from_line_no`.
+        equal to `from_line_no`. A given scope can belong to only one generated
+        source file, so this is unambiguous.
     """
-    candidates: list[int] = []
+    candidates: list[AdaLocation] = []
 
     # Consider the first line for this scope's root expression, if any
     events = cast(Iterable[ExprStart], scope.iter_events(filter=ExprStart))
     try:
-        line_no = next(iter(events)).line_no
+        loc = next(iter(events)).loc
     except StopIteration:
         # If there is no root expression, just use the first scope line. It's
         # degraded mode because users are interested in expressions rather than
         # scopes.
-        candidates.append(scope.line_range.first_line)
+        candidates.append(scope.line_range.first_loc)
     else:
-        candidates.append(line_no)
+        candidates.append(loc)
 
     # Consider memoization lookup points for properties
     if isinstance(scope, Property):
         lookup_scope = scope.memoization_lookup
         if lookup_scope:
-            candidates.append(lookup_scope.line_range.first_line)
+            candidates.append(lookup_scope.line_range.first_loc)
 
     # Filter candidates if needed with `from_line_no`
     if from_line_no:
-        candidates = [l for l in candidates if from_line_no < l]
+        candidates = [loc for loc in candidates if from_line_no < loc.line_no]
 
     return candidates
 
@@ -71,7 +73,7 @@ def break_scope_start(
     :param same_call: Whether the breakpoint must trigger in the same call
         frame as the currently selected frame.
     """
-    candidates = scope_start_line_nos(scope, from_line_no)
+    candidates = scope_start_locs(scope, from_line_no)
     return (
         BreakpointGroup(context, candidates, same_call=same_call)
         if candidates
@@ -105,7 +107,7 @@ def go_next(context: Context) -> None:
         bp_group = break_scope_start(
             context,
             state.property_scope.scope,
-            from_line_no=state.line_no,
+            from_line_no=state.loc.line_no,
             same_call=True,
         )
 
@@ -124,11 +126,11 @@ def go_next(context: Context) -> None:
 
         # First look for the point where the current expression terminates its
         # evaluation.
-        next_slocs_candidates.append(current_expr.done_event.line_no)
+        next_slocs_candidates.append(current_expr.done_event.loc)
 
         # Now look for the starting point for all sub-expressions
         for subexpr in current_expr.start_event.sub_expr_start:
-            next_slocs_candidates.append(subexpr.line_no)
+            next_slocs_candidates.append(subexpr.loc)
 
         BreakpointGroup(context, next_slocs_candidates, same_call=True)
         gdb.execute("continue")
@@ -177,11 +179,11 @@ def go_out(context: Context) -> None:
 
     # Look for the point in the generated library where its evaluation will be
     # done.
-    until_line_no = None
+    until_loc = None
     for e in scope_state.scope.events:
         if isinstance(e, ExprDone) and e.expr_id == current_expr.expr_id:
-            until_line_no = e.line_no
-    if until_line_no is None:
+            until_loc = e.loc
+    if until_loc is None:
         print(
             "ERROR: cannot find the end of evaluation for expression {}."
             " Code generation may have a bug.".format(current_expr)
@@ -190,7 +192,7 @@ def go_out(context: Context) -> None:
 
     # Now go there! When we land in the expected place, also be useful and
     # display the value we got.
-    BreakpointGroup(context, [until_line_no], same_call=True)
+    BreakpointGroup(context, [until_loc], same_call=True)
     gdb.execute("continue")
     frame = gdb.selected_frame()
     new_state = context.decode_state(frame)
@@ -229,12 +231,6 @@ def go_step_inside(context: Context) -> None:
     If execution is about to call a property, step inside it. Traverse
     dispatch properties in order to land directly in the dispatched property.
     """
-
-    def continue_until(line_no: int, hide_output: bool) -> None:
-        dest_spec = "{}:{}".format(context.debug_info.filename, line_no)
-        gdb.Breakpoint(dest_spec, internal=True, temporary=True)
-        gdb.execute("continue", to_string=hide_output)
-
     # First, look for a property call in the current execution state
     state = context.decode_state()
     if not state:
@@ -260,11 +256,11 @@ def go_step_inside(context: Context) -> None:
         def filter(e: BaseEvent) -> bool:
             if not isinstance(e, PropertyCall):
                 return False
-            line_no = e.line_range.first_line
-            if line_no not in expr_range:
+            loc = e.line_range.first_loc
+            if loc not in expr_range:
                 return False
             for fr in filter_ranges:
-                if line_no in fr:
+                if loc in fr:
                     return False
             return True
 
@@ -306,6 +302,6 @@ def go_step_inside(context: Context) -> None:
             # (abstract runtime check). No need to put a breakpoint, there.
             pass
         else:
-            line_nos.extend(scope_start_line_nos(prop))
+            line_nos.extend(scope_start_locs(prop))
     BreakpointGroup(context, line_nos)
     gdb.execute("continue")

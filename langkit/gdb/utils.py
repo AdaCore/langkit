@@ -24,9 +24,6 @@ def name_repr(expr: Binding) -> str:
 def prop_repr(prop: Property) -> str:
     """
     Return a colored repr for a property name.
-
-    :type prop: langkit.gdb.debug_info.Property
-    :rtype: str
     """
     prefix = "[dispatcher]"
     if prop.name.startswith(prefix):

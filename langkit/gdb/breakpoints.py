@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import gdb
 
+from langkit.debug_info import AdaLocation
 from langkit.gdb.context import Context
 
 
@@ -61,20 +62,17 @@ class BreakpointGroup:
     def __init__(
         self,
         context: Context,
-        line_nos: list[int],
+        locs: list[AdaLocation],
         same_call: bool = False,
     ):
         """
-        :param line_nos: Line numbers for all the breakpoints to create in this
-            group.
+        :param locs: Locations for all the breakpoints to create in this group.
         :param same_call: Whether breakpoints must trigger in the same call
             frame as the currently selected frame.
         """
         frame_sig = FrameSignature.from_frame() if same_call else None
         self.context = context
-        self.breakpoints = [
-            _Breakpoint(context, l, frame_sig) for l in line_nos
-        ]
+        self.breakpoints = [_Breakpoint(context, l, frame_sig) for l in locs]
 
         self._event_callback = lambda _: self.cleanup()
         gdb.events.stop.connect(self._event_callback)
@@ -99,12 +97,10 @@ class _Breakpoint(gdb.Breakpoint):
     def __init__(
         self,
         context: Context,
-        line_no: int,
+        loc: AdaLocation,
         frame_sig: FrameSignature | None,
     ):
-        super().__init__(
-            "{}:{}".format(context.debug_info.filename, line_no), internal=True
-        )
+        super().__init__(loc.gdb_spec, internal=True)
         self.frame_sig = frame_sig
 
     def stop(self) -> bool:

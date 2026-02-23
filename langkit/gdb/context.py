@@ -21,7 +21,7 @@ class Context:
         standalone: bool,
     ):
         """
-        :param str lib_name: Lower-case name for the generated library.
+        :param lib_name: Lower-case name for the generated library.
 
         :param astnode_names: List of camel-with-mixed-case names for all node
             types.
