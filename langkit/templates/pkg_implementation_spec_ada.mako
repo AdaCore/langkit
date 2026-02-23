@@ -61,6 +61,7 @@ ${exts.with_clauses(with_clauses)}
 
 private package ${ada_lib_name}.Implementation is
 
+   pragma Extensions_Allowed (On);
    pragma Suppress (Container_Checks);
 
    use Support.Diagnostics, Support.Slocs, Support.Text;
