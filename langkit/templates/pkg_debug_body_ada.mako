@@ -6,10 +6,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 
-${(exts.with_clauses(with_clauses + [
-   ((ctx.symbol_canonicalizer.unit_fqn, False, False)
-    if ctx.symbol_canonicalizer else None),
-]))}
+${exts.with_clauses(with_clauses)}
 
 package body ${ada_lib_name}.Debug is
 

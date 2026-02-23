@@ -53,18 +53,7 @@ with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
 
 pragma Warnings (Off, "referenced");
-${exts.with_clauses(with_clauses + [
-   ((ctx.symbol_canonicalizer.unit_fqn, False, False)
-    if ctx.symbol_canonicalizer
-       and not ctx.symbol_canonicalizer.unit_fqn.startswith("Langkit_Support.")
-    else None),
-   ((cfg.library.defaults.unit_provider.unit_fqn, False, False)
-    if cfg.library.defaults.unit_provider else None),
-   ((cache_collection.decision_heuristic.unit_fqn, False, False)
-    if cache_collection is not None
-       and cache_collection.decision_heuristic
-    else None)
-])}
+${exts.with_clauses(with_clauses)}
 pragma Warnings (On, "referenced");
 
 ## Generate a dispatching case statement for the root node class. It will keep

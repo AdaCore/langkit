@@ -211,6 +211,24 @@ class GeneratedException:
         return names.Name("Exception") + self.name
 
 
+@dataclasses.dataclass
+class ContextClause:
+    """
+    Couple of context clauses (unit-level ``with``/``use``) in generated Ada
+    code to target a given unit.
+    """
+
+    use_clause: bool = False
+    """
+    Whether to generate a ``use`` clause for  the unit.
+    """
+
+    is_private: bool = True
+    """
+    Whether the ``with`` clause must be a ``private with``.
+    """
+
+
 @dataclasses.dataclass(frozen=True)
 class DeferredEntities:
     """
@@ -639,8 +657,8 @@ class CompileCtx:
                 self.warnings.disable(warning)
 
         self.with_clauses: dict[
-            tuple[str, AdaSourceKind], list[tuple[str, bool, bool]]
-        ] = defaultdict(list)
+            tuple[str, AdaSourceKind], dict[str, ContextClause]
+        ] = defaultdict(lambda: defaultdict(lambda: ContextClause()))
         """
         Mapping that binds a list of additional WITH/USE clauses to generate
         for each source file in the generated library. Used to add WITH/USE
@@ -991,10 +1009,11 @@ class CompileCtx:
         Add a WITH clause for `to_pkg` in the `source_kind` part of the
         `from_pkg` generated package.
 
-        :param from_pkg: Package to which the WITH clause must be added.
+        :param from_pkg: Package to which the WITH clause must be added (not
+            prefixed with the generated library name).
         :param source_kind: Kind of source file in which the WITH clause must
             be added.
-        :param to_pkg: Name of the Ada package to WITH.
+        :param to_pkg: Name of the Ada package to WITH (fully qualified name).
         :param use_clause: Whether to generate the corresponding USE clause.
         :param is_private: Whether to generate a "private with" clause.
         """
@@ -1002,9 +1021,51 @@ class CompileCtx:
             "Cannot generate a private with clause and a use clause for {}"
             " (from {}:{})".format(to_pkg, source_kind, from_pkg)
         )
-        self.with_clauses[(from_pkg, source_kind)].append(
-            (to_pkg, use_clause, is_private)
-        )
+
+        # Do not generate useless clauses: decls from parent packages are
+        # implicitly in scope: no need to WITH/USE them.
+        from_fqn = f"{self.ada_api_settings.lib_name}.{from_pkg}"
+        if from_fqn == to_pkg or from_fqn.startswith(to_pkg + "."):
+            return
+
+        clause = self.with_clauses[(from_pkg, source_kind)][to_pkg]
+        if use_clause:
+            clause.use_clause = True
+        if not is_private:
+            clause.is_private = False
+
+    def finalize_with_clauses(self) -> None:
+        """
+        Add necessary with clauses to generated Ada units.
+
+        This is done late in the compilation pipeline so that information from
+        Lkt compilation is available.
+        """
+
+        # If the language spec set a non-default symbol canonicalizer, add
+        # a context clauses so that the implementation can use it.
+        sc = self.symbol_canonicalizer
+        if sc and not sc.unit_fqn.startswith("Langkit_Support."):
+            self.add_with_clause(
+                "Implementation", AdaSourceKind.body, sc.unit_fqn
+            )
+            self.add_with_clause("Debug", AdaSourceKind.body, sc.unit_fqn)
+
+        # Likewise for the default unit provider
+        dup = self.config.library.defaults.unit_provider
+        if dup:
+            self.add_with_clause(
+                "Implementation", AdaSourceKind.body, dup.unit_fqn
+            )
+
+        # Likewise for the cache collection heuristic
+        cc = self.config.library.cache_collection
+        if cc is not None and cc.decision_heuristic is not None:
+            self.add_with_clause(
+                "Implementation",
+                AdaSourceKind.body,
+                cc.decision_heuristic.unit_fqn,
+            )
 
     def sorted_types(
         self, type_set: Sequence[CompiledType]
@@ -2201,6 +2262,9 @@ class CompileCtx:
                 "render parsers code", lambda p: Parser.render_parser(p, self)
             ),
             PropertyPass("render property", PropertyDef.render_property),
+            GlobalPass(
+                "finalize with clauses", CompileCtx.finalize_with_clauses
+            ),
             errors_checkpoint_pass,
             MajorStepPass("Generate library sources"),
             EmitterPass("setup directories", Emitter.setup_directories),
