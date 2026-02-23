@@ -83,6 +83,8 @@ pragma Warnings (On, "referenced");
 
 package body ${ada_lib_name}.Implementation is
 
+   pragma Extensions_Allowed (On);
+
    use Precomputed_Symbols;
 
    pragma Warnings (Off, "has no effect");
