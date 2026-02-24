@@ -1,6 +1,7 @@
 driver: lkt_build_and_run
 control:
     - [SKIP, "not has_ocaml", "OCaml support required"]
+    - [XFAIL, "os == 'windows'", "See eng/codepeer/opam#16"]
 encoding: utf-8
 
 config:
