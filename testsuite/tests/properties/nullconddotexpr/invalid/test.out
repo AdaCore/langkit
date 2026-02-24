@@ -1,0 +1,19 @@
+== prefix.lkt ==
+prefix.lkt:17:9: error: Invalid prefix type for the null conditional operator: Equation
+17 |         eq?.solve()
+   |         ^^
+
+
+== prefix_array.lkt ==
+prefix_array.lkt:17:10: error: Invalid result type for the null conditional operator: Equation
+17 |         (a?[0]).solve()
+   |          ^^^^^
+
+
+== suffix.lkt ==
+suffix.lkt:15:31: error: Invalid result type for the null conditional operator: Equation
+15 |     fun get_eq2(): Equation = node?.get_eq1()
+   |                               ^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

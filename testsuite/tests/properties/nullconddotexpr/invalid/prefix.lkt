@@ -1,0 +1,19 @@
+# Check that "a?.b" is rejected when "a" has a non-nullable type
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    @exported
+    fun prop(): Bool = {
+        val eq = %true;
+        eq?.solve()
+    }
+}
