@@ -464,11 +464,12 @@ class Deserializer:
         match (rtype, obj):
             case (types.GenericAlias(__origin__=T.dict), dict(obj)):
                 key_type, value_type = rtype.__args__
-                if key_type != str:
-                    self._bad_type(key_type, "dict key")
                 result = {}
                 for name, value in obj.items():
-                    result[name] = self.deserialize(
+                    deserialized_name = self.deserialize(
+                        context, key_type, name
+                    )
+                    result[deserialized_name] = self.deserialize(
                         self.sub_context(context, name),
                         value_type,
                         value,
@@ -500,7 +501,7 @@ class Deserializer:
         """
         Return a sub-context.
         """
-        if ":" in name:
+        if not isinstance(name, str) or ":" in name:
             name = repr(name)
         return f"{context}:{name}"
 

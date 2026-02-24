@@ -7,6 +7,7 @@ import itertools
 
 from enum import Enum
 
+from langkit.names import Name
 from langkit.utils.deserialization import (
     DataclassFieldMetadata,
     DeserializationError,
@@ -14,10 +15,12 @@ from langkit.utils.deserialization import (
 )
 
 
-def test(rtype, obj):
+def test(rtype, obj, extra_types=()):
     print(repr(obj))
 
     d = Deserializer()
+    for t, d_f in extra_types:
+        d.add_type(t, d_f)
     try:
         value = d.deserialize("<input>", rtype, obj)
     except (DeserializationError, TypeError) as exc:
@@ -126,6 +129,13 @@ test(dict[str, int], {"a": 1, "b": "foo"})
 print("# dict[int, int]")
 print()
 test(dict[int, int], {})
+test(dict[int, int], {1: 10})
+print()
+
+print("# dict[Name, int]")
+print()
+test(dict[Name, int], {"Foo": 1}, [(Name, Name._deserialize)])
+test(dict[Name, int], {"foo": 1}, [(Name, Name._deserialize)])
 print()
 
 print("# Dataclasses")
@@ -161,7 +171,6 @@ print()
 print("# Invalid types")
 print()
 test(int | None, None)
-test(dict[int, int], {1: 10})
 test(list[object], [1])
 test(EColor, [1])
 print()
