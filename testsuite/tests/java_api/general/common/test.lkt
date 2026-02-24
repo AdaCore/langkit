@@ -110,6 +110,12 @@ class FooNode implements Node[FooNode] {
     @exported
     @external()
     fun new_struct_with_inner(): WithInner
+
+    @exported
+    fun null_example(): Example = null[Example]
+
+    @exported
+    fun null_sequence(): Sequence = null[Sequence]
 }
 
 class Example: FooNode {

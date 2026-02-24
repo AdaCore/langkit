@@ -1167,15 +1167,18 @@ class JavaAPISettings(AbstractAPISettings):
             case ct.ASTNodeType():
                 return (
                     (
-                        f"node_from_entity(env, Entity_wrap_bare_node"
-                        f"(env, {expr}))"
+                        f"{self.wrapping_type(the_type)}_from_entity"
+                        f"(env, Entity_wrap_bare_node(env, {expr}))"
                     )
                     if ast_wrapping
                     else f"PointerWrapper_wrap(env, (void*) {expr})"
                 )
             case ct.EntityType():
                 return (
-                    f"node_from_entity(env, Entity_wrap(env, {expr}))"
+                    (
+                        f"{self.wrapping_type(the_type)}_from_entity"
+                        f"(env, Entity_wrap(env, {expr}))"
+                    )
                     if ast_wrapping
                     else f"Entity_wrap(env, {expr})"
                 )

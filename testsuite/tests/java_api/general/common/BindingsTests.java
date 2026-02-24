@@ -307,6 +307,16 @@ public final class BindingsTests {
                 "hash(e1) == hash(e3) = " + (e1.hashCode() == e3.hashCode())
             );
 
+            // Test null node wrapping
+            FooNode nExample = root.pNullExample();
+            FooNode nSequence = root.pNullSequence();
+            System.out.println(
+                "Null example class = " + nExample.getClassName()
+            );
+            System.out.println(
+                "Null sequence class = " + nSequence.getClassName()
+            );
+
             // Test empty struct nullity
             EmptyStruct emptyStruct = root.pNewEmptyStruct();
             System.out.println(

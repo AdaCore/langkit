@@ -442,6 +442,43 @@
         % endfor
 </%def>
 
+<%def name="jni_c_decl(cls)">
+    <% type_name = java_api.wrapping_type(cls)%>
+jclass ${type_name}_class_ref = NULL;
+jmethodID ${type_name}_from_entity_id = NULL;
+</%def>
+
+<%def name="jni_init_global_refs(cls)">
+    <%
+    type_name = java_api.wrapping_type(cls)
+    sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
+    %>
+    ${type_name}_class_ref = (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$${type_name}")
+    );
+
+    ${type_name}_from_entity_id = (*env)->GetStaticMethodID(
+        env,
+        ${type_name}_class_ref,
+        "fromEntity",
+        "(L${sig_base}$Entity;)L${sig_base}$${type_name};"
+    );
+</%def>
+
+<%def name="jni_wrapper(cls)">
+    <% type_name = java_api.wrapping_type(cls)%>
+// Util function to wrap a native entity into a Java node class
+jobject ${type_name}_from_entity(JNIEnv *env, jobject entity) {
+    return (*env)->CallStaticObjectMethod(
+        env,
+        ${type_name}_class_ref,
+        ${type_name}_from_entity_id,
+        entity
+    );
+}
+</%def>
+
 <%def name="jni_field_accessor(field)">
     <%
     api = java_api
