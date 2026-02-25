@@ -2307,6 +2307,10 @@ class CompileCtx:
                 documentation.
                 """
             ),
+            EmitterPass(
+                "remove obsolete generated sources",
+                Emitter.remove_obsolete_generated_sources,
+            ),
         ]
 
     def run_passes(self, passes: list[AbstractPass]) -> None:

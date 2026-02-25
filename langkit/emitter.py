@@ -116,6 +116,18 @@ class Emitter:
         self.output_files: set[str] = set()
         self.source_post_processors = context.source_post_processors
 
+        # If available, keep track of the set of sources generated during the
+        # last compilation.
+        prev_output_files = self.cache.db.get("output_files")
+        self.prev_output_files: set[str] = (
+            set(prev_output_files)
+            if (
+                isinstance(prev_output_files, list)
+                and all(isinstance(f, str) for f in prev_output_files)
+            )
+            else set()
+        )
+
         self.root_renderer = Renderer(
             create_template_lookup([self.context.extensions_dir])
         )
@@ -1161,8 +1173,12 @@ class Emitter:
                 if is_interface:
                     self.add_library_interface(file_path)
 
-            # If asked not to generate the body, skip the rest
+            # If asked not to generate the body, skip the rest, but still
+            # register the body as a generated source.
             if kind == AdaSourceKind.body and cached_body:
+                self.register_output_file(
+                    self.ada_file_path(out_dir, kind, full_qual_name)
+                )
                 return
 
             with names.camel_with_underscores:
@@ -1185,6 +1201,14 @@ class Emitter:
         do_emit(AdaSourceKind.spec)
         if has_body:
             do_emit(AdaSourceKind.body)
+
+    def register_output_file(self, filename: str) -> None:
+        """
+        Register a source file as being generated.
+        """
+        # Canonicalize the file so that we can use filename string equality to
+        # check whether two filenames represent the same file.
+        self.output_files.add(os.path.abspath(filename))
 
     def write_source_file(
         self,
@@ -1209,9 +1233,13 @@ class Emitter:
             if post_processor is not None:
                 source = post_processor.process(source)
 
-        if not os.path.exists(file_path) or not self.cache.has_same_hash(
-            file_path, source
-        ):
+        # Generated source files must be considered as outputs even if they did
+        # not change during an incremental build.
+        self.register_output_file(file_path)
+
+        if not os.path.exists(
+            file_path
+        ) or not self.cache.filename_has_same_hash(file_path, source):
             if self.context.verbosity >= Verbosity.debug:
                 printcol(
                     "Rewriting stale source: {}".format(file_path),
@@ -1221,8 +1249,7 @@ class Emitter:
             # the current platform.
             with open(file_path, "w", encoding="utf-8", newline="") as f:
                 f.write(source)
-            self.cache.set_entry_from_hash(file_path, source)
-            self.output_files.add(file_path)
+            self.cache.set_filename_entry_from_hash(file_path, source)
             return True
         return False
 
@@ -1426,3 +1453,16 @@ class Emitter:
         # Keep track of the list of input/output files
         self.cache.set_entry("input_files", input_files)
         self.cache.set_entry("output_files", sorted(self.output_files))
+
+    def remove_obsolete_generated_sources(self, ctx: CompileCtx) -> None:
+        """
+        Remove sources that were generated during the previous incremental
+        build, but that were no longer generated this time.
+
+        These files should not interfere with this build, so we must remove
+        them.
+        """
+        obsolete_sources = self.prev_output_files - self.output_files
+        for filename in obsolete_sources:
+            if os.path.exists(filename):
+                os.remove(filename)

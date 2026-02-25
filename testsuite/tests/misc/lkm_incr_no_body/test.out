@@ -1,0 +1,12 @@
+With WRITE_A_BODY=yes
+  libfoolang-extra_src.adb
+  libfoolang-extra_src.ads
+  libfoolang-lexer_state_machine.adb
+  libfoolang-lexer_state_machine.ads
+
+With WRITE_A_BODY=
+  libfoolang-extra_src.ads
+  libfoolang-lexer_state_machine.adb
+  libfoolang-lexer_state_machine.ads
+
+Done

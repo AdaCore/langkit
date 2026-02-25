@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os.path
 
 
 class Cache:
@@ -53,6 +54,15 @@ class Cache:
         with open(filename, "rb") as f:
             return hashlib.file_digest(f, "md5").hexdigest()
 
+    def _canonicalized_filename(self, filename: str) -> str:
+        """
+        Return a canonicalized filename.
+
+        This allows us to use string equality to check whether two filenames
+        represent the same file.
+        """
+        return os.path.abspath(filename)
+
     def has_same_value(self, key: str, value: object) -> bool:
         """
         Return whether the cached value for ``key`` is equal to ``value``.
@@ -69,6 +79,12 @@ class Cache:
         self.db[key] = value
         return result
 
+    def filename_has_same_value(self, key: str, value: object) -> bool:
+        """
+        Like ``has_same_value``, but canonicalizing ``key`` as a filename.
+        """
+        return self.has_same_value(self._canonicalized_filename(key), value)
+
     def has_same_hash(self, key: str, content: str) -> bool:
         """
         Return whether ``content`` has the same hash as previously. Update the
@@ -76,15 +92,22 @@ class Cache:
         """
         return self.has_same_value(key, self._content_hash(content))
 
+    def filename_has_same_hash(self, key: str, content: str) -> bool:
+        """
+        Like ``has_same_hash``, but canonicalizing ``key`` as a filename.
+        """
+        return self.has_same_hash(self._canonicalized_filename(key), content)
+
     def has_file_changed(self, filename: str) -> bool:
         """
         Return whether the given filename changed since the last time we
         checked. Update the cache entry accordingly.
         """
+        key = self._canonicalized_filename(filename)
         try:
-            return not self.has_same_value(filename, self._file_hash(filename))
+            return not self.has_same_value(key, self._file_hash(filename))
         except IOError:
-            self.db.pop(filename)
+            self.db.pop(key)
             return True
 
     def set_entry(self, key: str, value: object) -> None:
@@ -94,6 +117,12 @@ class Cache:
         json.dumps(value)
         self.db[key] = value
 
+    def set_filename_entry(self, key: str, value: object) -> None:
+        """
+        Like ``set_entry``, but canonicalizing ``key`` as a filename.
+        """
+        self.set_entry(self._canonicalized_filename(key), value)
+
     def set_entry_from_hash(self, key: str, content: str) -> None:
         """
         Add a cache entry that associates the given key and the hash of the
@@ -101,12 +130,18 @@ class Cache:
         """
         self.set_entry(key, self._content_hash(content))
 
+    def set_filename_entry_from_hash(self, key: str, content: str) -> None:
+        """
+        Like ``set_entry_from_hash``, but canonicalizing ``key`` as a filename.
+        """
+        self.set_entry_from_hash(self._canonicalized_filename(key), content)
+
     def set_entry_from_file_hash(self, filename: str) -> None:
         """
         Add a cache entry that associates the given key and the hash of the
         content of the given file (assumed to be readable).
         """
-        return self.set_entry(filename, self._file_hash(filename))
+        return self.set_filename_entry(filename, self._file_hash(filename))
 
     def save(self) -> None:
         """Save the content of the cache to a file."""
