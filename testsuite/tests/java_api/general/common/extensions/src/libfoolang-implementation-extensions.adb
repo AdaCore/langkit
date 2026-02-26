@@ -27,4 +27,16 @@ package body Libfoolang.Implementation.Extensions is
       return False;
    end Foo_Node_P_Trigger_Unit_Requested;
 
+   function Foo_Node_P_New_Struct_With_Inner
+     (Node : Bare_Foo_Node) return Internal_With_Inner
+   is
+      Empty_Struct : Internal_Empty_Struct := (Dummy => ' ');
+   begin
+      return
+        (Empty => Empty_Struct,
+         Sloc  => (1, 42),
+         Som   =>
+           (Examples => No_Internal_Entity_Example_Array_Type));
+   end Foo_Node_P_New_Struct_With_Inner;
+
 end Libfoolang.Implementation.Extensions;

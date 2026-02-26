@@ -232,6 +232,8 @@ me false = None
 me true = <Sequence foo.txt:1:1-1:50>
 falseNode.equals(falseNodeStruct.node) = true
 root.pMyNode().bareNode = <Sequence foo.txt:1:1-1:50>
+withInner.sloc = 1:42
+withInner.som = []
 aChar.equals(otherChar) = true
 --------------
 
