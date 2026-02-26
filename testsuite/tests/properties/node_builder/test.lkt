@@ -78,7 +78,7 @@ class LiteralSequence: FooNode {
     @exported
     @lazy
     lf_non_nullable_not_null: SynthNonNullable =
-        SynthNonNullable.builder(items=node.items?[0].to_builder()).build()
+        SynthNonNullable.builder(items=node.items[0].to_builder()).build()
 
     @exported
     @lazy
@@ -88,7 +88,7 @@ class LiteralSequence: FooNode {
     @exported
     @lazy
     lf_nullable_not_null: SynthNullable =
-        SynthNullable.builder(items=node.items?[0].to_builder()).build()
+        SynthNullable.builder(items=node.items[0].to_builder()).build()
 
     # We need to make sure that synthetized nodes are assigned the right
     # parent: the parent of the builder root is the one given as argument, and
@@ -98,7 +98,7 @@ class LiteralSequence: FooNode {
     @lazy
     lf_parent_root: SynthParent = SynthParent.builder(
         f=SynthChild1.builder(
-            f=SynthChild2.builder(f=node.items?[0].to_builder())
+            f=SynthChild2.builder(f=node.items[0].to_builder())
         )
     ).build(node)
 
@@ -106,7 +106,7 @@ class LiteralSequence: FooNode {
     @lazy
     lf_parent_child: SynthParent = SynthParent.builder(
         f=SynthChild1.builder(f=node.to_builder())
-    ).build(node.items?[0])
+    ).build(node.items[0])
 
     @exported
     @lazy
@@ -149,7 +149,7 @@ class LiteralSequence: FooNode {
     # builders).
 
     fun create_node_builder(): NodeBuilder[SynthNonNullable] =
-        SynthNonNullable.builder(items=node.items?[0].to_builder())
+        SynthNonNullable.builder(items=node.items[0].to_builder())
 
     @exported
     @lazy
@@ -160,7 +160,7 @@ class LiteralSequence: FooNode {
 
     @lazy
     lf_node_builder: NodeBuilder[SynthNonNullable] =
-        SynthNonNullable.builder(items=node.items?[0].to_builder())
+        SynthNonNullable.builder(items=node.items[0].to_builder())
 
     @exported
     @lazy

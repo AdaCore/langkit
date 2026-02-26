@@ -20,7 +20,7 @@ class Example: FooNode {
     @exported
     @memoized
     fun test_prop(numbers: Array[Int], c: String): Int =
-        if c == "one" then numbers?[0] else numbers?[1]
+        if c == "one" then numbers[0] else numbers[1]
 
     @exported
     @memoized

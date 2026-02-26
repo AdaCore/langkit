@@ -418,6 +418,12 @@ class NullCond:
         Return a new variable after appending a new couple for it and ``expr``
         to ``checks``.
         """
+        if not expr.type.null_allowed:
+            error(
+                "Invalid prefix type for the null conditional operator:"
+                f" {expr.type.lkt_name}",
+                location=location,
+            )
         var = PropertyDef.get().vars.create(
             location, codegen_name="Var_Expr", type=expr.type
         )
@@ -425,11 +431,21 @@ class NullCond:
         return var.ref_expr
 
     @staticmethod
-    def wrap_checks(checks: NullCond.CheckStack, expr: E.Expr) -> E.Expr:
+    def wrap_checks(
+        location: Location,
+        checks: NullCond.CheckStack,
+        expr: E.Expr,
+    ) -> E.Expr:
         """
         Turn the given checks and ``expr`` to the final expression according to
         null conditional rules.
         """
+        if checks and not expr.type.null_allowed:
+            error(
+                "Invalid result type for the null conditional operator:"
+                f" {expr.type.lkt_name}",
+                location=location,
+            )
         result = expr
         for couple in reversed(checks):
             result = E.ThenExpr(
@@ -643,7 +659,9 @@ class ExpressionCompiler:
         """
         checks: NullCond.CheckStack = []
         result = self._lower_expr(expr, checks, env)
-        return NullCond.wrap_checks(checks, result)
+        return NullCond.wrap_checks(
+            Location.from_lkt_node(expr), checks, result
+        )
 
     def lower_prefix_expr(
         self,

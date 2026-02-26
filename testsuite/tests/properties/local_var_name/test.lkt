@@ -15,8 +15,8 @@ class FooNode implements Node[FooNode] {
 class Example: FooNode {
     @exported
     fun prop(ints: Array[Int]): Int = {
-        val get = ints?[0];
+        val get = ints[0];
 
-        get + ints?[1]
+        get + ints[1]
     }
 }
