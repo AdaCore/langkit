@@ -1,6 +1,6 @@
 ===== Start the Java rewriting tests =====
 --- Rewriting context ---
-Asserting: Rewriting context is None
+Asserting: Rewriting context reference is null
 Creating rewriting context
 Asserting: Rewriting context reference to analysis context
 Try: Creating an other rewriting context
@@ -9,6 +9,7 @@ Try: Creating an other rewriting context
 Asserting: Rewriting context is opened
 Closing the rewriting context
 Asserting: Rewriting context is closed
+Asserting: Rewriting context reference is null
 
 Creating an other rewriting context
 Applying the new rewriting context
@@ -16,6 +17,7 @@ Asserting: Rewriting result is successful
 Asserting: Rewriting result has no diagnostics
 Asserting: Rewriting result unit is none
 Asserting: Other rewriting context is closed
+Asserting: Rewriting context reference is null
 Free the apply result
 -------------------------
 

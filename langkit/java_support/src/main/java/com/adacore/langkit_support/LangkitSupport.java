@@ -299,7 +299,8 @@ public class LangkitSupport {
     }
 
     /** Handle for an analysis context rewriting session. */
-    public interface RewritingContextInterface extends AutoCloseable {
+    public interface RewritingContextInterface extends
+        AutoCloseable, TruffleObject {
         /** Return whether the rewriting context is closed. */
         public abstract boolean isClosed();
 
@@ -388,7 +389,8 @@ public class LangkitSupport {
      * needed to start analyzing sources. It will contain the result of all
      * analysis, and is the main holder for all the data.
      */
-    public interface AnalysisContextInterface extends AutoCloseable {
+    public interface AnalysisContextInterface extends
+        AutoCloseable, TruffleObject {
 
         /**
          * Get an analysis unit from the given file in the current context.
@@ -450,6 +452,15 @@ public class LangkitSupport {
          */
         @CompilerDirectives.TruffleBoundary
         public default RewritingContextInterface startRewriting() {
+            throw new NotImplementedException();
+        }
+
+        /**
+         * Get the current rewriting session for the context. This may return
+         * null if no rewriting session has been started for now.
+         */
+        @CompilerDirectives.TruffleBoundary
+        public default RewritingContextInterface getRewritingContext() {
             throw new NotImplementedException();
         }
 
