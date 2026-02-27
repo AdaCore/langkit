@@ -868,29 +868,36 @@ class JavaAPISettings(AbstractAPISettings):
         """
         base = base or []
         field_type = self.wrapping_type(field.public_type, False)
+        field_ni_type = self.ni_type(field.public_type, False)
         field_name = "_".join(base + [field.native_name])
+
+        # Create possible results
+        wrap_value = self.ni_wrap(
+            field.public_type,
+            f"structNative.get_{field_name}()",
+            [],
+            ast_wrapping=ast_wrapping,
+        )
+        wrap_address = self.ni_wrap(
+            field.public_type,
+            f"({field_ni_type}) structNative.address_{field_name}()",
+            [],
+            ast_wrapping=ast_wrapping,
+        )
 
         # If the field to wrap is a leaf (not a struct) then generate the
         # wrapping operation on it by getting the native value from the
         # native struct.
         if field.fields is None:
-            return self.ni_wrap(
-                field.public_type,
-                f"structNative.get_{field_name}()",
-                [],
-                ast_wrapping=ast_wrapping,
+            return (
+                wrap_address if field.public_type.is_ada_record else wrap_value
             )
 
         # Else, it the field has sub-fields, this is a composite value
         # (struct), we call the wrapping operation for the field type with
         # the native address of the field.
         elif field.fields:
-            return self.ni_wrap(
-                field.public_type,
-                f"structNative.address_{field_name}()",
-                [],
-                ast_wrapping=ast_wrapping,
-            )
+            return wrap_address
 
         # Else, the field is a struct without any fields, we just return its
         # `NONE` singleton.

@@ -708,6 +708,14 @@ public final class BindingsTests {
             FooNode bareNode = bareNodeStruct.bareNode;
             System.out.println("root.pMyNode().bareNode = " + bareNode);
 
+            // Test a struct with other structs and builtin type in it
+            WithInner withInner = root.pNewStructWithInner();
+            System.out.println("withInner.sloc = " + withInner.sloc);
+            System.out.println(
+                "withInner.som = "
+                + Arrays.toString(withInner.som.examples)
+            );
+
             // Test passing this structure as a property parameter
             Char aChar = bareNodeStruct.aChar;
             Char otherChar = root.pGetChar(bareNodeStruct);
