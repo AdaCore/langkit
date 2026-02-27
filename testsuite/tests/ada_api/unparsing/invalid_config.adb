@@ -1,6 +1,8 @@
 with Ada.Command_Line; use Ada.Command_Line;
 with Ada.Text_IO;      use Ada.Text_IO;
 
+with GNATCOLL.VFS; use GNATCOLL.VFS;
+
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Generic_API.Unparsing;
 use Langkit_Support.Generic_API.Unparsing;
@@ -9,20 +11,40 @@ with Libfoolang.Generic_API; use Libfoolang.Generic_API;
 
 procedure Invalid_Config is
 
-   procedure Check (Filename : String; Check_All_Nodes : Boolean := False);
+   procedure Check
+     (Filename          : String;
+      Check_All_Nodes   : Boolean := False;
+      Config_Overriding : String := "");
 
    -----------
    -- Check --
    -----------
 
-   procedure Check (Filename : String; Check_All_Nodes : Boolean := False) is
+   procedure Check
+     (Filename          : String;
+      Check_All_Nodes   : Boolean := False;
+      Config_Overriding : String := "")
+   is
       Diagnostics : Diagnostics_Vectors.Vector;
       Config      : Unparsing_Configuration;
       Indent      : constant String := "    ";
    begin
-      Put_Line ("# " & Filename);
+      Put ("# " & Filename);
+      if Config_Overriding /= "" then
+         Put (" (overriding: " & Config_Overriding & ")");
+      end if;
+      New_Line;
+
       Config := Load_Unparsing_Config
-        (Self_Id, Filename, Diagnostics, Check_All_Nodes);
+        (Language        => Self_Id,
+         Filename        => Filename,
+         Diagnostics     => Diagnostics,
+         Check_All_Nodes => Check_All_Nodes,
+         Overridings     =>
+           (if Config_Overriding = ""
+            then Empty_File_Array
+            else (1 => Create (+Config_Overriding))));
+
       if Config = No_Unparsing_Configuration then
          Put ((1 .. 4 => ' '));
          Print (Diagnostics, Prefix => "", Indent => 4);
@@ -44,6 +66,7 @@ begin
    Check ("no_such_file.json");
    Check ("invalid_syntax.json");
    Check ("missing_node_configs.json");
+   Check ("invalid_node_configs.json");
    Check ("invalid_type_name.json");
    Check ("invalid_node_name.json");
    Check ("invalid_error_node.json");
@@ -59,6 +82,14 @@ begin
    Check ("invalid_flush_before_children_2.json");
    Check ("invalid_independent_lines_1.json");
    Check ("invalid_independent_lines_2.json");
+   New_Line;
+
+   Put_Line ("== Errors in overridings ==");
+   New_Line;
+   Check ("root_node.json", Config_Overriding => "no_such_file.json");
+   Check ("root_node.json", Config_Overriding => "invalid_syntax.json");
+   Check ("root_node.json", Config_Overriding => "missing_node_configs.json");
+   Check ("root_node.json", Config_Overriding => "invalid_node_configs.json");
    New_Line;
 
    Put_Line ("== Decoding errors in templates ==");

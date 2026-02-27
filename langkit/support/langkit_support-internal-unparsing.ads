@@ -159,11 +159,11 @@ package Langkit_Support.Internal.Unparsing is
      Prettier_Ada.Documents.Format_Options_Type;
 
    type Unparsers_Impl is record
-      Token_Spacings : Token_Spacing_Table;
-      Token_Newlines : Token_Newline_Table;
-      Node_Unparsers : Node_Unparser_Map;
-      Default_Config : Bytes_Access;
-      Format_Options : Format_Options_Access;
+      Token_Spacings          : Token_Spacing_Table;
+      Token_Newlines          : Token_Newline_Table;
+      Node_Unparsers          : Node_Unparser_Map;
+      Default_Config_Filename : Bytes_Access;
+      Format_Options          : Format_Options_Access;
    end record;
    type Unparsers is access constant Unparsers_Impl;
 

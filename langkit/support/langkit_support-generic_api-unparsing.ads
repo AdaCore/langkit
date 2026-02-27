@@ -82,6 +82,7 @@
 private with Ada.Finalization;
 
 with GNATCOLL.Traces;
+with GNATCOLL.VFS; use GNATCOLL.VFS;
 with Prettier_Ada.Documents;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
@@ -99,23 +100,26 @@ package Langkit_Support.Generic_API.Unparsing is
    --  Special value to mean the absence of an unparsing configuration
 
    function Default_Unparsing_Configuration
-     (Language : Language_Id) return Unparsing_Configuration;
+     (Language    : Language_Id) return Unparsing_Configuration;
    --  Return the default unparsing configuration for the given language
 
    function Load_Unparsing_Config
      (Language        : Language_Id;
       Filename        : String;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean := False)
+      Check_All_Nodes : Boolean := False;
+      Overridings     : File_Array := Empty_File_Array)
       return Unparsing_Configuration;
-   --  Read and parse the unparsing configuration for the given Language from
-   --  Filename. Append error messages to ``Diagnostics`` and return
+   --  Read and parse the unparsing configuration for the given ``Language``
+   --  from ``Filename``, with overriding loaded from the files at
+   --  ``Overridings``. Append error messages to ``Diagnostics`` and return
    --  ``No_Unparsing_Configuration`` if an error occurs while reading the
-   --  configuration file.
+   --  configurations.
    --
    --  If ``Check_All_Nodes`` is true, ensure that the configuration covers all
    --  possible parse nodes (creating an error if this is not the case).
    --
+
    --  The configuration is a JSON file that provides "document templates":
    --  patterns to generate Prettier documents:
    --
@@ -432,6 +436,13 @@ package Langkit_Support.Generic_API.Unparsing is
    --  natural number that indicates the maximum number of consecutive empty
    --  lines to preserve during the source code reformatting. If omitted, all
    --  empty lines are preserved.
+   --
+   --  ``Overridings`` must be a (possibly empty) list of filenames that
+   --  contain node configurations to complete/replace node configurations
+   --  found in the original unparsing configuration. It is also formatted in
+   --  JSON: it must be an object with a single "node_configs" mapping,
+   --  following the same format as in the main configuration file. If multiple
+   --  overriding files are provided, they are all applied in the same order.
 
    function Unparse_To_Prettier
      (Node          : Lk_Node;

@@ -13,6 +13,7 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Internal;       use Langkit_Support.Internal;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Internal.Unparsing;
@@ -355,9 +356,10 @@ private package Langkit_Support.Unparsing_Config is
 
    function Load_Unparsing_Config_From_Buffer
      (Language        : Language_Id;
-      Buffer          : String;
+      Buffer          : Memory_Buffer_And_Access;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean)
+      Check_All_Nodes : Boolean;
+      Overridings     : Memory_Buffer_And_Access_Array)
       return Unparsing_Configuration_Access;
    --  Implementation for
    --  ``Langkit_Support.Generic_API.Unparsing.Load_Unparsing_Config``, but

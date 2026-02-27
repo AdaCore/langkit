@@ -1,6 +1,10 @@
 driver: lkt_build_and_run
 config:
   library:
+    builtin_unparsing_overridings:
+      Some_Overriding:
+        filename: overriding.json
+        doc: This is the documentation for Some_Overriding.
     defaults:
       unparsing_config: default_cfg.json
       format_options:
@@ -176,3 +180,26 @@ gpr_mains:
     # Ensure that auto-checks do not complain when the input source has
     # trailing whitespaces (the reforrmatted source don't).
     - main.adb -c config.json -A trivias/trailing_whitespaces.txt
+
+    # Check that overridings are 1) taken into account and 2) in the right
+    # order (the second overriding applies on top of the first one, etc.).
+    - main.adb
+        -c overridings/base.json
+        overridings/example.txt
+    - main.adb
+        -c overridings/base.json
+        --overriding overridings/o1.json
+        overridings/example.txt
+    - main.adb
+        -c overridings/base.json
+        --overriding overridings/o1.json
+        --overriding overridings/o2.json
+        overridings/example.txt
+    - main.adb
+        -c overridings/base.json
+        --overriding overridings/o2.json
+        --overriding overridings/o1.json
+        overridings/example.txt
+
+    # Check that the builtin overridings work as expected
+    - builtin_overriding.adb

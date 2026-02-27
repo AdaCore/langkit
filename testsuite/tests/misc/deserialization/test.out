@@ -47,7 +47,16 @@ True
 # dict[int, int]
 
 {}
-    TypeError: invalid deserialization type for dict key: <class 'int'>
+    {}
+{1: 10}
+    {1: 10}
+
+# dict[Name, int]
+
+{'Foo': 1}
+    {<Name Foo>: 1}
+{'foo': 1}
+    DeserializationError: <input>: words must start with an upper case character followed by lower case characters: 'foo'
 
 # Dataclasses
 
@@ -103,8 +112,6 @@ True
 
 None
     TypeError: type expected, got int | None
-{1: 10}
-    TypeError: invalid deserialization type for dict key: <class 'int'>
 [1]
     TypeError: Deserializer callback needed for type <class 'object'>
 [1]

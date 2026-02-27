@@ -154,6 +154,25 @@ class FormatOptions:
         assert self.indentation_continuation >= 0
 
 
+@dataclasses.dataclass(frozen=True)
+class BuiltinUnparsingOverriding:
+    """
+    Unparsing configuration overriding that is built in the generated library.
+    """
+
+    filename: str
+    """
+    Filename (relative to the extension directory) that contains the JSON
+    configuration overriding.
+    """
+
+    doc: str | None = None
+    """
+    Documentation for that builtin overriding (present in the generated Ada
+    public API).
+    """
+
+
 @dataclasses.dataclass
 class LibraryDefaults:
     """
@@ -404,6 +423,18 @@ class LibraryConfig:
 
     This maps destination directories (relative to the installation prefix) to
     the files/directories to install (relative to the library root directory).
+    """
+
+    builtin_unparsing_overridings: dict[Name, BuiltinUnparsingOverriding] = (
+        dataclasses.field(default_factory=dict)
+    )
+    """
+    Unparsing configuration overridings that are built in the generated
+    library.
+
+    This mapping associates an entity name (camel with underscore convention)
+    in ``$.Generic_API.Unparsing.Builtin_Overridings`` to the corresponding
+    overriding information.
     """
 
     @property
@@ -814,7 +845,8 @@ def cache_summary(config: CompilationConfig) -> object:
         elif isinstance(value, dict):
             result = {}
             for k, v in value.items():
-                assert isinstance(k, str)
+                if not isinstance(k, str):
+                    k = repr(k)
                 result[k] = recurse(v)
             return result
 

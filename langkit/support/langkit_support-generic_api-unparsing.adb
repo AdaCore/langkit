@@ -21,16 +21,15 @@ with Ada.Strings.Unbounded.Aux;
 pragma Warnings (On, "internal");
 
 with GNAT.Regpat;
-with GNAT.Strings;
 
 with GNATCOLL.Iconv;
 with GNATCOLL.Opt_Parse;
-with GNATCOLL.VFS; use GNATCOLL.VFS;
 with Prettier_Ada.Documents.Json;
 
 with Langkit_Support.Errors;         use Langkit_Support.Errors;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Internal;       use Langkit_Support.Internal;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Internal.Unparsing;
@@ -57,13 +56,18 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    function Load_Unparsing_Config_From_Buffer
      (Language        : Language_Id;
-      Buffer          : String;
+      Buffer          : Memory_Buffer_And_Access;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean)
+      Check_All_Nodes : Boolean;
+      Overridings     : Memory_Buffer_And_Access_Array)
       return Unparsing_Configuration
    is (Ada.Finalization.Controlled with
        Value => Load_Unparsing_Config_From_Buffer
-                  (Language, Buffer, Diagnostics, Check_All_Nodes));
+                  (Language,
+                   Buffer,
+                   Diagnostics,
+                   Check_All_Nodes,
+                   Overridings));
    --  Like ``Load_Unparsing_Config``, but loading the unparsing configuration
    --  from an in-memory buffer rather than from a file.
 
@@ -1422,11 +1426,12 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Diagnostics : Diagnostics_Vectors.Vector;
       Result      : constant Unparsing_Configuration :=
-        Load_Unparsing_Config_From_Buffer
+        Load_Unparsing_Config
           (Language,
-           Language.Unparsers.Default_Config.all,
+           Language.Unparsers.Default_Config_Filename.all,
            Diagnostics,
-           Check_All_Nodes => False);
+           Check_All_Nodes => False,
+           Overridings     => Empty_File_Array);
    begin
       if not Diagnostics.Is_Empty then
          raise Program_Error;
@@ -1442,26 +1447,28 @@ package body Langkit_Support.Generic_API.Unparsing is
      (Language        : Language_Id;
       Filename        : String;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean := False)
+      Check_All_Nodes : Boolean := False;
+      Overridings     : File_Array := Empty_File_Array)
       return Unparsing_Configuration
    is
-      use type GNAT.Strings.String_Access;
-
-      JSON_Text : GNAT.Strings.String_Access := Create (+Filename).Read_File;
+      Filenames : File_Array (1 .. Overridings'Length + 1);
+      Buffers   : Memory_Buffer_And_Access_Array (1 .. Overridings'Length + 1);
    begin
-      if JSON_Text = null then
-         Append
-           (Diagnostics,
-            No_Source_Location_Range,
-            To_Text ("cannot read " & Filename));
+      Filenames (1) := Create (+Filename);
+      Filenames (2 .. Filenames'Last) := Overridings;
+      if not Load_Buffers (Language, Filenames, Buffers, Diagnostics) then
          return No_Unparsing_Configuration;
       end if;
 
       return Result : constant Unparsing_Configuration :=
         Load_Unparsing_Config_From_Buffer
-          (Language, JSON_Text.all, Diagnostics, Check_All_Nodes)
+          (Language        => Language,
+           Buffer          => Buffers (1),
+           Diagnostics     => Diagnostics,
+           Check_All_Nodes => Check_All_Nodes,
+           Overridings     => Buffers (2 .. Buffers'Last))
       do
-         GNAT.Strings.Free (JSON_Text);
+         Free (Buffers);
       end return;
    end Load_Unparsing_Config;
 
@@ -2907,6 +2914,13 @@ package body Langkit_Support.Generic_API.Unparsing is
          Help        => "Name of the JSON pretty-printer configuration file",
          Default_Val => Null_Unbounded_String);
 
+      package Overriding_Filenames is new Parse_Option_List
+        (Parser      => Parser,
+         Long        => "--overriding",
+         Arg_Type    => Unbounded_String,
+         Accumulate  => True,
+         Help        => "JSON files to override the unparsing configuration.");
+
       package Check_All_Nodes is new Parse_Flag
         (Parser      => Parser,
          Short       => "-C",
@@ -3116,18 +3130,30 @@ package body Langkit_Support.Generic_API.Unparsing is
       declare
          Diagnostics : Diagnostics_Vectors.Vector;
          Filename    : constant String := To_String (Config_Filename.Get);
+
+         Overridings      : constant Overriding_Filenames.Result_Array :=
+           Overriding_Filenames.Get;
+         Overriding_Files : File_Array (Overridings'Range);
       begin
-         if Filename = "" then
-            Config := Default_Unparsing_Configuration (Language);
-         else
-            Config := Load_Unparsing_Config
-              (Language, Filename, Diagnostics, Check_All_Nodes.Get);
-            if Config = No_Unparsing_Configuration then
-               Put_Line ("Error when loading the unparsing configuration:");
-               Print (Diagnostics);
-               Set_Exit_Status (Failure);
-               return;
-            end if;
+         for I in Overridings'Range loop
+            Overriding_Files (I) := Create (+To_String (Overridings (I)));
+         end loop;
+
+         Config := Load_Unparsing_Config
+           (Language        => Language,
+            Filename        =>
+              (if Filename = ""
+               then Language.Unparsers.Default_Config_Filename.all
+               else Filename),
+            Diagnostics     => Diagnostics,
+            Check_All_Nodes => Check_All_Nodes.Get,
+            Overridings     => Overriding_Files);
+
+         if Config = No_Unparsing_Configuration then
+            Put_Line ("Error when loading the unparsing configuration:");
+            Print (Diagnostics);
+            Set_Exit_Status (Failure);
+            return;
          end if;
       end;
 

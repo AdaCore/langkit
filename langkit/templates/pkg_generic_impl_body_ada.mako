@@ -9,6 +9,15 @@ with ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.Generic_Impl is
 
+   package Builtin_Files is
+      % for i, f in enumerate(sorted(emitter.builtin_files.values())):
+         Buffer_${i}   : constant Character
+         with Import, External_Name => ${ascii_repr(f.contents_c_symbol(ctx))};
+         Contents_${i} : constant Memory_Buffer :=
+           (Buffer_${i}'Address, ${f.size});
+      % endfor
+   end Builtin_Files;
+
    ---------
    -- "+" --
    ---------
@@ -49,6 +58,20 @@ package body ${ada_lib_name}.Generic_Impl is
               From_Rebound => Entity.Info.From_Rebound,
               Metadata     => +Md);
    end "+";
+
+   ----------------------
+   -- Get_Builtin_File --
+   ----------------------
+
+   function Get_Builtin_File (Filename : String) return Memory_Buffer is
+   begin
+      % for i, (n, f) in enumerate(sorted(emitter.builtin_files.items())):
+         if Filename = ${ascii_repr(n)} then
+            return Builtin_Files.Contents_${i};
+         end if;
+      % endfor
+      return No_Memory_Buffer;
+   end Get_Builtin_File;
 
    --------------------
    -- Create_Context --

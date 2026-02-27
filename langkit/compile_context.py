@@ -1850,6 +1850,7 @@ class CompileCtx:
             "java_doc": documentation.java_doc(self),
             "ocaml_doc": documentation.ocaml_doc(self),
             "ada_c_doc": documentation.ada_c_doc(self),
+            "format_ada_doc": documentation.format_ada,
             "emitter": self.emitter,
         }
         for fn in CompileCtx._template_extensions_fns:
@@ -2231,6 +2232,10 @@ class CompileCtx:
         return [
             MajorStepPass("Prepare code emission", start_code_emission),
             EmitterPass(
+                "register builtin unparsing configurations",
+                Emitter.register_builtin_unparsing_configs,
+            ),
+            EmitterPass(
                 "add with clauses from Lkt", Emitter.add_with_clauses_from_lkt
             ),
             EmitterPass(
@@ -2272,6 +2277,9 @@ class CompileCtx:
             EmitterPass("emit OCaml API", Emitter.emit_ocaml_api),
             EmitterPass("emit Java API", Emitter.emit_java_api),
             EmitterPass("emit Language Server", Emitter.emit_language_server),
+            EmitterPass(
+                "emit units for builtin files", Emitter.emit_builtin_files
+            ),
             EmitterPass(
                 "emit library project file", Emitter.emit_lib_project_file
             ),
