@@ -33,10 +33,10 @@ package body Libfoolang.Implementation.Extensions is
       Empty_Struct : Internal_Empty_Struct := (Dummy => ' ');
    begin
       return
-        (Empty => Empty_Struct,
-         Sloc  => (1, 42),
-         Som   =>
-           (Examples => No_Internal_Entity_Example_Array_Type));
+        (Empty   => Empty_Struct,
+         Sloc    => (1, 42),
+         Big_Int => Create_Big_Integer ("42"),
+         Som     => (Examples => No_Internal_Entity_Example_Array_Type));
    end Foo_Node_P_New_Struct_With_Inner;
 
 end Libfoolang.Implementation.Extensions;

@@ -715,6 +715,7 @@ public final class BindingsTests {
                 "withInner.som = "
                 + Arrays.toString(withInner.som.examples)
             );
+            System.out.println("withInner.big_int = " + withInner.bigInt);
 
             // Test passing this structure as a property parameter
             Char aChar = bareNodeStruct.aChar;
