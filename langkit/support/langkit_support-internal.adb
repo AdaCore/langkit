@@ -14,16 +14,27 @@ package body Langkit_Support.Internal is
    ----------------------
 
    function Builtin_Filename (Filename : String) return String is
-      Prefix_Last : constant Natural :=
+      Actual_Filename : String := Filename;
+      Prefix_Last     : constant Natural :=
         Filename'First + Builtin_Filename_Prefix'Length - 1;
    begin
-      if Prefix_Last >= Filename'Last
-         or else Filename (Filename'First .. Prefix_Last)
+      --  On Windows, GNATCOLL.VFS may turn forward slashes into backward
+      --  slashes: canonicalize to forward slashes so that we can use string
+      --  equality to check filenames.
+
+      for C of Actual_Filename loop
+         if C = '\' then
+            C := '/';
+         end if;
+      end loop;
+
+      if Prefix_Last >= Actual_Filename'Last
+         or else Actual_Filename (Actual_Filename'First .. Prefix_Last)
                  /= Builtin_Filename_Prefix
       then
          return "";
       else
-         return Filename (Prefix_Last + 1 .. Filename'Last);
+         return Actual_Filename (Prefix_Last + 1 .. Actual_Filename'Last);
       end if;
    end Builtin_Filename;
 
