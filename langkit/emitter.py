@@ -233,7 +233,7 @@ class Emitter:
         The core library is made of Ada and C sources, so always include them.
         """
 
-        self.library_interfaces = set()
+        self.library_interfaces: set[str] = set()
         """
         Set of source file base names for all sources that must appear in the
         "Interfaces" attribute of the generated library project file.
@@ -244,14 +244,8 @@ class Emitter:
         # Add all additional source files to the list of library interfaces and
         # declare them as such in instrumentation metadata.
         for f in context.additional_source_files:
-            self.add_library_interface(f, generated=False)
-
-        if self.coverage:
-            assert self.gnatcov
-            # Add the buffer-list unit from GNATcoverage's instrumentation to
-            # the list of library interfaces. TODO: hopefully, we should not
-            # have to do this anymore after S916-064 is addressed.
-            self.library_interfaces.add(self.gnatcov.buffer_list_file(self))
+            self.add_library_interface(f)
+            self.instr_md.additional_sources.add(os.path.basename(f))
 
         self.main_project_file = os.path.join(
             self.lib_root, f"{self.lib_name_low}.gpr"
@@ -465,32 +459,9 @@ class Emitter:
             else destination
         )
 
-    def add_library_interface(
-        self, filename: str, generated: bool, is_ada: bool = True
-    ) -> None:
+    def add_library_interface(self, filename: str) -> None:
         assert not self._project_file_emitted
-
-        filename = os.path.basename(filename)
-
-        # Register Ada source files in the appropriate instrumentation metadata
-        # set for coverage reports.
-        if is_ada:
-            source_set = (
-                self.instr_md.generated_sources
-                if generated
-                else self.instr_md.additional_sources
-            )
-            source_set.add(filename)
-
-            # Add GNATcoverage's additional buffer units to the library
-            # interface.  TODO: hopefully, we should not have to do this
-            # anymore after S916-064 is addressed.
-            if self.coverage:
-                assert self.gnatcov
-                for f in self.gnatcov.buffer_files(filename):
-                    self.library_interfaces.add(f)
-
-        self.library_interfaces.add(filename)
+        self.library_interfaces.add(os.path.basename(filename))
 
     def setup_directories(self, ctx: CompileCtx) -> None:
         """
@@ -617,8 +588,7 @@ class Emitter:
             # Register the imported unit as an interface in the generated
             # project.
             self.add_library_interface(
-                self.ada_file_path(self.src_dir, source_kind, qual_name),
-                generated=True,
+                self.ada_file_path(self.src_dir, source_kind, qual_name)
             )
 
             with open(file) as f:
@@ -881,9 +851,7 @@ class Emitter:
                 os.path.join(self.src_dir, header_filename),
                 render("c_api/header_c"),
             )
-            self.add_library_interface(
-                header_filename, generated=True, is_ada=False
-            )
+            self.add_library_interface(header_filename)
 
         self.write_ada_module(
             self.src_dir,
@@ -987,6 +955,7 @@ class Emitter:
                 ),
                 Language.c_cpp,
             )
+            self.instr_md.generated_sources.add(os.path.basename(gdb_c_path))
 
     def emit_ocaml_api(self, ctx: CompileCtx) -> None:
         """
@@ -1184,11 +1153,13 @@ class Emitter:
             ] + qual_name
 
             # When requested, register library module as library interfaces
-            if is_interface and in_library:
-                self.add_library_interface(
-                    self.ada_file_path(out_dir, kind, full_qual_name),
-                    generated=True,
+            file_path = self.ada_file_path(out_dir, kind, full_qual_name)
+            if in_library:
+                self.instr_md.generated_sources.add(
+                    os.path.basename(file_path)
                 )
+                if is_interface:
+                    self.add_library_interface(file_path)
 
             # If asked not to generate the body, skip the rest
             if kind == AdaSourceKind.body and cached_body:

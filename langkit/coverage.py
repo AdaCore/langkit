@@ -87,6 +87,7 @@ class InstrumentationMetadata:
                     "generated_sources": list(self.generated_sources),
                 },
                 f,
+                indent=2,
             )
 
     @classmethod
@@ -272,10 +273,13 @@ class CoverageReport:
 
         # Read the coverage report for each file
         for f in files:
+            f = os.path.basename(f)
             file_report = CoverageReport.File(f)
 
             # Parse all lines
             for src_mapping in load_xml(f + ".xml"):
+                if src_mapping.tag != "src_mapping":
+                    continue
                 xml_line = get_child(get_child(src_mapping, "src"), "line")
                 line = CoverageReport.Line(
                     int(xml_line.attrib["num"]),
@@ -532,47 +536,6 @@ class GNATcov:
         """
         self.context = context
 
-    def _unit_slug(self, base_filename: str) -> str:
-        """
-        Return the slug that "gnatcov instrument" computes for a source file.
-
-        See GNATcoverage's instrument-common.ads for more information.
-        """
-        # Identify which unit "filename" is for. Pray that there are no
-        # separates in the generated libraary.
-        unit_name = os.path.splitext(base_filename)[0]
-        is_spec = base_filename.endswith(".ads")
-
-        return "{}_{}".format(
-            "s" if is_spec else "b",
-            "_z_".join(
-                part.replace("z", "zz") for part in unit_name.split("-")
-            ),
-        )
-
-    def buffer_list_file(self, emitter: Emitter) -> str:
-        """
-        Return the name of the source file that "gnatcov instrument" creates to
-        hold the list of coverage buffers for the generated library.
-        """
-        return "gnatcov_rts-buffers-lists-{}.ads".format(emitter.lib_name_low)
-
-    def buffer_files(self, base_filename: str) -> list[str]:
-        """
-        Return the names of the source files that "gnatcov instrument" creates
-        to hold coverage buffers corresponding to the given file name.
-
-        Note: subunits are not supported.
-
-        :param base_filename: Base filename for which we want coverage buffer
-            source files.
-        """
-        unit_slug = self._unit_slug(base_filename)
-        return [
-            "gnatcov_rts-buffers-{}{}.ads".format(buffer_kind, unit_slug)
-            for buffer_kind in ("p", "b")
-        ]
-
     def instrument(self, emitter: Emitter, instr_dir: str) -> None:
         """
         Run "gnatcov instrument" on the generated library.
@@ -584,6 +547,7 @@ class GNATcov:
         Put SID files in the ``$BUILD_DIR/obj/$LIBNAME/sids`` directory
         (removed and created if needed).
         """
+        assert self.context is not None
         ensure_clean_dir(instr_dir)
 
         subprocess.check_call(
@@ -596,6 +560,7 @@ class GNATcov:
                 emitter.main_project_file,
                 "--no-subprojects",
                 "-X{}_COVINSTR=true".format(emitter.lib_name_up),
+                f"-j{self.context.jobs}",
             ]
         )
 
@@ -723,6 +688,9 @@ class GNATcov:
         # generated sources.
         for f in gen_sources.files.values():
             PropertyDSLCoverage(f, orig_sources)
+
+        # Remove code coverage for generated files (irrelevant)
+        report.groups.pop("gen")
 
         # Output the final report
         report.render(output_dir)

@@ -124,18 +124,6 @@ library project ${lib_name} is
          for Interfaces use Interfaces;
    end case;
 
-   % if emitter.coverage:
-      --  Before "gnatcov instrument" produced instrumented sources, not all
-      --  interfaces units are present, so do not define interfaces at this
-      --  stage. "gnatcov instrument" does not need to know interfaces in order
-      --  to work, anyway.
-      case For_Coverage_Instrumentation is
-         when "false" =>
-         when "true" =>
-            Interfaces := ();
-      end case;
-   % endif
-
    for Library_Name use "${capi.shared_object_basename}";
    for Library_Kind use Library_Kind_Param;
    for Library_Dir use "lib/" & Library_Kind_Param & "/" & Build_Mode;

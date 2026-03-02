@@ -404,6 +404,14 @@ class ManageScript(abc.ABC):
         LibraryType.add_argument(subparser)
 
         subparser.add_argument(
+            "--jobs",
+            "-j",
+            type=int,
+            default=get_cpu_count(),
+            help="Number of jobs to spawn in parallel for calls to builders"
+            " (default: your number of cpu).",
+        )
+        subparser.add_argument(
             "--verbosity",
             "-v",
             nargs="?",
@@ -502,14 +510,6 @@ class ManageScript(abc.ABC):
         """
         Add arguments to tune code compilation to "subparser".
         """
-        subparser.add_argument(
-            "--jobs",
-            "-j",
-            type=int,
-            default=get_cpu_count(),
-            help="Number of jobs to spawn in parallel for calls to builders"
-            " (default: your number of cpu).",
-        )
         subparser.add_argument(
             "--parallel-builds",
             type=int,
@@ -621,6 +621,7 @@ class ManageScript(abc.ABC):
     def create_context(
         self,
         config: C.CompilationConfig,
+        jobs: int,
         verbosity: Verbosity,
     ) -> CompileCtx:
         """
@@ -631,6 +632,7 @@ class ManageScript(abc.ABC):
         return CompileCtx(
             config=config,
             plugin_loader=PluginLoader(config.library.root_directory),
+            jobs=jobs,
             verbosity=verbosity,
         )
 
@@ -729,7 +731,9 @@ class ManageScript(abc.ABC):
             # If the subcommand requires a context, create it now
             config = self.create_config(parsed_args)
             C.update_config_from_args(config, parsed_args)
-            self.context = self.create_context(config, parsed_args.verbosity)
+            self.context = self.create_context(
+                config, parsed_args.jobs, parsed_args.verbosity
+            )
 
             # Setup directories. If there is a configuration, get the root
             # directory from it. Otherwise, consider that the directory in
