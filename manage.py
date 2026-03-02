@@ -6,12 +6,11 @@ import json
 import os
 import os.path as P
 from pathlib import Path, PurePath
+import shutil
 import subprocess
 import sys
 import tempfile
 from typing import Callable, Dict, List
-
-from e3.fs import rm, sync_tree
 
 from langkit.packaging import NativeLibPackager, Platform
 import langkit.scripts.lkm as lkm
@@ -428,17 +427,18 @@ def bootstrap(args: Namespace) -> None:
 
     # Copy the Lkt project sources (YAML config, Lkt sources and extensions)
     # into the bootstrap directory.
-    sync_tree(
-        source=str(LKT_LIB_ROOT),
-        target=str(LKT_BOOTSTRAP_ROOT),
-        ignore=[
+    shutil.copytree(
+        src=str(LKT_LIB_ROOT),
+        dst=str(LKT_BOOTSTRAP_ROOT),
+        ignore=lambda _, items: set(items)
+        & {
             ".gitignore",
             "__pycache__",
             "bootstrap",
             "build",
             "check_bootstrap.py",
-        ],
-        delete=False,
+        },
+        dirs_exist_ok=True,
     )
 
     # Regenerate the Lkt project in the bootstrap directory
@@ -459,11 +459,14 @@ def bootstrap(args: Namespace) -> None:
     # codegen).
     for child in Path(LKT_BOOTSTRAP_ROOT / "extensions").iterdir():
         if child.name != "src":
-            rm(str(child), recursive=True)
+            if child.is_dir():
+                shutil.rmtree(str(child))
+            else:
+                child.unlink()
 
     # Get rid of the Java and OCaml bindings, irrelevant for bootstrap matters
     for d in ["java", "ocaml"]:
-        rm(str(LKT_BOOTSTRAP_ROOT / d), recursive=True)
+        shutil.rmtree(str(LKT_BOOTSTRAP_ROOT / d))
 
 
 def clean(args: Namespace) -> None:
@@ -471,7 +474,7 @@ def clean(args: Namespace) -> None:
     Clean up build artifacts for the bootstrap Liblktlang.
     """
     for subdir in ["obj", "lib"]:
-        rm(str(LKT_BOOTSTRAP_ROOT / subdir), recursive=True)
+        shutil.rmtree(str(LKT_BOOTSTRAP_ROOT / subdir))
 
 
 def make(args: Namespace) -> None:
