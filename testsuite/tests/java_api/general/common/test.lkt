@@ -167,5 +167,6 @@ struct EmptyStruct {}
 struct WithInner {
     empty: EmptyStruct
     sloc: SourceLocation
+    big_int: BigInt
     som: SomeStruct
 }

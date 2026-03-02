@@ -868,7 +868,7 @@ class JavaAPISettings(AbstractAPISettings):
         """
         base = base or []
         field_type = self.wrapping_type(field.public_type, False)
-        field_ni_type = self.ni_type(field.public_type, False)
+        field_ref_type = self.ni_reference_type(field.public_type)
         field_name = "_".join(base + [field.native_name])
 
         # Create possible results
@@ -880,7 +880,7 @@ class JavaAPISettings(AbstractAPISettings):
         )
         wrap_address = self.ni_wrap(
             field.public_type,
-            f"({field_ni_type}) structNative.address_{field_name}()",
+            f"({field_ref_type}) structNative.address_{field_name}()",
             [],
             ast_wrapping=ast_wrapping,
         )
