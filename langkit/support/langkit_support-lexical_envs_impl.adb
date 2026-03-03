@@ -157,8 +157,13 @@ package body Langkit_Support.Lexical_Envs_Impl is
    --  TODO: It might be exactly the same to return Local_Result rather than
    --  make it an in out param, now that we have a wrapper.
 
-   procedure Reset_Lookup_Cache (Self : Lexical_Env);
-   --  Reset Self's lexical environment lookup cache
+   procedure Reset_Lookup_Cache
+     (Self            : Lexical_Env;
+      For_Destruction : Boolean := False);
+   --  Reset Self's lexical environment lookup cache. If ``For_Destruction``
+   --  is set, it does not try to reset values to sensical ones, and in
+   --  particular does not try to retrieve values from the parent env, which
+   --  would cause invalid reads in case it was already destroyed.
 
    function Key_Image
      (Self : Lexical_Env; Key : Thin_Symbol) return String
@@ -195,7 +200,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
       if Unwrap (Self).Lookup_Cache_Valid then
          P := Parent (Self);
          return (P in Null_Lexical_Env | Empty_Env
-                 or else Is_Lookup_Cache_Valid (P));
+                 or else (Unwrap (Self).Parent_Cache_Version =
+                            Unwrap (P).Lookup_Cache_Version
+                          and then Is_Lookup_Cache_Valid (P)));
       else
          return False;
       end if;
@@ -205,12 +212,16 @@ package body Langkit_Support.Lexical_Envs_Impl is
    -- Reset_Lookup_Cache --
    ------------------------
 
-   procedure Reset_Lookup_Cache (Self : Lexical_Env) is
+   procedure Reset_Lookup_Cache
+     (Self            : Lexical_Env;
+      For_Destruction : Boolean := False)
+   is
       use Lookup_Cache_Maps;
 
       Env      : constant Lexical_Env_Access := Unwrap (Self);
       C        : Cursor := First (Env.Lookup_Cache);
       Removed  : Long_Long_Integer := 0;
+      P        : constant Lexical_Env := Parent (Self);
 
       procedure Free is new Ada.Unchecked_Deallocation
         (Entity_Info, Entity_Info_Ptr);
@@ -239,6 +250,14 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       Env.Lookup_Cache.Clear;
       Env.Lookup_Cache_Valid := True;
+      Env.Lookup_Cache_Version := Env.Lookup_Cache_Version + 1;
+
+      --  Only reset the parent cache version if we plan on using this env
+      --  again. Otherwise, it may cause an invalid read if this is called in a
+      --  context where the parent has already been free'd.
+      if not For_Destruction and then P /= Null_Lexical_Env then
+         Env.Parent_Cache_Version := Unwrap (P).Lookup_Cache_Version;
+      end if;
 
       if Removed > 0 and then Env.Node /= No_Node then
          Notify_Cache_Updated (Env.Node, -Removed);
@@ -615,11 +634,14 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Sym_Table         : Symbol_Table;
-      Owner             : Generic_Unit_Ptr) return Lexical_Env is
+      Owner             : Generic_Unit_Ptr) return Lexical_Env
+   is
+      Parent_Cache_Version : Natural := 0;
    begin
 
       if Parent /= Null_Lexical_Env then
          Inc_Ref (Parent);
+         Parent_Cache_Version := Unwrap (Parent).Lookup_Cache_Version;
       elsif Sym_Table = No_Symbol_Table then
          raise Constraint_Error
          with "Sym_Table shouldn't be null if Parent is null";
@@ -637,8 +659,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
             Referenced_Envs          => <>,
             Map                      => new Internal_Envs.Map,
             Rebindings_Pool          => null,
-            Lookup_Cache_Valid       => True,
             Lookup_Cache             => Lookup_Cache_Maps.Empty_Map,
+            Lookup_Cache_Valid       => True,
+            Lookup_Cache_Version     => 0,
+            Parent_Cache_Version     => Parent_Cache_Version,
             Rebindings_Assoc_Ref_Env => -1),
          Owner => Owner);
    end Create_Lexical_Env;
@@ -1902,7 +1926,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
                end if;
 
                --  Release the lookup cache
-               Reset_Lookup_Cache (Self);
+               Reset_Lookup_Cache (Self, For_Destruction => True);
             end if;
 
          when Orphaned =>
@@ -2830,9 +2854,12 @@ package body Langkit_Support.Lexical_Envs_Impl is
    -- Reset_Caches --
    ------------------
 
-   procedure Reset_Caches (Self : Lexical_Env) is
+   procedure Reset_Caches
+     (Self            : Lexical_Env;
+      For_Destruction : Boolean := False)
+   is
    begin
-      Reset_Lookup_Cache (Self);
+      Reset_Lookup_Cache (Self, For_Destruction);
    end Reset_Caches;
 
    ----------------------

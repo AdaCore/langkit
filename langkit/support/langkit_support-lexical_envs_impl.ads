@@ -436,9 +436,12 @@ package Langkit_Support.Lexical_Envs_Impl is
    --      is dynamic);
    --    * resets the cache of referenced environments.
 
-   procedure Reset_Caches (Self : Lexical_Env)
+   procedure Reset_Caches
+     (Self            : Lexical_Env;
+      For_Destruction : Boolean := False)
      with Pre => Self.Kind = Static_Primary;
-   --- Reset the caches for this env
+   --  Reset the caches for this env. Set ``For_Destruction`` to True if this
+   --  env is not be used anymore.
 
    function Get
      (Self        : Lexical_Env;
@@ -724,6 +727,16 @@ package Langkit_Support.Lexical_Envs_Impl is
                   --  Whether Cached_Results contains lookup results that can
                   --  be currently reused (i.e. whether they are not stale).
 
+                  Lookup_Cache_Version : Natural := 0;
+                  --  The number of times the lookup cache was reset
+
+                  Parent_Cache_Version : Natural := 0;
+                  --  The lookup cache version of this env's parent, if any.
+                  --  It's updated when this env is reset, and is used to make
+                  --  sure we don't use this env's lookup cache if its parent
+                  --  cache was updated, because entries of this cache may have
+                  --  been computed based on its parent's lookup cache.
+
                   Referenced_Envs : Referenced_Envs_Vectors.Vector;
                   --  A list of environments referenced by this environment
 
@@ -874,8 +887,10 @@ private
       Referenced_Envs          => <>,
       Map                      => Empty_Env_Map'Access,
       Rebindings_Pool          => null,
-      Lookup_Cache_Valid       => False,
       Lookup_Cache             => Lookup_Cache_Maps.Empty_Map,
+      Lookup_Cache_Valid       => False,
+      Lookup_Cache_Version     => 0,
+      Parent_Cache_Version     => 0,
       Rebindings_Assoc_Ref_Env => -1);
 
    --  Because of circular elaboration issues, we cannot call Hash here to
