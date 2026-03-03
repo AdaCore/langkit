@@ -118,6 +118,16 @@
    fun:caml_sys_exit
    fun:main
 }
+{
+   caml sys_exit specific issues
+   Memcheck:Param
+   sigaltstack(ss)
+   fun:sigaltstack
+   fun:caml_stop_stack_overflow_detection
+   fun:caml_terminate_signals
+   fun:caml_do_exit
+   fun:main
+}
 
 # On Ubuntu 24.04, the OCaml testcase exhibits memory leaks during the
 # elaboration of some shared libraries. The precise cause is unknown, but these
