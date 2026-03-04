@@ -8,6 +8,8 @@ import shutil
 import subprocess
 import sys
 
+import yaml
+
 from langkit.compile_context import CompileCtx
 import langkit.config as C
 from langkit.diagnostics import DiagnosticError
@@ -255,9 +257,14 @@ def build_and_run(
     maven_exec = os.environ.get("MAVEN_EXECUTABLE")
     maven_repo = os.environ.get("MAVEN_LOCAL_REPO")
 
-    config = C.CompilationConfig.deserialize(
-        "test.yaml:config", derive_config(base_config, config)
-    )
+    # Create the configuration to use to build this test library. Write the
+    # correspoding "langkit.yaml" file to make developper investigation
+    # convenient.
+    config_yaml = derive_config(base_config, config)
+    with open("langkit.yaml", "w") as f:
+        yaml.dump(config_yaml, f)
+
+    config = C.CompilationConfig.deserialize("test.yaml:config", config_yaml)
     m = Manage(config)
 
     # First build the library. Forward all test.py's arguments to the libmanage
