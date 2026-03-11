@@ -139,8 +139,12 @@ package body ${ada_lib_name}.Implementation is
      (V : AST_Envs.Entity_Vectors.Vector) return ${T.entity.array.name};
    pragma Warnings (On, "referenced");
 
-   procedure Reset_Envs_Caches (Unit : Internal_Unit);
-   --  Reset the env caches of all lexical environments created for ``Unit``
+   procedure Reset_Envs_Caches
+     (Unit            : Internal_Unit;
+      For_Destruction : Boolean := False);
+   --  Reset the env caches of all lexical environments created for ``Unit``.
+   --  Set ``For_Destruction`` to True if the envs in that unit are not be used
+   --  anymore.
 
    procedure Destroy (Env : in out Lexical_Env_Access);
 
@@ -1030,7 +1034,10 @@ package body ${ada_lib_name}.Implementation is
    -- Reset_Envs_Caches --
    -----------------------
 
-   procedure Reset_Envs_Caches (Unit : Internal_Unit) is
+   procedure Reset_Envs_Caches
+     (Unit            : Internal_Unit;
+      For_Destruction : Boolean := False)
+   is
       procedure Internal (Node : ${T.root_node.name});
       --  Reset env caches in ``Node`` and then in its children recursively
 
@@ -1047,7 +1054,7 @@ package body ${ada_lib_name}.Implementation is
          end if;
          --  Make sure to only reset caches of envs belonging to this unit
          if Node.Self_Env.Owner = Generic_Unit then
-            AST_Envs.Reset_Caches (Node.Self_Env);
+            AST_Envs.Reset_Caches (Node.Self_Env, For_Destruction);
          end if;
          for I in 1 .. Children_Count (Node) loop
             Internal (Child (Node, I));
@@ -1511,7 +1518,7 @@ package body ${ada_lib_name}.Implementation is
       --  that what is accessed in ``Lexical_Env_Cache_Updated`` is still
       --  valid, as it will be called back by lexical envs that are being
       --  destroyed.
-      Reset_Envs_Caches (Unit);
+      Reset_Envs_Caches (Unit, For_Destruction => True);
 
       Unit.PLE_Roots_Starting_Token.Destroy;
       Unit.Env_Populated_Roots.Destroy;

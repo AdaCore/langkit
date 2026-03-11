@@ -1,0 +1,9 @@
+=== Initial Resolution ===
+Lookup d from c : <Scope d.txt:1:1-1:14>
+=== Clearing d.txt ===
+Lookup dummy from a : None
+=== Repairing d.txt ===
+Lookup dummy from a : None
+Lookup d from c : <Scope d.txt:1:1-1:14>
+main.adb: Done.
+Done

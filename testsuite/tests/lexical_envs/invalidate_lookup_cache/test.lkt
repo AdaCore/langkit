@@ -1,0 +1,54 @@
+# Check that lookup caches of lexical envs are robust to intermediate queries
+# that may alter their validity. See the main.py for the actual scenario
+# against which we're checking our robustness.
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(scope)
+    scope <- Scope(
+        "def" identifier ?(":" identifier) "{" list*(ref_clause) "}"
+    )
+    identifier <- Id(@Identifier)
+    ref_clause <- RefClause("+" identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Id: FooNode implements TokenNode {
+}
+
+class RefClause: FooNode {
+    @parse_field ref_id: Id
+
+    @exported
+    fun lookup(): Entity[FooNode] =
+        self.children_env.get_first(node.ref_id.symbol).as[Scope]
+}
+
+class Scope: FooNode {
+    @parse_field name: Id
+    @nullable @parse_field parent_name: Id
+    @parse_field content: ASTList[RefClause]
+
+    fun parent_env_name(): Symbol =
+        self.parent_name.do(
+            (pn) => pn.symbol,
+            default_val=s"__root__"
+        )
+
+    fun initial_env(): DesignatedEnv = DesignatedEnv(
+        kind=DesignatedEnvKind.named_env,
+        env_name=self.parent_env_name(),
+        direct_env=null[LexicalEnv]
+    )
+
+    env_spec {
+        set_initial_env(self.initial_env())
+        add_to_env_kv(node.name.symbol, node)
+        add_env(names=[self.name.symbol])
+    }
+}
