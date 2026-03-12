@@ -58,7 +58,7 @@ private package ${ada_lib_name}.Unparsers is
    <% tok_text_ids = {} %>
    % for tok in ctx.unparsers.sorted_token_unparsers:
       <%
-         text = tok.match_text or ctx.lexer_literals_map[tok]
+         text = tok.match_text
          text_id = tok_text_ids.get(text)
          if text_id is None:
             emit_text_constant = True
