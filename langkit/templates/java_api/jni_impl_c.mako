@@ -11,6 +11,7 @@ api = java_api
 nat = c_api.get_name
 
 root_node_type = api.wrapping_type(T.root_node)
+c_root_node_type = ctx.root_node_type.c_type(capi).name
 
 h_file = f"com_adacore_{ctx.lib_name.lower}_{ctx.lib_name.camel}_JNI_LIB.h"
 lib_file = f"{ctx.lib_name.lower}.h"
@@ -286,8 +287,10 @@ ${iterator.jni_c_decl(iterator_type)}
     % endif
 % endfor
 
-jclass ${root_node_type}_class_ref = NULL;
-jmethodID ${root_node_type}_from_entity_id = NULL;
+% for node_type in ctx.node_types:
+${ast_node.jni_c_decl(node_type)}
+% endfor
+
 jfieldID ${root_node_type}_entity_field_id = NULL;
 
 // ==========
@@ -945,17 +948,9 @@ ${iterator.jni_init_global_refs(iterator_type)}
     % endif
 % endfor
 
-    ${root_node_type}_class_ref = (*env)->NewGlobalRef(
-        env,
-        (*env)->FindClass(env, "${sig_base}$${root_node_type}")
-    );
-
-    ${root_node_type}_from_entity_id = (*env)->GetStaticMethodID(
-        env,
-        ${root_node_type}_class_ref,
-        "fromEntity",
-        "(L${sig_base}$Entity;)L${sig_base}$${root_node_type};"
-    );
+% for node_type in ctx.node_types:
+${ast_node.jni_init_global_refs(node_type)}
+% endfor
 
     ${root_node_type}_entity_field_id = (*env)->GetFieldID(
         env,
@@ -1098,15 +1093,9 @@ void check_exception(JNIEnv *env) {
     );
 }
 
-// Util function to wrap a native entity into a Java node class
-jobject node_from_entity(JNIEnv *env, jobject entity) {
-    return (*env)->CallStaticObjectMethod(
-        env,
-        ${root_node_type}_class_ref,
-        ${root_node_type}_from_entity_id,
-        entity
-    );
-}
+% for node_type in ctx.node_types:
+${ast_node.jni_wrapper(node_type)}
+% endfor
 
 // Util function to get the entity Java object from a wrapped node
 jobject get_node_entity(JNIEnv *env, jobject node) {
@@ -3344,7 +3333,7 @@ ${api.jni_func_sig("rewriting_handle_to_node", "jobject")}(
     jclass jni_lib,
     jobject rewriting_node
 ) {
-    ${node_type} bare_node = ${nat("rewriting_handle_to_node")}(
+    ${c_root_node_type} bare_node = ${nat("rewriting_handle_to_node")}(
         RewritingNode_unwrap(
             env,
             rewriting_node
