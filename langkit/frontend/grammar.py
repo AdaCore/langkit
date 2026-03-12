@@ -221,15 +221,11 @@ def create_grammar(resolver: Resolver) -> P.Grammar:
                     f"Unknown token: {token_name}",
                     location=rule.f_token_name,
                 )
-
-            match_text = ""
-            if rule.f_expr:
-                # The grammar is supposed to mainain this invariant
-                assert isinstance(rule.f_expr, L.TokenLit)
-                match_text = denoted_str(rule.f_expr)
-
             return P._Token(
-                context=ctx, location=loc, val=val, match_text=match_text
+                context=ctx,
+                location=loc,
+                val=val,
+                match_text=denoted_str(rule.f_expr) if rule.f_expr else "",
             )
 
         elif isinstance(rule, L.TokenLit):
