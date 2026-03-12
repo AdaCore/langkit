@@ -180,7 +180,7 @@ class TokenUnparser(Unparser):
     def from_parser(
         cls,
         unparsers: Unparsers,
-        parser: Parser | _Token,
+        parser: Parser,
     ) -> TokenUnparser: ...
 
     @overload
@@ -191,7 +191,7 @@ class TokenUnparser(Unparser):
     def from_parser(
         cls,
         unparsers: Unparsers,
-        parser: Parser | _Token | None,
+        parser: Parser | None,
     ) -> TokenUnparser | None:
         """
         Create a token unparser out of a parser, assumed to parse a token.
