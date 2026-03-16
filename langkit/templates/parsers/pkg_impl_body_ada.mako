@@ -11,6 +11,7 @@ with System;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Packrat;     use Langkit_Support.Packrat;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 

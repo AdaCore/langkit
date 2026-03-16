@@ -8,11 +8,12 @@ pragma Warnings (Off, "obsolescent");
 with GNATCOLL.GMP.Integers;
 
 with Langkit_Support.Errors;
+with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 private with Langkit_Support.Internal.Analysis;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
-with Langkit_Support.Types;   use Langkit_Support.Types;
+with Langkit_Support.Types;       use Langkit_Support.Types;
 
 
 --  This package provides types and functions used in the whole ${ada_lib_name}
@@ -170,9 +171,9 @@ package ${ada_lib_name}.Common is
    --  Return a string representation of ``Token_Id`` that is suitable in error
    --  messages.
 
-   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind
+   function To_Token_Kind (Index : Token_Kind_Index) return Token_Kind
       with Inline;
-   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind
+   function From_Token_Kind (Kind : Token_Kind) return Token_Kind_Index
       with Inline;
 
    function Is_Token_Node (Kind : ${T.node_kind}) return Boolean;
