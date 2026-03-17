@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import java.math.BigInteger;
 
+import com.adacore.langkit_support.LangkitSupport;
 import com.adacore.libfoolang.Libfoolang.*;
 
 public final class BindingsTests {
@@ -146,19 +147,31 @@ public final class BindingsTests {
      * Test getting a unit from the unit provider.
      */
     private static void testUnitProvider() {
-       header("Unit provider");
+        header("Unit provider");
 
-       AnalysisContext ctx = AnalysisContext.create();
-       AnalysisUnit unit = ctx.getUnitFromProvider(
-           Text.create("pkg"),
-           AnalysisUnitKind.UNIT_BODY
-       );
-       System.out.println(
-           "pkg/body resolved to: "
-           + new File(unit.getFileName()).getName()
-       );
+        AnalysisContext ctx = AnalysisContext.create();
 
-       footer("Unit provider");
+        // Try getting a unit with the unit kind enum value
+        LangkitSupport.AnalysisUnit unit = ctx.getUnitFromProvider(
+            Text.create("pkg"),
+            AnalysisUnitKind.UNIT_BODY
+        );
+        System.out.println(
+            "pkg/body resolved to: "
+            + new File(unit.getFileName()).getName()
+        );
+
+        // Ensure an invalid unit kind raise an error
+        try {
+            unit = ctx.getUnitFromProvider(
+                Text.create("pkg"),
+                AnalysisUnitKind.fromName("what!")
+            );
+        } catch (Exception e) {
+            System.out.println("Expected exception: " + e.getMessage());
+        }
+
+        footer("Unit provider");
     }
 
     /**
