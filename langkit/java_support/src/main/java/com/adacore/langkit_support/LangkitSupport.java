@@ -18,7 +18,7 @@ import com.oracle.truffle.api.interop.TruffleObject;
 public class LangkitSupport {
 
     /** Exception to raise when interface default methods are not overrode. */
-    private static final
+    public static final
     class NotImplementedException extends RuntimeException {
         public NotImplementedException () {};
 
