@@ -153,7 +153,7 @@ public final class BindingsTests {
 
         // Try getting a unit with the unit kind enum value
         LangkitSupport.AnalysisUnit unit = ctx.getUnitFromProvider(
-            Text.create("pkg"),
+            "pkg",
             AnalysisUnitKind.UNIT_BODY
         );
         System.out.println(
@@ -164,12 +164,19 @@ public final class BindingsTests {
         // Ensure an invalid unit kind raise an error
         try {
             unit = ctx.getUnitFromProvider(
-                Text.create("pkg"),
+                "pkg",
                 AnalysisUnitKind.fromName("what!")
             );
         } catch (Exception e) {
             System.out.println("Expected exception: " + e.getMessage());
         }
+
+        // Try getting a unit with the unit kind as a string
+        unit = ctx.getUnitFromProvider("pkg", "unit_body");
+        System.out.println(
+            "pkg/body (as string) resolved to: "
+            + new File(unit.getFileName()).getName()
+        );
 
         footer("Unit provider");
     }
