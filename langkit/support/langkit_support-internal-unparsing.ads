@@ -24,6 +24,11 @@ package Langkit_Support.Internal.Unparsing is
    -- Token unparsers --
    ---------------------
 
+   type Token_Unparser_Index is new Natural;
+   --  Unique identifier (for a given language) of a token unparser
+
+   No_Token_Unparser : constant Token_Unparser_Index := 0;
+
    type Token_Unparser_Impl is record
       Kind : Token_Kind_Index;
       --  Token kind for the token to unparse. This is used to apply
@@ -31,9 +36,20 @@ package Langkit_Support.Internal.Unparsing is
 
       Text : Text_Access;
       --  Text to emit for that token
+
+      Index : Token_Unparser_Index;
+      --  Index of this token unparser
+
+      Is_Symbol : Boolean;
+      --  Whether the token kind has symbols: in this case, token equivalence
+      --  must compare the symbol for the token text.
    end record;
    type Token_Unparser is access constant Token_Unparser_Impl;
    --  Description of how to unparse a specific token
+
+   type Token_Unparser_Array_Impl is
+     array (Token_Unparser_Index range <>) of aliased Token_Unparser;
+   type Token_Unparser_Array is access constant Token_Unparser_Array_Impl;
 
    type Token_Sequence_Impl is
      array (Positive range <>) of aliased Token_Unparser;
@@ -159,8 +175,10 @@ package Langkit_Support.Internal.Unparsing is
      Prettier_Ada.Documents.Format_Options_Type;
 
    type Unparsers_Impl is record
+      Case_Insensitive        : Boolean;
       Token_Spacings          : Token_Spacing_Table;
       Token_Newlines          : Token_Newline_Table;
+      Token_Unparsers         : Token_Unparser_Array;
       Node_Unparsers          : Node_Unparser_Map;
       Default_Config_Filename : Bytes_Access;
       Format_Options          : Format_Options_Access;

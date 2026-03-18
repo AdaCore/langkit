@@ -437,6 +437,40 @@ package Langkit_Support.Generic_API.Unparsing is
    --  lines to preserve during the source code reformatting. If omitted, all
    --  empty lines are preserved.
    --
+   --  The "token_configs" entry is optional. If provided, it must be an
+   --  object, and is used to control how static tokens used for parsing
+   --  (keywords, punctuation, ...) must be formatted. This object can have the
+   --  following entries:
+   --
+   --  * "default" (optional): Can be "lower" (format tokens as lower case),
+   --    "upper" (format tokens as upper case), or "original" (keep the
+   --    formatting found in the original sources). If omitted, "lower" is
+   --    used. Note that for case-sensitive languages, "lower" and "upper" are
+   --    equivalent: just use the casing defined by the language.
+   --
+   --  * "formattings" (optional): An object that maps default token
+   --    formattings to the ones to use when unparsing with this configuration.
+   --    These formattings override the formattings implied by the "casing"
+   --    setting. For associations to null, use the formatting found in the
+   --    original source.
+   --
+   --  For example::
+   --
+   --    "token_configs": {
+   --      "default": "upper",
+   --      "formattings": {
+   --        "|": "!",
+   --        "abstract": "Abstract",
+   --        "overriding": null
+   --      }
+   --    }
+   --
+   --  This configuration instructs the unparser to, by default, turn all
+   --  keywords into uppercase, but unparse "|" tokens into "!" (valid if the
+   --  lexer considers that the two are equivalent), unparse "abstract" as
+   --  "Abstract", and preserve the original formatting for "overriding"
+   --  keywords.
+   --
    --  ``Overridings`` must be a (possibly empty) list of filenames that
    --  contain node configurations to complete/replace node configurations
    --  found in the original unparsing configuration. It is also formatted in

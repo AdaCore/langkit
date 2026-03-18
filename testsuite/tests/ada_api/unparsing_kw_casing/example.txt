@@ -1,0 +1,7 @@
+var v1 = 1;
+VAR v2 := 2;
+Var v3 = 3;
+
+fun f1(a) = a + 1;
+FUN f2(b, c) = a + f1(c);
+Fun f3(d) = f2(d, d);

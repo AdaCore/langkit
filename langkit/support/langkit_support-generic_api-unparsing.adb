@@ -414,6 +414,7 @@ package body Langkit_Support.Generic_API.Unparsing is
    function Instantiate_Template
      (Pool          : in out Document_Pool;
       Symbols       : in out Symbol_Instantiation_Context;
+      Config        : Unparsing_Configuration_Record;
       Node          : Lk_Node;
       Current_Token : in out Lk_Token;
       Trivias       : Trivias_Info;
@@ -448,6 +449,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       Trivias : not null access constant Trivias_Info;
       --  Information used to process trivias as expected
+
+      Token_Formattings : Token_Unparser_Formattings;
+      --  Formatting for tokens from the unparsing configuration
    end record;
    --  Group of common parameters for ``Instantiate_Template_Helper``, to have
    --  a single argument to pass down to recursion.
@@ -1187,7 +1191,8 @@ package body Langkit_Support.Generic_API.Unparsing is
             Items.Append
               (Pool.Create_Token
                  (Fragment.Comment_Token.Kind,
-                  Comment_Stripped_Text (Fragment.Comment_Token)));
+                  Comment_Stripped_Text (Fragment.Comment_Token),
+                  No_Token_Unparser));
 
          when Whitespaces =>
             Items.Append
@@ -1260,10 +1265,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                Count        : constant Natural := Node.Children_Count;
                Sep_Fragment : Unparsing_Fragment :=
                  (if Node_Unparser.Separator = null
-                  then (Kind          => List_Separator_Fragment,
-                        Token_Kind    => No_Token_Kind_Ref,
-                        Token_Text    => To_Unbounded_Text (""),
-                        List_Sep_Kind => Sep_Template)
+                  then (Kind           => List_Separator_Fragment,
+                        Token_Kind     => No_Token_Kind_Ref,
+                        Token_Text     => To_Unbounded_Text (""),
+                        Token_Unparser => No_Token_Unparser,
+                        List_Sep_Kind  => Sep_Template)
                   else Fragment_For
                          (Id, Node_Unparser.Separator, Sep_Template));
             begin
@@ -1309,9 +1315,10 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Token =>
             Process.all
               (Fragment      =>
-                 (Kind       => Token_Fragment,
-                  Token_Kind => Token_Node_Kind (Node_Type),
-                  Token_Text => To_Unbounded_Text (Node.Text)),
+                 (Kind           => Token_Fragment,
+                  Token_Kind     => Token_Node_Kind (Node_Type),
+                  Token_Text     => To_Unbounded_Text (Node.Text),
+                  Token_Unparser => No_Token_Unparser),
                Current_Token => Current_Token);
       end case;
    end Iterate_On_Fragments;
@@ -1513,6 +1520,7 @@ package body Langkit_Support.Generic_API.Unparsing is
    function Instantiate_Template
      (Pool          : in out Document_Pool;
       Symbols       : in out Symbol_Instantiation_Context;
+      Config        : Unparsing_Configuration_Record;
       Node          : Lk_Node;
       Current_Token : in out Lk_Token;
       Trivias       : Trivias_Info;
@@ -1524,7 +1532,8 @@ package body Langkit_Support.Generic_API.Unparsing is
          Current_Token,
          Symbols'Unrestricted_Access,
          Arguments'Unrestricted_Access,
-         Trivias'Unrestricted_Access);
+         Trivias'Unrestricted_Access,
+         Config.Token_Formattings);
    begin
       return Result : constant Document_Type :=
         Instantiate_Template_Helper (Pool, State, Template.Root)
@@ -1756,9 +1765,30 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when Table_Separator | Token =>
             declare
-               Items : Document_Vectors.Vector;
+               Items    : Document_Vectors.Vector;
+               Unparser : constant Token_Unparser_Index :=
+                 Template.Token_Unparser;
+
+               --  If this token comes from an unparser, apply the formatting
+               --  rules from the config to it. Otherwise, just use the
+               --  formatting from the sources (Current_Token).
+
+               Format_Cfg : Token_Unparser_Formattings_Impl renames
+                 State.Token_Formattings.all;
+               Formatting : constant Document_Type :=
+                 (if Unparser = No_Token_Unparser
+                  then null
+                  elsif Template.Kind = Table_Separator
+                  then Format_Cfg (Unparser).Table_Separator
+                  else Format_Cfg (Unparser).Token);
             begin
-               Items.Append (Template);
+               Items.Append
+                 (if Formatting = null
+                  then Pool.Create_Token
+                         (State.Current_Token.Kind,
+                          To_Unbounded_Text (State.Current_Token.Text),
+                          No_Token_Unparser)
+                  else Formatting);
                Process_Trivias
                  (State.Current_Token,
                   Items,
@@ -1790,6 +1820,15 @@ package body Langkit_Support.Generic_API.Unparsing is
       Trivias     : Trivias_Info;
       Pool        : Document_Pool;
       Next_Symbol : Some_Template_Symbol := 1;
+
+      function Document_For_Token_Fragment
+        (Current_Token : Lk_Token;
+         Fragment      : Unparsing_Fragment)
+         return Document_Type
+      with Pre => Fragment.Kind in Token_Fragment | List_Separator_Fragment;
+      --  Return the document to use to format the given (token) unparsing
+      --  fragment. This takes token formatting rules from ``Config`` into
+      --  account.
 
       procedure Skip_Tokens
         (Current_Token : in out Lk_Token;
@@ -1865,6 +1904,47 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
       end Emit_Error;
 
+      ---------------------------------
+      -- Document_For_Token_Fragment --
+      ---------------------------------
+
+      function Document_For_Token_Fragment
+        (Current_Token : Lk_Token;
+         Fragment      : Unparsing_Fragment)
+         return Document_Type
+      is
+         Result   : Document_Type;
+         Unparser : Token_Unparser_Index renames Fragment.Token_Unparser;
+      begin
+         if Fragment.Token_Kind = No_Token_Kind_Ref then
+
+            --  This is a dummy fragment: yield an empty document list for it
+
+            return Pool.Create_Empty_List;
+
+         elsif Unparser = No_Token_Unparser then
+
+            --  This fragment does not come from an unparser: create a document
+            --  that reflects exactly the token that comes from sources.
+
+            return Pool.Create_Token
+                     (Fragment.Token_Kind, Fragment.Token_Text, Unparser);
+         end if;
+
+         --  This token comes from an unparser: apply the formatting rules from
+         --  the config to it.
+
+         Result := Config.Value.Token_Formattings.all (Unparser).Token;
+         if Result = null then
+            return Pool.Create_Token
+                     (Current_Token.Kind,
+                      To_Unbounded_Text (Current_Token.Text),
+                      Unparser);
+         else
+            return Result;
+         end if;
+      end Document_For_Token_Fragment;
+
       -----------------
       -- Skip_Tokens --
       -----------------
@@ -1903,8 +1983,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                pragma Assert (Fragment.Kind = Token_Fragment);
             begin
                Items.Append
-                 (Pool.Create_Token
-                    (Fragment.Token_Kind, Fragment.Token_Text));
+                 (Document_For_Token_Fragment (Current_Token, Fragment));
                Process_Trivias
                  (Current_Token, Items, Pool, Trivias, Skip_Token => True);
             end;
@@ -2060,9 +2139,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                         or else Is_Fake_Token);
 
                      Token : Document_Type :=
-                       (if F.Token_Kind = No_Token_Kind_Ref
-                        then Pool.Create_Empty_List
-                        else Pool.Create_Token (F.Token_Kind, F.Token_Text));
+                       Document_For_Token_Fragment (Current_Token, F);
                   begin
                      --  If we have a list separator, instantiate the
                      --  corresponding template to wrap ``Token``.
@@ -2102,6 +2179,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                            Token := Instantiate_Template
                              (Pool          => Pool,
                               Symbols       => Symbols,
+                              Config        => Config.Value.all,
                               Node          => N,
                               Current_Token => Current_Token,
                               Trivias       => Trivias,
@@ -2286,6 +2364,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                                   (Pool          => Pool,
                                    Symbols       => Symbols,
                                    Node          => N,
+                                   Config        => Config.Value.all,
                                    Current_Token => Current_Token,
                                    Trivias       => Trivias,
                                    Template      => Table_Join_Template,
@@ -2343,6 +2422,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                Result := Instantiate_Template
                  (Pool          => Pool,
                   Symbols       => Symbols,
+                  Config        => Config.Value.all,
                   Node          => N,
                   Trivias       => Trivias,
                   Current_Token => Current_Token,
@@ -2450,6 +2530,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   Result := Instantiate_Template
                     (Pool          => Pool,
                      Symbols       => Symbols,
+                     Config        => Config.Value.all,
                      Node          => N,
                      Current_Token => Current_Token,
                      Trivias       => Trivias,
@@ -2576,6 +2657,7 @@ package body Langkit_Support.Generic_API.Unparsing is
            (Instantiate_Template
               (Pool          => Pool,
                Symbols       => Symbols,
+               Config        => Config.Value.all,
                Node          => Node,
                Current_Token => Current_Token,
                Trivias       => Trivias,

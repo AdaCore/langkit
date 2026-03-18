@@ -219,4 +219,39 @@ package body Langkit_Support.Text is
       end return;
    end To_Lower;
 
+   --------------
+   -- To_Upper --
+   --------------
+
+   function To_Upper (C : Character_Type) return Character_Type is
+      subtype WWC is Wide_Wide_Character;
+
+      First_ASCII : constant WWC :=
+         WWC'Val (Character'Pos (ASCII.NUL));
+      Last_ASCII  : constant WWC :=
+         WWC'Val (Character'Pos (ASCII.DEL));
+      subtype WWC_ASCII is WWC range First_ASCII .. Last_ASCII;
+   begin
+      if C in 'a' .. 'z' then
+         return WWC'Val (WWC'Pos (C) - WWC'Pos ('a') + WWC'Pos ('A'));
+      elsif C in WWC_ASCII'Range then
+         return C;
+      else
+         return Ada.Wide_Wide_Characters.Handling.To_Upper (C);
+      end if;
+   end To_Upper;
+
+   --------------
+   -- To_Upper --
+   --------------
+
+   function To_Upper (Text : Text_Type) return Text_Type is
+   begin
+      return Result : Text_Type := Text do
+         for C of Result loop
+            C := To_Upper (C);
+         end loop;
+      end return;
+   end To_Upper;
+
 end Langkit_Support.Text;

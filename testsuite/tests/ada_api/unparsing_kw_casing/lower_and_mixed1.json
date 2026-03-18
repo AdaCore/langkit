@@ -1,0 +1,11 @@
+{
+  "node_configs": {
+    "DeclList": {"sep": ["hardline", "recurse"]}
+  },
+  "token_configs": {
+    "default": "lower",
+    "formattings": {
+      "var": "Var"
+    }
+  }
+}

@@ -1503,9 +1503,10 @@ package body Langkit_Support.Prettier_Utils is
    ----------------------------
 
    function Create_Table_Separator
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type
+     (Self     : in out Document_Pool;
+      Kind     : Token_Kind_Ref;
+      Text     : Unbounded_Text_Type;
+      Unparser : Token_Unparser_Index) return Document_Type
    is
       Position : Text_To_Document_Maps.Cursor;
       Inserted : Boolean;
@@ -1517,6 +1518,7 @@ package body Langkit_Support.Prettier_Utils is
              (Kind               => Table_Separator,
               Token_Kind         => Kind,
               Token_Text         => Text,
+              Token_Unparser     => Unparser,
               Token_Prettier_Doc => <>)
          do
             Self.Register (Result);
@@ -1537,9 +1539,10 @@ package body Langkit_Support.Prettier_Utils is
    ------------------
 
    function Create_Token
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type
+     (Self     : in out Document_Pool;
+      Kind     : Token_Kind_Ref;
+      Text     : Unbounded_Text_Type;
+      Unparser : Token_Unparser_Index) return Document_Type
    is
       Position : Text_To_Document_Maps.Cursor;
       Inserted : Boolean;
@@ -1551,6 +1554,7 @@ package body Langkit_Support.Prettier_Utils is
              (Kind               => Token,
               Token_Kind         => Kind,
               Token_Text         => Text,
+              Token_Unparser     => Unparser,
               Token_Prettier_Doc => <>)
          do
             Self.Register (Result);

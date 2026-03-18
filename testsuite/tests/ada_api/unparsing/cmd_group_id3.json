@@ -18,7 +18,7 @@
         "f_callee": "recurse"
       }
     },
-    "ExampleCall": {
+    "BuiltinCall": {
       "node": "recurse"
     }
   }
