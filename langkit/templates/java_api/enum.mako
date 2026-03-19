@@ -76,6 +76,20 @@
             return (${java_type}) map.get(cValue);
         }
 
+        /** Create a new enumeration value from its variant name. */
+        public static ${java_type} fromName(
+            String name
+        ) {
+            return switch (name.toLowerCase()) {
+                % for v in cls.values:
+                case "${v.name.lower}" -> ${java_type}.${v.name.upper};
+                % endfor
+                default -> throw new EnumException(
+                    "Cannot get ${java_type} from \"" + name + '"'
+                );
+            };
+        }
+
         /**
          * Get the C value from the enum instance.
          *

@@ -3910,59 +3910,69 @@ public final class ${ctx.lib_name.camel} {
         }
 
         % if cfg.library.defaults.unit_provider:
-        /**
-         * Get an analysis unit from the given unit name and unit kind in the
-         * current context with additional parameters.
-         *
-         * @param name Name of the unit.
-         * @param kind Kind of the unit.
-         * @param charset The charset of the buffer.
-         * @param rule The rule to parse the buffer with.
-         * @return The new analysis unit.
-         */
+        /** Create a new analysis unit from the unit provider. */
         public AnalysisUnit getUnitFromProvider(
-            final Text name,
-            final AnalysisUnitKind kind,
-            final String charset,
-            final boolean reparse
+            String name,
+            AnalysisUnitKind kind,
+            String charset,
+            boolean reparse
         ) {
-            if(ImageInfo.inImageCode()) {
-                TextNative nameNative = StackValue.get(TextNative.class);
-                name.unwrap(nameNative);
-                try (
-                    CCharPointerHolder charsetNative =
-                        charset == null ?
-                        null :
-                        CTypeConversion.toCString(charset);
-                ) {
-                    final AnalysisUnitNative resNative =
-                        NI_LIB.${nat("get_analysis_unit_from_provider")}(
-                        this.reference.ni(),
-                        nameNative,
+            try (var nameText = Text.create(name)) {
+                if(ImageInfo.inImageCode()) {
+                    TextNative nameNative = StackValue.get(TextNative.class);
+                    nameText.unwrap(nameNative);
+                    try (
+                        CCharPointerHolder charsetNative =
+                            charset == null ?
+                            null :
+                            CTypeConversion.toCString(charset);
+                    ) {
+                        final AnalysisUnitNative resNative =
+                            NI_LIB.${nat("get_analysis_unit_from_provider")}(
+                            this.reference.ni(),
+                            nameNative,
+                            kind.toC(),
+                            (charset == null ?
+                                WordFactory.nullPointer() :
+                                charsetNative.get()),
+                            (reparse ? 1 : 0)
+                        );
+                        return AnalysisUnit.wrap(resNative);
+                    }
+                } else {
+                    return JNI_LIB.${nat("get_analysis_unit_from_provider")}(
+                        this,
+                        nameText,
                         kind.toC(),
-                        (charset == null ?
-                            WordFactory.nullPointer() :
-                            charsetNative.get()),
-                        (reparse ? 1 : 0)
+                        charset,
+                        reparse
                     );
-                    return AnalysisUnit.wrap(resNative);
                 }
-            } else {
-                return JNI_LIB.${nat("get_analysis_unit_from_provider")}(
-                    this,
-                    name,
-                    kind.toC(),
-                    charset,
-                    reparse
-                );
+            } catch (Throwable e) {
+                throw e;
             }
         }
 
         public AnalysisUnit getUnitFromProvider(
-            final Text name,
-            final AnalysisUnitKind kind
+            String name,
+            AnalysisUnitKind kind
         ) {
-            return this.getUnitFromProvider(name, kind, "", false);
+            return this.getUnitFromProvider(name, kind, null, false);
+        }
+
+        @Override
+        public AnalysisUnit getUnitFromProvider(
+            String name,
+            String kind,
+            String charset,
+            boolean reparse
+        ) {
+            return this.getUnitFromProvider(
+                name,
+                AnalysisUnitKind.fromName(kind),
+                charset,
+                reparse
+            );
         }
         % endif
 

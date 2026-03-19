@@ -18,7 +18,7 @@ import com.oracle.truffle.api.interop.TruffleObject;
 public class LangkitSupport {
 
     /** Exception to raise when interface default methods are not overrode. */
-    private static final
+    public static final
     class NotImplementedException extends RuntimeException {
         public NotImplementedException () {};
 
@@ -437,6 +437,43 @@ public class LangkitSupport {
         public abstract AnalysisUnit getUnitFromBuffer(
                 final String buffer,
                 final String name);
+
+        /**
+         * Get a new analysis unit from the context unit provider by its name
+         * and its kind. Use additional parameter to configure the way the
+         * unit is parsed.
+         *
+         * @param name Name of the unit to get.
+         * @param kind Kind of the unit to get as a string.
+         * @param charset Charset to parse the analysis unit.
+         * @param reparse Whether to reparse the analysis unit.
+         * @return The new analysis unit if it is found, null otherwise.
+         */
+        @CompilerDirectives.TruffleBoundary
+        public default AnalysisUnit getUnitFromProvider(
+            String name,
+            String kind,
+            String charset,
+            boolean reparse
+        ) {
+            throw new NotImplementedException();
+        }
+
+        /**
+         * Get a new analysis unit from the context unit provider by its name
+         * and its kind.
+         *
+         * @param name Name of the unit to get.
+         * @param kind Kind of the unit to get as a string.
+         * @return The new analysis unit if it is found, null otherwise.
+         */
+        @CompilerDirectives.TruffleBoundary
+        public default AnalysisUnit getUnitFromProvider(
+            String name,
+            String kind
+        ) {
+            return getUnitFromProvider(name, kind, null, false);
+        }
 
         /**
          * Start a rewriting session for Context.
