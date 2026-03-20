@@ -48,10 +48,10 @@ grammar foo_grammar {
     ref <- Ref(name)
     call_arg <- CallArg(?pick(name "=") expr)
     call <- or(
-        | Call(name "(" list*(call_arg, ",") ")")
-        | ExampleCall(
-            "example" null(Name) "(" list*(call_arg, ",") ")"
+        | BuiltinCall(
+            @Identifier("builtin") null(Name) "(" list*(call_arg, ",") ")"
         )
+        | Call(name "(" list*(call_arg, ",") ")")
     )
     block <- or(
         | Block("{" list*(or(var_decl | fun_decl)) "}")
@@ -161,7 +161,7 @@ class Call: Expr {
     @parse_field args: ASTList[CallArg]
 }
 
-class ExampleCall: Call {
+class BuiltinCall: Call {
 }
 
 class DottedName: Expr {

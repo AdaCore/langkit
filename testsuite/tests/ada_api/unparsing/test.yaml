@@ -15,6 +15,7 @@ config:
 gpr_mains:
     - main.adb -c config.json example.txt
     - main.adb -c config.json param_spec.txt -r param_spec
+    - main.adb -c config.json --overriding token_cfg.json example.txt
 
     - invalid_config.adb
     - commands.adb

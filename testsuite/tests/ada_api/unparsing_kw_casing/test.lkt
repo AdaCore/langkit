@@ -1,0 +1,94 @@
+# Check that token formattings in the unparsing configuration work as expected
+# in a language that is case insensitive.
+
+@case_insensitive
+lexer foo_lexer {
+    @trivia()
+    Whitespace <- p"[ \n\r\t]+"
+
+    @unparsing_spacing(with=alphanumericals)
+    family alphanumericals {
+        Var <- "var"
+
+        @symbol()
+        Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+
+        Number <- p"[0-9]+"
+    }
+    family punctuation {
+        Semicolon <- ";"
+        LParen <- "("
+        RParen <- ")"
+        Comma <- ","
+        Equal <- or("=" | ":=")
+        Plus <- "+"
+    }
+
+    family comments {
+        @with_unparsing_newline
+        @trivia(comment=true)
+        Comment <- p"#(.?)+"
+    }
+}
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    @main_rule main_rule <- list*(or(var_decl | fun_decl))
+    name <- Name(@Identifier)
+
+    var_decl <- VarDecl("var" name "=" expr ";")
+    fun_decl <- FunDecl(
+        @Identifier("fun") name "(" list*(name, ",") ")" "=" expr ";"
+    )
+    expr <- or(
+        | Addition(expr "+" expr)
+        | CallExpr(name "(" list*(expr, ",") ")")
+        | number
+        | ref
+    )
+    number <- Number(@Number)
+    ref <- Ref(name)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+@abstract
+class Decl: FooNode {
+    @parse_field name: Name
+}
+
+class FunDecl: Decl {
+    @parse_field args: ASTList[Name]
+    @parse_field body: Expr
+}
+
+class VarDecl: Decl {
+    @parse_field value: Expr
+}
+
+@abstract
+class Expr: FooNode {
+}
+
+class Addition: Expr {
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
+}
+
+class CallExpr: Expr {
+    @parse_field callee: Name
+    @parse_field args: ASTList[Expr]
+}
+
+class Number: Expr implements TokenNode {
+}
+
+class Ref: Expr {
+    @parse_field name: Name
+}

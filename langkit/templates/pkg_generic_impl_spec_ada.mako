@@ -13,6 +13,8 @@ with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
 with Langkit_Support.Text;              use Langkit_Support.Text;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 
 with ${ada_lib_name}.Implementation;
@@ -209,6 +211,12 @@ private package ${ada_lib_name}.Generic_Impl is
      (Left, Right       : Internal_Token;
       Left_SN, Right_SN : Token_Safety_Net) return Boolean;
 
+   procedure Extract_Tokens
+     (Input       : Analysis.Lexer_Input;
+      With_Trivia : Boolean;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+
    --  Language descriptor table for ${ada_lib_name}.
    --
    --  We define it here and export its address to avoid making the
@@ -235,6 +243,9 @@ private package ${ada_lib_name}.Generic_Impl is
 
       Token_Kinds        => Token_Kind_Descriptors'Access,
       Token_Family_Names => Token_Family_Names'Access,
+      Token_Termination  => ${(
+         G.token_kind_index(ctx.lexer.tokens.Termination)
+      )},
 
       Types          => Generic_Introspection.Types'Access,
       Enum_Types     => Generic_Introspection.Enum_Types'Access,
@@ -305,6 +316,8 @@ private package ${ada_lib_name}.Generic_Impl is
       Entity_Image => Entity_Image'Access,
 
       Token_Is_Equivalent => Token_Is_Equivalent'Access,
+
+      Extract_Tokens => Extract_Tokens'Access,
 
       Create_Enum      => Create_Enum'Access,
       Create_Array     => Create_Array'Access,

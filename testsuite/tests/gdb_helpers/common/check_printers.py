@@ -146,4 +146,4 @@ gdb.print_expr(
 break_lkt("test_tokens")
 run_continue()
 check_var_state("null_var", "No_Token")
-check_var_state("first", "<Token 7 1/0 at 1:1-1:8 'example'>")
+check_var_state("first", "<Token 8 1/0 at 1:1-1:8 'example'>")

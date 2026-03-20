@@ -28,6 +28,33 @@ def f2(a: Int, ): Int
 == main.adb -c config.json param_spec.txt -r param_spec ==
 a: Int=2
 
+== main.adb -c config.json --overriding token_cfg.json example.txt ==
+var v1: Int := 2;
+null var v2: Int := 0;
+
+def f1(a: Int, b: Int:=0): Int
+{
+    print(a, b);
+    very_long_call(
+        aaaaaaaaa,
+        bbbbbbb,
+        cccccccc,
+        dddddddd,
+        eeeeeee,
+        fffffffff,
+        ggggggggg,
+        hhhhhhhh
+    );
+    a + b + 1;
+
+    n1, n2, n2 := foo(a, b);
+}
+
+def f2(a: Int, ): Int
+{
+    a + 1;
+}
+
 == invalid_config.adb ==
 == Errors outside of templates ==
 
@@ -269,6 +296,24 @@ missing node config for PlusBlock
 missing node config for ASTList[LabeledStmts]
 missing node config for ASTList[Stmt]
 missing node config for AssignStmt
+
+== Errors in token configs ==
+# invalid_token_configs.json
+    invalid "token_configs" entry: object expected
+# invalid_token_default.json
+    invalid "default" entry: string expected
+# invalid_token_default2.json
+    invalid "default" value: invalid
+# invalid_token_formattings.json
+    invalid "formattings" entry: object expected
+# invalid_token_formattings_key.json
+    no such token found in the grammar: 'nosuchtoken'
+# invalid_token_formattings_value1.json
+    invalid formatting entry for token 'builtin'
+# invalid_token_formattings_value2.json
+    invalid formatting for token 'builtin'
+# invalid_token_formattings_value3.json
+    invalid formatting for token '='
 
 Done.
 

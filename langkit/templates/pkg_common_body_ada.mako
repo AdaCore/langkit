@@ -138,11 +138,14 @@ package body ${ada_lib_name}.Common is
               else Token_Kind_Name (Token_Id));
    end Token_Error_Image;
 
-   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind
-   is (Token_Kind'Val (Raw));
+   --  ``Token_Kind_Index`` is a 1-based index type, but 'Val and 'Pos deal
+   --  with 0-based indexes.
 
-   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind
-   is (Token_Kind'Pos (Kind));
+   function To_Token_Kind (Index : Token_Kind_Index) return Token_Kind
+   is (Token_Kind'Val (Index - 1));
+
+   function From_Token_Kind (Kind : Token_Kind) return Token_Kind_Index
+   is (Token_Kind'Pos (Kind) + 1);
 
    -------------------
    -- Is_Token_Node --

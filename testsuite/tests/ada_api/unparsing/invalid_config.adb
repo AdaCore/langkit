@@ -175,5 +175,16 @@ begin
    Check ("missing_nodes.json", Check_All_Nodes => True);
    New_Line;
 
+   Put_Line ("== Errors in token configs ==");
+   Check ("invalid_token_configs.json");
+   Check ("invalid_token_default.json");
+   Check ("invalid_token_default2.json");
+   Check ("invalid_token_formattings.json");
+   Check ("invalid_token_formattings_key.json");
+   Check ("invalid_token_formattings_value1.json");
+   Check ("invalid_token_formattings_value2.json");
+   Check ("invalid_token_formattings_value3.json");
+   New_Line;
+
    Put_Line ("Done.");
 end Invalid_Config;

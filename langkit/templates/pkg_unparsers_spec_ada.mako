@@ -55,10 +55,13 @@ private package ${ada_lib_name}.Unparsers is
    ## Emit constants for token unparsers and token sequence unparsers. Emit
    ## only one Text_Type constant for each text value needed.
 
-   <% tok_text_ids = {} %>
-   % for tok in ctx.unparsers.sorted_token_unparsers:
+   <%
+      tok_text_ids = {}
+      tok_var_items = []
+   %>
+   % for i, tok in enumerate(ctx.unparsers.sorted_token_unparsers, 1):
       <%
-         text = tok.match_text or ctx.lexer_literals_map[tok]
+         text = tok.match_text
          text_id = tok_text_ids.get(text)
          if text_id is None:
             emit_text_constant = True
@@ -66,12 +69,16 @@ private package ${ada_lib_name}.Unparsers is
             tok_text_ids[text] = text_id
          else:
             emit_text_constant = False
+         tok_var_items.append(f"{i} => {tok.var_name}'Access")
       %>
       % if emit_text_constant:
          ${text_id} : aliased constant Text_Type := ${text_repr(text)};
       % endif
       ${tok.var_name} : aliased constant Token_Unparser_Impl :=
-        (${G.token_kind_index(tok.token)}, ${text_id}'Access);
+        (Kind      => ${G.token_kind_index(tok.token)},
+         Text      => ${text_id}'Access,
+         Index     => ${i},
+         Is_Symbol => ${tok.token.matched_by_pattern});
    % endfor
 
    % for tok_seq in ctx.unparsers.token_sequence_unparsers:
@@ -82,6 +89,13 @@ private package ${ada_lib_name}.Unparsers is
                for i, tok in enumerate(tok_seq.tokens, 1))});
       % endif
    % endfor
+
+   <%
+      if not tok_var_items:
+         tok_var_items.append("1 .. 0 => <>")
+   %>
+   Token_Unparsers : aliased constant Token_Unparser_Array_Impl :=
+   ${ada_block_with_parens(tok_var_items, 3)};
 
    ## Emit constants for lists of field unparsers
 
@@ -191,8 +205,10 @@ private package ${ada_lib_name}.Unparsers is
       End_Of_Line => Prettier_Ada.Documents.${str(opts.end_of_line_kind)});
 
    Unparsers : aliased constant Unparsers_Impl :=
-     (Token_Spacings'Access,
+     (${ctx.lexer.case_insensitive},
+      Token_Spacings'Access,
       Token_Newlines'Access,
+      Token_Unparsers'Access,
       Node_Unparsers'Access,
       Default_Config_Filename'Access,
       Format_Options'Access);

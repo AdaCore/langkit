@@ -4,8 +4,9 @@ with System;
 
 with Ada.Unchecked_Deallocation;
 
-with ${ada_lib_name}.Public_Converters;  use ${ada_lib_name}.Public_Converters;
 with ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Lexer_Implementation;
+with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
 package body ${ada_lib_name}.Generic_Impl is
 
@@ -649,5 +650,28 @@ package body ${ada_lib_name}.Generic_Impl is
         (Wrap_Token (Left_SN.Context, Left),
          Wrap_Token (Right_SN.Context, Right));
    end Token_Is_Equivalent;
+
+   --------------------
+   -- Extract_Tokens --
+   --------------------
+
+   procedure Extract_Tokens
+     (Input       : Analysis.Lexer_Input;
+      With_Trivia : Boolean;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      Same_Contents : Boolean;
+   begin
+      Lexer_Implementation.Extract_Tokens
+        (Input         => Input,
+         With_Trivia   => With_Trivia,
+         File_Reader   => null,
+         TDH           => TDH,
+         Diagnostics   => Diagnostics,
+         Old_TDH       => null,
+         Same_Contents => Same_Contents);
+      pragma Unreferenced (Same_Contents);
+   end Extract_Tokens;
 
 end ${ada_lib_name}.Generic_Impl;

@@ -22,6 +22,8 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Internal.Unparsing;
+use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
@@ -322,6 +324,7 @@ private package Langkit_Support.Prettier_Utils is
          when Table_Separator | Token =>
             Token_Kind         : Token_Kind_Ref;
             Token_Text         : Unbounded_Text_Type;
+            Token_Unparser     : Token_Unparser_Index;
             Token_Prettier_Doc : Prettier.Document_Type;
 
          when Trim =>
@@ -527,9 +530,10 @@ private package Langkit_Support.Prettier_Utils is
    --  Return a ``Table`` node
 
    function Create_Table_Separator
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type;
+     (Self     : in out Document_Pool;
+      Kind     : Token_Kind_Ref;
+      Text     : Unbounded_Text_Type;
+      Unparser : Token_Unparser_Index) return Document_Type;
    --  Return a ``Table_Separator`` node
 
    function Create_Soft_Line
@@ -537,9 +541,10 @@ private package Langkit_Support.Prettier_Utils is
    --  Return a ``Soft_Line`` node
 
    function Create_Token
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type;
+     (Self     : in out Document_Pool;
+      Kind     : Token_Kind_Ref;
+      Text     : Unbounded_Text_Type;
+      Unparser : Token_Unparser_Index) return Document_Type;
    --  Return a ``Token`` node
 
    function Create_Trim (Self : in out Document_Pool) return Document_Type;

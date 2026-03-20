@@ -1,0 +1,90 @@
+== main.adb -c upper.json example.txt ==
+VAR v1=1;
+VAR v2=2;
+VAR v3=3;
+
+FUN f1(a)=a+1;
+FUN f2(b,c)=a+f1(c);
+FUN f3(d)=f2(d,d);
+
+== main.adb -c upper_and_mixed1.json example.txt ==
+Var v1=1;
+Var v2=2;
+Var v3=3;
+
+FUN f1(a)=a+1;
+FUN f2(b,c)=a+f1(c);
+FUN f3(d)=f2(d,d);
+
+== main.adb -c upper_and_mixed2.json example.txt ==
+VAR v1=1;
+VAR v2=2;
+VAR v3=3;
+
+Fun f1(a)=a+1;
+Fun f2(b,c)=a+f1(c);
+Fun f3(d)=f2(d,d);
+
+== main.adb -c lower.json example.txt ==
+var v1=1;
+var v2=2;
+var v3=3;
+
+fun f1(a)=a+1;
+fun f2(b,c)=a+f1(c);
+fun f3(d)=f2(d,d);
+
+== main.adb -c lower_and_mixed1.json example.txt ==
+Var v1=1;
+Var v2=2;
+Var v3=3;
+
+fun f1(a)=a+1;
+fun f2(b,c)=a+f1(c);
+fun f3(d)=f2(d,d);
+
+== main.adb -c lower_and_mixed2.json example.txt ==
+var v1=1;
+var v2=2;
+var v3=3;
+
+Fun f1(a)=a+1;
+Fun f2(b,c)=a+f1(c);
+Fun f3(d)=f2(d,d);
+
+== main.adb -c original.json example.txt ==
+var v1=1;
+VAR v2:=2;
+Var v3=3;
+
+fun f1(a)=a+1;
+FUN f2(b,c)=a+f1(c);
+Fun f3(d)=f2(d,d);
+
+== main.adb -c original_and_mixed1.json example.txt ==
+Var v1=1;
+Var v2:=2;
+Var v3=3;
+
+fun f1(a)=a+1;
+FUN f2(b,c)=a+f1(c);
+Fun f3(d)=f2(d,d);
+
+== main.adb -c original_and_mixed2.json example.txt ==
+var v1=1;
+VAR v2:=2;
+Var v3=3;
+
+Fun f1(a)=a+1;
+Fun f2(b,c)=a+f1(c);
+Fun f3(d)=f2(d,d);
+
+== main.adb -c upper_and_mixed1.json --overriding over.json example.txt ==
+var v1=1;
+var v2=2;
+var v3=3;
+
+fun f1(a)=a+1;
+fun f2(b,c)=a+f1(c);
+fun f3(d)=f2(d,d);
+Done

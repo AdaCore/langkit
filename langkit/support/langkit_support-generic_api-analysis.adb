@@ -107,11 +107,6 @@ package body Langkit_Support.Generic_API.Analysis is
    --  Return a public token reference to wrap ``Token``. Use safety net from
    --  ``Origin Token``.
 
-   function "+" (Kind : Raw_Token_Kind) return Token_Kind_Index
-   is (Token_Kind_Index (Kind + 1));
-   --  ``Raw_Token_Kind`` is a 0-based index type, whereas ``Token_Kind_Index``
-   --  is a 1-based one.
-
    function Rule_Or_Default
      (Desc : Language_Descriptor;
       Rule : Grammar_Rule_Ref) return Grammar_Rule_Index
@@ -1435,7 +1430,7 @@ package body Langkit_Support.Generic_API.Analysis is
       Reject_Null_Token (Self);
 
       D := Data (Self.Index, Self.TDH.all);
-      return From_Index (Self.Desc, +D.Kind);
+      return From_Index (Self.Desc, D.Kind);
    end Kind;
 
    ---------

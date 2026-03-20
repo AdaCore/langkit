@@ -106,6 +106,13 @@ package Langkit_Support.Text is
    --  Run ``To_Lower`` on each character of a copy of ``Text`` and return the
    --  result.
 
+   function To_Upper (C : Character_Type) return Character_Type with Inline;
+   --  Like ``To_Lower`` above, but to convert to uppercase
+
+   function To_Upper (Text : Text_Type) return Text_Type with Inline;
+   --  Run ``To_Upper`` on each character of a copy of ``Text`` and return the
+   --  result.
+
    type Text_Access is access all Text_Type;
    type Text_Cst_Access is access constant Text_Type;
 

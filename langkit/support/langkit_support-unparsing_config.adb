@@ -4,12 +4,22 @@
 --
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+pragma Warnings (Off, "is an internal GNAT unit");
+with Ada.Strings.Unbounded.Aux; use Ada.Strings.Unbounded.Aux;
+pragma Warnings (On, "is an internal GNAT unit");
+with System;
 
+with GNATCOLL.Iconv;
 with GNATCOLL.JSON; use GNATCOLL.JSON;
 
 with Langkit_Support.Errors; use Langkit_Support.Errors;
+with Langkit_Support.Internal.Analysis;
+use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Names;  use Langkit_Support.Names;
 with Langkit_Support.Slocs;  use Langkit_Support.Slocs;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+with Langkit_Support.Types;  use Langkit_Support.Types;
 
 package body Langkit_Support.Unparsing_Config is
 
@@ -32,6 +42,17 @@ package body Langkit_Support.Unparsing_Config is
    Linear_Template_For_Join : constant Linear_Template_Vectors.Vector :=
      [(Kind => Recurse_Left), (Kind => Recurse_Right)];
    --  Linear template for table row join templates
+
+   package Token_Id_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_Text_Type,
+      Element_Type    => Token_Unparser_Index,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
+
+   function Token_Id_Map
+     (Desc : Language_Descriptor_Access) return Token_Id_Maps.Map;
+   --  Return a mapping from token unparser texts to the corresponding token
+   --  unparser indexes.
 
    ---------------
    -- Read_JSON --
@@ -198,7 +219,9 @@ package body Langkit_Support.Unparsing_Config is
                when Token_Item =>
                   Doc_Item :=
                     Pool.Create_Token
-                      (LT_Item.Token_Kind, LT_Item.Token_Text);
+                      (LT_Item.Token_Kind,
+                       LT_Item.Token_Text,
+                       LT_Item.Token_Unparser);
                when Field_Item =>
                   Doc_Item :=
                     Pool.Create_Recurse_Field
@@ -221,6 +244,21 @@ package body Langkit_Support.Unparsing_Config is
          Root    => Template.Root,
          Symbols => Template.Symbols);
    end Expand_Regular_Node_Template;
+
+   ------------------
+   -- Token_Id_Map --
+   ------------------
+
+   function Token_Id_Map
+     (Desc : Language_Descriptor_Access) return Token_Id_Maps.Map is
+   begin
+      return Result : Token_Id_Maps.Map do
+         for Unparser of Desc.Unparsers.Token_Unparsers.all loop
+            Result.Insert
+              (To_Unbounded_Text (Unparser.Text.all), Unparser.Index);
+         end loop;
+      end return;
+   end Token_Id_Map;
 
    -----------
    -- Image --
@@ -284,12 +322,14 @@ package body Langkit_Support.Unparsing_Config is
       for T of Tokens.all loop
          declare
             F : constant Unparsing_Fragment := Fragment_For (Id, T);
+            pragma Assert (F.Token_Unparser = T.Index);
          begin
             Linear_Template.Append
               (Linear_Template_Item'
-                 (Kind       => Token_Item,
-                  Token_Kind => F.Token_Kind,
-                  Token_Text => F.Token_Text));
+                 (Kind           => Token_Item,
+                  Token_Kind     => F.Token_Kind,
+                  Token_Text     => F.Token_Text,
+                  Token_Unparser => F.Token_Unparser));
          end;
       end loop;
    end Linear_Template_From_Unparser;
@@ -399,9 +439,10 @@ package body Langkit_Support.Unparsing_Config is
    begin
       return
         (case List_Sep is
-         when None                   => (Token_Fragment, Kind, Text),
+         when None                   =>
+           (Token_Fragment, Kind, Text, Token.Index),
          when List_Sep_Template_Kind =>
-           (List_Separator_Fragment, Kind, Text, List_Sep));
+           (List_Separator_Fragment, Kind, Text, Token.Index, List_Sep));
    end Fragment_For;
 
    -------------
@@ -410,6 +451,7 @@ package body Langkit_Support.Unparsing_Config is
 
    procedure Release (Self : in out Unparsing_Configuration_Access) is
    begin
+      Free (Self.Token_Formattings);
       for Cur in Self.Node_Configs.Iterate loop
          declare
             Node_Config : Node_Config_Access renames
@@ -443,6 +485,19 @@ package body Langkit_Support.Unparsing_Config is
       ------------------
       -- JSON helpers --
       ------------------
+
+      procedure Set_Token_Documents
+        (Index : Token_Unparser_Index; Text : Text_Type);
+      --  Set a specific formatting (``Text``) for the formatting of the given
+      --  token unparser.
+      --
+      --  If ``Text`` is an empty string, this instructs the config to preserve
+      --  token formatting for the givne unparser.
+
+      procedure Load_Token_Formattings
+        (JSON : JSON_Value; Token_Map : Token_Id_Maps.Map);
+      --  Load token formattings configuration from JSON to
+      --  ``Desc.Unparsers.Token_Unparsers``.
 
       package Node_JSON_Maps is new Ada.Containers.Hashed_Maps
         (Key_Type        => Type_Index,
@@ -693,6 +748,237 @@ package body Langkit_Support.Unparsing_Config is
       Result : Unparsing_Configuration_Access :=
         new Unparsing_Configuration_Record;
       Pool   : Document_Pool renames Result.Pool;
+
+      -------------------------
+      -- Set_Token_Documents --
+      -------------------------
+
+      procedure Set_Token_Documents
+        (Index : Token_Unparser_Index; Text : Text_Type)
+      is
+         Unparser : Token_Unparser_Impl renames
+           Desc.Unparsers.Token_Unparsers.all (Index).all;
+         Docs     : Token_Documents renames
+           Result.Token_Formattings.all (Index);
+      begin
+         if Text = "" then
+            Docs := (null, null);
+         else
+            declare
+               K : constant Token_Kind_Ref :=
+                 From_Index (Language, Unparser.Kind);
+               T : constant Unbounded_Text_Type := To_Unbounded_Text (Text);
+            begin
+               Docs :=
+                 (Token           => Pool.Create_Token (K, T, Index),
+                  Table_Separator => Pool.Create_Table_Separator
+                                       (K, T, Index));
+            end;
+         end if;
+      end Set_Token_Documents;
+
+      ----------------------------
+      -- Load_Token_Formattings --
+      ----------------------------
+
+      procedure Load_Token_Formattings
+        (JSON : JSON_Value; Token_Map : Token_Id_Maps.Map)
+      is
+         Symbols : Symbol_Table := Create_Symbol_Table;
+         TDH     : Token_Data_Handler;
+
+         procedure Process (Name : String; Value : JSON_Value);
+         --  Callback for GNATCOLL.JSON.Map_JSON_Object, to decode entries from
+         --  the "formattings" mapping.
+
+         procedure Validate_Token
+           (Name  : String;
+            Text  : Unbounded_String;
+            Index : Token_Unparser_Index);
+         --  Abort config parsing if ``Text`` is not a valid formatting for the
+         --  token unparser ``Index``. ``Name`` is the name of this token
+         --  unparser, used to format a user-level error message.
+
+         function Matches
+           (Token : Stored_Token_Data;
+            Index : Token_Unparser_Index) return Boolean;
+         --  Return whether the given parsed token matches the given token
+         --  unparser (i.e. it has the expected kind and possibly text for
+         --  symbols).
+
+         -------------
+         -- Process --
+         -------------
+
+         procedure Process (Name : String; Value : JSON_Value) is
+
+            --  Find the token unparser that this entry aims to format
+
+            use Token_Id_Maps;
+            Pos   : constant Cursor :=
+              Token_Map.Find (To_Unbounded_Text (From_UTF8 (Name)));
+            Index : Token_Unparser_Index;
+         begin
+            if not Has_Element (Pos) then
+               Abort_Parsing
+                 ("no such token found in the grammar: '" & Name & "'");
+            end if;
+            Index := Element (Pos);
+
+            --  Two entries are accepted: null to mean "preserve the orignial
+            --  fomatting", and a string to give a concrete formatting for this
+            --  unparser.
+
+            if Value.Kind = JSON_Null_Type then
+               Set_Token_Documents (Index, "");
+            elsif Value.Kind /= JSON_String_Type then
+               Abort_Parsing
+                 ("invalid formatting entry for token '" & Name & "'");
+            end if;
+
+            --  First validate the new formatting: lexing it must yield exactly
+            --  one token with the right kind, and an acceptable token text for
+            --  the corresponding unparser.
+
+            Validate_Token (Name, Value.Get, Index);
+            Set_Token_Documents (Index, From_UTF8 (Value.Get));
+         end Process;
+
+         --------------------
+         -- Validate_Token --
+         --------------------
+
+         procedure Validate_Token
+           (Name  : String;
+            Text  : Unbounded_String;
+            Index : Token_Unparser_Index)
+         is
+            --  Use the language lexer to validate the given formatting
+
+            Bytes       : Big_String_Access;
+            Input       : Langkit_Support.Internal.Analysis.Lexer_Input
+              (Kind => Bytes_Buffer);
+            Diagnostics : Diagnostics_Vectors.Vector;
+         begin
+            Input.Charset := To_Unbounded_String (GNATCOLL.Iconv.UTF8);
+            Input.Read_BOM := False;
+            Get_String (Text, Bytes, Input.Bytes_Count);
+            Input.Bytes := Bytes.all'Address;
+
+            Desc.Extract_Tokens.all
+              (Input       => Input,
+               With_Trivia => True,
+               TDH         => TDH,
+               Diagnostics => Diagnostics);
+
+            --  For a valid formatting, we expect no lexing error and exactly
+            --  two tokens: the one from ``Text``, then the termination token.
+
+            if not Diagnostics.Is_Empty
+               or else TDH.Tokens.Length /= 2
+               or else not TDH.Trivias.Is_Empty
+               or else not Matches (TDH.Tokens.First_Element, Index)
+            then
+               pragma Assert
+                 (Stored_Token_Data'(TDH.Tokens.Last_Element).Kind
+                  = Desc.Token_Termination);
+               Abort_Parsing ("invalid formatting for token '" & Name & "'");
+            end if;
+         end Validate_Token;
+
+         -------------
+         -- Matches --
+         -------------
+
+         function Matches
+           (Token : Stored_Token_Data;
+            Index : Token_Unparser_Index) return Boolean
+         is
+            Unparser : Token_Unparser_Impl renames
+              Desc.Unparsers.Token_Unparsers.all (Index).all;
+         begin
+            return Token.Kind = Unparser.Kind
+                   and then (not Unparser.Is_Symbol
+                             or else Token.Symbol
+                                     = Find (Symbols, Unparser.Text.all));
+         end Matches;
+
+         type Default_Type is (Case_Sensitive, Lower, Upper, Original);
+         Default : Default_Type := Lower;
+         J       : JSON_Value;
+      begin
+         Initialize (TDH, Symbols, System.Null_Address);
+
+         if JSON.Kind /= JSON_Object_Type then
+            Abort_Parsing ("invalid ""token_configs"" entry: object expected");
+         end if;
+
+         --  Determine the default formatting to use
+
+         if JSON.Has_Field ("default") then
+            J := JSON.Get ("default");
+            if J.Kind /= JSON_String_Type then
+               Abort_Parsing ("invalid ""default"" entry: string expected");
+            end if;
+
+            declare
+               Value : constant String := J.Get;
+            begin
+               if Value = "lower" then
+                  Default := Lower;
+               elsif Value = "upper" then
+                  Default := Upper;
+               elsif Value = "original" then
+                  Default := Original;
+               else
+                  Abort_Parsing ("invalid ""default"" value: " & Value);
+               end if;
+            end;
+         end if;
+
+         --  Adjust the default for case sensitive languages
+
+         if not Desc.Unparsers.Case_Insensitive
+            and then Default in Lower | Upper
+         then
+            Default := Case_Sensitive;
+         end if;
+
+         --  Instantiate this default for all token unparsers
+
+         for Unparser of Desc.Unparsers.Token_Unparsers.all loop
+            declare
+               Input_Text : Text_Type renames Unparser.Text.all;
+               Value      : constant Text_Type :=
+                 (case Default is
+                  when Case_Sensitive => Input_Text,
+                  when Lower          => To_Lower (Input_Text),
+                  when Upper          => To_Upper (Input_Text),
+                  when Original       => "");
+            begin
+               Set_Token_Documents (Unparser.Index, Value);
+            end;
+         end loop;
+
+         --  Override defaults with manual formattings from the config
+
+         if not JSON.Has_Field ("formattings") then
+            return;
+         end if;
+         J := JSON.Get ("formattings");
+         if J.Kind /= JSON_Object_Type then
+            Abort_Parsing ("invalid ""formattings"" entry: object expected");
+         end if;
+         J.Map_JSON_Object (Process'Access);
+
+         Free (TDH);
+         Destroy (Symbols);
+      exception
+         when Invalid_Input =>
+            Free (TDH);
+            Destroy (Symbols);
+            raise;
+      end Load_Token_Formattings;
 
       ----------------------
       -- Add_Node_Entries --
@@ -1782,19 +2068,24 @@ package body Langkit_Support.Unparsing_Config is
 
                      declare
                         Item : Linear_Template_Item :=
-                          (Kind       => Token_Item,
-                           Token_Kind => No_Token_Kind_Ref,
-                           Token_Text => To_Unbounded_Text
-                                           (From_UTF8 (T.Get)));
+                          (Kind           => Token_Item,
+                           Token_Kind     => No_Token_Kind_Ref,
+                           Token_Text     => To_Unbounded_Text
+                                               (From_UTF8 (T.Get)),
+                           Token_Unparser => <>);
                      begin
                         Process_Linear_Template_Item (Item, Context);
 
                         if Kind = "text" then
                            return Pool.Create_Token
-                                    (Item.Token_Kind, Item.Token_Text);
+                                    (Item.Token_Kind,
+                                     Item.Token_Text,
+                                     Item.Token_Unparser);
                         else
                            return Pool.Create_Table_Separator
-                                    (Item.Token_Kind, Item.Token_Text);
+                                    (Item.Token_Kind,
+                                     Item.Token_Text,
+                                     Item.Token_Unparser);
                         end if;
                      end;
                   end;
@@ -2076,7 +2367,39 @@ package body Langkit_Support.Unparsing_Config is
          JSON_Overridings (I) := Read_JSON (Overridings (I), Diagnostics);
       end loop;
 
-      --  Then load the unparsing configuration from them
+      --  Load the token formattings from all JSON documents
+
+      declare
+         Key       : constant String := "token_configs";
+         Found     : Boolean := False;
+         Unparsers : Token_Unparser_Array_Impl renames
+           Desc.Unparsers.Token_Unparsers.all;
+         Token_Map : constant Token_Id_Maps.Map := Token_Id_Map (Desc);
+      begin
+         --  By default, use the formatting found in token unparsers
+
+         Result.Token_Formattings :=
+           new Token_Unparser_Formattings_Impl (Unparsers'Range);
+         for U of Unparsers loop
+            Set_Token_Documents (U.Index, U.Text.all);
+         end loop;
+
+         --  Process JSON documents in reverse order so that the last one that
+         --  has a "token_configs" entry has precedence.
+
+         for O of reverse JSON_Overridings loop
+            if O.Has_Field (Key) then
+               Found := True;
+               Load_Token_Formattings (O.Get (Key), Token_Map);
+               exit;
+            end if;
+         end loop;
+         if not Found and then JSON.Has_Field (Key) then
+            Load_Token_Formattings (JSON.Get (Key), Token_Map);
+         end if;
+      end;
+
+      --  Load the node configurations from them
 
       Add_Node_Entries (JSON, Node_JSON_Map);
       for O of JSON_Overridings loop

@@ -15,6 +15,8 @@ use Langkit_Support.Internal.Introspection;
 with Langkit_Support.Internal.Unparsing;
 use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 
 --  .. note:: This unit is internal: only Langkit and Langkit-generated
@@ -143,6 +145,12 @@ package Langkit_Support.Internal.Descriptor is
      (Left, Right       : Internal_Token;
       Left_SN, Right_SN : Token_Safety_Net) return Boolean;
 
+   type Extract_Tokens_Type is access procedure
+     (Input       : Analysis.Lexer_Input;
+      With_Trivia : Boolean;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+
    type Create_Enum_Type is access function
      (Enum_Type   : Type_Index;
       Value_Index : Enum_Value_Index) return Internal_Value_Access;
@@ -175,6 +183,7 @@ package Langkit_Support.Internal.Descriptor is
 
       Token_Kinds        : Token_Kind_Descriptor_Array_Access;
       Token_Family_Names : Token_Family_Name_Array_Access;
+      Token_Termination  : Token_Kind_Index;
 
       --  Descriptors for introspection capabilities
 
@@ -262,6 +271,8 @@ package Langkit_Support.Internal.Descriptor is
       Entity_Image : Entity_Image_Type;
 
       Token_Is_Equivalent : Token_Is_Equivalent_Type;
+
+      Extract_Tokens : Extract_Tokens_Type;
 
       --  Operations to build/inspect generic data types
 

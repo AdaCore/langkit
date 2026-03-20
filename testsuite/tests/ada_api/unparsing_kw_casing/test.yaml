@@ -1,0 +1,15 @@
+driver: lkt_build_and_run
+gpr_mains:
+    - main.adb -c upper.json example.txt
+    - main.adb -c upper_and_mixed1.json example.txt
+    - main.adb -c upper_and_mixed2.json example.txt
+
+    - main.adb -c lower.json example.txt
+    - main.adb -c lower_and_mixed1.json example.txt
+    - main.adb -c lower_and_mixed2.json example.txt
+
+    - main.adb -c original.json example.txt
+    - main.adb -c original_and_mixed1.json example.txt
+    - main.adb -c original_and_mixed2.json example.txt
+
+    - main.adb -c upper_and_mixed1.json --overriding over.json example.txt
