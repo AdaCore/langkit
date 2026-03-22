@@ -481,7 +481,7 @@ def build_and_run(
             lib_path = m.dirs.build_lib_dir("relocatable", "dev")
             os_specific_options.extend(
                 [
-                    f"--native-compiler-options=-I{m.dirs.build_dir("src")}",
+                    f"--native-compiler-options=-I{m.dirs.build_dir('src')}",
                     f"--native-compiler-options=-L{lib_path}",
                 ]
             )
