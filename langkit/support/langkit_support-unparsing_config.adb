@@ -962,14 +962,14 @@ package body Langkit_Support.Unparsing_Config is
 
          --  Override defaults with manual formattings from the config
 
-         if not JSON.Has_Field ("formattings") then
-            return;
+         if JSON.Has_Field ("formattings") then
+            J := JSON.Get ("formattings");
+            if J.Kind /= JSON_Object_Type then
+               Abort_Parsing
+                 ("invalid ""formattings"" entry: object expected");
+            end if;
+            J.Map_JSON_Object (Process'Access);
          end if;
-         J := JSON.Get ("formattings");
-         if J.Kind /= JSON_Object_Type then
-            Abort_Parsing ("invalid ""formattings"" entry: object expected");
-         end if;
-         J.Map_JSON_Object (Process'Access);
 
          Free (TDH);
          Destroy (Symbols);
