@@ -716,9 +716,23 @@ class CompileCtx:
         clauses required by extensions. See the `add_with_clause` method.
         """
 
-        self.impl_packages: list[ImplementationPackage] = []
+        self.per_node_impl_packages: dict[
+            ASTNodeType, list[ImplementationPackage]
+        ] = defaultdict(list)
         """
-        List of implementation packages that hosts properties and env spec.
+        Used iff when the ``EmissionConfig.per_node_implementation_packages``
+        configuration setting is enabled.
+
+        For each node, list of implementation packages that hosts its
+        properties and env spec.
+        """
+
+        self.global_impl_packages: list[ImplementationPackage] = []
+        """
+        Used iff when the ``EmissionConfig.per_node_implementation_packages``
+        configuration setting is disabled.
+
+        List of implementation packages that host properties and env specs.
         """
 
         self.default_impl_package = ImplementationPackage(
@@ -1160,15 +1174,27 @@ class CompileCtx:
         ]:
             self.add_with_clause(from_pkg, source_kind, name)
 
-    def get_free_impl_package(self) -> ImplementationPackage:
+    def get_free_impl_package(
+        self,
+        node: ASTNodeType,
+    ) -> ImplementationPackage:
         """
-        Return an implementation packages that has at least one free slot for a
-        property or an env spec. Create a new package if needed.
+        Get an implementation packages for the given node that has at least one
+        free slot for a property or an env spec. Create a new package if
+        needed.
         """
-        impl_packages = self.impl_packages
+        per_node = self.config.emission.per_node_implementation_packages
+        impl_packages = (
+            self.per_node_impl_packages[node]
+            if per_node
+            else self.global_impl_packages
+        )
         if not impl_packages or impl_packages[-1].full:
+            prefix = names.Name("Impl")
+            if per_node:
+                prefix += node.kwless_raw_name
             impl_pkg = ImplementationPackage(
-                self, f"Impl_{len(impl_packages)}"
+                self, f"{prefix.camel_with_underscores}_{len(impl_packages)}"
             )
             impl_packages.append(impl_pkg)
             self.add_with_clauses_for_properties(
@@ -1188,7 +1214,8 @@ class CompileCtx:
         elif prop.external:
             impl_pkg = self.default_impl_package
         else:
-            impl_pkg = self.get_free_impl_package()
+            assert isinstance(prop.owner, ASTNodeType)
+            impl_pkg = self.get_free_impl_package(prop.owner)
 
         # Bind the implementation package and the property
         impl_pkg.properties.append(prop)

@@ -541,6 +541,11 @@ class EmissionConfig:
     Maximal number of items to put in implementation packages.
     """
 
+    per_node_implementation_packages: bool = False
+    """
+    Whether each node type gets its own list of implementation packages.
+    """
+
 
 @dataclasses.dataclass
 class ManageDefaults:

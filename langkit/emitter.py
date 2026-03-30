@@ -14,7 +14,12 @@ from typing import Any
 
 from langkit.caching import Cache
 from langkit.common import ada_printable_bytes
-from langkit.compile_context import AdaSourceKind, CompileCtx, Verbosity
+from langkit.compile_context import (
+    AdaSourceKind,
+    CompileCtx,
+    ImplementationPackage,
+    Verbosity,
+)
 from langkit.config import cache_summary
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Location, error
@@ -818,14 +823,24 @@ class Emitter:
             )
 
         # Emit code for implementation packages
-        for impl_pkg in self.context.impl_packages:
-            self.write_ada_module(
-                self.src_dir,
-                "pkg_impl",
-                [impl_pkg.name],
-                impl_pkg=impl_pkg,
-                in_library=True,
-            )
+
+        def process_pkg_list(pkg_list: list[ImplementationPackage]) -> None:
+            for impl_pkg in pkg_list:
+                self.write_ada_module(
+                    self.src_dir,
+                    "pkg_impl",
+                    [impl_pkg.name],
+                    impl_pkg=impl_pkg,
+                    in_library=True,
+                )
+
+        if self.context.config.emission.per_node_implementation_packages:
+            assert not self.context.global_impl_packages
+            for pkg_list in self.context.per_node_impl_packages.values():
+                process_pkg_list(pkg_list)
+        else:
+            assert not self.context.per_node_impl_packages
+            process_pkg_list(self.context.global_impl_packages)
 
     def emit_mains(self, ctx: CompileCtx) -> None:
         """

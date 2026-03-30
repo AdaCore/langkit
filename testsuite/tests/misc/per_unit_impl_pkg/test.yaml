@@ -1,0 +1,7 @@
+driver: lkt_build_and_run
+gpr_mains: []
+post_scripts: [test.py]
+config:
+  emission:
+    implementation_packages_capacity: 2
+    per_node_implementation_packages: true

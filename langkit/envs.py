@@ -220,7 +220,7 @@ class EnvSpec:
             return
 
         # Do the assignment itself
-        impl_pkg = context.get_free_impl_package()
+        impl_pkg = context.get_free_impl_package(self.owner)
         impl_pkg.env_specs.append(self)
         self.impl_package = impl_pkg
 

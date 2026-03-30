@@ -1,0 +1,23 @@
+# Check that the emission.per_node_implementation_packages config setting works
+# as expected.
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun prop1(): Bool = true
+
+    @exported
+    fun prop2(): Bool = false
+}
+
+class Example: FooNode {
+    fun prop1(): Bool = false
+    fun prop2(): Bool = true
+}
