@@ -12,6 +12,7 @@ val _ =
     | Foo(koin(): 123)
     | Foo(koin(): true)
     | Foo(p_referenced_decl(): d)when d is not null
+    | Foo(bar, baz)
     | *(p_referenced_decl(): d)
     | [a,...,b]
     | not[a,...]

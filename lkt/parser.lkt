@@ -361,6 +361,7 @@ grammar lkt_grammar {
         | PropertyPatternDetail(
             CallExpr(ref_id "(" / args ")") ":" / pattern
         )
+        | DestructuringPatternDetail(pattern_binding)
     )
     expr <- or(
         | BinOp(stream_concat Op.StreamConcat(":::") expr)

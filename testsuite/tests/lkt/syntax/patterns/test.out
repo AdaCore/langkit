@@ -1,9 +1,9 @@
-LangkitRoot[1:1-10:57]
+LangkitRoot[1:1-11:57]
 |f_doc: <null>
 |f_imports:
 |  BaseImportList[1:1-1:1]: <empty list>
 |f_decls:
-|  FullDeclList[1:1-10:57]
+|  FullDeclList[1:1-11:57]
 |  |  FullDecl[1:1-1:17]
 |  |  |f_doc: <null>
 |  |  |f_decl_annotations:
@@ -200,241 +200,276 @@ LangkitRoot[1:1-10:57]
 |  |  |  |  |  |  |  |  |f_details:
 |  |  |  |  |  |  |  |  |  PatternDetailList[5:60-5:60]: <empty list>
 |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  FullDecl[6:1-6:39]
+|  |  FullDecl[6:1-6:27]
 |  |  |f_doc: <null>
 |  |  |f_decl_annotations:
 |  |  |  DeclAnnotationList[5:60-5:60]: <empty list>
 |  |  |f_decl:
-|  |  |  ValDecl[6:1-6:39]
+|  |  |  ValDecl[6:1-6:27]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[6:5-6:6]: _
 |  |  |  |f_decl_type: <null>
 |  |  |  |f_expr:
-|  |  |  |  Isa[6:9-6:39]
+|  |  |  |  Isa[6:9-6:27]
 |  |  |  |  |f_expr:
 |  |  |  |  |  RefId[6:9-6:10]: a
 |  |  |  |  |f_pattern:
-|  |  |  |  |  ComplexPattern[6:14-6:39]
+|  |  |  |  |  ComplexPattern[6:14-6:27]
 |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  AnyTypePattern[6:14-6:15]
+|  |  |  |  |  |  TypePattern[6:14-6:17]
+|  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  SimpleTypeRef[6:14-6:17]
+|  |  |  |  |  |  |  |f_type_name:
+|  |  |  |  |  |  |  |  RefId[6:14-6:17]: Foo
 |  |  |  |  |  |f_details:
-|  |  |  |  |  |  PatternDetailList[6:16-6:38]
-|  |  |  |  |  |  |  PropertyPatternDetail[6:16-6:38]
-|  |  |  |  |  |  |  |f_call:
-|  |  |  |  |  |  |  |  CallExpr[6:16-6:35]
-|  |  |  |  |  |  |  |  |f_name:
-|  |  |  |  |  |  |  |  |  RefId[6:16-6:33]: p_referenced_decl
-|  |  |  |  |  |  |  |  |f_args:
-|  |  |  |  |  |  |  |  |  ArgumentList[6:34-6:34]: <empty list>
-|  |  |  |  |  |  |  |f_expected_value:
-|  |  |  |  |  |  |  |  RenamingComplexPattern[6:37-6:38]
-|  |  |  |  |  |  |  |  |f_decl:
-|  |  |  |  |  |  |  |  |  BindingValDecl[6:37-6:38]
-|  |  |  |  |  |  |  |  |  |f_syn_name:
-|  |  |  |  |  |  |  |  |  |  DefId[6:37-6:38]: d
-|  |  |  |  |  |  |  |  |f_pattern: <null>
-|  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  PatternDetailList[6:38-6:38]: <empty list>
-|  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  PatternDetailList[6:18-6:26]
+|  |  |  |  |  |  |  DestructuringPatternDetail[6:18-6:21]
+|  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  BindingValDecl[6:18-6:21]
+|  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  DefId[6:18-6:21]: bar
+|  |  |  |  |  |  |  DestructuringPatternDetail[6:23-6:26]
+|  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  BindingValDecl[6:23-6:26]
+|  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  DefId[6:23-6:26]: baz
 |  |  |  |  |  |f_predicate: <null>
-|  |  FullDecl[7:1-7:25]
+|  |  FullDecl[7:1-7:39]
 |  |  |f_doc: <null>
 |  |  |f_decl_annotations:
-|  |  |  DeclAnnotationList[6:39-6:39]: <empty list>
+|  |  |  DeclAnnotationList[6:27-6:27]: <empty list>
 |  |  |f_decl:
-|  |  |  ValDecl[7:1-7:25]
+|  |  |  ValDecl[7:1-7:39]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[7:5-7:6]: _
 |  |  |  |f_decl_type: <null>
 |  |  |  |f_expr:
-|  |  |  |  Isa[7:9-7:25]
+|  |  |  |  Isa[7:9-7:39]
 |  |  |  |  |f_expr:
 |  |  |  |  |  RefId[7:9-7:10]: a
 |  |  |  |  |f_pattern:
-|  |  |  |  |  ComplexPattern[7:14-7:25]
+|  |  |  |  |  ComplexPattern[7:14-7:39]
 |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  ListPattern[7:14-7:25]
-|  |  |  |  |  |  |f_sub_patterns:
-|  |  |  |  |  |  |  PatternList[7:15-7:24]
-|  |  |  |  |  |  |  |  RenamingComplexPattern[7:15-7:16]
-|  |  |  |  |  |  |  |  |f_decl:
-|  |  |  |  |  |  |  |  |  BindingValDecl[7:15-7:16]
-|  |  |  |  |  |  |  |  |  |f_syn_name:
-|  |  |  |  |  |  |  |  |  |  DefId[7:15-7:16]: a
-|  |  |  |  |  |  |  |  |f_pattern: <null>
-|  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  PatternDetailList[7:16-7:16]: <empty list>
-|  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |  |  EllipsisPattern[7:18-7:21]
-|  |  |  |  |  |  |  |  |f_binding: <null>
-|  |  |  |  |  |  |  |  RenamingComplexPattern[7:23-7:24]
-|  |  |  |  |  |  |  |  |f_decl:
-|  |  |  |  |  |  |  |  |  BindingValDecl[7:23-7:24]
-|  |  |  |  |  |  |  |  |  |f_syn_name:
-|  |  |  |  |  |  |  |  |  |  DefId[7:23-7:24]: b
-|  |  |  |  |  |  |  |  |f_pattern: <null>
-|  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  PatternDetailList[7:24-7:24]: <empty list>
-|  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  AnyTypePattern[7:14-7:15]
 |  |  |  |  |  |f_details:
-|  |  |  |  |  |  PatternDetailList[7:25-7:25]: <empty list>
+|  |  |  |  |  |  PatternDetailList[7:16-7:38]
+|  |  |  |  |  |  |  PropertyPatternDetail[7:16-7:38]
+|  |  |  |  |  |  |  |f_call:
+|  |  |  |  |  |  |  |  CallExpr[7:16-7:35]
+|  |  |  |  |  |  |  |  |f_name:
+|  |  |  |  |  |  |  |  |  RefId[7:16-7:33]: p_referenced_decl
+|  |  |  |  |  |  |  |  |f_args:
+|  |  |  |  |  |  |  |  |  ArgumentList[7:34-7:34]: <empty list>
+|  |  |  |  |  |  |  |f_expected_value:
+|  |  |  |  |  |  |  |  RenamingComplexPattern[7:37-7:38]
+|  |  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  |  BindingValDecl[7:37-7:38]
+|  |  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  |  DefId[7:37-7:38]: d
+|  |  |  |  |  |  |  |  |f_pattern: <null>
+|  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  PatternDetailList[7:38-7:38]: <empty list>
+|  |  |  |  |  |  |  |  |f_predicate: <null>
 |  |  |  |  |  |f_predicate: <null>
-|  |  FullDecl[8:1-8:26]
+|  |  FullDecl[8:1-8:25]
 |  |  |f_doc: <null>
 |  |  |f_decl_annotations:
-|  |  |  DeclAnnotationList[7:25-7:25]: <empty list>
+|  |  |  DeclAnnotationList[7:39-7:39]: <empty list>
 |  |  |f_decl:
-|  |  |  ValDecl[8:1-8:26]
+|  |  |  ValDecl[8:1-8:25]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[8:5-8:6]: _
 |  |  |  |f_decl_type: <null>
 |  |  |  |f_expr:
-|  |  |  |  Isa[8:9-8:26]
+|  |  |  |  Isa[8:9-8:25]
 |  |  |  |  |f_expr:
 |  |  |  |  |  RefId[8:9-8:10]: a
 |  |  |  |  |f_pattern:
-|  |  |  |  |  NotPattern[8:14-8:26]
-|  |  |  |  |  |f_sub_pattern:
-|  |  |  |  |  |  ComplexPattern[8:18-8:26]
-|  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  ListPattern[8:18-8:26]
-|  |  |  |  |  |  |  |f_sub_patterns:
-|  |  |  |  |  |  |  |  PatternList[8:19-8:25]
-|  |  |  |  |  |  |  |  |  RenamingComplexPattern[8:19-8:20]
-|  |  |  |  |  |  |  |  |  |f_decl:
-|  |  |  |  |  |  |  |  |  |  BindingValDecl[8:19-8:20]
-|  |  |  |  |  |  |  |  |  |  |f_syn_name:
-|  |  |  |  |  |  |  |  |  |  |  DefId[8:19-8:20]: a
-|  |  |  |  |  |  |  |  |  |f_pattern: <null>
-|  |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  |  PatternDetailList[8:20-8:20]: <empty list>
-|  |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |  |  |  EllipsisPattern[8:22-8:25]
-|  |  |  |  |  |  |  |  |  |f_binding: <null>
-|  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  PatternDetailList[8:26-8:26]: <empty list>
-|  |  |  |  |  |  |f_predicate: <null>
-|  |  FullDecl[9:1-9:31]
+|  |  |  |  |  ComplexPattern[8:14-8:25]
+|  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  ListPattern[8:14-8:25]
+|  |  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  |  PatternList[8:15-8:24]
+|  |  |  |  |  |  |  |  RenamingComplexPattern[8:15-8:16]
+|  |  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  |  BindingValDecl[8:15-8:16]
+|  |  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  |  DefId[8:15-8:16]: a
+|  |  |  |  |  |  |  |  |f_pattern: <null>
+|  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  PatternDetailList[8:16-8:16]: <empty list>
+|  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  |  |  EllipsisPattern[8:18-8:21]
+|  |  |  |  |  |  |  |  |f_binding: <null>
+|  |  |  |  |  |  |  |  RenamingComplexPattern[8:23-8:24]
+|  |  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  |  BindingValDecl[8:23-8:24]
+|  |  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  |  DefId[8:23-8:24]: b
+|  |  |  |  |  |  |  |  |f_pattern: <null>
+|  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  PatternDetailList[8:24-8:24]: <empty list>
+|  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |f_details:
+|  |  |  |  |  |  PatternDetailList[8:25-8:25]: <empty list>
+|  |  |  |  |  |f_predicate: <null>
+|  |  FullDecl[9:1-9:26]
 |  |  |f_doc: <null>
 |  |  |f_decl_annotations:
-|  |  |  DeclAnnotationList[8:26-8:26]: <empty list>
+|  |  |  DeclAnnotationList[8:25-8:25]: <empty list>
 |  |  |f_decl:
-|  |  |  ValDecl[9:1-9:31]
+|  |  |  ValDecl[9:1-9:26]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[9:5-9:6]: _
 |  |  |  |f_decl_type: <null>
 |  |  |  |f_expr:
-|  |  |  |  Isa[9:9-9:31]
+|  |  |  |  Isa[9:9-9:26]
 |  |  |  |  |f_expr:
 |  |  |  |  |  RefId[9:9-9:10]: a
 |  |  |  |  |f_pattern:
-|  |  |  |  |  OrPattern[9:14-9:31]
-|  |  |  |  |  |f_left_sub_pattern:
-|  |  |  |  |  |  ComplexPattern[9:14-9:19]
+|  |  |  |  |  NotPattern[9:14-9:26]
+|  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  ComplexPattern[9:18-9:26]
 |  |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  ListPattern[9:14-9:19]
+|  |  |  |  |  |  |  ListPattern[9:18-9:26]
 |  |  |  |  |  |  |  |f_sub_patterns:
-|  |  |  |  |  |  |  |  PatternList[9:15-9:18]
-|  |  |  |  |  |  |  |  |  EllipsisPattern[9:15-9:18]
+|  |  |  |  |  |  |  |  PatternList[9:19-9:25]
+|  |  |  |  |  |  |  |  |  RenamingComplexPattern[9:19-9:20]
+|  |  |  |  |  |  |  |  |  |f_decl:
+|  |  |  |  |  |  |  |  |  |  BindingValDecl[9:19-9:20]
+|  |  |  |  |  |  |  |  |  |  |f_syn_name:
+|  |  |  |  |  |  |  |  |  |  |  DefId[9:19-9:20]: a
+|  |  |  |  |  |  |  |  |  |f_pattern: <null>
+|  |  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  |  PatternDetailList[9:20-9:20]: <empty list>
+|  |  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  |  |  |  EllipsisPattern[9:22-9:25]
 |  |  |  |  |  |  |  |  |  |f_binding: <null>
 |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  PatternDetailList[9:19-9:19]: <empty list>
+|  |  |  |  |  |  |  PatternDetailList[9:26-9:26]: <empty list>
 |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |f_right_sub_pattern:
-|  |  |  |  |  |  ComplexPattern[9:22-9:31]
-|  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  ListPattern[9:22-9:31]
-|  |  |  |  |  |  |  |f_sub_patterns:
-|  |  |  |  |  |  |  |  PatternList[9:23-9:30]
-|  |  |  |  |  |  |  |  |  ComplexPattern[9:23-9:24]
-|  |  |  |  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  |  IntegerPattern[9:23-9:24]: 1
-|  |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  |  PatternDetailList[9:24-9:24]: <empty list>
-|  |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |  |  |  ComplexPattern[9:26-9:27]
-|  |  |  |  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  |  IntegerPattern[9:26-9:27]: 2
-|  |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  |  PatternDetailList[9:27-9:27]: <empty list>
-|  |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |  |  |  ComplexPattern[9:29-9:30]
-|  |  |  |  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  |  IntegerPattern[9:29-9:30]: 3
-|  |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  |  PatternDetailList[9:30-9:30]: <empty list>
-|  |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  PatternDetailList[9:31-9:31]: <empty list>
-|  |  |  |  |  |  |f_predicate: <null>
-|  |  FullDecl[10:1-10:57]
+|  |  FullDecl[10:1-10:31]
 |  |  |f_doc: <null>
 |  |  |f_decl_annotations:
-|  |  |  DeclAnnotationList[9:31-9:31]: <empty list>
+|  |  |  DeclAnnotationList[9:26-9:26]: <empty list>
 |  |  |f_decl:
-|  |  |  ValDecl[10:1-10:57]
+|  |  |  ValDecl[10:1-10:31]
 |  |  |  |f_syn_name:
 |  |  |  |  DefId[10:5-10:6]: _
 |  |  |  |f_decl_type: <null>
 |  |  |  |f_expr:
-|  |  |  |  Isa[10:9-10:57]
+|  |  |  |  Isa[10:9-10:31]
 |  |  |  |  |f_expr:
 |  |  |  |  |  RefId[10:9-10:10]: a
 |  |  |  |  |f_pattern:
-|  |  |  |  |  ComplexPattern[10:14-10:57]
+|  |  |  |  |  OrPattern[10:14-10:31]
+|  |  |  |  |  |f_left_sub_pattern:
+|  |  |  |  |  |  ComplexPattern[10:14-10:19]
+|  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  ListPattern[10:14-10:19]
+|  |  |  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  |  |  PatternList[10:15-10:18]
+|  |  |  |  |  |  |  |  |  EllipsisPattern[10:15-10:18]
+|  |  |  |  |  |  |  |  |  |f_binding: <null>
+|  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  PatternDetailList[10:19-10:19]: <empty list>
+|  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |f_right_sub_pattern:
+|  |  |  |  |  |  ComplexPattern[10:22-10:31]
+|  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  ListPattern[10:22-10:31]
+|  |  |  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  |  |  PatternList[10:23-10:30]
+|  |  |  |  |  |  |  |  |  ComplexPattern[10:23-10:24]
+|  |  |  |  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |  |  |  IntegerPattern[10:23-10:24]: 1
+|  |  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  |  PatternDetailList[10:24-10:24]: <empty list>
+|  |  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  |  |  |  ComplexPattern[10:26-10:27]
+|  |  |  |  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |  |  |  IntegerPattern[10:26-10:27]: 2
+|  |  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  |  PatternDetailList[10:27-10:27]: <empty list>
+|  |  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  |  |  |  ComplexPattern[10:29-10:30]
+|  |  |  |  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |  |  |  IntegerPattern[10:29-10:30]: 3
+|  |  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  |  PatternDetailList[10:30-10:30]: <empty list>
+|  |  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  PatternDetailList[10:31-10:31]: <empty list>
+|  |  |  |  |  |  |f_predicate: <null>
+|  |  FullDecl[11:1-11:57]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[10:31-10:31]: <empty list>
+|  |  |f_decl:
+|  |  |  ValDecl[11:1-11:57]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[11:5-11:6]: _
+|  |  |  |f_decl_type: <null>
+|  |  |  |f_expr:
+|  |  |  |  Isa[11:9-11:57]
+|  |  |  |  |f_expr:
+|  |  |  |  |  RefId[11:9-11:10]: a
+|  |  |  |  |f_pattern:
+|  |  |  |  |  ComplexPattern[11:14-11:57]
 |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  ListPattern[10:14-10:57]
+|  |  |  |  |  |  ListPattern[11:14-11:57]
 |  |  |  |  |  |  |f_sub_patterns:
-|  |  |  |  |  |  |  PatternList[10:15-10:56]
-|  |  |  |  |  |  |  |  ComplexPattern[10:15-10:24]
+|  |  |  |  |  |  |  PatternList[11:15-11:56]
+|  |  |  |  |  |  |  |  ComplexPattern[11:15-11:24]
 |  |  |  |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  TypePattern[10:15-10:24]
+|  |  |  |  |  |  |  |  |  TypePattern[11:15-11:24]
 |  |  |  |  |  |  |  |  |  |f_type_name:
-|  |  |  |  |  |  |  |  |  |  SimpleTypeRef[10:15-10:24]
+|  |  |  |  |  |  |  |  |  |  SimpleTypeRef[11:15-11:24]
 |  |  |  |  |  |  |  |  |  |  |f_type_name:
-|  |  |  |  |  |  |  |  |  |  |  RefId[10:15-10:24]: BasicDecl
+|  |  |  |  |  |  |  |  |  |  |  RefId[11:15-11:24]: BasicDecl
 |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  PatternDetailList[10:24-10:24]: <empty list>
+|  |  |  |  |  |  |  |  |  PatternDetailList[11:24-11:24]: <empty list>
 |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |  |  ComplexPattern[10:26-10:30]
+|  |  |  |  |  |  |  |  ComplexPattern[11:26-11:30]
 |  |  |  |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  NullPattern[10:26-10:30]
+|  |  |  |  |  |  |  |  |  NullPattern[11:26-11:30]
 |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  PatternDetailList[10:30-10:30]: <empty list>
+|  |  |  |  |  |  |  |  |  PatternDetailList[11:30-11:30]: <empty list>
 |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |  |  ComplexPattern[10:32-10:56]
+|  |  |  |  |  |  |  |  ComplexPattern[11:32-11:56]
 |  |  |  |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  TypePattern[10:32-10:41]
+|  |  |  |  |  |  |  |  |  TypePattern[11:32-11:41]
 |  |  |  |  |  |  |  |  |  |f_type_name:
-|  |  |  |  |  |  |  |  |  |  SimpleTypeRef[10:32-10:41]
+|  |  |  |  |  |  |  |  |  |  SimpleTypeRef[11:32-11:41]
 |  |  |  |  |  |  |  |  |  |  |f_type_name:
-|  |  |  |  |  |  |  |  |  |  |  RefId[10:32-10:41]: BasicDecl
+|  |  |  |  |  |  |  |  |  |  |  RefId[11:32-11:41]: BasicDecl
 |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  PatternDetailList[10:42-10:55]
-|  |  |  |  |  |  |  |  |  |  FieldPatternDetail[10:42-10:55]
+|  |  |  |  |  |  |  |  |  PatternDetailList[11:42-11:55]
+|  |  |  |  |  |  |  |  |  |  FieldPatternDetail[11:42-11:55]
 |  |  |  |  |  |  |  |  |  |  |f_id:
-|  |  |  |  |  |  |  |  |  |  |  Id[10:42-10:49]: f_field
+|  |  |  |  |  |  |  |  |  |  |  Id[11:42-11:49]: f_field
 |  |  |  |  |  |  |  |  |  |  |f_expected_value:
-|  |  |  |  |  |  |  |  |  |  |  ComplexPattern[10:51-10:55]
+|  |  |  |  |  |  |  |  |  |  |  ComplexPattern[11:51-11:55]
 |  |  |  |  |  |  |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  |  |  |  NullPattern[10:51-10:55]
+|  |  |  |  |  |  |  |  |  |  |  |  NullPattern[11:51-11:55]
 |  |  |  |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  |  |  |  PatternDetailList[10:55-10:55]: <empty list>
+|  |  |  |  |  |  |  |  |  |  |  |  PatternDetailList[11:55-11:55]: <empty list>
 |  |  |  |  |  |  |  |  |  |  |  |f_predicate: <null>
 |  |  |  |  |  |  |  |  |f_predicate: <null>
 |  |  |  |  |  |f_details:
-|  |  |  |  |  |  PatternDetailList[10:57-10:57]: <empty list>
+|  |  |  |  |  |  PatternDetailList[11:57-11:57]: <empty list>
 |  |  |  |  |  |f_predicate: <null>
