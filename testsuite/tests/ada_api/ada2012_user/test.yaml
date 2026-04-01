@@ -1,0 +1,15 @@
+# Check that building user code of the generated library works in Ada
+# 2012 mode. Enable inlining so that the biggest closure is analyzed in 2012
+# mode.
+driver: lkt_build_and_run
+gpr_mains: [main.adb]
+main_gprbuild_extra_args:
+  - -cargs:Ada
+  - -gnat2012
+  - -O2
+  - -gnatn2
+config:
+  emission:
+    # Use a big capacity so that Inline and First_Controlling_Paramater aspects
+    # are generated in the same unit.
+    implementation_packages_capacity: 1000

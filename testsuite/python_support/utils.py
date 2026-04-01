@@ -217,6 +217,7 @@ def build_and_run(
     py_script: str | None = None,
     py_args: list[str] | None = None,
     gpr_mains: list[Main] | None = None,
+    main_gprbuild_extra_args: list[str] | None = None,
     ocaml_main: Main | None = None,
     java_main: Main | None = None,
     ni_main: Main | None = None,
@@ -238,6 +239,8 @@ def build_and_run(
         generated GPR file, to build and run with the generated library. Each
         main can be either a Main instance or a string (for the main source
         file basename, the main is run without arguments).
+    :param main_gprbuild_extra_args: Additional switches to pass to GPRbuild
+        when compiling mains.
     :param ocaml_main: If not None, name of the OCaml source file to build and
         run with the built library available.
     :param java_main: If not None, name of the Java main sourec file to build
@@ -385,7 +388,7 @@ def build_and_run(
                     main_sources=fmt_str_list(main_source_files),
                 )
             )
-        run("gprbuild", "-Pgen", "-q", "-p")
+        run("gprbuild", "-Pgen", "-q", "-p", *(main_gprbuild_extra_args or []))
 
         # Now run all mains. If there are more than one main to run, print a
         # heading before each one.

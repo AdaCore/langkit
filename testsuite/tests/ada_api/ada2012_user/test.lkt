@@ -1,0 +1,27 @@
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    v: LogicVar
+
+    # Have at least one dispatching property, so that we generate a dispatcher,
+    # which have inlining enabled.
+    fun my_pred(): Bool = false
+
+    # Have one predicate so that we generate a functor, which has a
+    # First_Controlling_Parameter aspect (invalid Ada 2012 code).
+    fun get_eq(): Equation =
+        node.v <- self %and FooNode.my_pred%(node.v)
+
+    @exported
+    fun get_bool(): Bool = self.get_eq().solve()
+}
+
+class Example: FooNode implements TokenNode {
+    fun my_pred(): Bool = true
+}
