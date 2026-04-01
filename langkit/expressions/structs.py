@@ -431,6 +431,7 @@ class EvalMemberExpr(Expr):
         implicit_deref: bool = False,
         is_super: bool = False,
         unsafe: bool = False,
+        context_clause_added: bool = False,
     ):
         """
         :param receiver_expr: The receiver of the field access.
@@ -461,6 +462,10 @@ class EvalMemberExpr(Expr):
             field access. This is used to avoid noisy and useless null checks
             in generated code: these checks would fail only because of a bug in
             the code generator.
+
+        :param context_clause_added: Whether the Ada context clause to give
+            access to the evalutaed member has already been added to the unit
+            that contains this member evalution code.
         """
         # When calling environment properties, the call itself happens are
         # outside a property. We cannot create a variable in this context, and
@@ -474,6 +479,7 @@ class EvalMemberExpr(Expr):
         self.implicit_deref = implicit_deref
         self.is_super = is_super
         self.unsafe = unsafe
+        self.context_clause_added = context_clause_added
 
         self.original_receiver_expr = receiver_expr
         self.receiver_expr = (
@@ -621,7 +627,9 @@ class EvalMemberExpr(Expr):
                         (str(PropertyDef.entity_info_name), einfo_expr)
                     )
 
-            # Build the call
+            # Build the call. Make sure the caller has access to it.
+            if not self.context_clause_added:
+                self.add_with_clause(self.node_data.impl_package_qual_name)
             ret = "{} ({})".format(
                 self.node_data.qual_impl_name,
                 ", ".join(

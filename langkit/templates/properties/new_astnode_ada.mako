@@ -48,8 +48,8 @@ Initialize
    Unit => Self.Unit,
 
    ## Keep the token start/end null, as expected for a synthetized node
-   Token_Start_Index => No_Token_Index,
-   Token_End_Index   => No_Token_Index,
+   Token_Start_Index => Langkit_Support.Token_Data_Handlers.No_Token_Index,
+   Token_End_Index   => Langkit_Support.Token_Data_Handlers.No_Token_Index,
 
    ## We consider the creator of a synthetized nodes as its parent even
    ## though the latter is not a regular child.

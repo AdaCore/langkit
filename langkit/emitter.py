@@ -14,7 +14,12 @@ from typing import Any
 
 from langkit.caching import Cache
 from langkit.common import ada_printable_bytes
-from langkit.compile_context import AdaSourceKind, CompileCtx, Verbosity
+from langkit.compile_context import (
+    AdaSourceKind,
+    CompileCtx,
+    ImplementationPackage,
+    Verbosity,
+)
 from langkit.config import cache_summary
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Location, error
@@ -753,6 +758,8 @@ class Emitter:
             Unit("pkg_c", "C"),
             # Unit for implementation of analysis primitives
             Unit("pkg_implementation", "Implementation"),
+            # Unit that exposes all properties implementations
+            Unit("pkg_all_properties", "All_Properties", has_body=False),
             # Unit for AST node iteration primitives
             Unit("pkg_iterators", "Iterators"),
             # Unit for converters between public and implementation types
@@ -772,7 +779,7 @@ class Emitter:
             ),
             # Unit for all parsers
             Unit("parsers/pkg_main", "Parsers"),
-            Unit("parsers/pkg_impl", "Parsers_Impl", is_interface=False),
+            Unit("parsers/pkg_impl", "Parsers_Impl"),
             # Units for the lexer
             Unit("pkg_lexer", "Lexer"),
             Unit("pkg_lexer_impl", "Lexer_Implementation"),
@@ -814,6 +821,26 @@ class Emitter:
                 in_library=True,
                 is_interface=u.is_interface,
             )
+
+        # Emit code for implementation packages
+
+        def process_pkg_list(pkg_list: list[ImplementationPackage]) -> None:
+            for impl_pkg in pkg_list:
+                self.write_ada_module(
+                    self.src_dir,
+                    "pkg_impl",
+                    [impl_pkg.name],
+                    impl_pkg=impl_pkg,
+                    in_library=True,
+                )
+
+        if self.context.config.emission.per_node_implementation_packages:
+            assert not self.context.global_impl_packages
+            for pkg_list in self.context.per_node_impl_packages.values():
+                process_pkg_list(pkg_list)
+        else:
+            assert not self.context.per_node_impl_packages
+            process_pkg_list(self.context.global_impl_packages)
 
     def emit_mains(self, ctx: CompileCtx) -> None:
         """
@@ -1129,6 +1156,7 @@ class Emitter:
         cached_body: bool = False,
         in_library: bool = False,
         is_interface: bool = True,
+        **kwargs: Any,
     ) -> None:
         """
         Write an Ada module (both spec and body) using a standardized scheme
@@ -1152,6 +1180,8 @@ class Emitter:
 
         :param is_interface: Whether to include this module in the generated
             library interface.
+
+        :param kwargs: Parameter to pass to template rendering.
         """
 
         def do_emit(kind: AdaSourceKind) -> None:
@@ -1195,6 +1225,7 @@ class Emitter:
                             kind.value,
                         ),
                         with_clauses=with_clauses,
+                        **kwargs,
                     ),
                 )
 

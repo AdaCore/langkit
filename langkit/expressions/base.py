@@ -21,7 +21,7 @@ from typing import (
 import funcy
 
 from langkit.common import ascii_repr
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import AdaSourceKind, CompileCtx
 from langkit.compiled_types import (
     ASTNodeType,
     AbstractNodeData,
@@ -274,6 +274,21 @@ class Expr:
         result_var = self.result_var
         assert result_var is not None
         return result_var.ref_expr
+
+    @staticmethod
+    def add_with_clause(
+        to_pkg: str,
+        use_clause: bool = False,
+    ) -> None:
+        """
+        Wrapper around ``CompileCtx.add_with_clause`` to add a ``with`` clause
+        to the body of the implementation package of the current property.
+        """
+        caller = PropertyDef.get()
+        ctx = get_context()
+        ctx.add_with_clause(
+            caller.impl_package.name, AdaSourceKind.body, to_pkg, use_clause
+        )
 
     def render_pre(self) -> str:
         """
@@ -1938,6 +1953,7 @@ class PropertyDef(AbstractNodeData):
     activate_tracing: bool
     artificial: bool
     call_memoizable: bool
+    external: bool
     called_by_super: bool
     dispatch_table: list[tuple[ASTNodeType, PropertyDef]]
     memoized: bool
@@ -2918,6 +2934,18 @@ class PropertyDef(AbstractNodeData):
                     )
                 else:
                     self.untyped_wrapper_decl = self.untyped_wrapper_def = ""
+
+        if self.is_dispatcher:
+            # Dispatchers need to call static properties, so we need the "with"
+            # clauses that will make the properties visible.
+            ctx = get_context()
+            for _, static_prop in self.dispatch_table:
+                ctx.add_with_clause(
+                    self.impl_package.name,
+                    AdaSourceKind.body,
+                    static_prop.impl_package.qual_name,
+                    use_clause=True,
+                )
 
     @property
     def doc(self) -> str:

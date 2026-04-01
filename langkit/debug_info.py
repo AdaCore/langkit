@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import abc
 from collections import defaultdict
+import glob
 import inspect
 import os.path
 import shlex
@@ -76,8 +77,10 @@ class DebugInfo:
             return result
 
         filename = has_unit_sym.symtab.fullname()
-        with open(filename, "r") as f:
-            result._try_parse(filename, f)
+        lib_prefix = filename.rsplit("-", 1)[0]
+        for impl_body in glob.glob(lib_prefix + "-impl_*.adb"):
+            with open(impl_body, "r") as f:
+                result._try_parse(impl_body, f)
 
         return result
 

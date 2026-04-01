@@ -2464,6 +2464,13 @@ private package ${ada_lib_name}.Implementation is
    --  This function allocates a string whose lifetime will be associated with
    --  ``Unit``.
 
+   function To_Lookup_Kind_Type (K : Lookup_Kind) return Lookup_Kind_Type
+   is
+     (Lookup_Kind_Type'Val (Lookup_Kind'Pos (K)));
+
+   function Construct_Entity_Array
+     (V : AST_Envs.Entity_Vectors.Vector) return ${T.entity.array.name};
+
 private
    --  We only have a private part to defer the initialization of struct
    --  constants. This allows us to circumvent circularity problems between

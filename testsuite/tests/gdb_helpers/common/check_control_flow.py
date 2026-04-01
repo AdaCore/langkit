@@ -187,5 +187,5 @@ run_foosi("Now evaluating <FooNode.control_flow_helper at test.lkt:@NUMBER>")
 gdb.test(
     "foosi",
     "@/(Thread \\d+ hit )?/Breakpoint @...,"
-    " libfoolang.implementation.foo_node_p_control_flow_helper@...",
+    " libfoolang.impl@....foo_node_p_control_flow_helper@...",
 )

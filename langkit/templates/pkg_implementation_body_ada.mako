@@ -134,11 +134,6 @@ package body ${ada_lib_name}.Implementation is
       Destroy : Destroy_Procedure);
    --  Common underlying implementation for Register_Destroyable_Gen
 
-   pragma Warnings (Off, "referenced");
-   function Construct_Entity_Array
-     (V : AST_Envs.Entity_Vectors.Vector) return ${T.entity.array.name};
-   pragma Warnings (On, "referenced");
-
    procedure Reset_Envs_Caches
      (Unit            : Internal_Unit;
       For_Destruction : Boolean := False);
@@ -405,12 +400,6 @@ package body ${ada_lib_name}.Implementation is
 
       return '@' & Stripped_Image (Address_To_Id_Maps.Element (C));
    end Get_Env_Id;
-
-   pragma Warnings (Off, "referenced");
-   function To_Lookup_Kind_Type (K : Lookup_Kind) return Lookup_Kind_Type
-   is
-     (Lookup_Kind_Type'Val (Lookup_Kind'Pos (K)));
-   pragma Warnings (On, "referenced");
 
    ----------------------
    -- Allocate_Context --
@@ -2160,7 +2149,6 @@ package body ${ada_lib_name}.Implementation is
       State           : in out PLE_Node_State;
       Add_To_Env_Only : Boolean := False) is
    begin
-
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
          % if n.env_spec.pre_actions:
@@ -4516,10 +4504,6 @@ package body ${ada_lib_name}.Implementation is
       Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnv.name}
    is (AST_Envs.Group (AST_Envs.Lexical_Env_Array (Envs.Items), Env_Md));
 
-   % for astnode in ctx.node_types:
-       ${astnode_types.body_decl(astnode)}
-   % endfor
-
    ------------------
    -- Children_Env --
    ------------------
@@ -4820,8 +4804,12 @@ package body ${ada_lib_name}.Implementation is
    ---------------
 
    function Can_Reach (El, From : ${T.root_node.name}) return Boolean is
+      function Property (El, From : ${T.root_node.name}) return Boolean
+      with
+        Import,
+        External_Name => ${ascii_repr(ctx.can_reach_property_symbol)};
    begin
-      return ${T.root_node.kwless_raw_name}_P_Can_Reach (El, From);
+      return Property (El, From);
    end Can_Reach;
 
    -----------------
@@ -5036,8 +5024,6 @@ package body ${ada_lib_name}.Implementation is
    % for struct_type in ctx.struct_types:
    ${struct_types.body(struct_type)}
    % endfor
-
-   ${astnode_types.logic_helpers()}
 
    % for astnode in ctx.node_types:
       ${astnode_types.body(astnode)}
