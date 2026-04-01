@@ -36,6 +36,7 @@ if py_args is not None:
 gpr_mains = test_env.get("gpr_mains")
 if gpr_mains:
     gpr_mains = [Main.parse(m) for m in gpr_mains]
+main_gprbuild_extra_args = test_env.get("main_gprbuild_extra_args")
 
 ocaml_main = decode_main("ocaml_main")
 java_main = decode_main("java_main")
@@ -59,6 +60,7 @@ build_and_run(
     py_script=py_script,
     py_args=py_args,
     gpr_mains=gpr_mains,
+    main_gprbuild_extra_args=main_gprbuild_extra_args,
     ocaml_main=ocaml_main,
     java_main=java_main,
     ni_main=ni_main,

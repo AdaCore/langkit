@@ -16,6 +16,8 @@ pragma Warnings (On, "use clause for package * has no effect");
 
 private package ${ada_lib_name}.${impl_pkg.name} is
 
+   pragma Extensions_Allowed (On);
+
    % for prop in impl_pkg.properties:
       ${prop.prop_decl}
 
