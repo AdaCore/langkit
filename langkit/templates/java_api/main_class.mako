@@ -4753,6 +4753,8 @@ public final class ${ctx.lib_name.camel} {
         }
 
         ${java_doc('langkit.rewriting.kind',  8)}
+        @Override
+        @CompilerDirectives.TruffleBoundary
         public NodeKind getKind() {
             if(this.kind == null) {
                 final int kindNative;
@@ -4819,6 +4821,7 @@ public final class ${ctx.lib_name.camel} {
         }
 
         /** Get whether the rewriting node is a none node. */
+        @Override
         public boolean isNone() {
             return this.reference.isNull();
         }
@@ -4943,8 +4946,9 @@ public final class ${ctx.lib_name.camel} {
         }
 
         ${java_doc('langkit.rewriting.child_by_ref', 8)}
+        @Override
         public RewritingNode getChild(
-            final MemberReference childMember
+            LangkitSupport.MemberReferenceInterface childMember
         ) {
             final RewritingNode res;
 

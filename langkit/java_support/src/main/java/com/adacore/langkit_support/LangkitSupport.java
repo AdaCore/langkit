@@ -674,8 +674,17 @@ public class LangkitSupport {
             throw new NotImplementedException();
         }
 
+        /** Get the kind of this node. */
+        @CompilerDirectives.TruffleBoundary
+        default NodeKindInterface getKind() {
+            throw new NotImplementedException();
+        }
+
         /** Return a copy of this node. */
         RewritingNodeInterface clone();
+
+        /** Get whether the rewriting node is a null node. */
+        boolean isNone();
 
         /** Return whether this rewriting node is tied. */
         boolean isTied();
@@ -714,6 +723,14 @@ public class LangkitSupport {
 
         /** Remove this node from its parent. */
         void removeFromParent();
+
+        /** Get a child of this node. */
+        @CompilerDirectives.TruffleBoundary
+        default RewritingNodeInterface getChild(
+            MemberReferenceInterface childReference
+        ) {
+            throw new NotImplementedException();
+        }
 
         /** Set the child of this node. */
         @CompilerDirectives.TruffleBoundary
