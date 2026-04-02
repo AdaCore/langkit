@@ -17,6 +17,10 @@ import com.oracle.truffle.api.interop.TruffleObject;
 
 public class LangkitSupport {
 
+    // ==========
+    // Exceptions
+    // ==========
+
     /** Exception to raise when interface default methods are not overrode. */
     public static final
     class NotImplementedException extends RuntimeException {
@@ -128,6 +132,10 @@ public class LangkitSupport {
             return diagnostics;
         }
     }
+
+    // ==========
+    // Common interfacing API
+    // ==========
 
     /** Classes that implement this interface wrap the langkit characters
      *  which are 32 bit wide. */

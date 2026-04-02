@@ -166,7 +166,7 @@
                 )
             );
 
-        // Initialisation of the method map
+        // Initialization of the method map
         static {
             % if len(cls.fields_with_accessors()) > 0:
             try {
