@@ -33,7 +33,6 @@ import java.util.function.Function;
 
 import java.lang.StringBuilder;
 import java.lang.Iterable;
-import java.lang.reflect.Method;
 
 import java.math.BigInteger;
 
@@ -170,7 +169,7 @@ public final class ${ctx.lib_name.camel} {
                                            : StandardCharsets.UTF_32LE;
 
     /** A map to store node descriptions associated to their camel name. */
-    public static final Map<String, Reflection.Node>
+    public static final Map<String, LangkitSupport.Reflection.Node>
         NODE_DESCRIPTION_MAP = new HashMap<>();
 
     static {
@@ -572,175 +571,6 @@ public final class ${ctx.lib_name.camel} {
     }
 
     // ==========
-    // Reflection utils
-    // ==========
-
-    public static final class Reflection extends LangkitSupport.Reflection {
-        /**
-        * This class represents the description of a node.
-        */
-        public static final class Node extends LangkitSupport.Reflection.Node {
-
-            // ----- Instance attributes -----
-
-            /** Kind of the node. This kind is null if the node is abstract */
-            public final NodeKind kind;
-
-            /** Whether the node is a token node */
-            public final boolean isTokenNode;
-
-            /** Whether the node is a list node */
-            public final boolean isListNode;
-
-            /** Java class of the node */
-            public final Class<? extends ${root_node_type}> clazz;
-
-            /** Simple name of the Java class of the node */
-            public final String className;
-
-            /** Fields of the node, sorted by parsing order */
-            public final String[] fields;
-
-            /** Map containing description for all fields of the node */
-            public final Map<String, Field> fieldDescriptions;
-
-            // ----- Constructors -----
-
-            /** Create a new node description with its kind and class */
-            public Node (
-                NodeKind kind,
-                final boolean isTokenNode,
-                final boolean isListNode,
-                final Class<? extends ${root_node_type}> clazz,
-                final String className,
-                final String[] fields,
-                final Map<String, Field> fieldDescriptions
-            ) {
-                this.kind = kind;
-                this.isTokenNode = isTokenNode;
-                this.isListNode = isListNode;
-                this.clazz = clazz;
-                this.className = className;
-                this.fieldDescriptions = fieldDescriptions;
-                this.fields = fields;
-            }
-
-        }
-
-        /**
-        * This class represents the description of a node field.
-        */
-        public static final class Field extends
-            LangkitSupport.Reflection.Field {
-
-            // ----- Instance attributes -----
-
-            /** The Java method for the field */
-            public final Method javaMethod;
-
-            /** The parameters of the method */
-            public final List<Param> params;
-
-            /** The generic member reference of this field */
-            public final MemberReference memberRef;
-
-            // ----- Constructors -----
-
-            /**
-            * Create a new field description.
-            *
-            * @param method The Java method to access the field.
-            * @param params The parameters of the field call.
-            */
-            public Field(
-                final Method javaMethod,
-                final List<Param> params,
-                final MemberReference memberRef
-            ) {
-                this.javaMethod = javaMethod;
-                this.params = params;
-                this.memberRef = memberRef;
-            }
-
-            // ----- Getters -----
-
-            /** The parameters of the method */
-            public List<Param> getParams() {
-                return this.params;
-            }
-
-            /** The Java method for the field */
-            public Method getJavaMethod() {
-                return this.javaMethod;
-            }
-
-        }
-
-        /**
-        * This class represents a parameter description.
-        */
-        public static class Param extends LangkitSupport.Reflection.Param {
-
-            // ----- Instance attributes -----
-
-            /** The type of the argument */
-            public final Class<?> type;
-
-            /** The name of the parameter */
-            public final String name;
-
-            /** The optional default value of the parameter */
-            public final Optional<Object> defaultValue;
-
-            // ----- Constructors -----
-
-            /**
-            * Create a new langkit parameter.
-            *
-            * @param type The type of the parameter.
-            * @param name The name of the parameter.
-            */
-            public Param(
-                final Class<?> type,
-                final String name
-            ) {
-                this.type = type;
-                this.name = name;
-                this.defaultValue = Optional.empty();
-            }
-
-            /** Create a new parameter description with a default value. */
-            public Param(
-                final Class<?> type,
-                final String name,
-                final Object defaultValue
-            ) {
-                this.type = type;
-                this.name = name;
-                this.defaultValue = Optional.ofNullable(defaultValue);
-            }
-
-            // ----- Getters -----
-
-            /** Get the name of the parameter. */
-            public String getName() {
-                return this.name;
-            }
-
-            /** The type of the parameter */
-            public Class<?> getType() {
-                return this.type;
-            }
-
-            /** The optional default value of the parameter */
-            public Optional<Object> getDefaultValue() {
-                return this.defaultValue;
-            }
-
-        }
-    }
-
-    // ==========
     // Language specific extensions
     // ==========
 
@@ -1123,7 +953,7 @@ public final class ${ctx.lib_name.camel} {
         public final int value;
 
         /** Description associated to the node kind. */
-        private Reflection.Node description;
+        private LangkitSupport.Reflection.Node description;
 
         // ----- Constructors -----
 
@@ -1168,11 +998,12 @@ public final class ${ctx.lib_name.camel} {
             return this.value;
         }
 
-        public Reflection.Node getDescription() {
+        @Override
+        public LangkitSupport.Reflection.Node getDescription() {
             return this.description;
         }
 
-        void setDescription(Reflection.Node description) {
+        void setDescription(LangkitSupport.Reflection.Node description) {
             this.description = description;
         }
 
@@ -1240,6 +1071,7 @@ public final class ${ctx.lib_name.camel} {
         // ----- Instance methods -----
 
         /** Get the native value of the enum instance. */
+        @Override
         public int toC() {
             return this.value;
         }
@@ -5550,41 +5382,41 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Getters -----
 
-        public Reflection.Node getDescription() {
+        public LangkitSupport.Reflection.Node getDescription() {
             return ${root_node_type}.description;
         }
 
         public NodeKind getKind() {
-            return this.getDescription().kind;
+            return (NodeKind) this.getDescription().kind();
         }
 
         public String getClassName() {
-            return this.getDescription().className;
+            return this.getDescription().className();
         }
 
         public boolean isTokenNode() {
-            return this.getDescription().isTokenNode;
+            return this.getDescription().isTokenNode();
         }
 
         public boolean isListNode() {
-            return this.getDescription().isListNode;
+            return this.getDescription().isListNode();
         }
 
         public String[] getFieldNames() {
-            return this.getDescription().fields;
+            return this.getDescription().fields();
         }
 
-        public Map<String, Reflection.Field> getFieldDescriptions()
-        {
-            return this.getDescription().fieldDescriptions;
+        public Map<String, LangkitSupport.Reflection.Field>
+        getFieldDescriptions() {
+            return this.getDescription().fieldDescriptions();
         }
 
         @CompilerDirectives.TruffleBoundary
-        public Reflection.Field getFieldDescription(
+        public LangkitSupport.Reflection.Field getFieldDescription(
             final String name
         ) {
             return this.getDescription()
-                .fieldDescriptions
+                .fieldDescriptions()
                 .get(name);
         }
 

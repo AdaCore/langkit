@@ -40,6 +40,67 @@ public class LangkitSupport {
         }
     }
 
+    // ==========
+    // Reflection utils
+    // ==========
+
+    public static final class Reflection {
+
+        /**
+        * This class represents the description of a node.
+        *
+        * @param kind Kind of the node. This kind is null if the node is
+        *             abstract.
+        * @param isTokenNode Whether the node is a token node.
+        * @param isListNode Whether the node is a list node.
+        * @param clazz Java class of the node.
+        * @param className Simple name of the Java class of the node.
+        * @param fields Fields of the node, sorted by parsing order.
+        * @param fieldDescriptions Map containing description for all fields
+        *                          of the node.
+        */
+        public record Node(
+            NodeKindInterface kind,
+            boolean isTokenNode,
+            boolean isListNode,
+            Class<? extends NodeInterface> clazz,
+            String className,
+            String[] fields,
+            Map<String, Field> fieldDescriptions
+        ) {}
+
+        /**
+        * This class represents the description of a node field.
+        *
+        * @param javaMethod Reference to the Java method for the field.
+        * @param params Parameters of the method.
+        * @param memberRef Member reference corresponding to this field.
+        */
+        public record Field(
+            Method javaMethod,
+            List<Param> params,
+            MemberReferenceInterface memberRef
+        ) {}
+
+        /**
+        * This class represents a parameter description.
+        *
+        * @param type Type of the parameter
+        * @param name Name of the parameter
+        * @param defaultValue Optional default value of the parameter.
+        */
+        public record Param(
+            Class<?> type,
+            String name,
+            Optional<Object> defaultValue
+        ) {}
+
+    }
+
+    // ==========
+    // Project managing
+    // ==========
+
     /**
      * Abstract class representing a project manager that fetches project files
      * and creates analysis contexts.
@@ -239,7 +300,9 @@ public class LangkitSupport {
         return message;
     }
 
-    public interface NodeKindInterface {}
+    public interface NodeKindInterface {
+        Reflection.Node getDescription();
+    }
 
     public interface TokenKindInterface {
         /**
@@ -598,32 +661,10 @@ public class LangkitSupport {
         public abstract Diagnostic[] getDiagnostics();
     }
 
-    /** This type represents the Reflection utils nodes. */
-    public abstract static class Reflection {
-        /** This class represents the description of a node. */
-        public abstract static class Node {}
-
-        /** This class represents the description of a node field. */
-        public abstract static class Field {
-            /** The parameters of the method */
-            public abstract List<? extends Reflection.Param> getParams();
-            /** The Java method for the field */
-            public abstract Method getJavaMethod();
-        }
-
-        /** This class represents a parameter description. */
-        public abstract static class Param {
-            /** Get the name of the parameter. */
-            public abstract String getName();
-            /** The type of the parameter */
-            public abstract Class<?> getType();
-            /** The optional default value of the parameter */
-            public abstract Optional<Object> getDefaultValue();
-        }
-    }
-
     /** This type represents a member reference. */
-    public interface MemberReferenceInterface {}
+    public interface MemberReferenceInterface {
+        int toC();
+    }
 
     /** This type represents the rewriting node. */
     public interface RewritingNodeInterface {

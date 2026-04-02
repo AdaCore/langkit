@@ -310,7 +310,7 @@ public final class BindingsTests {
             );
             System.out.println(
                 "Node 'p_all_items' member reference equality = " +
-                (root.getFieldDescription("p_all_items").memberRef ==
+                (root.getFieldDescription("p_all_items").memberRef() ==
                  MemberReference.FOO_SEQUENCE_P_ALL_ITEMS)
             );
 
@@ -607,18 +607,23 @@ public final class BindingsTests {
             FooNode root = unit.getRoot();
 
             // Test the character manipulation
-            Reflection.Field getAField = root.getFieldDescription("p_get_a");
-            Reflection.Field getEacuteField =
+            LangkitSupport.Reflection.Field getAField =
+                root.getFieldDescription("p_get_a");
+            LangkitSupport.Reflection.Field getEacuteField =
                 root.getFieldDescription("p_get_eacute");
             Char c1 = root.pGetA(
                 (Char) (
-                    (Reflection.Param) getAField.params.get(0)
-                ).defaultValue.get()
+                    (LangkitSupport.Reflection.Param) getAField
+                        .params()
+                        .get(0)
+                ).defaultValue().get()
             );
             Char c2 = root.pGetEacute(
                 (Char) (
-                    (Reflection.Param) getEacuteField.params.get(0)
-                ).defaultValue.get()
+                    (LangkitSupport.Reflection.Param) getEacuteField
+                        .params()
+                        .get(0)
+                ).defaultValue().get()
             );
             Char cIdent = root.pIdentity(Char.create('\u00e9'));
             System.out.println("The 'a' char = " + c1.toString());
