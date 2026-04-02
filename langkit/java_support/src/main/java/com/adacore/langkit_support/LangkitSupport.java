@@ -629,19 +629,19 @@ public class LangkitSupport {
     public interface RewritingNodeInterface {
         /** Return the None value for this type. */
         @CompilerDirectives.TruffleBoundary
-        public static RewritingNodeInterface getNONE() {
+        static RewritingNodeInterface getNONE() {
             throw new NotImplementedException();
         }
 
         /** Return a copy of this node. */
-        public abstract RewritingNodeInterface clone();
+        RewritingNodeInterface clone();
 
         /** Return whether this rewriting node is tied. */
-        public abstract boolean isTied();
+        boolean isTied();
 
         /** Insert a node before this node. */
         @CompilerDirectives.TruffleBoundary
-        public default void insertBefore(
+        default void insertBefore(
             final RewritingNodeInterface toInsert)
         {
             throw new NotImplementedException();
@@ -649,34 +649,34 @@ public class LangkitSupport {
 
         /** Replace this node by a new node. */
         @CompilerDirectives.TruffleBoundary
-        public default void replace(RewritingNodeInterface newNode) {
+        default void replace(RewritingNodeInterface newNode) {
             throw new NotImplementedException();
         }
 
         /** Insert a node after this node. */
         @CompilerDirectives.TruffleBoundary
-        public default void insertAfter(RewritingNodeInterface toInsert) {
+        default void insertAfter(RewritingNodeInterface toInsert) {
             throw new NotImplementedException();
         }
 
         /** Insert a node first amongst this node siblings. */
         @CompilerDirectives.TruffleBoundary
-        public default void insertFirst(RewritingNodeInterface toInsert) {
+        default void insertFirst(RewritingNodeInterface toInsert) {
             throw new NotImplementedException();
         }
 
         /** Insert a node last amongst this node siblings. */
         @CompilerDirectives.TruffleBoundary
-        public default void insertLast(RewritingNodeInterface toInsert) {
+        default void insertLast(RewritingNodeInterface toInsert) {
             throw new NotImplementedException();
         }
 
         /** Remove this node from its parent. */
-        public abstract void removeFromParent();
+        void removeFromParent();
 
         /** Set the child of this node. */
         @CompilerDirectives.TruffleBoundary
-        public default void setChild(
+        default void setChild(
             MemberReferenceInterface childMember,
             RewritingNodeInterface child
         ) {
