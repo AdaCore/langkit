@@ -579,10 +579,9 @@ class Decl: LktNode implements DeclarationInterface {
                     FunctionType(
                         params=
                             node.entity_type()
-                                .instantiate_generic_decl(
+                                .instantiate_generic_type_decl(
                                     [td.owning_type().as_entity]
                                 )
-                                .as[TypeDecl]
                                 .singleton()
                             & ft.params,
                         return_type=ft.return_type,
@@ -651,10 +650,9 @@ class Decl: LktNode implements DeclarationInterface {
                     etd.decl_type.referenced_decl()
                 case gd: GenericDecl => gd.decl.get_type()
                 case sd: SelfDecl =>
-                    self.entity_type().instantiate_generic_decl(
+                    self.entity_type().instantiate_generic_type_decl(
                         [sd.owning_type()]
                     )
-                    .as![TypeDecl]
                 case nd: NodeDecl => nd.owning_type()
                 case _ => null[Entity[TypeDecl]]
             }
@@ -667,41 +665,37 @@ class Decl: LktNode implements DeclarationInterface {
     |" ``self`` is an entity type: in this case, the result is ``Entity[T]``.
     @exported
     fun get_cast_type(cast_to: Entity[TypeDecl]): Entity[TypeDecl] =
-        (
-            if
-                (
-                    not (cast_to.is_null or self.is_null)
-                    and node == node.entity_type().node
-                )
-                and cast_to.node != node.entity_type().node
-            then node.entity_type().instantiate_generic_decl([cast_to])
-            else cast_to
-        )
-        .as[TypeDecl]
+        if
+            not (cast_to.is_null or self.is_null)
+            and node == node.entity_type().node
+            and cast_to.node != node.entity_type().node
+        then node.entity_type().instantiate_generic_type_decl([cast_to])
+        else cast_to
 
     |" Return the type of ``E.keep[T]`` when ``keep_type`` materializes the
     |" input type (``T``), and ``self`` is the type of ``E``.
     @exported
-    fun get_keep_type(keep_type: Entity[TypeDecl]): Entity[TypeDecl] =
-        (
+    fun get_keep_type(keep_type: Entity[TypeDecl]): Entity[TypeDecl] = {
+        val elt_type =
             if
-                (
-                    not (keep_type.is_null or self.is_null)
-                    and (
-                        node == node.entity_type().node
-                        or (
-                            node == node.array_type().node
-                            and self.as[TypeDecl].get_array_content_type().node
+                not keep_type.is_null
+                and not self.is_null
+                and (
+                    node == node.entity_type().node
+                    or (
+                        node == node.array_type().node
+                        and (
+                            self.as[TypeDecl].get_array_content_type().node
                             == node.entity_type().node
                         )
                     )
                 )
                 and keep_type.node != node.entity_type().node
-            then node.entity_type().instantiate_generic_decl([keep_type])
-            else keep_type
-        )
-        .as[TypeDecl]
-        ?.make_array_type()
+            then node.entity_type().instantiate_generic_type_decl([keep_type])
+            else keep_type;
+
+        elt_type?.make_array_type()
+    }
 
     |" Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
     |" member and ``prefix_type`` is the type of ``E``.
@@ -709,35 +703,33 @@ class Decl: LktNode implements DeclarationInterface {
     fun get_suffix_type(prefix_type: Entity[TypeDecl]): Entity[TypeDecl] = {
         val suffix_type = self?.get_type();
 
-        (
-            if
-                (
-                    (not prefix_type.is_null and not self.is_null)
-                    and prefix_type.node == node.entity_type().node
-                )
-                and self.full_decl()?.has_annotation(s"parse_field")
-            then node.entity_type().instantiate_generic_decl([suffix_type])
-            # If we are accessing a lazy field through a type, or a @property
-            # annotated function, consider it as a reference to a property-like
-            # field.
-            # This is necessary for type dynamic_lexical_env(Type.lazy_field).
-            elif
-                (
-                    (not self.is_null and prefix_type.is_null)
-                    and node is FieldDecl
-                )
-                and self.full_decl().has_annotation(s"lazy")
-            then self.as[FieldDecl].lazy_field_function_type()
-            elif
-                (
-                    (not self.is_null and prefix_type.is_null)
-                    and node is FunDecl
-                )
-                and self.full_decl().has_annotation(s"property")
-            then self.function_type()
-            else suffix_type
-        )
-        .as[TypeDecl]
+        if self.is_null
+        then suffix_type
+
+        elif
+            not prefix_type.is_null
+            and prefix_type.node == node.entity_type().node
+            and self.full_decl()?.has_annotation(s"parse_field")
+        then
+            node.entity_type().instantiate_generic_type_decl([suffix_type])
+
+        # If we are accessing a lazy field through a type, or a @property
+        # annotated function, consider it as a reference to a property-like
+        # field. This is necessary for type
+        # dynamic_lexical_env(Type.lazy_field).
+        elif
+            prefix_type.is_null
+            and node is FieldDecl
+            and self.full_decl().has_annotation(s"lazy")
+        then self.as[FieldDecl].lazy_field_function_type()
+
+        elif
+            prefix_type.is_null
+            and node is FunDecl
+            and self.full_decl().has_annotation(s"property")
+        then self.function_type()
+
+        else suffix_type
     }
 
     |" Return the declaration corresponding to ``current_name``'s name inside
@@ -751,33 +743,22 @@ class Decl: LktNode implements DeclarationInterface {
     |" If ``property()`` returns an enum value, we should not be able to access
     |" the enum fields.
     fun type_var_suffix_ref(current_name: Entity[RefId]): Entity[Decl] =
-        self.do(
-            (v1) =>
-            match v1 {
+        if self.is_null
+        then null[Entity[Decl]]
+        else {
+            bind origin = self;
+            val scope = match self {
                 case e: EnumTypeDecl =>
-                    {
-                        bind origin = self;
+                    e.basic_trait_from_self().defined_scope()
+                case _ => self.defined_scope()
+            };
+            val result = scope.get_first(
+                current_name.symbol,
+                lookup=LookupKind.flat
+            ).as[Decl];
 
-                        e.basic_trait_from_self().defined_scope().get_first(
-                            current_name.symbol,
-                            lookup=LookupKind.flat
-                        )
-                        .as[Decl]
-                        ?.subdecl_if_generic()
-                    }
-                case _ =>
-                    {
-                        bind origin = self;
-
-                        self.defined_scope().get_first(
-                            current_name.symbol,
-                            lookup=LookupKind.flat
-                        )
-                        .as[Decl]
-                        ?.subdecl_if_generic()
-                    }
-            }
-        )
+            result?.subdecl_if_generic()
+        }
 
     |" Return the declaration corresponding to current_name's name inside
     |" when Self is used as a declaration.
@@ -898,10 +879,9 @@ class Decl: LktNode implements DeclarationInterface {
                                 name=s"var",
                                 param_type=
                                     node.entity_type()
-                                        .instantiate_generic_decl(
+                                        .instantiate_generic_type_decl(
                                             [fd.owning_type().as_entity]
-                                        )
-                                        .as[TypeDecl],
+                                        ),
                                 has_default_value=false,
                                 decl=SynthParamDecl().as_entity
                             )
@@ -1978,7 +1958,7 @@ class TypeDecl: Decl implements TypeInterface {
                         (ot) => ot?.node == t.entity_type().node
                     )
                 )
-            then t.entity_type().instantiate_generic_decl([t]).as[TypeDecl]
+            then t.entity_type().instantiate_generic_type_decl([t])
             else t
         )
     }
@@ -2199,7 +2179,7 @@ class TypeDecl: Decl implements TypeInterface {
     |" parameter.
     @memoized
     fun make_array_type(): Entity[TypeDecl] =
-        self?.array_type().instantiate_generic_decl([self]).as[TypeDecl]
+        self?.array_type().instantiate_generic_type_decl([self])
 
     |" Get the type parameter used to rebind the Array type declaration.
     fun get_array_content_type(): Entity[TypeDecl] =
@@ -2232,7 +2212,7 @@ class TypeDecl: Decl implements TypeInterface {
     |" Return a rebinded version of BasicTrait, in order to allow for all
     |" types to have builtins (do, singleton...) in their environment.
     fun basic_trait_from_self(): Entity[TypeDecl] =
-        self.basic_trait().instantiate_generic_decl([self]).as[TypeDecl]
+        self.basic_trait().instantiate_generic_type_decl([self])
 
     |" Traverse ``Entity`` and ``origin`` simultaneously and list all
     |" all types found in origin that would replace ty in Entity.
@@ -2290,10 +2270,10 @@ class TypeDecl: Decl implements TypeInterface {
     |" a class (hence not a Node), return Entity as is.
     fun as_node_builder_type(): Entity[TypeDecl] =
         self.as[ClassDecl].do(
-            (_) => self.node_builder_type().instantiate_generic_decl([self]),
+            (_) =>
+                self.node_builder_type().instantiate_generic_type_decl([self]),
             default_val=self
         )
-        .as[TypeDecl]
 
     |" Return an array containing all subclasses of the type.
     fun base_types(include_self: Bool = false): Array[Entity[TypeDecl]] =
@@ -2389,6 +2369,12 @@ class TypeDecl: Decl implements TypeInterface {
         # ``builder`` function should not be available.
         else null[LexicalEnv]
 
+    |" Convenience wrapper around ``Decl.instantiated_generic_decl`` when it is
+    |" known to return a ``TypeDecl``.
+    fun instantiate_generic_type_decl(
+        param_types: Array[Entity[TypeDecl]]
+    ): Entity[TypeDecl] =
+        self.instantiate_generic_decl(param_types).as![TypeDecl]
 }
 
 |" Synthetic list of type references, used to create synthetic type
@@ -2563,11 +2549,10 @@ class BasicClassDecl: NamedTypeDecl {
             then
                 self.as_bare_decl().instantiate_generic_decl(
                     [
-                        self.entity_type().as_bare_decl()
-                        .instantiate_generic_decl(
+                        self.entity_type().as_bare_decl().as[TypeDecl]
+                        .instantiate_generic_type_decl(
                             [self.node_env.get_first(s"T").as[TypeDecl]]
                         )
-                        .as[TypeDecl]
                     ]
                 )
                 .as[BasicClassDecl]
@@ -2876,10 +2861,13 @@ class TraitDecl: NamedTypeDecl {
         then
             self.as_bare_decl().instantiate_generic_decl(
                 [
-                    self.entity_type().as_bare_decl().instantiate_generic_decl(
-                        [self.node_env.get_first(s"T").as[TypeDecl]]
-                    )
-                    .as[TypeDecl]
+                    self
+                        .entity_type()
+                        .as_bare_decl()
+                        .as[TypeDecl]
+                        .instantiate_generic_type_decl(
+                            [self.node_env.get_first(s"T").as[TypeDecl]]
+                        )
                 ]
             )
             .defined_scope()
@@ -4621,29 +4609,19 @@ class KeepExpr: Expr {
     array_element_type: LogicVar
 
     fun xref_equation(): Equation =
-        (
-            (
-                (
-                    (
-                        (
-                            self.expr.xref_equation()
-                            %and self.keep_type.xref_equation()
-                        )
-                        %and self.actual_type_var
-                        <- Decl.get_keep_type%(
-                            self.expr.actual_type_var,
-                            self.keep_type.type_var
-                        )
-                    )
-                    %and self.expr.expected_type_var <- null[Entity[TypeDecl]]
-                )
-                %and {
-                    bind error_location = node.expr;
-                    TypeDecl.is_of_array_type%(self.expr.actual_type_var)
-                }
-            )
-            %and self.array_element_type
-            <- TypeDecl.get_array_content_type%(self.expr.actual_type_var)
+        self.expr.xref_equation()
+        %and self.keep_type.xref_equation()
+        %and self.actual_type_var <- Decl.get_keep_type%(
+            self.expr.actual_type_var,
+            self.keep_type.type_var
+        )
+        %and self.expr.expected_type_var <- null[Entity[TypeDecl]]
+        %and {
+            bind error_location = node.expr;
+            TypeDecl.is_of_array_type%(self.expr.actual_type_var)
+        }
+        %and self.array_element_type <- TypeDecl.get_array_content_type%(
+            self.expr.actual_type_var
         )
         %and {
             bind error_location = node.keep_type;
