@@ -732,22 +732,16 @@ class Decl: LktNode implements DeclarationInterface {
         else suffix_type
     }
 
-    |" Return the declaration corresponding to ``current_name``'s name inside
-    |" when ``self`` is used as an expression:
-    |"
-    |" .. code::
-    |"
-    |"    property().name
-    |"               ^^^^
-    |"
-    |" If ``property()`` returns an enum value, we should not be able to access
-    |" the enum fields.
+    |" Return the declaration that ``E.M`` references when ``self`` is the type
+    |" of ``E`` and ``current_name`` is the member reference ``M``.
     fun type_var_suffix_ref(current_name: Entity[RefId]): Entity[Decl] =
         if self.is_null
         then null[Entity[Decl]]
         else {
             bind origin = self;
             val scope = match self {
+                # If ``property()`` returns an enum value, then
+                # "property().name" cannot refer to the enum type members.
                 case e: EnumTypeDecl =>
                     e.basic_trait_from_self().defined_scope()
                 case _ => self.defined_scope()
