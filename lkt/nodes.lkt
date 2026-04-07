@@ -33,27 +33,28 @@
 import parser
 import tokens
 
-|" Call argument used to find the corresponding FunParamDecl during type
+|" Call argument used to find the corresponding ``FunParamDecl`` during type
 |" resolution of function calls.
 dynvar current_name: Entity[Argument]
 
-|" Whether we are currently solving a LogicPropage or a LogicPredicate.
+|" Whether we are currently solving a ``LogicPropagate`` or a
+|" ``LogicPredicate``.
 dynvar in_logic_call: Bool
 
 |" Origin node of the request.
 dynvar origin: Entity[LktNode]
 
-|" Completion item for language servers
+|" Completion item for language servers.
 struct CompleteItem implements CompletionItemInterface {
     declaration: Entity[Decl] implements CompletionItemInterface.decl
 }
 
-|" Reference result struct
+|" Reference result struct.
 struct RefResult implements RefResultInterface {
     ref: Entity[RefId] implements RefResultInterface.ref
 }
 
-|" Root node class for lkt AST nodes.
+|" Root node class for Lkt AST nodes.
 @abstract
 class LktNode implements Node[LktNode], LspNodeInterface {
     |" Enable or disable the solver traces for debugging purposes.
@@ -70,7 +71,7 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     |" Return the lexical env that contains all definitions from the prelude.
     fun prelude_env(): LexicalEnv = node.prelude_unit().root.children_env
 
-    |" Return wether this node belongs to the Lkt prelude unit.
+    |" Return whether this node belongs to the Lkt prelude unit.
     fun is_from_prelude(): Bool = node.unit == node.prelude_unit()
 
     fun root_env(): LexicalEnv = node.unit.root.node_env
@@ -125,55 +126,55 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     fun error_node_trait(): Entity[NamedTypeDecl] =
         node.get_builtin_type(s"ErrorNode")
 
-    |" Unit method. Return the character builtin type.
+    |" Unit method. Return the ``Char`` builtin type.
     @exported
     fun char_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Char")
 
-    |" Unit method. Return the integer builtin type.
+    |" Unit method. Return the ``Int`` builtin type.
     @exported
     fun int_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Int")
 
-    |" Unit method. Return the boolean builtin type.
+    |" Unit method. Return the ``Bool`` builtin type.
     @exported
     fun bool_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Bool")
 
-    |" Unit method. Return the big integer builtin type.
+    |" Unit method. Return the ``BigInt`` builtin type.
     @exported
     fun bigint_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"BigInt")
 
-    |" Unit method. Return the string builtin type.
+    |" Unit method. Return the ``String`` builtin type.
     @exported
     fun string_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"String")
 
-    |" Unit method. Return the string builtin type.
+    |" Unit method. Return the ``Symbol`` builtin type.
     @exported
     fun symbol_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Symbol")
 
-    |" Unit method. Return the property error builtin type.
+    |" Unit method. Return the ``PropertyError`` builtin type.
     @exported
     fun property_error_type(): Entity[NamedTypeDecl] =
         node.get_builtin_type(s"PropertyError")
 
-    |" Unit method. Return the regexp builtin type.
+    |" Unit method. Return the ``Regexp`` builtin type.
     @exported
     fun regexp_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Regexp")
 
-    |" Unit method. Return the logicvar builtin type.
+    |" Unit method. Return the ``Entity`` generic builtin type.
     @exported
     fun entity_gen_type(): Entity[GenericDecl] =
         node.get_builtin_gen_decl(s"Entity")
 
-    |" Unit method. Return the logicvar builtin type.
+    |" Unit method. Return the ``Entity`` builtin type.
     @exported
     fun entity_type(): Entity[NamedTypeDecl] =
         node.entity_gen_type().decl.as[NamedTypeDecl]
 
-    |" Unit method. Return the logicvar builtin type.
+    |" Unit method. Return the ``LogicVar`` builtin type.
     @exported
     fun logicvar_type(): Entity[NamedTypeDecl] =
         node.get_builtin_type(s"LogicVar")
 
-    |" Unit method. Return the logicvar builtin type.
+    |" Unit method. Return the ``Equation`` builtin type.
     @exported
     fun equation_type(): Entity[NamedTypeDecl] =
         node.get_builtin_type(s"Equation")
@@ -188,32 +189,32 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     fun array_type(): Entity[NamedTypeDecl] =
         node.array_gen_type().decl.as[NamedTypeDecl]
 
-    |" Unit method. Return the ASTList builtin generic type.
+    |" Unit method. Return the ``ASTList`` builtin generic type.
     @exported
     fun astlist_gen_type(): Entity[GenericDecl] =
         node.get_builtin_gen_decl(s"ASTList")
 
-    |" Unit method. Return the ASTList builtin type.
+    |" Unit method. Return the ``ASTList`` builtin type.
     @exported
     fun astlist_type(): Entity[NamedTypeDecl] =
         node.astlist_gen_type().decl.as[NamedTypeDecl]
 
-    |" Unit method. Return the NodeBuilder builtin generic type.
+    |" Unit method. Return the ``NodeBuilder`` builtin generic type.
     @exported
     fun node_builder_gen_type(): Entity[GenericDecl] =
         node.get_builtin_gen_decl(s"NodeBuilder")
 
-    |" Unit method. Return the NodeBuilder builtin type.
+    |" Unit method. Return the ``NodeBuilder`` builtin type.
     @exported
     fun node_builder_type(): Entity[NamedTypeDecl] =
         node.node_builder_gen_type().decl.as[NamedTypeDecl]
 
-    |" Unit method. Return the Iterator builtin generic trait.
+    |" Unit method. Return the ``Iterator`` builtin generic trait.
     @exported
     fun iterator_gen_trait(): Entity[GenericDecl] =
         node.get_builtin_gen_decl(s"Iterator")
 
-    |" Unit method. Return the Iterator builtin trait.
+    |" Unit method. Return the ``Iterator`` builtin trait.
     @exported
     fun iterator_trait(): Entity[TraitDecl] =
         node.iterator_gen_trait().decl.as[TraitDecl]
@@ -228,12 +229,12 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     fun analysis_unit_trait(): Entity[TraitDecl] =
         node.analysis_unit_gen_trait().decl.as[TraitDecl]
 
-    |" Return an empty synthetic TypeRef list node. Used to generate synthetic
-    |" type declarations.
+    |" Return an empty synthetic ``TypeRef`` list node. Used to generate
+    |" synthetic type declarations.
     fun get_empty_type_ref_list(): SyntheticTypeRefList =
         node.self_root().empty_type_ref_list
 
-    |" Create a AnyTypeDecl.
+    |" Create an ``AnyTypeDecl``.
     @memoized
     fun any_type(): Entity[TypeDecl] =
         AnyTypeDecl(traits=node.get_empty_type_ref_list()).as_entity
@@ -253,29 +254,29 @@ class LktNode implements Node[LktNode], LspNodeInterface {
         unit.root.as![LangkitRoot].as_bare_entity
     }
 
-    |" Return the topmost (from ``Self`` to the root node) FullDecl annotated
-    |" with ``@invalid``, null otherwise.
+    |" Return the topmost (from ``Self`` to the root node) ``FullDecl``
+    |" annotated with ``@invalid``, null otherwise.
     @exported
     fun topmost_invalid_decl(): LktNode =
         node.parents().filter(
             (p) => p.as[FullDecl].do((fd) => fd.has_annotation(s"invalid"))
         ).at(-1)
 
-    |" If name resolution on this lkt compilation unit fails, this returns all
+    |" If name resolution on this Lkt compilation unit fails, this returns all
     |" the diagnostics that were produced while resolving it.
     @exported
     fun nameres_diagnostics(): Array[SolverDiagnostic]
             implements LspNodeInterface.nameres_diagnostics =
         self.solve_equation().diagnostics
 
-    |" Solve the equation created by this node. This should be used on entry
-    |" points only.
+    |" Solve the equation created by this node. This should be used on xref
+    |" entry points only.
     @memoized
     @call_memoizable
     fun solve_equation(): SolverResult =
         self.xref_equation().solve_with_diagnostics()
 
-    |" Finds the nearest parent that is an xref_entry_point and solve its
+    |" Find the nearest parent that is an xref entry point and solve its
     |" equation.
     @exported
     @memoized
@@ -310,7 +311,7 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     @call_memoizable
     fun solve_generic_types(): Bool = self.generic_type_equation().solve()
 
-    |" Helper function to create a memoized FunctionType.
+    |" Helper function to create a memoized ``FunctionType``.
     @memoized
     fun function_type_helper(
         param_types: Array[Entity[TypeDecl]],
@@ -328,17 +329,17 @@ class LktNode implements Node[LktNode], LspNodeInterface {
             )
             .as_entity
 
-    |" Return this same entity but with its rebindings shed according to
-    |" its children lexical environment.
+    |" Return this same entity but with its rebindings shed according to its
+    |" children lexical environment.
     fun shed_rebindings(): Entity[LktNode] =
         Entity[LktNode](
             node=node,
             info=node.children_env.shed_rebindings(self.info)
         )
 
-    |" Designates entities that are entry point for the xref solving
-    |" infrastructure. If this returns true, then nameres_diagnostics can be
-    |" called on it.
+    |" Return whether this node is an entry point for the xref solving
+    |" infrastructure. If this returns true, then ``nameres_diagnostics`` can
+    |" be called on it.
     @exported
     fun xref_entry_point(): Bool implements LspNodeInterface.xref_entry_point =
         false
@@ -350,24 +351,24 @@ class LktNode implements Node[LktNode], LspNodeInterface {
             "Property LktNode.xref_equation not implemented"
         )
 
-    |" Creates an equation that wil resolve expected types for children nodes.
+    |" Return an equation to resolve expected types for children nodes.
     fun expected_type_equation(): Equation =
         raise[Equation] PropertyError(
             "Property LktNode.expected_type_equation not implemented"
         )
 
-    |" Creates an equation that will resolve generic types for children nodes.
+    |" Return an equation to resolve generic types for children nodes.
     fun generic_type_equation(): Equation =
         raise[Equation] PropertyError(
             "Property LktNode.generic_type_equation not implemented"
         )
 
-    |" Return an array of completion item for language server clients
+    |" Return an array of completion item for language server clients.
     @exported
     fun complete(): Array[CompleteItem]
             implements LspNodeInterface.complete_items = {
         val items = self.unit.root.children_env.get(null[Symbol]);
-        # When the completing a type expression, we only care about types
+        # When completing a type expression, we only care about types
         if self.parents().any((p) => p is TypeRef)
         then items.filtermap(
             (d) => CompleteItem(declaration=d.as[Decl]),
@@ -396,8 +397,8 @@ class LexerCaseRuleCondAlt: BaseLexerCaseRuleAlt {
     send: LexerCaseRuleSend
 }
 
-|" Default alternative of a case rule which sends the token if all the
-|" previous alternatives failed.
+|" Default alternative of a case rule which sends the token if all the previous
+|" alternatives failed.
 class LexerCaseRuleDefaultAlt: BaseLexerCaseRuleAlt {
     @parse_field
     send: LexerCaseRuleSend
@@ -455,7 +456,8 @@ class Decl: LktNode implements DeclarationInterface {
             implements DeclarationInterface.defining_names =
         [self.syn_name]
 
-    |" Checks if this decl implements the Node trait
+    |" Return if this declaration implements the ``Node`` trait.
+    |"
     |" TODO: rework this.
     fun implements_node(): Bool =
         self.as[ClassDecl].do(
@@ -476,7 +478,7 @@ class Decl: LktNode implements DeclarationInterface {
             default_val=false
         )
 
-    |" Get this declaration without rebindings information.
+    |" Return this declaration without rebindings information.
     @exported
     fun as_bare_decl(): Entity[Decl] =
         # This is used by lkt_toolbox as a simple solution to filter out
@@ -531,7 +533,10 @@ class Decl: LktNode implements DeclarationInterface {
             )
     }
 
-    |" Build and return a FunctionType corresponding to the current FunDecl.
+    |" Return a ``FunctionType`` node that can be used to type calls using the
+    |" current declaration as the call target (the function type for a function
+    |" declaration, the constructor type for a struct or a class declaration,
+    |" ...).
     fun function_type(): Entity[FunctionType] =
         if self.is_null then null[Entity[FunctionType]]
         else
@@ -545,9 +550,10 @@ class Decl: LktNode implements DeclarationInterface {
                 case _ => null[Entity[FunctionType]]
             }
 
-    |" Build and return a FunctionType corresponding to the current FunDecl
-    |" with an extra LogicVar at the beginning. Moreover, if the function is
-    |" a dynamic combiner, set its parameters to an array of logic variables.
+    |" ``FunDecl.function_type_aux`` wrapper to deal with function references
+    |" in the context of propagate/predicate equations: replace the first
+    |" parameter to be an array of logic variables if used as a dynamic
+    |" combiner, prepend a parameter corresponding to ``self`` otherwise.
     @memoized
     fun logic_function_type(): Entity[FunctionType] = match self {
         case td: FunDecl =>
@@ -588,7 +594,11 @@ class Decl: LktNode implements DeclarationInterface {
         case _ => null[Entity[FunctionType]]
     }
 
-    |" Return the type of the Decl.
+    |" Return the relevant type when this declaration is used to create a
+    |" value (the return type for a function, the type itself for
+    |" structs/classes, ...).
+    |"
+    |" This returns null when the type cannot be inferred.
     @exported
     @memoized
     @call_memoizable
@@ -650,8 +660,11 @@ class Decl: LktNode implements DeclarationInterface {
             }
         )
 
-    |" If we are casting an entity (Self) to something that is not an entity,
-    |" make it an entity.
+    |" Return the type of ``E.as[T]`` when ``cast_to`` materializes the cast
+    |" destination type (``T``), and ``self`` is the type of ``E``.
+    |"
+    |" The result is ``T`` except when ``T`` is a bare node type whereas
+    |" ``self`` is an entity type: in this case, the result is ``Entity[T]``.
     @exported
     fun get_cast_type(cast_to: Entity[TypeDecl]): Entity[TypeDecl] =
         (
@@ -666,9 +679,8 @@ class Decl: LktNode implements DeclarationInterface {
         )
         .as[TypeDecl]
 
-    |" Return the type of Entity when we only keep elements of type keep_type.
-    |" If we are casting an entity (Self) to something that is not an entity,
-    |" make it an entity.
+    |" Return the type of ``E.keep[T]`` when ``keep_type`` materializes the
+    |" input type (``T``), and ``self`` is the type of ``E``.
     @exported
     fun get_keep_type(keep_type: Entity[TypeDecl]): Entity[TypeDecl] =
         (
@@ -691,8 +703,8 @@ class Decl: LktNode implements DeclarationInterface {
         .as[TypeDecl]
         ?.make_array_type()
 
-    |" If we are accessing a ParseField of an entity, then that field's type
-    |" also needs to be an entity.
+    |" Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+    |" member and ``prefix_type`` is the type of ``E``.
     @exported
     fun get_suffix_type(prefix_type: Entity[TypeDecl]): Entity[TypeDecl] = {
         val suffix_type = self?.get_type();
@@ -728,14 +740,15 @@ class Decl: LktNode implements DeclarationInterface {
         .as[TypeDecl]
     }
 
-    |" Return the declaration corresponding to current_name's name inside
-    |" when Self is used as an expression:
+    |" Return the declaration corresponding to ``current_name``'s name inside
+    |" when ``self`` is used as an expression:
+    |"
     |" .. code::
     |"
-    |"     property().name
-    |"                ^^^^
+    |"    property().name
+    |"               ^^^^
     |"
-    |" If property() returns an Enum value, we should not be able to access
+    |" If ``property()`` returns an enum value, we should not be able to access
     |" the enum fields.
     fun type_var_suffix_ref(current_name: Entity[RefId]): Entity[Decl] =
         self.do(
@@ -1522,7 +1535,6 @@ class FunDecl: UserValDecl {
                 )
             }
 
-    |" Build and return a FunctionType corresponding to the current FunDecl.
     fun function_type_aux(): Entity[FunctionType] =
         self.function_type_helper(
             self.params.map((a) => a.get_type()),
@@ -2628,8 +2640,6 @@ class ClassDecl: BasicClassDecl {
             )
         )
 
-    |" Build and return a FunctionType corresponding to the constructor of
-    |" this current ClassDecl.
     fun function_type_aux(): Entity[FunctionType] =
         self.function_type_helper(
             self.constructor_fields().map(
@@ -2768,7 +2778,6 @@ class StructDecl: NamedTypeDecl {
 
     fun decl_type_name(): String = "struct declaration"
 
-    |" Build and return a FunctionType corresponding to the current FunDecl.
     fun function_type_aux(): Entity[FunctionType] =
         self.function_type_helper(
             self.decls.filter((d) => d.decl is FieldDecl).map(
