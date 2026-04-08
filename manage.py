@@ -61,34 +61,37 @@ def create_subparser(
     subparsers: _SubParsersAction,
     fn: Callable[..., None],
     *,
-    with_jobs: bool = False,
-    with_no_lksp: bool = False,
-    with_gargs: bool = False,
+    accept_unknown_args: bool = False,
+    no_basic_options: bool = False,
     with_build_dir: bool = False,
-    with_libs: bool = False,
+    with_gargs: bool = False,
     with_generate_dll_lib_adding: bool = False,
     with_generate_msvc_lib: bool = False,
+    with_jobs: bool = False,
+    with_libs: bool = False,
+    with_no_lksp: bool = False,
     with_no_mypy: bool = False,
     with_output: bool = False,
-    no_basic_options: bool = False,
-    accept_unknown_args: bool = False,
 ) -> ArgumentParser:
     """
     Create a subparser with given ``fn`` as func. Extract doc and name from
     the function.
 
-    :param bool with_jobs: Whether to create the --jobs/-j option.
-    :param bool with_no_lksp: Whether to create the --no-langkit-support
-        option.
-    :param bool with_gargs: Whether to create the --gargs option.
-    :param bool with_build_dir: Whether to create the --build-dir option.
-    :param bool with_libs: Whether to create the --lib option.
-    :param bool with_generate_dll_lib_adding: Whether to create the
-        --generate-auto-dll-dirs option.
-    :param bool with_output: Whether to create the --output option.
-    :param bool with_no_mypy: Whether to create the --no-mypy option.
+    :param accept_unknown_args: Whether the subparser should accept unknown
+        arguments.
     :param no_basic_options: Whether to disable the creation of basic options
         (--build-mode, ...).
+    :param with_build_dir: Whether to create the --build-dir option.
+    :param with_gargs: Whether to create the --gargs option.
+    :param with_generate_dll_lib_adding: Whether to create the
+        --generate-auto-dll-dirs option.
+    :param with_generate_msvc_lib: Whether to create the --generate-msvc-lib
+        option.
+    :param with_jobs: Whether to create the --jobs/-j option.
+    :param with_libs: Whether to create the --lib option.
+    :param with_no_lksp: Whether to create the --no-langkit-support option.
+    :param with_no_mypy: Whether to create the --no-mypy option.
+    :param with_output: Whether to create the --output option.
     """
     subparser = subparsers.add_parser(
         name=fn.__name__.replace("_", "-"),
@@ -556,9 +559,9 @@ if __name__ == "__main__":
     create_subparser(
         subparsers,
         build_langkit_support,
-        with_jobs=True,
-        with_gargs=True,
         with_build_dir=True,
+        with_gargs=True,
+        with_jobs=True,
     )
     create_subparser(
         subparsers,
@@ -587,21 +590,21 @@ if __name__ == "__main__":
     create_subparser(
         subparsers,
         make,
-        with_jobs=True,
-        with_no_lksp=True,
-        with_gargs=True,
         with_build_dir=True,
-        with_libs=True,
+        with_gargs=True,
         with_generate_dll_lib_adding=True,
         with_generate_msvc_lib=True,
+        with_jobs=True,
+        with_libs=True,
+        with_no_lksp=True,
         with_no_mypy=True,
     )
     printenv_parser = create_subparser(
         subparsers,
         printenv,
-        with_no_lksp=True,
         with_build_dir=True,
         with_libs=True,
+        with_no_lksp=True,
         with_output=True,
     )
     printenv_parser.add_argument(
@@ -615,7 +618,7 @@ if __name__ == "__main__":
 
     create_subparser(subparsers, test, accept_unknown_args=True)
 
-    create_subparser(subparsers, bootstrap, with_jobs=True, with_gargs=True)
+    create_subparser(subparsers, bootstrap, with_gargs=True, with_jobs=True)
 
     create_subparser(subparsers, clean, no_basic_options=True)
 
