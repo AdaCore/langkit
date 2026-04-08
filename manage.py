@@ -64,6 +64,7 @@ def create_subparser(
     accept_unknown_args: bool = False,
     no_basic_options: bool = False,
     with_build_dir: bool = False,
+    with_coverage: bool = False,
     with_gargs: bool = False,
     with_generate_dll_lib_adding: bool = False,
     with_generate_msvc_lib: bool = False,
@@ -82,6 +83,7 @@ def create_subparser(
     :param no_basic_options: Whether to disable the creation of basic options
         (--build-mode, ...).
     :param with_build_dir: Whether to create the --build-dir option.
+    :param with_coverage: Whether to create the --coverage option.
     :param with_gargs: Whether to create the --gargs option.
     :param with_generate_dll_lib_adding: Whether to create the
         --generate-auto-dll-dirs option.
@@ -137,6 +139,10 @@ def create_subparser(
             "--build-dir",
             help="Use a non-default build directory. This allows out-of-tree"
             " builds.",
+        )
+    if with_coverage:
+        subparser.add_argument(
+            "--coverage", action="store_true", help="Enable code coverage."
         )
     if with_libs:
         subparser.add_argument(
@@ -502,6 +508,9 @@ def make(args: Namespace) -> None:
         f"-j{args.jobs}",
     ]
 
+    if args.coverage:
+        argv.append("--coverage")
+
     # If the DLL directories adding flag is on forward it
     if args.generate_auto_dll_dirs:
         argv.append("--generate-auto-dll-dirs")
@@ -591,6 +600,7 @@ if __name__ == "__main__":
         subparsers,
         make,
         with_build_dir=True,
+        with_coverage=True,
         with_gargs=True,
         with_generate_dll_lib_adding=True,
         with_generate_msvc_lib=True,
