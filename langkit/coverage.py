@@ -384,7 +384,7 @@ class CoverageReport:
                         ),
                     )
 
-                    elt_methods = etree.SubElement(elt_class, "methods")
+                    etree.SubElement(elt_class, "methods")
                     elt_lines = etree.SubElement(elt_class, "lines")
 
                     lines_valid = 0
