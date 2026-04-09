@@ -6,7 +6,7 @@ import dataclasses
 import os.path
 
 import langkit
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import CompilationMode, CompileCtx
 import langkit.config as C
 from langkit.diagnostics import DiagnosticError
 import langkit.names as names
@@ -49,7 +49,7 @@ for t in [
 
     try:
         ctx = CompileCtx(config, plugin_loader)
-        ctx.create_all_passes(check_only=True)
+        ctx.create_all_passes(CompilationMode.check_only)
         ctx.emit()
     except DiagnosticError:
         pass

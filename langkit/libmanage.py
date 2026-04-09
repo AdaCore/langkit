@@ -26,7 +26,7 @@ from typing import (
     cast,
 )
 
-from langkit.compile_context import Verbosity
+from langkit.compile_context import CompilationMode, Verbosity
 import langkit.config as C
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
@@ -172,12 +172,26 @@ class ManageScript(abc.ABC):
         )
         self.add_generate_args(generate_parser)
 
+        ################
+        # Generate LSP #
+        ################
+
+        generate_lsp_parser = self.add_subcommand(self.do_generate_lsp)
+        self.add_generate_lsp_args(generate_lsp_parser, with_common=True)
+
         #########
         # Build #
         #########
 
         self.build_parser = build_parser = self.add_subcommand(self.do_build)
         self.add_build_args(build_parser)
+
+        #############
+        # Build LSP #
+        #############
+
+        build_lsp_parser = self.add_subcommand(self.do_build_lsp)
+        self.add_build_lsp_args(build_lsp_parser, with_common=True)
 
         ########
         # Make #
@@ -186,6 +200,14 @@ class ManageScript(abc.ABC):
         self.make_parser = make_parser = self.add_subcommand(self.do_make)
         self.add_generate_args(make_parser)
         self.add_build_args(make_parser, no_build_mode=True)
+
+        ############
+        # Make LSP #
+        ############
+
+        make_lsp_parser = self.add_subcommand(self.do_make_lsp)
+        self.add_generate_lsp_args(make_lsp_parser, with_common=True)
+        self.add_build_lsp_args(make_lsp_parser, with_common=True)
 
         ########################
         # List optional passes #
@@ -465,6 +487,31 @@ class ManageScript(abc.ABC):
             help="Style for error messages.",
         )
 
+        subparser.add_argument(
+            "--enable-lsp",
+            action="store_true",
+            dest="enable_lsp",
+            help="Enable the Language server building.",
+        )
+        subparser.add_argument(
+            "--disable-lsp",
+            action="store_false",
+            dest="enable_lsp",
+            help="Disable the Language server building.",
+        )
+
+    @staticmethod
+    def add_generate_force_arg(subparser: argparse.ArgumentParser) -> None:
+        """
+        Add arguments to force code generation.
+        """
+        subparser.add_argument(
+            "--force",
+            "-f",
+            action="store_true",
+            help="Force code generation (disregard the cache).",
+        )
+
     @classmethod
     def add_generate_args(cls, subparser: argparse.ArgumentParser) -> None:
         """
@@ -481,12 +528,21 @@ class ManageScript(abc.ABC):
             action="store_true",
             help="Display the list of available warnings.",
         )
-        subparser.add_argument(
-            "--force",
-            "-f",
-            action="store_true",
-            help="Force code generation (disregard the cache).",
-        )
+        cls.add_generate_force_arg(subparser)
+        cls.add_generate_lsp_args(subparser, with_common=False)
+
+    @classmethod
+    def add_generate_lsp_args(
+        cls,
+        subparser: argparse.ArgumentParser,
+        *,
+        with_common: bool,
+    ) -> None:
+        """
+        Add arguments to tune language server code generation to "subparser".
+        """
+        if with_common:
+            cls.add_generate_force_arg(subparser)
 
     @staticmethod
     def add_build_mode_arg(subparser: argparse.ArgumentParser) -> None:
@@ -595,24 +651,13 @@ class ManageScript(abc.ABC):
             dest="enable_java",
             help="Disable the Java bindings building/installation.",
         )
-        subparser.add_argument(
-            "--enable-lsp",
-            action="store_true",
-            dest="enable_lsp",
-            help="Enable the Language server building.",
-        )
-        subparser.add_argument(
-            "--disable-lsp",
-            action="store_false",
-            dest="enable_lsp",
-            help="Disable the Language server building.",
-        )
-        subparser.add_argument(
-            "--native-lsp",
-            action="store_true",
-            dest="native_lsp",
-            help="Enable the native image language server building.",
-        )
+        self.add_build_lsp_args(subparser, with_common=False)
+        self.add_maven_args(subparser)
+
+    def add_maven_args(self, subparser: argparse.ArgumentParser) -> None:
+        """
+        Add arguments to configure the local Maven repository.
+        """
         subparser.add_argument(
             "--maven-local-repo",
             help="Specify the Maven repository to use, default one is the"
@@ -622,6 +667,25 @@ class ManageScript(abc.ABC):
             "--maven-executable",
             help="Specify the Maven executable to use. The default one is"
             ' "mvn".',
+        )
+
+    def add_build_lsp_args(
+        self,
+        subparser: argparse.ArgumentParser,
+        *,
+        with_common: bool,
+    ) -> None:
+        """
+        Add arguments to tune how the language server is built.
+        """
+        if with_common:
+            self.add_build_mode_arg(subparser)
+            self.add_maven_args(subparser)
+        subparser.add_argument(
+            "--native-lsp",
+            action="store_true",
+            dest="native_lsp",
+            help="Enable the native image language server building.",
         )
 
     @abc.abstractmethod
@@ -797,7 +861,11 @@ class ManageScript(abc.ABC):
         """
         if self.context.gnatcov:
             self.context.gnatcov.build_mode = args.build_modes[0]
-        self.context.create_all_passes(check_only=args.check_only)
+        self.context.create_all_passes(
+            CompilationMode.check_only
+            if args.check_only
+            else CompilationMode.generate_lib
+        )
 
         self.log_info(
             "Generating source for {}...".format(self.lib_name.lower()),
@@ -809,7 +877,17 @@ class ManageScript(abc.ABC):
         if args.check_only:
             return
 
+        if args.enable_lsp:
+            self.do_generate_lsp(args)
+
         self.log_info("Generation complete!", Colors.OKGREEN)
+
+    def do_generate_lsp(self, args: argparse.Namespace) -> None:
+        """
+        Generate sources for the language server.
+        """
+        self.context.create_all_passes(CompilationMode.generate_lsp)
+        self.context.emit(force=args.force)
 
     def what_to_build(
         self, args: argparse.Namespace, is_library: bool
@@ -1220,39 +1298,41 @@ class ManageScript(abc.ABC):
                     ["clean", "package"], self.maven_project, args
                 )
 
-                # Build the language server
-                if args.enable_lsp:
-                    if self.context.config.language_server is None:
-                        self.log_info(
-                            "No language server configuration was provided",
-                            Colors.FAIL,
-                        )
-                    else:
-                        self.log_info(
-                            "Installing the Java Bindings...", Colors.HEADER
-                        )
-
-                        self.maven_command(
-                            ["install"], self.maven_project, args
-                        )
-
-                        self.log_info(
-                            "Building the Language server...", Colors.HEADER
-                        )
-
-                        extra_maven_args = [
-                            f"-Dconfig.python={sys.executable}"
-                        ]
-                        if args.native_lsp:
-                            extra_maven_args.append("-Pnative")
-                        self.maven_command(
-                            ["clean", "package"],
-                            self.lklsp_project,
-                            args,
-                            extra_maven_args,
-                        )
+        # Build the language server
+        if args.enable_lsp:
+            self.do_build_lsp(args)
 
         self.log_info("Build complete!", Colors.OKGREEN)
+
+    def do_build_lsp(self, args: argparse.Namespace) -> None:
+        """
+        Build the generated language server.
+
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
+        """
+        if self.context.config.language_server is None:
+            self.log_info(
+                "No language server configuration was provided", Colors.FAIL
+            )
+        else:
+            self.log_info("Installing the Java Bindings...", Colors.HEADER)
+
+            self.maven_command(["install"], self.maven_project, args)
+
+            self.log_info("Building the Language server...", Colors.HEADER)
+
+            extra_maven_args = [
+                f"-Dconfig.python={sys.executable}",
+            ]
+            if args.native_lsp:
+                extra_maven_args.append("-Pnative")
+            self.maven_command(
+                ["clean", "package"],
+                self.lklsp_project,
+                args,
+                extra_maven_args,
+            )
 
     def run_macos_workaround(self, dylib_dir: str) -> None:
         """
@@ -1339,6 +1419,16 @@ class ManageScript(abc.ABC):
         """
         self.do_generate(args)
         self.do_build(args)
+
+    def do_make_lsp(self, args: argparse.Namespace) -> None:
+        """
+        Generate and build the language server in one command.
+
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
+        """
+        self.do_generate_lsp(args)
+        self.do_build_lsp(args)
 
     def do_install(self, args: argparse.Namespace) -> None:
         """
@@ -1512,7 +1602,7 @@ class ManageScript(abc.ABC):
             manage.py.
         """
         printcol("Optional passes", Colors.CYAN)
-        self.context.create_all_passes()
+        self.context.create_all_passes(CompilationMode.generate_lib)
 
         for p in self.context.all_passes:
             if p.is_optional:

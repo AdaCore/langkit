@@ -21,6 +21,7 @@ from langkit import names
 from langkit.c_api import CAPISettings, CAPIType
 from langkit.common import is_keyword
 from langkit.compile_context import (
+    CompilationMode,
     CompileCtx,
     ImplementationPackage,
     get_context,
@@ -80,17 +81,27 @@ def type_ref_list_doc(types: Sequence[CompiledType]) -> str:
 
 @CompileCtx.register_template_extensions
 def template_extensions(ctx: CompileCtx) -> dict:
+    result = {
+        "ctx": ctx,
+        "cfg": ctx.config,
+    }
+
+    # Generating the language server does not need much more than the config.
+    # In particular, names that come from the Lkt compilation are not
+    # available, so stop there.
+    if ctx.compilation_mode == CompilationMode.generate_lsp:
+        return result
+
     capi = ctx.c_api_settings
     root_entity = ctx.root_node_type.entity
 
     return {
+        **result,
         "names": names,
         "grammar_rule_type": T.GrammarRule.c_type(capi).name,
         "default_grammar_rule": capi.get_name("default_grammar_rule"),
         "root_entity": root_entity,
         "entity_array": root_entity.array.api_name,
-        "ctx": ctx,
-        "cfg": ctx.config,
         "ada_lib_name": ctx.ada_api_settings.lib_name,
         "T": T,
         "ada_api": ctx.ada_api_settings,
