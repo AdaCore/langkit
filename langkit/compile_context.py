@@ -86,6 +86,7 @@ if TYPE_CHECKING:
         UserField,
     )
     import langkit.expressions as E
+    from langkit.emitter import Emitter
     from langkit.envs import EnvSpec
     from langkit.expressions import DynamicVariable, PropertyDef
     from langkit.frontend.resolver import Resolver
@@ -163,6 +164,23 @@ class Verbosity(enum.IntEnum):
             return cls[s]
         except KeyError:
             raise ValueError(f"invalid verbosity level: {s!r}")
+
+
+class CompilationMode(enum.Enum):
+    """
+    Compilation mode for the language spec.
+    """
+
+    generate_lib = enum.auto()
+    """
+    Compile the language spec and generate library sources, bindings included.
+    """
+
+    check_only = enum.auto()
+    """
+    Compile the language spec but do not generate any code. This is useful for
+    IDE hooks.
+    """
 
 
 class GeneratedException:
@@ -370,9 +388,15 @@ class CompileCtx:
     List of all passes in the Langkit compilation pipeline.
     """
 
-    check_only: bool
+    emitter: Emitter
     """
-    Whether this context is configured to only run checks on the language spec.
+    ``Emitter`` instance, created each time we set a new list of compilation
+    passes.
+    """
+
+    mode: CompilationMode
+    """
+    Compilation mode for this context.
     """
 
     init_hooks: list[Callable[[CompileCtx], None]] = []
@@ -421,7 +445,6 @@ class CompileCtx:
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
-        from langkit.emitter import Emitter
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
         from langkit.java_api import JavaAPISettings
@@ -864,12 +887,6 @@ class CompileCtx:
         """
         Generator used to create unique names for internal members: see
         ``langkit.compiled_types.MemberNames``.
-        """
-
-        self.emitter = Emitter(self)
-        """
-        During code emission, corresponding instance of Emitter. None the rest
-        of the time.
         """
 
         self.emission_started = False
@@ -2085,23 +2102,23 @@ class CompileCtx:
         assert not cls._template_extensions_frozen
         CompileCtx._template_extensions_fns.append(exts_fn)
 
-    def create_all_passes(self, check_only: bool = False) -> None:
+    def create_all_passes(self, mode: CompilationMode) -> None:
         """
         Create all the passes necessary to the compilation of the DSL. This
         should be called before ``emit``.
 
-        :param check_only: If true, only perform validity checks: stop before
-            code emission. This is useful for IDE hooks. False by default.
+        :param mode: Compilation mode, to determine the set of compilation
+            passes to run.
         """
-        self.check_only = check_only
+        from langkit.emitter import Emitter
 
-        # Compute the list of passes to run:
+        self.compilation_mode = mode
+        self.emitter = Emitter(self)
 
-        # First compile the DSL
-        self.all_passes = self.compilation_passes
-
-        # Then, if requested, emit code for the generated library
-        if not self.check_only:
+        # Compute the list of passes to run
+        self.all_passes = []
+        self.all_passes += self.compilation_passes
+        if mode == CompilationMode.generate_lib:
             self.all_passes += self.code_emission_passes()
 
         # Activate/desactive optional passes as per explicit requests
@@ -2148,7 +2165,7 @@ class CompileCtx:
 
         with names.camel_with_underscores, global_context(self):
             self.run_passes(self.all_passes)
-            if not self.check_only:
+            if self.compilation_mode != CompilationMode.check_only:
                 self.emitter.track_in_cache()
                 self.emitter.cache.save()
 
@@ -2399,6 +2416,30 @@ class CompileCtx:
             ),
         ]
 
+    @property
+    def start_code_emission_pass(self) -> AbstractPass:
+        """
+        Return a pass that allows code emission.
+        """
+        from langkit.passes import MajorStepPass
+
+        def start_code_emission(ctx: CompileCtx) -> None:
+            ctx.emission_started = True
+
+        return MajorStepPass("Prepare code emission", start_code_emission)
+
+    @property
+    def end_code_emission_pass(self) -> AbstractPass:
+        """
+        Return a pass that closes code emission.
+        """
+        from langkit.passes import MajorStepPass
+
+        def end_code_emission(ctx: CompileCtx) -> None:
+            ctx.emission_started = False
+
+        return MajorStepPass("Close code emission", end_code_emission)
+
     def code_emission_passes(self) -> list[AbstractPass]:
         """
         Return the list of passes to emit sources for the generated library.
@@ -2418,11 +2459,8 @@ class CompileCtx:
         )
         from langkit.railroad_diagrams import emit_railroad_diagram
 
-        def start_code_emission(ctx: CompileCtx) -> None:
-            ctx.emission_started = True
-
         return [
-            MajorStepPass("Prepare code emission", start_code_emission),
+            self.start_code_emission_pass,
             EmitterPass(
                 "register builtin unparsing configurations",
                 Emitter.register_builtin_unparsing_configs,
@@ -2508,6 +2546,7 @@ class CompileCtx:
                 "remove obsolete generated sources",
                 Emitter.remove_obsolete_generated_sources,
             ),
+            self.end_code_emission_pass,
         ]
 
     def run_passes(self, passes: list[AbstractPass]) -> None:

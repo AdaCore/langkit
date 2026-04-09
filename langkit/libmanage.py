@@ -26,7 +26,7 @@ from typing import (
     cast,
 )
 
-from langkit.compile_context import Verbosity
+from langkit.compile_context import CompilationMode, Verbosity
 import langkit.config as C
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
@@ -797,7 +797,11 @@ class ManageScript(abc.ABC):
         """
         if self.context.gnatcov:
             self.context.gnatcov.build_mode = args.build_modes[0]
-        self.context.create_all_passes(check_only=args.check_only)
+        self.context.create_all_passes(
+            CompilationMode.check_only
+            if args.check_only
+            else CompilationMode.generate_lib
+        )
 
         self.log_info(
             "Generating source for {}...".format(self.lib_name.lower()),

@@ -10,7 +10,7 @@ import sys
 
 import yaml
 
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import CompilationMode, CompileCtx
 import langkit.config as C
 from langkit.diagnostics import DiagnosticError
 from langkit.libmanage import ManageScript
@@ -200,7 +200,7 @@ def emit_and_print_errors(
 
     try:
         ctx = prepare_context(actual_config)
-        ctx.create_all_passes()
+        ctx.create_all_passes(CompilationMode.generate_lib)
         ctx.emit()
         # ... and tell about how it went
     except DiagnosticError:
