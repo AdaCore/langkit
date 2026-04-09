@@ -1300,6 +1300,9 @@ class ManageScript(abc.ABC):
 
         # Build the language server
         if args.enable_lsp:
+            self.log_info("Installing the Java Bindings...", Colors.HEADER)
+            self.maven_command(["install"], self.maven_project, args)
+
             self.do_build_lsp(args)
 
         self.log_info("Build complete!", Colors.OKGREEN)
@@ -1316,12 +1319,7 @@ class ManageScript(abc.ABC):
                 "No language server configuration was provided", Colors.FAIL
             )
         else:
-            self.log_info("Installing the Java Bindings...", Colors.HEADER)
-
-            self.maven_command(["install"], self.maven_project, args)
-
             self.log_info("Building the Language server...", Colors.HEADER)
-
             extra_maven_args = [
                 f"-Dconfig.python={sys.executable}",
             ]
