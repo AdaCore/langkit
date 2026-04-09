@@ -786,6 +786,9 @@ public class LangkitSupport {
         /** The nth child of the node. */
         public abstract NodeInterface getChild(int n);
 
+        /** Get a stream on this node subtree. */
+        Stream<? extends NodeInterface> walk();
+
         /** The text of the node. */
         public abstract String getText();
 

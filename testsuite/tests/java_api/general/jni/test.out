@@ -294,5 +294,19 @@ Visiting <NullNode foo.txt:1:46-1:50>
 Visited 10 nodes
 -----------------------
 
+--- Tree walk ---
+Show the tree using the 'walk' method:
+Visit <Sequence foo.txt:1:1-1:50>
+Visit <NullNode foo.txt:1:1-1:5>
+Visit <Example foo.txt:1:6-1:13>
+Visit <Var foo.txt:1:14-1:37>
+Visit <Sequence foo.txt:1:19-1:36>
+Visit <NullNode foo.txt:1:19-1:23>
+Visit <Example foo.txt:1:24-1:31>
+Visit <NullNode foo.txt:1:32-1:36>
+Visit <Example foo.txt:1:38-1:45>
+Visit <NullNode foo.txt:1:46-1:50>
+-----------------
+
 ===== End of the Java tests =====
 Done

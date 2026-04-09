@@ -890,6 +890,21 @@ public final class BindingsTests {
 
         footer("Default visitor");
     }
+
+    private static void testTreeWalk() {
+        header("Tree walk");
+        System.out.println("Show the tree using the 'walk' method:");
+        try(
+            AnalysisContext context = AnalysisContext.create()
+        ) {
+            AnalysisUnit unit = context.getUnitFromFile("foo.txt");
+            unit.getRoot().walk().forEach(n -> {
+                System.out.println("Visit " + n);
+            });
+        }
+        footer("Tree walk");
+    }
+
     /**
      * Run the Java tests one by one
      *
@@ -914,6 +929,7 @@ public final class BindingsTests {
         testStruct();
         testEventHandlers();
         testDefaultVisitor();
+        testTreeWalk();
         System.out.println("===== End of the Java tests =====");
     }
 
