@@ -3,7 +3,7 @@ import os
 import os.path
 import sys
 
-from e3.fs import sync_tree
+from e3.fs import mkdir, mv, sync_tree
 from e3.testsuite.control import YAMLTestControlCreator
 from e3.testsuite.driver.classic import TestAbortWithError
 from e3.testsuite.driver.diff import (
@@ -91,6 +91,10 @@ class BaseDriver(DiffTestDriver):
         for path in self.test_env.get("sync_trees", []):
             sync_tree(self.test_dir(path), self.working_dir(), delete=False)
 
+        if self.env.lkt_coverage:
+            self.lkt_traces_dir = self.working_dir("lkt_srctraces")
+            mkdir(self.lkt_traces_dir)
+
     def tear_down(self):
         # Allow test drivers to create "*.log" files in their working space
         # just for logging purposes, and so forward them to the test result,
@@ -104,6 +108,12 @@ class BaseDriver(DiffTestDriver):
                 f"\n\n{log_content}"
                 "\n\n== END =="
             )
+
+        if self.env.lkt_coverage:
+            for filename in glob.glob(
+                os.path.join(self.lkt_traces_dir, "*.srctrace")
+            ):
+                mv(filename, self.env.lkt_traces_dir)
 
         super().tear_down()
 
@@ -289,6 +299,10 @@ class BaseDriver(DiffTestDriver):
 
         if memcheck and self.valgrind_enabled:
             argv = valgrind_cmd(argv, suppressions=valgrind_suppressions)
+
+        env = env or dict(os.environ)
+        if self.env.lkt_coverage and for_coverage:
+            env["GNATCOV_TRACE_FILE"] = self.lkt_traces_dir + "/"
 
         self.shell(argv, env=env, analyze_output=analyze_output)
 
