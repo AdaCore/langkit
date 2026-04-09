@@ -16,6 +16,7 @@ from langkit.caching import Cache
 from langkit.common import ada_printable_bytes
 from langkit.compile_context import (
     AdaSourceKind,
+    CompilationMode,
     CompileCtx,
     ImplementationPackage,
     Verbosity,
@@ -116,8 +117,18 @@ class Emitter:
         self.context = context
         self.verbosity = context.verbosity
 
+        # Use a different cache when emitting code for the language server so
+        # that incrementality of regular compilation does not interfere with
+        # the incrementality of LSP generation (these are two separate steps,
+        # with two different Emitter instances).
+        cache_filename = (
+            "langkit_lsp_cache"
+            if context.compilation_mode == CompilationMode.generate_lsp
+            else "langkit_cache"
+        )
+
         self.lib_root = config.emission.library_directory
-        self.cache = Cache(os.path.join(self.lib_root, "obj", "langkit_cache"))
+        self.cache = Cache(os.path.join(self.lib_root, "obj", cache_filename))
         self.output_files: set[str] = set()
         self.source_post_processors = context.source_post_processors
 

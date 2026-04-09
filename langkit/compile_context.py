@@ -182,6 +182,11 @@ class CompilationMode(enum.Enum):
     IDE hooks.
     """
 
+    generate_lsp = enum.auto()
+    """
+    Generate sources for the language server.
+    """
+
 
 class GeneratedException:
     """
@@ -2117,9 +2122,12 @@ class CompileCtx:
 
         # Compute the list of passes to run
         self.all_passes = []
-        self.all_passes += self.compilation_passes
-        if mode == CompilationMode.generate_lib:
-            self.all_passes += self.code_emission_passes()
+        if mode == CompilationMode.generate_lsp:
+            self.all_passes += self.generate_lsp_passes
+        else:
+            self.all_passes += self.compilation_passes
+            if mode == CompilationMode.generate_lib:
+                self.all_passes += self.code_emission_passes()
 
         # Activate/desactive optional passes as per explicit requests
         pass_activations = dict(self.config.optional_passes)
@@ -2433,12 +2441,12 @@ class CompileCtx:
         """
         Return a pass that closes code emission.
         """
-        from langkit.passes import MajorStepPass
+        from langkit.passes import GlobalPass
 
         def end_code_emission(ctx: CompileCtx) -> None:
             ctx.emission_started = False
 
-        return MajorStepPass("Close code emission", end_code_emission)
+        return GlobalPass("Close code emission", end_code_emission)
 
     def code_emission_passes(self) -> list[AbstractPass]:
         """
@@ -2514,7 +2522,6 @@ class CompileCtx:
             EmitterPass("emit GDB helpers", Emitter.emit_gdb_helpers),
             EmitterPass("emit OCaml API", Emitter.emit_ocaml_api),
             EmitterPass("emit Java API", Emitter.emit_java_api),
-            EmitterPass("emit Language Server", Emitter.emit_language_server),
             EmitterPass(
                 "emit units for builtin files", Emitter.emit_builtin_files
             ),
@@ -2546,6 +2553,19 @@ class CompileCtx:
                 "remove obsolete generated sources",
                 Emitter.remove_obsolete_generated_sources,
             ),
+            self.end_code_emission_pass,
+        ]
+
+    @property
+    def generate_lsp_passes(self) -> list[AbstractPass]:
+        """
+        Return the list of passes to generate the language server.
+        """
+        from langkit.passes import Emitter, EmitterPass
+
+        return [
+            self.start_code_emission_pass,
+            EmitterPass("emit Language Server", Emitter.emit_language_server),
             self.end_code_emission_pass,
         ]
 
