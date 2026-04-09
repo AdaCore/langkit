@@ -1,0 +1,7 @@
+def run_ci():
+    # Do not rebuild gnatcov just because it depends on Libadalang/Langkit: our
+    # goal here is only to compute Liblktlang's code coverage, not to check the
+    # impact of Langkit changes on gnatcov. Besides, building gnatcov's closure
+    # takes forever...
+    anod_install("gnatcov")
+    anod_test("langkit", qualifier="coverage")
