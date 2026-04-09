@@ -39,6 +39,9 @@ ComparableT = TypeVar("ComparableT", bound=Comparable)
 
 
 class LibraryType(Enum):
+    # Mention the the static libraries first, so that when library types are
+    # installed in this order, "static" is the default library type in the
+    # installed project files.
     static = "static"
     static_pic = "static-pic"
     relocatable = "relocatable"
@@ -59,6 +62,34 @@ class BuildMode(Enum):
     dev = "dev"
     prod = "prod"
     prof = "prof"
+
+
+def gpr_scenario_vars(
+    lib_name: str,
+    library_type: LibraryType,
+    build_mode: BuildMode,
+    enable_build_warnings: bool,
+) -> list[str]:
+    """
+    Return the project scenario variables to pass to GPRbuild.
+
+    :param lib_name: GPR library name, used to set the right external variable
+        to control warnings.
+    :param library_type: Library flavor to use.
+    :param build_mode: Build mode to use.
+    :param enable_build_warnings: Whether to enable build warnings.
+    """
+    result = [
+        f"-XBUILD_MODE={build_mode.value}",
+        f"-XLIBRARY_TYPE={library_type.value}",
+        f"-XGPR_BUILD={library_type.value}",
+        f"-XXMLADA_BUILD={library_type.value}",
+    ]
+
+    if enable_build_warnings:
+        result.append(f"-X{lib_name.upper()}_WARNINGS=true")
+
+    return result
 
 
 def copy_with(obj: T, **kwargs: object) -> T:

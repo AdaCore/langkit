@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>${src_file.name} - ${report.title}</title>
+        <title>${src_file.basename} - ${report.title}</title>
         <link rel="StyleSheet" type="text/css" href="coverage.css" />
         <script type="text/javascript">
             function toggle(ids) {
@@ -16,7 +16,7 @@
         </script>
     </head>
     <body>
-        <h1>${src_file.name} - ${report.title}</h1>
+        <h1>${src_file.basename} - ${report.title}</h1>
 
         <p><a href="index.html">Back to the index</a></p>
 

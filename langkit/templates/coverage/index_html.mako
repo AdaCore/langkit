@@ -15,7 +15,7 @@
                 </tr>
                 % for _, f in sorted(group.files.items()):
                     <tr>
-                        <td><a href="${f.html_file}">${f.name}</a></td>
+                        <td><a href="${f.html_file}">${f.basename}</a></td>
                         <td>
                             <table class="summary"><tr>
                                 % for state in report.SUMMARY_STATES:

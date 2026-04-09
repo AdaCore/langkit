@@ -2167,6 +2167,7 @@ class CompileCtx:
         # necessary (for instance not needed for setenv).
         self.lkt_units = load_lkt(self.config.lkt_spec)
         self.lkt_resolver = Resolver(self, self.lkt_units)
+        self.emitter.instr_md.lkt_units = [u.filename for u in self.lkt_units]
 
         create_types(self.lkt_resolver)
         self.lexer = create_lexer(self.lkt_resolver)

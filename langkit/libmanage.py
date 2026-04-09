@@ -46,6 +46,7 @@ from langkit.utils import (
     col,
     format_printenv,
     get_cpu_count,
+    gpr_scenario_vars,
     parse_choice,
     parse_cmdline_args,
     parse_list_of_choices,
@@ -184,7 +185,7 @@ class ManageScript(abc.ABC):
 
         self.make_parser = make_parser = self.add_subcommand(self.do_make)
         self.add_generate_args(make_parser)
-        self.add_build_args(make_parser)
+        self.add_build_args(make_parser, no_build_mode=True)
 
         ########################
         # List optional passes #
@@ -290,6 +291,11 @@ class ManageScript(abc.ABC):
         #############################
 
         self.coverage_parser = self.add_subcommand(self.do_coverage)
+        self.coverage_parser.add_argument(
+            "--cobertura-root",
+            help="Root direcotry for the Cobertura report. If not passed,"
+            " Cobertura reports are not generated.",
+        )
         self.coverage_parser.add_argument(
             "--instr-dir",
             help="Directory that contains Langkit-generated instrumentation"
@@ -464,6 +470,7 @@ class ManageScript(abc.ABC):
         """
         Add arguments to tune code generation to "subparser".
         """
+        cls.add_build_mode_arg(subparser)
         subparser.add_argument(
             "--check-only",
             action="store_true",
@@ -481,7 +488,8 @@ class ManageScript(abc.ABC):
             help="Force code generation (disregard the cache).",
         )
 
-    def add_build_mode_arg(self, subparser: argparse.ArgumentParser) -> None:
+    @staticmethod
+    def add_build_mode_arg(subparser: argparse.ArgumentParser) -> None:
 
         def parse_choice_into_list(s: str) -> list[Enum]:
             fn = parse_choice(BuildMode)
@@ -506,10 +514,19 @@ class ManageScript(abc.ABC):
             help="Select a list of build modes",
         )
 
-    def add_build_args(self, subparser: argparse.ArgumentParser) -> None:
+    def add_build_args(
+        self,
+        subparser: argparse.ArgumentParser,
+        no_build_mode: bool = False,
+    ) -> None:
         """
         Add arguments to tune code compilation to "subparser".
+
+        :param no_build_mode: If true, do not add the ``--build-mode``
+            argument.
         """
+        if not no_build_mode:
+            self.add_build_mode_arg(subparser)
         subparser.add_argument(
             "--parallel-builds",
             type=int,
@@ -518,7 +535,6 @@ class ManageScript(abc.ABC):
             " careful because this is in addition to the number of jobs.",
         )
 
-        self.add_build_mode_arg(subparser)
         subparser.add_argument(
             "--enable-build-warnings",
             action="store_true",
@@ -779,6 +795,8 @@ class ManageScript(abc.ABC):
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
+        if self.context.gnatcov:
+            self.context.gnatcov.build_mode = args.build_modes[0]
         self.context.create_all_passes(check_only=args.check_only)
 
         self.log_info(
@@ -828,25 +846,35 @@ class ManageScript(abc.ABC):
             return [[(b, lib_type) for b in self.build_modes]]
 
     def gpr_scenario_vars(
-        self, library_type: str = "relocatable", build_mode: str = "dev"
+        self,
+        library_type: LibraryType,
+        build_mode: BuildMode,
     ) -> list[str]:
         """
         Return the project scenario variables to pass to GPRbuild.
 
-        :param library_type: Library flavor to use. Must be "relocatable" or
-            "static".
+        :param library_type: Library flavor to use.
+        :param build_mode: Build mode to use.
         """
-        result = [
-            "-XBUILD_MODE={}".format(build_mode),
-            "-XLIBRARY_TYPE={}".format(library_type),
-            "-XGPR_BUILD={}".format(library_type),
-            "-XXMLADA_BUILD={}".format(library_type),
-        ]
+        return gpr_scenario_vars(
+            lib_name=self.lib_name,
+            library_type=library_type,
+            build_mode=build_mode,
+            enable_build_warnings=self.enable_build_warnings,
+        )
 
-        if self.enable_build_warnings:
-            result.append("-X{}_WARNINGS=true".format(self.lib_name.upper()))
-
-        return result
+    @property
+    def gpr_coverage_args(self) -> list[str]:
+        """
+        Return the list of GPR tools arguments needed for coverage, if needed.
+        """
+        if self.context.config.emission.coverage:
+            return [
+                "--src-subdirs=gnatcov-instr",
+                "--implicit-with=gnatcov_rts",
+            ]
+        else:
+            return []
 
     def gprbuild(
         self,
@@ -874,6 +902,7 @@ class ManageScript(abc.ABC):
             "-p",
             "-j{}".format(args.jobs),
             "-P{}".format(project_file),
+            *self.gpr_coverage_args,
         ]
 
         if not args.with_rpath:
@@ -921,12 +950,7 @@ class ManageScript(abc.ABC):
                 )
 
             argv = list(base_argv)
-            argv.extend(
-                self.gpr_scenario_vars(
-                    library_type=library_type.value,
-                    build_mode=build_mode.value,
-                )
-            )
+            argv.extend(self.gpr_scenario_vars(library_type, build_mode))
             if mains:
                 argv.extend("{}.adb".format(main) for main in mains)
             if Diagnostics.style == DiagnosticStyle.gnu_full:
@@ -957,7 +981,7 @@ class ManageScript(abc.ABC):
         args: argparse.Namespace,
         project_file: str,
         is_library: bool,
-        build_mode: str,
+        build_mode: BuildMode,
     ) -> None:
         """
         Run GPRinstall on a project file.
@@ -974,6 +998,7 @@ class ManageScript(abc.ABC):
             "--prefix={}".format(self.dirs.install_dir()),
             "--build-var=LIBRARY_TYPE",
             "--build-var={}_LIBRARY_TYPE".format(project_name),
+            *self.gpr_coverage_args,
         ]
 
         # If this is a library, install sources in an unique location: there is
@@ -994,20 +1019,12 @@ class ManageScript(abc.ABC):
         if args.verbosity == Verbosity.none:
             base_argv.append("-q")
 
-        def run(library_type: str) -> None:
-            argv = list(base_argv)
-            argv.append("--build-name={}".format(library_type))
-            argv.extend(self.gpr_scenario_vars(library_type, build_mode))
-            self.check_call("Install", argv)
-
-        # Install the static libraries first, so that in the resulting project
-        # files, "static" is the default library type.
-        if LibraryType.static in args.library_types:
-            run("static")
-        if LibraryType.static_pic in args.library_types:
-            run("static-pic")
-        if LibraryType.relocatable in args.library_types:
-            run("relocatable")
+        for lib_type in LibraryType:
+            if lib_type in args.library_types:
+                argv = list(base_argv)
+                argv.append(f"--build-name={lib_type.value}")
+                argv.extend(self.gpr_scenario_vars(lib_type, build_mode))
+                self.check_call("Install", argv)
 
     def generate_lib_file(
         self,
@@ -1333,7 +1350,7 @@ class ManageScript(abc.ABC):
         if len(self.build_modes) != 1:
             print("Exactly one build mode required")
             raise DiagnosticError
-        build_mode = self.build_modes[0].value
+        build_mode = self.build_modes[0]
 
         lib_name = self.lib_name.lower()
         lib_name_camel = lib_name.capitalize()
@@ -1534,6 +1551,7 @@ class ManageScript(abc.ABC):
                 traces=args.traces,
                 output_dir=args.output_dir,
                 working_dir=working_dir,
+                cobertura_root=args.cobertura_root,
             )
 
         if args.working_dir:

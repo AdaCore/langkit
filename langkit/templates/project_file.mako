@@ -22,10 +22,6 @@ with "prettier_ada";
    with "langkit_support";
 % endif
 
-% if emitter.coverage:
-   with "gnatcov_rts";
-% endif
-
 ${exts.include_extension(ctx.ext('withed_projects'))}
 
 <%
@@ -57,59 +53,13 @@ library project ${lib_name} is
      external ("${upper_lib_name}_EXTERNALLY_BUILT", "false");
    for Externally_Built use Externally_Built;
 
-   ## Disable style checks on instrumented code
-   % if emitter.coverage:
-      Enable_Warnings : Boolean := "false";
-   % else:
-      Enable_Warnings : Boolean :=
-        external ("${lib_name.upper()}_WARNINGS", "false");
-   % endif
+   Enable_Warnings : Boolean :=
+     external ("${lib_name.upper()}_WARNINGS", "false");
 
-   ## We rely a lot on project installation (gprinstall), and gnatcov does not
-   ## handle that well, so we need kludges to compute code coverage using
-   ## gnatcov without completely reworking how Langkit-generated libraries are
-   ## built and tested.
-   ##
-   ## Generating a library for which we want to compute code coverage happens
-   ## in four steps:
-   ##
-   ## 1. Langkit generates library sources in the regular location
-   ##    (../../include/$/).
-   ##
-   ## 2. We run "gnatcov instrument" with the $_COVINSTR scenario
-   ##    variable set to true. "gnatcov instrument" generates instrumented
-   ##    sources in the "$-gnatcov-instr" subdirectory in the object directory.
-   ##
-   ## 3. Langkit moves these instrumented sources to the
-   ##    ../../obj/$/$-gnatcov-instr directory so that the path of instrumented
-   ##    sources does not depend on scenario variables.
-   ##
-   ## 4. gprinstall and all other uses of the not-yet-installed project leave
-   ##    the $_COVINSTR scenario variable to "false" (its default value) so
-   ##    that the source directory is ../../obj/$/$-gnatcov-instr (i.e. points
-   ##    to instrumented sources).
-   ##
-   ## This organization is indeed involved, but given gnatcov's requirements,
-   ## no simple setup is possible, and this reduces the number of places that
-   ## have to worry about these things to this Mako template and to the
-   ## langkit.coverage module.
-   Primary_Source_Dirs :=
+   for Source_Dirs use
    ${format_str_set(
       [emitter.path_to(d, project_path) for d in source_dirs if d], 3
    )};
-
-   % if emitter.coverage:
-      Secondary_Source_Dirs :=
-        ("obj/${lib_name.lower()}-gnatcov-instr");
-      For_Coverage_Instrumentation : Boolean :=
-        external ("${lib_name.upper()}_COVINSTR", "false");
-      case For_Coverage_Instrumentation is
-         when "false" => for Source_Dirs use Secondary_Source_Dirs;
-         when "true" =>  for Source_Dirs use Primary_Source_Dirs;
-      end case;
-   % else:
-      for Source_Dirs use Primary_Source_Dirs;
-   % endif
 
    for Languages use
    ${format_str_set(emitter.project_languages, 3)};
