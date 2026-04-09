@@ -2425,16 +2425,19 @@ class CompileCtx:
         ]
 
     @property
-    def start_code_emission_pass(self) -> AbstractPass:
+    def start_code_emission_passes(self) -> list[AbstractPass]:
         """
         Return a pass that allows code emission.
         """
-        from langkit.passes import MajorStepPass
+        from langkit.passes import Emitter, EmitterPass, MajorStepPass
 
         def start_code_emission(ctx: CompileCtx) -> None:
             ctx.emission_started = True
 
-        return MajorStepPass("Prepare code emission", start_code_emission)
+        return [
+            MajorStepPass("Prepare code emission", start_code_emission),
+            EmitterPass("setup directories", Emitter.setup_directories),
+        ]
 
     @property
     def end_code_emission_pass(self) -> AbstractPass:
@@ -2468,7 +2471,7 @@ class CompileCtx:
         from langkit.railroad_diagrams import emit_railroad_diagram
 
         return [
-            self.start_code_emission_pass,
+            *self.start_code_emission_passes,
             EmitterPass(
                 "register builtin unparsing configurations",
                 Emitter.register_builtin_unparsing_configs,
@@ -2503,7 +2506,6 @@ class CompileCtx:
             ),
             errors_checkpoint_pass,
             MajorStepPass("Generate library sources"),
-            EmitterPass("setup directories", Emitter.setup_directories),
             # Run early plugin code emission passes after the directories are
             # created but yet before the project file has been emitted so they
             # can generate source files there.
@@ -2564,7 +2566,7 @@ class CompileCtx:
         from langkit.passes import Emitter, EmitterPass
 
         return [
-            self.start_code_emission_pass,
+            *self.start_code_emission_passes,
             EmitterPass("emit Language Server", Emitter.emit_language_server),
             self.end_code_emission_pass,
         ]
