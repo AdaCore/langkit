@@ -14,7 +14,7 @@ import shutil
 import subprocess
 import sys
 
-from e3.testsuite import Testsuite
+from e3.testsuite import Testsuite, logger
 
 import drivers.adalog_driver
 import drivers.langkit_support_driver
@@ -70,6 +70,23 @@ class LangkitTestsuite(Testsuite):
             help="Enable computation of code coverage for Langkit and"
             " Langkit_Support. This requires coverage.py and"
             " GNATcoverage.",
+        )
+        parser.add_argument(
+            "--lkt-coverage",
+            action="store_true",
+            help="Compute the code coverage of the testsuite on"
+            " Liblktlang and produce a report in `$output_dir/lkt_coverage`."
+            " This requires GNATcoverage and a coverage build of Liblktlang.",
+        )
+        parser.add_argument(
+            "--lkt-gnatcov-instr-dir",
+            help="Directory that contains instrumentation data files for"
+            " Liblktlang.",
+        )
+        parser.add_argument(
+            "--cobertura-root",
+            help="Root direcotry for the Cobertura report. If not passed,"
+            " Cobertura reports are not generated.",
         )
 
         parser.add_argument(
@@ -161,6 +178,7 @@ class LangkitTestsuite(Testsuite):
 
         args = self.main.args
 
+        self.env.lkt_coverage = args.lkt_coverage
         self.env.rewrite_baselines = args.rewrite
         self.env.control_condition_env = {
             "restricted_env": args.restricted_env,
@@ -172,17 +190,37 @@ class LangkitTestsuite(Testsuite):
             "valgrind": args.valgrind,
         }
 
+        def set_up_empty_dir(*path):
+            """
+            Helper to create a directory, ensuring it is empty if it already
+            exists.
+            """
+            dirname = os.path.join(*path)
+            if os.path.exists(dirname):
+                shutil.rmtree(dirname)
+            os.mkdir(dirname)
+            return dirname
+
         if args.coverage:
             # Create a directory that we'll use to:
             #
             #   1) collect coverage data for each testcase;
             #   2) generate the HTML report.
-            self.env.coverage_dir = os.path.join(self.output_dir, "coverage")
-            self.env.langkit_support_coverage_dir = os.path.join(
+            self.env.coverage_dir = set_up_empty_dir(
+                self.output_dir, "coverage"
+            )
+            self.env.langkit_support_coverage_dir = set_up_empty_dir(
                 self.env.coverage_dir, "langkit_support"
             )
-            os.mkdir(self.env.coverage_dir)
-            os.mkdir(self.env.langkit_support_coverage_dir)
+
+        # Likewise for Liblktlang coverage
+        if args.lkt_coverage:
+            self.env.lkt_traces_dir = set_up_empty_dir(
+                self.working_dir, "lkt_traces"
+            )
+            self.env.lkt_coverage_dir = set_up_empty_dir(
+                self.output_dir, "lkt_coverage"
+            )
 
         def run(name, args):
             p = subprocess.run(
@@ -294,7 +332,9 @@ class LangkitTestsuite(Testsuite):
         )
 
     def tear_down(self):
-        if self.main.args.coverage:
+        args = self.main.args
+
+        if args.coverage:
             # Consolidate coverage data for each testcase and generate both a
             # sumary textual report on the standard output and a detailed HTML
             # report.
@@ -358,6 +398,24 @@ class LangkitTestsuite(Testsuite):
                     "No test exercised Langkit_Support: no coverage report"
                     " to produce"
                 )
+
+        if args.lkt_coverage:
+            # Do not import Langkit modules unless we need them, so that
+            # regular testsuite modes do not require it.
+            from langkit.coverage import GNATcov
+
+            logger.info("Computing the coverage report for Liblktlang")
+            GNATcov().generate_report(
+                title="Liblktlang Coverage Report",
+                instr_dir=args.lkt_gnatcov_instr_dir,
+                traces=glob.glob(
+                    os.path.join(self.env.lkt_traces_dir, "*.srctrace")
+                ),
+                output_dir=self.env.lkt_coverage_dir,
+                working_dir=self.working_dir,
+                cobertura_root=args.cobertura_root,
+            )
+            logger.info("The coverage report is ready")
 
         super().tear_down()
 

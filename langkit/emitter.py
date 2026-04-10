@@ -267,15 +267,25 @@ class Emitter:
         "Interfaces" attribute of the generated library project file.
         """
 
+        self.coverage_units: set[str] = set()
+        """
+        Set of units for which to compute code coverage.
+
+        These are "units of interest" in the gnatcov sense: unit names for Ada,
+        and file basenames for other languages.
+        """
+
         project_file_basename = f"{self.lib_name_low}.gpr"
         self.instr_md = InstrumentationMetadata(
             project_file_basename, [u.filename for u in context.lkt_units]
         )
 
-        # Add all additional source files to the list of library interfaces and
-        # declare them as such in instrumentation metadata.
+        # Add all additional source files to the list of library
+        # interfaces/coverage units and declare them as such in instrumentation
+        # metadata.
         for f in context.additional_source_files:
             self.add_library_interface(f)
+            self.add_coverage_unit(f)
             self.instr_md.additional_sources.add(os.path.basename(f))
 
         self.main_project_file = os.path.join(
@@ -493,6 +503,29 @@ class Emitter:
     def add_library_interface(self, filename: str) -> None:
         assert not self._project_file_emitted
         self.library_interfaces.add(os.path.basename(filename))
+
+    def add_coverage_unit(self, filename: str) -> None:
+        """
+        Add a unit of interest for code coverage.
+
+        Source code is relevant for coverage only when its execution status
+        influences the final coverage report, so this includes:
+
+        * extension source files, as they appear themselves in the coverage
+          report;
+        * implementation packages, as they contain source code that has debug
+          info that points to Lkt source code.
+        """
+        assert not self._project_file_emitted
+        basename = os.path.basename(filename)
+
+        # Add the unit name for Ada sources, and the basename for other
+        # languages.
+        self.coverage_units.add(
+            basename[:-4].replace("-", ".")
+            if basename.endswith(".ads") or basename.endswith(".adb")
+            else basename
+        )
 
     def setup_directories(self, ctx: CompileCtx) -> None:
         """
@@ -846,6 +879,7 @@ class Emitter:
                     [impl_pkg.name],
                     impl_pkg=impl_pkg,
                     in_library=True,
+                    for_coverage=True,
                 )
 
         if self.context.config.emission.per_node_implementation_packages:
@@ -1170,6 +1204,7 @@ class Emitter:
         cached_body: bool = False,
         in_library: bool = False,
         is_interface: bool = True,
+        for_coverage: bool = False,
         **kwargs: Any,
     ) -> None:
         """
@@ -1195,6 +1230,9 @@ class Emitter:
         :param is_interface: Whether to include this module in the generated
             library interface.
 
+        :param for_coverage: Whether to include this module in the set of units
+            of interest for code coverage.
+
         :param kwargs: Parameter to pass to template rendering.
         """
 
@@ -1216,6 +1254,8 @@ class Emitter:
                 )
                 if is_interface:
                     self.add_library_interface(file_path)
+                if for_coverage:
+                    self.add_coverage_unit(file_path)
 
             # If asked not to generate the body, skip the rest, but still
             # register the body as a generated source.

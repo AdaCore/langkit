@@ -221,4 +221,9 @@ library project ${lib_name} is
       end case;
    end Binder;
 
+   package Coverage is
+      for Units use
+      ${format_str_set(emitter.coverage_units, 6)};
+   end Coverage;
+
 end ${lib_name};
