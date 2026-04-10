@@ -168,6 +168,10 @@ gpr_mains:
 
     - main.adb -c table_align/table_sep_in_field.json table_align/calls.txt
 
+    # Ensure that, when original token formatting is requested, preserved
+    # tokens are turned into token separators when the config mandates it.
+    - main.adb -c table_align/token_original.json table_align/calls.txt
+
     - main.adb -c table_align/inherit.json table_align/blocks.txt
     - main.adb -c table_align/inherit_null.json table_align/blocks.txt
 

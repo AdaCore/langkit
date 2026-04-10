@@ -217,6 +217,9 @@ private package Langkit_Support.Prettier_Utils is
      | Expected_Whitespaces
      | Flush_Line_Breaks;
 
+   subtype Token_Document_Kind is Document_Kind
+   with Static_Predicate => Token_Document_Kind in Table_Separator | Token;
+
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
 
       --  Note that for "stateless leaf" documents which occur very frequently
@@ -546,6 +549,17 @@ private package Langkit_Support.Prettier_Utils is
       Text     : Unbounded_Text_Type;
       Unparser : Token_Unparser_Index) return Document_Type;
    --  Return a ``Token`` node
+
+   function Create_Token_Kind
+     (Self       : in out Document_Pool;
+      Doc_Kind   : Token_Document_Kind;
+      Token_Kind : Token_Kind_Ref;
+      Text       : Unbounded_Text_Type;
+      Unparser   : Token_Unparser_Index) return Document_Type
+   is (case Doc_Kind is
+       when Token           => Create_Token (Self, Token_Kind, Text, Unparser),
+       when Table_Separator => Create_Table_Separator
+                                 (Self, Token_Kind, Text, Unparser));
 
    function Create_Trim (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Trim`` node

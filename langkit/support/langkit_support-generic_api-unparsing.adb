@@ -1784,8 +1784,9 @@ package body Langkit_Support.Generic_API.Unparsing is
             begin
                Items.Append
                  (if Formatting = null
-                  then Pool.Create_Token
-                         (State.Current_Token.Kind,
+                  then Pool.Create_Token_Kind
+                         (Template.Kind,
+                          State.Current_Token.Kind,
                           To_Unbounded_Text (State.Current_Token.Text),
                           No_Token_Unparser)
                   else Formatting);
