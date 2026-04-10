@@ -1,0 +1,14 @@
+===== Start the Java tests =====
+
+--- Interfaces ---
+TypeInterface: <TypeDecl foo.txt:1:1-1:8>
+TypeInterface.full_name: int
+DefiningNameInterface: <DefId foo.txt:1:5-1:8>
+DefiningNameInterface.full_name: int
+Uses:
+    <RefId foo.txt:2:9-2:12>
+    <RefId foo.txt:3:9-3:12>
+------------------
+
+===== End of the Java tests =====
+Done

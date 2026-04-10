@@ -87,6 +87,12 @@
         }
         % endif
 
+        // ----- Generic Interfaces overrides -----
+
+        % for field in cls.fields_with_interfaces_overrides():
+        ${interface_overrides(field)}
+        % endfor
+
         // ----- Field accessors -----
 
         % for field in cls.fields_with_accessors():
@@ -231,6 +237,32 @@
         }
 </%def>
 
+<%def name="interface_overrides(field)">
+    <%
+    from langkit.java_api import format_name
+
+    api = java_api
+
+    implements = field.implements
+    # Inheritance information are reset at this point, so when an overriding
+    # property implements an interface method, we are unable to use some
+    # functions that would ease the generation of the generic interface
+    # override because it is now considered private.
+    callee = format_name(
+        ("p_" if field.is_property else "f_") + field.original_name
+    )
+    %>
+        public ${api.support_type_name(implements.return_type, True)}
+        ${format_name((Name("G") + implements.name).lower)} (
+            ${api.create_support_prototype_args(implements.args, prefix=True)}
+        ) {
+            return ${callee}(
+                ${api.cast_arguments_from_interface(
+                    implements.args, field.arguments)}
+            );
+        }
+</%def>
+
 <%def name="field_accessor(field)">
     <%
     from langkit.java_api import format_name
@@ -254,17 +286,6 @@
     implements = field.implements
     %>
         % if not method.name in api.excluded_fields:
-
-        % if implements is not None:
-        public ${api.support_type_name(implements.return_type, True)}
-        ${format_name((Name("G") + implements.name).lower)} (
-            ${api.create_support_prototype_args(implements.args, prefix=True)}
-        ) {
-            return ${method.name}(
-                ${api.cast_arguments_from_interface(method.params)}
-            );
-        }
-        % endif
 
         ${java_doc(field, 8)}
         public ${return_type} ${method.name}(

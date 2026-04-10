@@ -1,0 +1,142 @@
+# Test that Java API is properly working
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule
+    main_rule <- list*(decl)
+
+    decl <- or(type_decl | var_decl)
+    type_decl <- TypeDecl("def" def_id)
+    var_decl <- VarDecl("var" def_id ":" ref_id ?pick("=" ref_id))
+
+    ref_id <- RefId(@Identifier)
+    def_id <- DefId(@Identifier)
+}
+
+enum Color {
+    case red, green, blue
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class DefId: FooNode implements TokenNode, DefiningNameInterface {
+    @exported
+    fun get_type(): Entity[TypeDecl] 
+            implements DefiningNameInterface.get_type =
+        self.parent.as![Decl].get_type()
+
+    @exported
+    fun full_name(): String implements DefiningNameInterface.full_name =
+        self.symbol.image()
+
+    @exported
+    fun decl_detail(): String implements DefiningNameInterface.decl_detail =
+        match self.parent.as![Decl] {
+            case _: TypeDecl => "type"
+            case _: VarDecl => "var"
+        }
+
+    @exported
+    fun completion_kind(): Int
+            implements DefiningNameInterface.completion_item_kind =
+        self.completion_item_kind_to_int(
+            match self.parent.as![Decl] {
+                case _: TypeDecl => CompletionItemKind.class_kind
+                case _: VarDecl => CompletionItemKind.variable_kind
+            }
+        )
+
+    @exported
+    fun doc(): String implements DefiningNameInterface.documentation = "doc"
+
+    @exported
+    fun find_all_references(units: Array[AnalysisUnit]): Array[RefResult]
+            implements DefiningNameInterface.find_all_references =
+        units.mapcat(
+            (u) =>
+                u.root.children
+                    .filter((c) => c is VarDecl)
+                    .mapcat((c) => {
+                        val v = c.as[VarDecl];
+                        (
+                            if v.as_entity.type_id.rfd_defid().node == node
+                            then [RefResult(r=v.as_entity.type_id)]
+                            else []: RefResult
+                        ) & (
+                            if v.as_entity.ref_id?.rfd_defid().node == node
+                            then [RefResult(r=v.as_entity.ref_id)]
+                            else []: RefResult
+                        )
+                    })
+        )
+
+    @exported
+    fun find_all_impls(
+        @ignored units: Array[AnalysisUnit]
+    ): Array[Entity[DefId]]
+        implements DefiningNameInterface.find_implementations = [self]
+}
+
+@abstract
+class Decl: FooNode implements DeclarationInterface {
+    @parse_field
+    def_id: DefId
+
+    env_spec {
+        add_to_env_kv(self.def_id.symbol, node)
+    }
+
+    @exported
+    fun def_ids(): Array[Entity[DefId]]
+            implements DeclarationInterface.defining_names =
+        self.def_id.singleton()
+
+    @exported
+    fun full_name(): String = self.def_id.full_name()
+
+    @abstract
+    fun get_type(): Entity[TypeDecl]
+}
+
+class TypeDecl: Decl implements TypeInterface {
+
+    fun get_type(): Entity[TypeDecl] = self
+
+    @exported
+    fun full_name(): String implements TypeInterface.full_name =
+        self.def_id.full_name()
+
+    @exported
+    fun def_name(): Entity[DefId] implements TypeInterface.defining_name =
+        self.def_id
+}
+
+class VarDecl: Decl {
+    @parse_field
+    type_id: RefId
+
+    @parse_field
+    @nullable
+    ref_id: RefId
+
+    fun get_type(): Entity[TypeDecl] = self.type_id.rfd_decl().as![TypeDecl]
+}
+
+class RefId: FooNode implements TokenNode, ReferenceInterface {
+    @exported
+    fun rfd_decl(): Entity[Decl] =
+        self.node_env.get_first(self.symbol).as![Decl]
+
+    @exported
+    fun rfd_defid(): Entity[DefId]
+            implements ReferenceInterface.referenced_defining_name =
+        self.rfd_decl().def_id
+}
+
+struct RefResult implements RefResultInterface {
+    r: Entity[RefId] implements RefResultInterface.ref
+}

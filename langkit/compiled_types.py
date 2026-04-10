@@ -3750,6 +3750,16 @@ class ASTNodeType(BaseStructType):
             if not f.is_overriding
         ]
 
+    def fields_with_interfaces_overrides(self) -> list[AbstractNodeData]:
+        """
+        Return a list of fields for which we must generate overrides of the
+        generic interface methods.
+        """
+        return self.get_abstract_node_data(
+            include_inherited=False,
+            predicate=lambda f: f.implements is not None,
+        )
+
     def fields_to_initialize(self, include_inherited: bool) -> list[BaseField]:
         """
         Return the list of fields to initialize for this node.
