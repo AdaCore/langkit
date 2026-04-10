@@ -3271,6 +3271,13 @@ var v1:T=f(
     ccc=C
 );
 
+== main.adb -c table_align/token_original.json table_align/calls.txt ==
+var v1:T=f(
+    a  =A,
+    bb =B,
+    ccc=C
+);
+
 == main.adb -c table_align/inherit.json table_align/blocks.txt ==
 {
 var v0  : T = 0;
