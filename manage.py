@@ -542,6 +542,25 @@ def run_mypy(args: Namespace) -> None:
     subprocess.check_call(["mypy"], cwd=LANGKIT_ROOT, env=env)
 
 
+def make_lsp(args: Namespace) -> None:
+    """
+    Generate and build the language server for Lkt.
+    """
+    prepare_bootstrap(args)
+
+    argv = [
+        "make-lsp",
+        "--config",
+        str(LKT_LIB_ROOT / "langkit.yaml"),
+        f"--build-mode={args.build_mode}",
+        f"-j{args.jobs}",
+    ]
+    if args.native_lsp:
+        argv.append("--native-lsp")
+
+    lkm.main([*BOOTSTRAP_LKM_RUN_BASE_ARGS, *argv])
+
+
 def test(args: Namespace, remaining_args: List[str]) -> None:
     """
     Run Langkit's testsuite.
@@ -625,6 +644,18 @@ if __name__ == "__main__":
     )
 
     create_subparser(subparsers, run_mypy)
+
+    make_lsp_parser = create_subparser(
+        subparsers,
+        make_lsp,
+        with_build_dir=True,
+        with_jobs=True,
+    )
+    make_lsp_parser.add_argument(
+        "--native-lsp",
+        action="store_true",
+        help="Enable the native image language server building.",
+    )
 
     create_subparser(subparsers, test, accept_unknown_args=True)
 
