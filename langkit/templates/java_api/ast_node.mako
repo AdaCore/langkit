@@ -71,7 +71,7 @@
         // ----- Instance methods -----
 
         @Override
-        public Reflection.Node getDescription() {
+        public LangkitSupport.Reflection.Node getDescription() {
             return ${java_type}.description;
         }
 
@@ -149,8 +149,8 @@
     %>
 
         /** Full description of the node (kind, fields, class...) */
-        public static final Reflection.Node description =
-            new Reflection.Node(
+        public static final LangkitSupport.Reflection.Node description =
+            new LangkitSupport.Reflection.Node(
                 ${kind},
                 ${"true" if cls.is_token_node else "false"},
                 ${"true" if cls.is_list_type else "false"},
@@ -160,13 +160,13 @@
                     ${",".join([f'"{name}"' for name in field_names])}
                 },
                 new HashMap<>(
-                    ${f"{base_type}.description.fieldDescriptions" \
+                    ${f"{base_type}.description.fieldDescriptions()" \
                       if base_type else \
                       ""}
                 )
             );
 
-        // Initialisation of the method map
+        // Initialization of the method map
         static {
             % if len(cls.fields_with_accessors()) > 0:
             try {
@@ -185,32 +185,30 @@
                 % if not method.name in api.excluded_fields:
                 {
                     // Get the Java method of the field
-                    Method method = ${java_type}.class.getMethod(
+                    var method = ${java_type}.class.getMethod(
                         "${method.name}",
                         new Class[]{${",".join(param_classes)}}
                     );
 
                     // Create the parameter list
-                    List<Reflection.Param> parameters = new ArrayList<>();
+                    List<LangkitSupport.Reflection.Param> parameters =
+                        new ArrayList<>();
                     % for param in method.params:
-                        % if param.default_value_expr is None:
-                    parameters.add(new Reflection.Param(
-                        ${api.wrapping_type(param.public_type)}.class,
-                        "${param.name}"
-                    ));
-                        % else:
-                    parameters.add(new Reflection.Param(
+                    parameters.add(new LangkitSupport.Reflection.Param(
                         ${api.wrapping_type(param.public_type)}.class,
                         "${param.name}",
-                        ${param.default_value_expr}
-                    ));
+                        % if param.default_value_expr is None:
+                        Optional.empty()
+                        % else:
+                        Optional.ofNullable(${param.default_value_expr})
                         % endif
+                    ));
                     % endfor
 
                     // Add the method and the parameters in maps
-                    description.fieldDescriptions.put(
+                    description.fieldDescriptions().put(
                         "${method.native_name}",
-                        new Reflection.Field(
+                        new LangkitSupport.Reflection.Field(
                             method,
                             parameters,
                             MemberReference.${member_ref_name}

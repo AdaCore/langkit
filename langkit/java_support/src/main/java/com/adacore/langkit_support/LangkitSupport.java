@@ -17,6 +17,10 @@ import com.oracle.truffle.api.interop.TruffleObject;
 
 public class LangkitSupport {
 
+    // ==========
+    // Exceptions
+    // ==========
+
     /** Exception to raise when interface default methods are not overrode. */
     public static final
     class NotImplementedException extends RuntimeException {
@@ -35,6 +39,67 @@ public class LangkitSupport {
             super(message);
         }
     }
+
+    // ==========
+    // Reflection utils
+    // ==========
+
+    public static final class Reflection {
+
+        /**
+        * This class represents the description of a node.
+        *
+        * @param kind Kind of the node. This kind is null if the node is
+        *             abstract.
+        * @param isTokenNode Whether the node is a token node.
+        * @param isListNode Whether the node is a list node.
+        * @param clazz Java class of the node.
+        * @param className Simple name of the Java class of the node.
+        * @param fields Fields of the node, sorted by parsing order.
+        * @param fieldDescriptions Map containing description for all fields
+        *                          of the node.
+        */
+        public record Node(
+            NodeKindInterface kind,
+            boolean isTokenNode,
+            boolean isListNode,
+            Class<? extends NodeInterface> clazz,
+            String className,
+            String[] fields,
+            Map<String, Field> fieldDescriptions
+        ) {}
+
+        /**
+        * This class represents the description of a node field.
+        *
+        * @param javaMethod Reference to the Java method for the field.
+        * @param params Parameters of the method.
+        * @param memberRef Member reference corresponding to this field.
+        */
+        public record Field(
+            Method javaMethod,
+            List<Param> params,
+            MemberReferenceInterface memberRef
+        ) {}
+
+        /**
+        * This class represents a parameter description.
+        *
+        * @param type Type of the parameter
+        * @param name Name of the parameter
+        * @param defaultValue Optional default value of the parameter.
+        */
+        public record Param(
+            Class<?> type,
+            String name,
+            Optional<Object> defaultValue
+        ) {}
+
+    }
+
+    // ==========
+    // Project managing
+    // ==========
 
     /**
      * Abstract class representing a project manager that fetches project files
@@ -128,6 +193,10 @@ public class LangkitSupport {
             return diagnostics;
         }
     }
+
+    // ==========
+    // Common interfacing API
+    // ==========
 
     /** Classes that implement this interface wrap the langkit characters
      *  which are 32 bit wide. */
@@ -231,7 +300,9 @@ public class LangkitSupport {
         return message;
     }
 
-    public interface NodeKindInterface {}
+    public interface NodeKindInterface {
+        Reflection.Node getDescription();
+    }
 
     public interface TokenKindInterface {
         /**
@@ -590,50 +661,37 @@ public class LangkitSupport {
         public abstract Diagnostic[] getDiagnostics();
     }
 
-    /** This type represents the Reflection utils nodes. */
-    public abstract static class Reflection {
-        /** This class represents the description of a node. */
-        public abstract static class Node {}
-
-        /** This class represents the description of a node field. */
-        public abstract static class Field {
-            /** The parameters of the method */
-            public abstract List<? extends Reflection.Param> getParams();
-            /** The Java method for the field */
-            public abstract Method getJavaMethod();
-        }
-
-        /** This class represents a parameter description. */
-        public abstract static class Param {
-            /** Get the name of the parameter. */
-            public abstract String getName();
-            /** The type of the parameter */
-            public abstract Class<?> getType();
-            /** The optional default value of the parameter */
-            public abstract Optional<Object> getDefaultValue();
-        }
-    }
-
     /** This type represents a member reference. */
-    public interface MemberReferenceInterface {}
+    public interface MemberReferenceInterface {
+        int toC();
+    }
 
     /** This type represents the rewriting node. */
     public interface RewritingNodeInterface {
         /** Return the None value for this type. */
         @CompilerDirectives.TruffleBoundary
-        public static RewritingNodeInterface getNONE() {
+        static RewritingNodeInterface getNONE() {
+            throw new NotImplementedException();
+        }
+
+        /** Get the kind of this node. */
+        @CompilerDirectives.TruffleBoundary
+        default NodeKindInterface getKind() {
             throw new NotImplementedException();
         }
 
         /** Return a copy of this node. */
-        public abstract RewritingNodeInterface clone();
+        RewritingNodeInterface clone();
+
+        /** Get whether the rewriting node is a null node. */
+        boolean isNone();
 
         /** Return whether this rewriting node is tied. */
-        public abstract boolean isTied();
+        boolean isTied();
 
         /** Insert a node before this node. */
         @CompilerDirectives.TruffleBoundary
-        public default void insertBefore(
+        default void insertBefore(
             final RewritingNodeInterface toInsert)
         {
             throw new NotImplementedException();
@@ -641,34 +699,42 @@ public class LangkitSupport {
 
         /** Replace this node by a new node. */
         @CompilerDirectives.TruffleBoundary
-        public default void replace(RewritingNodeInterface newNode) {
+        default void replace(RewritingNodeInterface newNode) {
             throw new NotImplementedException();
         }
 
         /** Insert a node after this node. */
         @CompilerDirectives.TruffleBoundary
-        public default void insertAfter(RewritingNodeInterface toInsert) {
+        default void insertAfter(RewritingNodeInterface toInsert) {
             throw new NotImplementedException();
         }
 
         /** Insert a node first amongst this node siblings. */
         @CompilerDirectives.TruffleBoundary
-        public default void insertFirst(RewritingNodeInterface toInsert) {
+        default void insertFirst(RewritingNodeInterface toInsert) {
             throw new NotImplementedException();
         }
 
         /** Insert a node last amongst this node siblings. */
         @CompilerDirectives.TruffleBoundary
-        public default void insertLast(RewritingNodeInterface toInsert) {
+        default void insertLast(RewritingNodeInterface toInsert) {
             throw new NotImplementedException();
         }
 
         /** Remove this node from its parent. */
-        public abstract void removeFromParent();
+        void removeFromParent();
+
+        /** Get a child of this node. */
+        @CompilerDirectives.TruffleBoundary
+        default RewritingNodeInterface getChild(
+            MemberReferenceInterface childReference
+        ) {
+            throw new NotImplementedException();
+        }
 
         /** Set the child of this node. */
         @CompilerDirectives.TruffleBoundary
-        public default void setChild(
+        default void setChild(
             MemberReferenceInterface childMember,
             RewritingNodeInterface child
         ) {
