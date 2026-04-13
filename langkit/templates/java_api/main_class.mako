@@ -5748,6 +5748,12 @@ public final class ${ctx.lib_name.camel} {
             return visitor.visit(this, param);
         }
 
+        // ----- Generic Interfaces overrides -----
+
+        % for field in T.root_node.fields_with_interfaces_overrides():
+        ${ast_node.interface_overrides(field)}
+        % endfor
+
         // ----- Field accessors -----
 
         % for field in T.root_node.fields_with_accessors():

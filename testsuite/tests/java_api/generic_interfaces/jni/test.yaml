@@ -1,0 +1,13 @@
+driver: lkt_build_and_run
+control:
+  - [SKIP, "not has_java", "Java support required"]
+
+sync_trees:
+  - ../common
+
+config:
+  library:
+    defaults:
+      unit_provider: Libfoolang.Helpers.Create_Unit_Provider
+    symbol_canonicalizer: Pkg.Canonicalize
+java_main: InterfaceTests.java

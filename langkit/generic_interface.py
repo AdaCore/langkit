@@ -80,6 +80,10 @@ class BaseGenericInterface:
         """
         return ArrayInterface(self)
 
+    @property
+    def is_array(self) -> bool:
+        return False
+
     @abc.abstractproperty
     def lkt_name(self) -> str:
         pass
@@ -154,6 +158,10 @@ class ArrayInterface(BaseGenericInterface):
     @property
     def lkt_name(self) -> str:
         return f"Array[{self.element_type.lkt_name}]"
+
+    @property
+    def is_array(self) -> bool:
+        return False
 
 
 def type_implements_interface(

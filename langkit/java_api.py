@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
-from langkit.compiled_types import BaseField, CompiledType, T
+from langkit.compiled_types import Argument, BaseField, CompiledType, T
 from langkit.generic_interface import (
     ArrayInterface,
     BaseGenericInterface,
@@ -1299,7 +1299,11 @@ class JavaAPISettings(AbstractAPISettings):
         )
 
     @classmethod
-    def cast_arguments_from_interface(cls, params: list[JavaParam]) -> str:
+    def cast_arguments_from_interface(
+        cls,
+        interface_params: list[GenericArgument],
+        method_params: list[Argument],
+    ) -> str:
         """
         Create a string to cast list of arguments from an interface method to
         their corresponding concrete types.
@@ -1307,12 +1311,16 @@ class JavaAPISettings(AbstractAPISettings):
         return ", ".join(
             [
                 (
-                    f"Arrays.copyOf({p.name}, {p.name}.length, "
-                    f"{cls.wrapping_type(p.public_type)}.class)"
-                    if p.public_type.is_array
-                    else f"({cls.wrapping_type(p.public_type)}) {p.name}"
+                    f"Arrays.copyOf({format_name(i.name.lower)},"
+                    f" {format_name(i.name.lower)}.length,"
+                    f" {cls.wrapping_type(m.public_type)}.class)"
+                    if i.type.is_array
+                    else (
+                        f"({cls.wrapping_type(m.public_type)})"
+                        f" {format_name(i.name.lower)}"
+                    )
                 )
-                for p in params
+                for i, m in zip(interface_params, method_params)
             ]
         )
 
