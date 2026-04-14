@@ -169,11 +169,25 @@ public final class ${ctx.lib_name.camel} {
         BYTE_ORDER == ByteOrder.BIG_ENDIAN ? StandardCharsets.UTF_32BE
                                            : StandardCharsets.UTF_32LE;
 
+    /** A map to store descriptions of all structure types. */
+    public static final Map<String, LangkitSupport.Reflection.Struct>
+        STRUCT_DESCRIPTION_MAP = new HashMap();
+
     /** A map to store node descriptions associated to their camel name. */
     public static final Map<String, LangkitSupport.Reflection.Node>
         NODE_DESCRIPTION_MAP = new HashMap<>();
 
     static {
+        // Fill the struct description map
+        % for struct_type in ctx.struct_types:
+            % if api.should_emit_struct(struct_type):
+        STRUCT_DESCRIPTION_MAP.put(
+            "${api.wrapping_type(struct_type, ast_wrapping=False)}",
+            ${api.wrapping_type(struct_type, ast_wrapping=False)}.description
+        );
+            % endif
+        % endfor
+
         // Fill the node description map and set the node kind descriptions
         % for astnode in ctx.node_types:
         NODE_DESCRIPTION_MAP.put(

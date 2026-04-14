@@ -1011,9 +1011,7 @@ class NullExpr(BindableLiteralExpr):
             assert isinstance(self.type.element_type, ASTNodeType)
             t = self.type.element_type
         else:
-            raise AssertionError(
-                f"cannot generate Java null constant for {t.lkt_name}"
-            )
+            return "null"
         return f"{t.kwless_raw_name.camel}.NONE"
 
     def render_ocaml_constant(self) -> str:

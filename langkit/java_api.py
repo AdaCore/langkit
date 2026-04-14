@@ -81,6 +81,11 @@ class StructField:
     Generic field implemented.
     """
 
+    default_value: str | None = None
+    """
+    Default field value as a Java literal, if some.
+    """
+
     @property
     def name(self) -> str:
         """
@@ -279,6 +284,11 @@ class JavaAPISettings(AbstractAPISettings):
                         else None
                     ),
                     implements=field.implements,
+                    default_value=(
+                        field.default_value.render_java_constant()
+                        if field.default_value is not None
+                        else None
+                    ),
                 )
             )
         return res

@@ -534,6 +534,33 @@ Visit <NullNode foo.txt:1:46-1:50>
     Member reference: FOO_VAR_F_ARG
     Java method name: fArg
     Params: []
+
+==== Structure reflection information
+
+- Struct: BareNodeStruct
+  Is public: true
+  Fields: [a_boolean: boolean = Optional.empty, bare_node: FooNode = Optional.empty, a_char: Char = Optional.empty]
+- Struct: EmptyStruct
+  Is public: true
+  Fields: []
+- Struct: Entity
+  Is public: false
+  Fields: [node: PointerWrapper = Optional.empty, info: EntityInfo = Optional.empty]
+- Struct: EntityInfo
+  Is public: false
+  Fields: [md: Metadata = Optional.empty, rebindings: PointerWrapper = Optional.empty, from_rebound: boolean = Optional.empty]
+- Struct: FooNodeStruct
+  Is public: true
+  Fields: [node: FooNode = Optional.empty]
+- Struct: Metadata
+  Is public: false
+  Fields: [eq_used: boolean = Optional.empty, eq_ignored: boolean = Optional.empty]
+- Struct: SomeStruct
+  Is public: true
+  Fields: [examples: Example[] = Optional.empty]
+- Struct: WithInner
+  Is public: true
+  Fields: [empty: EmptyStruct = Optional.empty, sloc: SourceLocation = Optional.empty, big_int: BigInteger = Optional.empty, som: SomeStruct = Optional.empty]
 ------------------
 
 ===== End of the Java tests =====

@@ -49,6 +49,30 @@ public class LangkitSupport {
     public static final class Reflection {
 
         /**
+         * This class represents the description of a structure type.
+         *
+         * @param clazz Java class corresponding to the structure.
+         * @param fields Fields present in the structure.
+         */
+        public record Struct(
+            boolean isPublic,
+            Class<? extends StructInterface> clazz,
+            List<StructField> fields
+        ) {}
+
+        /**
+         * This class represents a field in a structure type.
+         *
+         * @param name Name of the field as defined in the Lkt spec.
+         * @param type Java class representing the type of the field.
+         */
+        public record StructField(
+            String name,
+            Class<?> type,
+            Optional<Object> defaultValue
+        ) {}
+
+        /**
         * This class represents the description of a node.
         *
         * @param kind Kind of the node. This kind is null if the node is

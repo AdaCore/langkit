@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -977,6 +978,34 @@ public final class BindingsTests {
                         .toList()
                 );
             }
+        }
+
+        // Show all structure reflection information
+        System.out.println("\n==== Structure reflection information\n");
+        for (
+            var structEntry : Libfoolang.STRUCT_DESCRIPTION_MAP
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .toList()
+        ) {
+            var structType = structEntry.getValue();
+            System.out.println(
+                "- Struct: " + structType.clazz().getSimpleName()
+            );
+            System.out.println("  Is public: " + structType.isPublic());
+            System.out.println(
+                "  Fields: " + structType.fields()
+                    .stream()
+                    .map(
+                        p -> p.name() +
+                        ": " +
+                        p.type().getSimpleName() +
+                        " = " +
+                        p.defaultValue().map(BindingsTests::toString)
+                    )
+                    .toList()
+            );
         }
 
         footer("Reflection");
