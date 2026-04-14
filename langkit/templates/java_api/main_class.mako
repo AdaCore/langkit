@@ -596,7 +596,8 @@ public final class ${ctx.lib_name.camel} {
     // ==========
 
     /**
-     * This class represents exception during symbol manipulation.
+     * This class represents an exception that occurred during symbol
+     * manipulation.
      */
     public static final class SymbolException extends RuntimeException {
         private static final long serialVersionUID = 1L;
@@ -608,7 +609,8 @@ public final class ${ctx.lib_name.camel} {
     }
 
     /**
-     * This class reprsents exception during enum manipulation.
+     * This class represents an exception that occurred during enum
+     * manipulation.
      */
     public static final class EnumException extends RuntimeException {
         private static final long serialVersionUID = 1L;
