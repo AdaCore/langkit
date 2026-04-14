@@ -21,8 +21,8 @@
     %>
 
     ${java_doc(cls, 4)}
-    public static final class ${java_type} implements AutoCloseable,
-    Iterator<${elem_java_wrapped_type}> {
+    public static final class ${java_type}
+        implements LangkitSupport.LangkitIterator<${elem_java_wrapped_type}> {
 
         // ----- Class attributes -----
 
