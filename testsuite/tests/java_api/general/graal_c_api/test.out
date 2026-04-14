@@ -561,6 +561,21 @@ Visit <NullNode foo.txt:1:46-1:50>
 - Struct: WithInner
   Is public: true
   Fields: [empty: EmptyStruct = Optional.empty, sloc: SourceLocation = Optional.empty, big_int: BigInteger = Optional.empty, som: SomeStruct = Optional.empty]
+
+==== Enum reflection information
+
+- Enum: AnalysisUnitKind
+  Values: [unit_specification, unit_body]
+- Enum: Color
+  Values: [red, green, blue]
+- Enum: CompletionItemKind
+  Values: [text_kind, method_kind, function_kind, constructor_kind, field_kind, variable_kind, class_kind, interface_kind, module_kind, property_kind, unit_kind, value_kind, enum_kind, keyword_kind, snippet_kind, color_kind, file_kind, reference_kind, folder_kind, enum_member_kind, constant_kind, struct_kind, event_kind, operator_kind, type_parameter_kind]
+- Enum: DesignatedEnvKind
+  Values: [none, current_env, named_env, direct_env]
+- Enum: GrammarRule
+  Values: [main_rule_rule, node_rule, example_rule, null_node_rule, var_rule, ident_rule, string_rule]
+- Enum: LookupKind
+  Values: [recursive, flat, minimal]
 ------------------
 
 ===== End of the Java tests =====

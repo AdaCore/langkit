@@ -1008,6 +1008,25 @@ public final class BindingsTests {
             );
         }
 
+        // Show all enum reflection information
+        System.out.println("\n==== Enum reflection information\n");
+        for (
+            var enumEntry : Libfoolang.ENUM_DESCRIPTION_MAP
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .toList()
+        ) {
+            var enumType = enumEntry.getValue();
+            System.out.println("- Enum: " + enumType.clazz().getSimpleName());
+            System.out.println(
+                "  Values: " + enumType.values()
+                    .stream()
+                    .map(v -> v.name())
+                    .toList()
+            );
+        }
+
         footer("Reflection");
     }
 

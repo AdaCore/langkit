@@ -49,6 +49,28 @@ public class LangkitSupport {
     public static final class Reflection {
 
         /**
+         * This class represents the description of an enumeration type.
+         *
+         * @param clazz Java class of the enumeration.
+         * @param values Values available in this enumeration.
+         */
+        public record Enum(
+            Class<? extends EnumInterface> clazz,
+            List<EnumValue> values
+        ) {}
+
+        /**
+         * This class represents a value in an enumeration type.
+         *
+         * @param name Value name, as defined in the Lkt spec.
+         * @param javaValue Java value corresponding to it.
+         */
+        public record EnumValue(
+            String name,
+            EnumInterface javaValue
+        ) {}
+
+        /**
          * This class represents the description of a structure type.
          *
          * @param clazz Java class corresponding to the structure.

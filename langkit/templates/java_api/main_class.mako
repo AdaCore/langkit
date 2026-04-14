@@ -169,6 +169,9 @@ public final class ${ctx.lib_name.camel} {
         BYTE_ORDER == ByteOrder.BIG_ENDIAN ? StandardCharsets.UTF_32BE
                                            : StandardCharsets.UTF_32LE;
 
+    public static final Map<String, LangkitSupport.Reflection.Enum>
+        ENUM_DESCRIPTION_MAP = new HashMap();
+
     /** A map to store descriptions of all structure types. */
     public static final Map<String, LangkitSupport.Reflection.Struct>
         STRUCT_DESCRIPTION_MAP = new HashMap();
@@ -178,6 +181,14 @@ public final class ${ctx.lib_name.camel} {
         NODE_DESCRIPTION_MAP = new HashMap<>();
 
     static {
+        // Fill the enumeration description map
+        % for enum_type in ctx.enum_types:
+        ENUM_DESCRIPTION_MAP.put(
+            "${api.wrapping_type(enum_type)}",
+            ${api.wrapping_type(enum_type)}.description
+        );
+        % endfor
+
         // Fill the struct description map
         % for struct_type in ctx.struct_types:
             % if api.should_emit_struct(struct_type):

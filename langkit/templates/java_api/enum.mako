@@ -19,6 +19,24 @@
 
         // ----- Attributes -----
 
+        public static final LangkitSupport.Reflection.Enum description =
+            new LangkitSupport.Reflection.Enum(
+                ${java_type}.class,
+                new ArrayList<>()
+            );
+
+        static {
+            // Initialization of the description
+            % for i in range(len(cls.values)):
+            description.values().add(
+                new LangkitSupport.Reflection.EnumValue(
+                    "${cls.values[i].name.lower}",
+                    ${java_type}.${api.mangle_enum(cls.values[i].name.upper)}
+                )
+            );
+            % endfor
+        }
+
         /** Singleton that represents the none enum value. */
         public static final ${java_type} NONE =
             ${api.mangle_enum(cls.values[0].name.upper)};
