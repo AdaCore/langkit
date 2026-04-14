@@ -8,7 +8,7 @@
     %>
 
     ${java_doc(cls, 4)}
-    public enum ${java_type} {
+    public enum ${java_type} implements LangkitSupport.EnumInterface {
 
         // ----- Enum values -----
 

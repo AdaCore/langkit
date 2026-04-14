@@ -302,17 +302,20 @@ public class LangkitSupport {
         return message;
     }
 
+    /** Base for all enumerations defined in a Langkit spec. */
+    public interface EnumInterface {}
+
     /** Base interface for all iterators defined in a Langkit spec. */
     public interface LangkitIterator<T> extends Iterator<T>, AutoCloseable {}
 
     /** Base interface for all structs defined in a Langkit spec. */
     public interface StructInterface {}
 
-    public interface NodeKindInterface {
+    public interface NodeKindInterface extends EnumInterface {
         Reflection.Node getDescription();
     }
 
-    public interface TokenKindInterface {
+    public interface TokenKindInterface extends EnumInterface {
         /**
          * Get the C value from the enum instance.
          *
@@ -670,7 +673,7 @@ public class LangkitSupport {
     }
 
     /** This type represents a member reference. */
-    public interface MemberReferenceInterface {
+    public interface MemberReferenceInterface extends EnumInterface {
         int toC();
     }
 
