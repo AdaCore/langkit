@@ -305,6 +305,9 @@ public class LangkitSupport {
     /** Base interface for all iterators defined in a Langkit spec. */
     public interface LangkitIterator<T> extends Iterator<T>, AutoCloseable {}
 
+    /** Base interface for all structs defined in a Langkit spec. */
+    public interface StructInterface {}
+
     public interface NodeKindInterface {
         Reflection.Node getDescription();
     }
