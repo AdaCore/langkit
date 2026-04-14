@@ -120,6 +120,11 @@
         {"kind": "recurse_field", "field": "f_expected_value"}
       ]
     },
+    "DestructuringPatternDetail": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_decl"}
+      ]
+    },
     "BaseCallExpr": {
       "node": {
         "kind": "group", "document": "recurse"

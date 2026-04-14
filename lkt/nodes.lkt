@@ -3120,6 +3120,12 @@ class PropertyPatternDetail: PatternDetail {
     expected_value: Pattern
 }
 
+|" Pattern detail denoting the destructuring of a field as a shorthand.
+class DestructuringPatternDetail: PatternDetail {
+    @parse_field
+    decl: BindingValDecl
+}
+
 |" Base class for expressions. Encompasses regular expressions as well as
 |" special expressions (grammar expressions, etc).
 @abstract
