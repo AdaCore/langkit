@@ -170,7 +170,11 @@ grammar lkt_grammar {
             list*(
                 EnumClassCase(
                     "case"
-                    list+(EnumClassAltDecl(def_id null(ASTList[TypeRef])), ",")
+                    list+(
+                        EnumClassAltDecl(def_id null(ASTList[TypeRef])),
+                        ",",
+                        allow_trailing
+                    )
                 )
             )
             decl_block.dont_skip("}")
@@ -193,7 +197,7 @@ grammar lkt_grammar {
             ?pick("implements" type_list)
             "{"
             "case"
-            list+(enum_lit_decl, ",")
+            list+(enum_lit_decl, ",", allow_trailing)
             decl_block.dont_skip("}")
             "}"
         )

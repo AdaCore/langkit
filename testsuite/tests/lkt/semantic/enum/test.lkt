@@ -1,5 +1,5 @@
 enum Basic{
-    case a1, b1, c1
+    case a1, b1, c1,
 }
 
 val v1 : Basic = Basic.a1
@@ -18,7 +18,7 @@ val not_match1 : Opened = Basic.a1
 val enum_no_field : Basic = Basic.a1.b1
 
 enum class Toto {
-    case Titi, Tata
+    case Titi, Tata,
 
     fun t(): Int = match node {
         case _: Toto.Titi => 1
