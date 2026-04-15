@@ -400,9 +400,8 @@ package body Liblktlang.Implementation.Extensions is
             end loop;
             raise Assertion_Error with "Errors in prelude";
          end if;
-
-         Populate_Lexical_Env (Prelude);
       end if;
+      Populate_Lexical_Env (Prelude);
       return Unwrap_Unit (Prelude);
    end Lkt_Node_P_Prelude_Unit;
 
