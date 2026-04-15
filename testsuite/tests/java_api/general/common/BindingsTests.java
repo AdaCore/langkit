@@ -957,6 +957,7 @@ public final class BindingsTests {
                 var fieldName = fieldEntry.getKey();
                 var field = fieldEntry.getValue();
                 System.out.println("  - Name: " + fieldName);
+                System.out.println("  - Is nullable: " + field.isNullable());
                 System.out.println(
                     "    Member reference: " + field.memberRef()
                 );

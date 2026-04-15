@@ -123,11 +123,13 @@ public class LangkitSupport {
         * @param javaMethod Reference to the Java method for the field.
         * @param params Parameters of the method.
         * @param memberRef Member reference corresponding to this field.
+        * @param isNullable Whether the field result may be null.
         */
         public record Field(
             Method javaMethod,
             List<Param> params,
-            MemberReferenceInterface memberRef
+            MemberReferenceInterface memberRef,
+            boolean isNullable
         ) {}
 
         /**

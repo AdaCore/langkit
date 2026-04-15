@@ -379,6 +379,12 @@ class JavaAPISettings(AbstractAPISettings):
         )
         return res
 
+    def is_field_nullable(self, field: ct.AbstractNodeData) -> bool:
+        """
+        Get whether the field value may be null.
+        """
+        return not isinstance(field, ct.BaseField) or field.nullable
+
     def get_java_method(self, field: ct.Field) -> JavaMethod:
         """
         Get the Java method from the given field.

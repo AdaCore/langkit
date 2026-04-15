@@ -221,7 +221,8 @@
                         new LangkitSupport.Reflection.Field(
                             method,
                             parameters,
-                            MemberReference.${member_ref_name}
+                            MemberReference.${member_ref_name},
+                            ${str(api.is_field_nullable(field)).lower()}
                         )
                     );
                 }
