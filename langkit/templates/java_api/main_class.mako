@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import java.lang.StringBuilder;
 import java.lang.Iterable;
@@ -5508,6 +5509,15 @@ public final class ${ctx.lib_name.camel} {
                 ));
             }
 
+        }
+
+        @Override
+        public Stream<? extends ${root_node_type}> walk() {
+            if (this.isNone()) return Stream.empty();
+            return Stream.concat(
+                Stream.of(this),
+                Stream.of(this.children()).flatMap(${root_node_type}::walk)
+            );
         }
 
         /**
