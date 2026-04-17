@@ -151,7 +151,6 @@ class ManageScript(abc.ABC):
 
     def __init__(self) -> None:
         self.dirs: Directories
-        self.context: C.CompilationConfig
 
         ########################
         # Main argument parser #
