@@ -395,6 +395,7 @@ public final class ${ctx.lib_name.camel} {
          * Construct a DefaultVisitor with a default behavior that does
          * nothing.
          */
+        @SuppressWarnings("this-escape")
         public DefaultVisitor () {
             this.defaultBehavior = createDefaultBehavior();
         }
