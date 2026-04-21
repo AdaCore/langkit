@@ -193,7 +193,7 @@
                     // Get the Java method of the field
                     var method = ${java_type}.class.getMethod(
                         "${method.name}",
-                        new Class[]{${",".join(param_classes)}}
+                        new Class<?>[]{${",".join(param_classes)}}
                     );
 
                     // Create the parameter list
