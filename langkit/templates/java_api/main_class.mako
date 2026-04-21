@@ -501,6 +501,7 @@ public final class ${ctx.lib_name.camel} {
          *
          * @return The pointer based value for NI.
          */
+        @SuppressWarnings("unchecked")
         public <T extends PointerBase> T ni() {
             return (T) this.ni;
         }
