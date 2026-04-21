@@ -720,7 +720,7 @@ public final class ${ctx.lib_name.camel} {
         public final ExceptionKind kind;
 
         /** Native stack trace.  */
-        private final LangkitStackTrace internalStackTrace;
+        private final transient LangkitStackTrace internalStackTrace;
 
         // ----- Constructors -----
 
