@@ -73,7 +73,7 @@
                 throw new EnumException(
                     "Cannot get ${java_type} from " + cValue
                 );
-            return (${java_type}) map.get(cValue);
+            return map.get(cValue);
         }
 
         /** Create a new enumeration value from its variant name. */

@@ -835,7 +835,7 @@ public final class ${ctx.lib_name.camel} {
                 throw new EnumException(
                     "Cannot get TokenKind from " + cValue
                 );
-            return (TokenKind) map.get(cValue);
+            return map.get(cValue);
         }
 
         /**
@@ -919,7 +919,7 @@ public final class ${ctx.lib_name.camel} {
                 throw new EnumException(
                     "Cannot get ExceptionKind from " + cValue
                 );
-            return (ExceptionKind) map.get(cValue);
+            return map.get(cValue);
         }
 
         /**
@@ -995,7 +995,7 @@ public final class ${ctx.lib_name.camel} {
         ) {
             if(!map.containsKey(cValue))
                 throw new EnumException("Cannot get NodeKind from " + cValue);
-            return (NodeKind) map.get(cValue);
+            return map.get(cValue);
         }
 
         // ----- Instance methods -----
@@ -1072,7 +1072,7 @@ public final class ${ctx.lib_name.camel} {
                 throw new EnumException(
                     "Cannot get MemberReference from " + cValue
                 );
-            return (MemberReference) map.get(cValue);
+            return map.get(cValue);
         }
 
         // ----- Instance methods -----
