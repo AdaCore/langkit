@@ -598,6 +598,7 @@ public final class ${ctx.lib_name.camel} {
      * This class represents exception during symbol manipulation.
      */
     public static final class SymbolException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
         public SymbolException(
             final String symbol
         ) {
@@ -609,6 +610,7 @@ public final class ${ctx.lib_name.camel} {
      * This class reprsents exception during enum manipulation.
      */
     public static final class EnumException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
         public EnumException(
             final String msg
         ) {
@@ -620,6 +622,7 @@ public final class ${ctx.lib_name.camel} {
      * This class represents an exception in the references manipulation.
      */
     public static final class ReferenceException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
         public ReferenceException(
             final String msg
         ) {
@@ -710,6 +713,8 @@ public final class ${ctx.lib_name.camel} {
     public static class LangkitException extends RuntimeException {
 
         // ----- Instance attributes -----
+
+        private static final long serialVersionUID = 1L;
 
         /** The kind of the langkit exception. */
         public final ExceptionKind kind;
