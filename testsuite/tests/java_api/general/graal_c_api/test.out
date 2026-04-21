@@ -276,6 +276,10 @@ from: <AnalysisUnit "example">
 found: false
 is_not_found_error: true
 
+--- Unit diagnostic callback
+unit: <AnalysisUnit "example">
+message: diag
+
 === Null callbacks ===
 === Unclosed event handler ===
 ----------------------
@@ -479,6 +483,11 @@ Visit <NullNode foo.txt:1:46-1:50>
     Member reference: FOO_FOO_NODE_P_SAME_COLOR_DFLT
     Java method name: pSameColorDflt
     Params: [c: Color = Optional[RED]]
+  - Name: p_trigger_unit_diagnostic
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_TRIGGER_UNIT_DIAGNOSTIC
+    Java method name: pTriggerUnitDiagnostic
+    Params: [message: Symbol = Optional.empty]
   - Name: p_trigger_unit_requested
   - Is nullable: true
     Member reference: FOO_FOO_NODE_P_TRIGGER_UNIT_REQUESTED

@@ -89,6 +89,10 @@ class FooNode implements Node[FooNode] {
     fun trigger_unit_requested(name: Symbol, found: Bool, error: Bool): Bool
 
     @exported
+    @external()
+    fun trigger_unit_diagnostic(message: Symbol): Bool
+
+    @exported
     fun iter_int_id(it: Iterator[Int]): Iterator[Int] = it
 
     @exported

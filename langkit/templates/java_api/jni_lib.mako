@@ -134,7 +134,8 @@
         @CompilerDirectives.TruffleBoundary
         public static native PointerWrapper ${nat("create_event_handler")}(
             EventHandler.UnitRequestedCallback unitRequestedCallback,
-            EventHandler.UnitParsedCallback unitParsedCallback
+            EventHandler.UnitParsedCallback unitParsedCallback,
+            EventHandler.UnitDiagnosticCallback unitDiagnosticCallback
         );
 
         /** Decrease the ref counter of the event handler */
