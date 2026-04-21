@@ -30,6 +30,12 @@ MyEH: Unit_Requested_Callback
   Found: FALSE
   Is_Not_Found_Error: TRUE
 
+== unit diagnostic ==
+
+MyEH: Unit_Diagnostic_Callback
+  Unit: <AnalysisUnit main.txt>
+  Message: diag
+
 main.adb: Done.
 MyEH: Release
 

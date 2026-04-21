@@ -810,6 +810,9 @@ base_langkit_docs = {
 
         ``unit_parsed`` is a callback that will be called when a unit is
         parsed.
+
+        ``unit_diagnostic`` is a callback that will be called when a
+        diagnostic is emitted for a unit.
     """,
     "langkit.event_handler_type": """
         Interface to handle events sent by the analysis context.
@@ -838,6 +841,14 @@ base_langkit_docs = {
 
         ``Reparsed`` indicates whether the unit was reparsed, or whether it was
         the first parse.
+    """,
+    "langkit.event_handler_unit_diagnostic_callback": """
+        Callback that will be called when a diagnostic is emitted for an
+        analysis unit.
+
+        ``Unit`` is the unit for which the diagnostic is emitted.
+
+        ``Message`` is the diagnostic message.
     """,
     "langkit.event_handler_destroy_callback": """
         Callback type for functions that are called when destroying an event

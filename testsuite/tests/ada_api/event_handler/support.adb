@@ -52,6 +52,22 @@ package body Support is
       New_Line;
    end Unit_Parsed_Callback;
 
+   ------------------------------
+   -- Unit_Diagnostic_Callback --
+   ------------------------------
+
+   overriding procedure Unit_Diagnostic_Callback
+     (Self    : in out Event_Handler;
+      Context : Analysis_Context'Class;
+      Unit    : Analysis_Unit'Class;
+      Message : Text_Type) is
+   begin
+      Log (Self, "Unit_Diagnostic_Callback");
+      Put_Line ("  Unit: " & Image (Unit));
+      Put_Line ("  Message: " & Image (Message));
+      New_Line;
+   end Unit_Diagnostic_Callback;
+
    -------------
    -- Release --
    -------------

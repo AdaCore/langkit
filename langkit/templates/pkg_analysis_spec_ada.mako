@@ -175,6 +175,13 @@ package ${ada_lib_name}.Analysis is
       Reparsed : Boolean) is null;
    ${ada_doc('langkit.event_handler_unit_parsed_callback', 3)}
 
+   procedure Unit_Diagnostic_Callback
+     (Self    : in out Event_Handler_Interface;
+      Context : Analysis_Context'Class;
+      Unit    : Analysis_Unit'Class;
+      Message : Text_Type) is null;
+   ${ada_doc('langkit.event_handler_unit_diagnostic_callback', 3)}
+
    procedure Release (Self : in out Event_Handler_Interface) is abstract;
    --  Actions to perform when releasing resources associated to Self
 

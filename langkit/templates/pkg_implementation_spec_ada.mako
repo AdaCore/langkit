@@ -1818,6 +1818,12 @@ private package ${ada_lib_name}.Implementation is
       Unit     : Internal_Unit;
       Reparsed : Boolean) is null;
 
+   procedure Unit_Diagnostic_Callback
+     (Self    : in out Internal_Event_Handler;
+      Context : Internal_Context;
+      Unit    : Internal_Unit;
+      Message : Text_Type) is null;
+
    procedure Dec_Ref (Self : in out Internal_Event_Handler_Access);
 
    -----------------------------
