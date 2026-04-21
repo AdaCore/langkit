@@ -128,7 +128,11 @@
             }
 
             public ${elem_type} next() {
+                % if elem_type == root_node_type:
+                return this.listNode.getChild(cursor++);
+                % else:
                 return (${elem_type}) this.listNode.getChild(cursor++);
+                % endif
             }
         }
 
