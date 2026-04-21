@@ -619,6 +619,7 @@ class _EventHandlerWrapper:
             _event_handler_cb_destroy,
             _event_handler_cb_unit_requested,
             _event_handler_cb_unit_parsed,
+            _event_handler_cb_unit_diagnostic,
         )
 
     def __del__(self) -> None:
@@ -682,6 +683,23 @@ class _EventHandlerWrapper:
         except BaseException as exc:
             _log_uncaught_error("EventHandler.unit_parsed_callback")
 
+    @staticmethod
+    def unit_diagnostic_func(self: _EventHandlerWrapper,
+                             context: object,
+                             unit: object,
+                             message: _text) -> None:
+        py_context = AnalysisContext._wrap(context)
+        py_unit = AnalysisUnit._wrap(unit)
+        py_message = message.contents._wrap()
+        try:
+            self.event_handler.unit_diagnostic_callback(
+                py_context,
+                py_unit,
+                py_message,
+            )
+        except BaseException as exc:
+            _log_uncaught_error("EventHandler.unit_diagnostic_callback")
+
 
 def _canonicalize_buffer(buffer: AnyStr,
                          charset: Opt[bytes]) -> Tuple[bytes, Opt[bytes]]:
@@ -736,6 +754,13 @@ class EventHandler(Protocol):
                              unit: AnalysisUnit,
                              reparsed: bool) -> None:
         ${py_doc('langkit.event_handler_unit_parsed_callback', 8)}
+        pass
+
+    def unit_diagnostic_callback(self,
+                                 context: AnalysisContext,
+                                 unit: AnalysisUnit,
+                                 message: str) -> None:
+        ${py_doc('langkit.event_handler_unit_diagnostic_callback', 8)}
         pass
 
 
@@ -2323,6 +2348,13 @@ _event_handler_unit_parsed_func = ctypes.CFUNCTYPE(
     AnalysisUnit._c_type,    # unit
     ctypes.c_uint8,          # reparsed
 )
+_event_handler_unit_diagnostic_func = ctypes.CFUNCTYPE(
+    None,
+    ctypes.py_object,        # data
+    AnalysisContext._c_type, # context
+    AnalysisUnit._c_type,    # unit
+    ctypes.POINTER(_text),   # message
+)
 _create_event_handler = _import_func(
     '${capi.get_name("create_event_handler")}',
     [
@@ -2330,6 +2362,7 @@ _create_event_handler = _import_func(
         _event_handler_destroy_func,
         _event_handler_unit_requested_func,
         _event_handler_unit_parsed_func,
+        _event_handler_unit_diagnostic_func,
     ],
     _event_handler,
 )
@@ -2347,6 +2380,9 @@ _event_handler_cb_unit_requested = _event_handler_unit_requested_func(
 )
 _event_handler_cb_unit_parsed = _event_handler_unit_parsed_func(
     _EventHandlerWrapper.unit_parsed_func
+)
+_event_handler_cb_unit_diagnostic = _event_handler_unit_diagnostic_func(
+    _EventHandlerWrapper.unit_diagnostic_func
 )
 
 # Unit providers

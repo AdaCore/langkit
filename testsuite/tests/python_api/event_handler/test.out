@@ -54,5 +54,20 @@ Traceback (most recent call last):
   File "<string>", line XXX, in maybe_raise
 ValueError: artificial exception
 
+== unit diagnostic ==
+
+MyEH: unit_diagnostic_callback
+  unit: <AnalysisUnit 'main.txt'>
+  message: diag
+
+MyEH: unit_diagnostic_callback
+Uncaught exception in EventHandler.unit_diagnostic_callback:
+Traceback (most recent call last):
+  File ".../__init__.py", line XXX, in unit_diagnostic_func
+     <source code>
+  File "<string>", line XXX, in unit_diagnostic_callback
+  File "<string>", line XXX, in maybe_raise
+ValueError: artificial exception
+
 main.py: Done.
 Done
