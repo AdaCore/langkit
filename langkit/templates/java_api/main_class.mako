@@ -4790,7 +4790,7 @@ public final class ${ctx.lib_name.camel} {
         // ----- Getters -----
 
         public RewritingNode getNONE() {
-            return this.NONE;
+            return RewritingNode.NONE;
         }
 
         ${java_doc('langkit.rewriting.kind',  8)}
