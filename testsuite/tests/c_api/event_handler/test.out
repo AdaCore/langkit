@@ -4,11 +4,11 @@ main.c: Starting...
 
 == unit parsed ==
 
-MyEH: eh_unit_requested
+MyEH: eh_unit_parsed
   unit: <AnalysisUnit main.txt>
   reparsed: 0
 
-MyEH: eh_unit_requested
+MyEH: eh_unit_parsed
   unit: <AnalysisUnit main.txt>
   reparsed: 1
 
@@ -31,6 +31,12 @@ MyEH: eh_unit_requested
   from: <AnalysisUnit main.txt>
   found: 0
   is_not_found_error: 1
+
+== unit diagnostic ==
+
+MyEH: eh_unit_diagnostic
+  unit: <AnalysisUnit main.txt>
+  message: "diag"
 
 MyEH: eh_destroy
 

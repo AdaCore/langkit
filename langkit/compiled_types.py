@@ -127,6 +127,9 @@ def template_extensions(ctx: CompileCtx) -> dict:
         "event_handler_unit_parsed_type": CAPIType(
             capi, "event_handler_unit_parsed_callback"
         ).name,
+        "event_handler_unit_diagnostic_type": CAPIType(
+            capi, "event_handler_unit_diagnostic_callback"
+        ).name,
         "file_reader_type": CAPIType(capi, "file_reader").name,
         "file_reader_destroy_type": CAPIType(
             capi, "file_reader_destroy_callback"

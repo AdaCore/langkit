@@ -234,6 +234,14 @@ typedef void (*${event_handler_unit_parsed_type})(
    ${bool_type} reparsed
 );
 
+${c_doc('langkit.event_handler_unit_diagnostic_callback')}
+typedef void (*${event_handler_unit_diagnostic_type})(
+   void *data,
+   ${analysis_context_type} context,
+   ${analysis_unit_type} unit,
+   ${text_type} *message
+);
+
 /*
  * Types for file readers
  */
@@ -654,7 +662,8 @@ ${capi.get_name('create_event_handler')}(
    void *data,
    ${event_handler_destroy_type} destroy_func,
    ${event_handler_unit_requested_type} unit_requested_func,
-   ${event_handler_unit_parsed_type} unit_parsed_func
+   ${event_handler_unit_parsed_type} unit_parsed_func,
+   ${event_handler_unit_diagnostic_type} unit_diagnostic_func
 );
 
 ${c_doc('langkit.event_handler_dec_ref')}
