@@ -1258,6 +1258,11 @@ public final class ${ctx.lib_name.camel} {
             return this.value == other.value;
         }
 
+        @Override
+        public int hashCode() {
+            return this.value;
+        }
+
     }
 
     ${java_doc('langkit.big_integer_type', 4)}
@@ -3140,6 +3145,15 @@ public final class ${ctx.lib_name.camel} {
                     this.triviaIndex == other.triviaIndex;
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(
+                this.tokenDataHandler,
+                this.tokenIndex,
+                this.triviaIndex
+            );
+        }
+
         // ----- Inner classes -----
 
         /**
@@ -3253,6 +3267,11 @@ public final class ${ctx.lib_name.camel} {
                 Object o
             ) {
                 return o == this;
+            }
+
+            @Override
+            public int hashCode() {
+                return System.identityHashCode(this);
             }
 
         }
@@ -4184,6 +4203,11 @@ public final class ${ctx.lib_name.camel} {
             return this.reference.equals(other.reference);
         }
 
+        @Override
+        public int hashCode() {
+            return this.reference.hashCode();
+        }
+
     }
 
     % if ctx.generate_unparsers:
@@ -4540,6 +4564,11 @@ public final class ${ctx.lib_name.camel} {
             );
         }
 
+        @Override
+        public int hashCode() {
+            return this.reference.hashCode();
+        }
+
     }
 
     ${java_doc('langkit.rewriting.unit_rewriting_handle_type', 4)}
@@ -4687,6 +4716,11 @@ public final class ${ctx.lib_name.camel} {
             if(!(o instanceof RewritingUnit)) return false;
             final RewritingUnit other = (RewritingUnit) o;
             return this.reference.equals(other.reference);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.reference.hashCode();
         }
 
     }
@@ -5231,6 +5265,11 @@ public final class ${ctx.lib_name.camel} {
             if(!(o instanceof RewritingNode)) return false;
             final RewritingNode other = (RewritingNode) o;
             return this.reference.equals(other.reference);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.reference.hashCode();
         }
 
     }
