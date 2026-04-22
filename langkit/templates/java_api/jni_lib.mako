@@ -16,15 +16,19 @@
 
         // ----- Static initializer -----
 
+        @SuppressWarnings("restricted")
+        private static void loadNativeLibraries() {
+            if(!NativeTools.IS_WINDOWS) {
+                System.loadLibrary("langkit_sigsegv_handler");
+            }
+            System.loadLibrary(
+                "${cfg.library.language_name.lower}lang_jni"
+            );
+        }
+
         static {
             if(!ImageInfo.inImageCode()) {
-                // Load the needed libraries
-                if(!NativeTools.IS_WINDOWS) {
-                    System.loadLibrary("langkit_sigsegv_handler");
-                }
-                System.loadLibrary(
-                    "${cfg.library.language_name.lower}lang_jni"
-                );
+                loadNativeLibraries();
 
                 // Initialize the JNI library
                 ${nat("initialize")}();

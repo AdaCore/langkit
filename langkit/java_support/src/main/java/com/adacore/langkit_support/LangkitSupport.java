@@ -35,6 +35,7 @@ public class LangkitSupport {
     /** Exception to represent errors during project manipulation. */
     public static final
     class ProjectManagerException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
         public ProjectManagerException(final String message) {
             super(message);
         }

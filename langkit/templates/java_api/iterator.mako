@@ -184,6 +184,11 @@
             return this.reference.equals(other.reference);
         }
 
+        @Override
+        public int hashCode() {
+            return this.reference.hashCode();
+        }
+
     }
 </%def>
 

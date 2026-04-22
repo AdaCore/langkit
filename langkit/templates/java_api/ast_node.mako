@@ -128,7 +128,11 @@
             }
 
             public ${elem_type} next() {
+                % if elem_type == root_node_type:
+                return this.listNode.getChild(cursor++);
+                % else:
                 return (${elem_type}) this.listNode.getChild(cursor++);
+                % endif
             }
         }
 
@@ -193,7 +197,7 @@
                     // Get the Java method of the field
                     var method = ${java_type}.class.getMethod(
                         "${method.name}",
-                        new Class[]{${",".join(param_classes)}}
+                        new Class<?>[]{${",".join(param_classes)}}
                     );
 
                     // Create the parameter list

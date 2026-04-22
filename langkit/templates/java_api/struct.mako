@@ -116,6 +116,7 @@
          * @param structNative The NI structure native value.
          * @return The newly wrapped structure.
          */
+        @SuppressWarnings("cast")
         static ${java_type} wrap(
             final ${ni_type} structNative
         ) {

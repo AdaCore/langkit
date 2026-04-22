@@ -395,6 +395,7 @@ public final class ${ctx.lib_name.camel} {
          * Construct a DefaultVisitor with a default behavior that does
          * nothing.
          */
+        @SuppressWarnings("this-escape")
         public DefaultVisitor () {
             this.defaultBehavior = createDefaultBehavior();
         }
@@ -501,6 +502,7 @@ public final class ${ctx.lib_name.camel} {
          *
          * @return The pointer based value for NI.
          */
+        @SuppressWarnings("unchecked")
         public <T extends PointerBase> T ni() {
             return (T) this.ni;
         }
@@ -597,6 +599,7 @@ public final class ${ctx.lib_name.camel} {
      * This class represents exception during symbol manipulation.
      */
     public static final class SymbolException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
         public SymbolException(
             final String symbol
         ) {
@@ -608,6 +611,7 @@ public final class ${ctx.lib_name.camel} {
      * This class reprsents exception during enum manipulation.
      */
     public static final class EnumException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
         public EnumException(
             final String msg
         ) {
@@ -619,6 +623,7 @@ public final class ${ctx.lib_name.camel} {
      * This class represents an exception in the references manipulation.
      */
     public static final class ReferenceException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
         public ReferenceException(
             final String msg
         ) {
@@ -710,11 +715,13 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Instance attributes -----
 
+        private static final long serialVersionUID = 1L;
+
         /** The kind of the langkit exception. */
         public final ExceptionKind kind;
 
         /** Native stack trace.  */
-        private final LangkitStackTrace internalStackTrace;
+        private final transient LangkitStackTrace internalStackTrace;
 
         // ----- Constructors -----
 
@@ -829,7 +836,7 @@ public final class ${ctx.lib_name.camel} {
                 throw new EnumException(
                     "Cannot get TokenKind from " + cValue
                 );
-            return (TokenKind) map.get(cValue);
+            return map.get(cValue);
         }
 
         /**
@@ -913,7 +920,7 @@ public final class ${ctx.lib_name.camel} {
                 throw new EnumException(
                     "Cannot get ExceptionKind from " + cValue
                 );
-            return (ExceptionKind) map.get(cValue);
+            return map.get(cValue);
         }
 
         /**
@@ -989,7 +996,7 @@ public final class ${ctx.lib_name.camel} {
         ) {
             if(!map.containsKey(cValue))
                 throw new EnumException("Cannot get NodeKind from " + cValue);
-            return (NodeKind) map.get(cValue);
+            return map.get(cValue);
         }
 
         // ----- Instance methods -----
@@ -1066,7 +1073,7 @@ public final class ${ctx.lib_name.camel} {
                 throw new EnumException(
                     "Cannot get MemberReference from " + cValue
                 );
-            return (MemberReference) map.get(cValue);
+            return map.get(cValue);
         }
 
         // ----- Instance methods -----
@@ -1250,6 +1257,11 @@ public final class ${ctx.lib_name.camel} {
             if(!(o instanceof Char)) return false;
             Char other = (Char) o;
             return this.value == other.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value;
         }
 
     }
@@ -3134,6 +3146,15 @@ public final class ${ctx.lib_name.camel} {
                     this.triviaIndex == other.triviaIndex;
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(
+                this.tokenDataHandler,
+                this.tokenIndex,
+                this.triviaIndex
+            );
+        }
+
         // ----- Inner classes -----
 
         /**
@@ -3247,6 +3268,11 @@ public final class ${ctx.lib_name.camel} {
                 Object o
             ) {
                 return o == this;
+            }
+
+            @Override
+            public int hashCode() {
+                return System.identityHashCode(this);
             }
 
         }
@@ -4178,6 +4204,11 @@ public final class ${ctx.lib_name.camel} {
             return this.reference.equals(other.reference);
         }
 
+        @Override
+        public int hashCode() {
+            return this.reference.hashCode();
+        }
+
     }
 
     % if ctx.generate_unparsers:
@@ -4534,6 +4565,11 @@ public final class ${ctx.lib_name.camel} {
             );
         }
 
+        @Override
+        public int hashCode() {
+            return this.reference.hashCode();
+        }
+
     }
 
     ${java_doc('langkit.rewriting.unit_rewriting_handle_type', 4)}
@@ -4683,6 +4719,11 @@ public final class ${ctx.lib_name.camel} {
             return this.reference.equals(other.reference);
         }
 
+        @Override
+        public int hashCode() {
+            return this.reference.hashCode();
+        }
+
     }
 
     ${java_doc('langkit.rewriting.node_rewriting_handle_type', 4)}
@@ -4750,7 +4791,7 @@ public final class ${ctx.lib_name.camel} {
         // ----- Getters -----
 
         public RewritingNode getNONE() {
-            return this.NONE;
+            return RewritingNode.NONE;
         }
 
         ${java_doc('langkit.rewriting.kind',  8)}
@@ -5225,6 +5266,11 @@ public final class ${ctx.lib_name.camel} {
             if(!(o instanceof RewritingNode)) return false;
             final RewritingNode other = (RewritingNode) o;
             return this.reference.equals(other.reference);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.reference.hashCode();
         }
 
     }
