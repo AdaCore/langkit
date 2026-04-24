@@ -4158,7 +4158,8 @@ package body ${ada_lib_name}.Implementation is
       if Value = null then
          return Null_Node_Builder;
       else
-         return new Copy_Node_Builder_Record'(Ref_Count => 1, Value => Value);
+         return new Copy_Node_Builder_Record'
+           (Ref_Count => 1, Hash => Hash (Value), Value => Value);
       end if;
    end Create_Copy_Node_Builder;
 
@@ -4198,6 +4199,10 @@ package body ${ada_lib_name}.Implementation is
            (Self              : ${t.record_type};
             Parent, Self_Node : ${T.root_node.name})
             return ${T.root_node.name};
+
+         overriding function Is_Equivalent
+           (Left  : ${t.record_type};
+            Right : Node_Builder_Record'Class) return Boolean;
 
          overriding function Trace_Image
            (Self : ${t.record_type}) return String
@@ -4332,6 +4337,31 @@ package body ${ada_lib_name}.Implementation is
             return Result;
          end Build;
 
+         -------------------
+         -- Is_Equivalent --
+         -------------------
+
+         overriding function Is_Equivalent
+           (Left  : ${t.record_type};
+            Right : Node_Builder_Record'Class) return Boolean
+         is
+            % if constructor_args:
+               L : ${t.record_type} renames Left;
+               R : ${t.record_type} renames ${t.record_type} (Right);
+            % endif
+         begin
+            % if constructor_args:
+               return ${" and then ".join(
+                  arg.type.equivalent_function_call(
+                     f"L.{arg.codegen_name}", f"R.{arg.codegen_name}"
+                  )
+                  for arg in constructor_args
+               )};
+            % else:
+               return True;
+            % endif
+         end Is_Equivalent;
+
          % if refcount_needed:
 
             -------------
@@ -4372,6 +4402,19 @@ package body ${ada_lib_name}.Implementation is
                   Inc_Ref (Builder.${arg.codegen_name});
                % endif
             % endfor
+
+            % if constructor_args:
+               Builder.Hash := Combine
+                 (${ada_block_with_parens(
+                     [
+                        f"{i} => Hash ({arg.codegen_name})"
+                        for i, arg in enumerate(constructor_args, 1)
+                     ],
+                     18,
+                   )});
+            % else:
+               Builder.Hash := Initial_Hash;
+            % endif
             return Node_Builder_Type (Builder);
          end ${t.synth_constructor};
       % endif

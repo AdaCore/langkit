@@ -25,6 +25,7 @@ with Ada.Containers.Vectors;
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;       use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
+with Ada.Tags;                    use Ada.Tags;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
@@ -41,6 +42,7 @@ with Langkit_Support.Adalog.Solver_Interface;
 with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
+with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Lexical_Envs_Impl;
@@ -553,6 +555,10 @@ private package ${ada_lib_name}.Implementation is
       Ref_Count : Integer;
       --  Negative values are interpreted as "always living singleton".
       --  Non-negative values have the usual ref-counting semantics.
+
+      Hash : Hash_Type;
+      --  Cached hash for this node builder. It is computed at node builder
+      --  creation.
    end record;
    type Node_Builder_Type is access all Node_Builder_Record'Class;
 
@@ -568,10 +574,24 @@ private package ${ada_lib_name}.Implementation is
    --  This function is meant to be called in a property: ``Self_Node`` must be
    --  the ``Self`` of the calling property.
 
+   function Is_Equivalent
+     (Left  : Node_Builder_Record;
+      Right : Node_Builder_Record'Class) return Boolean
+   is abstract;
    function Trace_Image (Self : Node_Builder_Record) return String is abstract;
 
    procedure Release (Self : in out Node_Builder_Record) is null;
    --  Free resources for this node builder
+
+   function Hash (Self : Node_Builder_Type) return Hash_Type
+   is (if Self = null then Initial_Hash else Self.Hash);
+
+   function Equivalent (Left, Right : Node_Builder_Type) return Boolean
+   is (if Left = null
+       then Right = null
+       else Right /= null
+            and then Left.all'Tag = Right.all'Tag
+            and then Left.Is_Equivalent (Right.all));
 
    function Trace_Image (Self : Node_Builder_Type) return String
    is (if Self = null
@@ -588,12 +608,17 @@ private package ${ada_lib_name}.Implementation is
       Parent, Self_Node : ${T.root_node.name}) return ${T.root_node.name}
    is (Self.Value);
 
+   overriding function Is_Equivalent
+     (Left  : Copy_Node_Builder_Record;
+      Right : Node_Builder_Record'Class) return Boolean
+   is (Left.Value = Copy_Node_Builder_Record (Right).Value);
+
    overriding function Trace_Image
      (Self : Copy_Node_Builder_Record) return String
    is ("<NodeBuilder to copy " & Trace_Image (Self.Value) & ">");
 
    Null_Node_Builder_Record : aliased Copy_Node_Builder_Record :=
-     (Ref_Count => -1, Value => null);
+     (Ref_Count => -1, Hash => Initial_Hash, Value => null);
    Null_Node_Builder        : constant Node_Builder_Type :=
      Null_Node_Builder_Record'Access;
 

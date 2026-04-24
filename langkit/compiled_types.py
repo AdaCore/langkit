@@ -4687,6 +4687,10 @@ class NodeBuilderType(CompiledType):
             null_allowed=False,
             is_refcounted=True,
             nullexpr="null",
+            # Non-hashable types are forbidden for synthetic node fields, so we
+            # know we can write hash functions for all node builder types.
+            hashable=True,
+            has_equivalent_function=True,
             lkt_name=f"NodeBuilder[{node_type.lkt_name}]",
         )
         context.add_pending_composite_type(self)
@@ -4696,6 +4700,10 @@ class NodeBuilderType(CompiledType):
         Whether we need to generate code to create synthetizing node builders
         for this type in Ada.
         """
+
+        # Node builders pre-compute their hashes, so they always require hash
+        # functions.
+        context.add_pending_required_hash_function(self)
 
     @property
     def record_type(self) -> str:
@@ -4770,6 +4778,11 @@ class NodeBuilderType(CompiledType):
                 ),
             )
         return result
+
+    def require_hash_function(self) -> None:
+        super().require_hash_function()
+        for arg in self.synth_constructor_args:
+            arg.type.require_hash_function()
 
     def builtin_properties(self, owner: CompiledType) -> list[E.PropertyDef]:
         """
