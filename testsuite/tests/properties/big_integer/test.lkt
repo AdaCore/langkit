@@ -35,6 +35,13 @@ class FooNode implements Node[FooNode] {
     fun check_to_big_int(i: Int): BigInt = i.as_big_int()
 
     fun to_int(b: Bool): BigInt = if b then 1b else 0b
+
+    @external()
+    fun print_int(i: BigInt): Bool
+
+    @exported
+    @memoized
+    fun mmz_print_int(i: BigInt): Bool = node.print_int(i)
 }
 
 class Decl: FooNode {

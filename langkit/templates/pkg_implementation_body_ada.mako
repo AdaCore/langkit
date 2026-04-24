@@ -33,7 +33,7 @@ with Ada.Unchecked_Deallocation;
 with System;
 with System.Memory;
 
-% if T.String.requires_hash_function:
+% if T.BigInt.requires_hash_function or T.String.requires_hash_function:
 with GNAT.String_Hash;
 % endif
 with GNAT.Task_Lock;
@@ -3447,6 +3447,15 @@ package body ${ada_lib_name}.Implementation is
    begin
       return Create_Big_Integer (-Value.Value);
    end "-";
+
+   % if T.BigInt.requires_hash_function:
+      function Hash (I : Big_Integer_Type) return Hash_Type is
+         function String_Hash is new GNAT.String_Hash.Hash
+           (Character, String, Hash_Type);
+      begin
+         return String_Hash (I.Value.Image);
+      end Hash;
+   % endif
 
    ------------------
    -- Unit_Version --

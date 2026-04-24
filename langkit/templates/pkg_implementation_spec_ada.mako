@@ -519,6 +519,10 @@ private package ${ada_lib_name}.Implementation is
    function "-" (Left, Right : Big_Integer_Type) return Big_Integer_Type;
    function "-" (Value : Big_Integer_Type) return Big_Integer_Type;
 
+   % if T.BigInt.requires_hash_function:
+      function Hash (I : Big_Integer_Type) return Hash_Type;
+   % endif
+
    % if ctx.properties_logging:
    function Trace_Image (I : Big_Integer_Type) return String;
    % endif

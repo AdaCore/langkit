@@ -5396,6 +5396,7 @@ class BigIntegerType(CompiledType):
             exposed=True,
             nullexpr="No_Big_Integer",
             is_refcounted=True,
+            hashable=True,
             has_equivalent_function=True,
             is_ada_record=True,
             c_type_name="big_integer",
