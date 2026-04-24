@@ -13,8 +13,10 @@ begin
       raise Program_Error;
    end if;
 
-   Put_Line ("Calling FooNode.P_P");
-   Dummy := U.Root.Child (1).P_P;
+   for Dummy_Bool in Boolean loop
+      Put_Line ("Calling FooNode.P_P");
+      Dummy := U.Root.Child (1).P_P;
+   end loop;
 
    Put_Line ("main.adb: Done.");
 end Main;

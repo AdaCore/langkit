@@ -452,6 +452,17 @@ private package ${ada_lib_name}.Implementation is
    --  AST_Envs.Create_Dynamic_Lexical_Env.
 
    ## Generate Hash functions for "built-in types" if need be
+
+   % if T.Address.requires_hash_function:
+
+      --  On all relevant targets, addresses returned by the system allocator
+      --  are aligned on 4-bytes boundaries, so ignore the 2 least significant
+      --  bits.
+
+      function Hash is new Langkit_Support.Hashes.Hash_Address
+        (Ignored_LSB => 2);
+   % endif
+
    % if T.Bool.requires_hash_function:
       function Hash (B : Boolean) return Hash_Type;
    % endif

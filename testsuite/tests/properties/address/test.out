@@ -1,5 +1,6 @@
 main.adb: Running...
 Calling FooNode.P_P
 FooNode.P_Print_Addr called
+Calling FooNode.P_P
 main.adb: Done.
 Done
