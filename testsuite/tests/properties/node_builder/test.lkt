@@ -165,6 +165,22 @@ class LiteralSequence: FooNode {
     @exported
     @lazy
     lf_staged_node_builder: SynthNonNullable = node.lf_node_builder.build()
+
+    # Check that NodeBuilder is covariant, i.e. that NodeBuilder[T1] is a
+    # subtype of NodeBuilder[T2] iff T1 is a subtype of T2. It it was not the
+    # case, the general_node_builder property would not compile.
+
+    fun foo_node_builder(): NodeBuilder[FooNode] =
+        raise[NodeBuilder[FooNode]] PropertyError()
+
+    fun literal_builder(): NodeBuilder[Literal] =
+        raise[NodeBuilder[Literal]] PropertyError()
+
+    @ignored
+    fun general_node_builder(b: Bool): NodeBuilder[FooNode] =
+        if b
+        then node.foo_node_builder()
+        else node.literal_builder()
 }
 
 class Name: FooNode implements TokenNode {

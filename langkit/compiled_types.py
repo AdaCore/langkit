@@ -1618,8 +1618,8 @@ class CompiledType:
             ``self`` and ``other`` keys being the names of mismatching types.
         """
 
-        # ASTNodeType instances (and thus entities) always can be unified:
-        # just take the most recent common ancestor.
+        # ASTNodeType instances (and thus entities an node builders) always can
+        # be unified: just take the most recent common ancestor.
         if isinstance(self, EntityType) and isinstance(other, EntityType):
             bare_self = self.element_type
             assert isinstance(bare_self, ASTNodeType)
@@ -1634,6 +1634,18 @@ class CompiledType:
             # EntityType, mypy pretends that entity_result does not matches
             # _Self.
             return entity_result  # type: ignore
+
+        elif isinstance(self, NodeBuilderType) and isinstance(
+            other, NodeBuilderType
+        ):
+            node_builder_result = ASTNodeType.common_ancestor(
+                self.node_type, other.node_type
+            ).builder_type
+
+            # Even though this block is guarded by the check that self is an
+            # NodeBuilderType, mypy pretends that node_builder_type does not
+            # matches _Self.
+            return node_builder_result  # type: ignore
 
         elif isinstance(self, ASTNodeType) and isinstance(other, ASTNodeType):
             # Even though this block is guarded by the check that self is an
