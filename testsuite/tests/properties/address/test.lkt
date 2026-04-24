@@ -1,0 +1,24 @@
+# Test that the Address type is correctly implemented
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @external()
+    fun print_addr(a: Address): Bool
+
+    # Generated code this property will mention System.Address: we used not to
+    # generate the corresponding "with System;" clause.
+    fun print_addr_wrapper(a: Address): Bool = node.print_addr(a)
+
+    @exported
+    fun p(): Bool = node.print_addr_wrapper(null[Address])
+}
+
+class Example: FooNode implements TokenNode {
+}

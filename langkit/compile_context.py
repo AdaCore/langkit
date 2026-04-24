@@ -1195,6 +1195,7 @@ class CompileCtx:
             "Langkit_Support.Symbols",
             "Langkit_Support.Text",
             "Langkit_Support.Types",
+            "System",
             f"{lib_name}.Common",
             f"{lib_name}.Implementation",
         ]:
