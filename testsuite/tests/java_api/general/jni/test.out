@@ -308,5 +308,233 @@ Visit <Example foo.txt:1:38-1:45>
 Visit <NullNode foo.txt:1:46-1:50>
 -----------------
 
+--- Reflection ---
+
+==== Node reflection information
+
+- Node: Example
+  Kind: EXAMPLE
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+  - Name: p_singleton
+    Member reference: FOO_EXAMPLE_P_SINGLETON
+    Java method name: pSingleton
+    Params: []
+- Node: FooNode
+  Kind: null
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+  - Name: child_index
+    Member reference: FOO_CHILD_INDEX
+    Java method name: childIndex
+    Params: []
+  - Name: children
+    Member reference: FOO_CHILDREN
+    Java method name: children
+    Params: []
+  - Name: completion_item_kind_to_int
+    Member reference: FOO_COMPLETION_ITEM_KIND_TO_INT
+    Java method name: completionItemKindToInt
+    Params: [kind: CompletionItemKind = Optional.empty]
+  - Name: full_sloc_image
+    Member reference: FOO_FULL_SLOC_IMAGE
+    Java method name: fullSlocImage
+    Params: []
+  - Name: is_ghost
+    Member reference: FOO_IS_GHOST
+    Java method name: isGhost
+    Params: []
+  - Name: next_sibling
+    Member reference: FOO_NEXT_SIBLING
+    Java method name: nextSibling
+    Params: []
+  - Name: p_array_len
+    Member reference: FOO_FOO_NODE_P_ARRAY_LEN
+    Java method name: pArrayLen
+    Params: [a: int[] = Optional.empty]
+  - Name: p_array_prop_error
+    Member reference: FOO_FOO_NODE_P_ARRAY_PROP_ERROR
+    Java method name: pArrayPropError
+    Params: []
+  - Name: p_count
+    Member reference: FOO_FOO_NODE_P_COUNT
+    Java method name: pCount
+    Params: [seq: Example[] = Optional.empty]
+  - Name: p_get_a
+    Member reference: FOO_FOO_NODE_P_GET_A
+    Java method name: pGetA
+    Params: [c: Char = Optional[97]]
+  - Name: p_get_char
+    Member reference: FOO_FOO_NODE_P_GET_CHAR
+    Java method name: pGetChar
+    Params: [s: BareNodeStruct = Optional.empty]
+  - Name: p_get_eacute
+    Member reference: FOO_FOO_NODE_P_GET_EACUTE
+    Java method name: pGetEacute
+    Params: [c: Char = Optional[233]]
+  - Name: p_get_int_array
+    Member reference: FOO_FOO_NODE_P_GET_INT_ARRAY
+    Java method name: pGetIntArray
+    Params: []
+  - Name: p_get_node
+    Member reference: FOO_FOO_NODE_P_GET_NODE
+    Java method name: pGetNode
+    Params: [nodeStruct: FooNodeStruct = Optional.empty]
+  - Name: p_get_str
+    Member reference: FOO_FOO_NODE_P_GET_STR
+    Java method name: pGetStr
+    Params: [s: String = Optional.empty]
+  - Name: p_identity
+    Member reference: FOO_FOO_NODE_P_IDENTITY
+    Java method name: pIdentity
+    Params: [c: Char = Optional.empty]
+  - Name: p_int_double
+    Member reference: FOO_FOO_NODE_P_INT_DOUBLE
+    Java method name: pIntDouble
+    Params: [c: BigInteger = Optional.empty]
+  - Name: p_is_struct_null
+    Member reference: FOO_FOO_NODE_P_IS_STRUCT_NULL
+    Java method name: pIsStructNull
+    Params: [s: EmptyStruct = Optional.empty]
+  - Name: p_iter_entity
+    Member reference: FOO_FOO_NODE_P_ITER_ENTITY
+    Java method name: pIterEntity
+    Params: []
+  - Name: p_iter_int
+    Member reference: FOO_FOO_NODE_P_ITER_INT
+    Java method name: pIterInt
+    Params: []
+  - Name: p_iter_int_id
+    Member reference: FOO_FOO_NODE_P_ITER_INT_ID
+    Java method name: pIterIntId
+    Params: [it: IntegerIterator = Optional.empty]
+  - Name: p_iter_struct
+    Member reference: FOO_FOO_NODE_P_ITER_STRUCT
+    Java method name: pIterStruct
+    Params: []
+  - Name: p_me
+    Member reference: FOO_FOO_NODE_P_ME
+    Java method name: pMe
+    Params: [b: boolean = Optional.empty]
+  - Name: p_my_node
+    Member reference: FOO_FOO_NODE_P_MY_NODE
+    Java method name: pMyNode
+    Params: []
+  - Name: p_new_empty_struct
+    Member reference: FOO_FOO_NODE_P_NEW_EMPTY_STRUCT
+    Java method name: pNewEmptyStruct
+    Params: []
+  - Name: p_new_struct_with_inner
+    Member reference: FOO_FOO_NODE_P_NEW_STRUCT_WITH_INNER
+    Java method name: pNewStructWithInner
+    Params: []
+  - Name: p_null_example
+    Member reference: FOO_FOO_NODE_P_NULL_EXAMPLE
+    Java method name: pNullExample
+    Params: []
+  - Name: p_null_sequence
+    Member reference: FOO_FOO_NODE_P_NULL_SEQUENCE
+    Java method name: pNullSequence
+    Params: []
+  - Name: p_same_color
+    Member reference: FOO_FOO_NODE_P_SAME_COLOR
+    Java method name: pSameColor
+    Params: [c: Color = Optional.empty]
+  - Name: p_same_color_dflt
+    Member reference: FOO_FOO_NODE_P_SAME_COLOR_DFLT
+    Java method name: pSameColorDflt
+    Params: [c: Color = Optional[RED]]
+  - Name: p_trigger_unit_requested
+    Member reference: FOO_FOO_NODE_P_TRIGGER_UNIT_REQUESTED
+    Java method name: pTriggerUnitRequested
+    Params: [name: Symbol = Optional.empty, found: boolean = Optional.empty, error: boolean = Optional.empty]
+  - Name: p_with_md
+    Member reference: FOO_FOO_NODE_P_WITH_MD
+    Java method name: pWithMd
+    Params: [eqUsed: boolean = Optional.empty, eqIgnored: boolean = Optional.empty]
+  - Name: parent
+    Member reference: FOO_PARENT
+    Java method name: parent
+    Params: []
+  - Name: parents
+    Member reference: FOO_PARENTS
+    Java method name: parents
+    Params: [withSelf: boolean = Optional[true]]
+  - Name: previous_sibling
+    Member reference: FOO_PREVIOUS_SIBLING
+    Java method name: previousSibling
+    Params: []
+  - Name: token_end
+    Member reference: FOO_TOKEN_END
+    Java method name: tokenEnd
+    Params: []
+  - Name: token_start
+    Member reference: FOO_TOKEN_START
+    Java method name: tokenStart
+    Params: []
+- Node: FooNodeBaseList
+  Kind: null
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+- Node: FooNodeList
+  Kind: null
+  Is token node: false
+  Is list node: true
+  Parsing fields: []
+  All fields:
+- Node: Ident
+  Kind: IDENT
+  Is token node: true
+  Is list node: false
+  Parsing fields: []
+  All fields:
+  - Name: p_sym
+    Member reference: FOO_IDENT_P_SYM
+    Java method name: pSym
+    Params: [sym: Symbol = Optional.empty]
+- Node: NullNode
+  Kind: NULL_NODE
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+- Node: Sequence
+  Kind: SEQUENCE
+  Is token node: false
+  Is list node: true
+  Parsing fields: []
+  All fields:
+  - Name: p_all_items
+    Member reference: FOO_SEQUENCE_P_ALL_ITEMS
+    Java method name: pAllItems
+    Params: []
+  - Name: p_example_items
+    Member reference: FOO_SEQUENCE_P_EXAMPLE_ITEMS
+    Java method name: pExampleItems
+    Params: []
+- Node: StringLiteral
+  Kind: STRING_LITERAL
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+- Node: Var
+  Kind: VAR
+  Is token node: false
+  Is list node: false
+  Parsing fields: [f_arg]
+  All fields:
+  - Name: f_arg
+    Member reference: FOO_VAR_F_ARG
+    Java method name: fArg
+    Params: []
+------------------
+
 ===== End of the Java tests =====
 Done

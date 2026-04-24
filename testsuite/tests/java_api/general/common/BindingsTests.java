@@ -4,12 +4,14 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import java.math.BigInteger;
 
 import com.adacore.langkit_support.LangkitSupport;
+import com.adacore.libfoolang.Libfoolang;
 import com.adacore.libfoolang.Libfoolang.*;
 
 public final class BindingsTests {
@@ -70,6 +72,17 @@ public final class BindingsTests {
                 "\n  trivia_count = " + unit.getTriviaCount()
             );
         }
+    }
+
+    /**
+     * Get the string representation of the provided object. If the value is
+     * an instance of the `Libfoolang.Char` class, return the numeric value of
+     * it to avoid encoding issues on test baselines.
+     */
+    private static String toString(Object obj) {
+        return Objects.toString(
+            obj instanceof Libfoolang.Char c ? c.value : obj
+        );
     }
 
     // ----- Test methods -----
@@ -905,6 +918,70 @@ public final class BindingsTests {
         footer("Tree walk");
     }
 
+    private static void testReflection() {
+        header("Reflection");
+
+        // Show all node reflection information
+        System.out.println("\n==== Node reflection information\n");
+        for (
+            var nodeEntry : Libfoolang.NODE_DESCRIPTION_MAP
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .toList()
+        ) {
+            var nodeType = nodeEntry.getValue();
+            System.out.println("- Node: " + nodeType.className());
+            System.out.println("  Kind: " + nodeType.kind());
+            System.out.println("  Is token node: " + nodeType.isTokenNode());
+            System.out.println("  Is list node: " + nodeType.isListNode());
+            System.out.println(
+                "  Parsing fields: " + Arrays.toString(nodeType.fields())
+            );
+            System.out.println("  All fields:");
+            for (
+                var fieldEntry : nodeType
+                    .fieldDescriptions()
+                    .entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .filter(
+                        e -> e
+                            .getValue()
+                            .javaMethod()
+                            .getDeclaringClass() == nodeType.clazz()
+                    )
+                    .toList()
+            ) {
+                var fieldName = fieldEntry.getKey();
+                var field = fieldEntry.getValue();
+                System.out.println("  - Name: " + fieldName);
+                System.out.println(
+                    "    Member reference: " + field.memberRef()
+                );
+                System.out.println(
+                    "    Java method name: " + field.javaMethod().getName()
+                );
+                System.out.println(
+                    "    Params: " +
+                    field
+                        .params()
+                        .stream()
+                        .map(
+                            p -> p.name() +
+                                ": " +
+                                p.type().getSimpleName() +
+                                " = " +
+                                p.defaultValue().map(BindingsTests::toString)
+                        )
+                        .toList()
+                );
+            }
+        }
+
+        footer("Reflection");
+    }
+
     /**
      * Run the Java tests one by one
      *
@@ -930,6 +1007,7 @@ public final class BindingsTests {
         testEventHandlers();
         testDefaultVisitor();
         testTreeWalk();
+        testReflection();
         System.out.println("===== End of the Java tests =====");
     }
 
