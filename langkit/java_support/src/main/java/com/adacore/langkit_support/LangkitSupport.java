@@ -49,6 +49,22 @@ public class LangkitSupport {
     public static final class Reflection {
 
         /**
+         * This class represents the reflection description of an analysis
+         * library. This is the main entry point of the reflection API.
+         *
+         * @param enumMap All enumeration types defined by the analysis
+         *                library.
+         * @param structMap All structure types defined by the analysis
+         *                  library.
+         * @param nodeMap All node types defined by the analysis library.
+         */
+        public record Library(
+            Map<String, Enum> enumMap,
+            Map<String, Struct> structMap,
+            Map<String, Node> nodeMap
+        ) {}
+
+        /**
          * This class represents the description of an enumeration type.
          *
          * @param clazz Java class of the enumeration.
@@ -247,6 +263,16 @@ public class LangkitSupport {
     // ==========
     // Common interfacing API
     // ==========
+
+    /**
+     * This is the base interface of all classes representing Langkit analysis
+     * libraries.
+     */
+    public interface AnalysisLibrary {
+        public static Reflection.Library getDescription() {
+            throw new NotImplementedException();
+        }
+    }
 
     /** Classes that implement this interface wrap the langkit characters
      *  which are 32 bit wide. */

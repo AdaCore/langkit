@@ -1028,6 +1028,12 @@ public final class BindingsTests {
             );
         }
 
+        // Test reflection fetching method
+        var library = Libfoolang.getDescription();
+        assert library.nodeMap() == Libfoolang.NODE_DESCRIPTION_MAP;
+        assert library.structMap() == Libfoolang.STRUCT_DESCRIPTION_MAP;
+        assert library.enumMap() == Libfoolang.ENUM_DESCRIPTION_MAP;
+
         footer("Reflection");
     }
 

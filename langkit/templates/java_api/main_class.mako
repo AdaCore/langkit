@@ -74,7 +74,8 @@ Those bindings call the native library using JNI and Native-Image C API.
 
 ====================
 */
-public final class ${ctx.lib_name.camel} {
+public final class ${ctx.lib_name.camel}
+    implements LangkitSupport.AnalysisLibrary {
 
     // ==========
     // Native entry points
@@ -211,6 +212,15 @@ public final class ${ctx.lib_name.camel} {
         );
             % endif
         % endfor
+    }
+
+    /** Redefine the reflection accession method. */
+    public static LangkitSupport.Reflection.Library getDescription() {
+        return new LangkitSupport.Reflection.Library(
+            ENUM_DESCRIPTION_MAP,
+            STRUCT_DESCRIPTION_MAP,
+            NODE_DESCRIPTION_MAP
+        );
     }
 
     // ==========
