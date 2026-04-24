@@ -343,12 +343,12 @@
 
       function Equivalent (L, R : ${cls.name}) return Boolean is
       begin
-         return ${(' and then '.join(
-            ('Equivalent (L.{}, R.{})'
-             if f.type.has_equivalent_function else
-             'L.{} = R.{}').format(f.names.codegen, f.names.codegen)
+         return ${' and then '.join(
+            f.type.equivalent_function_call(
+               f"L.{f.names.codegen}", f"R.{f.names.codegen}"
+            )
             for f in cls.get_fields()
-         ))};
+         )};
       end Equivalent;
 
    % endif

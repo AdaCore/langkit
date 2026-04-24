@@ -161,15 +161,9 @@ begin
    case L.Kind is
       % for t in key_types:
          when ${t.memoization_kind} =>
-            <%
-               l = 'L.As_{}'.format(t.name)
-               r = 'R.As_{}'.format(t.name)
-            %>
-            % if t.has_equivalent_function:
-               return Equivalent (${l}, ${r});
-            % else:
-               return ${l} = ${r};
-            % endif
+            return ${t.equivalent_function_call(
+               f"L.As_{t.name}", f"R.As_{t.name}"
+            )};
       % endfor
    end case;
 end Equivalent;

@@ -403,13 +403,9 @@
       end if;
 
       for I in L.Items'Range loop
-         if
-            % if cls.element_type.has_equivalent_function:
-               not Equivalent (L.Items (I), R.Items (I))
-            % else:
-               L.Items (I) /= R.Items (I)
-            % endif
-         then
+         if not (${cls.element_type.equivalent_function_call(
+               "L.Items (I)", "R.Items (I)"
+         )}) then
             return False;
          end if;
       end loop;
@@ -460,9 +456,7 @@
       function Make_Unique (A : ${cls.name}) return ${cls.name} is
          <%
             elt_type = cls.element_type
-            elt_equiv_func = ('Equivalent'
-                              if elt_type.has_equivalent_function else
-                              '"="')
+            elt_equiv_func = elt_type.equivalent_function_name
          %>
 
          --  To keep the order of the result deterministic, this function works

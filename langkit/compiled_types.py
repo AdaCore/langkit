@@ -1125,6 +1125,25 @@ class CompiledType:
         return self._has_equivalent_function
 
     @property
+    def equivalent_function_name(self) -> str:
+        """
+        Code generation helper: return the name of the Ada function to check
+        equivalence between two values of this type.
+        """
+        return "Equivalent" if self.has_equivalent_function else '"="'
+
+    def equivalent_function_call(self, left: str, right: str) -> str:
+        """
+        Code generation helper: return Ada code to check equivalence between
+        two values of this type.
+        """
+        return (
+            f"Equivalent ({left}, {right})"
+            if self.has_equivalent_function
+            else f"{left} = {right}"
+        )
+
+    @property
     def requires_hash_function(self) -> bool:
         """
         Return whether code generation must produce a Hash function for this
