@@ -79,6 +79,18 @@ begin
    end;
    New_Line;
 
+   Put_Line ("== List_Node_With_Null_Child ==");
+   declare
+      L : Synth_Literal_List;
+   begin
+      L := N.F_Lf_List_Node_With_Null_Child;
+      Put_Line (L.Image);
+   exception
+      when Exc : Property_Error =>
+         Put_Line ("Property_Error: " & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line ("== Non_Nullable_Null ==");
    declare
       R : Synth_Non_Nullable;

@@ -26,8 +26,11 @@ SynthLiteralListWithUserField[0:0-0:0]
 |  Literal[1:13-1:14]: 3
 Number: 42
 
+== List_Node_With_Null_Child ==
+Property_Error: main.txt:1:1-1:15: list child of SynthLiteralList cannot be null; add a nullable annotation to this field to allow it
+
 == Non_Nullable_Null ==
-Property_Error: main.txt:1:1-1:15: SynthNonNullable.items cannot be null in synthetic nodes; add a nullable annotation to this field to allow it
+Property_Error: main.txt:1:1-1:15: field SynthNonNullable.items cannot be null; add a nullable annotation to this field to allow it
 
 == Non_Nullable_Not_Null ==
 <SynthNonNullable main.txt:0:0-0:0>

@@ -4816,14 +4816,12 @@ class NodeBuilderType(CompiledType):
             assert len(args) == 1
             parent_expr = args[0] or E.NullExpr(None, T.root_node)
 
-            return E.LiteralExpr(
+            return E.CallExpr(
                 debug_info,
-                template=(
-                    "Node_Builder_Type'({}).all.Build"
-                    " (Parent => {}, Self_Node => Self)"
-                ),
-                expr_type=node_data.type,
-                operands=[prefix, parent_expr],
+                "Built_Node",
+                "Node_Builder_Build_Wrapper",
+                node_data.type,
+                [prefix, parent_expr, prop.node_var.ref_expr],
             )
 
         return [

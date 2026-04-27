@@ -67,6 +67,13 @@ class LiteralSequence: FooNode {
             number=42b
         ).build()
 
+    @exported
+    @lazy
+    lf_list_node_with_null_child: SynthLiteralList =
+        SynthLiteralList.builder(
+            [node.items[0].to_builder(), null[Literal].to_builder()]
+        ).build()
+
     # SynthNonNullable.items cannot be null while SynthNullable.items can: we
     # need to check the behavior of both cases for both nodes.
 

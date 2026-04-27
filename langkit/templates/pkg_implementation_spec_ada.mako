@@ -573,6 +573,12 @@ private package ${ada_lib_name}.Implementation is
    end record;
    type Node_Builder_Type is access all Node_Builder_Record'Class;
 
+   procedure Validate
+     (Self : Node_Builder_Record; Self_Node : ${T.root_node.name})
+   is null;
+   --  Raise a property error if it is invalid to instantiate this node builder
+   --  from ``Self_Node``'s unit (assumed not to be null).
+
    function Build
      (Self              : Node_Builder_Record;
       Parent, Self_Node : ${T.root_node.name}) return ${T.root_node.name}
@@ -609,6 +615,23 @@ private package ${ada_lib_name}.Implementation is
        then "<NodeBuilder null>"
        else Self.Trace_Image);
 
+   function Node_Builder_Build_Wrapper
+     (Self              : Node_Builder_Type;
+      Parent, Self_Node : ${T.root_node.name}) return ${T.root_node.name};
+   --  Wrapper around ``Node_Builder_Record.Build`` that performs validaty
+   --  check before running any node synthetization.
+
+   procedure Validate_Check_Child
+     (Desc      : String;
+      Builder   : Node_Builder_Type;
+      Nullable  : Boolean;
+      Self_Node : ${T.root_node.name});
+   --  Helper for the implementation of ``Node_Builder_Record.Validate`` for
+   --  synthetizing builders.
+   --
+   --  Ensure that ``Builder`` does not return a foreign node, and if
+   --  ``Nullable`` is false, that it does not return a null node.
+
    type Copy_Node_Builder_Record is new Node_Builder_Record with record
       Value : ${T.root_node.name};
       --  Existing node that this builder must yield
@@ -641,6 +664,11 @@ private package ${ada_lib_name}.Implementation is
 
    function Create_Copy_Node_Builder
      (Value : ${T.root_node.name}) return Node_Builder_Type;
+
+   function Is_Synthetizing (Self : Node_Builder_Type) return Boolean
+   is (Self.all not in Copy_Node_Builder_Record'Class);
+   --  Return whether this node builder synthetizes nodes (i.e. it is not
+   --  copying existing nodes).
 
    % for t in ctx.node_builder_types:
       subtype ${t.name} is Node_Builder_Type;
