@@ -856,30 +856,26 @@ class Decl: LktNode implements DeclarationInterface {
                     then fd.params.map((p) => p.to_generic_param())
                     elif fd.is_dynamic_combiner()
                     then
-                        [
-                            ResolvedParam(
-                                name=fd.params.at(0).name(),
-                                param_type=self.logicvar_type()
-                                .make_array_type(),
-                                has_default_value=false,
-                                decl=fd.params.at(0)
-                            )
-                        ]
+                        ResolvedParam(
+                            name=fd.params.at(0).name(),
+                            param_type=self.logicvar_type()
+                            .make_array_type(),
+                            has_default_value=false,
+                            decl=fd.params.at(0)
+                        ).singleton()
                         & fd.params.ifilter((_, i) => i >= 1)
                                    .map((p) => p.to_generic_param())
                     else
-                        [
-                            ResolvedParam(
-                                name=s"var",
-                                param_type=
-                                    node.entity_type()
-                                        .instantiate_generic_type_decl(
-                                            [fd.owning_type().as_entity]
-                                        ),
-                                has_default_value=false,
-                                decl=SynthParamDecl().as_entity
-                            )
-                        ]
+                        ResolvedParam(
+                            name=s"var",
+                            param_type=
+                                node.entity_type()
+                                    .instantiate_generic_type_decl(
+                                        [fd.owning_type().as_entity]
+                                    ),
+                            has_default_value=false,
+                            decl=SynthParamDecl().as_entity
+                        ).singleton()
                         & fd.params.map((p) => p.to_generic_param())
                 case lfd: SynthFunDecl => lfd.params
                 case cd: ClassDecl =>
@@ -1091,18 +1087,16 @@ class Decl: LktNode implements DeclarationInterface {
                         )
                         and self.name() != s"RootNode__"
                     then
-                        [
-                            EnvAssoc(
-                                key=s"RootNode__",
-                                value=node,
-                                dest_env=DesignatedEnv(
-                                    kind=DesignatedEnvKind.direct_env,
-                                    env_name=null[Symbol],
-                                    direct_env=node.root_env()
-                                ),
-                                metadata=null[Metadata]
-                            )
-                        ]
+                        EnvAssoc(
+                            key=s"RootNode__",
+                            value=node,
+                            dest_env=DesignatedEnv(
+                                kind=DesignatedEnvKind.direct_env,
+                                env_name=null[Symbol],
+                                direct_env=node.root_env()
+                            ),
+                            metadata=null[Metadata]
+                        ).singleton()
                     else
                         []: EnvAssoc;
 
@@ -1111,22 +1105,20 @@ class Decl: LktNode implements DeclarationInterface {
                 # __default_metadata in the prelude unit.
                 val metadata_entry =
                     if self.full_decl()?.has_annotation(s"metadata") then
-                        [
-                            EnvAssoc(
-                                key=(
-                                    if node.is_from_prelude()
-                                    then s"__default_metadata"
-                                    else s"__user_metadata"
-                                ),
-                                value=node,
-                                dest_env=DesignatedEnv(
-                                    kind=DesignatedEnvKind.direct_env,
-                                    env_name=null[Symbol],
-                                    direct_env=node.root_env()
-                                ),
-                                metadata=null[Metadata]
-                            )
-                        ]
+                        EnvAssoc(
+                            key=(
+                                if node.is_from_prelude()
+                                then s"__default_metadata"
+                                else s"__user_metadata"
+                            ),
+                            value=node,
+                            dest_env=DesignatedEnv(
+                                kind=DesignatedEnvKind.direct_env,
+                                env_name=null[Symbol],
+                                direct_env=node.root_env()
+                            ),
+                            metadata=null[Metadata]
+                        ).singleton()
                     else
                         []: EnvAssoc;
 
@@ -1338,18 +1330,16 @@ class FieldDecl: ComponentDecl {
             then
                 node.owning_type().do(
                     (ot) =>
-                    [
-                        EnvAssoc(
-                            key=s"node",
-                            value=ot.node_decl(),
-                            dest_env=DesignatedEnv(
-                                kind=DesignatedEnvKind.current_env,
-                                env_name=null[Symbol],
-                                direct_env=null[LexicalEnv]
-                            ),
-                            metadata=null[Metadata]
-                        )
-                    ]
+                    EnvAssoc(
+                        key=s"node",
+                        value=ot.node_decl(),
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
+                    ).singleton()
                 )
             else null[Array[EnvAssoc]]
         )
@@ -2347,7 +2337,7 @@ class TypeDecl: Decl implements TypeInterface {
             # function.
             DynEnvWrapper(
                 names=[s"builder"],
-                types=[
+                types=
                     SynthFunDecl(
                         params=params,
                         return_type=self.as_node_builder_type()
@@ -2355,7 +2345,7 @@ class TypeDecl: Decl implements TypeInterface {
                     .as_bare_entity
                     .function_type_aux()
                     .as[TypeDecl]
-                ]
+                    .singleton()
             )
             .do((dew) => dew.dynenvwrapper_instantiation_env)
         }
@@ -2542,12 +2532,11 @@ class BasicClassDecl: NamedTypeDecl {
             if node == node.astlist_type().node
             then
                 self.as_bare_decl().instantiate_generic_decl(
-                    [
-                        self.entity_type().as_bare_decl().as[TypeDecl]
-                        .instantiate_generic_type_decl(
-                            [self.node_env.get_first(s"T").as[TypeDecl]]
-                        )
-                    ]
+                    self.entity_type().as_bare_decl().as[TypeDecl]
+                    .instantiate_generic_type_decl(
+                        [self.node_env.get_first(s"T").as[TypeDecl]]
+                    )
+                    .singleton()
                 )
                 .as[BasicClassDecl]
             else self;
@@ -2662,23 +2651,21 @@ class EnumClassDecl: BasicClassDecl {
             & (
                 if self.full_decl().has_annotation(s"qualifier")
                 then
-                    [
-                        EnvAssoc(
-                            key=s"as_bool",
-                            value=self.function_type_helper(
-                                []: Entity[TypeDecl],
-                                node.bool_type(),
-                                null[Entity[Decl]]
-                            )
-                            .node,
-                            dest_env=DesignatedEnv(
-                                kind=DesignatedEnvKind.direct_env,
-                                env_name=null[Symbol],
-                                direct_env=node.decls.children_env
-                            ),
-                            metadata=null[Metadata]
+                    EnvAssoc(
+                        key=s"as_bool",
+                        value=self.function_type_helper(
+                            []: Entity[TypeDecl],
+                            node.bool_type(),
+                            null[Entity[Decl]]
                         )
-                    ]
+                        .node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.direct_env,
+                            env_name=null[Symbol],
+                            direct_env=node.decls.children_env
+                        ),
+                        metadata=null[Metadata]
+                    ).singleton()
                 else null[Array[EnvAssoc]]
             )
         )
@@ -2790,7 +2777,7 @@ class StructDecl: NamedTypeDecl {
     fun update_func_env(): LexicalEnv =
         DynEnvWrapper(
             names=[s"update"],
-            types=[
+            types=
                 SynthFunDecl(
                     params=self.decls.filter((d) => d.decl is FieldDecl).map(
                         (a) =>
@@ -2806,7 +2793,7 @@ class StructDecl: NamedTypeDecl {
                 .as_bare_entity
                 .function_type_aux()
                 .as[TypeDecl]
-            ]
+                .singleton()
         )
         .do((dew) => dew.dynenvwrapper_instantiation_env)
 
@@ -2854,15 +2841,14 @@ class TraitDecl: NamedTypeDecl {
         if node == node.node_trait().node
         then
             self.as_bare_decl().instantiate_generic_decl(
-                [
-                    self
-                        .entity_type()
-                        .as_bare_decl()
-                        .as[TypeDecl]
-                        .instantiate_generic_type_decl(
-                            [self.node_env.get_first(s"T").as[TypeDecl]]
-                        )
-                ]
+                self
+                    .entity_type()
+                    .as_bare_decl()
+                    .as[TypeDecl]
+                    .instantiate_generic_type_decl(
+                        [self.node_env.get_first(s"T").as[TypeDecl]]
+                    )
+                    .singleton()
             )
             .defined_scope()
         else self.super()
