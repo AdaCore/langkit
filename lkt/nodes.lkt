@@ -1899,6 +1899,11 @@ class TypeDecl: Decl implements TypeInterface {
             ((self.is_null or rhs.is_null) or self == rhs)
             or rhs.base_types().contains(self)
 
+    |" Wrapper around ``TypeDecl.common_ancestor`` that returns the nearest
+    |" common ancestor for ``self`` and all types for the ``other_types`` slice
+    |" between indexes ``idx`` and ``other_types.length() - 1`` (included).
+    |"
+    |" ``imprecise`` is forwarded to ``TypeDecl.common_ancestor``.
     fun common_ancestor_helper(
         other_types: Array[Entity[TypeDecl]],
         idx: Int,
