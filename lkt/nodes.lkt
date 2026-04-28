@@ -4497,72 +4497,46 @@ class IfExpr: Expr {
         [self.then_expr, self.else_expr]
         & self.alternatives.map((alt) => alt.then_expr)
 
-    |" Find the expected type for all branches by computing the common
-    |" ancestor of the type of all context free expressions, or the expected
-    |" type of the IfExpr if no expression is context free.
+    |" Return an equation that assigns the expected types for all branch
+    |" expressions.
     fun expected_branch_type_equation(): Equation = {
+        # Gather logic variables for all branch expressions which provide a
+        # context-free type, so that we can put constraints on the type of the
+        # if expression itself. If there is no context-free type available,
+        # just use the expected type of the if expression itself.
         val logic_vars =
             self.branch_exprs().filter((expr) => expr.has_context_free_type())
             .map((expr) => expr.actual_type_var)
             or? [self.expected_type_var];
 
+        # Assign the common ancestor type for all branches to our "branch
+        # merge" variable.
         self.expected_branch_type_var
-        <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+
+        # Unify our "branch merge" variable with expected types for all branch
+        # expressions.
         %and self.branch_exprs().logic_all(
             (e) => e.expected_type_var <-> self.expected_branch_type_var
         )
     }
 
-    fun xref_equation(): Equation =
-        (
-            (
-                self.cond_branches_equation()
-                %and self.expected_branch_type_equation()
-            )
-            %and (
-                # Check the type of the branches
-                self.branch_exprs().logic_all(
-                    (e) =>
-                    e.xref_equation()
-                    %and {
-                        bind error_location = e.node;
-                        TypeDecl.matching_type%(
-                            e.expected_type_var,
-                            e.actual_type_var
-                        )
-                    }
-                )
-            )
-        )
-        %and (
-            # Set the type of the IfExpr
-            self.actual_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(
-                self.branch_exprs().map((e) => e.actual_type_var)
-            )
-        )
-
-    |" Create an equation verifying that all conditions are valid.
+    |" Return an equation that verifies that all condition expressions are
+    |" valid and assigns them their expected types.
     fun cond_branches_equation(): Equation =
-        (
-            (
-                self.cond_expr.xref_equation()
-                %and self.cond_expr.expected_type_var <- self.bool_type()
+        self.cond_expr.xref_equation()
+        %and self.cond_expr.expected_type_var <- self.bool_type()
+        %and {
+            bind error_location = node.cond_expr;
+            TypeDecl.matching_type%(
+                self.cond_expr.expected_type_var,
+                self.cond_expr.actual_type_var
             )
-            %and {
-                bind error_location = node.cond_expr;
-                TypeDecl.matching_type%(
-                    self.cond_expr.expected_type_var,
-                    self.cond_expr.actual_type_var
-                )
-            }
-        )
+        }
         %and self.alternatives.logic_all(
             (alt) =>
-            (
-                alt.cond_expr.xref_equation()
-                %and alt.cond_expr.expected_type_var <- self.bool_type()
-            )
+            alt.cond_expr.xref_equation()
+            %and alt.cond_expr.expected_type_var <- self.bool_type()
             %and {
                 bind error_location = alt.cond_expr.node;
                 TypeDecl.commutative_matching_type%(
@@ -4570,6 +4544,25 @@ class IfExpr: Expr {
                     alt.cond_expr.actual_type_var
                 )
             }
+        )
+
+    fun xref_equation(): Equation =
+        self.cond_branches_equation()
+        %and self.expected_branch_type_equation()
+
+        # Check the type of the branches
+        %and self.branch_exprs().logic_all(
+            (e) =>
+            e.xref_equation()
+            %and {
+                bind error_location = e.node;
+                TypeDecl.matching_type%(e.expected_type_var, e.actual_type_var)
+            }
+        )
+
+        # Set the type of the IfExpr
+        %and self.actual_type_var <- TypeDecl.imprecise_common_ancestor_list%(
+            self.branch_exprs().map((e) => e.actual_type_var)
         )
 }
 
