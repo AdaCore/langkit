@@ -1162,11 +1162,8 @@ class CompiledType:
         Add `self` to the set of types that are used as keys in the hashed maps
         used to implement properties memoization. It has to be hashable.
         """
-        assert self.hashable, "Trying to use {} as hashable type".format(
-            self.lkt_name
-        )
         context.memoization_keys.add(self)
-        self.require_hash_function()
+        context.add_pending_required_hash_function(self)
 
     def add_as_memoization_value(self, context: CompileCtx) -> None:
         """
@@ -5127,8 +5124,8 @@ class SetType(CompiledType):
             hashable=False,
             exposed=False,
         )
-        element_type.require_hash_function()
         context.add_pending_composite_type(self)
+        context.add_pending_required_hash_function(element_type)
 
     @property
     def name(self) -> names.Name:

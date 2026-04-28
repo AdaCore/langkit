@@ -553,6 +553,15 @@ class CompileCtx:
         has run, set to None to prevent further types creation.
         """
 
+        self.pending_required_hash_functions: set[CompiledType] | None = set()
+        """
+        Set of types for which code generation will need a hash function.
+
+        Since composition relationship between types is not always known at
+        type creation, we process type closures only once all these
+        relationships are determined.
+        """
+
         self._struct_types: list[StructType] | None = None
         """
         List of all plain struct types.
@@ -1353,11 +1362,11 @@ class CompileCtx:
 
         # We need a hash function for the metadata structure as the
         # Langkit_Support.Lexical_Env generic package requires it.
-        T.env_md.require_hash_function()
+        self.add_pending_required_hash_function(T.env_md)
 
         # We expose a hash function for public entities, so we must generate
         # the underlying required helpers.
-        T.entity.require_hash_function()
+        self.add_pending_required_hash_function(T.entity)
 
         # Create the type for grammar rules
         EnumType(
@@ -2302,6 +2311,10 @@ class CompileCtx:
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.
             GlobalPass("compute types", CompileCtx.compute_types),
+            GlobalPass(
+                "list required hash functions",
+                CompileCtx.list_required_hash_functions,
+            ),
             ASTNodePass(
                 "check inferred field types",
                 lambda _, node: node.check_inferred_field_types(),
@@ -3618,6 +3631,27 @@ class CompileCtx:
                 message += "({})".format(annot.reason)
 
             non_blocking_error(message, location=prop.location)
+
+    def add_pending_required_hash_function(self, t: CompiledType) -> None:
+        """
+        Register a required hash function for the given type, or plan to
+        register it if it is too early to register it.
+        """
+        assert t.hashable, f"Trying to use {t.lkt_name} as hashable type"
+        if self.pending_required_hash_functions is None:
+            t.require_hash_function()
+        else:
+            self.pending_required_hash_functions.add(t)
+
+    def list_required_hash_functions(self) -> None:
+        """
+        Register all required hash functions.
+        """
+        types = self.pending_required_hash_functions
+        assert types is not None
+        self.pending_required_hash_functions = None
+        for t in types:
+            t.require_hash_function()
 
     TypeSet = utils.TypeSet
 
