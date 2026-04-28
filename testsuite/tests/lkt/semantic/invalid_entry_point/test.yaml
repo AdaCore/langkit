@@ -1,2 +1,2 @@
 driver: lkt
-entry_point: bar.lkql
+entry_points: [bar.lkql]

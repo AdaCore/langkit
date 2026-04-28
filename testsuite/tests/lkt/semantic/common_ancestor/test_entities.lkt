@@ -1,0 +1,4 @@
+from common import A, B, C, D, E
+
+val v1 = if true then null[Entity[B]] else null[Entity[C]]
+val v2 = if true then null[Entity[D]] else null[D].as_entity
