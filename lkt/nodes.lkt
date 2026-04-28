@@ -2259,12 +2259,12 @@ class TypeDecl: Decl implements TypeInterface {
             default_val=self
         )
 
-    |" Return an array containing all subclasses of the type.
+    |" Return an array containing all base types of ``self`` (ancestors last).
+    |"
+    |" If ``include_self``, also include this type.
     fun base_types(include_self: Bool = false): Array[Entity[TypeDecl]] =
         (if include_self then [self] else null[Array[Entity[TypeDecl]]])
-        & self.base_type().do(
-            (bt) => bt.referenced_decl().do((b) => [b] & b.base_types())
-        )
+        & self.base_type()?.referenced_decl().do((b) => [b] & b.base_types())
 
     |" Return true if Self is a subtype of other.
     fun is_subtype(
