@@ -2276,29 +2276,49 @@ class TypeDecl: Decl implements TypeInterface {
         other: Entity[TypeDecl]
     ): Bool = false
 
-    |" Return the nearest common ancestor between Self and other.
-    |" If imprecise is True, return either type that is non-null.
-    |" If both types are the Entity type, use their wrapped type instead.
+    |" Like ``common_ancestor``, expect this does not handle covariant types.
+    fun common_ancestor_bare(
+        other: Entity[TypeDecl],
+        imprecise: Bool = false
+    ): Entity[TypeDecl] =
+        if self.is_null
+        then other
+
+        elif other.is_null
+        then self
+
+        else {
+            # Considering chains of base types, return the nearest ancestor
+            # that is common to both types.
+            val other_bases = other?.base_types(true);
+
+            self?.base_types(true).find((b) => other_bases.contains(b))
+
+            # In imprecise mode, if no common ancestor was found, just return
+            # ``self``.
+            or? (if imprecise then self else null[Entity[TypeDecl]])
+        }
+
+    |" Return the nearest common ancestor between ``self`` and ``other``.
+    |"
+    |" When there is no common ancestor, return the null type (if ``imprecise``
+    |" is False) or either ``self`` or ``other`` that is non-null.
+    |"
+    |" If both types are instantiations of ``Entity``, use the bare node types
+    |" instead.
     fun common_ancestor(
         other: Entity[TypeDecl],
         imprecise: Bool = false
     ): Entity[TypeDecl] =
-        (
-            if
-                node == self.entity_type().node
-                and other.node == self.entity_type().node
-            then
-                self.get_entity_node_type().common_ancestor(
-                    other.get_entity_node_type()
-                )
-            elif self == other then self
-            else null[Entity[TypeDecl]]
-        )
-        .do(
-            (ca) => ca,
-            default_val=if imprecise then if self.is_null then other else self
-            else null[Entity[TypeDecl]]
-        )
+        if
+            node == self.entity_type().node
+            and other.node == self.entity_type().node
+        then
+            self.get_entity_node_type().common_ancestor_bare(
+                other.get_entity_node_type()
+            )
+        else
+            self.common_ancestor_bare(other, imprecise)
 
     |" Create an environment with the builder() function associated to the
     |" node type parameter. If the type is not a class, return an empty
@@ -2562,23 +2582,6 @@ class BasicClassDecl: NamedTypeDecl {
                 [le, entity.basic_trait_from_self().defined_scope()]
                 .env_group()
             else le
-        )
-    }
-
-    fun common_ancestor(
-        other: Entity[TypeDecl],
-        imprecise: Bool = false
-    ): Entity[TypeDecl] = {
-        val other_bases = other?.base_types(true);
-
-        (
-            if other.is_null then null[Entity[TypeDecl]]
-            else self?.base_types(true).find((b) => other_bases.contains(b))
-        )
-        .do(
-            (ca) => ca,
-            default_val=if imprecise then if self.is_null then other else self
-            else null[Entity[TypeDecl]]
         )
     }
 }
