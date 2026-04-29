@@ -1813,7 +1813,19 @@ class TypeDecl: Decl implements TypeInterface {
 
     |" Return the base type for this node, if any.
     @exported
-    fun base_type(): Entity[TypeRef] = self.syn_base_type
+    fun base_type(): Entity[TypeDecl] = self.syn_base_type?.referenced_decl()
+
+    |" Return an array containing all base types of ``self`` (ancestors last).
+    |"
+    |" If ``include_self``, also include this type.
+    fun base_types(include_self: Bool = false): Array[Entity[TypeDecl]] = {
+        val self_part =
+            if include_self
+            then [self]
+            else null[Array[Entity[TypeDecl]]];
+
+        self_part & self.base_type().do((b) => [b] & b.base_types())
+    }
 
     |" Return the base type for this node, if any.
     @exported
@@ -1823,7 +1835,6 @@ class TypeDecl: Decl implements TypeInterface {
             else self
         )
         .base_type()
-        ?.referenced_decl()
 
     |" Predicate used to verify that operands of equation logic operators are
     |" of equation type.
@@ -2259,13 +2270,6 @@ class TypeDecl: Decl implements TypeInterface {
             default_val=self
         )
 
-    |" Return an array containing all base types of ``self`` (ancestors last).
-    |"
-    |" If ``include_self``, also include this type.
-    fun base_types(include_self: Bool = false): Array[Entity[TypeDecl]] =
-        (if include_self then [self] else null[Array[Entity[TypeDecl]]])
-        & self.base_type()?.referenced_decl().do((b) => [b] & b.base_types())
-
     |" Return true if Self is a subtype of other.
     fun is_subtype(
         @ignored
@@ -2407,22 +2411,14 @@ class EnumClassAltDecl: TypeDecl {
     fun decl_type_name(): String = "enum class alt declaration"
 
     fun is_subtype(other: Entity[TypeDecl]): Bool =
-        self.parent_type().is_subtype(other)
+        self.base_type().is_subtype(other)
 
     @with_dynvars(origin)
-    fun defined_scope(): LexicalEnv = self.parent_type().defined_scope()
+    fun defined_scope(): LexicalEnv = self.base_type().defined_scope()
 
     |" Return the parent EnumTypeDecl.
-    fun parent_type(): Entity[TypeDecl] =
+    fun base_type(): Entity[TypeDecl] =
         self.parent.parent.parent.parent.as![TypeDecl]
-
-    |" Return an array containing all subclasses of the type.
-    fun base_types(include_self: Bool = false): Array[Entity[TypeDecl]] =
-        (
-            if include_self then [self.as[TypeDecl]]
-            else null[Array[Entity[TypeDecl]]]
-        )
-        & self.parent_type().base_types(true)
 
     # Empty env spec: alts are added as part of EnumClassDecl's env_spec
     env_spec {
@@ -2522,9 +2518,7 @@ class BasicClassDecl: NamedTypeDecl {
         (
             [
                 self.decls.children_env,
-                self.base_type()?.referenced_decl()
-                .as[NamedTypeDecl]
-                ?.defined_scope()
+                self.base_type().as[NamedTypeDecl]?.defined_scope()
             ]
             & self.traits.map((t) => t.referenced_decl()?.defined_scope())
         )
@@ -2554,9 +2548,7 @@ class BasicClassDecl: NamedTypeDecl {
         (
             [
                 entity.decls.children_env,
-                entity.base_type()?.referenced_decl()
-                .as[NamedTypeDecl]
-                ?.defined_scope_as_entity()
+                entity.base_type().as[NamedTypeDecl]?.defined_scope_as_entity()
             ]
             & entity.traits.map(
                 (t) => t.referenced_decl()?.defined_scope_as_entity()

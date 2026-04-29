@@ -607,7 +607,7 @@ class LktTypesLoader:
                     insert_first = False
                     if (
                         isinstance(decl, L.BasicClassDecl)
-                        and decl.p_base_type is None
+                        and decl.f_syn_base_type is None
                     ):
                         root_node_decl = decl
                         insert_first = True
@@ -2152,7 +2152,7 @@ class LktTypesLoader:
                 error(message, location=trait_ref)
 
         # Root node case
-        base_type_node = decl.p_base_type
+        base_type_node = decl.f_syn_base_type
         if base_type_node is None:
             check_trait(
                 node_trait_ref,
