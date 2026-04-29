@@ -242,6 +242,31 @@ Decl <ValDecl "v6" test_nodes.lkt:17:1-21:2>
               has_type None
               references <ClassDecl "E" common.lkt:5:1-5:14>
 
+<ValDecl "v7" test_nodes.lkt:23:1-23:37> failed nameres:
+test_nodes.lkt:23:30-23:37: error: expected Int, got B
+ 23 | val v7 = if true then 0 else null[B]
+    |                              ^^^^^^^ 
+
+Decl <ValDecl "v7" test_nodes.lkt:23:1-23:37>
+     has_type None
+
+   Expr <IfExpr test_nodes.lkt:23:10-23:37>
+        has_type None
+
+      Id   <RefId "true" test_nodes.lkt:23:13-23:17>
+           has_type None
+           references None
+
+      Expr <NumLit test_nodes.lkt:23:23-23:24>
+           has_type None
+
+      Expr <NullLit test_nodes.lkt:23:30-23:37>
+           has_type None
+
+         Id   <RefId "B" test_nodes.lkt:23:35-23:36>
+              has_type None
+              references <ClassDecl "B" common.lkt:2:1-2:14>
+
 Resolving test_entities.lkt
 ===========================
 Id   <ModuleId "common" test_entities.lkt:1:6-1:12>

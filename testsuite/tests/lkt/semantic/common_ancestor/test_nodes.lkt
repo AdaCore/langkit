@@ -19,3 +19,5 @@ val v6 = match 1 {
     case m2: Int => null[D]
     case m3: Int => null[E]
 }
+
+val v7 = if true then 0 else null[B]
