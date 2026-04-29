@@ -1,0 +1,33 @@
+# Check that memoization correctly ignores the "EntityInfo.from_rebound" field
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@Example)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @external()
+    fun trace(): Bool
+
+    fun create_entity(from_rebound: Bool): Entity[FooNode] = Entity[FooNode](
+        node=node,
+        info=EntityInfo(
+            md=null[Metadata],
+            rebindings=null[EnvRebindings],
+            from_rebound=from_rebound
+        )
+    )
+
+    @memoized
+    fun memoized_prop(@ignored e: Entity[FooNode]): Bool = node.trace()
+
+    @exported
+    fun trigger(from_rebound: Bool): Bool =
+        node.memoized_prop(node.create_entity(from_rebound))
+}
+
+class Example: FooNode implements TokenNode {
+}

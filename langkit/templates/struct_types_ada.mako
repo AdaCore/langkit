@@ -252,7 +252,8 @@
          return ${cls.name};
    % endif
 
-   % if cls.has_equivalent_function:
+   % if cls.has_equivalent_function \
+         and not cls.has_builtin_equivalent_function:
       function Equivalent (L, R : ${cls.name}) return Boolean;
    % endif
 
@@ -335,7 +336,8 @@
 
    % endif
 
-   % if cls.has_equivalent_function:
+   % if cls.has_equivalent_function \
+         and not cls.has_builtin_equivalent_function:
 
       ----------------
       -- Equivalent --
@@ -406,6 +408,12 @@
       begin
          <%
             fields = cls.get_fields()
+
+            # The Entity_Info.From_Rebound field is not taken into account for
+            # equivalence checks (see Lexical_Envs_Impl.Equivalent), so the
+            # hash function must also ignore it.
+            if cls == T.EntityInfo:
+               fields = [f for f in fields if f.names.index != "from_rebound"]
 
             def field_hash(f):
                return 'Hash (R.{})'.format(f.names.codegen)

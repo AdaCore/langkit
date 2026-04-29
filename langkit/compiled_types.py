@@ -901,6 +901,7 @@ class CompiledType:
         element_type: CompiledType | None = None,
         hashable: bool = False,
         has_equivalent_function: bool = False,
+        has_builtin_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         api_name: str | names.Name | None = None,
         lkt_name: str | None = None,
@@ -979,6 +980,10 @@ class CompiledType:
             values of this type must go through an Equivalent function. If not,
             code generation will use its "=" operator.
 
+        :param has_builtin_equivalent_function: Whether the Equivalent function
+            always part of generated code. Regular code generation should not
+            define it.
+
         :param type_repo_name: Name to use for registration in TypeRepo. The
             camel-case of "name" is used if left to None.
 
@@ -1019,6 +1024,7 @@ class CompiledType:
         self._element_type = element_type
         self.hashable = hashable
         self._has_equivalent_function = has_equivalent_function
+        self.has_builtin_equivalent_function = has_builtin_equivalent_function
         self._requires_hash_function = False
         self._api_name = api_name
         self._lkt_name = lkt_name
@@ -2795,6 +2801,7 @@ class BaseStructType(CompiledType):
         element_type: CompiledType | None = None,
         hashable: bool = False,
         has_equivalent_function: bool = False,
+        has_builtin_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         api_name: str | names.Name | None = None,
         lkt_name: str | None = None,
@@ -2835,6 +2842,7 @@ class BaseStructType(CompiledType):
             element_type=element_type,
             hashable=hashable,
             has_equivalent_function=has_equivalent_function,
+            has_builtin_equivalent_function=has_builtin_equivalent_function,
             type_repo_name=type_repo_name or name.camel,
             api_name=api_name,
             lkt_name=lkt_name,
@@ -2949,6 +2957,7 @@ class StructType(BaseStructType):
         java_nullexpr: str | None = None,
         element_type: CompiledType | None = None,
         has_equivalent_function: bool = False,
+        has_builtin_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         conversion_requires_context: bool = False,
     ):
@@ -2979,6 +2988,7 @@ class StructType(BaseStructType):
             java_nullexpr=java_nullexpr,
             hashable=True,
             has_equivalent_function=has_equivalent_function,
+            has_builtin_equivalent_function=has_builtin_equivalent_function,
             type_repo_name=name.camel,
             api_name=name,
             lkt_name=name.camel,
@@ -2999,7 +3009,14 @@ class StructType(BaseStructType):
 
     @property
     def has_equivalent_function(self) -> bool:
-        return any(f.type.has_equivalent_function for f in self.get_fields())
+        # There must be an Equivalent function for this struct if...
+        return (
+            # 1. This is a builtin type that has its own builtin Equivalent
+            #    function.
+            self._has_equivalent_function
+            # 2. At least of its fields has an Equivalent function.
+            or any(f.type.has_equivalent_function for f in self.get_fields())
+        )
 
     def require_hash_function(self) -> None:
         super().require_hash_function()
@@ -3127,6 +3144,10 @@ class EntityType(StructType):
                     doc="Entity info for this node",
                 ),
             ],
+            # Equivalent for Entity is defined in
+            # Langkit_Support.Lexical_Envs_Impl, and re-exported in
+            # $.Implementation.
+            has_builtin_equivalent_function=self.astnode.is_root_node,
         )
         self.is_entity_type = True
         self._element_type = astnode
@@ -5999,6 +6020,11 @@ def create_builtin_types(context: CompileCtx) -> None:
                 doc="",
             ),
         ],
+        has_equivalent_function=True,
+        # Equivalent for Entity_Info is defined in
+        # Langkit_Support.Lexical_Envs_Impl, and re-exported in
+        # $.Implementation.
+        has_builtin_equivalent_function=True,
     )
 
 
