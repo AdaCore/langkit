@@ -50,6 +50,9 @@ langkit_build_and_test:
     # Gather Cobertura report files
     - TEST_DIR=$(anod info test langkit -Qcoverage --show working_dir)
     - cp -r $TEST_DIR/results/new/lkt_coverage/cobertura coverage
+
+    # Print metrics for integration in MR summary
+    - print-global-coverage coverage/*.xml
   artifacts:
     paths:
       - xunit-*.xml
@@ -59,6 +62,7 @@ langkit_build_and_test:
       coverage_report:
         coverage_format: cobertura
         path: coverage/*.xml
+  coverage: '/^Line Coverage:\s+(\d+\.\d+)$/'
 
 
 #############################
