@@ -5,6 +5,7 @@ Generation of code coverage reports for generated libraries.
 from __future__ import annotations
 
 from collections import OrderedDict
+import dataclasses
 import json
 import os.path
 import subprocess
@@ -243,6 +244,53 @@ class CoverageReport:
         def __init__(self, kind: str, message: str):
             self.kind = kind
             self.message = message
+
+    @dataclasses.dataclass(frozen=True)
+    class Summary:
+        lines_total: int
+        """
+        Total number of coverable lines.
+        """
+
+        lines_covered: int
+        """
+        Number of lines that are fully covered.
+        """
+
+        @property
+        def coverage_ratio(self) -> float:
+            """
+            Return the ratio of lines covered per total coverable lines count.
+            """
+            if self.lines_total == 0:
+                return 1.0
+            else:
+                return self.lines_covered / self.lines_total
+
+        @property
+        def formatted(self) -> list[str]:
+            """
+            Return a formatted coverage report summary.
+            """
+            lines_total = str(self.lines_total)
+            lines_covered = str(self.lines_covered)
+            ratio = f"{self.coverage_ratio:.2%}"
+            ratio_integral, ratio_decimal = ratio.split(".")
+
+            count_width = max(
+                len(lines_total), len(lines_covered), len(ratio_integral)
+            )
+            lines_total = lines_total.rjust(count_width)
+            lines_covered = lines_covered.rjust(count_width)
+            ratio_integral = ratio_integral.rjust(count_width)
+            ratio = f"{ratio_integral}.{ratio_decimal}"
+
+            return [
+                "Code coverage summary:",
+                f"    Covered lines:   {lines_total}",
+                f"    Coverable lines: {lines_covered}",
+                f"    Coverage ratio:  {ratio}",
+            ]
 
     UNKNOWN_STATE_NAME = "unknown"
     STATES = [
@@ -742,7 +790,7 @@ class GNATcov:
         xml_dir: str,
         output_dir: str,
         cobertura_root: str | None = None,
-    ) -> None:
+    ) -> CoverageReport.Summary:
         """
         Helper for generate_report. Load GNATcoverage's XML report and produce
         our final coverage report.
@@ -771,6 +819,19 @@ class GNATcov:
         # Output the final report
         report.render(output_dir, cobertura_root)
 
+        # Compute the coverage ratio
+        lines_total = 0
+        lines_covered = 0
+        for group in report.groups.values():
+            for src_file in group.files.values():
+                for line in src_file.lines:
+                    if line.state == ".":
+                        continue
+                    lines_total += 1
+                    if line.state == "+":
+                        lines_covered += 1
+        return CoverageReport.Summary(lines_total, lines_covered)
+
     def generate_report(
         self,
         title: str,
@@ -779,7 +840,7 @@ class GNATcov:
         output_dir: str,
         working_dir: str,
         cobertura_root: str | None = None,
-    ) -> None:
+    ) -> CoverageReport.Summary:
         """
         Generate a HTML coverage report.
 
@@ -801,6 +862,6 @@ class GNATcov:
         ensure_clean_dir(output_dir)
 
         xml_dir = self._generate_xml_report(instr_dir, traces, working_dir)
-        self._generate_final_report(
+        return self._generate_final_report(
             title, instr_dir, xml_dir, output_dir, cobertura_root
         )
