@@ -1,0 +1,130 @@
+Resolving test.lkt
+==================
+Id   <RefId "A" test.lkt:2:11-2:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Id   <RefId "A" test.lkt:3:11-3:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "node_arr" test.lkt:5:1-5:30>
+     has_type <StructDecl prelude: "Array[A]">
+
+   Expr <NullLit test.lkt:5:16-5:30>
+        has_type <StructDecl prelude: "Array[A]">
+
+      Id   <RefId "Array" test.lkt:5:21-5:26>
+           has_type None
+           references <StructDecl prelude: "Array[T]">
+
+      Id   <RefId "A" test.lkt:5:27-5:28>
+           has_type None
+           references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "node_lst" test.lkt:6:1-6:32>
+     has_type <ClassDecl prelude: "ASTList[A]">
+
+   Expr <NullLit test.lkt:6:16-6:32>
+        has_type <ClassDecl prelude: "ASTList[A]">
+
+      Id   <RefId "ASTList" test.lkt:6:21-6:28>
+           has_type None
+           references <ClassDecl prelude: "ASTList[T]">
+
+      Id   <RefId "A" test.lkt:6:29-6:30>
+           has_type None
+           references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "entity_arr" test.lkt:8:1-8:40>
+     has_type <StructDecl prelude: "Array[Entity[A]]">
+
+   Expr <NullLit test.lkt:8:18-8:40>
+        has_type <StructDecl prelude: "Array[Entity[A]]">
+
+      Id   <RefId "Array" test.lkt:8:23-8:28>
+           has_type None
+           references <StructDecl prelude: "Array[T]">
+
+      Id   <RefId "Entity" test.lkt:8:29-8:35>
+           has_type None
+           references <StructDecl prelude: "Entity[N]">
+
+      Id   <RefId "A" test.lkt:8:36-8:37>
+           has_type None
+           references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "entity_lst" test.lkt:9:1-9:42>
+     has_type <StructDecl prelude: "Entity[ASTList[A]]">
+
+   Expr <NullLit test.lkt:9:18-9:42>
+        has_type <StructDecl prelude: "Entity[ASTList[A]]">
+
+      Id   <RefId "Entity" test.lkt:9:23-9:29>
+           has_type None
+           references <StructDecl prelude: "Entity[N]">
+
+      Id   <RefId "ASTList" test.lkt:9:30-9:37>
+           has_type None
+           references <ClassDecl prelude: "ASTList[T]">
+
+      Id   <RefId "A" test.lkt:9:38-9:39>
+           has_type None
+           references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "v1" test.lkt:11:1-11:26>
+     has_type <StructDecl prelude: "Array[B]">
+
+   Expr <KeepExpr test.lkt:11:10-11:26>
+        has_type <StructDecl prelude: "Array[B]">
+
+      Id   <RefId "node_arr" test.lkt:11:10-11:18>
+           has_type <StructDecl prelude: "Array[A]">
+           references <ValDecl "node_arr" test.lkt:5:1-5:30>
+
+      Id   <RefId "B" test.lkt:11:24-11:25>
+           has_type None
+           references <ClassDecl "B" test.lkt:2:1-2:15>
+
+Decl <ValDecl "v2" test.lkt:12:1-12:26>
+     has_type <StructDecl prelude: "Array[C]">
+
+   Expr <KeepExpr test.lkt:12:10-12:26>
+        has_type <StructDecl prelude: "Array[C]">
+
+      Id   <RefId "node_lst" test.lkt:12:10-12:18>
+           has_type <ClassDecl prelude: "ASTList[A]">
+           references <ValDecl "node_lst" test.lkt:6:1-6:32>
+
+      Id   <RefId "C" test.lkt:12:24-12:25>
+           has_type None
+           references <ClassDecl "C" test.lkt:3:1-3:15>
+
+Decl <ValDecl "v3" test.lkt:13:1-13:28>
+     has_type <StructDecl prelude: "Array[Entity[B]]">
+
+   Expr <KeepExpr test.lkt:13:10-13:28>
+        has_type <StructDecl prelude: "Array[Entity[B]]">
+
+      Id   <RefId "entity_arr" test.lkt:13:10-13:20>
+           has_type <StructDecl prelude: "Array[Entity[A]]">
+           references <ValDecl "entity_arr" test.lkt:8:1-8:40>
+
+      Id   <RefId "B" test.lkt:13:26-13:27>
+           has_type None
+           references <ClassDecl "B" test.lkt:2:1-2:15>
+
+Decl <ValDecl "v4" test.lkt:14:1-14:28>
+     has_type <StructDecl prelude: "Array[Entity[C]]">
+
+   Expr <KeepExpr test.lkt:14:10-14:28>
+        has_type <StructDecl prelude: "Array[Entity[C]]">
+
+      Id   <RefId "entity_lst" test.lkt:14:10-14:20>
+           has_type <StructDecl prelude: "Entity[ASTList[A]]">
+           references <ValDecl "entity_lst" test.lkt:9:1-9:42>
+
+      Id   <RefId "C" test.lkt:14:26-14:27>
+           has_type None
+           references <ClassDecl "C" test.lkt:3:1-3:15>
+
