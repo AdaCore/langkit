@@ -3027,6 +3027,8 @@ class StructType(BaseStructType):
         )
 
     def require_hash_function(self) -> None:
+        if self._requires_hash_function:
+            return
         super().require_hash_function()
         for f in self.get_fields():
             f.type.require_hash_function()
@@ -4809,6 +4811,8 @@ class NodeBuilderType(CompiledType):
         return result
 
     def require_hash_function(self) -> None:
+        if self._requires_hash_function:
+            return
         super().require_hash_function()
         for arg in self.synth_constructor_args:
             arg.type.require_hash_function()
@@ -5080,6 +5084,8 @@ class ArrayType(CompiledType):
         self._requires_unique_function = True
 
     def require_hash_function(self) -> None:
+        if self._requires_hash_function:
+            return
         super().require_hash_function()
 
         # Array hash functions uses the element type's hash function, so

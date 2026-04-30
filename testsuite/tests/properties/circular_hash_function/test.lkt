@@ -1,0 +1,30 @@
+# Regression test: compilation used to crash with infinite recursion in case of
+# circular reference between hash functions.
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule
+    main_rule <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+@synthetic
+class SynthNode: FooNode {
+    builder: NodeBuilder[SynthNode]
+}
+
+class Example: FooNode {
+    @memoized
+    fun builder_id(nb: NodeBuilder[SynthNode]): NodeBuilder[SynthNode] = nb
+
+    @lazy lf_node: FooNode = node.builder_id(
+        SynthNode.builder(builder=null[SynthNode].to_builder())
+    ).build()
+
+    @exported
+    fun p(): Entity[FooNode] = node.lf_node.as_bare_entity
+}
