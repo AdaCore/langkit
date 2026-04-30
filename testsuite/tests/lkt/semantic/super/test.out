@@ -1,0 +1,106 @@
+Resolving test.lkt
+==================
+Decl <FunDecl "f" test.lkt:2:5-2:21>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:2:14-2:17>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:2:20-2:21>
+        has_type <StructDecl prelude: "Int">
+
+Id   <RefId "A" test.lkt:4:11-4:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-3:2>
+
+Decl <FunDecl "f" test.lkt:5:5-5:36>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:5:14-5:17>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:5:20-5:36>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <CallExpr test.lkt:5:20-5:32>
+           has_type <StructDecl prelude: "Int">
+
+         Expr <DotExpr test.lkt:5:20-5:30>
+              has_type <FunctionType "() -> Int" test.lkt>
+
+            Id   <RefId "node" test.lkt:5:20-5:24>
+                 has_type <ClassDecl "B" test.lkt:4:1-6:2>
+                 references <NodeDecl "node" test.lkt:4:1-6:2>
+
+            Id   <RefId "super" test.lkt:5:25-5:30>
+                 has_type <FunctionType "() -> Int" test.lkt>
+                 references <FunDecl "f" test.lkt:2:5-2:21>
+
+      Expr <NumLit test.lkt:5:35-5:36>
+           has_type <StructDecl prelude: "Int">
+
+Id   <RefId "A" test.lkt:7:11-7:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-3:2>
+
+Decl <FunDecl "f" test.lkt:8:5-8:36>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:8:14-8:17>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:8:20-8:36>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <CallExpr test.lkt:8:20-8:32>
+           has_type <StructDecl prelude: "Int">
+
+         Expr <DotExpr test.lkt:8:20-8:30>
+              has_type <FunctionType "() -> Int" test.lkt>
+
+            Id   <RefId "node" test.lkt:8:20-8:24>
+                 has_type <ClassDecl "C" test.lkt:7:1-10:2>
+                 references <NodeDecl "node" test.lkt:7:1-10:2>
+
+            Id   <RefId "super" test.lkt:8:25-8:30>
+                 has_type <FunctionType "() -> Int" test.lkt>
+                 references <FunDecl "f" test.lkt:2:5-2:21>
+
+      Expr <NumLit test.lkt:8:35-8:36>
+           has_type <StructDecl prelude: "Int">
+
+<FunDecl "g" test.lkt:9:5-9:36> failed nameres:
+test.lkt:9:25-9:30: error: undefined entity
+ 9 |     fun g(): Int = node.super() + 3
+   |                         ^^^^^ 
+
+Decl <FunDecl "g" test.lkt:9:5-9:36>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:9:14-9:17>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:9:20-9:36>
+        has_type None
+
+      Expr <CallExpr test.lkt:9:20-9:32>
+           has_type None
+
+         Expr <DotExpr test.lkt:9:20-9:30>
+              has_type None
+
+            Id   <RefId "node" test.lkt:9:20-9:24>
+                 has_type <ClassDecl "C" test.lkt:7:1-10:2>
+                 references <NodeDecl "node" test.lkt:7:1-10:2>
+
+            Id   <RefId "super" test.lkt:9:25-9:30>
+                 has_type None
+                 references None
+
+      Expr <NumLit test.lkt:9:35-9:36>
+           has_type None
+
