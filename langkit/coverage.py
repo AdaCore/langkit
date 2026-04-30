@@ -9,7 +9,6 @@ import dataclasses
 import json
 import os.path
 import subprocess
-import sys
 from typing import TYPE_CHECKING
 import xml.etree.ElementTree as etree
 
