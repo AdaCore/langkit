@@ -79,7 +79,11 @@ class PythonDriver(BaseDriver):
         if self.valgrind_enabled:
             derived_env["VALGRIND_ENABLED"] = "1"
 
-        self.run_and_check(argv + self.script_and_args, derived_env)
+        self.run_and_check(
+            argv + self.script_and_args,
+            derived_env,
+            for_coverage=True,
+        )
 
     @property
     def support_dir(self):
