@@ -405,7 +405,7 @@ class LangkitTestsuite(Testsuite):
             from langkit.coverage import GNATcov
 
             logger.info("Computing the coverage report for Liblktlang")
-            GNATcov().generate_report(
+            coverage_summary = GNATcov().generate_report(
                 title="Liblktlang Coverage Report",
                 instr_dir=args.lkt_gnatcov_instr_dir,
                 traces=glob.glob(
@@ -416,6 +416,8 @@ class LangkitTestsuite(Testsuite):
                 cobertura_root=args.cobertura_root,
             )
             logger.info("The coverage report is ready")
+            for line in coverage_summary.formatted:
+                logger.info(line)
 
         super().tear_down()
 
