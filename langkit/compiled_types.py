@@ -901,6 +901,7 @@ class CompiledType:
         element_type: CompiledType | None = None,
         hashable: bool = False,
         has_equivalent_function: bool = False,
+        has_builtin_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         api_name: str | names.Name | None = None,
         lkt_name: str | None = None,
@@ -979,6 +980,10 @@ class CompiledType:
             values of this type must go through an Equivalent function. If not,
             code generation will use its "=" operator.
 
+        :param has_builtin_equivalent_function: Whether the Equivalent function
+            always part of generated code. Regular code generation should not
+            define it.
+
         :param type_repo_name: Name to use for registration in TypeRepo. The
             camel-case of "name" is used if left to None.
 
@@ -1019,6 +1024,7 @@ class CompiledType:
         self._element_type = element_type
         self.hashable = hashable
         self._has_equivalent_function = has_equivalent_function
+        self.has_builtin_equivalent_function = has_builtin_equivalent_function
         self._requires_hash_function = False
         self._api_name = api_name
         self._lkt_name = lkt_name
@@ -1125,6 +1131,25 @@ class CompiledType:
         return self._has_equivalent_function
 
     @property
+    def equivalent_function_name(self) -> str:
+        """
+        Code generation helper: return the name of the Ada function to check
+        equivalence between two values of this type.
+        """
+        return "Equivalent" if self.has_equivalent_function else '"="'
+
+    def equivalent_function_call(self, left: str, right: str) -> str:
+        """
+        Code generation helper: return Ada code to check equivalence between
+        two values of this type.
+        """
+        return (
+            f"Equivalent ({left}, {right})"
+            if self.has_equivalent_function
+            else f"{left} = {right}"
+        )
+
+    @property
     def requires_hash_function(self) -> bool:
         """
         Return whether code generation must produce a Hash function for this
@@ -1143,11 +1168,8 @@ class CompiledType:
         Add `self` to the set of types that are used as keys in the hashed maps
         used to implement properties memoization. It has to be hashable.
         """
-        assert self.hashable, "Trying to use {} as hashable type".format(
-            self.lkt_name
-        )
         context.memoization_keys.add(self)
-        self.require_hash_function()
+        context.add_pending_required_hash_function(self)
 
     def add_as_memoization_value(self, context: CompileCtx) -> None:
         """
@@ -1599,8 +1621,8 @@ class CompiledType:
             ``self`` and ``other`` keys being the names of mismatching types.
         """
 
-        # ASTNodeType instances (and thus entities) always can be unified:
-        # just take the most recent common ancestor.
+        # ASTNodeType instances (and thus entities an node builders) always can
+        # be unified: just take the most recent common ancestor.
         if isinstance(self, EntityType) and isinstance(other, EntityType):
             bare_self = self.element_type
             assert isinstance(bare_self, ASTNodeType)
@@ -1615,6 +1637,18 @@ class CompiledType:
             # EntityType, mypy pretends that entity_result does not matches
             # _Self.
             return entity_result  # type: ignore
+
+        elif isinstance(self, NodeBuilderType) and isinstance(
+            other, NodeBuilderType
+        ):
+            node_builder_result = ASTNodeType.common_ancestor(
+                self.node_type, other.node_type
+            ).builder_type
+
+            # Even though this block is guarded by the check that self is an
+            # NodeBuilderType, mypy pretends that node_builder_type does not
+            # matches _Self.
+            return node_builder_result  # type: ignore
 
         elif isinstance(self, ASTNodeType) and isinstance(other, ASTNodeType):
             # Even though this block is guarded by the check that self is an
@@ -2767,6 +2801,7 @@ class BaseStructType(CompiledType):
         element_type: CompiledType | None = None,
         hashable: bool = False,
         has_equivalent_function: bool = False,
+        has_builtin_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         api_name: str | names.Name | None = None,
         lkt_name: str | None = None,
@@ -2807,6 +2842,7 @@ class BaseStructType(CompiledType):
             element_type=element_type,
             hashable=hashable,
             has_equivalent_function=has_equivalent_function,
+            has_builtin_equivalent_function=has_builtin_equivalent_function,
             type_repo_name=type_repo_name or name.camel,
             api_name=api_name,
             lkt_name=lkt_name,
@@ -2921,6 +2957,7 @@ class StructType(BaseStructType):
         java_nullexpr: str | None = None,
         element_type: CompiledType | None = None,
         has_equivalent_function: bool = False,
+        has_builtin_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         conversion_requires_context: bool = False,
     ):
@@ -2951,6 +2988,7 @@ class StructType(BaseStructType):
             java_nullexpr=java_nullexpr,
             hashable=True,
             has_equivalent_function=has_equivalent_function,
+            has_builtin_equivalent_function=has_builtin_equivalent_function,
             type_repo_name=name.camel,
             api_name=name,
             lkt_name=name.camel,
@@ -2971,7 +3009,14 @@ class StructType(BaseStructType):
 
     @property
     def has_equivalent_function(self) -> bool:
-        return any(f.type.has_equivalent_function for f in self.get_fields())
+        # There must be an Equivalent function for this struct if...
+        return (
+            # 1. This is a builtin type that has its own builtin Equivalent
+            #    function.
+            self._has_equivalent_function
+            # 2. At least of its fields has an Equivalent function.
+            or any(f.type.has_equivalent_function for f in self.get_fields())
+        )
 
     def require_hash_function(self) -> None:
         super().require_hash_function()
@@ -3099,6 +3144,10 @@ class EntityType(StructType):
                     doc="Entity info for this node",
                 ),
             ],
+            # Equivalent for Entity is defined in
+            # Langkit_Support.Lexical_Envs_Impl, and re-exported in
+            # $.Implementation.
+            has_builtin_equivalent_function=self.astnode.is_root_node,
         )
         self.is_entity_type = True
         self._element_type = astnode
@@ -4659,6 +4708,10 @@ class NodeBuilderType(CompiledType):
             null_allowed=False,
             is_refcounted=True,
             nullexpr="null",
+            # Non-hashable types are forbidden for synthetic node fields, so we
+            # know we can write hash functions for all node builder types.
+            hashable=True,
+            has_equivalent_function=True,
             lkt_name=f"NodeBuilder[{node_type.lkt_name}]",
         )
         context.add_pending_composite_type(self)
@@ -4668,6 +4721,10 @@ class NodeBuilderType(CompiledType):
         Whether we need to generate code to create synthetizing node builders
         for this type in Ada.
         """
+
+        # Node builders pre-compute their hashes, so they always require hash
+        # functions.
+        context.add_pending_required_hash_function(self)
 
     @property
     def record_type(self) -> str:
@@ -4743,6 +4800,11 @@ class NodeBuilderType(CompiledType):
             )
         return result
 
+    def require_hash_function(self) -> None:
+        super().require_hash_function()
+        for arg in self.synth_constructor_args:
+            arg.type.require_hash_function()
+
     def builtin_properties(self, owner: CompiledType) -> list[E.PropertyDef]:
         """
         Return properties available for all node builder types.
@@ -4775,14 +4837,12 @@ class NodeBuilderType(CompiledType):
             assert len(args) == 1
             parent_expr = args[0] or E.NullExpr(None, T.root_node)
 
-            return E.LiteralExpr(
+            return E.CallExpr(
                 debug_info,
-                template=(
-                    "Node_Builder_Type'({}).all.Build"
-                    " (Parent => {}, Self_Node => Self)"
-                ),
-                expr_type=node_data.type,
-                operands=[prefix, parent_expr],
+                "Built_Node",
+                "Node_Builder_Build_Wrapper",
+                node_data.type,
+                [prefix, parent_expr, prop.node_var.ref_expr],
             )
 
         return [
@@ -5096,8 +5156,8 @@ class SetType(CompiledType):
             hashable=False,
             exposed=False,
         )
-        element_type.require_hash_function()
         context.add_pending_composite_type(self)
+        context.add_pending_required_hash_function(element_type)
 
     @property
     def name(self) -> names.Name:
@@ -5396,6 +5456,7 @@ class BigIntegerType(CompiledType):
             exposed=True,
             nullexpr="No_Big_Integer",
             is_refcounted=True,
+            hashable=True,
             has_equivalent_function=True,
             is_ada_record=True,
             c_type_name="big_integer",
@@ -5959,6 +6020,11 @@ def create_builtin_types(context: CompileCtx) -> None:
                 doc="",
             ),
         ],
+        has_equivalent_function=True,
+        # Equivalent for Entity_Info is defined in
+        # Langkit_Support.Lexical_Envs_Impl, and re-exported in
+        # $.Implementation.
+        has_builtin_equivalent_function=True,
     )
 
 

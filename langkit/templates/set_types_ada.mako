@@ -9,9 +9,7 @@
 
    <%
       elt_type = cls.element_type
-      elt_equiv_func = ('Equivalent'
-                        if elt_type.has_equivalent_function else
-                        '"="')
+      elt_equiv_func = elt_type.equivalent_function_name
       pkg_name = cls.hashed_sets_pkg_name
    %>
 

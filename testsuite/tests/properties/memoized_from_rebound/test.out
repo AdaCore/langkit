@@ -1,0 +1,10 @@
+main.adb: Running...
+About to call FooNode.P_Trigger (From_Rebound => FALSE):
+FooNode.trace was called
+  -> FALSE
+
+About to call FooNode.P_Trigger (From_Rebound => TRUE):
+  -> FALSE
+
+main.adb: Done.
+Done

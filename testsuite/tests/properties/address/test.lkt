@@ -1,0 +1,32 @@
+# Test that the Address type is correctly implemented
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    # External property, to trigger a side effect (print)
+    @external()
+    fun print_addr(a: Address): Bool
+
+    # Memoized property that has a side effect: no side effect if called a
+    # second time with equivalent arguments.
+    #
+    # Since this property is memoized, this should trigger the generation of a
+    # Hash function for Adress (we used not to generate it).
+    #
+    # Generated code this property will mention System.Address: we used not to
+    # generate the corresponding "with System;" clause.
+    @memoized
+    fun mmz_print_addr(a: Address): Bool = node.print_addr(a)
+
+    @exported
+    fun p(): Bool = node.mmz_print_addr(null[Address])
+}
+
+class Example: FooNode implements TokenNode {
+}

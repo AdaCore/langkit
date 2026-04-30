@@ -26,8 +26,11 @@ SynthLiteralListWithUserField[0:0-0:0]
 |  Literal[1:13-1:14]: 3
 Number: 42
 
+== List_Node_With_Null_Child ==
+Property_Error: main.txt:1:1-1:15: list child of SynthLiteralList cannot be null; add a nullable annotation to this field to allow it
+
 == Non_Nullable_Null ==
-Property_Error: main.txt:1:1-1:15: SynthNonNullable.items cannot be null in synthetic nodes; add a nullable annotation to this field to allow it
+Property_Error: main.txt:1:1-1:15: field SynthNonNullable.items cannot be null; add a nullable annotation to this field to allow it
 
 == Non_Nullable_Not_Null ==
 <SynthNonNullable main.txt:0:0-0:0>
@@ -74,6 +77,43 @@ Property_Error: main.txt:1:1-1:15: synthetic node parents must belong to the sam
 
 == Staged_Node_Builder ==
 <SynthNonNullable main.txt:0:0-0:0>
+
+== Node builders and memoization ==
+Calling Literal_Sequence.P_Check_Mmz ( 1)...
+... Literal_Sequence.P_Print_Msg called with:
+    <NodeBuilder to copy None>
+Calling Literal_Sequence.P_Check_Mmz ( 2)...
+... Literal_Sequence.P_Print_Msg called with:
+    <NodeBuilder to copy <LiteralSequence main.txt:1:1-1:15>>
+Calling Literal_Sequence.P_Check_Mmz ( 5)...
+... Literal_Sequence.P_Print_Msg called with:
+    <NodeBuilder to synthetize SynthUserField>
+Calling Literal_Sequence.P_Check_Mmz ( 6)...
+... Literal_Sequence.P_Print_Msg called with:
+    <NodeBuilder to synthetize SynthLiteralList>
+Calling Literal_Sequence.P_Check_Mmz ( 7)...
+... Literal_Sequence.P_Print_Msg called with:
+    <NodeBuilder to synthetize SynthLiteralList>
+Calling Literal_Sequence.P_Check_Mmz ( 1)...
+Calling Literal_Sequence.P_Check_Mmz ( 2)...
+Calling Literal_Sequence.P_Check_Mmz ( 5)...
+Calling Literal_Sequence.P_Check_Mmz ( 6)...
+Calling Literal_Sequence.P_Check_Mmz ( 7)...
+
+== Node builders and Equivalent ==
+Equivalence 1 <-> 1: TRUE
+Equivalence 1 <-> 2: FALSE
+Equivalence 2 <-> 2: TRUE
+Equivalence 2 <-> 3: FALSE
+Equivalence 3 <-> 3: TRUE
+Equivalence 4 <-> 4: TRUE
+Equivalence 4 <-> 5: FALSE
+Equivalence 5 <-> 5: TRUE
+Equivalence 4 <-> 1: FALSE
+Equivalence 6 <-> 6: TRUE
+Equivalence 6 <-> 7: FALSE
+Equivalence 7 <-> 7: TRUE
+Equivalence 6 <-> 1: FALSE
 
 main.adb: Done.
 Done

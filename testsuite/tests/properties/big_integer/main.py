@@ -26,5 +26,14 @@ for decl in u.root:
 
 
 print(".p_identity(1234) = {}".format(u.root.p_identity(1234)))
+print()
+
+huge = 9999999999999999999999999999999999999999999999999
+print("Checking hash/memoization:")
+for i in (0, 0, 1, huge, 1, huge):
+    print(f"Calling FooNode.p_mmz_print_int({i})...")
+    sys.stdout.flush()
+    u.root.p_mmz_print_int(i)
+print()
 
 print("main.py: Done.")

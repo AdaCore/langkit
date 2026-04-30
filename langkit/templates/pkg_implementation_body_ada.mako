@@ -33,7 +33,7 @@ with Ada.Unchecked_Deallocation;
 with System;
 with System.Memory;
 
-% if T.String.requires_hash_function:
+% if T.BigInt.requires_hash_function or T.String.requires_hash_function:
 with GNAT.String_Hash;
 % endif
 with GNAT.Task_Lock;
@@ -3448,6 +3448,15 @@ package body ${ada_lib_name}.Implementation is
       return Create_Big_Integer (-Value.Value);
    end "-";
 
+   % if T.BigInt.requires_hash_function:
+      function Hash (I : Big_Integer_Type) return Hash_Type is
+         function String_Hash is new GNAT.String_Hash.Hash
+           (Character, String, Hash_Type);
+      begin
+         return String_Hash (I.Value.Image);
+      end Hash;
+   % endif
+
    ------------------
    -- Unit_Version --
    ------------------
@@ -4109,6 +4118,80 @@ package body ${ada_lib_name}.Implementation is
       return Fetch_Sibling (Node, E_Info, 1);
    end Next_Sibling;
 
+   --------------------------------
+   -- Node_Builder_Build_Wrapper --
+   --------------------------------
+
+   function Node_Builder_Build_Wrapper
+     (Self              : Node_Builder_Type;
+      Parent, Self_Node : ${T.root_node.name}) return ${T.root_node.name}
+   is
+      Synthetizing : constant Boolean := Is_Synthetizing (Self);
+      Unit         : constant Internal_Unit := Self_Node.Unit;
+      Env          : constant Lexical_Env :=
+        (if Parent = null
+         then Empty_Env
+         else Parent.Self_Env);
+   begin
+      if Synthetizing and then Parent /= null and then Parent.Unit /= Unit then
+         Raise_Property_Exception
+           (Self_Node,
+            Property_Error'Identity,
+            "synthetic node parents must belong to the same unit as the nodes"
+            & " that trigger node synthetization");
+      end if;
+
+      --  Forbid node synthetization when Self.Self_Env is foreign, as in that
+      --  case, this new node would escape the relocation mechanism when that
+      --  foreign env is terminated.
+      --
+      --  Note that we could, in principle, register this synthetized node so
+      --  that the relocation mechanism takes care of it, but this incurs extr
+      --  a complexity for a use case that is not yet proven useful. So just
+      --  forbid this situation.
+
+      if Synthetizing and then AST_Envs.Is_Foreign_Strict (Env, Self_Node) then
+         Raise_Property_Exception
+           (Self_Node,
+            Property_Error'Identity,
+            "synthetic nodes cannot have foreign lexical envs");
+      end if;
+
+      Self.all.Validate (Self_Node);
+      return Self.all.Build (Parent, Self_Node);
+   end Node_Builder_Build_Wrapper;
+
+   --------------------------
+   -- Validate_Check_Child --
+   --------------------------
+
+   procedure Validate_Check_Child
+     (Desc      : String;
+      Builder   : Node_Builder_Type;
+      Nullable  : Boolean;
+      Self_Node : ${T.root_node.name})
+   is
+      Child : ${T.root_node.name};
+   begin
+      --  There is no need to do the checks below on synthetizing node
+      --  builders, as they are guaranteed by construction to return non-null
+      --  values that belong to the same unit as Self_Node.
+
+      if Is_Synthetizing (Builder) then
+         Builder.Validate (Self_Node);
+         return;
+      end if;
+
+      Child := Builder.Build (null, Self_Node);
+      if Child = null and then not Nullable then
+         Raise_Property_Exception
+           (Self_Node,
+            Property_Error'Identity,
+            Desc & " cannot be null; add a nullable annotation to this field"
+            & " to allow it");
+      end if;
+   end Validate_Check_Child;
+
    -------------
    -- Inc_Ref --
    -------------
@@ -4149,7 +4232,8 @@ package body ${ada_lib_name}.Implementation is
       if Value = null then
          return Null_Node_Builder;
       else
-         return new Copy_Node_Builder_Record'(Ref_Count => 1, Value => Value);
+         return new Copy_Node_Builder_Record'
+           (Ref_Count => 1, Hash => Hash (Value), Value => Value);
       end if;
    end Create_Copy_Node_Builder;
 
@@ -4185,10 +4269,17 @@ package body ${ada_lib_name}.Implementation is
          % endif
          type ${t.access_type} is access all ${t.record_type};
 
+         overriding procedure Validate
+           (Self : ${t.record_type}; Self_Node : ${T.root_node.name});
+
          overriding function Build
            (Self              : ${t.record_type};
             Parent, Self_Node : ${T.root_node.name})
             return ${T.root_node.name};
+
+         overriding function Is_Equivalent
+           (Left  : ${t.record_type};
+            Right : Node_Builder_Record'Class) return Boolean;
 
          overriding function Trace_Image
            (Self : ${t.record_type}) return String
@@ -4197,6 +4288,47 @@ package body ${ada_lib_name}.Implementation is
          % if refcount_needed:
             overriding procedure Release (Self : in out ${t.record_type});
          % endif
+
+         --------------
+         -- Validate --
+         --------------
+
+         overriding procedure Validate
+           (Self : ${t.record_type}; Self_Node : ${T.root_node.name}) is
+         begin
+            ## Reject null nodes for fields that are not nullable for
+            ## synthetic nodes.
+            % for i, field in enumerate(parse_fields, 1):
+               Validate_Check_Child
+                 (Desc      => "field " & ${ascii_repr(field.qualname)},
+                  Builder   => Self.${field.names.codegen},
+                  Nullable  => ${field.nullable},
+                  Self_Node => Self_Node);
+            % endfor
+
+            ## Same constraint for list elements
+            % if list_elements_arg:
+               declare
+                  Elements_Builders : ${(
+                     list_elements_arg.type.array_type_name
+                  )} renames Self.${list_elements_arg.codegen_name}.Items;
+               begin
+                  for I in Elements_Builders'Range loop
+                     Validate_Check_Child
+                       (Desc      =>
+                          "list child of "
+                          & ${ascii_repr(t.node_type.lkt_name)},
+                        Builder   => Elements_Builders (I),
+                        Nullable  => False,
+                        Self_Node => Self_Node);
+                  end loop;
+               end;
+            % endif
+
+            ## In case there were no check emitted for this node builder, make
+            ## this procedure body syntaxically valid.
+            null;
+         end Validate;
 
          -----------
          -- Build --
@@ -4214,29 +4346,6 @@ package body ${ada_lib_name}.Implementation is
                then Empty_Env
                else Parent.Self_Env);
          begin
-            if Parent /= null and then Parent.Unit /= Unit then
-               Raise_Property_Exception
-                 (Self_Node,
-                  Property_Error'Identity,
-                  "synthetic node parents must belong to the same unit as the"
-                  & " nodes that trigger node synthetization");
-            end if;
-
-            ## Forbid node synthetization when Self.Self_Env is foreign, as in
-            ## that case, this new node would escape the relocation mechanism
-            ## when that foreign env is terminated.
-            ##
-            ## Note that we could, in principle, register this synthetized node
-            ## so that the relocation mechanism takes care of it, but this
-            ## incurs extra complexity for a use case that is not yet proven
-            ## useful. So just forbid this situation.
-            if AST_Envs.Is_Foreign_Strict (Env, Parent) then
-               Raise_Property_Exception
-                 (Self_Node,
-                  Property_Error'Identity,
-                  "synthetic nodes cannot have foreign lexical envs");
-            end if;
-
             ## Allocate the synthetic node and initialize all of its components
             ## except the children.
             Result := new ${T.root_node.value_type_name}
@@ -4272,19 +4381,6 @@ package body ${ada_lib_name}.Implementation is
                      %>
                      ${child_expr} :=
                        Self.${field.names.codegen}.Build (Result, Self_Node);
-
-                     ## Reject null nodes for fields that are not nullable for
-                     ## synthetic nodes.
-                     % if not field.nullable:
-                        if ${child_expr} = null then
-                           Raise_Property_Exception
-                             (Self_Node,
-                              Property_Error'Identity,
-                              "${field.qualname} cannot be null in synthetic"
-                              & " nodes; add a nullable annotation to this"
-                              & " field to allow it");
-                        end if;
-                     % endif
                   % endfor
 
                   Initialize_Fields_For_${t.node_type.kwless_raw_name}
@@ -4322,6 +4418,31 @@ package body ${ada_lib_name}.Implementation is
 
             return Result;
          end Build;
+
+         -------------------
+         -- Is_Equivalent --
+         -------------------
+
+         overriding function Is_Equivalent
+           (Left  : ${t.record_type};
+            Right : Node_Builder_Record'Class) return Boolean
+         is
+            % if constructor_args:
+               L : ${t.record_type} renames Left;
+               R : ${t.record_type} renames ${t.record_type} (Right);
+            % endif
+         begin
+            % if constructor_args:
+               return ${" and then ".join(
+                  arg.type.equivalent_function_call(
+                     f"L.{arg.codegen_name}", f"R.{arg.codegen_name}"
+                  )
+                  for arg in constructor_args
+               )};
+            % else:
+               return True;
+            % endif
+         end Is_Equivalent;
 
          % if refcount_needed:
 
@@ -4363,6 +4484,19 @@ package body ${ada_lib_name}.Implementation is
                   Inc_Ref (Builder.${arg.codegen_name});
                % endif
             % endfor
+
+            % if constructor_args:
+               Builder.Hash := Combine
+                 (${ada_block_with_parens(
+                     [
+                        f"{i} => Hash ({arg.codegen_name})"
+                        for i, arg in enumerate(constructor_args, 1)
+                     ],
+                     18,
+                   )});
+            % else:
+               Builder.Hash := Initial_Hash;
+            % endif
             return Node_Builder_Type (Builder);
          end ${t.synth_constructor};
       % endif

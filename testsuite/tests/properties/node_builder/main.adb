@@ -79,6 +79,18 @@ begin
    end;
    New_Line;
 
+   Put_Line ("== List_Node_With_Null_Child ==");
+   declare
+      L : Synth_Literal_List;
+   begin
+      L := N.F_Lf_List_Node_With_Null_Child;
+      Put_Line (L.Image);
+   exception
+      when Exc : Property_Error =>
+         Put_Line ("Property_Error: " & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line ("== Non_Nullable_Null ==");
    declare
       R : Synth_Non_Nullable;
@@ -215,6 +227,52 @@ begin
    exception
       when Exc : Property_Error =>
          Put_Line ("Property_Error: " & Exception_Message (Exc));
+   end;
+   New_Line;
+
+   Put_Line ("== Node builders and memoization ==");
+   declare
+      Dummy : Boolean;
+      type Int_Array is array (Positive range <>) of Integer;
+   begin
+      for Ignored in Boolean loop
+         for I of Int_Array'(1, 2, 5, 6, 7) loop
+            Put_Line
+              ("Calling Literal_Sequence.P_Check_Mmz (" & I'Image & ")...");
+            Dummy := N.P_Check_Mmz (I);
+         end loop;
+      end loop;
+   end;
+   New_Line;
+
+   Put_Line ("== Node builders and Equivalent ==");
+   declare
+      Dummy : Boolean;
+      type Couple is record
+         Left, Right : Integer;
+      end record;
+      type Couple_Array is array (Positive range <>) of Couple;
+   begin
+      for C of Couple_Array'
+        ((1, 1),
+         (1, 2),
+         (2, 2),
+         (2, 3),
+         (3, 3),
+
+         (4, 4),
+         (4, 5),
+         (5, 5),
+         (4, 1),
+
+         (6, 6),
+         (6, 7),
+         (7, 7),
+         (6, 1))
+      loop
+         Put ("Equivalence" & C.Left'Image & " <->" & C.Right'Image & ": ");
+         Put_Line (N.P_Check_Equivalent (C.Left, C.Right)'Image);
+      end loop;
    end;
    New_Line;
 

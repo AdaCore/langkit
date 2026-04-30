@@ -32,6 +32,7 @@ from langkit.compiled_types import (
     EnumValue,
     MemberNames,
     NoCompiledType,
+    NodeBuilderType,
     T,
     UserField,
     gdb_helper,
@@ -594,6 +595,12 @@ class Expr:
         from langkit.expressions import CastExpr
 
         if self.type == t:
+            return self
+
+        # Code-generation wise, there is only one node builder reference type,
+        # so there is no need for conversions.
+        if isinstance(t, NodeBuilderType):
+            assert isinstance(self.type, NodeBuilderType)
             return self
 
         assert isinstance(t, (ASTNodeType, EntityType))

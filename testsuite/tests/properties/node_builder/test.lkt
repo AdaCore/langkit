@@ -67,6 +67,13 @@ class LiteralSequence: FooNode {
             number=42b
         ).build()
 
+    @exported
+    @lazy
+    lf_list_node_with_null_child: SynthLiteralList =
+        SynthLiteralList.builder(
+            [node.items[0].to_builder(), null[Literal].to_builder()]
+        ).build()
+
     # SynthNonNullable.items cannot be null while SynthNullable.items can: we
     # need to check the behavior of both cases for both nodes.
 
@@ -165,6 +172,67 @@ class LiteralSequence: FooNode {
     @exported
     @lazy
     lf_staged_node_builder: SynthNonNullable = node.lf_node_builder.build()
+
+    # Check that NodeBuilder is covariant, i.e. that NodeBuilder[T1] is a
+    # subtype of NodeBuilder[T2] iff T1 is a subtype of T2. It it was not the
+    # case, the general_node_builder property would not compile.
+
+    fun foo_node_builder(): NodeBuilder[FooNode] =
+        raise[NodeBuilder[FooNode]] PropertyError()
+
+    fun literal_builder(): NodeBuilder[Literal] =
+        raise[NodeBuilder[Literal]] PropertyError()
+
+    @ignored
+    fun general_node_builder(b: Bool): NodeBuilder[FooNode] =
+        if b
+        then node.foo_node_builder()
+        else node.literal_builder()
+
+    # Check that the Hash function for node builders work as expected: make
+    # properties use it through the memoization mechanism (node builders used
+    # as memoized property arguments, and thus memoization keys).
+
+    @external()
+    fun print_msg(n: NodeBuilder[FooNode]): Bool
+
+    @memoized
+    fun mmz_node_builder(n: NodeBuilder[FooNode]): Bool = node.print_msg(n)
+
+    fun indexed_builder(index: Int): NodeBuilder[FooNode] =
+        # Copy node builders: null node, and two different nodes
+        if index == 1
+        then null[FooNode].to_builder()
+        elif index == 2
+        then node.to_builder()
+        elif index == 3
+        then node.parent.to_builder()
+
+        # Synthetizing node builders: sometimes different shapes, sometimes
+        # different user fields.
+        elif index == 4
+        then SynthUserField.builder(name=node.name.to_builder(), number=42b)
+        elif index == 5
+        then SynthUserField.builder(name=node.name.to_builder(), number=43b)
+
+        elif index == 6
+        then SynthLiteralList.builder([]: NodeBuilder[Literal])
+        elif index == 7
+        then SynthLiteralList.builder(node.list_elts())
+
+        else raise[NodeBuilder[FooNode]] PropertyError(
+            "invalid node builder index"
+        )
+
+    @exported
+    fun check_mmz(index: Int): Bool =
+        node.mmz_node_builder(node.indexed_builder(index))
+
+    # Also check their Equivalent function
+
+    @exported
+    fun check_equivalent(left: Int, right: Int): Bool =
+        node.indexed_builder(left) == node.indexed_builder(right)
 }
 
 class Name: FooNode implements TokenNode {

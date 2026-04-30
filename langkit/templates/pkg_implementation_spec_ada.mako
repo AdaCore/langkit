@@ -25,6 +25,7 @@ with Ada.Containers.Vectors;
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;       use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
+with Ada.Tags;                    use Ada.Tags;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
@@ -41,6 +42,7 @@ with Langkit_Support.Adalog.Solver_Interface;
 with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
+with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Lexical_Envs_Impl;
@@ -450,6 +452,17 @@ private package ${ada_lib_name}.Implementation is
    --  AST_Envs.Create_Dynamic_Lexical_Env.
 
    ## Generate Hash functions for "built-in types" if need be
+
+   % if T.Address.requires_hash_function:
+
+      --  On all relevant targets, addresses returned by the system allocator
+      --  are aligned on 4-bytes boundaries, so ignore the 2 least significant
+      --  bits.
+
+      function Hash is new Langkit_Support.Hashes.Hash_Address
+        (Ignored_LSB => 2);
+   % endif
+
    % if T.Bool.requires_hash_function:
       function Hash (B : Boolean) return Hash_Type;
    % endif
@@ -519,6 +532,10 @@ private package ${ada_lib_name}.Implementation is
    function "-" (Left, Right : Big_Integer_Type) return Big_Integer_Type;
    function "-" (Value : Big_Integer_Type) return Big_Integer_Type;
 
+   % if T.BigInt.requires_hash_function:
+      function Hash (I : Big_Integer_Type) return Hash_Type;
+   % endif
+
    % if ctx.properties_logging:
    function Trace_Image (I : Big_Integer_Type) return String;
    % endif
@@ -549,8 +566,18 @@ private package ${ada_lib_name}.Implementation is
       Ref_Count : Integer;
       --  Negative values are interpreted as "always living singleton".
       --  Non-negative values have the usual ref-counting semantics.
+
+      Hash : Hash_Type;
+      --  Cached hash for this node builder. It is computed at node builder
+      --  creation.
    end record;
    type Node_Builder_Type is access all Node_Builder_Record'Class;
+
+   procedure Validate
+     (Self : Node_Builder_Record; Self_Node : ${T.root_node.name})
+   is null;
+   --  Raise a property error if it is invalid to instantiate this node builder
+   --  from ``Self_Node``'s unit (assumed not to be null).
 
    function Build
      (Self              : Node_Builder_Record;
@@ -564,15 +591,46 @@ private package ${ada_lib_name}.Implementation is
    --  This function is meant to be called in a property: ``Self_Node`` must be
    --  the ``Self`` of the calling property.
 
+   function Is_Equivalent
+     (Left  : Node_Builder_Record;
+      Right : Node_Builder_Record'Class) return Boolean
+   is abstract;
    function Trace_Image (Self : Node_Builder_Record) return String is abstract;
 
    procedure Release (Self : in out Node_Builder_Record) is null;
    --  Free resources for this node builder
 
+   function Hash (Self : Node_Builder_Type) return Hash_Type
+   is (if Self = null then Initial_Hash else Self.Hash);
+
+   function Equivalent (Left, Right : Node_Builder_Type) return Boolean
+   is (if Left = null
+       then Right = null
+       else Right /= null
+            and then Left.all'Tag = Right.all'Tag
+            and then Left.Is_Equivalent (Right.all));
+
    function Trace_Image (Self : Node_Builder_Type) return String
    is (if Self = null
        then "<NodeBuilder null>"
        else Self.Trace_Image);
+
+   function Node_Builder_Build_Wrapper
+     (Self              : Node_Builder_Type;
+      Parent, Self_Node : ${T.root_node.name}) return ${T.root_node.name};
+   --  Wrapper around ``Node_Builder_Record.Build`` that performs validaty
+   --  check before running any node synthetization.
+
+   procedure Validate_Check_Child
+     (Desc      : String;
+      Builder   : Node_Builder_Type;
+      Nullable  : Boolean;
+      Self_Node : ${T.root_node.name});
+   --  Helper for the implementation of ``Node_Builder_Record.Validate`` for
+   --  synthetizing builders.
+   --
+   --  Ensure that ``Builder`` does not return a foreign node, and if
+   --  ``Nullable`` is false, that it does not return a null node.
 
    type Copy_Node_Builder_Record is new Node_Builder_Record with record
       Value : ${T.root_node.name};
@@ -584,12 +642,17 @@ private package ${ada_lib_name}.Implementation is
       Parent, Self_Node : ${T.root_node.name}) return ${T.root_node.name}
    is (Self.Value);
 
+   overriding function Is_Equivalent
+     (Left  : Copy_Node_Builder_Record;
+      Right : Node_Builder_Record'Class) return Boolean
+   is (Left.Value = Copy_Node_Builder_Record (Right).Value);
+
    overriding function Trace_Image
      (Self : Copy_Node_Builder_Record) return String
    is ("<NodeBuilder to copy " & Trace_Image (Self.Value) & ">");
 
    Null_Node_Builder_Record : aliased Copy_Node_Builder_Record :=
-     (Ref_Count => -1, Value => null);
+     (Ref_Count => -1, Hash => Initial_Hash, Value => null);
    Null_Node_Builder        : constant Node_Builder_Type :=
      Null_Node_Builder_Record'Access;
 
@@ -601,6 +664,11 @@ private package ${ada_lib_name}.Implementation is
 
    function Create_Copy_Node_Builder
      (Value : ${T.root_node.name}) return Node_Builder_Type;
+
+   function Is_Synthetizing (Self : Node_Builder_Type) return Boolean
+   is (Self.all not in Copy_Node_Builder_Record'Class);
+   --  Return whether this node builder synthetizes nodes (i.e. it is not
+   --  copying existing nodes).
 
    % for t in ctx.node_builder_types:
       subtype ${t.name} is Node_Builder_Type;
