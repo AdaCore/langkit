@@ -1,0 +1,3 @@
+import helper_1, helper_2
+
+val v = helper_1.v + helper_2.v
