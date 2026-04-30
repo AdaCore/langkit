@@ -395,10 +395,12 @@ package body Liblktlang.Implementation.Extensions is
          --  an assertion error.
 
          if Prelude.Diagnostics'Length > 0 then
+            pragma Annotate (Xcov, Exempt_On, "defensive code");
             for Diagnostic of Prelude.Diagnostics loop
                Put_Line (To_Pretty_String (Diagnostic));
             end loop;
             raise Assertion_Error with "Errors in prelude";
+            pragma Annotate (Xcov, Exempt_Off);
          end if;
       end if;
       Populate_Lexical_Env (Prelude);
