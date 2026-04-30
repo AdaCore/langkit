@@ -1,0 +1,7 @@
+test.lkt:2:13-2:18: error: expected Int, got String
+ 2 | val v = 1 + "foo"
+   |             ^^^^^ 
+test.lkt:2:13-2:18: error: expression must be of type Int or BigInt, got String
+ 2 | val v = 1 + "foo"
+   |             ^^^^^ 
+

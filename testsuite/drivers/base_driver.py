@@ -260,6 +260,16 @@ class BaseDriver(DiffTestDriver):
 
         env[env_var] = path_list
 
+    @property
+    def extra_lkt_path(self) -> list[str]:
+        """
+        Return a list of directories to add to the LKT_PATH env var.
+        """
+        return [
+            self.working_dir(item)
+            for item in self.test_env.get("extra_lkt_path", [])
+        ]
+
     #
     # Run helpers
     #
@@ -303,6 +313,10 @@ class BaseDriver(DiffTestDriver):
         env = env or dict(os.environ)
         if self.env.lkt_coverage and for_coverage:
             env["GNATCOV_TRACE_FILE"] = self.lkt_traces_dir + "/"
+
+        # Add LKT_PATH entries from the test.yaml
+        for dirname in self.extra_lkt_path:
+            self.add_path(env, "LKT_PATH", dirname)
 
         self.shell(argv, env=env, analyze_output=analyze_output)
 

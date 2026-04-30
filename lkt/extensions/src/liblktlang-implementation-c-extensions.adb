@@ -34,8 +34,10 @@ package body Liblktlang.Implementation.C.Extensions is
 
    exception
       when Exc : others =>
+         pragma Annotate (Xcov, Exempt_On, "defensive code");
          Set_Last_Exception (Exc);
          return lkt_unit_provider (System.Null_Address);
+         pragma Annotate (Xcov, Exempt_Off);
    end lkt_create_default_provider;
 
 end Liblktlang.Implementation.C.Extensions;

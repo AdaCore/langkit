@@ -9,7 +9,6 @@ import dataclasses
 import json
 import os.path
 import subprocess
-import sys
 from typing import TYPE_CHECKING
 import xml.etree.ElementTree as etree
 
@@ -467,10 +466,14 @@ class CoverageReport:
                 row = Row(src_file.basename)
                 file_rows[src_file.basename] = row
                 for line in src_file.lines:
+                    # Consider that no-code and exempted-and-not-covered lines
+                    # are not coverable.
                     if line.state in (".", "*"):
                         continue
                     row.lines_total += 1
-                    if line.state == "+":
+                    # Consider that executed lines (whether they are exempted
+                    # or not) are covered.
+                    if line.state in ("+", "#"):
                         row.lines_covered += 1
 
         # Create the total summary

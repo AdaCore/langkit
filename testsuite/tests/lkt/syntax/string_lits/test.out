@@ -34,6 +34,10 @@ s = ERROR: 1:10: invalid escape sequence
 
 backslash_quote.lkt:1:13: Invalid token, ignored
 
+== block_escape_invalid_char.lkt ==
+
+s = ERROR: 1:12: invalid escape sequence
+
 == block_missing_space.lkt ==
 
 s = ERROR: 1:11: space missing

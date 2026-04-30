@@ -1,0 +1,2 @@
+driver: lkt
+extra_lkt_path: [src1, src2]

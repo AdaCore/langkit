@@ -1,0 +1,2 @@
+# Test lkt_toolbox's --check-only mode
+val v = 1 + "foo"
