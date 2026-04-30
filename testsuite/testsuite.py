@@ -13,6 +13,7 @@ import os
 import shutil
 import subprocess
 import sys
+from typing import IO
 
 from e3.testsuite import Testsuite, logger
 
@@ -331,6 +332,47 @@ class LangkitTestsuite(Testsuite):
             else self.main.args.jobs
         )
 
+    def dump_testsuite_result(self) -> None:
+        args = self.main.args
+
+        # Compute the code coverage report for Liblktlang
+        self.coverage_summary = []
+        if args.lkt_coverage:
+            # Do not import Langkit modules unless we need them, so that
+            # regular testsuite modes do not require it.
+            from langkit.coverage import GNATcov
+
+            logger.info("Computing the coverage report for Liblktlang")
+            coverage_report = GNATcov().generate_report(
+                title="Liblktlang Coverage Report",
+                instr_dir=args.lkt_gnatcov_instr_dir,
+                traces=glob.glob(
+                    os.path.join(self.env.lkt_traces_dir, "*.srctrace")
+                ),
+                output_dir=self.env.lkt_coverage_dir,
+                working_dir=self.working_dir,
+                cobertura_root=args.cobertura_root,
+            )
+            logger.info("The coverage report is ready")
+
+            # Produce a code coverage summary
+            self.coverage_summary = coverage_report.format_summary()
+
+        super().dump_testsuite_result()
+        if self.coverage_summary:
+            logger.info("Coverage summary:")
+            for line in self.coverage_summary:
+                logger.info(line)
+
+    def write_comment_file(self, comment_file: IO[str]) -> None:
+        super().write_comment_file(comment_file)
+
+        if self.coverage_summary:
+            print("", file=comment_file)
+            print("Coverage summary:", file=comment_file)
+            for line in self.coverage_summary:
+                print(f"  {line}", file=comment_file)
+
     def tear_down(self):
         args = self.main.args
 
@@ -398,26 +440,6 @@ class LangkitTestsuite(Testsuite):
                     "No test exercised Langkit_Support: no coverage report"
                     " to produce"
                 )
-
-        if args.lkt_coverage:
-            # Do not import Langkit modules unless we need them, so that
-            # regular testsuite modes do not require it.
-            from langkit.coverage import GNATcov
-
-            logger.info("Computing the coverage report for Liblktlang")
-            coverage_summary = GNATcov().generate_report(
-                title="Liblktlang Coverage Report",
-                instr_dir=args.lkt_gnatcov_instr_dir,
-                traces=glob.glob(
-                    os.path.join(self.env.lkt_traces_dir, "*.srctrace")
-                ),
-                output_dir=self.env.lkt_coverage_dir,
-                working_dir=self.working_dir,
-                cobertura_root=args.cobertura_root,
-            )
-            logger.info("The coverage report is ready")
-            for line in coverage_summary.formatted:
-                logger.info(line)
 
         super().tear_down()
 

@@ -53,6 +53,9 @@ langkit_build_and_test:
 
     # Print metrics for integration in MR summary
     - print-global-coverage coverage/*.xml
+
+    # Display the coverage summary in the job log for convenience
+    - cat $TEST_DIR/results/new/comment
   artifacts:
     paths:
       - xunit-*.xml
