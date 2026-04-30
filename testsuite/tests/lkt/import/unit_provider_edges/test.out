@@ -1,0 +1,16 @@
+# foo unit_specification
+
+Got unit 'foo.lkt'
+foo.lkt: Cannot open source file
+
+# bar unit_body
+
+Got unit 'bar.lkt'
+bar.lkt: Cannot open source file
+
+# foo-bar unit_body
+
+Got unit ''
+: Cannot open source file
+
+Done
