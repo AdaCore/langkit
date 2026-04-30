@@ -1000,6 +1000,11 @@ class CompiledType:
             public to internal values requires an analysis context.
         """
         assert isinstance(context, CompileCtx)
+
+        # Something went wrong if we try to created new compiled types after we
+        # have started code emission.
+        assert not context.emission_started
+
         if isinstance(name, str):
             name = names.Name.from_camel(name)
         if isinstance(api_name, str):
