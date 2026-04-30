@@ -467,7 +467,7 @@ class CoverageReport:
                 row = Row(src_file.basename)
                 file_rows[src_file.basename] = row
                 for line in src_file.lines:
-                    if line.state == ".":
+                    if line.state in (".", "*"):
                         continue
                     row.lines_total += 1
                     if line.state == "+":
