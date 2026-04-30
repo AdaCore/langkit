@@ -92,6 +92,20 @@ instance, to run them using Python 3.7, run:
 If you want to learn more about this test driver's options (for instance to run
 tests under Valgrind), add a `-h` flag.
 
+In order to make the testsuite compute code coverage for Liblktlang, you need a
+working GNATcoverage setup. Build Liblktlang in coverage mode:
+
+    $ lkm make --coverage
+
+Then run the testsuite itself in coverage mode:
+
+    $ python manage.py test \
+        --lkt-coverage \
+        --lkt-gnatcov-instr-dir lkt/build/obj/instr/
+
+The testsuite prints a code coverage summary before exit, and you can find the
+detailed coverage report in `out/new/lkt_coverage`.
+
 Documentation
 -------------
 

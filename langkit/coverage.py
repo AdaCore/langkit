@@ -9,6 +9,7 @@ import dataclasses
 import json
 import os.path
 import subprocess
+import sys
 from typing import TYPE_CHECKING
 import xml.etree.ElementTree as etree
 
@@ -245,53 +246,6 @@ class CoverageReport:
             self.kind = kind
             self.message = message
 
-    @dataclasses.dataclass(frozen=True)
-    class Summary:
-        lines_total: int
-        """
-        Total number of coverable lines.
-        """
-
-        lines_covered: int
-        """
-        Number of lines that are fully covered.
-        """
-
-        @property
-        def coverage_ratio(self) -> float:
-            """
-            Return the ratio of lines covered per total coverable lines count.
-            """
-            if self.lines_total == 0:
-                return 1.0
-            else:
-                return self.lines_covered / self.lines_total
-
-        @property
-        def formatted(self) -> list[str]:
-            """
-            Return a formatted coverage report summary.
-            """
-            lines_total = str(self.lines_total)
-            lines_covered = str(self.lines_covered)
-            ratio = f"{self.coverage_ratio:.2%}"
-            ratio_integral, ratio_decimal = ratio.split(".")
-
-            count_width = max(
-                len(lines_total), len(lines_covered), len(ratio_integral)
-            )
-            lines_total = lines_total.rjust(count_width)
-            lines_covered = lines_covered.rjust(count_width)
-            ratio_integral = ratio_integral.rjust(count_width)
-            ratio = f"{ratio_integral}.{ratio_decimal}"
-
-            return [
-                "Code coverage summary:",
-                f"    Covered lines:   {lines_total}",
-                f"    Coverable lines: {lines_covered}",
-                f"    Coverage ratio:  {ratio}",
-            ]
-
     UNKNOWN_STATE_NAME = "unknown"
     STATES = [
         (".", "no_code"),
@@ -478,6 +432,104 @@ class CoverageReport:
                         etree.ElementTree(elt_coverage).write(
                             f, encoding="utf-8", xml_declaration=True
                         )
+
+    def format_summary(self) -> list[str]:
+        """
+        Return a per-file and total summary of covered lines.
+        """
+
+        @dataclasses.dataclass
+        class Row:
+            name: str
+            lines_total: int = 0
+            lines_covered: int = 0
+
+            @property
+            def coverage_ratio(self) -> str:
+                ratio = (
+                    1.0
+                    if self.lines_total == 0
+                    else self.lines_covered / self.lines_total
+                )
+                return f"{ratio:.2%}"
+
+        @dataclasses.dataclass(frozen=True)
+        class FormattedRow:
+            name: str
+            lines_total: str
+            lines_covered: str
+            coverage_ratio: str
+
+        # Create per-file summaries
+        file_rows = {}
+        for group in self.groups.values():
+            for src_file in group.files.values():
+                row = Row(src_file.basename)
+                file_rows[src_file.basename] = row
+                for line in src_file.lines:
+                    if line.state in (".", "*"):
+                        continue
+                    row.lines_total += 1
+                    if line.state == "+":
+                        row.lines_covered += 1
+
+        # Create the total summary
+        total_row = Row("Total")
+        for row in file_rows.values():
+            total_row.lines_total += row.lines_total
+            total_row.lines_covered += row.lines_covered
+
+        # We are going to display summaries in a table: compute column widths
+        all_rows = [*file_rows.values(), total_row]
+        formatted_all_rows = [
+            FormattedRow("Source file", "Total", "Covered", "%Covered")
+        ] + [
+            FormattedRow(
+                r.name,
+                str(r.lines_total),
+                str(r.lines_covered),
+                r.coverage_ratio,
+            )
+            for r in all_rows
+        ]
+        max_name = max(len(r.name) for r in formatted_all_rows)
+        max_total = max(len(r.lines_total) for r in formatted_all_rows)
+        max_covered = max(len(r.lines_covered) for r in formatted_all_rows)
+        max_ratio = max(len(r.coverage_ratio) for r in formatted_all_rows)
+        spacing = "  "
+
+        line_length = (
+            max_name
+            + len(spacing)
+            + max_total
+            + len(spacing)
+            + max_covered
+            + len(spacing)
+            + max_ratio
+        )
+
+        # Ready to format the table
+        result = []
+        separator = "-" * line_length
+
+        def append_row(r: FormattedRow) -> None:
+            result.append(
+                r.name.ljust(max_name)
+                + spacing
+                + r.lines_total.rjust(max_total)
+                + spacing
+                + r.lines_covered.rjust(max_covered)
+                + spacing
+                + r.coverage_ratio.rjust(max_ratio),
+            )
+
+        append_row(formatted_all_rows[0])
+        result.append(separator)
+        for r in formatted_all_rows[1:-1]:
+            append_row(r)
+        result.append(separator)
+        append_row(formatted_all_rows[-1])
+        return result
 
 
 class LktCoverage:
@@ -790,7 +842,7 @@ class GNATcov:
         xml_dir: str,
         output_dir: str,
         cobertura_root: str | None = None,
-    ) -> CoverageReport.Summary:
+    ) -> CoverageReport:
         """
         Helper for generate_report. Load GNATcoverage's XML report and produce
         our final coverage report.
@@ -819,18 +871,7 @@ class GNATcov:
         # Output the final report
         report.render(output_dir, cobertura_root)
 
-        # Compute the coverage ratio
-        lines_total = 0
-        lines_covered = 0
-        for group in report.groups.values():
-            for src_file in group.files.values():
-                for line in src_file.lines:
-                    if line.state == ".":
-                        continue
-                    lines_total += 1
-                    if line.state == "+":
-                        lines_covered += 1
-        return CoverageReport.Summary(lines_total, lines_covered)
+        return report
 
     def generate_report(
         self,
@@ -840,7 +881,7 @@ class GNATcov:
         output_dir: str,
         working_dir: str,
         cobertura_root: str | None = None,
-    ) -> CoverageReport.Summary:
+    ) -> CoverageReport:
         """
         Generate a HTML coverage report.
 
