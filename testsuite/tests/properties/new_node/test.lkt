@@ -52,6 +52,10 @@ class LiteralSequence: FooNode {
     fun prop2(with_null: Bool): Entity[SynthNode2] = (
         if with_null then node.new_node2_null else node.new_node2
     ).as_bare_entity
+
+    @exported
+    @memoized
+    fun prop3(): Entity[SynthNode3] = SynthNode3(name=node.name).as_bare_entity
 }
 
 class Name: FooNode implements TokenNode {
@@ -67,4 +71,16 @@ class SynthNode: FooNode {
 class SynthNode2: FooNode {
     @parse_field name: Name
     @parse_field @nullable items: ASTList[Literal]
+}
+
+@abstract
+class SynthNode3Parent: FooNode {
+    @abstract @parse_field name: Name
+    @abstract @parse_field @nullable value: Literal
+}
+
+@synthetic
+class SynthNode3: SynthNode3Parent {
+    @parse_field name: Name
+    @parse_field @null_field value: Literal
 }
