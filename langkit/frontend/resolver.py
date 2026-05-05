@@ -342,11 +342,24 @@ class Resolver:
                         " element type",
                         location=name,
                     )
-                (element_type,) = type_args
 
-                # Check that the element type is a node and that the designated
-                # root node is indeed the root node.
-                return self.resolve_node(element_type, scope).list
+                # Check that the element type is a node
+                (element_type,) = type_args
+                resolved_element_type = self.resolve_node(element_type, scope)
+
+                # If the set of list node types is frozen, make sure the
+                # requested list node type already exists.
+                if (
+                    resolved_element_type not in self.context.list_types
+                    and self.context.pending_node_types is None
+                ):
+                    error(
+                        "the grammar does not does have a list type for"
+                        f" {resolved_element_type.lkt_name}",
+                        location=name,
+                    )
+
+                return resolved_element_type.list
 
             elif generic == self.builtins.generics.array:
                 if len(type_args) != 1:

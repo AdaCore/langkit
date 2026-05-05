@@ -1,0 +1,22 @@
+# Check that references to non existent ASTList instances are correctly
+# rejected.
+#
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Wrapper(Example("example")))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Wrapper: FooNode {
+    @parse_field item: Example
+}
+
+class Example: FooNode implements TokenNode {
+    @exported
+    fun f(): Entity[FooNode] =
+        node.parent.as[ASTList[Example]].at(0).as_bare_entity
+}

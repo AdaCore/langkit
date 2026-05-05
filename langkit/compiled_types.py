@@ -1001,7 +1001,7 @@ class CompiledType:
         """
         assert isinstance(context, CompileCtx)
 
-        # Something went wrong if we try to created new compiled types after we
+        # Something went wrong if we try to create new compiled types after we
         # have started code emission.
         assert not context.emission_started
 

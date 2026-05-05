@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:21:24: error: the grammar does not does have a list type for Example
+21 |         node.parent.as[ASTList[Example]].at(0).as_bare_entity
+   |                        ^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done
