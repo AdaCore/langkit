@@ -15,21 +15,27 @@
     fields = api.get_struct_fields(cls)
     flatten_fields = api.flatten_struct_fields(fields)
 
-    implements = api.support_interfaces(
+    implements = ["LangkitSupport.StructInterface"] + api.support_interfaces(
         cls.implemented_interfaces(include_parents=False)
     )
     %>
 
     ${java_doc(cls, 4)}
     public static final class ${java_type}
-    % if len(implements) > 0:
     implements ${", ".join(implements)}
-    % endif
     {
 
-    % if not cls.is_empty:
-
         // ----- Class attributes -----
+
+        /** Full description of the structure. */
+        public static final LangkitSupport.Reflection.Struct description =
+            new LangkitSupport.Reflection.Struct(
+                ${str(cls.exposed and not cls.is_entity_type).lower()},
+                ${java_type}.class,
+                new ArrayList<>()
+            );
+
+    % if not cls.is_empty:
 
         /** Singleton that represents the none value for the structure. */
         public static final ${java_type} NONE = new ${java_type}(
@@ -38,6 +44,25 @@
                 for field in fields
             ])}
         );
+
+        static {
+            // Initialization of the description
+            % for field in fields:
+            description.fields().add(
+                new LangkitSupport.Reflection.StructField(
+                    "${field.lower_name}",
+                    ${api.wrapping_type(
+                        field.public_type, ast_wrapping=wrap_nodes
+                    )}.class,
+                    % if field.default_value is not None:
+                    Optional.ofNullable(${field.default_value})
+                    % else:
+                    Optional.empty()
+                    % endif
+                )
+            );
+            % endfor
+        }
 
         // ----- Instance attributes -----
 

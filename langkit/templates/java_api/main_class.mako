@@ -74,7 +74,8 @@ Those bindings call the native library using JNI and Native-Image C API.
 
 ====================
 */
-public final class ${ctx.lib_name.camel} {
+public final class ${ctx.lib_name.camel}
+    implements LangkitSupport.AnalysisLibrary {
 
     // ==========
     // Native entry points
@@ -169,11 +170,36 @@ public final class ${ctx.lib_name.camel} {
         BYTE_ORDER == ByteOrder.BIG_ENDIAN ? StandardCharsets.UTF_32BE
                                            : StandardCharsets.UTF_32LE;
 
+    public static final Map<String, LangkitSupport.Reflection.Enum>
+        ENUM_DESCRIPTION_MAP = new HashMap();
+
+    /** A map to store descriptions of all structure types. */
+    public static final Map<String, LangkitSupport.Reflection.Struct>
+        STRUCT_DESCRIPTION_MAP = new HashMap();
+
     /** A map to store node descriptions associated to their camel name. */
     public static final Map<String, LangkitSupport.Reflection.Node>
         NODE_DESCRIPTION_MAP = new HashMap<>();
 
     static {
+        // Fill the enumeration description map
+        % for enum_type in ctx.enum_types:
+        ENUM_DESCRIPTION_MAP.put(
+            "${api.wrapping_type(enum_type)}",
+            ${api.wrapping_type(enum_type)}.description
+        );
+        % endfor
+
+        // Fill the struct description map
+        % for struct_type in ctx.struct_types:
+            % if api.should_emit_struct(struct_type):
+        STRUCT_DESCRIPTION_MAP.put(
+            "${api.wrapping_type(struct_type, ast_wrapping=False)}",
+            ${api.wrapping_type(struct_type, ast_wrapping=False)}.description
+        );
+            % endif
+        % endfor
+
         // Fill the node description map and set the node kind descriptions
         % for astnode in ctx.node_types:
         NODE_DESCRIPTION_MAP.put(
@@ -186,6 +212,15 @@ public final class ${ctx.lib_name.camel} {
         );
             % endif
         % endfor
+    }
+
+    /** Redefine the reflection accession method. */
+    public static LangkitSupport.Reflection.Library getDescription() {
+        return new LangkitSupport.Reflection.Library(
+            ENUM_DESCRIPTION_MAP,
+            STRUCT_DESCRIPTION_MAP,
+            NODE_DESCRIPTION_MAP
+        );
     }
 
     // ==========
@@ -596,7 +631,8 @@ public final class ${ctx.lib_name.camel} {
     // ==========
 
     /**
-     * This class represents exception during symbol manipulation.
+     * This class represents an exception that occurred during symbol
+     * manipulation.
      */
     public static final class SymbolException extends RuntimeException {
         private static final long serialVersionUID = 1L;
@@ -608,7 +644,8 @@ public final class ${ctx.lib_name.camel} {
     }
 
     /**
-     * This class reprsents exception during enum manipulation.
+     * This class represents an exception that occurred during enum
+     * manipulation.
      */
     public static final class EnumException extends RuntimeException {
         private static final long serialVersionUID = 1L;
@@ -5280,21 +5317,8 @@ public final class ${ctx.lib_name.camel} {
     // ===== Generated structure wrapping classes =====
 
     % for struct_type in ctx.struct_types:
-        % if struct_type.is_entity_type:
-            % if struct_type is root_entity:
+        % if api.should_emit_struct(struct_type):
     ${struct.wrapping_class(struct_type)}
-            % endif
-        % else:
-        <%
-        emit_struct = (
-            struct_type is T.EntityInfo
-            or struct_type is T.env_md
-            or struct_type.exposed
-        )
-        %>
-            % if emit_struct:
-    ${struct.wrapping_class(struct_type)}
-            % endif
         % endif
     % endfor
 

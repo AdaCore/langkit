@@ -290,21 +290,8 @@
     // ===== Generated structures =====
 
     % for struct_type in ctx.struct_types:
-        % if struct_type.is_entity_type:
-            % if struct_type is root_entity:
+        % if api.should_emit_struct(struct_type):
     ${struct.ni_def(struct_type)}
-            % endif
-        % else:
-        <%
-        emit_struct = (
-            struct_type is T.EntityInfo
-            or struct_type is T.env_md
-            or struct_type.exposed
-        )
-        %>
-            % if emit_struct:
-    ${struct.ni_def(struct_type)}
-            % endif
         % endif
     % endfor
 
@@ -1064,21 +1051,8 @@
         // ----- Structure functions -----
 
         % for struct_type in ctx.struct_types:
-            % if struct_type.is_entity_type:
-                % if struct_type is root_entity:
+            % if api.should_emit_struct(struct_type):
         ${struct.ni_funcs(struct_type)}
-                % endif
-            % else:
-            <%
-            emit_struct = (
-                struct_type is T.EntityInfo
-                or struct_type is T.env_md
-                or struct_type.exposed
-            )
-            %>
-                % if emit_struct:
-        ${struct.ni_funcs(struct_type)}
-                % endif
             % endif
         % endfor
 

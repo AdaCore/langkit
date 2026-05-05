@@ -81,6 +81,11 @@ class StructField:
     Generic field implemented.
     """
 
+    default_value: str | None = None
+    """
+    Default field value as a Java literal, if some.
+    """
+
     @property
     def name(self) -> str:
         """
@@ -279,6 +284,11 @@ class JavaAPISettings(AbstractAPISettings):
                         else None
                     ),
                     implements=field.implements,
+                    default_value=(
+                        field.default_value.render_java_constant()
+                        if field.default_value is not None
+                        else None
+                    ),
                 )
             )
         return res
@@ -368,6 +378,12 @@ class JavaAPISettings(AbstractAPISettings):
             )
         )
         return res
+
+    def is_field_nullable(self, field: ct.AbstractNodeData) -> bool:
+        """
+        Get whether the field value may be null.
+        """
+        return not isinstance(field, ct.BaseField) or field.nullable
 
     def get_java_method(self, field: ct.Field) -> JavaMethod:
         """

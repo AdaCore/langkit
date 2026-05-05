@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,6 +49,68 @@ public class LangkitSupport {
     public static final class Reflection {
 
         /**
+         * This class represents the reflection description of an analysis
+         * library. This is the main entry point of the reflection API.
+         *
+         * @param enumMap All enumeration types defined by the analysis
+         *                library.
+         * @param structMap All structure types defined by the analysis
+         *                  library.
+         * @param nodeMap All node types defined by the analysis library.
+         */
+        public record Library(
+            Map<String, Enum> enumMap,
+            Map<String, Struct> structMap,
+            Map<String, Node> nodeMap
+        ) {}
+
+        /**
+         * This class represents the description of an enumeration type.
+         *
+         * @param clazz Java class of the enumeration.
+         * @param values Values available in this enumeration.
+         */
+        public record Enum(
+            Class<? extends EnumInterface> clazz,
+            List<EnumValue> values
+        ) {}
+
+        /**
+         * This class represents a value in an enumeration type.
+         *
+         * @param name Value name, as defined in the Lkt spec.
+         * @param javaValue Java value corresponding to it.
+         */
+        public record EnumValue(
+            String name,
+            EnumInterface javaValue
+        ) {}
+
+        /**
+         * This class represents the description of a structure type.
+         *
+         * @param clazz Java class corresponding to the structure.
+         * @param fields Fields present in the structure.
+         */
+        public record Struct(
+            boolean isPublic,
+            Class<? extends StructInterface> clazz,
+            List<StructField> fields
+        ) {}
+
+        /**
+         * This class represents a field in a structure type.
+         *
+         * @param name Name of the field as defined in the Lkt spec.
+         * @param type Java class representing the type of the field.
+         */
+        public record StructField(
+            String name,
+            Class<?> type,
+            Optional<Object> defaultValue
+        ) {}
+
+        /**
         * This class represents the description of a node.
         *
         * @param kind Kind of the node. This kind is null if the node is
@@ -76,11 +139,13 @@ public class LangkitSupport {
         * @param javaMethod Reference to the Java method for the field.
         * @param params Parameters of the method.
         * @param memberRef Member reference corresponding to this field.
+        * @param isNullable Whether the field result may be null.
         */
         public record Field(
             Method javaMethod,
             List<Param> params,
-            MemberReferenceInterface memberRef
+            MemberReferenceInterface memberRef,
+            boolean isNullable
         ) {}
 
         /**
@@ -199,6 +264,16 @@ public class LangkitSupport {
     // Common interfacing API
     // ==========
 
+    /**
+     * This is the base interface of all classes representing Langkit analysis
+     * libraries.
+     */
+    public interface AnalysisLibrary {
+        public static Reflection.Library getDescription() {
+            throw new NotImplementedException();
+        }
+    }
+
     /** Classes that implement this interface wrap the langkit characters
      *  which are 32 bit wide. */
     public interface CharInterface {}
@@ -301,11 +376,20 @@ public class LangkitSupport {
         return message;
     }
 
-    public interface NodeKindInterface {
+    /** Base for all enumerations defined in a Langkit spec. */
+    public interface EnumInterface {}
+
+    /** Base interface for all iterators defined in a Langkit spec. */
+    public interface LangkitIterator<T> extends Iterator<T>, AutoCloseable {}
+
+    /** Base interface for all structs defined in a Langkit spec. */
+    public interface StructInterface {}
+
+    public interface NodeKindInterface extends EnumInterface {
         Reflection.Node getDescription();
     }
 
-    public interface TokenKindInterface {
+    public interface TokenKindInterface extends EnumInterface {
         /**
          * Get the C value from the enum instance.
          *
@@ -663,7 +747,7 @@ public class LangkitSupport {
     }
 
     /** This type represents a member reference. */
-    public interface MemberReferenceInterface {
+    public interface MemberReferenceInterface extends EnumInterface {
         int toC();
     }
 

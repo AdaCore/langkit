@@ -308,5 +308,317 @@ Visit <Example foo.txt:1:38-1:45>
 Visit <NullNode foo.txt:1:46-1:50>
 -----------------
 
+--- Reflection ---
+
+==== Node reflection information
+
+- Node: Example
+  Kind: EXAMPLE
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+  - Name: p_singleton
+  - Is nullable: true
+    Member reference: FOO_EXAMPLE_P_SINGLETON
+    Java method name: pSingleton
+    Params: []
+- Node: FooNode
+  Kind: null
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+  - Name: child_index
+  - Is nullable: true
+    Member reference: FOO_CHILD_INDEX
+    Java method name: childIndex
+    Params: []
+  - Name: children
+  - Is nullable: true
+    Member reference: FOO_CHILDREN
+    Java method name: children
+    Params: []
+  - Name: completion_item_kind_to_int
+  - Is nullable: true
+    Member reference: FOO_COMPLETION_ITEM_KIND_TO_INT
+    Java method name: completionItemKindToInt
+    Params: [kind: CompletionItemKind = Optional.empty]
+  - Name: full_sloc_image
+  - Is nullable: true
+    Member reference: FOO_FULL_SLOC_IMAGE
+    Java method name: fullSlocImage
+    Params: []
+  - Name: is_ghost
+  - Is nullable: true
+    Member reference: FOO_IS_GHOST
+    Java method name: isGhost
+    Params: []
+  - Name: next_sibling
+  - Is nullable: true
+    Member reference: FOO_NEXT_SIBLING
+    Java method name: nextSibling
+    Params: []
+  - Name: p_array_len
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_ARRAY_LEN
+    Java method name: pArrayLen
+    Params: [a: int[] = Optional.empty]
+  - Name: p_array_prop_error
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_ARRAY_PROP_ERROR
+    Java method name: pArrayPropError
+    Params: []
+  - Name: p_count
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_COUNT
+    Java method name: pCount
+    Params: [seq: Example[] = Optional.empty]
+  - Name: p_get_a
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_GET_A
+    Java method name: pGetA
+    Params: [c: Char = Optional[97]]
+  - Name: p_get_char
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_GET_CHAR
+    Java method name: pGetChar
+    Params: [s: BareNodeStruct = Optional.empty]
+  - Name: p_get_eacute
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_GET_EACUTE
+    Java method name: pGetEacute
+    Params: [c: Char = Optional[233]]
+  - Name: p_get_int_array
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_GET_INT_ARRAY
+    Java method name: pGetIntArray
+    Params: []
+  - Name: p_get_node
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_GET_NODE
+    Java method name: pGetNode
+    Params: [nodeStruct: FooNodeStruct = Optional.empty]
+  - Name: p_get_str
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_GET_STR
+    Java method name: pGetStr
+    Params: [s: String = Optional.empty]
+  - Name: p_identity
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_IDENTITY
+    Java method name: pIdentity
+    Params: [c: Char = Optional.empty]
+  - Name: p_int_double
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_INT_DOUBLE
+    Java method name: pIntDouble
+    Params: [c: BigInteger = Optional.empty]
+  - Name: p_is_struct_null
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_IS_STRUCT_NULL
+    Java method name: pIsStructNull
+    Params: [s: EmptyStruct = Optional.empty]
+  - Name: p_iter_entity
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_ITER_ENTITY
+    Java method name: pIterEntity
+    Params: []
+  - Name: p_iter_int
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_ITER_INT
+    Java method name: pIterInt
+    Params: []
+  - Name: p_iter_int_id
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_ITER_INT_ID
+    Java method name: pIterIntId
+    Params: [it: IntegerIterator = Optional.empty]
+  - Name: p_iter_struct
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_ITER_STRUCT
+    Java method name: pIterStruct
+    Params: []
+  - Name: p_me
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_ME
+    Java method name: pMe
+    Params: [b: boolean = Optional.empty]
+  - Name: p_my_node
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_MY_NODE
+    Java method name: pMyNode
+    Params: []
+  - Name: p_new_empty_struct
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_NEW_EMPTY_STRUCT
+    Java method name: pNewEmptyStruct
+    Params: []
+  - Name: p_new_struct_with_inner
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_NEW_STRUCT_WITH_INNER
+    Java method name: pNewStructWithInner
+    Params: []
+  - Name: p_null_example
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_NULL_EXAMPLE
+    Java method name: pNullExample
+    Params: []
+  - Name: p_null_sequence
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_NULL_SEQUENCE
+    Java method name: pNullSequence
+    Params: []
+  - Name: p_same_color
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_SAME_COLOR
+    Java method name: pSameColor
+    Params: [c: Color = Optional.empty]
+  - Name: p_same_color_dflt
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_SAME_COLOR_DFLT
+    Java method name: pSameColorDflt
+    Params: [c: Color = Optional[RED]]
+  - Name: p_trigger_unit_requested
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_TRIGGER_UNIT_REQUESTED
+    Java method name: pTriggerUnitRequested
+    Params: [name: Symbol = Optional.empty, found: boolean = Optional.empty, error: boolean = Optional.empty]
+  - Name: p_with_md
+  - Is nullable: true
+    Member reference: FOO_FOO_NODE_P_WITH_MD
+    Java method name: pWithMd
+    Params: [eqUsed: boolean = Optional.empty, eqIgnored: boolean = Optional.empty]
+  - Name: parent
+  - Is nullable: true
+    Member reference: FOO_PARENT
+    Java method name: parent
+    Params: []
+  - Name: parents
+  - Is nullable: true
+    Member reference: FOO_PARENTS
+    Java method name: parents
+    Params: [withSelf: boolean = Optional[true]]
+  - Name: previous_sibling
+  - Is nullable: true
+    Member reference: FOO_PREVIOUS_SIBLING
+    Java method name: previousSibling
+    Params: []
+  - Name: token_end
+  - Is nullable: true
+    Member reference: FOO_TOKEN_END
+    Java method name: tokenEnd
+    Params: []
+  - Name: token_start
+  - Is nullable: true
+    Member reference: FOO_TOKEN_START
+    Java method name: tokenStart
+    Params: []
+- Node: FooNodeBaseList
+  Kind: null
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+- Node: FooNodeList
+  Kind: null
+  Is token node: false
+  Is list node: true
+  Parsing fields: []
+  All fields:
+- Node: Ident
+  Kind: IDENT
+  Is token node: true
+  Is list node: false
+  Parsing fields: []
+  All fields:
+  - Name: p_sym
+  - Is nullable: true
+    Member reference: FOO_IDENT_P_SYM
+    Java method name: pSym
+    Params: [sym: Symbol = Optional.empty]
+- Node: NullNode
+  Kind: NULL_NODE
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+- Node: Sequence
+  Kind: SEQUENCE
+  Is token node: false
+  Is list node: true
+  Parsing fields: []
+  All fields:
+  - Name: p_all_items
+  - Is nullable: true
+    Member reference: FOO_SEQUENCE_P_ALL_ITEMS
+    Java method name: pAllItems
+    Params: []
+  - Name: p_example_items
+  - Is nullable: true
+    Member reference: FOO_SEQUENCE_P_EXAMPLE_ITEMS
+    Java method name: pExampleItems
+    Params: []
+- Node: StringLiteral
+  Kind: STRING_LITERAL
+  Is token node: false
+  Is list node: false
+  Parsing fields: []
+  All fields:
+- Node: Var
+  Kind: VAR
+  Is token node: false
+  Is list node: false
+  Parsing fields: [f_arg]
+  All fields:
+  - Name: f_arg
+  - Is nullable: false
+    Member reference: FOO_VAR_F_ARG
+    Java method name: fArg
+    Params: []
+
+==== Structure reflection information
+
+- Struct: BareNodeStruct
+  Is public: true
+  Fields: [a_boolean: boolean = Optional.empty, bare_node: FooNode = Optional.empty, a_char: Char = Optional.empty]
+- Struct: EmptyStruct
+  Is public: true
+  Fields: []
+- Struct: Entity
+  Is public: false
+  Fields: [node: PointerWrapper = Optional.empty, info: EntityInfo = Optional.empty]
+- Struct: EntityInfo
+  Is public: false
+  Fields: [md: Metadata = Optional.empty, rebindings: PointerWrapper = Optional.empty, from_rebound: boolean = Optional.empty]
+- Struct: FooNodeStruct
+  Is public: true
+  Fields: [node: FooNode = Optional.empty]
+- Struct: Metadata
+  Is public: false
+  Fields: [eq_used: boolean = Optional.empty, eq_ignored: boolean = Optional.empty]
+- Struct: SomeStruct
+  Is public: true
+  Fields: [examples: Example[] = Optional.empty]
+- Struct: WithInner
+  Is public: true
+  Fields: [empty: EmptyStruct = Optional.empty, sloc: SourceLocation = Optional.empty, big_int: BigInteger = Optional.empty, som: SomeStruct = Optional.empty]
+
+==== Enum reflection information
+
+- Enum: AnalysisUnitKind
+  Values: [unit_specification, unit_body]
+- Enum: Color
+  Values: [red, green, blue]
+- Enum: CompletionItemKind
+  Values: [text_kind, method_kind, function_kind, constructor_kind, field_kind, variable_kind, class_kind, interface_kind, module_kind, property_kind, unit_kind, value_kind, enum_kind, keyword_kind, snippet_kind, color_kind, file_kind, reference_kind, folder_kind, enum_member_kind, constant_kind, struct_kind, event_kind, operator_kind, type_parameter_kind]
+- Enum: DesignatedEnvKind
+  Values: [none, current_env, named_env, direct_env]
+- Enum: GrammarRule
+  Values: [main_rule_rule, node_rule, example_rule, null_node_rule, var_rule, ident_rule, string_rule]
+- Enum: LookupKind
+  Values: [recursive, flat, minimal]
+------------------
+
 ===== End of the Java tests =====
 Done
