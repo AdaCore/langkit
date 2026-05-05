@@ -1833,18 +1833,26 @@ class ExpressionCompiler:
         def check_element_type(
             location: L.LktNode,
             expected: CompiledType,
-            actual: CompiledType,
-        ) -> None:
+            actual: E.Expr,
+        ) -> CompiledType:
             """
-            Helper to emit an error message if ``expected`` and ``actual`` are
-            not the same type.
+            Helper to emit an error message if ``expected`` and the type of
+            ``actual`` cannot be unified.
             """
-            check_source_language(
-                expected == actual,
-                f"Element of type {expected.lkt_name} expected, got"
-                f" {actual.lkt_name}",
-                location=location,
-            )
+            # If the type of the array is inferred from its element, unify the
+            # type we got so far with the current element.
+            error_msg_pattern = "Element of type {self} expected, got {other}"
+            if explicit_element_type is None:
+                return expected.unify(actual.type, location, error_msg_pattern)
+            else:
+                check_source_language(
+                    actual.type.matches(expected),
+                    error_msg_pattern.format(
+                        self=expected.lkt_name, other=actual.type.lkt_name
+                    ),
+                    location=location,
+                )
+                return expected
 
         explicit_element_type = (
             None
@@ -1856,11 +1864,13 @@ class ExpressionCompiler:
         for i, el in enumerate(expr.f_exprs):
             el_expr = self.lower_expr(el, env)
             if i == 0:
-                element_type = el_expr.type
-                if explicit_element_type is not None:
-                    check_element_type(el, explicit_element_type, element_type)
+                element_type = (
+                    el_expr.type
+                    if explicit_element_type is None
+                    else check_element_type(el, explicit_element_type, el_expr)
+                )
             else:
-                check_element_type(el, element_type, el_expr.type)
+                element_type = check_element_type(el, element_type, el_expr)
             elements.append(el_expr)
         if not elements:
             if explicit_element_type is None:
@@ -1870,6 +1880,10 @@ class ExpressionCompiler:
                 )
             else:
                 element_type = explicit_element_type
+
+        # For code generation purposes, the type of each element must be the
+        # same as the array element type: do the necessary conversions.
+        elements = [e.unified_expr(element_type) for e in elements]
 
         array_type = element_type.array
         return E.ArrayLiteral.construct_static(
