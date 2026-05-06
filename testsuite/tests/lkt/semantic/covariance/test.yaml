@@ -1,0 +1,4 @@
+driver: lkt
+entry_points:
+  - array.lkt
+  - entity.lkt

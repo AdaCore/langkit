@@ -1070,6 +1070,37 @@ class Decl: LktNode implements DeclarationInterface {
         or callee_type.is_null
         or callee_type.as[FunctionType]?.should_ignore_constructor_arg()
 
+    |" Return whether ``self`` and ``other`` are equivalent generic
+    |" instantiations.
+    |"
+    |" The same generic declaration can be instantiated several times with
+    |" structurally equivalent (but different) rebindings: this performs a
+    |" structural comparison.
+    fun is_equivalent_decl(other: Entity[Decl]): Bool =
+        # Simple case: we were given the same node/rebindings
+        self == other
+        or {
+            # If both are instantiations, check that they instantiate the
+            # same declaration with equivalent type arguments.
+            val gen_self = self?.parent.as[GenericDecl];
+            val gen_other = other?.parent.as[GenericDecl];
+
+            not gen_self.is_null
+            and gen_self.node == gen_other.node
+            and gen_self.generic_params_names().all(
+                (param) => {
+                    val self_type =
+                        gen_self.children_env.get_first(param).as[TypeDecl];
+                    val other_type =
+                        gen_other.children_env.get_first(param).as[TypeDecl];
+
+                    not self_type.is_null
+                    and not other_type.is_null
+                    and self_type.is_equivalent_decl(other_type)
+                }
+            )
+        }
+
     env_spec {
         add_all_to_env(
             {
@@ -1886,10 +1917,9 @@ class TypeDecl: Decl implements TypeInterface {
         "expression must be of type Int, BigInt or Node, got $Self"
     )
     fun is_int_or_node(): Bool =
-        (self.is_null or self.is_int_type())
-        or self.node_env.get_first(s"RootNode__")
-        .as[TypeDecl]
-        .is_subtype_or_eq(self)
+        self.is_null
+        or self.is_int_type()
+        or self.is_subtype(self.node_env.get_first(s"RootNode__").as[TypeDecl])
 
     @predicate_error(
         "expression must be a stream, got $Self"
@@ -1915,11 +1945,8 @@ class TypeDecl: Decl implements TypeInterface {
 
     |" Return whether ``rhs`` is equal to or is a subtype of ``self``.
     @predicate_error("$rhs is not a subtype of $Self")
-    fun is_subtype_or_eq(rhs: Entity[TypeDecl]): Bool =
-        self.is_null
-        or rhs.is_null
-        or self == rhs
-        or rhs.base_types().contains(self)
+    fun is_subtype_pred(rhs: Entity[TypeDecl]): Bool =
+        self.is_null or rhs.is_null or rhs.is_subtype(self)
 
     |" Return whether ``rhs`` is equal to or is a subtype of ``Entity[self]``.
     @predicate_error("$rhs is not a subtype of $Self")
@@ -1927,12 +1954,9 @@ class TypeDecl: Decl implements TypeInterface {
         node.is_null
         or not (node is ClassDecl)
         or rhs.is_null
-        or {
-            val entity_type =
-                self.entity_type().instantiate_generic_type_decl([self]);
-            entity_type == rhs
-            or rhs.base_types().contains(entity_type)
-        }
+        or rhs.is_subtype(
+            self.entity_type().instantiate_generic_type_decl([self])
+        )
 
     |" Wrapper around ``TypeDecl.common_ancestor`` that returns the nearest
     |" common ancestor for ``self`` and all types for the ``other_types`` slice
@@ -1993,55 +2017,17 @@ class TypeDecl: Decl implements TypeInterface {
     @predicate_error("could not determine type")
     fun could_determine_type(): Bool = not node.is_null
 
-    |" Return true if Self and other are matcing generic types.
-    @predicate_error("expected $Self, got $other")
-    fun matching_generic_types(other: Entity[TypeDecl]): Bool =
-        self.parent.as[GenericDecl].do(
-            (lhs_gen) =>
-            other.parent.as[GenericDecl].do(
-                (rhs_gen) =>
-                lhs_gen.decl.node == rhs_gen.decl.node
-                and lhs_gen.generic_param_decls.all(
-                    (f) =>
-                    lhs_gen.children_env.get_first(f.decl.name())
-                    .as![TypeDecl]
-                    .matching_type(
-                        rhs_gen.children_env.get_first(f.decl.name())
-                        .as![TypeDecl]
-                    )
-                ),
-                default_val=false
-            ),
-            default_val=node == other.node
-        )
-
-    |" Return true if Self and other are matching types.
+    |" Return true if ``other`` matches ``self``
     @predicate_error("expected $Self, got $other")
     fun matching_type(other: Entity[TypeDecl]): Bool =
-        if self is AnyTypeDecl or other is AnyTypeDecl then true
-        else (
-            # If either self or other is null, consider that it is not
-            # necessary to test if types match, as there should be an other
-            # predicate failing prior to this one.
-            (self.is_null or other.is_null)
-            or match self {
-                case ft: FunctionType =>
-                    other.as[FunctionType].do(
-                        (rhs) =>
-                        (
-                            ft.params.length() == rhs.params.length()
-                            and ft.params.iall(
-                                (a, idx) => a.matching_type(rhs.params.at(idx))
-                            )
-                        )
-                        and ft.return_type.matching_type(rhs.return_type),
-                        default_val=false
-                    )
-                case _ =>
-                    other.is_subtype(self)
-                    or self.matching_generic_types(other)
-            }
-        )
+        self is AnyTypeDecl
+        or other is AnyTypeDecl
+        # If either self or other is null, consider that it is not necessary to
+        # test if types match, as there should be an other predicate failing
+        # prior to this one.
+        or self.is_null
+        or other.is_null
+        or other.is_subtype(self)
 
     |" Return True if the types match or we are expecting an Entity and get a
     |" LogicVar.
@@ -2296,11 +2282,12 @@ class TypeDecl: Decl implements TypeInterface {
             default_val=self
         )
 
-    |" Return true if Self is a subtype of other.
-    fun is_subtype(
-        @ignored
-        other: Entity[TypeDecl]
-    ): Bool = false
+    |" Return true if ``self`` is a subtype of ``other``.
+    fun is_subtype(other: Entity[TypeDecl]): Bool =
+        # A given type is always a subtype of itself, so include "self" in the
+        # equivalence checks with "other".
+        self.base_types(include_self=true)
+            .any((t) => t == other or t.is_equivalent_decl(other))
 
     |" Return the nearest common ancestor between ``self`` and ``other``.
     |"
@@ -2438,9 +2425,6 @@ class EnumClassAltDecl: TypeDecl {
 
     fun decl_type_name(): String = "enum class alt declaration"
 
-    fun is_subtype(other: Entity[TypeDecl]): Bool =
-        self.base_type().is_subtype(other)
-
     @with_dynvars(origin)
     fun defined_scope(): LexicalEnv = self.base_type().defined_scope()
 
@@ -2535,9 +2519,6 @@ class BasicClassDecl: NamedTypeDecl {
     syn_base_type: TypeRef
     @parse_field
     traits: ASTList[TypeRef]
-
-    fun is_subtype(other: Entity[TypeDecl]): Bool =
-        not self.base_types().find((b) => b == other).is_null
 
     @memoized
     @call_memoizable
@@ -4651,7 +4632,7 @@ class KeepExpr: Expr {
         )
         %and {
             bind error_location = node.keep_type;
-            TypeDecl.is_subtype_or_eq%(
+            TypeDecl.is_subtype_pred%(
                 self.array_element_type,
                 self.keep_type.type_var
             )
