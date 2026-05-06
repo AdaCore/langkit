@@ -25,6 +25,7 @@ public class LangkitSupport {
     /** Exception to raise when interface default methods are not overrode. */
     public static final
     class NotImplementedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
         public NotImplementedException () {};
 
         @Override
