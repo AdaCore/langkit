@@ -1,0 +1,221 @@
+Resolving test.lkt
+==================
+Id   <RefId "Node" test.lkt:1:26-1:30>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "FooNode" test.lkt:1:31-1:38>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+Expr <Id "abstract" test.lkt:4:2-4:10>
+     has_type None
+
+Id   <RefId "FooNode" test.lkt:5:22-5:29>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+Expr <Id "parse_field" test.lkt:6:6-6:17>
+     has_type None
+
+Decl <FieldDecl "p1" test.lkt:6:18-6:29>
+     has_type <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+   Id   <RefId "FooNode" test.lkt:6:22-6:29>
+        has_type None
+        references <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+Decl <FieldDecl "p2" test.lkt:7:5-7:12>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:7:9-7:12>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Expr <Id "synthetic" test.lkt:10:2-10:11>
+     has_type None
+
+Id   <RefId "BaseSynthNode" test.lkt:11:18-11:31>
+     has_type None
+     references <ClassDecl "BaseSynthNode" test.lkt:5:1-8:2>
+
+Expr <Id "parse_field" test.lkt:12:6-12:17>
+     has_type None
+
+Decl <FieldDecl "p3" test.lkt:12:18-12:29>
+     has_type <ClassDecl "Example" test.lkt:16:1-33:2>
+
+   Id   <RefId "Example" test.lkt:12:22-12:29>
+        has_type None
+        references <ClassDecl "Example" test.lkt:16:1-33:2>
+
+Decl <FieldDecl "p4" test.lkt:13:5-13:16>
+     has_type <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+   Id   <RefId "FooNode" test.lkt:13:9-13:16>
+        has_type None
+        references <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+Id   <RefId "FooNode" test.lkt:16:16-16:23>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+Id   <RefId "FooNode" test.lkt:16:35-16:42>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+Expr <Id "memoized" test.lkt:17:6-17:14>
+     has_type None
+
+Decl <FunDecl "p" test.lkt:18:5-32:6>
+     has_type <FunctionType "() -> Entity[SynthNode]" test.lkt>
+
+   Id   <RefId "Entity" test.lkt:18:14-18:20>
+        has_type None
+        references <StructDecl prelude: "Entity[N]">
+
+   Id   <RefId "SynthNode" test.lkt:18:21-18:30>
+        has_type None
+        references <ClassDecl "SynthNode" test.lkt:11:1-14:2>
+
+   Expr <BlockExpr test.lkt:18:34-32:6>
+        has_type <StructDecl prelude: "Entity[SynthNode]">
+
+      Decl <ValDecl "p1" test.lkt:21:9-21:42>
+           has_type <ClassDecl prelude: "NodeBuilder[FooNode]">
+
+         Expr <CallExpr test.lkt:21:18-21:42>
+              has_type <ClassDecl prelude: "NodeBuilder[FooNode]">
+
+            Expr <DotExpr test.lkt:21:18-21:40>
+                 has_type <FunctionType prelude: "() -> NodeBuilder[FooNode]">
+
+               Expr <DotExpr test.lkt:21:18-21:29>
+                    has_type <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+                  Id   <RefId "node" test.lkt:21:18-21:22>
+                       has_type <ClassDecl "Example" test.lkt:16:1-33:2>
+                       references <NodeDecl "node" test.lkt:16:1-33:2>
+
+                  Id   <RefId "parent" test.lkt:21:23-21:29>
+                       has_type <ClassDecl "FooNode" test.lkt:1:1-2:2>
+                       references <FunDecl prelude: "parent">
+
+               Id   <RefId "to_builder" test.lkt:21:30-21:40>
+                    has_type <FunctionType prelude: "() -> NodeBuilder[FooNode]">
+                    references <FunDecl prelude: "to_builder">
+
+      Decl <ValDecl "p2" test.lkt:22:9-22:20>
+           has_type <StructDecl prelude: "Int">
+
+         Expr <NumLit test.lkt:22:18-22:20>
+              has_type <StructDecl prelude: "Int">
+
+      Decl <ValDecl "p3" test.lkt:23:9-23:35>
+           has_type <ClassDecl prelude: "NodeBuilder[Example]">
+
+         Expr <CallExpr test.lkt:23:18-23:35>
+              has_type <ClassDecl prelude: "NodeBuilder[Example]">
+
+            Expr <DotExpr test.lkt:23:18-23:33>
+                 has_type <FunctionType prelude: "() -> NodeBuilder[Example]">
+
+               Id   <RefId "node" test.lkt:23:18-23:22>
+                    has_type <ClassDecl "Example" test.lkt:16:1-33:2>
+                    references <NodeDecl "node" test.lkt:16:1-33:2>
+
+               Id   <RefId "to_builder" test.lkt:23:23-23:33>
+                    has_type <FunctionType prelude: "() -> NodeBuilder[Example]">
+                    references <FunDecl prelude: "to_builder">
+
+      Decl <ValDecl "p4" test.lkt:26:9-26:29>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+         Expr <DotExpr test.lkt:26:18-26:29>
+              has_type <ClassDecl "FooNode" test.lkt:1:1-2:2>
+
+            Id   <RefId "node" test.lkt:26:18-26:22>
+                 has_type <ClassDecl "Example" test.lkt:16:1-33:2>
+                 references <NodeDecl "node" test.lkt:16:1-33:2>
+
+            Id   <RefId "parent" test.lkt:26:23-26:29>
+                 has_type <ClassDecl "FooNode" test.lkt:1:1-2:2>
+                 references <FunDecl prelude: "parent">
+
+      Decl <ValDecl "builder" test.lkt:28:9-28:68>
+           has_type <ClassDecl prelude: "NodeBuilder[SynthNode]">
+
+         Expr <CallExpr test.lkt:28:23-28:68>
+              has_type <ClassDecl prelude: "NodeBuilder[SynthNode]">
+
+            Expr <DotExpr test.lkt:28:23-28:40>
+                 has_type <FunctionType "(NodeBuilder[Example], FooNode, NodeBuilder[FooNode], Int) -> NodeBuilder[SynthNode]" test.lkt>
+
+               Id   <RefId "SynthNode" test.lkt:28:23-28:32>
+                    has_type None
+                    references <ClassDecl "SynthNode" test.lkt:11:1-14:2>
+
+               Id   <RefId "builder" test.lkt:28:33-28:40>
+                    has_type <FunctionType "(NodeBuilder[Example], FooNode, NodeBuilder[FooNode], Int) -> NodeBuilder[SynthNode]" test.lkt>
+                    references <FunctionType "(NodeBuilder[Example], FooNode, NodeBuilder[FooNode], Int) -> NodeBuilder[SynthNode]" test.lkt>
+
+            Id   <RefId "p1" test.lkt:28:41-28:43>
+                 has_type None
+                 references <SynthParamDecl "[Synthetic parameter]" test.lkt:11:1-14:2>
+
+            Id   <RefId "p1" test.lkt:28:44-28:46>
+                 has_type <ClassDecl prelude: "NodeBuilder[FooNode]">
+                 references <ValDecl "p1" test.lkt:21:9-21:42>
+
+            Id   <RefId "p2" test.lkt:28:48-28:50>
+                 has_type None
+                 references <SynthParamDecl "[Synthetic parameter]" test.lkt:11:1-14:2>
+
+            Id   <RefId "p2" test.lkt:28:51-28:53>
+                 has_type <StructDecl prelude: "Int">
+                 references <ValDecl "p2" test.lkt:22:9-22:20>
+
+            Id   <RefId "p3" test.lkt:28:55-28:57>
+                 has_type None
+                 references <SynthParamDecl "[Synthetic parameter]" test.lkt:11:1-14:2>
+
+            Id   <RefId "p3" test.lkt:28:58-28:60>
+                 has_type <ClassDecl prelude: "NodeBuilder[Example]">
+                 references <ValDecl "p3" test.lkt:23:9-23:35>
+
+            Id   <RefId "p4" test.lkt:28:62-28:64>
+                 has_type None
+                 references <SynthParamDecl "[Synthetic parameter]" test.lkt:11:1-14:2>
+
+            Id   <RefId "p4" test.lkt:28:65-28:67>
+                 has_type <ClassDecl "FooNode" test.lkt:1:1-2:2>
+                 references <ValDecl "p4" test.lkt:26:9-26:29>
+
+      Decl <ValDecl "result" test.lkt:29:9-29:37>
+           has_type <ClassDecl "SynthNode" test.lkt:11:1-14:2>
+
+         Expr <CallExpr test.lkt:29:22-29:37>
+              has_type <ClassDecl "SynthNode" test.lkt:11:1-14:2>
+
+            Expr <DotExpr test.lkt:29:22-29:35>
+                 has_type <FunctionType prelude: "(FooNode) -> SynthNode">
+
+               Id   <RefId "builder" test.lkt:29:22-29:29>
+                    has_type <ClassDecl prelude: "NodeBuilder[SynthNode]">
+                    references <ValDecl "builder" test.lkt:28:9-28:68>
+
+               Id   <RefId "build" test.lkt:29:30-29:35>
+                    has_type <FunctionType prelude: "(FooNode) -> SynthNode">
+                    references <FunDecl prelude: "build">
+
+      Expr <DotExpr test.lkt:31:9-31:30>
+           has_type <StructDecl prelude: "Entity[SynthNode]">
+
+         Id   <RefId "result" test.lkt:31:9-31:15>
+              has_type <ClassDecl "SynthNode" test.lkt:11:1-14:2>
+              references <ValDecl "result" test.lkt:29:9-29:37>
+
+         Id   <RefId "as_bare_entity" test.lkt:31:16-31:30>
+              has_type <StructDecl prelude: "Entity[SynthNode]">
+              references <FunDecl prelude: "as_bare_entity">
+

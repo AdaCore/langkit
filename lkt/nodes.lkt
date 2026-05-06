@@ -2322,13 +2322,23 @@ class TypeDecl: Decl implements TypeInterface {
                         ).singleton()
                     }
                 )
-                # The rest of the parameters of the ``builder`` method
-                # are the constructor fields types as NodeBuilder.
+                # For all node types, the ``builder`` method takes one
+                # parameter per parse/user field.
                 & self.as[ClassDecl].constructor_fields().map(
-                    (a) =>
+                    (f) =>
                     ResolvedParam(
-                        name=a.name(),
-                        param_type=a.get_type()?.as_node_builder_type(),
+                        name=f.name(),
+                        param_type={
+                           val t = f.get_type();
+
+                           # The parameter for a parse field has the
+                           # corresponding ``NodeBuilder`` type, and the
+                           # parameter for a user field has the same type as
+                           # the field.
+                           if f.full_decl().has_annotation(s"parse_field")
+                           then t?.as_node_builder_type()
+                           else t
+                        },
                         has_default_value=false,
                         decl=SynthParamDecl().as_entity
                     )
