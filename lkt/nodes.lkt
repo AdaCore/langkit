@@ -1727,6 +1727,7 @@ class GenericDecl: Decl {
 
     fun decl_type_name(): String = "generic " & self.decl.decl_type_name()
 
+    |" Return the list of types used to instantiate this generic declaration
     fun instantiated_generic_params(): Array[Entity[TypeDecl]] =
         self.generic_param_decls.map(
             (gfd) => self.children_env.get_first(gfd.decl.name()).as[TypeDecl]
@@ -1856,28 +1857,30 @@ class TypeDecl: Decl implements TypeInterface {
     |"
     |" Note that this includes "logic" base types for covariant types, like
     |" ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
-    |" ``Entity[Child]``.
+    |" ``Entity[Child]``).
     @exported
     fun base_type(): Entity[TypeDecl] = {
         # Unwrap the entity type (if present) to the corresponding bare node
         # type.
         val entity_type = self.entity_type();
-        val is_entity = node == entity_type.node;
-        val bare_type =
-            if is_entity
-            then self.get_entity_node_type()
-            else self;
+        val node_builder_type = self.node_builder_type();
 
-        # Get the base type
-        val base_bare_type = bare_type.syn_base_type?.referenced_decl();
+        # If this is an Entity instantiation, return the Entity instantiation
+        # correspoding to the node base type.
+        if node == entity_type.node
+        then self.get_entity_node_type().base_type().do(
+            (t) => entity_type.instantiate_generic_decl([t]).as[TypeDecl]
+        )
 
-        # Rewrap the entity type if appropriate
-        if not base_bare_type.is_null and is_entity
-        then
-            entity_type
-                .instantiate_generic_decl([base_bare_type])
-                .as[TypeDecl]
-        else base_bare_type
+        # Likewise for NodeBuilder instantiations
+        elif node == node_builder_type.node
+        then self.get_node_builder_node_type().base_type().do(
+            (t) => node_builder_type.instantiate_generic_decl([t]).as[TypeDecl]
+        )
+
+        # Otherwise, just retreive the base type defined at the syntax level
+        # (if there is one).
+        else self.syn_base_type?.referenced_decl()
     }
 
     |" Return an array containing all base types of ``self`` (ancestors last).
@@ -1927,21 +1930,27 @@ class TypeDecl: Decl implements TypeInterface {
     fun is_stream(): Bool =
         self.is_null or self.node == self.stream_type().node
 
-    |" Get the type parameter used to rebind the Entity type declaration if
-    |" Self is the entity type.
-    fun get_entity_node_type(): Entity[TypeDecl] =
-        if self.is_null then null[Entity[TypeDecl]]
-        elif node == self.entity_type().node
-        then
-            self.parent.as[GenericDecl]?.children_env.get_first(
-                self.entity_gen_type().generic_param_decls.at(0).decl.name()
-            )
-            .as[TypeDecl]
-            .do(
-                (td) =>
-                if td.is_generic() then td else td.as_bare_decl().as![TypeDecl]
-            )
+    |" Helper for the ``get_*_type`` methods below: if ``self`` is an
+    |" instantiation of ``gen_type``, return the type with which it was
+    |" instantiated. Return ``self`` otherwise.
+    fun get_instantiation_type(gen_type: Entity[TypeDecl]): Entity[TypeDecl] =
+        if self.is_null
+        then null[Entity[TypeDecl]]
+
+        elif node == gen_type.node
+        then self.parent.as[GenericDecl]?.instantiated_generic_params().at(0)
+
         else self
+
+    |" If ``self`` is an instantiation of ``Entity``, return the type with
+    |" which it was instantiated. Return ``self`` otherwise.
+    fun get_entity_node_type(): Entity[TypeDecl] =
+        self.get_instantiation_type(self.entity_type())
+
+    |" If ``self`` is an instantiation of ``NodeBuilder``, return the type with
+    |" which it was instantiated. Return ``self`` otherwise.
+    fun get_node_builder_node_type(): Entity[TypeDecl] =
+        self.get_instantiation_type(self.node_builder_type())
 
     |" Return whether ``rhs`` is equal to or is a subtype of ``self``.
     @predicate_error("$rhs is not a subtype of $Self")
@@ -2755,11 +2764,7 @@ class StructDecl: NamedTypeDecl {
     fun entity_scope(): LexicalEnv =
         if node == node.entity_type().node
         then
-            self.parent.as[GenericDecl]?.children_env.get_first(
-                self.entity_gen_type().generic_param_decls.at(0).decl.name()
-            )
-            .as[TypeDecl]
-            .do(
+            self.get_entity_node_type().do(
                 (t) => {
                     bind origin = null[Entity[TypeDecl]];
 
@@ -3847,7 +3852,7 @@ class BinOp: Expr {
                 }
                 %and {
                     bind error_location = node.left;
-                    TypeDecl.is_subtype_or_eq%(
+                    TypeDecl.is_subtype_pred%(
                         self.left.expected_type_var,
                         self.left.actual_type_var
                     )

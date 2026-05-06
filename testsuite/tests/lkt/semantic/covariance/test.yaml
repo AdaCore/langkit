@@ -2,3 +2,4 @@ driver: lkt
 entry_points:
   - array.lkt
   - entity.lkt
+  - node_builder.lkt
