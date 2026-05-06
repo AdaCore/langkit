@@ -2022,7 +2022,7 @@ class TypeDecl: Decl implements TypeInterface {
                         default_val=false
                     )
                 case _ =>
-                    (self == other or other.is_subtype(self))
+                    other.is_subtype(self)
                     or self.matching_generic_types(other)
             }
         )
