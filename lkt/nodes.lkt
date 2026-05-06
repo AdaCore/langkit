@@ -2581,8 +2581,8 @@ class ClassDecl: BasicClassDecl {
 
     fun decl_type_name(): String = "class declaration"
 
-    |" Return a list of all fields that are necessaru in the constructor of
-    |" the class.
+    |" Return the list of all fields that must have a corresponding parameter
+    |" in the class constructor.
     fun constructor_fields(): Array[Entity[FieldDecl]] =
         self.base_types(true).mapcat(
             (base) =>
@@ -2590,12 +2590,15 @@ class ClassDecl: BasicClassDecl {
                 (d) => d.decl.as[FieldDecl],
                 (d) =>
                 d.decl is FieldDecl
-                and (
-                    if d.has_annotation(s"parse_field")
-                    then
-                        not d.has_annotation(s"abstract")
-                        and not d.has_annotation(s"null_field")
-                    else true
+
+                # Do not include parse fields if they have either the @abstract
+                # or @null_field annotations.
+                and not (
+                    d.has_annotation(s"parse_field")
+                    and (
+                        d.has_annotation(s"abstract")
+                        or d.has_annotation(s"null_field")
+                    )
                 )
             )
         )
