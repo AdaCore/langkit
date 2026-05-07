@@ -277,6 +277,400 @@ Decl <ValDecl "v4" entity.lkt:8:1-8:33>
               has_type None
               references <ClassDecl "D" common.lkt:4:1-4:14>
 
+Resolving function.lkt
+======================
+Id   <ModuleId "common" function.lkt:1:6-1:12>
+     references <LangkitRoot "common" common.lkt:1:1-4:14>
+
+Id   <ImportedId "A" function.lkt:1:20-1:21>
+     has_type None
+     references <ClassDecl "A" common.lkt:1:1-1:11>
+
+Id   <ImportedId "B" function.lkt:1:23-1:24>
+     has_type None
+     references <ClassDecl "B" common.lkt:2:1-2:14>
+
+Id   <ImportedId "C" function.lkt:1:26-1:27>
+     has_type None
+     references <ClassDecl "C" common.lkt:3:1-3:14>
+
+Id   <ImportedId "D" function.lkt:1:29-1:30>
+     has_type None
+     references <ClassDecl "D" common.lkt:4:1-4:14>
+
+Decl <FunDecl "take" function.lkt:3:1-3:41>
+     has_type <FunctionType "((B, B) -> B) -> Bool" function.lkt>
+
+   Decl <FunParamDecl "func" function.lkt:3:10-3:27>
+        has_type <FunctionType "(B, B) -> B" common.lkt>
+
+      Id   <RefId "B" function.lkt:3:17-3:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:3:20-3:21>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:3:26-3:27>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "Bool" function.lkt:3:30-3:34>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "true" function.lkt:3:37-3:41>
+        has_type <EnumTypeDecl prelude: "Bool">
+        references <EnumLitDecl prelude: "true">
+
+Decl <FunDecl "f1" function.lkt:6:1-6:22>
+     has_type <FunctionType "(B, B) -> B" function.lkt>
+
+   Decl <FunParamDecl "x" function.lkt:6:8-6:12>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:6:11-6:12>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Decl <FunParamDecl "y" function.lkt:6:14-6:18>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:6:17-6:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "B" function.lkt:6:21-6:22>
+        has_type None
+        references <ClassDecl "B" common.lkt:2:1-2:14>
+
+Decl <ValDecl "v1" function.lkt:7:1-7:18>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <CallExpr function.lkt:7:10-7:18>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "take" function.lkt:7:10-7:14>
+           has_type <FunctionType "((B, B) -> B) -> Bool" function.lkt>
+           references <FunDecl "take" function.lkt:3:1-3:41>
+
+      Id   <RefId "f1" function.lkt:7:15-7:17>
+           has_type <FunctionType "(B, B) -> B" function.lkt>
+           references <FunDecl "f1" function.lkt:6:1-6:22>
+
+Decl <FunDecl "f2" function.lkt:10:1-10:22>
+     has_type <FunctionType "(A, B) -> B" function.lkt>
+
+   Decl <FunParamDecl "x" function.lkt:10:8-10:12>
+        has_type <ClassDecl "A" common.lkt:1:1-1:11>
+
+      Id   <RefId "A" function.lkt:10:11-10:12>
+           has_type None
+           references <ClassDecl "A" common.lkt:1:1-1:11>
+
+   Decl <FunParamDecl "y" function.lkt:10:14-10:18>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:10:17-10:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "B" function.lkt:10:21-10:22>
+        has_type None
+        references <ClassDecl "B" common.lkt:2:1-2:14>
+
+Decl <ValDecl "v2" function.lkt:11:1-11:18>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <CallExpr function.lkt:11:10-11:18>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "take" function.lkt:11:10-11:14>
+           has_type <FunctionType "((B, B) -> B) -> Bool" function.lkt>
+           references <FunDecl "take" function.lkt:3:1-3:41>
+
+      Id   <RefId "f2" function.lkt:11:15-11:17>
+           has_type <FunctionType "(A, B) -> B" function.lkt>
+           references <FunDecl "f2" function.lkt:10:1-10:22>
+
+Decl <FunDecl "f3" function.lkt:14:1-14:22>
+     has_type <FunctionType "(C, B) -> B" function.lkt>
+
+   Decl <FunParamDecl "x" function.lkt:14:8-14:12>
+        has_type <ClassDecl "C" common.lkt:3:1-3:14>
+
+      Id   <RefId "C" function.lkt:14:11-14:12>
+           has_type None
+           references <ClassDecl "C" common.lkt:3:1-3:14>
+
+   Decl <FunParamDecl "y" function.lkt:14:14-14:18>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:14:17-14:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "B" function.lkt:14:21-14:22>
+        has_type None
+        references <ClassDecl "B" common.lkt:2:1-2:14>
+
+<ValDecl "v3" function.lkt:15:1-15:18> failed nameres:
+function.lkt:15:15-15:17: error: expected (B, B) -> B, got (C, B) -> B
+ 15 | val v3 = take(f3)
+    |               ^^ 
+
+Decl <ValDecl "v3" function.lkt:15:1-15:18>
+     has_type None
+
+   Expr <CallExpr function.lkt:15:10-15:18>
+        has_type None
+
+      Id   <RefId "take" function.lkt:15:10-15:14>
+           has_type None
+           references None
+
+      Id   <RefId "f3" function.lkt:15:15-15:17>
+           has_type <FunctionType "(C, B) -> B" function.lkt>
+           references <FunDecl "f3" function.lkt:14:1-14:22>
+
+Decl <FunDecl "f4" function.lkt:18:1-18:22>
+     has_type <FunctionType "(B, B) -> A" function.lkt>
+
+   Decl <FunParamDecl "x" function.lkt:18:8-18:12>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:18:11-18:12>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Decl <FunParamDecl "y" function.lkt:18:14-18:18>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:18:17-18:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "A" function.lkt:18:21-18:22>
+        has_type None
+        references <ClassDecl "A" common.lkt:1:1-1:11>
+
+<ValDecl "v4" function.lkt:19:1-19:18> failed nameres:
+function.lkt:19:15-19:17: error: expected (B, B) -> B, got (B, B) -> A
+ 19 | val v4 = take(f4)
+    |               ^^ 
+
+Decl <ValDecl "v4" function.lkt:19:1-19:18>
+     has_type None
+
+   Expr <CallExpr function.lkt:19:10-19:18>
+        has_type None
+
+      Id   <RefId "take" function.lkt:19:10-19:14>
+           has_type None
+           references None
+
+      Id   <RefId "f4" function.lkt:19:15-19:17>
+           has_type <FunctionType "(B, B) -> A" function.lkt>
+           references <FunDecl "f4" function.lkt:18:1-18:22>
+
+Decl <FunDecl "f5" function.lkt:22:1-22:22>
+     has_type <FunctionType "(B, B) -> C" function.lkt>
+
+   Decl <FunParamDecl "x" function.lkt:22:8-22:12>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:22:11-22:12>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Decl <FunParamDecl "y" function.lkt:22:14-22:18>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:22:17-22:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "C" function.lkt:22:21-22:22>
+        has_type None
+        references <ClassDecl "C" common.lkt:3:1-3:14>
+
+Decl <ValDecl "v5" function.lkt:23:1-23:18>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <CallExpr function.lkt:23:10-23:18>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "take" function.lkt:23:10-23:14>
+           has_type <FunctionType "((B, B) -> B) -> Bool" function.lkt>
+           references <FunDecl "take" function.lkt:3:1-3:41>
+
+      Id   <RefId "f5" function.lkt:23:15-23:17>
+           has_type <FunctionType "(B, B) -> C" function.lkt>
+           references <FunDecl "f5" function.lkt:22:1-22:22>
+
+Decl <FunDecl "f6" function.lkt:26:1-26:22>
+     has_type <FunctionType "(A, B) -> C" function.lkt>
+
+   Decl <FunParamDecl "x" function.lkt:26:8-26:12>
+        has_type <ClassDecl "A" common.lkt:1:1-1:11>
+
+      Id   <RefId "A" function.lkt:26:11-26:12>
+           has_type None
+           references <ClassDecl "A" common.lkt:1:1-1:11>
+
+   Decl <FunParamDecl "y" function.lkt:26:14-26:18>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:26:17-26:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "C" function.lkt:26:21-26:22>
+        has_type None
+        references <ClassDecl "C" common.lkt:3:1-3:14>
+
+Decl <ValDecl "v6" function.lkt:27:1-27:18>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <CallExpr function.lkt:27:10-27:18>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "take" function.lkt:27:10-27:14>
+           has_type <FunctionType "((B, B) -> B) -> Bool" function.lkt>
+           references <FunDecl "take" function.lkt:3:1-3:41>
+
+      Id   <RefId "f6" function.lkt:27:15-27:17>
+           has_type <FunctionType "(A, B) -> C" function.lkt>
+           references <FunDecl "f6" function.lkt:26:1-26:22>
+
+Decl <FunDecl "f7" function.lkt:30:1-30:22>
+     has_type <FunctionType "(D, B) -> B" function.lkt>
+
+   Decl <FunParamDecl "x" function.lkt:30:8-30:12>
+        has_type <ClassDecl "D" common.lkt:4:1-4:14>
+
+      Id   <RefId "D" function.lkt:30:11-30:12>
+           has_type None
+           references <ClassDecl "D" common.lkt:4:1-4:14>
+
+   Decl <FunParamDecl "y" function.lkt:30:14-30:18>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:30:17-30:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "B" function.lkt:30:21-30:22>
+        has_type None
+        references <ClassDecl "B" common.lkt:2:1-2:14>
+
+<ValDecl "v7" function.lkt:31:1-31:18> failed nameres:
+function.lkt:31:15-31:17: error: expected (B, B) -> B, got (D, B) -> B
+ 31 | val v7 = take(f7)
+    |               ^^ 
+
+Decl <ValDecl "v7" function.lkt:31:1-31:18>
+     has_type None
+
+   Expr <CallExpr function.lkt:31:10-31:18>
+        has_type None
+
+      Id   <RefId "take" function.lkt:31:10-31:14>
+           has_type None
+           references None
+
+      Id   <RefId "f7" function.lkt:31:15-31:17>
+           has_type <FunctionType "(D, B) -> B" function.lkt>
+           references <FunDecl "f7" function.lkt:30:1-30:22>
+
+Decl <FunDecl "f8" function.lkt:34:1-34:22>
+     has_type <FunctionType "(B, B) -> D" function.lkt>
+
+   Decl <FunParamDecl "x" function.lkt:34:8-34:12>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:34:11-34:12>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Decl <FunParamDecl "y" function.lkt:34:14-34:18>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:34:17-34:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "D" function.lkt:34:21-34:22>
+        has_type None
+        references <ClassDecl "D" common.lkt:4:1-4:14>
+
+<ValDecl "v8" function.lkt:35:1-35:18> failed nameres:
+function.lkt:35:15-35:17: error: expected (B, B) -> B, got (B, B) -> D
+ 35 | val v8 = take(f8)
+    |               ^^ 
+
+Decl <ValDecl "v8" function.lkt:35:1-35:18>
+     has_type None
+
+   Expr <CallExpr function.lkt:35:10-35:18>
+        has_type None
+
+      Id   <RefId "take" function.lkt:35:10-35:14>
+           has_type None
+           references None
+
+      Id   <RefId "f8" function.lkt:35:15-35:17>
+           has_type <FunctionType "(B, B) -> D" function.lkt>
+           references <FunDecl "f8" function.lkt:34:1-34:22>
+
+Decl <FunDecl "f9" function.lkt:38:1-38:28>
+     has_type <FunctionType "(B, B, B) -> B" function.lkt>
+
+   Decl <FunParamDecl "x" function.lkt:38:8-38:12>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:38:11-38:12>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Decl <FunParamDecl "y" function.lkt:38:14-38:18>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:38:17-38:18>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Decl <FunParamDecl "z" function.lkt:38:20-38:24>
+        has_type <ClassDecl "B" common.lkt:2:1-2:14>
+
+      Id   <RefId "B" function.lkt:38:23-38:24>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "B" function.lkt:38:27-38:28>
+        has_type None
+        references <ClassDecl "B" common.lkt:2:1-2:14>
+
+<ValDecl "v9" function.lkt:39:1-39:18> failed nameres:
+function.lkt:39:15-39:17: error: expected (B, B) -> B, got (B, B, B) -> B
+ 39 | val v9 = take(f9)
+    |               ^^ 
+
+Decl <ValDecl "v9" function.lkt:39:1-39:18>
+     has_type None
+
+   Expr <CallExpr function.lkt:39:10-39:18>
+        has_type None
+
+      Id   <RefId "take" function.lkt:39:10-39:14>
+           has_type None
+           references None
+
+      Id   <RefId "f9" function.lkt:39:15-39:17>
+           has_type <FunctionType "(B, B, B) -> B" function.lkt>
+           references <FunDecl "f9" function.lkt:38:1-38:28>
+
 Resolving node_builder.lkt
 ==========================
 Id   <ModuleId "common" node_builder.lkt:1:6-1:12>

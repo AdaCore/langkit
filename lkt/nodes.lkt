@@ -2471,6 +2471,22 @@ class FunctionType: TypeDecl {
     @with_dynvars(origin)
     fun defined_scope(): LexicalEnv = null[LexicalEnv]
 
+    fun is_subtype(other: Entity[TypeDecl]): Bool =
+        self == other
+
+        # Function types are...
+        or other.as[FunctionType].do(
+            (rhs) =>
+            self.params.length() == rhs.params.length()
+            # ... covariant on their return type
+            and self.params.iall(
+                (lhs_param, i) =>
+                rhs.params.at(i).is_subtype(lhs_param)
+            )
+            # ... contravariant on their argument types
+            and self.return_type.is_subtype(rhs.return_type)
+        )
+
     |" Return True if the arguments should be ignored.
     fun should_ignore_constructor_arg(): Bool =
         self?.origin?.full_decl()?.has_annotation(s"ignore_constructor_arg")
