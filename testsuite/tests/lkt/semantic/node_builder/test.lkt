@@ -1,0 +1,33 @@
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class BaseSynthNode: FooNode {
+    @parse_field p1: FooNode
+    p2: Int
+}
+
+@synthetic
+class SynthNode: BaseSynthNode {
+    @parse_field p3: Example
+    p4: FooNode
+}
+
+class Example: FooNode implements FooNode {
+    @memoized
+    fun p(): Entity[SynthNode] = {
+        # The .builder() method expects node builders for parse fields (instead
+        # of the node types themselves).
+        val p1 = node.parent.to_builder();
+        val p2 = 42;
+        val p3 = node.to_builder();
+
+        # However it expects the precise node type for user fields
+        val p4 = node.parent;
+
+        val builder = SynthNode.builder(p1=p1, p2=p2, p3=p3, p4=p4);
+        val result = builder.build();
+
+        result.as_bare_entity
+    }
+}
