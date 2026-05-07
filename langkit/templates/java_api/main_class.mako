@@ -171,11 +171,11 @@ public final class ${ctx.lib_name.camel}
                                            : StandardCharsets.UTF_32LE;
 
     public static final Map<String, LangkitSupport.Reflection.Enum>
-        ENUM_DESCRIPTION_MAP = new HashMap();
+        ENUM_DESCRIPTION_MAP = new HashMap<>();
 
     /** A map to store descriptions of all structure types. */
     public static final Map<String, LangkitSupport.Reflection.Struct>
-        STRUCT_DESCRIPTION_MAP = new HashMap();
+        STRUCT_DESCRIPTION_MAP = new HashMap<>();
 
     /** A map to store node descriptions associated to their camel name. */
     public static final Map<String, LangkitSupport.Reflection.Node>

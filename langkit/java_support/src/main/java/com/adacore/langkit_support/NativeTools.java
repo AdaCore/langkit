@@ -86,6 +86,7 @@ public class NativeTools {
     );
     private static MethodHandle setenvHandle = null;
 
+    @SuppressWarnings("restricted")
     private static MethodHandle getSetenvHandle() {
         if (setenvHandle == null) {
             // Get the address of the 'setenv' functions
@@ -108,6 +109,7 @@ public class NativeTools {
     );
     private static MethodHandle putenvHandle = null;
 
+    @SuppressWarnings("restricted")
     private static MethodHandle getPutenvHandle() {
         if (putenvHandle == null) {
             // Get the address of the '_putenv_s' functions

@@ -25,6 +25,7 @@ public class LangkitSupport {
     /** Exception to raise when interface default methods are not overrode. */
     public static final
     class NotImplementedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
         public NotImplementedException () {};
 
         @Override
@@ -332,6 +333,9 @@ public class LangkitSupport {
 
     public abstract static class Text implements AutoCloseable {
 
+        @Override
+        public abstract void close();
+
         /** The size of the text. */
         public abstract long getLength();
 
@@ -380,7 +384,9 @@ public class LangkitSupport {
     public interface EnumInterface {}
 
     /** Base interface for all iterators defined in a Langkit spec. */
-    public interface LangkitIterator<T> extends Iterator<T>, AutoCloseable {}
+    public interface LangkitIterator<T> extends Iterator<T>, AutoCloseable {
+        @Override void close();
+    }
 
     /** Base interface for all structs defined in a Langkit spec. */
     public interface StructInterface {}
@@ -450,6 +456,9 @@ public class LangkitSupport {
             this.success = success;
         }
 
+        @Override
+        public abstract void close();
+
         /** Return all diagnostics. */
         public abstract Diagnostic[] getDiagnostics();
     }
@@ -518,7 +527,9 @@ public class LangkitSupport {
     }
 
     /** Interface to override how source files are fetched and decoded. */
-    public interface FileReaderInterface extends AutoCloseable {}
+    public interface FileReaderInterface extends AutoCloseable {
+        @Override void close();
+    }
 
     /**
      * Interface to fetch analysis units from a name and a unit kind.
@@ -535,10 +546,14 @@ public class LangkitSupport {
      * See the documentation of each unit provider for the exact semantics of
      * the unit name/kind information.
      */
-    public interface UnitProviderInterface extends AutoCloseable {}
+    public interface UnitProviderInterface extends AutoCloseable {
+        @Override void close();
+    }
 
     /** Interface to handle events sent by the analysis context. */
-    public interface EventHandlerInterface extends AutoCloseable {}
+    public interface EventHandlerInterface extends AutoCloseable {
+        @Override void close();
+    }
 
     /**
      * Represents a context for all source analysis. This is the first type
