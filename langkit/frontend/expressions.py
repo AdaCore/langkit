@@ -3319,14 +3319,7 @@ class ExpressionCompiler:
                 args, _ = S.domain_signature.match(self.ctx, inner_expr)
                 logic_var = self.lower_logic_var_ref(args["var"], env)
                 domain_expr = self.lower_expr(args["domain"], env)
-                if not domain_expr.type.is_collection or not isinstance(
-                    domain_expr.type.element_type, EntityType
-                ):
-                    error(
-                        "Entity collection expected, got"
-                        f" {domain_expr.type.lkt_name}",
-                        location=args["domain"],
-                    )
+                expr_type_matches(args["domain"], domain_expr, T.entity.array)
                 return E.DomainExpr(
                     debug_info(expr, "LogicDomain"), domain_expr, logic_var
                 )
