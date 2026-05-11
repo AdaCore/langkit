@@ -209,6 +209,17 @@
         );
     }
 
+    /** The event handler unit diagnostic callback type */
+    public interface UnitDiagnosticFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        void invoke(
+            VoidPointer data,
+            AnalysisContextNative context,
+            AnalysisUnitNative unit,
+            TextNative message
+        );
+    }
+
     /** Anonymous structure for the token data handler */
     @RawStructure
     public interface TokenDataHandlerNative extends PointerBase {
@@ -351,6 +362,20 @@
                 AnalysisContextNative.class,
                 AnalysisUnitNative.class,
                 byte.class
+            );
+
+        /**
+         * This entry point literal provide a pointer to the unit diagnostic
+         * callback.
+         */
+        public static final CEntryPointLiteral<UnitDiagnosticFunctionPointer>
+            unitDiagnosticFunction = CEntryPointLiteral.create(
+                ${ctx.lib_name.camel}.class,
+                "unitDiagnostic",
+                IsolateThread.class,
+                AnalysisContextNative.class,
+                AnalysisUnitNative.class,
+                TextNative.class
             );
 
         // ----- Util functions -----
@@ -509,7 +534,8 @@
             VoidPointer data,
             VoidPointer destroy_callback,
             UnitRequestedFunctionPointer unit_requested_func,
-            UnitParsedFunctionPointer unit_parsed_func
+            UnitParsedFunctionPointer unit_parsed_func,
+            UnitDiagnosticFunctionPointer unit_diagnostic_func
         );
 
         /** Decrease the ref counter of the event handler */

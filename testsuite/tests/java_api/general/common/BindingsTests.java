@@ -778,19 +778,30 @@ public final class BindingsTests {
         footer("Struct");
     }
 
+    @FunctionalInterface
+    private interface TriConsumer<A, B, C> {
+        void accept(A a, B b, C c);
+    }
+
     private static void testEventHandlers() {
         header("Event handlers");
 
         // Local function to test event handlers
-        BiConsumer<
+        TriConsumer<
             EventHandler.UnitRequestedCallback,
-            EventHandler.UnitParsedCallback
-        > testHandler = (unitRequestedCallback, unitParsedCallback) -> {
+            EventHandler.UnitParsedCallback,
+            EventHandler.UnitDiagnosticCallback
+        > testHandler = (
+            unitRequestedCallback,
+            unitParsedCallback,
+            unitDiagnosticCallback
+        ) -> {
             // Create the context with the event handler and create units
             try(
                 EventHandler eventHandler = EventHandler.create(
                     unitRequestedCallback,
-                    unitParsedCallback
+                    unitParsedCallback,
+                    unitDiagnosticCallback
                 );
                 AnalysisContext context = AnalysisContext.create(
                     null,
@@ -830,6 +841,11 @@ public final class BindingsTests {
                     false,
                     true
                 );
+
+                // Call the property to trigger "unit diagnostic" callback
+                root.pTriggerUnitDiagnostic(
+                    Symbol.create("diag")
+                );
             }
         };
 
@@ -858,19 +874,31 @@ public final class BindingsTests {
             System.out.println("reparsed: " + reparsed);
             System.out.println();
         };
+        EventHandler.UnitDiagnosticCallback unitDiagnosticCallback = (
+            AnalysisContext context,
+            AnalysisUnit unit,
+            String message
+        ) -> {
+            System.out.println("--- Unit diagnostic callback");
+            System.out.println("unit: " + unit);
+            System.out.println("message: " + message);
+            System.out.println();
+        };
 
         System.out.println("=== Non null callbacks ===");
         testHandler.accept(
             unitRequestedCallback,
-            unitParsedCallback
+            unitParsedCallback,
+            unitDiagnosticCallback
         );
         System.out.println("=== Null callbacks ===");
-        testHandler.accept(null, null);
+        testHandler.accept(null, null, null);
 
         System.out.println("=== Unclosed event handler ===");
         EventHandler dontClose = EventHandler.create(
             unitRequestedCallback,
-            unitParsedCallback
+            unitParsedCallback,
+            unitDiagnosticCallback
         );
 
         footer("Event handlers");

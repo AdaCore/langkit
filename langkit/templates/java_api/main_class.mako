@@ -154,6 +154,41 @@ public final class ${ctx.lib_name.camel}
         }
     }
 
+    /**
+     * This method is the only valid callback to pass to a native event
+     * handler for unit diagnostic events.
+     * This method will dispatch the execution according to the passed
+     * analysis context.
+     */
+    @CEntryPoint
+    static void unitDiagnostic(
+        final IsolateThread thread,
+        final AnalysisContextNative contextNative,
+        final AnalysisUnitNative unitNative,
+        final TextNative messageNative
+    ) {
+        try(
+            final AnalysisContext context = AnalysisContext.wrap(
+                contextNative
+            );
+            final Text text = Text.wrap(messageNative)
+        ) {
+            // Get the callback from the context event handler
+            final EventHandler.UnitDiagnosticCallback callback = context
+                .getEventHandler()
+                .getUnitDiagnosticCallback();
+
+            // Call the callback
+            if(callback != null) {
+                callback.invoke(
+                    context,
+                    AnalysisUnit.wrap(unitNative),
+                    text.getContent()
+                );
+            }
+        }
+    }
+
     // ==========
     // Static values
     // ==========
@@ -2627,6 +2662,7 @@ public final class ${ctx.lib_name.camel}
         public static final EventHandler NONE = new EventHandler(
             PointerWrapper.nullPointer(),
             null,
+            null,
             null
         );
 
@@ -2651,6 +2687,12 @@ public final class ${ctx.lib_name.camel}
          */
         private final UnitParsedCallback unitParsedCallback;
 
+        /**
+         * The Java callback when a diagnostic is emitted for an analysis unit
+         * in the associated context.
+         */
+        private final UnitDiagnosticCallback unitDiagnosticCallback;
+
         // ----- Constructors -----
 
         /**
@@ -2659,15 +2701,18 @@ public final class ${ctx.lib_name.camel}
          * @param reference The reference to the native event handler.
          * @param unitRequestedCallback The callback for unit requests.
          * @param unitParsedCallback The callback for unit parsing.
+         * @param unitDiagnosticCallback The callback for unit diagnostics.
          */
         EventHandler(
             final PointerWrapper reference,
             final UnitRequestedCallback unitRequestedCallback,
-            final UnitParsedCallback unitParsedCallback
+            final UnitParsedCallback unitParsedCallback,
+            final UnitDiagnosticCallback unitDiagnosticCallback
         ) {
             this.reference = reference;
             this.unitRequestedCallback = unitRequestedCallback;
             this.unitParsedCallback = unitParsedCallback;
+            this.unitDiagnosticCallback = unitDiagnosticCallback;
         }
 
         /**
@@ -2675,10 +2720,12 @@ public final class ${ctx.lib_name.camel}
          *
          * @param unitRequestedCallback The callback for analysis unit requests.
          * @param unitParsedCallback The callback for analysis unit parsing.
+         * @param unitDiagnosticCallback The callback for unit diagnostics.
          */
         public static EventHandler create(
             final UnitRequestedCallback unitRequestedCallback,
-            final UnitParsedCallback unitParsedCallback
+            final UnitParsedCallback unitParsedCallback,
+            final UnitDiagnosticCallback unitDiagnosticCallback
         ) {
             // Prepare the reference to the native event handler
             final PointerWrapper reference;
@@ -2693,7 +2740,8 @@ public final class ${ctx.lib_name.camel}
                         (VoidPointer) thread,
                         WordFactory.nullPointer(),
                         NI_LIB.unitRequestedFunction.getFunctionPointer(),
-                        NI_LIB.unitParsedFunction.getFunctionPointer()
+                        NI_LIB.unitParsedFunction.getFunctionPointer(),
+                        NI_LIB.unitDiagnosticFunction.getFunctionPointer()
                     );
 
                 // Set the result to the created event handler
@@ -2701,7 +2749,8 @@ public final class ${ctx.lib_name.camel}
             } else {
                 reference = JNI_LIB.${nat("create_event_handler")}(
                     unitRequestedCallback,
-                    unitParsedCallback
+                    unitParsedCallback,
+                    unitDiagnosticCallback
                 );
             }
 
@@ -2709,8 +2758,26 @@ public final class ${ctx.lib_name.camel}
             return new EventHandler(
                 reference,
                 unitRequestedCallback,
-                unitParsedCallback
+                unitParsedCallback,
+                unitDiagnosticCallback
             );
+        }
+
+        /**
+         * Create a new event handler with the given callbacks.
+         *
+         * This overload exists for backward compatibility. Callers that do not
+         * need the unit diagnostic callback can use this instead of passing
+         * {@code null} explicitly.
+         *
+         * @param unitRequestedCallback The callback for analysis unit requests.
+         * @param unitParsedCallback The callback for analysis unit parsing.
+         */
+        public static EventHandler create(
+            final UnitRequestedCallback unitRequestedCallback,
+            final UnitParsedCallback unitParsedCallback
+        ) {
+            return create(unitRequestedCallback, unitParsedCallback, null);
         }
 
         /**
@@ -2788,6 +2855,10 @@ public final class ${ctx.lib_name.camel}
             return this.unitParsedCallback;
         }
 
+        public UnitDiagnosticCallback getUnitDiagnosticCallback() {
+            return this.unitDiagnosticCallback;
+        }
+
         // ----- Instance methods -----
 
         /** @see java.lang.AutoCloseable#close() */
@@ -2823,6 +2894,16 @@ public final class ${ctx.lib_name.camel}
                 AnalysisContext context,
                 AnalysisUnit unit,
                 boolean reparsed
+            );
+        }
+
+        ${java_doc('langkit.event_handler_unit_diagnostic_callback', 8)}
+        @FunctionalInterface
+        public interface UnitDiagnosticCallback {
+            void invoke(
+                AnalysisContext context,
+                AnalysisUnit unit,
+                String message
             );
         }
 

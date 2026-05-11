@@ -185,6 +185,22 @@ package body ${ada_lib_name}.Public_Converters is
       Self.Internal.Get.Unit_Parsed_Callback (Ctx, Unt, Reparsed);
    end Unit_Parsed_Callback;
 
+   ------------------------------
+   -- Unit_Diagnostic_Callback --
+   ------------------------------
+
+   overriding procedure Unit_Diagnostic_Callback
+     (Self    : in out Event_Handler_Wrapper;
+      Context : Internal_Context;
+      Unit    : Internal_Unit;
+      Message : Text_Type)
+   is
+      Ctx : constant Analysis_Context := Wrap_Context (Context);
+      Unt : constant Analysis_Unit := Wrap_Unit (Unit);
+   begin
+      Self.Internal.Get.Unit_Diagnostic_Callback (Ctx, Unt, Message);
+   end Unit_Diagnostic_Callback;
+
    --------------------------
    -- Wrap_Public_Provider --
    --------------------------

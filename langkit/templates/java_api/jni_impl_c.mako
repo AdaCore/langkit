@@ -46,6 +46,7 @@ typedef struct {
     JNIEnv *env;
     jobject unit_requested_callback;
     jobject unit_parsed_callback;
+    jobject unit_diagnostic_callback;
 } event_handler_data;
 
 // ==========
@@ -195,6 +196,8 @@ jclass UnitRequestedCallback_class_id = NULL;
 jmethodID UnitRequestedCallback_invoke_id = NULL;
 jclass UnitParsedCallback_class_id = NULL;
 jmethodID UnitParsedCallback_invoke_id = NULL;
+jclass UnitDiagnosticCallback_class_id = NULL;
+jmethodID UnitDiagnosticCallback_invoke_id = NULL;
 
 ${token_type} Token_new_value();
 jobject Token_wrap(JNIEnv *, ${token_type}, jobject);
@@ -698,6 +701,22 @@ ${api.jni_func_sig("initialize", "void")}(
         UnitParsedCallback_class_id,
         "invoke",
         "(L${sig_base}$AnalysisContext;L${sig_base}$AnalysisUnit;Z)V"
+    );
+
+    UnitDiagnosticCallback_class_id = (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(
+            env,
+            "${sig_base}$EventHandler$UnitDiagnosticCallback"
+        )
+    );
+
+    UnitDiagnosticCallback_invoke_id = (*env)->GetMethodID(
+        env,
+        UnitDiagnosticCallback_class_id,
+        "invoke",
+        "(L${sig_base}$AnalysisContext;L${sig_base}$AnalysisUnit;"
+        "Ljava/lang/String;)V"
     );
 
     Token_class_ref = (jclass) (*env)->NewGlobalRef(
@@ -2189,6 +2208,7 @@ void event_handler_destroy(
     if(jvm_running) {
         (*env)->DeleteGlobalRef(env, eh_data->unit_requested_callback);
         (*env)->DeleteGlobalRef(env, eh_data->unit_parsed_callback);
+        (*env)->DeleteGlobalRef(env, eh_data->unit_diagnostic_callback);
     }
     free(data);
 }
@@ -2263,12 +2283,47 @@ void event_handler_unit_parsed(
     }
 }
 
+// Util function called when a unit diagnostic is emitted
+void event_handler_unit_diagnostic(
+    void *data,
+    ${analysis_context_type} context,
+    ${analysis_unit_type} unit,
+    ${text_type} *message
+) {
+    // Get the event handler data
+    event_handler_data *eh_data = (event_handler_data *) data;
+    JNIEnv *env = eh_data->env;
+
+    // Verify that the callback is not null
+    if(eh_data->unit_diagnostic_callback != NULL) {
+        // Wrap the callback arguments
+        jobject analysis_context = AnalysisContext_wrap(env, context);
+        jobject analysis_unit = AnalysisUnit_wrap(env, unit);
+        jobject text = Text_wrap(env, *message);
+
+        // Call the unit diagnostic callback
+        (*env)->CallVoidMethod(
+            env,
+            eh_data->unit_diagnostic_callback,
+            UnitDiagnosticCallback_invoke_id,
+            analysis_context,
+            analysis_unit,
+            get_text_content(env, text)
+        );
+
+        // Remove the intermediary values
+        ${nat("context_decref")}(context);
+        ${nat("destroy_text")}(message);
+    }
+}
+
 // Create a new event handler
 ${api.jni_func_sig("create_event_handler", "jobject")}(
     JNIEnv *env,
     jclass jni_lib,
     jobject unit_requested_callback,
-    jobject unit_parsed_callback
+    jobject unit_parsed_callback,
+    jobject unit_diagnostic_callback
 ) {
     // Create the structure to store the event handler information
     event_handler_data *data = (event_handler_data *) malloc(
@@ -2283,13 +2338,18 @@ ${api.jni_func_sig("create_event_handler", "jobject")}(
         env,
         unit_parsed_callback
     );
+    data->unit_diagnostic_callback = (*env)->NewGlobalRef(
+        env,
+        unit_diagnostic_callback
+    );
 
     // Call the native function
     ${event_handler_type} res_native = ${nat("create_event_handler")}(
         (void *) data,
         &event_handler_destroy,
         &event_handler_unit_requested,
-        &event_handler_unit_parsed
+        &event_handler_unit_parsed,
+        &event_handler_unit_diagnostic
     );
 
     // Return the wrapped pointer

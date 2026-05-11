@@ -25,6 +25,12 @@ package Support is
       Unit     : Analysis_Unit'Class;
       Reparsed : Boolean);
 
+   overriding procedure Unit_Diagnostic_Callback
+     (Self    : in out Event_Handler;
+      Context : Analysis_Context'Class;
+      Unit    : Analysis_Unit'Class;
+      Message : Text_Type);
+
    overriding procedure Release (Self : in out Event_Handler);
 
    function Create_Event_Handler

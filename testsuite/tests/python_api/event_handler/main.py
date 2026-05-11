@@ -53,6 +53,14 @@ class EventHandler(libfoolang.EventHandler):
         print(f"  reparsed: {reparsed}")
         print("")
 
+    def unit_diagnostic_callback(self, context, unit, message):
+        print(f"{self.label}: unit_diagnostic_callback")
+        flush()
+        ExceptionManager.maybe_raise()
+        print(f"  unit: {unit}")
+        print(f"  message: {message}")
+        print("")
+
 
 # Create an analysis context with our event handler
 print("== create context ==")
@@ -80,6 +88,15 @@ n.p_trigger_unit_requested("foo_2", found=False, error=False)
 n.p_trigger_unit_requested("foo_3", found=False, error=True)
 with ExceptionManager.enable():
     n.p_trigger_unit_requested("foo_4", found=False, error=False)
+    flush()
+    print("")
+
+# Trigger the "unit diagnostic" event
+print("== unit diagnostic ==")
+print("")
+n.p_trigger_unit_diagnostic("diag")
+with ExceptionManager.enable():
+    n.p_trigger_unit_diagnostic("diag_exc")
     flush()
     print("")
 

@@ -12,6 +12,10 @@ class FooNode implements Node[FooNode] {
     @exported
     @external()
     fun trigger_unit_requested(name: Symbol, found: Bool, error: Bool): Bool
+
+    @exported
+    @external()
+    fun trigger_unit_diagnostic(message: Symbol): Bool
 }
 
 class Example: FooNode implements TokenNode {

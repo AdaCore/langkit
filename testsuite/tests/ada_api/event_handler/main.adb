@@ -42,5 +42,13 @@ begin
    Dummy := N.P_Trigger_Unit_Requested
      (Name => To_Unbounded_Text ("foo_3"), Found => False, Error => True);
 
+   --  Trigger the "unit diagnostic" event
+
+   Put_Line ("== unit diagnostic ==");
+   New_Line;
+
+   Dummy := N.P_Trigger_Unit_Diagnostic
+     (Message => To_Unbounded_Text ("diag"));
+
    Put_Line ("main.adb: Done.");
 end Main;

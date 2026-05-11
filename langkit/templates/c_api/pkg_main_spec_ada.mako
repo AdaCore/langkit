@@ -251,6 +251,14 @@ package ${ada_lib_name}.Implementation.C is
       with Convention => C;
    ${ada_c_doc('langkit.event_handler_unit_parsed_callback', 3)}
 
+   type ${event_handler_unit_diagnostic_type} is access procedure
+     (Data    : System.Address;
+      Context : ${analysis_context_type};
+      Unit    : ${analysis_unit_type};
+      Message : access constant ${text_type})
+      with Convention => C;
+   ${ada_c_doc('langkit.event_handler_unit_diagnostic_callback', 3)}
+
    type ${event_handler_destroy_type} is access procedure
      (Data : System.Address)
       with Convention => C;
@@ -684,10 +692,11 @@ package ${ada_lib_name}.Implementation.C is
    --------------------
 
    function ${capi.get_name('create_event_handler')}
-     (Data                : System.Address;
-      Destroy_Func        : ${event_handler_destroy_type};
-      Unit_Requested_Func : ${event_handler_unit_requested_type};
-      Unit_Parsed_Func    : ${event_handler_unit_parsed_type})
+     (Data                 : System.Address;
+      Destroy_Func         : ${event_handler_destroy_type};
+      Unit_Requested_Func  : ${event_handler_unit_requested_type};
+      Unit_Parsed_Func     : ${event_handler_unit_parsed_type};
+      Unit_Diagnostic_Func : ${event_handler_unit_diagnostic_type})
       return ${event_handler_type}
       with Export        => True,
            Convention    => C,

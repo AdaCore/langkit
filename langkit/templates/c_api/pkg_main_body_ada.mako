@@ -43,11 +43,12 @@ package body ${ada_lib_name}.Implementation.C is
       Ada.Finalization.Limited_Controlled
       and Internal_Event_Handler
    with record
-      Ref_Count           : Natural;
-      Data                : System.Address;
-      Destroy_Func        : ${event_handler_destroy_type};
-      Unit_Requested_Func : ${event_handler_unit_requested_type};
-      Unit_Parsed_Func    : ${event_handler_unit_parsed_type};
+      Ref_Count            : Natural;
+      Data                 : System.Address;
+      Destroy_Func         : ${event_handler_destroy_type};
+      Unit_Requested_Func  : ${event_handler_unit_requested_type};
+      Unit_Parsed_Func     : ${event_handler_unit_parsed_type};
+      Unit_Diagnostic_Func : ${event_handler_unit_diagnostic_type};
    end record;
 
    overriding procedure Finalize (Self : in out C_Event_Handler);
@@ -67,6 +68,12 @@ package body ${ada_lib_name}.Implementation.C is
       Context  : Internal_Context;
       Unit     : Internal_Unit;
       Reparsed : Boolean);
+
+   overriding procedure Unit_Diagnostic_Callback
+     (Self    : in out C_Event_Handler;
+      Context : Internal_Context;
+      Unit    : Internal_Unit;
+      Message : Text_Type);
 
    ------------------
    -- File readers --
@@ -1616,10 +1623,11 @@ package body ${ada_lib_name}.Implementation.C is
    end;
 
    function ${capi.get_name('create_event_handler')}
-     (Data                : System.Address;
-      Destroy_Func        : ${event_handler_destroy_type};
-      Unit_Requested_Func : ${event_handler_unit_requested_type};
-      Unit_Parsed_Func    : ${event_handler_unit_parsed_type})
+     (Data                 : System.Address;
+      Destroy_Func         : ${event_handler_destroy_type};
+      Unit_Requested_Func  : ${event_handler_unit_requested_type};
+      Unit_Parsed_Func     : ${event_handler_unit_parsed_type};
+      Unit_Diagnostic_Func : ${event_handler_unit_diagnostic_type})
       return ${event_handler_type} is
    begin
       Clear_Last_Exception;
@@ -1627,11 +1635,12 @@ package body ${ada_lib_name}.Implementation.C is
          Result : constant Internal_Event_Handler_Access :=
            new C_Event_Handler'
              (Ada.Finalization.Limited_Controlled with
-              Ref_Count           => 1,
-              Data                => Data,
-              Destroy_Func        => Destroy_Func,
-              Unit_Requested_Func => Unit_Requested_Func,
-              Unit_Parsed_Func    => Unit_Parsed_Func);
+              Ref_Count            => 1,
+              Data                 => Data,
+              Destroy_Func         => Destroy_Func,
+              Unit_Requested_Func  => Unit_Requested_Func,
+              Unit_Parsed_Func     => Unit_Parsed_Func,
+              Unit_Diagnostic_Func => Unit_Diagnostic_Func);
       begin
          return Wrap_Private_Event_Handler (Result);
       end;
@@ -1863,6 +1872,23 @@ package body ${ada_lib_name}.Implementation.C is
       Self.Unit_Parsed_Func
         (Self.Data, Context, Unit, (if Reparsed then 1 else 0));
    end Unit_Parsed_Callback;
+
+   ------------------------------
+   -- Unit_Diagnostic_Callback --
+   ------------------------------
+
+   overriding procedure Unit_Diagnostic_Callback
+     (Self    : in out C_Event_Handler;
+      Context : Internal_Context;
+      Unit    : Internal_Unit;
+      Message : Text_Type)
+   is
+      Message_Access : constant Text_Cst_Access := Message'Unrestricted_Access;
+      C_Message      : aliased constant ${text_type} := Wrap (Message_Access);
+   begin
+      Self.Unit_Diagnostic_Func
+        (Self.Data, Context, Unit, C_Message'Access);
+   end Unit_Diagnostic_Callback;
 
    ${exts.include_extension(
       ctx.ext('analysis', 'c_api', 'unit_providers', 'body')

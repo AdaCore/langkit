@@ -27,6 +27,25 @@ package body Libfoolang.Implementation.Extensions is
       return False;
    end Foo_Node_P_Trigger_Unit_Requested;
 
+   ----------------------------------------
+   -- Foo_Node_P_Trigger_Unit_Diagnostic --
+   ----------------------------------------
+
+   function Foo_Node_P_Trigger_Unit_Diagnostic
+     (Node    : Bare_Foo_Node;
+      Message : Symbol_Type) return Boolean
+   is
+   begin
+      if Node.Unit.Context.Event_Handler /= null then
+         Node.Unit.Context.Event_Handler.Unit_Diagnostic_Callback
+           (Context => Node.Unit.Context,
+            Unit    => Node.Unit,
+            Message => +Message);
+      end if;
+
+      return False;
+   end Foo_Node_P_Trigger_Unit_Diagnostic;
+
    function Foo_Node_P_New_Struct_With_Inner
      (Node : Bare_Foo_Node) return Internal_With_Inner
    is

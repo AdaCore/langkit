@@ -27,4 +27,25 @@ package body Libfoolang.Implementation.Extensions is
       return False;
    end Foo_Node_P_Trigger_Unit_Requested;
 
+   ----------------------------------------
+   -- Foo_Node_P_Trigger_Unit_Diagnostic --
+   ----------------------------------------
+
+   function Foo_Node_P_Trigger_Unit_Diagnostic
+     (Node    : Bare_Foo_Node;
+      Message : Symbol_Type) return Boolean
+   is
+      EH : constant Internal_Event_Handler_Access :=
+        Node.Unit.Context.Event_Handler;
+   begin
+      if EH /= null then
+         EH.Unit_Diagnostic_Callback
+           (Context => Node.Unit.Context,
+            Unit    => Node.Unit,
+            Message => Image (Message));
+      end if;
+
+      return False;
+   end Foo_Node_P_Trigger_Unit_Diagnostic;
+
 end Libfoolang.Implementation.Extensions;

@@ -45,13 +45,33 @@ eh_unit_parsed (void *data, foo_analysis_context ctx, foo_analysis_unit unit,
   (void) ctx;
 
   const char *eh_name = data;
-  printf ("%s: eh_unit_requested\n", eh_name);
+  printf ("%s: eh_unit_parsed\n", eh_name);
 
   printf ("  unit: ");
   fprint_unit (stdout, unit);
   puts ("");
 
   printf ("  reparsed: %i\n", reparsed);
+  puts ("");
+}
+
+static void
+eh_unit_diagnostic (void *data, foo_analysis_context ctx,
+		    foo_analysis_unit unit, foo_text *message)
+{
+  (void) ctx;
+
+  const char *eh_name = data;
+  printf ("%s: eh_unit_diagnostic\n", eh_name);
+
+  printf ("  unit: ");
+  fprint_unit (stdout, unit);
+  puts ("");
+
+  printf ("  message: ");
+  fprint_text (stdout, message, 1);
+  puts ("");
+
   puts ("");
 }
 
@@ -66,14 +86,17 @@ main (void)
   uint32_t foo_1_data[] = {'f', 'o', 'o', '_', '1'};
   uint32_t foo_2_data[] = {'f', 'o', 'o', '_', '2'};
   uint32_t foo_3_data[] = {'f', 'o', 'o', '_', '2'};
+  uint32_t diag_data[] = {'d', 'i', 'a', 'g'};
 
   foo_text foo_1_text = {foo_1_data, 5, 0};
   foo_text foo_2_text = {foo_2_data, 5, 0};
   foo_text foo_3_text = {foo_3_data, 5, 0};
+  foo_text diag_text = {diag_data, 4, 0};
 
   foo_symbol_type foo_1_symbol;
   foo_symbol_type foo_2_symbol;
   foo_symbol_type foo_3_symbol;
+  foo_symbol_type diag_symbol;
 
   foo_event_handler eh;
   foo_analysis_context ctx;
@@ -89,7 +112,7 @@ main (void)
   puts ("== create context ==\n");
 
   eh = foo_create_event_handler (eh_data, eh_destroy, eh_unit_requested,
-				 eh_unit_parsed);
+				 eh_unit_parsed, eh_unit_diagnostic);
   abort_on_exception ();
 
   ctx = foo_allocate_analysis_context ();
@@ -140,6 +163,9 @@ main (void)
   foo_context_symbol (ctx, &foo_3_text, &foo_3_symbol);
   abort_on_exception ();
 
+  foo_context_symbol (ctx, &diag_text, &diag_symbol);
+  abort_on_exception ();
+
   foo_foo_node_p_trigger_unit_requested(
     /* node= */ &n,
     /* name= */ &foo_1_symbol,
@@ -163,6 +189,17 @@ main (void)
     /* name= */ &foo_3_symbol,
     /* found= */ 0,
     /* error= */ 1,
+    /* value_p= */ &dummy
+  );
+  abort_on_exception ();
+
+  /* Trigger the "unit diagnostic" event.  */
+
+  puts ("== unit diagnostic ==\n");
+
+  foo_foo_node_p_trigger_unit_diagnostic(
+    /* node= */ &n,
+    /* message= */ &diag_symbol,
     /* value_p= */ &dummy
   );
   abort_on_exception ();
