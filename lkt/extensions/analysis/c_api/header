@@ -1,0 +1,16 @@
+## vim: ft=makocpp
+
+<% language_mode_type = T.LanguageMode.c_type(capi).name %>
+
+extern
+${unit_provider_type} ${capi.get_name("create_default_provider")}(
+    ${language_mode_type} mode
+);
+
+extern
+${unit_provider_type}
+${capi.get_name("create_default_provider_from_directories")}(
+    ${language_mode_type} mode,
+    char **directories,
+    int directories_count
+);

@@ -2,12 +2,12 @@
 
 _create_default_provider = _import_func(
     '${capi.get_name("create_default_provider")}',
-    [],
+    [ctypes.c_int],
     _unit_provider,
 )
 
 _create_default_provider_from_directories = _import_func(
     '${capi.get_name("create_default_provider_from_directories")}',
-    [ctypes.POINTER(ctypes.c_char_p)],
+    [ctypes.c_int, ctypes.POINTER(ctypes.c_char_p), ctypes.c_int],
     _unit_provider,
 )

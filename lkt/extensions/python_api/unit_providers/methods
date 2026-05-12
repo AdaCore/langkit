@@ -1,22 +1,24 @@
 ## vim: filetype=makopython
 
+<%
+    language_mode_type = pyapi.type_public_name(T.LanguageMode)
+%>
+
     @classmethod
-    def create_default(cls) -> UnitProvider:
-        """
-        Create a new unit provider that will look in the ``LKT_PATH``
-        environment variable to resolve sources. Note that the current
-        directory is implicitly looked at first.
-        """
-        c_value = _create_default_provider()
+    def create_default(cls, mode: ${language_mode_type}) -> UnitProvider:
+        ${py_doc("liblktlang.create_default_provider", 8)}
+        c_value = _create_default_provider(
+            ${pyapi.unwrap_value("mode", T.LanguageMode, "")},
+        )
         return _CUnitProvider(c_value)
 
     @classmethod
-    def from_directories(cls, directories: list[str]) -> UnitProvider:
-        """
-        Return a unit provider that will look for units in the given list of
-        directories. Note that the current directory is implicitly looked at
-        first.
-        """
+    def from_directories(
+        cls,
+        mode: ${language_mode_type},
+        directories: list[str],
+    ) -> UnitProvider:
+        ${py_doc("liblktlang.create_default_provider_from_directories", 8)}
         # Create a NULL-terminated array of strings
         c_strings = [
             ctypes.c_char_p(
@@ -35,5 +37,9 @@
             c_array_ptr, ctypes.POINTER(ctypes.c_char_p)
         )
 
-        c_value = _create_default_provider_from_directories(directories_arg)
+        c_value = _create_default_provider_from_directories(
+            ${pyapi.unwrap_value("mode", T.LanguageMode, "")},
+            directories_arg,
+            len(directories),
+        )
         return _CUnitProvider(c_value)

@@ -18,7 +18,7 @@ with Liblktlang_Support.Text;      use Liblktlang_Support.Text;
 package body Liblktlang.Implementation.Extensions is
 
    Lkt_Filename_Regexp : constant GNAT.Regpat.Pattern_Matcher :=
-     GNAT.Regpat.Compile ("([a-z](_?[a-z0-9]+)*)\.lkt");
+     GNAT.Regpat.Compile ("([a-z](_?[a-z0-9]+)*)\.(lkt|lkql)");
 
    package WWS renames Ada.Strings.Wide_Wide_Unbounded;
 
@@ -355,7 +355,7 @@ package body Liblktlang.Implementation.Extensions is
 
       Filename : constant String :=
         Ada.Directories.Simple_Name (Node.Unit.Get_Filename);
-      Matches  : Match_Array (0 .. 2);
+      Matches  : Match_Array (0 .. 3);
    begin
       Match (Lkt_Filename_Regexp, Filename, Matches);
 
@@ -365,11 +365,11 @@ package body Liblktlang.Implementation.Extensions is
       if Lkt_Node_P_Is_From_Prelude (Node) then
          return No_Symbol;
 
-      --  Otherwise, make sure the unit has a valid Lkt filename
+      --  Otherwise, make sure the unit has a valid filename
 
       elsif Matches (0) = No_Match then
          Raise_Property_Exception
-           (Node, Property_Error'Identity, "invalid Lkt filename");
+           (Node, Property_Error'Identity, "invalid filename");
       end if;
 
       --  From there, just strip the extension and we have the module name
