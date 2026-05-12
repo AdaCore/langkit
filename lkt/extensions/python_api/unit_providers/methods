@@ -1,6 +1,16 @@
 ## vim: filetype=makopython
 
     @classmethod
+    def create_default(cls) -> UnitProvider:
+        """
+        Create a new unit provider that will look in the ``LKT_PATH``
+        environment variable to resolve sources. Note that the current
+        directory is implicitly looked at first.
+        """
+        c_value = _create_default_provider()
+        return _CUnitProvider(c_value)
+
+    @classmethod
     def from_directories(cls, directories: list[str]) -> UnitProvider:
         """
         Return a unit provider that will look for units in the given list of
@@ -25,15 +35,5 @@
             c_array_ptr, ctypes.POINTER(ctypes.c_char_p)
         )
 
-        c_value = _create_default_provider(directories_arg)
+        c_value = _create_default_provider_from_directories(directories_arg)
         return _CUnitProvider(c_value)
-
-    @classmethod
-    def from_lkt_path(cls) -> UnitProvider:
-        """
-        Return a unit provider created from the ``LKT_PATH`` environment
-        variable.
-        """
-        return cls.from_directories(
-            os.environ.get("LKT_PATH", "").split(os.path.pathsep)
-        )
