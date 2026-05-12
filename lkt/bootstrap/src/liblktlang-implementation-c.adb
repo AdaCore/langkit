@@ -28,9 +28,10 @@ with Liblktlang.Private_Converters;
 use Liblktlang.Private_Converters;
 
 
-          with Liblktlang_Support.Errors;
-          with Liblktlang.Implementation.Extensions;
-            use Liblktlang.Implementation.Extensions;
+       with Liblktlang_Support.Errors;
+       with Liblktlang.Impl_0;
+       with Liblktlang.Implementation.Extensions;
+         use Liblktlang.Implementation.Extensions;
 
 
 package body Liblktlang.Implementation.C is
@@ -46,11 +47,12 @@ package body Liblktlang.Implementation.C is
       Ada.Finalization.Limited_Controlled
       and Internal_Event_Handler
    with record
-      Ref_Count           : Natural;
-      Data                : System.Address;
-      Destroy_Func        : lkt_event_handler_destroy_callback;
-      Unit_Requested_Func : lkt_event_handler_unit_requested_callback;
-      Unit_Parsed_Func    : lkt_event_handler_unit_parsed_callback;
+      Ref_Count            : Natural;
+      Data                 : System.Address;
+      Destroy_Func         : lkt_event_handler_destroy_callback;
+      Unit_Requested_Func  : lkt_event_handler_unit_requested_callback;
+      Unit_Parsed_Func     : lkt_event_handler_unit_parsed_callback;
+      Unit_Diagnostic_Func : lkt_event_handler_unit_diagnostic_callback;
    end record;
 
    overriding procedure Finalize (Self : in out C_Event_Handler);
@@ -70,6 +72,12 @@ package body Liblktlang.Implementation.C is
       Context  : Internal_Context;
       Unit     : Internal_Unit;
       Reparsed : Boolean);
+
+   overriding procedure Unit_Diagnostic_Callback
+     (Self    : in out C_Event_Handler;
+      Context : Internal_Context;
+      Unit    : Internal_Unit;
+      Message : Text_Type);
 
    ------------------
    -- File readers --
@@ -777,6 +785,7 @@ package body Liblktlang.Implementation.C is
       Lkt_Paren_Pattern => new Text_Type'(To_Text ("ParenPattern")),
       Lkt_Regex_Pattern => new Text_Type'(To_Text ("RegexPattern")),
       Lkt_Type_Pattern => new Text_Type'(To_Text ("TypePattern")),
+      Lkt_Destructuring_Pattern_Detail => new Text_Type'(To_Text ("DestructuringPatternDetail")),
       Lkt_Field_Pattern_Detail => new Text_Type'(To_Text ("FieldPatternDetail")),
       Lkt_Property_Pattern_Detail => new Text_Type'(To_Text ("PropertyPatternDetail")),
       Lkt_Default_List_Type_Ref => new Text_Type'(To_Text ("DefaultListTypeRef")),
@@ -1424,6 +1433,8 @@ package body Liblktlang.Implementation.C is
          Last_Exception.Kind := Exception_Native_Exception;
       elsif Id = Liblktlang_Support.Errors.Precondition_Failure'Identity then
          Last_Exception.Kind := Exception_Precondition_Failure;
+      elsif Id = Liblktlang_Support.Errors.Program_Error'Identity then
+         Last_Exception.Kind := Exception_Program_Error;
       elsif Id = Liblktlang_Support.Errors.Property_Error'Identity then
          Last_Exception.Kind := Exception_Property_Error;
       elsif Id = Liblktlang_Support.Errors.Rewriting.Template_Args_Error'Identity then
@@ -1820,10 +1831,11 @@ package body Liblktlang.Implementation.C is
    end;
 
    function lkt_create_event_handler
-     (Data                : System.Address;
-      Destroy_Func        : lkt_event_handler_destroy_callback;
-      Unit_Requested_Func : lkt_event_handler_unit_requested_callback;
-      Unit_Parsed_Func    : lkt_event_handler_unit_parsed_callback)
+     (Data                 : System.Address;
+      Destroy_Func         : lkt_event_handler_destroy_callback;
+      Unit_Requested_Func  : lkt_event_handler_unit_requested_callback;
+      Unit_Parsed_Func     : lkt_event_handler_unit_parsed_callback;
+      Unit_Diagnostic_Func : lkt_event_handler_unit_diagnostic_callback)
       return lkt_event_handler is
    begin
       Clear_Last_Exception;
@@ -1831,11 +1843,12 @@ package body Liblktlang.Implementation.C is
          Result : constant Internal_Event_Handler_Access :=
            new C_Event_Handler'
              (Ada.Finalization.Limited_Controlled with
-              Ref_Count           => 1,
-              Data                => Data,
-              Destroy_Func        => Destroy_Func,
-              Unit_Requested_Func => Unit_Requested_Func,
-              Unit_Parsed_Func    => Unit_Parsed_Func);
+              Ref_Count            => 1,
+              Data                 => Data,
+              Destroy_Func         => Destroy_Func,
+              Unit_Requested_Func  => Unit_Requested_Func,
+              Unit_Parsed_Func     => Unit_Parsed_Func,
+              Unit_Diagnostic_Func => Unit_Diagnostic_Func);
       begin
          return Wrap_Private_Event_Handler (Result);
       end;
@@ -2067,6 +2080,23 @@ package body Liblktlang.Implementation.C is
         (Self.Data, Context, Unit, (if Reparsed then 1 else 0));
    end Unit_Parsed_Callback;
 
+   ------------------------------
+   -- Unit_Diagnostic_Callback --
+   ------------------------------
+
+   overriding procedure Unit_Diagnostic_Callback
+     (Self    : in out C_Event_Handler;
+      Context : Internal_Context;
+      Unit    : Internal_Unit;
+      Message : Text_Type)
+   is
+      Message_Access : constant Text_Cst_Access := Message'Unrestricted_Access;
+      C_Message      : aliased constant lkt_text := Wrap (Message_Access);
+   begin
+      Self.Unit_Diagnostic_Func
+        (Self.Data, Context, Unit, C_Message'Access);
+   end Unit_Diagnostic_Callback;
+
    
 
 
@@ -2237,7 +2267,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2293,7 +2323,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2341,7 +2371,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2388,7 +2418,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2435,7 +2465,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2482,7 +2512,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2530,7 +2560,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2578,7 +2608,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2625,7 +2655,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2672,7 +2702,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2719,7 +2749,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2774,7 +2804,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2829,7 +2859,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2876,7 +2906,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2914,7 +2944,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Generic_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Basic_Trait_Gen
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Basic_Trait_Gen
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -2923,7 +2953,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -2961,7 +2991,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Trait_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Basic_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Basic_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -2970,7 +3000,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3008,7 +3038,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Generic_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Node_Gen_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Node_Gen_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3017,7 +3047,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3055,7 +3085,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Trait_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Node_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Node_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3064,7 +3094,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3102,7 +3132,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Generic_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Indexable_Gen_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Indexable_Gen_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3111,7 +3141,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3149,7 +3179,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Trait_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Indexable_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Indexable_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3158,7 +3188,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3196,7 +3226,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Token_Node_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Token_Node_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3205,7 +3235,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3243,7 +3273,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Error_Node_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Error_Node_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3252,7 +3282,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3290,7 +3320,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Char_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Char_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3299,7 +3329,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3337,7 +3367,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Int_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Int_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3346,7 +3376,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3384,7 +3414,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Bool_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Bool_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3393,7 +3423,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3431,7 +3461,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Bigint_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Bigint_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3440,7 +3470,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3478,7 +3508,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_String_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_String_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3487,7 +3517,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3525,7 +3555,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Symbol_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Symbol_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3534,7 +3564,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3572,7 +3602,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Property_Error_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Property_Error_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3581,7 +3611,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3619,7 +3649,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Regexp_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Regexp_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3628,7 +3658,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3666,7 +3696,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Generic_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Entity_Gen_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Entity_Gen_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3675,7 +3705,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3713,7 +3743,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Entity_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Entity_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3722,7 +3752,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3760,7 +3790,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Logicvar_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Logicvar_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3769,7 +3799,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3807,7 +3837,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Equation_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Equation_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3816,7 +3846,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3854,7 +3884,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Generic_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Array_Gen_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Array_Gen_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3863,7 +3893,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3901,7 +3931,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Array_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Array_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3910,7 +3940,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3921,6 +3951,100 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_lkt_node_p_array_type;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_p_stream_gen_type
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Entity_Generic_Decl;
+         begin
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Stream_Gen_Type
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                  (Result.Node, Result.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_p_stream_gen_type;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_p_stream_type
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Entity_Named_Type_Decl;
+         begin
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Stream_Type
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                  (Result.Node, Result.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_p_stream_type;
 
 
            
@@ -3948,7 +4072,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Generic_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Astlist_Gen_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Astlist_Gen_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -3957,7 +4081,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -3995,7 +4119,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Astlist_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Astlist_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4004,7 +4128,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4042,7 +4166,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Generic_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Node_Builder_Gen_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Node_Builder_Gen_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4051,7 +4175,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4089,7 +4213,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Named_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Node_Builder_Type
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Node_Builder_Type
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4098,7 +4222,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4136,7 +4260,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Generic_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Iterator_Gen_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Iterator_Gen_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4145,7 +4269,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4183,7 +4307,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Trait_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Iterator_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Iterator_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4192,7 +4316,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4230,7 +4354,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Generic_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Analysis_Unit_Gen_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Analysis_Unit_Gen_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4239,7 +4363,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4277,7 +4401,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Trait_Decl;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Analysis_Unit_Trait
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Analysis_Unit_Trait
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4286,7 +4410,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4324,7 +4448,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Bare_Lkt_Node;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Topmost_Invalid_Decl
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Topmost_Invalid_Decl
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4333,7 +4457,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4371,7 +4495,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Solver_Diagnostic_Array_Access;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Nameres_Diagnostics
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Nameres_Diagnostics
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -4381,7 +4505,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4419,7 +4543,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Solver_Result;
          begin
-            Result := Liblktlang.Implementation.Lkt_Node_P_Solve_Enclosing_Context
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Solve_Enclosing_Context
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -4429,7 +4553,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4467,7 +4591,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point
+            Result := Liblktlang.Impl_0.Dispatcher_Lkt_Node_P_Xref_Entry_Point
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -4477,7 +4601,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4515,7 +4639,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Complete_Item_Array_Access;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Complete
+            Result := Liblktlang.Impl_0.Dispatcher_Lkt_Node_P_Complete
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -4525,7 +4649,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4573,7 +4697,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4624,7 +4748,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4666,7 +4790,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Unit_Array_Access;
          begin
-            Result := Liblktlang.Implementation.Base_Import_P_Referenced_Units
+            Result := Liblktlang.Impl_0.Base_Import_P_Referenced_Units
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -4675,7 +4799,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4726,7 +4850,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4777,7 +4901,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4828,7 +4952,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4879,7 +5003,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4930,7 +5054,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -4981,7 +5105,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5032,7 +5156,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5083,7 +5207,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5125,7 +5249,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Base_Match_Branch_P_Match_Part
+            Result := Liblktlang.Impl_0.Dispatcher_Base_Match_Branch_P_Match_Part
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -5135,7 +5259,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5186,7 +5310,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5237,7 +5361,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5288,7 +5412,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5330,7 +5454,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Class_Qualifier_P_As_Bool
+            Result := Liblktlang.Impl_0.Dispatcher_Class_Qualifier_P_As_Bool
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -5339,7 +5463,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5390,7 +5514,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5442,7 +5566,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5484,7 +5608,7 @@ package body Liblktlang.Implementation.C is
 
             Result : String_Type;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Decl_P_Decl_Type_Name
+            Result := Liblktlang.Impl_0.Dispatcher_Decl_P_Decl_Type_Name
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -5494,7 +5618,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5536,7 +5660,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Def_Id_Array_Access;
          begin
-            Result := Liblktlang.Implementation.Decl_P_Def_Ids
+            Result := Liblktlang.Impl_0.Decl_P_Def_Ids
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -5546,7 +5670,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5588,7 +5712,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Decl;
          begin
-            Result := Liblktlang.Implementation.Decl_P_As_Bare_Decl
+            Result := Liblktlang.Impl_0.Decl_P_As_Bare_Decl
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -5598,7 +5722,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5640,7 +5764,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Decl_P_Get_Type
+            Result := Liblktlang.Impl_0.Decl_P_Get_Type
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -5650,7 +5774,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5701,7 +5825,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Decl_P_Get_Cast_Type
+            Result := Liblktlang.Impl_0.Decl_P_Get_Cast_Type
               (Unwrapped_Node,
                Cast_To => Unwrapped_Cast_To,
                E_Info => Node.Info);
@@ -5712,7 +5836,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5763,7 +5887,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Decl_P_Get_Keep_Type
+            Result := Liblktlang.Impl_0.Decl_P_Get_Keep_Type
               (Unwrapped_Node,
                Keep_Type => Unwrapped_Keep_Type,
                E_Info => Node.Info);
@@ -5774,7 +5898,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5825,7 +5949,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Decl_P_Get_Suffix_Type
+            Result := Liblktlang.Impl_0.Decl_P_Get_Suffix_Type
               (Unwrapped_Node,
                Prefix_Type => Unwrapped_Prefix_Type,
                E_Info => Node.Info);
@@ -5836,7 +5960,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5878,7 +6002,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Decl_P_Is_Generic
+            Result := Liblktlang.Impl_0.Decl_P_Is_Generic
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -5888,7 +6012,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5930,7 +6054,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Decl_P_Return_Type_Is_Instantiated
+            Result := Liblktlang.Impl_0.Decl_P_Return_Type_Is_Instantiated
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -5940,7 +6064,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -5982,7 +6106,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Decl_P_Is_Instantiated
+            Result := Liblktlang.Impl_0.Decl_P_Is_Instantiated
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -5992,7 +6116,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6034,7 +6158,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Symbol_Type;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Decl_P_Name
+            Result := Liblktlang.Impl_0.Dispatcher_Decl_P_Name
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -6043,7 +6167,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6085,7 +6209,7 @@ package body Liblktlang.Implementation.C is
 
             Result : String_Type;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Decl_P_Full_Name
+            Result := Liblktlang.Impl_0.Dispatcher_Decl_P_Full_Name
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -6095,7 +6219,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6146,7 +6270,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6197,7 +6321,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6248,7 +6372,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6299,7 +6423,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6350,7 +6474,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6401,7 +6525,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6452,7 +6576,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6503,7 +6627,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6554,7 +6678,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6605,7 +6729,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6647,7 +6771,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Fun_Decl_P_Is_Dynamic_Combiner
+            Result := Liblktlang.Impl_0.Fun_Decl_P_Is_Dynamic_Combiner
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -6657,7 +6781,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6706,7 +6830,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Fun_Decl_Array_Access;
          begin
-            Result := Liblktlang.Implementation.Fun_Decl_P_Find_All_Overrides
+            Result := Liblktlang.Impl_0.Fun_Decl_P_Find_All_Overrides
               (Unwrapped_Node,
                Units => Unwrapped_Units,
                E_Info => Node.Info);
@@ -6717,7 +6841,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6768,7 +6892,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6819,7 +6943,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6870,7 +6994,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6921,7 +7045,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -6972,7 +7096,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7023,7 +7147,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7074,7 +7198,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7125,7 +7249,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7176,7 +7300,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7227,7 +7351,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7278,7 +7402,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7320,7 +7444,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Def_Id;
          begin
-            Result := Liblktlang.Implementation.Type_Decl_P_Def_Id
+            Result := Liblktlang.Impl_0.Type_Decl_P_Def_Id
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -7330,7 +7454,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7370,9 +7494,9 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Ref;
+            Result : Internal_Entity_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Type_Decl_P_Base_Type
+            Result := Liblktlang.Impl_0.Dispatcher_Type_Decl_P_Base_Type
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -7382,7 +7506,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7396,58 +7520,6 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_type_decl_p_base_type;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_type_decl_p_base_type_if_entity
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Type_Decl then
-
-         declare
-            
-
-            Result : Internal_Entity_Type_Decl;
-         begin
-            Result := Liblktlang.Implementation.Type_Decl_P_Base_Type_If_Entity
-              (Unwrapped_Node,
-               E_Info => Node.Info);
-
-            Value_P.all :=
-                  (Result.Node, Result.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_type_decl_p_base_type_if_entity;
 
 
            
@@ -7485,7 +7557,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7536,7 +7608,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7587,7 +7659,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7638,7 +7710,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7689,7 +7761,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7740,7 +7812,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7791,7 +7863,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7842,7 +7914,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7893,7 +7965,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7944,7 +8016,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -7986,7 +8058,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Excludes_Null_P_As_Bool
+            Result := Liblktlang.Impl_0.Dispatcher_Excludes_Null_P_As_Bool
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -7995,7 +8067,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8037,7 +8109,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Expr_P_Get_Type
+            Result := Liblktlang.Impl_0.Dispatcher_Expr_P_Get_Type
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -8047,7 +8119,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8089,7 +8161,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Expr_P_Get_Generic_Type
+            Result := Liblktlang.Impl_0.Expr_P_Get_Generic_Type
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -8099,7 +8171,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8141,7 +8213,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Expr_P_Get_Expected_Type
+            Result := Liblktlang.Impl_0.Expr_P_Get_Expected_Type
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -8151,7 +8223,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8193,7 +8265,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Decl;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Expr_P_Referenced_Decl
+            Result := Liblktlang.Impl_0.Dispatcher_Expr_P_Referenced_Decl
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -8203,7 +8275,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8254,7 +8326,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8305,7 +8377,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8356,7 +8428,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8407,7 +8479,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8458,7 +8530,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8509,7 +8581,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8560,7 +8632,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8611,7 +8683,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8662,7 +8734,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8713,7 +8785,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8764,7 +8836,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8815,7 +8887,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8866,7 +8938,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8917,7 +8989,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -8968,7 +9040,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9019,7 +9091,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9070,7 +9142,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9121,7 +9193,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9172,7 +9244,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9223,7 +9295,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9274,7 +9346,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9325,7 +9397,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9376,7 +9448,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9427,7 +9499,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9478,7 +9550,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9529,7 +9601,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9580,7 +9652,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9631,7 +9703,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9682,7 +9754,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9733,7 +9805,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9784,7 +9856,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9835,7 +9907,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9886,7 +9958,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9937,7 +10009,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -9988,7 +10060,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10039,7 +10111,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10090,7 +10162,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10141,7 +10213,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10192,7 +10264,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10243,7 +10315,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10294,7 +10366,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10345,7 +10417,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10396,7 +10468,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10447,7 +10519,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10498,7 +10570,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10549,7 +10621,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10600,7 +10672,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10651,7 +10723,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10703,7 +10775,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10745,7 +10817,7 @@ package body Liblktlang.Implementation.C is
 
             Result : String_Type;
          begin
-            Result := Liblktlang.Implementation.Def_Id_P_Name
+            Result := Liblktlang.Impl_0.Def_Id_P_Name
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -10755,7 +10827,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10804,7 +10876,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Def_Id_Array_Access;
          begin
-            Result := Liblktlang.Implementation.Def_Id_P_Get_Implementatinons
+            Result := Liblktlang.Impl_0.Def_Id_P_Get_Implementatinons
               (Unwrapped_Node,
                Units => Unwrapped_Units,
                E_Info => Node.Info);
@@ -10815,7 +10887,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10857,7 +10929,7 @@ package body Liblktlang.Implementation.C is
 
             Result : String_Type;
          begin
-            Result := Liblktlang.Implementation.Def_Id_P_Decl_Detail
+            Result := Liblktlang.Impl_0.Def_Id_P_Decl_Detail
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -10867,7 +10939,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10909,7 +10981,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Integer;
          begin
-            Result := Liblktlang.Implementation.Def_Id_P_Completion_Item_Kind
+            Result := Liblktlang.Impl_0.Def_Id_P_Completion_Item_Kind
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -10919,7 +10991,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -10961,7 +11033,7 @@ package body Liblktlang.Implementation.C is
 
             Result : String_Type;
          begin
-            Result := Liblktlang.Implementation.Def_Id_P_Doc
+            Result := Liblktlang.Impl_0.Def_Id_P_Doc
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -10971,7 +11043,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11020,7 +11092,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Ref_Result_Array_Access;
          begin
-            Result := Liblktlang.Implementation.Def_Id_P_Find_All_References
+            Result := Liblktlang.Impl_0.Def_Id_P_Find_All_References
               (Unwrapped_Node,
                Units => Unwrapped_Units,
                E_Info => Node.Info);
@@ -11031,7 +11103,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11073,7 +11145,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Def_Id;
          begin
-            Result := Liblktlang.Implementation.Ref_Id_P_Referenced_Defining_Name
+            Result := Liblktlang.Impl_0.Ref_Id_P_Referenced_Defining_Name
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -11083,7 +11155,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11134,7 +11206,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11185,7 +11257,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11236,7 +11308,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11287,7 +11359,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11338,7 +11410,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11389,7 +11461,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11440,7 +11512,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11491,7 +11563,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11542,7 +11614,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11593,7 +11665,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11644,7 +11716,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11695,7 +11767,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11746,7 +11818,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11797,7 +11869,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11839,7 +11911,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Decoded_String_Value;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_String_Lit_P_Denoted_Value
+            Result := Liblktlang.Impl_0.Dispatcher_String_Lit_P_Denoted_Value
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -11848,7 +11920,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11890,7 +11962,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_String_Lit_P_Is_Prefixed_String
+            Result := Liblktlang.Impl_0.Dispatcher_String_Lit_P_Is_Prefixed_String
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -11899,7 +11971,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11941,7 +12013,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Character_Type;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_String_Lit_P_Prefix
+            Result := Liblktlang.Impl_0.Dispatcher_String_Lit_P_Prefix
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -11950,7 +12022,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -11992,7 +12064,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.String_Lit_P_Is_Regexp_Literal
+            Result := Liblktlang.Impl_0.String_Lit_P_Is_Regexp_Literal
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -12001,7 +12073,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12052,7 +12124,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12103,7 +12175,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12154,7 +12226,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12205,7 +12277,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12256,7 +12328,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12307,7 +12379,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12358,7 +12430,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12409,7 +12481,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12460,7 +12532,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12511,7 +12583,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12562,7 +12634,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12613,7 +12685,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12664,7 +12736,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12715,7 +12787,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12766,7 +12838,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12817,7 +12889,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12868,7 +12940,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12919,7 +12991,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -12970,7 +13042,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13021,7 +13093,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13072,7 +13144,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13123,7 +13195,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13174,7 +13246,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13225,7 +13297,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13276,7 +13348,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13327,7 +13399,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13378,7 +13450,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13429,7 +13501,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13480,7 +13552,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13529,7 +13601,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Full_Decl_P_Has_Annotation
+            Result := Liblktlang.Impl_0.Full_Decl_P_Has_Annotation
               (Unwrapped_Node,
                Name => Unwrapped_Name);
 
@@ -13539,7 +13611,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13590,7 +13662,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13641,7 +13713,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13692,7 +13764,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13743,7 +13815,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13794,7 +13866,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13845,7 +13917,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13896,7 +13968,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13947,7 +14019,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -13989,7 +14061,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Boolean;
          begin
-            Result := Liblktlang.Implementation.Dispatcher_Null_Cond_Qualifier_P_As_Bool
+            Result := Liblktlang.Impl_0.Dispatcher_Null_Cond_Qualifier_P_As_Bool
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -13998,7 +14070,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14049,7 +14121,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14100,7 +14172,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14151,7 +14223,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14202,7 +14274,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14253,7 +14325,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14304,7 +14376,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14355,7 +14427,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14406,7 +14478,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14457,7 +14529,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14508,7 +14580,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14522,6 +14594,57 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_paren_pattern_f_sub_pattern;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_regex_pattern_p_denoted_value
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_internal_decoded_string_value) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Regex_Pattern_Range then
+
+         declare
+            
+
+            Result : Internal_Decoded_String_Value;
+         begin
+            Result := Liblktlang.Implementation.Extensions.Regex_Pattern_P_Denoted_Value
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   Result
+            ;
+
+            return 1;
+         exception
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_regex_pattern_p_denoted_value;
 
 
            
@@ -14559,7 +14682,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14573,6 +14696,57 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_type_pattern_f_type_name;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_destructuring_pattern_detail_f_decl
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Destructuring_Pattern_Detail_Range then
+
+         declare
+            
+
+            Result : Bare_Binding_Val_Decl;
+         begin
+            Result := Destructuring_Pattern_Detail_F_Decl
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_destructuring_pattern_detail_f_decl;
 
 
            
@@ -14610,7 +14784,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14661,7 +14835,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14701,7 +14875,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Expr;
+            Result : Bare_Call_Expr;
          begin
             Result := Property_Pattern_Detail_F_Call
               (Unwrapped_Node);
@@ -14712,7 +14886,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14763,7 +14937,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14805,7 +14979,7 @@ package body Liblktlang.Implementation.C is
 
             Result : Internal_Entity_Type_Decl;
          begin
-            Result := Liblktlang.Implementation.Type_Ref_P_Referenced_Decl
+            Result := Liblktlang.Impl_0.Type_Ref_P_Referenced_Decl
               (Unwrapped_Node,
                E_Info => Node.Info);
 
@@ -14815,7 +14989,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14866,7 +15040,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14917,7 +15091,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -14968,7 +15142,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -15019,7 +15193,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -15070,7 +15244,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -15121,7 +15295,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;
@@ -15172,7 +15346,7 @@ package body Liblktlang.Implementation.C is
 
             return 1;
          exception
-            when Exc : Property_Error =>
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
                Set_Last_Exception (Exc);
                return 0;
          end;

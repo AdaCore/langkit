@@ -340,6 +340,11 @@ package Liblktlang_Support.Lexical_Envs_Impl is
    -- Lexical environment public API --
    ------------------------------------
 
+   type Lexical_Env_Array is array (Positive range <>) of Lexical_Env;
+   type Lexical_Env_Array_Access is access all Lexical_Env_Array;
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Lexical_Env_Array, Lexical_Env_Array_Access);
+
    type Entity_Resolver is access function (Ref : Entity) return Entity;
    --  Callback type for the lazy entity resolution mechanism. Such functions
    --  must take a "reference" entity (e.g. a name) and return the referenced
@@ -431,9 +436,12 @@ package Liblktlang_Support.Lexical_Envs_Impl is
    --      is dynamic);
    --    * resets the cache of referenced environments.
 
-   procedure Reset_Caches (Self : Lexical_Env)
+   procedure Reset_Caches
+     (Self            : Lexical_Env;
+      For_Destruction : Boolean := False)
      with Pre => Self.Kind = Static_Primary;
-   --- Reset the caches for this env
+   --  Reset the caches for this env. Set ``For_Destruction`` to True if this
+   --  env is not be used anymore.
 
    function Get
      (Self        : Lexical_Env;
@@ -690,10 +698,6 @@ package Liblktlang_Support.Lexical_Envs_Impl is
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Internal_Envs.Map, Internal_Map);
 
-   type Lexical_Env_Array_Access is access all Lexical_Env_Array;
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (Lexical_Env_Array, Lexical_Env_Array_Access);
-
    type Lexical_Env_Record (Kind : Lexical_Env_Kind) is
       new Base_Lexical_Env_Record
    with record
@@ -722,6 +726,16 @@ package Liblktlang_Support.Lexical_Envs_Impl is
                   Lookup_Cache_Valid : Boolean := True;
                   --  Whether Cached_Results contains lookup results that can
                   --  be currently reused (i.e. whether they are not stale).
+
+                  Lookup_Cache_Version : Natural := 0;
+                  --  The number of times the lookup cache was reset
+
+                  Parent_Cache_Version : Natural := 0;
+                  --  The lookup cache version of this env's parent, if any.
+                  --  It's updated when this env is reset, and is used to make
+                  --  sure we don't use this env's lookup cache if its parent
+                  --  cache was updated, because entries of this cache may have
+                  --  been computed based on its parent's lookup cache.
 
                   Referenced_Envs : Referenced_Envs_Vectors.Vector;
                   --  A list of environments referenced by this environment
@@ -873,8 +887,10 @@ private
       Referenced_Envs          => <>,
       Map                      => Empty_Env_Map'Access,
       Rebindings_Pool          => null,
-      Lookup_Cache_Valid       => False,
       Lookup_Cache             => Lookup_Cache_Maps.Empty_Map,
+      Lookup_Cache_Valid       => False,
+      Lookup_Cache_Version     => 0,
+      Parent_Cache_Version     => 0,
       Rebindings_Assoc_Ref_Env => -1);
 
    --  Because of circular elaboration issues, we cannot call Hash here to

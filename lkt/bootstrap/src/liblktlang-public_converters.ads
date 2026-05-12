@@ -136,6 +136,12 @@ private package Liblktlang.Public_Converters is
       Unit     : Internal_Unit;
       Reparsed : Boolean);
 
+   overriding procedure Unit_Diagnostic_Callback
+     (Self    : in out Event_Handler_Wrapper;
+      Context : Internal_Context;
+      Unit    : Internal_Unit;
+      Message : Text_Type);
+
    function Wrap_Public_Event_Handler
      (Self : Event_Handler_Reference) return Internal_Event_Handler_Access;
    --  Wrap a public event inside an internal one. If Self is a

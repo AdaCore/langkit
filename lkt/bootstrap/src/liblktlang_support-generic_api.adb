@@ -25,6 +25,16 @@ package body Liblktlang_Support.Generic_API is
       return Create_Name (Id.Language_Name.all);
    end Language_Name;
 
+   --------------------------
+   -- Is_Managed_Exception --
+   --------------------------
+
+   function Is_Managed_Exception
+     (Language : Language_Id; Exc : Exception_Id) return Boolean is
+   begin
+      return Language.Is_Managed_Exception.all (Exc);
+   end Is_Managed_Exception;
+
    --------------
    -- Language --
    --------------

@@ -8,6 +8,8 @@
 --  This package and its children provide generic APIs so that programs can
 --  work with all Langkit-generated libraries.
 
+with Ada.Exceptions; use Ada.Exceptions;
+
 limited private with Liblktlang_Support.Internal.Descriptor;
 with Liblktlang_Support.Names; use Liblktlang_Support.Names;
 with Liblktlang_Support.Text;  use Liblktlang_Support.Text;
@@ -47,6 +49,11 @@ package Liblktlang_Support.Generic_API is
    function Language_Name (Id : Language_Id) return Name_Type;
    --  Return the name of the language that the library corresponding to ``Id``
    --  analyzes.
+
+   function Is_Managed_Exception
+     (Language : Language_Id; Exc : Exception_Id) return Boolean;
+   --  Return whether ``id`` is one of the exceptions that properties in
+   --  ``Language`` are allowed to raise.
 
    -------------------
    -- Grammar rules --

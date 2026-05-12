@@ -9,10 +9,11 @@ with System;
 
 with GNATCOLL.VFS;
 
-with Liblktlang_Support.Slocs;   use Liblktlang_Support.Slocs;
-with Liblktlang_Support.Symbols; use Liblktlang_Support.Symbols;
-with Liblktlang_Support.Text;    use Liblktlang_Support.Text;
-with Liblktlang_Support.Types;   use Liblktlang_Support.Types;
+with Liblktlang_Support.Generic_API; use Liblktlang_Support.Generic_API;
+with Liblktlang_Support.Slocs;       use Liblktlang_Support.Slocs;
+with Liblktlang_Support.Symbols;     use Liblktlang_Support.Symbols;
+with Liblktlang_Support.Text;        use Liblktlang_Support.Text;
+with Liblktlang_Support.Types;       use Liblktlang_Support.Types;
 with Liblktlang_Support.Vectors;
 
 --  .. note:: This unit is internal: only Langkit and Langkit-generated
@@ -20,11 +21,8 @@ with Liblktlang_Support.Vectors;
 
 package Liblktlang_Support.Token_Data_Handlers is
 
-   type Raw_Token_Kind is new Natural;
-   --  Kind for a token, stored as a mere number
-
    type Stored_Token_Data is record
-      Kind : Raw_Token_Kind;
+      Kind : Token_Kind_Index;
 
       Source_First : Positive;
       Source_Last  : Natural;

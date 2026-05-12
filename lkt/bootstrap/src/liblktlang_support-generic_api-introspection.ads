@@ -12,7 +12,6 @@
 pragma Warnings (Off, "obsolescent");
 
 private with Ada.Containers.Hashed_Maps;
-with Ada.Exceptions; use Ada.Exceptions;
 private with Ada.Finalization;
 private with Ada.Unchecked_Deallocation;
 

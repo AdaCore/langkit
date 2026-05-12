@@ -1099,6 +1099,12 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
+         function Create_Destructuring_Pattern_Detail
+           (Handle : Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Field_Pattern_Detail
            (Handle : Rewriting_Handle
                ; F_Id : Node_Rewriting_Handle

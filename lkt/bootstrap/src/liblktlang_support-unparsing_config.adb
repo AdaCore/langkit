@@ -4,14 +4,32 @@
 --
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+pragma Warnings (Off, "is an internal GNAT unit");
+with Ada.Strings.Unbounded.Aux; use Ada.Strings.Unbounded.Aux;
+pragma Warnings (On, "is an internal GNAT unit");
+with System;
 
+with GNATCOLL.Iconv;
 with GNATCOLL.JSON; use GNATCOLL.JSON;
 
 with Liblktlang_Support.Errors; use Liblktlang_Support.Errors;
+with Liblktlang_Support.Internal.Analysis;
+use Liblktlang_Support.Internal.Analysis;
 with Liblktlang_Support.Names;  use Liblktlang_Support.Names;
 with Liblktlang_Support.Slocs;  use Liblktlang_Support.Slocs;
+with Liblktlang_Support.Token_Data_Handlers;
+use Liblktlang_Support.Token_Data_Handlers;
+with Liblktlang_Support.Types;  use Liblktlang_Support.Types;
 
 package body Liblktlang_Support.Unparsing_Config is
+
+   function Read_JSON
+     (Buffer      : Memory_Buffer_And_Access;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+      return JSON_Value;
+   --  Decode the JSON document in the given memory buffer and return it. In
+   --  case of parsing error, append messages to ``Diagnostics`` raise the
+   --  ``Invalid_Input`` exception.
 
    procedure Expand_Regular_Node_Template
      (Pool     : in out Document_Pool;
@@ -24,6 +42,48 @@ package body Liblktlang_Support.Unparsing_Config is
    Linear_Template_For_Join : constant Linear_Template_Vectors.Vector :=
      [(Kind => Recurse_Left), (Kind => Recurse_Right)];
    --  Linear template for table row join templates
+
+   package Token_Id_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_Text_Type,
+      Element_Type    => Token_Unparser_Index,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
+
+   function Token_Id_Map
+     (Desc : Language_Descriptor_Access) return Token_Id_Maps.Map;
+   --  Return a mapping from token unparser texts to the corresponding token
+   --  unparser indexes.
+
+   ---------------
+   -- Read_JSON --
+   ---------------
+
+   function Read_JSON
+     (Buffer      : Memory_Buffer_And_Access;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+      return JSON_Value
+   is
+      S : String (1 .. Buffer.Buffer.Byte_Size)
+        with Import, Address => Buffer.Buffer.Address;
+      R : constant Read_Result := Read (S);
+   begin
+      if R.Success then
+         return R.Value;
+      else
+         declare
+            Sloc       : constant Source_Location :=
+              (Line_Number (R.Error.Line), Column_Number (R.Error.Column));
+            Sloc_Range : constant Source_Location_Range :=
+              Make_Range (Sloc, Sloc);
+         begin
+            Append
+              (Diagnostics,
+               Sloc_Range,
+               To_Text (To_String (R.Error.Message)));
+            raise Invalid_Input;
+         end;
+      end if;
+   end Read_JSON;
 
    ----------------------------------
    -- Expand_Regular_Node_Template --
@@ -50,7 +110,7 @@ package body Liblktlang_Support.Unparsing_Config is
             return;
          end if;
 
-         case Self.Kind is
+         case Template_Non_Expression_Kind (Self.Kind) is
             when Align =>
                Replace (Self.Align_Contents);
 
@@ -76,17 +136,6 @@ package body Liblktlang_Support.Unparsing_Config is
             when If_Break =>
                Replace (Self.If_Break_Contents);
                Replace (Self.If_Break_Flat_Contents);
-
-            when If_Empty =>
-               Replace (Self.If_Empty_Then);
-               Replace (Self.If_Empty_Else);
-
-            when If_Kind =>
-               Replace (Self.If_Kind_Default);
-               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
-                  Replace (Self.If_Kind_Matchers (I).Document);
-               end loop;
-               Replace (Self.If_Kind_Absent);
 
             when Indent =>
                Replace (Self.Indent_Document);
@@ -119,6 +168,17 @@ package body Liblktlang_Support.Unparsing_Config is
 
             when Table_Separator | Token | Trim | Whitespace =>
                null;
+
+            when If_Then_Else =>
+               Replace (Self.If_Then);
+               Replace (Self.If_Else);
+
+            when Match =>
+               Replace (Self.Match_Default);
+               for I in 1 .. Self.Match_Matchers.Last_Index loop
+                  Replace (Self.Match_Matchers (I).Document);
+               end loop;
+               Replace (Self.Match_Absent);
          end case;
       end Replace;
 
@@ -159,7 +219,9 @@ package body Liblktlang_Support.Unparsing_Config is
                when Token_Item =>
                   Doc_Item :=
                     Pool.Create_Token
-                      (LT_Item.Token_Kind, LT_Item.Token_Text);
+                      (LT_Item.Token_Kind,
+                       LT_Item.Token_Text,
+                       LT_Item.Token_Unparser);
                when Field_Item =>
                   Doc_Item :=
                     Pool.Create_Recurse_Field
@@ -182,6 +244,21 @@ package body Liblktlang_Support.Unparsing_Config is
          Root    => Template.Root,
          Symbols => Template.Symbols);
    end Expand_Regular_Node_Template;
+
+   ------------------
+   -- Token_Id_Map --
+   ------------------
+
+   function Token_Id_Map
+     (Desc : Language_Descriptor_Access) return Token_Id_Maps.Map is
+   begin
+      return Result : Token_Id_Maps.Map do
+         for Unparser of Desc.Unparsers.Token_Unparsers.all loop
+            Result.Insert
+              (To_Unbounded_Text (Unparser.Text.all), Unparser.Index);
+         end loop;
+      end return;
+   end Token_Id_Map;
 
    -----------
    -- Image --
@@ -245,12 +322,14 @@ package body Liblktlang_Support.Unparsing_Config is
       for T of Tokens.all loop
          declare
             F : constant Unparsing_Fragment := Fragment_For (Id, T);
+            pragma Assert (F.Token_Unparser = T.Index);
          begin
             Linear_Template.Append
               (Linear_Template_Item'
-                 (Kind       => Token_Item,
-                  Token_Kind => F.Token_Kind,
-                  Token_Text => F.Token_Text));
+                 (Kind           => Token_Item,
+                  Token_Kind     => F.Token_Kind,
+                  Token_Text     => F.Token_Text,
+                  Token_Unparser => F.Token_Unparser));
          end;
       end loop;
    end Linear_Template_From_Unparser;
@@ -360,9 +439,10 @@ package body Liblktlang_Support.Unparsing_Config is
    begin
       return
         (case List_Sep is
-         when None                   => (Token_Fragment, Kind, Text),
+         when None                   =>
+           (Token_Fragment, Kind, Text, Token.Index),
          when List_Sep_Template_Kind =>
-           (List_Separator_Fragment, Kind, Text, List_Sep));
+           (List_Separator_Fragment, Kind, Text, Token.Index, List_Sep));
    end Fragment_For;
 
    -------------
@@ -371,6 +451,7 @@ package body Liblktlang_Support.Unparsing_Config is
 
    procedure Release (Self : in out Unparsing_Configuration_Access) is
    begin
+      Free (Self.Token_Formattings);
       for Cur in Self.Node_Configs.Iterate loop
          declare
             Node_Config : Node_Config_Access renames
@@ -392,9 +473,10 @@ package body Liblktlang_Support.Unparsing_Config is
 
    function Load_Unparsing_Config_From_Buffer
      (Language        : Language_Id;
-      Buffer          : String;
+      Buffer          : Memory_Buffer_And_Access;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean)
+      Check_All_Nodes : Boolean;
+      Overridings     : Memory_Buffer_And_Access_Array)
       return Unparsing_Configuration_Access
    is
       Desc      : constant Language_Descriptor_Access := +Language;
@@ -404,15 +486,30 @@ package body Liblktlang_Support.Unparsing_Config is
       -- JSON helpers --
       ------------------
 
+      procedure Set_Token_Documents
+        (Index : Token_Unparser_Index; Text : Text_Type);
+      --  Set a specific formatting (``Text``) for the formatting of the given
+      --  token unparser.
+      --
+      --  If ``Text`` is an empty string, this instructs the config to preserve
+      --  token formatting for the givne unparser.
+
+      procedure Load_Token_Formattings
+        (JSON : JSON_Value; Token_Map : Token_Id_Maps.Map);
+      --  Load token formattings configuration from JSON to
+      --  ``Desc.Unparsers.Token_Unparsers``.
+
       package Node_JSON_Maps is new Ada.Containers.Hashed_Maps
         (Key_Type        => Type_Index,
          Element_Type    => JSON_Value,
          Hash            => Hash,
          Equivalent_Keys => "=");
 
-      function Node_Entries (JSON : JSON_Value) return Node_JSON_Maps.Map;
-      --  Assuming that ``JSON`` is an object whose keys are node type names,
-      --  compute the corresponding map where keys are converted to node types.
+      procedure Add_Node_Entries
+        (JSON : JSON_Value; Map : in out Node_JSON_Maps.Map);
+      --  Check that ``JSON`` (assumed to be an object) has a ``node_configs``
+      --  key and that is is an object, then update ``Map`` to include its
+      --  entries (string keys are converted to the  corresponding node types).
 
       package Field_JSON_Maps is new Ada.Containers.Hashed_Maps
         (Key_Type        => Struct_Member_Index,
@@ -440,6 +537,10 @@ package body Liblktlang_Support.Unparsing_Config is
       function To_Symbol (Name : String) return Symbol_Type
       is (Find (Symbols, To_Text (Name)));
       --  Convert a name to the corresponding symbol in Symbols
+
+      Boolean_Type : constant Type_Ref :=
+        Type_Of (From_Bool (Language, False));
+      pragma Assert (Boolean_Type /= No_Type_Ref);
 
       function To_Type_Index (Name : String) return Type_Index;
       --  Return the type index for the node type that has the given
@@ -600,6 +701,31 @@ package body Liblktlang_Support.Unparsing_Config is
       --  templates parsing: ``Parse_Template`` takes care of the post-parsing
       --  validation.
 
+      function Parse_Subtemplate
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context) return Document_Type;
+      --  Wrapper around ``Parse_Template_Helper`` that ensures that the
+      --  returned node materializes a document template (i.e. not an
+      --  expression).
+
+      function Parse_Expression
+        (JSON      : JSON_Value;
+         Context   : in out Template_Parsing_Context;
+         Expr_Type : out Type_Ref) return Document_Type
+      with Post => Expr_Type /= No_Type_Ref;
+      --  Wrapper around ``Parse_Template_Helper`` that ensures that the
+      --  returned node materializes an expression (i.e. not a document
+      --  template), and that determines its type.
+
+      function Parse_Node_Expression
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context;
+         What    : String) return Document_Type;
+      --  Wrapper around ``Parse_Expression`` that ensures that the expressions
+      --  computes a node.
+      --
+      --  ``What`` is used to described what is checked in the error message.
+
       procedure Process_Recurse (Context : in out Template_Parsing_Context);
       --  Record in ``Context.State``` that a "recurse" or "recurse_flatten"
       --  template item has been found. This raises an error if one has already
@@ -632,6 +758,26 @@ package body Liblktlang_Support.Unparsing_Config is
       --  Check that symbol usage for both templates is compatible. Names are
       --  used for error message formatting.
 
+      function Mandatory_Key
+        (JSON           : JSON_Value;
+         Key            : String;
+         Context        : Template_Parsing_Context;
+         Message_Suffix : String) return JSON_Value;
+      --  Assuming that JSON is an object, check that it has a field "Key"
+      --  (calling Abort_Parsing if that is not the case) and return the value
+      --  of that field.
+      --
+      --  Message_Suffix is appended to the error message if the field is
+      --  absent.
+
+      procedure Check_Kind
+        (JSON    : JSON_Value;
+         Kind    : JSON_Value_Type;
+         Context : Template_Parsing_Context;
+         What    : String);
+      --  Call Abort_Parsing if the kind of JSON does not match Kind. What is
+      --  used to describe what is checked in the error message.
+
       procedure Abort_Parsing
         (Context : Template_Parsing_Context; Message : String)
       with No_Return;
@@ -652,25 +798,274 @@ package body Liblktlang_Support.Unparsing_Config is
         new Unparsing_Configuration_Record;
       Pool   : Document_Pool renames Result.Pool;
 
-      ------------------
-      -- Node_Entries --
-      ------------------
+      -------------------------
+      -- Set_Token_Documents --
+      -------------------------
 
-      function Node_Entries (JSON : JSON_Value) return Node_JSON_Maps.Map is
-         Result : Node_JSON_Maps.Map;
+      procedure Set_Token_Documents
+        (Index : Token_Unparser_Index; Text : Text_Type)
+      is
+         Unparser : Token_Unparser_Impl renames
+           Desc.Unparsers.Token_Unparsers.all (Index).all;
+         Docs     : Token_Documents renames
+           Result.Token_Formattings.all (Index);
+      begin
+         if Text = "" then
+            Docs := (null, null);
+         else
+            declare
+               K : constant Token_Kind_Ref :=
+                 From_Index (Language, Unparser.Kind);
+               T : constant Unbounded_Text_Type := To_Unbounded_Text (Text);
+            begin
+               Docs :=
+                 (Token           => Pool.Create_Token (K, T, Index),
+                  Table_Separator => Pool.Create_Table_Separator
+                                       (K, T, Index));
+            end;
+         end if;
+      end Set_Token_Documents;
+
+      ----------------------------
+      -- Load_Token_Formattings --
+      ----------------------------
+
+      procedure Load_Token_Formattings
+        (JSON : JSON_Value; Token_Map : Token_Id_Maps.Map)
+      is
+         Symbols : Symbol_Table := Create_Symbol_Table;
+         TDH     : Token_Data_Handler;
 
          procedure Process (Name : String; Value : JSON_Value);
-         --  Add Value to Result
+         --  Callback for GNATCOLL.JSON.Map_JSON_Object, to decode entries from
+         --  the "formattings" mapping.
+
+         procedure Validate_Token
+           (Name  : String;
+            Text  : Unbounded_String;
+            Index : Token_Unparser_Index);
+         --  Abort config parsing if ``Text`` is not a valid formatting for the
+         --  token unparser ``Index``. ``Name`` is the name of this token
+         --  unparser, used to format a user-level error message.
+
+         function Matches
+           (Token : Stored_Token_Data;
+            Index : Token_Unparser_Index) return Boolean;
+         --  Return whether the given parsed token matches the given token
+         --  unparser (i.e. it has the expected kind and possibly text for
+         --  symbols).
+
+         -------------
+         -- Process --
+         -------------
+
+         procedure Process (Name : String; Value : JSON_Value) is
+
+            --  Find the token unparser that this entry aims to format
+
+            use Token_Id_Maps;
+            Pos   : constant Cursor :=
+              Token_Map.Find (To_Unbounded_Text (From_UTF8 (Name)));
+            Index : Token_Unparser_Index;
+         begin
+            if not Has_Element (Pos) then
+               Abort_Parsing
+                 ("no such token found in the grammar: '" & Name & "'");
+            end if;
+            Index := Element (Pos);
+
+            --  Two entries are accepted: null to mean "preserve the orignial
+            --  fomatting", and a string to give a concrete formatting for this
+            --  unparser.
+
+            if Value.Kind = JSON_Null_Type then
+               Set_Token_Documents (Index, "");
+            elsif Value.Kind /= JSON_String_Type then
+               Abort_Parsing
+                 ("invalid formatting entry for token '" & Name & "'");
+            end if;
+
+            --  First validate the new formatting: lexing it must yield exactly
+            --  one token with the right kind, and an acceptable token text for
+            --  the corresponding unparser.
+
+            Validate_Token (Name, Value.Get, Index);
+            Set_Token_Documents (Index, From_UTF8 (Value.Get));
+         end Process;
+
+         --------------------
+         -- Validate_Token --
+         --------------------
+
+         procedure Validate_Token
+           (Name  : String;
+            Text  : Unbounded_String;
+            Index : Token_Unparser_Index)
+         is
+            --  Use the language lexer to validate the given formatting
+
+            Bytes       : Big_String_Access;
+            Input       : Liblktlang_Support.Internal.Analysis.Lexer_Input
+              (Kind => Bytes_Buffer);
+            Diagnostics : Diagnostics_Vectors.Vector;
+         begin
+            Input.Charset := To_Unbounded_String (GNATCOLL.Iconv.UTF8);
+            Input.Read_BOM := False;
+            Get_String (Text, Bytes, Input.Bytes_Count);
+            Input.Bytes := Bytes.all'Address;
+
+            Desc.Extract_Tokens.all
+              (Input       => Input,
+               With_Trivia => True,
+               TDH         => TDH,
+               Diagnostics => Diagnostics);
+
+            --  For a valid formatting, we expect no lexing error and exactly
+            --  two tokens: the one from ``Text``, then the termination token.
+
+            if not Diagnostics.Is_Empty
+               or else TDH.Tokens.Length /= 2
+               or else not TDH.Trivias.Is_Empty
+               or else not Matches (TDH.Tokens.First_Element, Index)
+            then
+               pragma Assert
+                 (Stored_Token_Data'(TDH.Tokens.Last_Element).Kind
+                  = Desc.Token_Termination);
+               Abort_Parsing ("invalid formatting for token '" & Name & "'");
+            end if;
+         end Validate_Token;
+
+         -------------
+         -- Matches --
+         -------------
+
+         function Matches
+           (Token : Stored_Token_Data;
+            Index : Token_Unparser_Index) return Boolean
+         is
+            Unparser : Token_Unparser_Impl renames
+              Desc.Unparsers.Token_Unparsers.all (Index).all;
+         begin
+            return Token.Kind = Unparser.Kind
+                   and then (not Unparser.Is_Symbol
+                             or else Token.Symbol
+                                     = Find (Symbols, Unparser.Text.all));
+         end Matches;
+
+         type Default_Type is (Case_Sensitive, Lower, Upper, Original);
+         Default : Default_Type := Lower;
+         J       : JSON_Value;
+      begin
+         Initialize (TDH, Symbols, System.Null_Address);
+
+         if JSON.Kind /= JSON_Object_Type then
+            Abort_Parsing ("invalid ""token_configs"" entry: object expected");
+         end if;
+
+         --  Determine the default formatting to use
+
+         if JSON.Has_Field ("default") then
+            J := JSON.Get ("default");
+            if J.Kind /= JSON_String_Type then
+               Abort_Parsing ("invalid ""default"" entry: string expected");
+            end if;
+
+            declare
+               Value : constant String := J.Get;
+            begin
+               if Value = "lower" then
+                  Default := Lower;
+               elsif Value = "upper" then
+                  Default := Upper;
+               elsif Value = "original" then
+                  Default := Original;
+               else
+                  Abort_Parsing ("invalid ""default"" value: " & Value);
+               end if;
+            end;
+         end if;
+
+         --  Adjust the default for case sensitive languages
+
+         if not Desc.Unparsers.Case_Insensitive
+            and then Default in Lower | Upper
+         then
+            Default := Case_Sensitive;
+         end if;
+
+         --  Instantiate this default for all token unparsers
+
+         for Unparser of Desc.Unparsers.Token_Unparsers.all loop
+            declare
+               Input_Text : Text_Type renames Unparser.Text.all;
+               Value      : constant Text_Type :=
+                 (case Default is
+                  when Case_Sensitive => Input_Text,
+                  when Lower          => To_Lower (Input_Text),
+                  when Upper          => To_Upper (Input_Text),
+                  when Original       => "");
+            begin
+               Set_Token_Documents (Unparser.Index, Value);
+            end;
+         end loop;
+
+         --  Override defaults with manual formattings from the config
+
+         if JSON.Has_Field ("formattings") then
+            J := JSON.Get ("formattings");
+            if J.Kind /= JSON_Object_Type then
+               Abort_Parsing
+                 ("invalid ""formattings"" entry: object expected");
+            end if;
+            J.Map_JSON_Object (Process'Access);
+         end if;
+
+         Free (TDH);
+         Destroy (Symbols);
+      exception
+         when Invalid_Input =>
+            Free (TDH);
+            Destroy (Symbols);
+            raise;
+      end Load_Token_Formattings;
+
+      ----------------------
+      -- Add_Node_Entries --
+      ----------------------
+
+      procedure Add_Node_Entries
+        (JSON : JSON_Value; Map : in out Node_JSON_Maps.Map)
+      is
+         Node_Configs : JSON_Value;
+
+         procedure Process (Name : String; Value : JSON_Value);
+         --  Add Value to Map
+
+         -------------
+         -- Process --
+         -------------
 
          procedure Process (Name : String; Value : JSON_Value) is
             Key : constant Type_Index := To_Type_Index (Name);
          begin
-            Result.Insert (Key, Value);
+            Map.Include (Key, Value);
          end Process;
       begin
-         JSON.Map_JSON_Object (Process'Access);
-         return Result;
-      end Node_Entries;
+         --  Check that JSON has a "node_configs" entry and that its value is
+         --  an object.
+
+         if not JSON.Has_Field ("node_configs") then
+            Abort_Parsing ("missing ""node_configs"" key");
+         end if;
+         Node_Configs := JSON.Get ("node_configs");
+         if Node_Configs.Kind /= JSON_Object_Type then
+            Abort_Parsing ("invalid ""node_configs"" entry: object expected");
+         end if;
+
+         --  Iterate on that object to update Map
+
+         Node_Configs.Map_JSON_Object (Process'Access);
+      end Add_Node_Entries;
 
       -------------------
       -- Field_Entries --
@@ -969,7 +1364,7 @@ package body Liblktlang_Support.Unparsing_Config is
             Info.Is_Referenced := False;
          end loop;
 
-         Root := Parse_Template_Helper (JSON, Context);
+         Root := Parse_Subtemplate (JSON, Context);
 
          --  Now, sanity check symbol usage and compute symbol usage that is
          --  specific to this template (Result_Symbols).
@@ -1073,6 +1468,7 @@ package body Liblktlang_Support.Unparsing_Config is
          Context : in out Template_Parsing_Context) return Document_Type
       is
          Symbol_Map : Symbol_Parsing_Maps.Map renames Context.Symbols;
+         Tmp        : JSON_Value;
       begin
          case JSON.Kind is
          when JSON_Array_Type =>
@@ -1080,8 +1476,7 @@ package body Liblktlang_Support.Unparsing_Config is
                Items : Document_Vectors.Vector;
             begin
                for D of JSON_Array'(JSON.Get) loop
-                  Items.Append
-                    (Parse_Template_Helper (D, Context));
+                  Items.Append (Parse_Subtemplate (D, Context));
                end loop;
                return Pool.Create_List (Items);
             end;
@@ -1105,6 +1500,9 @@ package body Liblktlang_Support.Unparsing_Config is
                elsif Value = "recurse" then
                   Process_Recurse (Context);
                   return Pool.Create_Recurse;
+               elsif Value = "recurse_flatten" then
+                  Process_Recurse (Context);
+                  return Pool.Create_Recurse_Flatten;
                elsif Value = "recurse_left" then
                   declare
                      Item : Linear_Template_Item := (Kind => Recurse_Left);
@@ -1125,6 +1523,13 @@ package body Liblktlang_Support.Unparsing_Config is
                   return Pool.Create_Trim;
                elsif Value = "whitespace" then
                   return Pool.Create_Whitespace;
+               elsif Value = "this_field" then
+                  if Context.Kind /= Field_Template then
+                     Abort_Parsing
+                       (Context,
+                        """this_field"" is valid only in field templates");
+                  end if;
+                  return Pool.Create_This_Field;
                else
                   Abort_Parsing
                     (Context,
@@ -1133,27 +1538,18 @@ package body Liblktlang_Support.Unparsing_Config is
             end;
 
          when JSON_Object_Type =>
-            if not JSON.Has_Field ("kind") then
-               Abort_Parsing (Context, "missing ""kind"" key");
-            elsif JSON.Get ("kind").Kind /= JSON_String_Type then
-               Abort_Parsing
-                 (Context,
-                  "invalid ""kind"": " & JSON.Get ("kind").Kind'Image);
-            end if;
-
+            Tmp := Mandatory_Key (JSON, "kind", Context, "");
+            Check_Kind (Tmp, JSON_String_Type, Context, """kind""");
             declare
-               Kind : constant String := JSON.Get ("kind");
+               Kind : constant String := Tmp.Get;
             begin
                if Kind = "align" then
                   declare
                      Width : JSON_Value;
                      Data  : Prettier.Alignment_Data_Type;
                   begin
-                     if not JSON.Has_Field ("width") then
-                        Abort_Parsing
-                          (Context, "missing ""width"" key for align");
-                     end if;
-                     Width := JSON.Get ("width");
+                     Width :=
+                       Mandatory_Key (JSON, "width", Context, "for align");
                      case Width.Kind is
                         when JSON_Int_Type =>
                            Data := (Kind => Prettier.Width, N => Width.Get);
@@ -1164,15 +1560,12 @@ package body Liblktlang_Support.Unparsing_Config is
                              (Context, "invalid ""width"" key for align");
                      end case;
 
-                     if not JSON.Has_Field ("contents") then
-                        Abort_Parsing
-                          (Context, "missing ""contents"" key for align");
-                     end if;
+                     Tmp :=
+                       Mandatory_Key (JSON, "contents", Context, "for align");
 
                      return Pool.Create_Align
                        (Data,
-                        Parse_Template_Helper
-                          (JSON.Get ("contents"), Context),
+                        Parse_Subtemplate (Tmp, Context),
                         Bubble_Up_Config (Context, Align, JSON));
                   end;
 
@@ -1183,10 +1576,8 @@ package body Liblktlang_Support.Unparsing_Config is
                   | "innerRoot"
                   | "continuationLineIndent"
                then
-                  if not JSON.Has_Field ("contents") then
-                     Abort_Parsing
-                       (Context, "missing ""contents"" key for " & Kind);
-                  end if;
+                  Tmp :=
+                    Mandatory_Key (JSON, "contents", Context, "for " & Kind);
                   return Pool.Create_Align
                     (Data     => (if Kind = "dedent"
                                   then (Kind => Prettier.Dedent)
@@ -1200,24 +1591,14 @@ package body Liblktlang_Support.Unparsing_Config is
                                   then
                                     (Kind => Prettier.Continuation_Line_Indent)
                                   else raise Program_Error),
-                     Contents  => Parse_Template_Helper
-                                    (JSON.Get ("contents"), Context),
+                     Contents  => Parse_Subtemplate (Tmp, Context),
                      Bubble_Up => Bubble_Up_Config (Context, Align, JSON));
 
                elsif Kind = "fill" then
-                  declare
-                     Document : Document_Type;
-                  begin
-                     if not JSON.Has_Field ("document") then
-                        Abort_Parsing
-                          (Context, "missing ""document"" key for fill");
-                     end if;
-                     Document :=
-                       Parse_Template_Helper (JSON.Get ("document"), Context);
-
-                     return Pool.Create_Fill
-                       (Document, Bubble_Up_Config (Context, Fill, JSON));
-                  end;
+                  Tmp := Mandatory_Key (JSON, "document", Context, "for fill");
+                  return Pool.Create_Fill
+                    (Parse_Subtemplate (Tmp, Context),
+                     Bubble_Up_Config (Context, Fill, JSON));
 
                elsif Kind = "group" then
                   declare
@@ -1225,51 +1606,34 @@ package body Liblktlang_Support.Unparsing_Config is
                      Should_Break : Boolean := False;
                      Id           : Template_Symbol := No_Template_Symbol;
                   begin
-                     if not JSON.Has_Field ("document") then
-                        Abort_Parsing
-                          (Context, "missing ""document"" key for group");
-                     end if;
-                     Document :=
-                       Parse_Template_Helper (JSON.Get ("document"), Context);
+                     Tmp :=
+                       Mandatory_Key (JSON, "document", Context, "for group");
+                     Document := Parse_Subtemplate (Tmp, Context);
 
                      if JSON.Has_Field ("shouldBreak") then
-                        declare
-                           JSON_Should_Break : constant JSON_Value :=
-                             JSON.Get ("shouldBreak");
-                        begin
-                           if JSON_Should_Break.Kind /= JSON_Boolean_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid group shouldBreak: "
-                                 & JSON_Should_Break.Kind'Image);
-                           end if;
-                           Should_Break := JSON_Should_Break.Get;
-                        end;
+                        Tmp := JSON.Get ("shouldBreak");
+                        Check_Kind
+                          (Tmp,
+                           JSON_Boolean_Type,
+                           Context,
+                           "group shouldBreak");
+                        Should_Break := Tmp.Get;
                      end if;
 
                      --  If a symbol is given to identify this group, create an
                      --  internal symbol for it.
 
                      if JSON.Has_Field ("id") then
-                        declare
-                           JSON_Id : constant JSON_Value := JSON.Get ("id");
-                        begin
-                           if JSON_Id.Kind /= JSON_String_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid group id: "
-                                 & JSON_Id.Kind'Image);
-                           end if;
+                        Tmp := JSON.Get ("id");
+                        Check_Kind
+                          (Tmp, JSON_String_Type, Context, "group id");
 
-                           begin
-                              Id := Declare_Symbol
-                                (JSON_Id.Get, Symbols, Symbol_Map);
-                           exception
-                              when Duplicate_Symbol_Definition =>
-                                 Abort_Parsing
-                                   (Context,
-                                    "duplicate group id: " & JSON_Id.Get);
-                           end;
+                        begin
+                           Id := Declare_Symbol (Tmp.Get, Symbols, Symbol_Map);
+                        exception
+                           when Duplicate_Symbol_Definition =>
+                              Abort_Parsing
+                                (Context, "duplicate group id: " & Tmp.Get);
                         end;
                      end if;
 
@@ -1290,19 +1654,15 @@ package body Liblktlang_Support.Unparsing_Config is
 
                      Group_Id : Template_Symbol := No_Template_Symbol;
                   begin
-                     if not JSON.Has_Field ("breakContents") then
-                        Abort_Parsing
-                          (Context,
-                           "missing ""breakContents"" key for ifBreak");
-                     end if;
-
                      Contents :=
-                       Parse_Template_Helper
-                         (JSON.Get ("breakContents"), Contents_Context);
+                       Parse_Subtemplate
+                         (Mandatory_Key
+                            (JSON, "breakContents", Context, "for ifBreak"),
+                          Contents_Context);
 
                      Flat_Contents :=
                        (if JSON.Has_Field ("flatContents")
-                        then Parse_Template_Helper
+                        then Parse_Subtemplate
                                (JSON.Get ("flatContents"), Flat_Context)
                         else null);
 
@@ -1320,56 +1680,45 @@ package body Liblktlang_Support.Unparsing_Config is
                      --  If present, get the symbol for the given group id
 
                      if JSON.Has_Field ("groupId") then
-                        declare
-                           JSON_Id : constant JSON_Value :=
-                             JSON.Get ("groupId");
-                        begin
-                           if JSON_Id.Kind /= JSON_String_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid group id: "
-                                 & JSON_Id.Kind'Image);
-                           end if;
-
-                           Group_Id :=
-                             Reference_Symbol
-                               (JSON_Id.Get, Symbols, Symbol_Map);
-                        end;
+                        Tmp := JSON.Get ("groupId");
+                        Check_Kind
+                          (Tmp, JSON_String_Type, Context, "group id");
+                        Group_Id :=
+                          Reference_Symbol (Tmp.Get, Symbols, Symbol_Map);
                      end if;
 
                      return Pool.Create_If_Break
                               (Contents, Flat_Contents, Group_Id);
                   end;
 
-               elsif Kind = "ifEmpty" then
-                  if Context.Kind /= Field_Template then
-                     Abort_Parsing
-                       (Context,
-                        """ifEmpty"" is valid only in field templates");
-                  end if;
-
+               elsif Kind = "if" then
                   declare
+                     T             : Type_Ref;
+                     Condition     : Document_Type;
                      Then_Contents : Document_Type;
                      Else_Contents : Document_Type;
 
                      Then_Context : Template_Parsing_Context := Context;
                      Else_Context : Template_Parsing_Context := Context;
                   begin
-                     if not JSON.Has_Field ("then") then
+                     Tmp :=
+                       Mandatory_Key (JSON, "condition", Context, "for if");
+                     Condition := Parse_Expression (Tmp, Context, T);
+                     if T /= Boolean_Type then
                         Abort_Parsing
                           (Context,
-                           "missing ""then"" key for ifEmpty");
+                           "if condition requires a boolean, got a "
+                           & Debug_Name (T));
                      end if;
-                     Then_Contents :=
-                       Parse_Template_Helper (JSON.Get ("then"), Then_Context);
 
-                     if not JSON.Has_Field ("else") then
-                        Abort_Parsing
-                          (Context,
-                           "missing ""else"" key for ifEmpty");
-                     end if;
+                     Tmp :=
+                       Mandatory_Key (JSON, "then", Context, "for if");
+                     Then_Contents := Parse_Subtemplate (Tmp, Then_Context);
+
+                     Tmp :=
+                       Mandatory_Key (JSON, "else", Context, "for if");
                      Else_Contents :=
-                       Parse_Template_Helper (JSON.Get ("else"), Else_Context);
+                       Parse_Subtemplate (Tmp, Else_Context);
 
                      --  Unify the parsing state for both branches and update
                      --  Context accordingly.
@@ -1382,15 +1731,15 @@ package body Liblktlang_Support.Unparsing_Config is
                      end if;
                      Context.State := Else_Context.State;
 
-                     return Pool.Create_If_Empty
-                              (Then_Contents, Else_Contents);
+                     return Pool.Create_If
+                              (Condition, Then_Contents, Else_Contents);
                   end;
 
-               elsif Kind = "ifKind" then
+               elsif Kind = "match" then
                   if Context.Kind not in Node_Template | Field_Template then
                      Abort_Parsing
                        (Context,
-                        """ifKind"" is valid in node templates and field"
+                        """match"" is valid in node templates and field"
                         & " templates only");
                   end if;
 
@@ -1398,9 +1747,9 @@ package body Liblktlang_Support.Unparsing_Config is
                      Field_JSON    : constant JSON_Value :=
                        JSON.Get ("field");
                      Matchers_JSON : constant JSON_Value :=
-                       JSON.Get ("matchers");
+                       Mandatory_Key (JSON, "matchers", Context, "for match");
                      Default_JSON  : constant JSON_Value :=
-                       JSON.Get ("default");
+                       Mandatory_Key (JSON, "default", Context, "for match");
                      Absent_JSON   : constant JSON_Value :=
                        JSON.Get ("absent");
 
@@ -1412,12 +1761,12 @@ package body Liblktlang_Support.Unparsing_Config is
                      if Context.Kind = Node_Template then
                         if Field_JSON.Kind = JSON_Null_Type then
                            Abort_Parsing
-                             (Context, "missing ""field"" key for ifKind");
+                             (Context, "missing ""field"" key for match");
 
                         elsif Field_JSON.Kind /= JSON_String_Type then
                            Abort_Parsing
                              (Context,
-                              "invalid ""field"" key kind for ifKind: found "
+                              "invalid ""field"" key kind for match: found "
                               & Field_JSON.Kind'Image
                               & "; expected "
                               & JSON_String_Type'Image);
@@ -1430,29 +1779,16 @@ package body Liblktlang_Support.Unparsing_Config is
 
                      elsif Field_JSON.Kind /= JSON_Null_Type then
                         Abort_Parsing
-                          (Context, "invalid ""field"" key for ifKind");
+                          (Context, "invalid ""field"" key for match");
                      else
                         Field_Ref := Context.Field;
                      end if;
 
-                     if Default_JSON.Kind = JSON_Null_Type then
-                        Abort_Parsing
-                          (Context, "missing ""default"" key for ifKind");
-                     end if;
-
-                     if Matchers_JSON.Kind = JSON_Null_Type then
-                        Abort_Parsing
-                          (Context, "missing ""matchers"" key for ifKind");
-
-                     elsif Matchers_JSON.Kind /= JSON_Array_Type then
-                        Abort_Parsing
-                          (Context,
-                           "invalid ""matchers"" key kind for ifKind: "
-                           & "found "
-                           & Matchers_JSON.Kind'Image
-                           & "; expected "
-                           & JSON_Array_Type'Image);
-                     end if;
+                     Check_Kind
+                       (Matchers_JSON,
+                        JSON_Array_Type,
+                        Context,
+                        """matchers"" key kind for match");
 
                      declare
                         --  Before parsing the "matchers", "default" or
@@ -1467,9 +1803,9 @@ package body Liblktlang_Support.Unparsing_Config is
                         Initial_Context : constant Template_Parsing_Context :=
                           Context;
 
-                        If_Kind_Default  : Document_Type;
-                        If_Kind_Absent   : Document_Type := null;
-                        If_Kind_Matchers : Matcher_Vectors.Vector;
+                        Match_Default  : Document_Type;
+                        Match_Absent   : Document_Type := null;
+                        Match_Matchers : Matcher_Vectors.Vector;
 
                         procedure Process_Matcher (Matcher_JSON : JSON_Value);
                         --  Process Matcher_JSON with their own nested context
@@ -1489,9 +1825,17 @@ package body Liblktlang_Support.Unparsing_Config is
                         procedure Process_Matcher (Matcher_JSON : JSON_Value)
                         is
                            Kind           : constant JSON_Value :=
-                             Matcher_JSON.Get ("kind");
+                             Mandatory_Key
+                               (Matcher_JSON,
+                                "kind",
+                                Context,
+                                "match matcher");
                            Document_JSON  : constant JSON_Value :=
-                             Matcher_JSON.Get ("document");
+                             Mandatory_Key
+                               (Matcher_JSON,
+                                "document",
+                                Context,
+                                "match matcher");
                            Types          : Type_Ref_Vectors.Vector;
                            Nested_Context : Template_Parsing_Context :=
                              Initial_Context;
@@ -1506,17 +1850,17 @@ package body Liblktlang_Support.Unparsing_Config is
                               Abort_Parsing
                                 (Context,
                                  "invalid matcher ""kind"" field for "
-                                 & """ifKind"" - found "
+                                 & """match"" - found "
                                  & Kind.Kind'Image
                                  & "; expected a string or array of strings");
                            end if;
 
                            --  Parse the matcher and store it in the table
 
-                           If_Kind_Matchers.Append
+                           Match_Matchers.Append
                              (Matcher_Record'
                                (Types,
-                                Parse_Template_Helper
+                                Parse_Subtemplate
                                  (Document_JSON, Nested_Context)));
 
                            --  Confirm that the final linear position is
@@ -1525,7 +1869,7 @@ package body Liblktlang_Support.Unparsing_Config is
                            if Nested_Context.State /= Context.State then
                               Abort_Parsing
                                 (Context,
-                                 "ifKind matcher """ & Kind.Get & """ has an "
+                                 "match matcher """ & Kind.Get & """ has an "
                                  & "inconsistent recurse structure");
                            end if;
                         end Process_Matcher;
@@ -1537,39 +1881,35 @@ package body Liblktlang_Support.Unparsing_Config is
                         function Parse_Type_Ref
                           (JSON : JSON_Value) return Type_Ref is
                         begin
-                           if JSON.Kind /= JSON_String_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid matcher ""kind"" field for "
-                                 & """ifKind"" - found "
-                                 & JSON.Kind'Image
-                                 & "; expected "
-                                 & JSON_String_Type'Image);
-                           end if;
+                           Check_Kind
+                             (JSON,
+                              JSON_String_Type,
+                              Context,
+                              "matcher ""kind"" field for match");
                            return From_Index
                              (Language, To_Type_Index (JSON.Get));
                         end Parse_Type_Ref;
 
                      begin
-                        If_Kind_Default :=
-                          Parse_Template_Helper (Default_JSON, Context);
+                        Match_Default :=
+                          Parse_Subtemplate (Default_JSON, Context);
 
                         if Absent_JSON.Kind /= JSON_Null_Type then
                            declare
-                              If_Kind_Absent_Context :
+                              Match_Absent_Context :
                                 Template_Parsing_Context :=
                                   Initial_Context;
 
                            begin
-                              If_Kind_Absent :=
-                                Parse_Template_Helper
-                                  (Absent_JSON, If_Kind_Absent_Context);
+                              Match_Absent :=
+                                Parse_Subtemplate
+                                  (Absent_JSON, Match_Absent_Context);
 
-                              if If_Kind_Absent_Context.State /= Context.State
+                              if Match_Absent_Context.State /= Context.State
                               then
                                  Abort_Parsing
                                    (Context,
-                                    "ifKind ""absent"" matcher has an "
+                                    "match ""absent"" matcher has an "
                                     & "inconsistent recurse structure");
                               end if;
                            end;
@@ -1578,181 +1918,147 @@ package body Liblktlang_Support.Unparsing_Config is
                         for Matcher_JSON of
                           JSON_Array'(Get (Matchers_JSON))
                         loop
-                           if Matcher_JSON.Kind /= JSON_Object_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid ""matchers"" element kind for "
-                                 & """ifKind"" - found "
-                                 & Matcher_JSON.Kind'Image
-                                 & "; expected "
-                                 & JSON_Object_Type'Image);
-                           end if;
-
+                           Check_Kind
+                             (Matcher_JSON,
+                              JSON_Object_Type,
+                              Context,
+                              """matchers"" element kind for match");
                            Process_Matcher (Matcher_JSON);
                         end loop;
 
                         return
-                          Pool.Create_If_Kind
+                          Pool.Create_Match
                             (Field_Ref,
-                             If_Kind_Matchers,
-                             If_Kind_Default,
-                             If_Kind_Absent);
+                             Match_Matchers,
+                             Match_Default,
+                             Match_Absent);
                      end;
                   end;
 
                elsif Kind = "indent" then
-                  if not JSON.Has_Field ("contents") then
-                     Abort_Parsing
-                       (Context, "missing ""contents"" key for indent");
-                  end if;
+                  Tmp := Mandatory_Key
+                    (JSON, "contents", Context, "for indent");
                   return Pool.Create_Indent
-                    (Parse_Template_Helper (JSON.Get ("contents"), Context),
+                    (Parse_Subtemplate (Tmp, Context),
                      Bubble_Up_Config (Context, Indent, JSON));
 
                elsif Kind = "recurse_field" then
+                  Tmp := Mandatory_Key
+                    (JSON, "field", Context, "for recurse_field");
+                  Check_Kind
+                    (Tmp,
+                     JSON_String_Type,
+                     Context,
+                     """field"" for recurse_field");
+
+                  --  Validate that "recurse_field" can appear in this template
+                  --  at this place. Let Process_Linear_Template_Item give us
+                  --  the field position: initialize it with Positive'Last (an
+                  --  obviously invalid position) to make it clear that this
+                  --  component needs an update.
+
                   declare
-                     F : JSON_Value;
+                     Item : Linear_Template_Item :=
+                       (Kind           => Field_Item,
+                        Field_Ref      => From_Index
+                                            (Language,
+                                             To_Struct_Member_Index
+                                               (Tmp.Get, Context.Node)),
+                        Field_Position => Positive'Last);
                   begin
-                     if not JSON.Has_Field ("field") then
-                        Abort_Parsing
-                          (Context, "missing ""field"" key for recurse_field");
-                     end if;
-
-                     F := JSON.Get ("field");
-                     if F.Kind /= JSON_String_Type then
-                        Abort_Parsing
-                          (Context,
-                           "invalid recurse_field field: " & F.Kind'Image);
-                     end if;
-
-                     --  Validate that "recurse_field" can appear in this
-                     --  template at this place. Let
-                     --  Process_Linear_Template_Item give us the field
-                     --  position: initialize it with Positive'Last (an
-                     --  obviously invalid position) to make it clear that this
-                     --  component needs an update.
-
-                     declare
-                        Item : Linear_Template_Item :=
-                          (Kind           => Field_Item,
-                           Field_Ref      => From_Index
-                                               (Language,
-                                                To_Struct_Member_Index
-                                                  (F.Get, Context.Node)),
-                           Field_Position => Positive'Last);
-                     begin
-                        Process_Linear_Template_Item (Item, Context);
-                        return Pool.Create_Recurse_Field
-                                 (Item.Field_Ref, Item.Field_Position);
-                     end;
-                  end;
-
-               elsif Kind = "recurse_flatten" then
-                  declare
-                     L     : JSON_Value;
-                     T     : Type_Ref;
-                     Types : Type_Vectors.Vector;
-                  begin
-                     --  Use the given type guard for the flattening, or use
-                     --  the root node to flatten for all nodes.
-
-                     if JSON.Has_Field ("if") then
-                        L := JSON.Get ("if");
-                        if L.Kind /= JSON_Array_Type then
-                           Abort_Parsing
-                             (Context,
-                              "invalid recurse_flatten if: " & L.Kind'Image);
-                        end if;
-                        for Name of JSON_Array'(L.Get) loop
-                           if Name.Kind /= JSON_String_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid item in recurse_flatten if: "
-                                 & Name.Kind'Image);
-                           end if;
-
-                           T := Map.Lookup_Type (To_Symbol (Name.Get));
-                           if T = No_Type_Ref or else not Is_Node_Type (T) then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid node type in recurse_flatten if: "
-                                 & Name.Get);
-                           end if;
-
-                           Types.Append (T);
-                        end loop;
-                     else
-                        Types.Append (Root_Node_Type (Language));
-                     end if;
-                     Process_Recurse (Context);
-                     return Pool.Create_Recurse_Flatten (Types);
+                     Process_Linear_Template_Item (Item, Context);
+                     return Pool.Create_Recurse_Field
+                              (Item.Field_Ref, Item.Field_Position);
                   end;
 
                elsif Kind in "tableSeparator" | "text" then
+                  Tmp := Mandatory_Key (JSON, "text", Context, "for " & Kind);
+                  Check_Kind (Tmp, JSON_String_Type, Context, "text field");
+
+                  --  Validate that this text template can appear in this
+                  --  template at this place. Let Process_Linear_Template_Item
+                  --  give us the token type: initialize it with
+                  --  No_Token_Kind_Ref (an obviously invalid position) to make
+                  --  it clear that this component needs an update.
+                  --
+                  --  There is one special case: we allow empty table
+                  --  separators, so that they can be put in table join
+                  --  templates.
+
+                  if Kind = "tableSeparator"
+                     and then Length (Unbounded_String'(Tmp.Get)) = 0
+                  then
+                     return Pool.Create_Empty_Table_Separator;
+                  end if;
+
                   declare
-                     T : JSON_Value;
+                     Item : Linear_Template_Item :=
+                       (Kind           => Token_Item,
+                        Token_Kind     => No_Token_Kind_Ref,
+                        Token_Text     => To_Unbounded_Text
+                                            (From_UTF8 (Tmp.Get)),
+                        Token_Unparser => <>);
                   begin
-                     if not JSON.Has_Field ("text") then
-                        Abort_Parsing
-                          (Context, "missing ""text"" key for " & Kind);
+                     Process_Linear_Template_Item (Item, Context);
+
+                     if Kind = "text" then
+                        return Pool.Create_Token
+                                 (Item.Token_Kind,
+                                  Item.Token_Text,
+                                  Item.Token_Unparser);
+                     else
+                        return Pool.Create_Table_Separator
+                                 (Item.Token_Kind,
+                                  Item.Token_Text,
+                                  Item.Token_Unparser);
                      end if;
-
-                     T := JSON.Get ("text");
-                     if T.Kind /= JSON_String_Type then
-                        Abort_Parsing
-                          (Context, "invalid text field: " & T.Kind'Image);
-                     end if;
-
-                     --  Validate that this text template can appear in this
-                     --  template at this place. Let
-                     --  Process_Linear_Template_Item give us the token type:
-                     --  initialize it with No_Token_Kind_Ref (an obviously
-                     --  invalid position) to make it clear that this component
-                     --  needs an update.
-                     --
-                     --  There is one special case: we allow empty table
-                     --  separators, so that they can be put in table join
-                     --  templates.
-
-                     if Kind = "tableSeparator"
-                        and then Length (Unbounded_String'(T.Get)) = 0
-                     then
-                        return Pool.Create_Empty_Table_Separator;
-                     end if;
-
-                     declare
-                        Item : Linear_Template_Item :=
-                          (Kind       => Token_Item,
-                           Token_Kind => No_Token_Kind_Ref,
-                           Token_Text => To_Unbounded_Text
-                                           (From_UTF8 (T.Get)));
-                     begin
-                        Process_Linear_Template_Item (Item, Context);
-
-                        if Kind = "text" then
-                           return Pool.Create_Token
-                                    (Item.Token_Kind, Item.Token_Text);
-                        else
-                           return Pool.Create_Table_Separator
-                                    (Item.Token_Kind, Item.Token_Text);
-                        end if;
-                     end;
                   end;
 
                elsif Kind = "whitespace" then
-                  if not JSON.Has_Field ("length") then
-                     Abort_Parsing (Context, "missing ""length"" key");
-                  end if;
+                  Tmp := Mandatory_Key
+                    (JSON, "length", Context, "for whitespace");
+                  Check_Kind
+                    (Tmp, JSON_Int_Type, Context, """length"" for whitespace");
+                  return Pool.Create_Whitespace (Tmp.Get);
+
+               elsif Kind = "is_a" then
+                  Tmp := Mandatory_Key (JSON, "node", Context, "for is_a");
                   declare
-                     Length : constant JSON_Value := JSON.Get ("length");
+                     Node  : constant Document_Type :=
+                       Parse_Node_Expression (Tmp, Context, "is_a");
+                     T     : Type_Ref;
+                     Types : Type_Vectors.Vector;
                   begin
-                     if Length.Kind /= JSON_Int_Type then
-                        Abort_Parsing
-                          (Context,
-                           "invalid whitespace length: " & Length.Kind'Image);
-                     end if;
-                     return Pool.Create_Whitespace (Length.Get);
+                     Tmp := Mandatory_Key (JSON, "kinds", Context, "for is_a");
+                     Check_Kind
+                       (Tmp,
+                        JSON_Array_Type,
+                        Context,
+                        """kinds"" for is_a");
+                     for Name of JSON_Array'(Tmp.Get) loop
+                        Check_Kind
+                          (Name,
+                           JSON_String_Type,
+                           Context,
+                           "item in kinds of is_a");
+                        T := Map.Lookup_Type (To_Symbol (Name.Get));
+                        if T = No_Type_Ref or else not Is_Node_Type (T) then
+                           Abort_Parsing
+                             (Context,
+                              "invalid node type in kinds of is_a: "
+                              & Name.Get);
+                        end if;
+
+                        Types.Append (T);
+                     end loop;
+
+                     return Pool.Create_Is_A (Node, Types);
                   end;
+
+               elsif Kind = "is_empty" then
+                  Tmp := Mandatory_Key (JSON, "node", Context, "for is_empty");
+                  return Pool.Create_Is_Empty
+                           (Parse_Node_Expression (Tmp, Context, "is_empty"));
 
                else
                   Abort_Parsing
@@ -1765,6 +2071,74 @@ package body Liblktlang_Support.Unparsing_Config is
               (Context, "invalid template JSON node: " & JSON.Kind'Image);
          end case;
       end Parse_Template_Helper;
+
+      -----------------------
+      -- Parse_Subtemplate --
+      -----------------------
+
+      function Parse_Subtemplate
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context) return Document_Type is
+      begin
+         return Result : constant Document_Type :=
+           Parse_Template_Helper (JSON, Context)
+         do
+            if Result.Kind in Template_Expression_Kind then
+               Abort_Parsing (Context, "template expected, got an expression");
+            end if;
+         end return;
+      end Parse_Subtemplate;
+
+      ----------------------
+      -- Parse_Expression --
+      ----------------------
+
+      function Parse_Expression
+        (JSON      : JSON_Value;
+         Context   : in out Template_Parsing_Context;
+         Expr_Type : out Type_Ref) return Document_Type is
+      begin
+         return Result : constant Document_Type :=
+           Parse_Template_Helper (JSON, Context)
+         do
+            --  First check manually that we have an expression so that adding
+            --  new expression node kinds do trigger a compilation error in the
+            --  case statement below until the new kind is handled there.
+
+            if Result.Kind not in Template_Expression_Kind then
+               Abort_Parsing (Context, "expression expected, got a template");
+            end if;
+
+            case Template_Expression_Kind (Result.Kind) is
+               when Is_A | Is_Empty =>
+                  Expr_Type := Boolean_Type;
+
+               when This_Field =>
+                  Expr_Type := Member_Type (Context.Field);
+            end case;
+         end return;
+      end Parse_Expression;
+
+      ---------------------------
+      -- Parse_Node_Expression --
+      ---------------------------
+
+      function Parse_Node_Expression
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context;
+         What    : String) return Document_Type
+      is
+         T : Type_Ref;
+      begin
+         return Result : constant Document_Type :=
+            Parse_Expression (JSON, Context, T)
+         do
+            if not Is_Node_Type (T) then
+               Abort_Parsing
+                 (Context, What & " expects a node, got a " & Debug_Name (T));
+            end if;
+         end return;
+      end Parse_Node_Expression;
 
       ---------------------
       -- Process_Recurse --
@@ -1950,6 +2324,46 @@ package body Liblktlang_Support.Unparsing_Config is
       end Bubble_Up_Config;
 
       -------------------
+      -- Mandatory_Key --
+      -------------------
+
+      function Mandatory_Key
+        (JSON           : JSON_Value;
+         Key            : String;
+         Context        : Template_Parsing_Context;
+         Message_Suffix : String) return JSON_Value is
+      begin
+         if not JSON.Has_Field (Key) then
+            declare
+               Actual_Suffix : constant String :=
+                 (if Message_Suffix = "" then "" else " " & Message_Suffix);
+            begin
+               Abort_Parsing
+                 (Context, "missing """ & Key & """ key" & Actual_Suffix);
+            end;
+         end if;
+         return JSON.Get (Key);
+      end Mandatory_Key;
+
+      ----------------
+      -- Check_Kind --
+      ----------------
+
+      procedure Check_Kind
+        (JSON    : JSON_Value;
+         Kind    : JSON_Value_Type;
+         Context : Template_Parsing_Context;
+         What    : String) is
+      begin
+         if JSON.Kind /= Kind then
+            Abort_Parsing
+              (Context,
+               "invalid " & What & ": " & Kind'Image & " expected, but "
+               & JSON.Kind'Image & " found");
+         end if;
+      end Check_Kind;
+
+      -------------------
       -- Abort_Parsing --
       -------------------
 
@@ -2002,43 +2416,58 @@ package body Liblktlang_Support.Unparsing_Config is
       --  For each node type described in the unparsing configuration,
       --  reference to the corresponding node configuration.
 
-      --  First, parse the JSON document
-
-      JSON_Result : constant Read_Result := Read (Buffer);
-      JSON        : JSON_Value;
+      JSON             : JSON_Value;
+      JSON_Overridings : array (Overridings'Range) of JSON_Value;
    begin
       Result.Ref_Count := 1;
       Result.Language := Language;
       Result.Symbols := Symbols;
 
-      if JSON_Result.Success then
-         JSON := JSON_Result.Value;
-      else
-         declare
-            Sloc       : constant Source_Location :=
-              (Line_Number (JSON_Result.Error.Line),
-               Column_Number (JSON_Result.Error.Column));
-            Sloc_Range : constant Source_Location_Range :=
-              Make_Range (Sloc, Sloc);
-         begin
-            Append
-              (Diagnostics,
-               Sloc_Range,
-               To_Text (To_String (JSON_Result.Error.Message)));
-            raise Invalid_Input;
-         end;
-      end if;
+      --  First, parse the main JSON document and the overridings
 
-      --  Then load the unparsing configuration from it. Require a
-      --  "node_configs" key.
+      JSON := Read_JSON (Buffer, Diagnostics);
+      for I in Overridings'Range loop
+         JSON_Overridings (I) := Read_JSON (Overridings (I), Diagnostics);
+      end loop;
 
-      if not JSON.Has_Field ("node_configs") then
-         Abort_Parsing ("missing ""node_configs"" key");
-      end if;
+      --  Load the token formattings from all JSON documents
 
-      --  Register all node configurations in Node_JSON_Map
+      declare
+         Key       : constant String := "token_configs";
+         Found     : Boolean := False;
+         Unparsers : Token_Unparser_Array_Impl renames
+           Desc.Unparsers.Token_Unparsers.all;
+         Token_Map : constant Token_Id_Maps.Map := Token_Id_Map (Desc);
+      begin
+         --  By default, use the formatting found in token unparsers
 
-      Node_JSON_Map := Node_Entries (JSON.Get ("node_configs"));
+         Result.Token_Formattings :=
+           new Token_Unparser_Formattings_Impl (Unparsers'Range);
+         for U of Unparsers loop
+            Set_Token_Documents (U.Index, U.Text.all);
+         end loop;
+
+         --  Process JSON documents in reverse order so that the last one that
+         --  has a "token_configs" entry has precedence.
+
+         for O of reverse JSON_Overridings loop
+            if O.Has_Field (Key) then
+               Found := True;
+               Load_Token_Formattings (O.Get (Key), Token_Map);
+               exit;
+            end if;
+         end loop;
+         if not Found and then JSON.Has_Field (Key) then
+            Load_Token_Formattings (JSON.Get (Key), Token_Map);
+         end if;
+      end;
+
+      --  Load the node configurations from them
+
+      Add_Node_Entries (JSON, Node_JSON_Map);
+      for O of JSON_Overridings loop
+         Add_Node_Entries (O, Node_JSON_Map);
+      end loop;
 
       --  Now, go through all node types: parse JSON configurations for nodes
       --  that have one, and implement configuration inheritance in general.

@@ -157,6 +157,7 @@ type lkt_node_Ptr is access Internal_Entity;
       Exception_Invalid_Unit_Name_Error,
       Exception_Native_Exception,
       Exception_Precondition_Failure,
+      Exception_Program_Error,
       Exception_Property_Error,
       Exception_Template_Args_Error,
       Exception_Template_Format_Error,
@@ -210,6 +211,7 @@ type lkt_node_Ptr is access Internal_Entity;
       subtype lkt_completion_item_kind is Completion_Item_Kind;
       subtype lkt_designated_env_kind is Designated_Env_Kind;
       subtype lkt_grammar_rule is Grammar_Rule;
+      subtype lkt_language_mode is Language_Mode;
       subtype lkt_lookup_kind is Lookup_Kind;
 
    function Copy_Bytes
@@ -353,6 +355,19 @@ type lkt_node_Ptr is access Internal_Entity;
    --
    --  ``Reparsed`` indicates whether the unit was reparsed, or whether it was
    --  the first parse.
+
+   type lkt_event_handler_unit_diagnostic_callback is access procedure
+     (Data    : System.Address;
+      Context : lkt_analysis_context;
+      Unit    : lkt_analysis_unit;
+      Message : access constant lkt_text)
+      with Convention => C;
+   --  Callback that will be called when a diagnostic is emitted for an
+   --  analysis unit.
+   --
+   --  ``Unit`` is the unit for which the diagnostic is emitted.
+   --
+   --  ``Message`` is the diagnostic message.
 
    type lkt_event_handler_destroy_callback is access procedure
      (Data : System.Address)
@@ -911,10 +926,11 @@ type lkt_node_Ptr is access Internal_Entity;
    --------------------
 
    function lkt_create_event_handler
-     (Data                : System.Address;
-      Destroy_Func        : lkt_event_handler_destroy_callback;
-      Unit_Requested_Func : lkt_event_handler_unit_requested_callback;
-      Unit_Parsed_Func    : lkt_event_handler_unit_parsed_callback)
+     (Data                 : System.Address;
+      Destroy_Func         : lkt_event_handler_destroy_callback;
+      Unit_Requested_Func  : lkt_event_handler_unit_requested_callback;
+      Unit_Parsed_Func     : lkt_event_handler_unit_parsed_callback;
+      Unit_Diagnostic_Func : lkt_event_handler_unit_diagnostic_callback)
       return lkt_event_handler
       with Export        => True,
            Convention    => C,
@@ -938,6 +954,9 @@ type lkt_node_Ptr is access Internal_Entity;
    --     user.
    --
    --  ``unit_parsed`` is a callback that will be called when a unit is parsed.
+   --
+   --  ``unit_diagnostic`` is a callback that will be called when a diagnostic
+   --  is emitted for a unit.
 
    procedure lkt_dec_ref_event_handler
      (Handler : lkt_event_handler)
@@ -1790,7 +1809,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_char_type";
-   --  Unit method. Return the character builtin type.
+   --  Unit method. Return the ``Char`` builtin type.
 
            
    
@@ -1807,7 +1826,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_int_type";
-   --  Unit method. Return the integer builtin type.
+   --  Unit method. Return the ``Int`` builtin type.
 
            
    
@@ -1824,7 +1843,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_bool_type";
-   --  Unit method. Return the boolean builtin type.
+   --  Unit method. Return the ``Bool`` builtin type.
 
            
    
@@ -1841,7 +1860,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_bigint_type";
-   --  Unit method. Return the big integer builtin type.
+   --  Unit method. Return the ``BigInt`` builtin type.
 
            
    
@@ -1858,7 +1877,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_string_type";
-   --  Unit method. Return the string builtin type.
+   --  Unit method. Return the ``String`` builtin type.
 
            
    
@@ -1875,7 +1894,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_symbol_type";
-   --  Unit method. Return the string builtin type.
+   --  Unit method. Return the ``Symbol`` builtin type.
 
            
    
@@ -1892,7 +1911,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_property_error_type";
-   --  Unit method. Return the property error builtin type.
+   --  Unit method. Return the ``PropertyError`` builtin type.
 
            
    
@@ -1909,7 +1928,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_regexp_type";
-   --  Unit method. Return the regexp builtin type.
+   --  Unit method. Return the ``Regexp`` builtin type.
 
            
    
@@ -1926,7 +1945,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_entity_gen_type";
-   --  Unit method. Return the logicvar builtin type.
+   --  Unit method. Return the ``Entity`` generic builtin type.
 
            
    
@@ -1943,7 +1962,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_entity_type";
-   --  Unit method. Return the logicvar builtin type.
+   --  Unit method. Return the ``Entity`` builtin type.
 
            
    
@@ -1960,7 +1979,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_logicvar_type";
-   --  Unit method. Return the logicvar builtin type.
+   --  Unit method. Return the ``LogicVar`` builtin type.
 
            
    
@@ -1977,7 +1996,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_equation_type";
-   --  Unit method. Return the logicvar builtin type.
+   --  Unit method. Return the ``Equation`` builtin type.
 
            
    
@@ -2019,6 +2038,40 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
+   function lkt_lkt_node_p_stream_gen_type
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_p_stream_gen_type";
+   --  Unit method. Return the stream builtin generic type.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_p_stream_type
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_p_stream_type";
+   --  Unit method. Return the stream builtin type.
+
+           
+   
+
+   
+   
+
    function lkt_lkt_node_p_astlist_gen_type
      (Node : lkt_node_Ptr;
 
@@ -2028,7 +2081,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_astlist_gen_type";
-   --  Unit method. Return the ASTList builtin generic type.
+   --  Unit method. Return the ``ASTList`` builtin generic type.
 
            
    
@@ -2045,7 +2098,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_astlist_type";
-   --  Unit method. Return the ASTList builtin type.
+   --  Unit method. Return the ``ASTList`` builtin type.
 
            
    
@@ -2062,7 +2115,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_node_builder_gen_type";
-   --  Unit method. Return the NodeBuilder builtin generic type.
+   --  Unit method. Return the ``NodeBuilder`` builtin generic type.
 
            
    
@@ -2079,7 +2132,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_node_builder_type";
-   --  Unit method. Return the NodeBuilder builtin type.
+   --  Unit method. Return the ``NodeBuilder`` builtin type.
 
            
    
@@ -2096,7 +2149,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_iterator_gen_trait";
-   --  Unit method. Return the Iterator builtin generic trait.
+   --  Unit method. Return the ``Iterator`` builtin generic trait.
 
            
    
@@ -2113,7 +2166,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_iterator_trait";
-   --  Unit method. Return the Iterator builtin trait.
+   --  Unit method. Return the ``Iterator`` builtin trait.
 
            
    
@@ -2164,8 +2217,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_topmost_invalid_decl";
-   --  Return the topmost (from ``Self`` to the root node) FullDecl annotated
-   --  with ``@invalid``, null otherwise.
+   --  Return the topmost (from ``Self`` to the root node) ``FullDecl``
+   --  annotated with ``@invalid``, null otherwise.
 
            
    
@@ -2182,7 +2235,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_nameres_diagnostics";
-   --  If name resolution on this lkt compilation unit fails, this returns all
+   --  If name resolution on this Lkt compilation unit fails, this returns all
    --  the diagnostics that were produced while resolving it.
 
            
@@ -2200,7 +2253,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_solve_enclosing_context";
-   --  Finds the nearest parent that is an xref_entry_point and solve its
+   --  Find the nearest parent that is an xref entry point and solve its
    --  equation.
 
            
@@ -2218,9 +2271,9 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_xref_entry_point";
-   --  Designates entities that are entry point for the xref solving
-   --  infrastructure. If this returns true, then nameres_diagnostics can be
-   --  called on it.
+   --  Return whether this node is an entry point for the xref solving
+   --  infrastructure. If this returns true, then ``nameres_diagnostics`` can
+   --  be called on it.
 
            
    
@@ -2237,7 +2290,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_complete";
-   --  Return an array of completion item for language server clients
+   --  Return an array of completion item for language server clients.
 
            
    
@@ -2634,7 +2687,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_decl_p_as_bare_decl";
-   --  Get this declaration without rebindings information.
+   --  Return this declaration without rebindings information.
 
            
    
@@ -2651,7 +2704,11 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_decl_p_get_type";
-   --  Return the type of the Decl.
+   --  Return the relevant type when this declaration is used to create a value
+   --  (the return type for a function, the type itself for structs/classes,
+   --  ...).
+   --
+   --  This returns null when the type cannot be inferred.
 
            
    
@@ -2671,8 +2728,11 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_decl_p_get_cast_type";
-   --  If we are casting an entity (Self) to something that is not an entity,
-   --  make it an entity.
+   --  Return the type of ``E.as[T]`` when ``cast_to`` materializes the cast
+   --  destination type (``T``), and ``self`` is the type of ``E``.
+   --
+   --  The result is ``T`` except when ``T`` is a bare node type whereas
+   --  ``self`` is an entity type: in this case, the result is ``Entity[T]``.
 
            
    
@@ -2692,9 +2752,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_decl_p_get_keep_type";
-   --  Return the type of Entity when we only keep elements of type keep_type.
-   --  If we are casting an entity (Self) to something that is not an entity,
-   --  make it an entity.
+   --  Return the type of ``E.keep[T]`` when ``keep_type`` materializes the
+   --  input type (``T``), and ``self`` is the type of ``E``.
 
            
    
@@ -2714,8 +2773,8 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_decl_p_get_suffix_type";
-   --  If we are accessing a ParseField of an entity, then that field's type
-   --  also needs to be an entity.
+   --  Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+   --  member and ``prefix_type`` is the type of ``E``.
 
            
    
@@ -3297,23 +3356,10 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_type_decl_p_base_type";
    --  Return the base type for this node, if any.
-
-           
-   
-
-   
-   
-
-   function lkt_type_decl_p_base_type_if_entity
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_type_decl_p_base_type_if_entity";
-   --  Return the base type for this node, if any.
+   --
+   --  Note that this includes "logic" base types for covariant types, like
+   --  ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
+   --  ``Entity[Child]``.
 
            
    
@@ -6290,6 +6336,23 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
+   function lkt_regex_pattern_p_denoted_value
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_internal_decoded_string_value) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_regex_pattern_p_denoted_value";
+   --  Return the equivalent string for this regular expression.
+
+           
+   
+
+   
+   
+
    function lkt_type_pattern_f_type_name
      (Node : lkt_node_Ptr;
 
@@ -6303,6 +6366,23 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  :ada:ref:`Function_Type_Ref`, :ada:ref:`Generic_Type_Ref`,
    --  :ada:ref:`Simple_Type_Ref`
    --
+   --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_destructuring_pattern_detail_f_decl
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_destructuring_pattern_detail_f_decl";
    --  When there are no parsing errors, this field is never null.
 
            
@@ -6358,16 +6438,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_property_pattern_detail_f_call";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Big_Num_Lit`, :ada:ref:`Block_Expr`,
-   --  :ada:ref:`Block_String_Lit`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Char_Lit`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
-   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Null_Lit`, :ada:ref:`Num_Lit`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
-   --
    --  When there are no parsing errors, this field is never null.
 
            

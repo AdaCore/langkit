@@ -1,7 +1,6 @@
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
-
 with System;
 
 with GNATCOLL.Iconv;
@@ -207,6 +206,7 @@ package body Liblktlang.Common is
       Lkt_Paren_Pattern => False,
       Lkt_Regex_Pattern => True,
       Lkt_Type_Pattern => False,
+      Lkt_Destructuring_Pattern_Detail => False,
       Lkt_Field_Pattern_Detail => False,
       Lkt_Property_Pattern_Detail => False,
       Lkt_Default_List_Type_Ref => True,
@@ -402,6 +402,7 @@ package body Liblktlang.Common is
       Lkt_Paren_Pattern => False,
       Lkt_Regex_Pattern => False,
       Lkt_Type_Pattern => False,
+      Lkt_Destructuring_Pattern_Detail => False,
       Lkt_Field_Pattern_Detail => False,
       Lkt_Property_Pattern_Detail => False,
       Lkt_Default_List_Type_Ref => False,
@@ -855,11 +856,14 @@ package body Liblktlang.Common is
               else Token_Kind_Name (Token_Id));
    end Token_Error_Image;
 
-   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind
-   is (Token_Kind'Val (Raw));
+   --  ``Token_Kind_Index`` is a 1-based index type, but 'Val and 'Pos deal
+   --  with 0-based indexes.
 
-   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind
-   is (Token_Kind'Pos (Kind));
+   function To_Token_Kind (Index : Token_Kind_Index) return Token_Kind
+   is (Token_Kind'Val (Index - 1));
+
+   function From_Token_Kind (Kind : Token_Kind) return Token_Kind_Index
+   is (Token_Kind'Pos (Kind) + 1);
 
    -------------------
    -- Is_Token_Node --

@@ -924,7 +924,7 @@ package body Liblktlang_Support.Prettier_Utils is
       function Recurse (Self : Document_Type) return Document_Type
       is (Deep_Copy (Pool, Self));
    begin
-      case Self.Kind is
+      case Template_Non_Expression_Kind (Self.Kind) is
          when Align =>
             return Pool.Create_Align
               (Self.Align_Data,
@@ -965,31 +965,6 @@ package body Liblktlang_Support.Prettier_Utils is
                Recurse (Self.If_Break_Flat_Contents),
                Self.If_Break_Group_Id);
 
-         when If_Empty =>
-            return Pool.Create_If_Empty
-              (Recurse (Self.If_Empty_Then), Recurse (Self.If_Empty_Else));
-
-         when If_Kind =>
-            declare
-               Matchers : Matcher_Vectors.Vector;
-            begin
-               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
-                  declare
-                     M : constant Matcher_Record := Self.If_Kind_Matchers (I);
-                  begin
-                     Matchers.Append
-                       (Matcher_Record'
-                          (M.Matched_Types, Recurse (M.Document)));
-                  end;
-               end loop;
-
-               return Pool.Create_If_Kind
-                 (Self.If_Kind_Field,
-                  Matchers,
-                  Recurse (Self.If_Kind_Default),
-                  Recurse (Self.If_Kind_Absent));
-            end;
-
          when Indent =>
             return Pool.Create_Indent
               (Recurse (Self.Indent_Document), Self.Indent_Bubble_Up);
@@ -1028,6 +1003,33 @@ package body Liblktlang_Support.Prettier_Utils is
 
          when Whitespace =>
             return Self;
+
+         when If_Then_Else =>
+            return Pool.Create_If
+              (Self.If_Condition,
+               Recurse (Self.If_Then),
+               Recurse (Self.If_Else));
+
+         when Match =>
+            declare
+               Matchers : Matcher_Vectors.Vector;
+            begin
+               for I in 1 .. Self.Match_Matchers.Last_Index loop
+                  declare
+                     M : constant Matcher_Record := Self.Match_Matchers (I);
+                  begin
+                     Matchers.Append
+                       (Matcher_Record'
+                          (M.Matched_Types, Recurse (M.Document)));
+                  end;
+               end loop;
+
+               return Pool.Create_Match
+                 (Self.Match_Field,
+                  Matchers,
+                  Recurse (Self.Match_Default),
+                  Recurse (Self.Match_Absent));
+            end;
       end case;
    end Deep_Copy;
 
@@ -1250,50 +1252,6 @@ package body Liblktlang_Support.Prettier_Utils is
       end return;
    end Create_If_Break;
 
-   ---------------------
-   -- Create_If_Empty --
-   ---------------------
-
-   function Create_If_Empty
-     (Self          : in out Document_Pool;
-      Then_Contents : Document_Type;
-      Else_Contents : Document_Type) return Document_Type is
-   begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind          => If_Empty,
-           If_Empty_Then => Then_Contents,
-           If_Empty_Else => Else_Contents)
-      do
-         Self.Register (Result);
-      end return;
-   end Create_If_Empty;
-
-   --------------------
-   -- Create_If_Kind --
-   --------------------
-
-   function Create_If_Kind
-     (Self             : in out Document_Pool;
-      If_Kind_Field    : Struct_Member_Ref;
-      If_Kind_Matchers : in out Matcher_Vectors.Vector;
-      If_Kind_Default  : Document_Type;
-      If_Kind_Absent   : Document_Type) return Document_Type
-   is
-   begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind             => If_Kind,
-           If_Kind_Field    => If_Kind_Field,
-           If_Kind_Matchers => Matcher_Vectors.Empty_Vector,
-           If_Kind_Default  => If_Kind_Default,
-           If_Kind_Absent   => If_Kind_Absent)
-      do
-         Result.If_Kind_Matchers.Move (If_Kind_Matchers);
-         Self.Register (Result);
-      end return;
-   end Create_If_Kind;
-
    -------------------
    -- Create_Indent --
    -------------------
@@ -1425,14 +1383,11 @@ package body Liblktlang_Support.Prettier_Utils is
    ----------------------------
 
    function Create_Recurse_Flatten
-     (Self  : in out Document_Pool;
-      Types : in out Type_Vectors.Vector) return Document_Type
-   is
+     (Self  : in out Document_Pool) return Document_Type is
    begin
       return Result : constant Document_Type :=
-        new Document_Record (Recurse_Flatten)
+        new Document_Record'(Kind => Recurse_Flatten)
       do
-         Result.Recurse_Flatten_Types.Move (Types);
          Self.Register (Result);
       end return;
    end Create_Recurse_Flatten;
@@ -1503,9 +1458,10 @@ package body Liblktlang_Support.Prettier_Utils is
    ----------------------------
 
    function Create_Table_Separator
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type
+     (Self     : in out Document_Pool;
+      Kind     : Token_Kind_Ref;
+      Text     : Unbounded_Text_Type;
+      Unparser : Token_Unparser_Index) return Document_Type
    is
       Position : Text_To_Document_Maps.Cursor;
       Inserted : Boolean;
@@ -1517,6 +1473,7 @@ package body Liblktlang_Support.Prettier_Utils is
              (Kind               => Table_Separator,
               Token_Kind         => Kind,
               Token_Text         => Text,
+              Token_Unparser     => Unparser,
               Token_Prettier_Doc => <>)
          do
             Self.Register (Result);
@@ -1537,9 +1494,10 @@ package body Liblktlang_Support.Prettier_Utils is
    ------------------
 
    function Create_Token
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type
+     (Self     : in out Document_Pool;
+      Kind     : Token_Kind_Ref;
+      Text     : Unbounded_Text_Type;
+      Unparser : Token_Unparser_Index) return Document_Type
    is
       Position : Text_To_Document_Maps.Cursor;
       Inserted : Boolean;
@@ -1551,6 +1509,7 @@ package body Liblktlang_Support.Prettier_Utils is
              (Kind               => Token,
               Token_Kind         => Kind,
               Token_Text         => Text,
+              Token_Unparser     => Unparser,
               Token_Prettier_Doc => <>)
          do
             Self.Register (Result);
@@ -1603,6 +1562,102 @@ package body Liblktlang_Support.Prettier_Utils is
 
       return Self.Whitespaces (Length);
    end Create_Whitespace;
+
+   ---------------
+   -- Create_If --
+   ---------------
+
+   function Create_If
+     (Self          : in out Document_Pool;
+      Condition     : Document_Type;
+      Then_Contents : Document_Type;
+      Else_Contents : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind         => If_Then_Else,
+           If_Condition => Condition,
+           If_Then      => Then_Contents,
+           If_Else      => Else_Contents)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_If;
+
+   ------------------
+   -- Create_Match --
+   ------------------
+
+   function Create_Match
+     (Self           : in out Document_Pool;
+      Match_Field    : Struct_Member_Ref;
+      Match_Matchers : in out Matcher_Vectors.Vector;
+      Match_Default  : Document_Type;
+      Match_Absent   : Document_Type) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind           => Match,
+           Match_Field    => Match_Field,
+           Match_Matchers => Matcher_Vectors.Empty_Vector,
+           Match_Default  => Match_Default,
+           Match_Absent   => Match_Absent)
+      do
+         Result.Match_Matchers.Move (Match_Matchers);
+         Self.Register (Result);
+      end return;
+   end Create_Match;
+
+   -----------------
+   -- Create_Is_A --
+   -----------------
+
+   function Create_Is_A
+     (Self  : in out Document_Pool;
+      Node  : Document_Type;
+      Kinds : in out Type_Vectors.Vector) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind       => Is_A,
+           Is_A_Node  => Node,
+           Is_A_Kinds => Type_Vectors.Empty_Vector)
+      do
+         Result.Is_A_Kinds.Move (Kinds);
+         Self.Register (Result);
+      end return;
+   end Create_Is_A;
+
+   ---------------------
+   -- Create_Is_Empty --
+   ---------------------
+
+   function Create_Is_Empty
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Is_Empty, Is_Empty_Node => Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Is_Empty;
+
+   -----------------------
+   -- Create_This_Field --
+   -----------------------
+
+   function Create_This_Field
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => This_Field)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_This_Field;
 
    -----------------------
    -- Bubble_Up_Trivias --
@@ -2051,55 +2106,6 @@ package body Liblktlang_Support.Prettier_Utils is
                Process (Document.If_Break_Contents, Prefix & List_Indent);
                Process (Document.If_Break_Flat_Contents, Prefix & List_Indent);
 
-            when If_Empty =>
-               Write (Prefix & "ifEmpty:");
-               Process (Document.If_Empty_Then, Prefix & List_Indent);
-               Process (Document.If_Empty_Else, Prefix & List_Indent);
-
-            when If_Kind =>
-               Write (Prefix & "ifKind:");
-               Write (Prefix & Simple_Indent & "default:");
-               Process
-                 (Document.If_Kind_Default,
-                  Prefix & Simple_Indent & Simple_Indent);
-               Write (Prefix & Simple_Indent & "absent:");
-               Process
-                 (Document.If_Kind_Absent,
-                  Prefix & Simple_Indent & Simple_Indent);
-               Write (Prefix & Simple_Indent & "matchers:");
-               declare
-                  Matcher_Kind_Indent     : constant Unbounded_String :=
-                    Prefix & Simple_Indent & Simple_Indent;
-                  Matcher_Document_Indent : constant Unbounded_String :=
-                    Prefix & Simple_Indent & Simple_Indent & Simple_Indent;
-
-               begin
-                  for Matcher_Index in
-                    Document.If_Kind_Matchers.First_Index
-                    .. Document.If_Kind_Matchers.Last_Index
-                  loop
-                     declare
-                        Types     : constant Type_Ref_Vectors.Vector :=
-                          Document
-                            .If_Kind_Matchers (Matcher_Index)
-                            .Matched_Types;
-                        Types_Str : Unbounded_String;
-                     begin
-                        for Kind_Index in Types.First_Index .. Types.Last_Index
-                        loop
-                           if Kind_Index > Types.First_Index then
-                              Append (Types_Str, " | ");
-                           end if;
-                           Append (Types_Str, Debug_Name (Types (Kind_Index)));
-                        end loop;
-                        Write (Matcher_Kind_Indent & Types_Str);
-                     end;
-                     Process
-                       (Document.If_Kind_Matchers (Matcher_Index).Document,
-                        Matcher_Document_Indent);
-                  end loop;
-               end;
-
             when Indent =>
                Write (Prefix & "indent:");
                Write_Bubble_Up
@@ -2132,14 +2138,6 @@ package body Liblktlang_Support.Prettier_Utils is
 
             when Recurse_Flatten =>
                Write (Prefix & "recurse_flatten:");
-               for I in 1 .. Document.Recurse_Flatten_Types.Last_Index loop
-                  declare
-                     T : constant Type_Ref :=
-                       Document.Recurse_Flatten_Types.Element (I);
-                  begin
-                     Write (Prefix & Simple_Indent & Debug_Name (T));
-                  end;
-               end loop;
 
             when Recurse_Left =>
                Write (Prefix & "recurse_left");
@@ -2185,6 +2183,74 @@ package body Liblktlang_Support.Prettier_Utils is
                Write
                  (Prefix & "whitespace(" & Document.Whitespace_Length'Image
                   & ")");
+
+            when If_Then_Else =>
+               Write (Prefix & "if:");
+               Process (Document.If_Condition, Prefix & List_Indent);
+               Process (Document.If_Then, Prefix & List_Indent);
+               Process (Document.If_Else, Prefix & List_Indent);
+
+            when Match =>
+               Write (Prefix & "match");
+               Write (Prefix & Simple_Indent & "default:");
+               Process
+                 (Document.Match_Default,
+                  Prefix & Simple_Indent & Simple_Indent);
+               Write (Prefix & Simple_Indent & "absent:");
+               Process
+                 (Document.Match_Absent,
+                  Prefix & Simple_Indent & Simple_Indent);
+               Write (Prefix & Simple_Indent & "matchers:");
+               declare
+                  Matcher_Kind_Indent     : constant Unbounded_String :=
+                    Prefix & Simple_Indent & Simple_Indent;
+                  Matcher_Document_Indent : constant Unbounded_String :=
+                    Prefix & Simple_Indent & Simple_Indent & Simple_Indent;
+
+               begin
+                  for Matcher_Index in
+                    Document.Match_Matchers.First_Index
+                    .. Document.Match_Matchers.Last_Index
+                  loop
+                     declare
+                        Types     : constant Type_Ref_Vectors.Vector :=
+                          Document
+                            .Match_Matchers (Matcher_Index)
+                            .Matched_Types;
+                        Types_Str : Unbounded_String;
+                     begin
+                        for Kind_Index in Types.First_Index .. Types.Last_Index
+                        loop
+                           if Kind_Index > Types.First_Index then
+                              Append (Types_Str, " | ");
+                           end if;
+                           Append (Types_Str, Debug_Name (Types (Kind_Index)));
+                        end loop;
+                        Write (Matcher_Kind_Indent & Types_Str);
+                     end;
+                     Process
+                       (Document.Match_Matchers (Matcher_Index).Document,
+                        Matcher_Document_Indent);
+                  end loop;
+               end;
+
+            when Is_A =>
+               Write (Prefix & "is_a:");
+               for I in 1 .. Document.Is_A_Kinds.Last_Index loop
+                  declare
+                     T : constant Type_Ref := Document.Is_A_Kinds.Element (I);
+                  begin
+                     Write (Prefix & Simple_Indent & Debug_Name (T));
+                  end;
+               end loop;
+               Process (Document.Is_A_Node, Prefix & List_Indent);
+
+            when Is_Empty =>
+               Write (Prefix & "is_empty:");
+               Process (Document.Is_Empty_Node, Prefix & List_Indent);
+
+            when This_Field =>
+               Write (Prefix & "this_field");
          end case;
       end Process;
    begin

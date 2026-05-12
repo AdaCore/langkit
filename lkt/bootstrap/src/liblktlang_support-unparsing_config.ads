@@ -13,6 +13,7 @@ with Liblktlang_Support.Generic_API.Analysis;
 use Liblktlang_Support.Generic_API.Analysis;
 with Liblktlang_Support.Generic_API.Introspection;
 use Liblktlang_Support.Generic_API.Introspection;
+with Liblktlang_Support.Internal;       use Liblktlang_Support.Internal;
 with Liblktlang_Support.Internal.Descriptor;
 use Liblktlang_Support.Internal.Descriptor;
 with Liblktlang_Support.Internal.Unparsing;
@@ -37,6 +38,18 @@ private package Liblktlang_Support.Unparsing_Config is
    is (Node_Unparser_For (Node)
          .Field_Unparsers
          .Field_Unparsers (Field_Index)'Access);
+
+   type Token_Documents is record
+      Token, Table_Separator : Document_Type;
+   end record;
+
+   type Token_Unparser_Formattings_Impl is
+     array (Token_Unparser_Index range <>) of Token_Documents;
+   type Token_Unparser_Formattings is
+     access all Token_Unparser_Formattings_Impl;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Token_Unparser_Formattings_Impl, Token_Unparser_Formattings);
 
    ----------------------
    -- Linear templates --
@@ -68,8 +81,9 @@ private package Liblktlang_Support.Unparsing_Config is
    is record
       case Kind is
          when Token_Item =>
-            Token_Kind : Token_Kind_Ref;
-            Token_Text : Unbounded_Text_Type;
+            Token_Kind     : Token_Kind_Ref;
+            Token_Text     : Unbounded_Text_Type;
+            Token_Unparser : Token_Unparser_Index;
             --  Same semantics as the homonym Unparsing_Fragment components
 
          when Field_Item =>
@@ -137,6 +151,11 @@ private package Liblktlang_Support.Unparsing_Config is
 
             Token_Text : Unbounded_Text_Type;
             --  Text to emit when unparsing this token fragment
+
+            Token_Unparser : Token_Unparser_Index;
+            --  If this token comes from a token unparser (true for all tokens
+            --  but the ones coming from token node unparsing), reference to
+            --  that unparser.
 
             case Kind is
                when List_Separator_Fragment =>
@@ -336,6 +355,12 @@ private package Liblktlang_Support.Unparsing_Config is
       Symbols : Symbol_Table;
       --  Symbol table for group ids
 
+      Token_Formattings : Token_Unparser_Formattings;
+      --  Token configurations for all "static" tokens in Language's parser.
+      --
+      --  It is left to null (unused) if ``Preserve_Tokens`` is True, and
+      --  it assigns one formatting for each token unparser otherwise.
+
       Node_Configs : Node_Config_Maps.Map;
       --  Node configurations for all node types in Language
 
@@ -355,9 +380,10 @@ private package Liblktlang_Support.Unparsing_Config is
 
    function Load_Unparsing_Config_From_Buffer
      (Language        : Language_Id;
-      Buffer          : String;
+      Buffer          : Memory_Buffer_And_Access;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean)
+      Check_All_Nodes : Boolean;
+      Overridings     : Memory_Buffer_And_Access_Array)
       return Unparsing_Configuration_Access;
    --  Implementation for
    --  ``Liblktlang_Support.Generic_API.Unparsing.Load_Unparsing_Config``, but

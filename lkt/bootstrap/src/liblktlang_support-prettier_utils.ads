@@ -22,6 +22,8 @@ with Liblktlang_Support.Generic_API.Analysis;
 use Liblktlang_Support.Generic_API.Analysis;
 with Liblktlang_Support.Generic_API.Introspection;
 use Liblktlang_Support.Generic_API.Introspection;
+with Liblktlang_Support.Internal.Unparsing;
+use Liblktlang_Support.Internal.Unparsing;
 with Liblktlang_Support.Symbols;     use Liblktlang_Support.Symbols;
 with Liblktlang_Support.Text;        use Liblktlang_Support.Text;
 
@@ -160,8 +162,11 @@ private package Liblktlang_Support.Prettier_Utils is
 
    end Trivias_Bubble_Up;
 
-   type Document_Kind is
-     (Align,
+   type Document_Kind is (
+
+      --  Template/document nodes
+
+      Align,
       Break_Parent,
       Empty_Table_Separator,
       Expected_Line_Breaks,
@@ -172,8 +177,6 @@ private package Liblktlang_Support.Prettier_Utils is
       Hard_Line,
       Hard_Line_Without_Break_Parent,
       If_Break,
-      If_Empty,
-      If_Kind,
       Indent,
       Line,
       List,
@@ -188,25 +191,57 @@ private package Liblktlang_Support.Prettier_Utils is
       Table_Separator,
       Token,
       Trim,
-      Whitespace);
+      Whitespace,
+
+      --  Conditionals
+
+      If_Then_Else,
+      Match,
+
+      --  Expressions
+
+      Is_A,
+      Is_Empty,
+      This_Field
+   );
+
+   subtype Template_Conditional_Kind is
+     Document_Kind range If_Then_Else .. Match;
+   --  Kind for a document that materializes conditionals for template
+   --  instantiation.
+
+   subtype Template_Expression_Kind is
+     Document_Kind range Is_A .. This_Field;
+   --  Kind for a document that materializes an expression for conditions in
+   --  template instantiation.
+
+   subtype Template_Non_Expression_Kind is Document_Kind
+   with Static_Predicate =>
+     Template_Non_Expression_Kind not in Template_Expression_Kind;
+   --  Any node that is not an expression, i.e. a document that will in the end
+   --  be expanded and turned into a Prettier document. This is anything but an
+   --  expression.
 
    subtype Template_Document_Kind is Document_Kind
    with Static_Predicate =>
      Template_Document_Kind not in
        Expected_Line_Breaks
      | Expected_Whitespaces
-     | Table;
+     | Table
+     | Template_Expression_Kind;
+   --  Kind for a document template (i.e. before instantiation)
 
    subtype Instantiated_Template_Document_Kind is Document_Kind
    with Static_Predicate =>
      Instantiated_Template_Document_Kind not in
-       If_Empty
-     | If_Kind
+       Template_Conditional_Kind
+     | Template_Expression_Kind
      | Recurse
      | Recurse_Field
      | Recurse_Flatten
      | Recurse_Left
      | Recurse_Right;
+   --  Kind for an instantiated document
 
    subtype Final_Document_Kind is Instantiated_Template_Document_Kind
    with Static_Predicate =>
@@ -214,6 +249,11 @@ private package Liblktlang_Support.Prettier_Utils is
        Expected_Line_Breaks
      | Expected_Whitespaces
      | Flush_Line_Breaks;
+   --  Kind for a document ready to be handed to Prettier
+
+   subtype Token_Document_Kind is Document_Kind
+   with Static_Predicate => Token_Document_Kind in Table_Separator | Token;
+   --  Kind for a document that maps a single source token
 
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
 
@@ -267,16 +307,6 @@ private package Liblktlang_Support.Prettier_Utils is
             If_Break_Flat_Contents : Document_Type;
             If_Break_Group_Id      : Template_Symbol;
 
-         when If_Empty =>
-            If_Empty_Then : Document_Type;
-            If_Empty_Else : Document_Type;
-
-         when If_Kind =>
-            If_Kind_Field    : Struct_Member_Ref;
-            If_Kind_Matchers : Matcher_Vectors.Vector;
-            If_Kind_Default  : Document_Type;
-            If_Kind_Absent   : Document_Type;
-
          when Indent =>
             Indent_Document  : Document_Type;
             Indent_Bubble_Up : Trivias_Bubble_Up.Config;
@@ -307,7 +337,7 @@ private package Liblktlang_Support.Prettier_Utils is
             --  related to fields: more simple and probably more efficient.
 
          when Recurse_Flatten =>
-            Recurse_Flatten_Types : Type_Vectors.Vector;
+            null;
 
          when Recurse_Left | Recurse_Right =>
             null;
@@ -322,6 +352,7 @@ private package Liblktlang_Support.Prettier_Utils is
          when Table_Separator | Token =>
             Token_Kind         : Token_Kind_Ref;
             Token_Text         : Unbounded_Text_Type;
+            Token_Unparser     : Token_Unparser_Index;
             Token_Prettier_Doc : Prettier.Document_Type;
 
          when Trim =>
@@ -330,6 +361,27 @@ private package Liblktlang_Support.Prettier_Utils is
          when Whitespace =>
             Whitespace_Length       : Positive;
             Whitespace_Prettier_Doc : Prettier.Document_Type;
+
+         when If_Then_Else =>
+            If_Condition : Document_Type;
+            If_Then      : Document_Type;
+            If_Else      : Document_Type;
+
+         when Match =>
+            Match_Field    : Struct_Member_Ref;
+            Match_Matchers : Matcher_Vectors.Vector;
+            Match_Default  : Document_Type;
+            Match_Absent   : Document_Type;
+
+         when Is_A =>
+            Is_A_Node  : Document_Type;
+            Is_A_Kinds : Type_Vectors.Vector;
+
+         when Is_Empty =>
+            Is_Empty_Node : Document_Type;
+
+         when This_Field =>
+            null;
       end case;
    end record;
 
@@ -399,7 +451,9 @@ private package Liblktlang_Support.Prettier_Utils is
    --
    --  Note: as a light optimization, leaf nodes that are considered as
    --  constant (singletons and tokens) are not duplicated: they are returned
-   --  as-is instead.
+   --  as-is instead. Also, expressions (i.e. non-template nodes) are also
+   --  considered as constant: unlike templates, once created, we never need to
+   --  mutate expressions.
 
    function Create_Align
      (Self      : in out Document_Pool;
@@ -458,20 +512,6 @@ private package Liblktlang_Support.Prettier_Utils is
       return Document_Type;
    --  Return an ``If_Break`` node
 
-   function Create_If_Empty
-     (Self          : in out Document_Pool;
-      Then_Contents : Document_Type;
-      Else_Contents : Document_Type) return Document_Type;
-   --  Return an ``If_Empty`` node
-
-   function Create_If_Kind
-     (Self             : in out Document_Pool;
-      If_Kind_Field    : Struct_Member_Ref;
-      If_Kind_Matchers : in out Matcher_Vectors.Vector;
-      If_Kind_Default  : Document_Type;
-      If_Kind_Absent   : Document_Type) return Document_Type;
-   --  Return an ``If_Kind`` node
-
    function Create_Indent
      (Self      : in out Document_Pool;
       Document  : Document_Type;
@@ -508,8 +548,7 @@ private package Liblktlang_Support.Prettier_Utils is
    --  Return a ``Recurse_Field`` node
 
    function Create_Recurse_Flatten
-     (Self  : in out Document_Pool;
-      Types : in out Type_Vectors.Vector) return Document_Type;
+     (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Recurse_Flatten`` node
 
    function Create_Recurse_Left
@@ -527,9 +566,10 @@ private package Liblktlang_Support.Prettier_Utils is
    --  Return a ``Table`` node
 
    function Create_Table_Separator
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type;
+     (Self     : in out Document_Pool;
+      Kind     : Token_Kind_Ref;
+      Text     : Unbounded_Text_Type;
+      Unparser : Token_Unparser_Index) return Document_Type;
    --  Return a ``Table_Separator`` node
 
    function Create_Soft_Line
@@ -537,10 +577,22 @@ private package Liblktlang_Support.Prettier_Utils is
    --  Return a ``Soft_Line`` node
 
    function Create_Token
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type;
+     (Self     : in out Document_Pool;
+      Kind     : Token_Kind_Ref;
+      Text     : Unbounded_Text_Type;
+      Unparser : Token_Unparser_Index) return Document_Type;
    --  Return a ``Token`` node
+
+   function Create_Token_Kind
+     (Self       : in out Document_Pool;
+      Doc_Kind   : Token_Document_Kind;
+      Token_Kind : Token_Kind_Ref;
+      Text       : Unbounded_Text_Type;
+      Unparser   : Token_Unparser_Index) return Document_Type
+   is (case Doc_Kind is
+       when Token           => Create_Token (Self, Token_Kind, Text, Unparser),
+       when Table_Separator => Create_Table_Separator
+                                 (Self, Token_Kind, Text, Unparser));
 
    function Create_Trim (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Trim`` node
@@ -549,6 +601,36 @@ private package Liblktlang_Support.Prettier_Utils is
      (Self   : in out Document_Pool;
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
+
+   function Create_If
+     (Self          : in out Document_Pool;
+      Condition     : Document_Type;
+      Then_Contents : Document_Type;
+      Else_Contents : Document_Type) return Document_Type;
+   --  Return an ``If_Then_Else`` node
+
+   function Create_Match
+     (Self           : in out Document_Pool;
+      Match_Field    : Struct_Member_Ref;
+      Match_Matchers : in out Matcher_Vectors.Vector;
+      Match_Default  : Document_Type;
+      Match_Absent   : Document_Type) return Document_Type;
+   --  Return an ``Match`` node
+
+   function Create_Is_A
+     (Self  : in out Document_Pool;
+      Node  : Document_Type;
+      Kinds : in out Type_Vectors.Vector) return Document_Type;
+   --  Return an ``Is_A`` node
+
+   function Create_Is_Empty
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type;
+   --  Return an ``Is_Empty`` node
+
+   function Create_This_Field
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``This_Field`` node
 
    procedure Bubble_Up_Trivias
      (Pool : in out Document_Pool; Document : in out Document_Type);

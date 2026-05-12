@@ -184,6 +184,46 @@ package body Liblktlang.Generic_Introspection is
       -- "=" --
       ---------
 
+      overriding function "=" (Left, Right : Internal_Rec_Language_Mode) return Boolean is
+      begin
+         return Left.Value = Right.Value;
+      end "=";
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : Internal_Rec_Language_Mode) return Type_Index is
+      begin
+         return Type_Index_For_Language_Mode;
+      end Type_Of;
+
+      -----------
+      -- Image --
+      -----------
+
+      overriding function Image (Value : Internal_Rec_Language_Mode) return String is
+      begin
+         return "Language_Mode(" & Value.Value'Image & ")";
+      end Image;
+
+      -----------------
+      -- Value_Index --
+      -----------------
+
+      overriding function Value_Index (Value : Internal_Rec_Language_Mode) return Enum_Value_Index
+      is
+      begin
+         return Language_Mode'Pos (Value.Value) + 1;
+      end Value_Index;
+
+
+      
+
+      ---------
+      -- "=" --
+      ---------
+
       overriding function "=" (Left, Right : Internal_Rec_Lookup_Kind) return Boolean is
       begin
          return Left.Value = Right.Value;
@@ -258,6 +298,14 @@ package body Liblktlang.Generic_Introspection is
                     new Internal_Rec_Grammar_Rule;
                begin
                   Result.Value := Grammar_Rule'Val (Value_Index - 1);
+                  return Internal_Value_Access (Result);
+               end;
+            when Type_Index_For_Language_Mode =>
+               declare
+                  Result : constant Internal_Acc_Language_Mode :=
+                    new Internal_Rec_Language_Mode;
+               begin
+                  Result.Value := Language_Mode'Val (Value_Index - 1);
                   return Internal_Value_Access (Result);
                end;
             when Type_Index_For_Lookup_Kind =>
@@ -2271,6 +2319,36 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Lkt_Node_P_Stream_Gen_Type =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N.P_Stream_Gen_Type);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Lkt_Node_P_Stream_Type =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N.P_Stream_Type);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Lkt_Node_P_Astlist_Gen_Type =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
@@ -3525,21 +3603,6 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Type_Decl.P_Base_Type);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Type_Decl_P_Base_Type_If_Entity =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Type_Decl.P_Base_Type_If_Entity);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -6253,6 +6316,29 @@ end;
 when others => null;
 end case;
 end;
+when Lkt_Regex_Pattern_Range =>
+declare
+N_Bare_Regex_Pattern : constant Analysis.Regex_Pattern := N.As_Regex_Pattern;
+begin
+case Member is
+when Member_Index_For_Regex_Pattern_P_Denoted_Value =>
+declare
+R : Internal_Acc_Decoded_String_Value :=  new Internal_Rec_Decoded_String_Value;
+begin
+R.Value := N_Bare_Regex_Pattern.P_Denoted_Value;
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
 when Lkt_Type_Pattern_Range =>
 declare
 N_Bare_Type_Pattern : constant Analysis.Type_Pattern := N.As_Type_Pattern;
@@ -6263,6 +6349,29 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Type_Pattern.F_Type_Name);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Destructuring_Pattern_Detail_Range =>
+declare
+N_Bare_Destructuring_Pattern_Detail : constant Analysis.Destructuring_Pattern_Detail := N.As_Destructuring_Pattern_Detail;
+begin
+case Member is
+when Member_Index_For_Destructuring_Pattern_Detail_F_Decl =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Destructuring_Pattern_Detail.F_Decl);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

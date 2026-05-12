@@ -12,6 +12,8 @@ with Liblktlang_Support.Internal.Descriptor;
 use Liblktlang_Support.Internal.Descriptor;
 with Liblktlang_Support.Slocs;             use Liblktlang_Support.Slocs;
 with Liblktlang_Support.Text;              use Liblktlang_Support.Text;
+with Liblktlang_Support.Token_Data_Handlers;
+use Liblktlang_Support.Token_Data_Handlers;
 with Liblktlang_Support.Types;             use Liblktlang_Support.Types;
 
 with Liblktlang.Implementation;
@@ -644,6 +646,8 @@ private package Liblktlang.Generic_Impl is
 
    --  Implementations for generic operations on analysis types
 
+   function Get_Builtin_File (Filename : String) return Memory_Buffer;
+
    function Create_Context
      (Charset     : String;
       File_Reader : File_Reader_Reference;
@@ -742,6 +746,12 @@ private package Liblktlang.Generic_Impl is
      (Left, Right       : Internal_Token;
       Left_SN, Right_SN : Token_Safety_Net) return Boolean;
 
+   procedure Extract_Tokens
+     (Input       : Analysis.Lexer_Input;
+      With_Trivia : Boolean;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+
    --  Language descriptor table for Liblktlang.
    --
    --  We define it here and export its address to avoid making the
@@ -766,6 +776,7 @@ private package Liblktlang.Generic_Impl is
 
       Token_Kinds        => Token_Kind_Descriptors'Access,
       Token_Family_Names => Token_Family_Names'Access,
+      Token_Termination  => Token_Index_For_Lkt_Termination,
 
       Types          => Generic_Introspection.Types'Access,
       Enum_Types     => Generic_Introspection.Enum_Types'Access,
@@ -777,6 +788,8 @@ private package Liblktlang.Generic_Impl is
       Struct_Members => Generic_Introspection.Struct_Members'Access,
       First_Property => Generic_Introspection.First_Property,
       Unparsers      => Liblktlang.Unparsers.Unparsers'Access,
+
+      Get_Builtin_File => Get_Builtin_File'Access,
 
       Create_Context          => Create_Context'Access,
       Context_Inc_Ref         => Context_Inc_Ref'Access,
@@ -831,10 +844,12 @@ private package Liblktlang.Generic_Impl is
 
       Token_Is_Equivalent => Token_Is_Equivalent'Access,
 
-      Create_Enum      => Create_Enum'Access,
-      Create_Array     => Create_Array'Access,
-      Create_Struct    => Create_Struct'Access,
-      Eval_Node_Member => Eval_Node_Member'Access,
-      Is_Managed_Error => Implementation.Properties_May_Raise'Access);
+      Extract_Tokens => Extract_Tokens'Access,
+
+      Create_Enum          => Create_Enum'Access,
+      Create_Array         => Create_Array'Access,
+      Create_Struct        => Create_Struct'Access,
+      Eval_Node_Member     => Eval_Node_Member'Access,
+      Is_Managed_Exception => Implementation.Properties_May_Raise'Access);
 
 end Liblktlang.Generic_Impl;

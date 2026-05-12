@@ -7,11 +7,12 @@ pragma Warnings (Off, "obsolescent");
 with GNATCOLL.GMP.Integers;
 
 with Liblktlang_Support.Errors;
+with Liblktlang_Support.Generic_API; use Liblktlang_Support.Generic_API;
 private with Liblktlang_Support.Internal.Analysis;
-with Liblktlang_Support.Symbols; use Liblktlang_Support.Symbols;
+with Liblktlang_Support.Symbols;     use Liblktlang_Support.Symbols;
 with Liblktlang_Support.Token_Data_Handlers;
 use Liblktlang_Support.Token_Data_Handlers;
-with Liblktlang_Support.Types;   use Liblktlang_Support.Types;
+with Liblktlang_Support.Types;       use Liblktlang_Support.Types;
 
 
 --  This package provides types and functions used in the whole Liblktlang
@@ -63,6 +64,9 @@ package Liblktlang.Common is
    Precondition_Failure : exception renames Liblktlang_Support.Errors.Precondition_Failure;
    --  Exception raised when an API is called while its preconditions are not
    --  satisfied.
+
+   Program_Error : exception renames Liblktlang_Support.Errors.Program_Error;
+   --  Internal exception, raised in case of a bug in the library.
 
    Property_Error : exception renames Liblktlang_Support.Errors.Property_Error;
    --  Exception that is raised when an error occurs while evaluating any
@@ -291,6 +295,16 @@ package Liblktlang.Common is
       function Trace_Image (Self : Grammar_Rule) return String
       is (Self'Image);
 
+      type Language_Mode is
+        (Lkt,
+         Lkql)
+      with Convention => C;
+      --  All languages that can be analyzed by Liblktlang. This enumeration is
+      --  used to provide information when creating a new unit provider.
+
+      function Trace_Image (Self : Language_Mode) return String
+      is (Self'Image);
+
       type Lookup_Kind is
         (Recursive,
          Flat,
@@ -491,6 +505,7 @@ package Liblktlang.Common is
       Lkt_Paren_Pattern,
       Lkt_Regex_Pattern,
       Lkt_Type_Pattern,
+      Lkt_Destructuring_Pattern_Detail,
       Lkt_Field_Pattern_Detail,
       Lkt_Property_Pattern_Detail,
       Lkt_Default_List_Type_Ref,
@@ -685,13 +700,14 @@ package Liblktlang.Common is
       Lkt_Paren_Pattern => 182,
       Lkt_Regex_Pattern => 183,
       Lkt_Type_Pattern => 184,
-      Lkt_Field_Pattern_Detail => 185,
-      Lkt_Property_Pattern_Detail => 186,
-      Lkt_Default_List_Type_Ref => 187,
-      Lkt_Function_Type_Ref => 188,
-      Lkt_Generic_Type_Ref => 189,
-      Lkt_Simple_Type_Ref => 190,
-      Lkt_Var_Bind => 191);
+      Lkt_Destructuring_Pattern_Detail => 185,
+      Lkt_Field_Pattern_Detail => 186,
+      Lkt_Property_Pattern_Detail => 187,
+      Lkt_Default_List_Type_Ref => 188,
+      Lkt_Function_Type_Ref => 189,
+      Lkt_Generic_Type_Ref => 190,
+      Lkt_Simple_Type_Ref => 191,
+      Lkt_Var_Bind => 192);
 
       subtype Lkt_Lkt_Node is Lkt_Node_Kind_Type
             range Lkt_Argument .. Lkt_Var_Bind;
@@ -1327,7 +1343,10 @@ package Liblktlang.Common is
             range Lkt_Type_Pattern .. Lkt_Type_Pattern;
       --% no-document: True
       subtype Lkt_Pattern_Detail is Lkt_Node_Kind_Type
-            range Lkt_Field_Pattern_Detail .. Lkt_Property_Pattern_Detail;
+            range Lkt_Destructuring_Pattern_Detail .. Lkt_Property_Pattern_Detail;
+      --% no-document: True
+      subtype Lkt_Destructuring_Pattern_Detail_Range is Lkt_Node_Kind_Type
+            range Lkt_Destructuring_Pattern_Detail .. Lkt_Destructuring_Pattern_Detail;
       --% no-document: True
       subtype Lkt_Field_Pattern_Detail_Range is Lkt_Node_Kind_Type
             range Lkt_Field_Pattern_Detail .. Lkt_Field_Pattern_Detail;
@@ -1566,9 +1585,9 @@ package Liblktlang.Common is
    --  Return a string representation of ``Token_Id`` that is suitable in error
    --  messages.
 
-   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind
+   function To_Token_Kind (Index : Token_Kind_Index) return Token_Kind
       with Inline;
-   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind
+   function From_Token_Kind (Kind : Token_Kind) return Token_Kind_Index
       with Inline;
 
    function Is_Token_Node (Kind : Lkt_Node_Kind_Type) return Boolean;

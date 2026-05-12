@@ -22,7 +22,8 @@ use Liblktlang.Lexer_State_Machine;
 
 package body Liblktlang.Lexer_Implementation is
 
-   use Token_Vectors, Trivia_Vectors, Integer_Vectors;
+   use Token_Vectors, Trivia_Vectors;
+   use Liblktlang_Support.Token_Data_Handlers.Integer_Vectors;
 
    procedure Extract_Tokens_From_Text_Buffer
      (Contents    : in out Decoded_File_Contents;

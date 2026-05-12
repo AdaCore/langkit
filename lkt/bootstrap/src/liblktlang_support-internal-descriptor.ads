@@ -6,7 +6,6 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Unchecked_Conversion;
 
-with Liblktlang_Support.Diagnostics;       use Liblktlang_Support.Diagnostics;
 with Liblktlang_Support.File_Readers;      use Liblktlang_Support.File_Readers;
 with Liblktlang_Support.Generic_API.Introspection;
 use Liblktlang_Support.Generic_API.Introspection;
@@ -16,6 +15,8 @@ use Liblktlang_Support.Internal.Introspection;
 with Liblktlang_Support.Internal.Unparsing;
 use Liblktlang_Support.Internal.Unparsing;
 with Liblktlang_Support.Slocs;             use Liblktlang_Support.Slocs;
+with Liblktlang_Support.Token_Data_Handlers;
+use Liblktlang_Support.Token_Data_Handlers;
 with Liblktlang_Support.Types;             use Liblktlang_Support.Types;
 
 --  .. note:: This unit is internal: only Langkit and Langkit-generated
@@ -34,6 +35,8 @@ package Liblktlang_Support.Internal.Descriptor is
    --  trivial to use, but all expect non-null arguments. All operations expect
    --  safe arguments (no stale reference) and non-null ones.
 
+   type Get_Builtin_File_Type is access function
+     (Filename : String) return Memory_Buffer;
    type Create_Context_Type is access function
      (Charset     : String := "";
       File_Reader : File_Reader_Reference := No_File_Reader_Reference;
@@ -142,6 +145,12 @@ package Liblktlang_Support.Internal.Descriptor is
      (Left, Right       : Internal_Token;
       Left_SN, Right_SN : Token_Safety_Net) return Boolean;
 
+   type Extract_Tokens_Type is access procedure
+     (Input       : Analysis.Lexer_Input;
+      With_Trivia : Boolean;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+
    type Create_Enum_Type is access function
      (Enum_Type   : Type_Index;
       Value_Index : Enum_Value_Index) return Internal_Value_Access;
@@ -155,8 +164,8 @@ package Liblktlang_Support.Internal.Descriptor is
      (Node      : Internal_Acc_Node;
       Member    : Struct_Member_Index;
       Arguments : Internal_Value_Array) return Internal_Value_Access;
-   type Is_Managed_Error_Type is access function
-     (Exc : Exception_Occurrence) return Boolean;
+   type Is_Managed_Exception_Type is access function
+     (Id : Exception_Id) return Boolean;
 
    type Language_Descriptor is limited record
       Language_Name : Text_Access;
@@ -174,6 +183,7 @@ package Liblktlang_Support.Internal.Descriptor is
 
       Token_Kinds        : Token_Kind_Descriptor_Array_Access;
       Token_Family_Names : Token_Family_Name_Array_Access;
+      Token_Termination  : Token_Kind_Index;
 
       --  Descriptors for introspection capabilities
 
@@ -204,6 +214,10 @@ package Liblktlang_Support.Internal.Descriptor is
       --  unparsers. Null otherwise.
 
       --  Implementation for generic operations
+
+      Get_Builtin_File : Get_Builtin_File_Type;
+      --  Return the bytes buffer for the builtin file identified by the given
+      --  filename. Return null if there is no such builtin file.
 
       Create_Context          : Create_Context_Type;
       Context_Inc_Ref         : Context_Inc_Ref_Type;
@@ -258,13 +272,15 @@ package Liblktlang_Support.Internal.Descriptor is
 
       Token_Is_Equivalent : Token_Is_Equivalent_Type;
 
+      Extract_Tokens : Extract_Tokens_Type;
+
       --  Operations to build/inspect generic data types
 
-      Create_Enum      : Create_Enum_Type;
-      Create_Array     : Create_Array_Type;
-      Create_Struct    : Create_Struct_Type;
-      Eval_Node_Member : Eval_Node_Member_Type;
-      Is_Managed_Error : Is_Managed_Error_Type;
+      Create_Enum          : Create_Enum_Type;
+      Create_Array         : Create_Array_Type;
+      Create_Struct        : Create_Struct_Type;
+      Eval_Node_Member     : Eval_Node_Member_Type;
+      Is_Managed_Exception : Is_Managed_Exception_Type;
    end record;
 
    function "+" is new Ada.Unchecked_Conversion

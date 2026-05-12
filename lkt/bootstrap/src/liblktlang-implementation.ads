@@ -20,6 +20,7 @@ with Ada.Containers.Vectors;
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;       use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
+with Ada.Tags;                    use Ada.Tags;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
@@ -36,6 +37,7 @@ with Liblktlang_Support.Adalog.Solver_Interface;
 with Liblktlang_Support.Bump_Ptr;     use Liblktlang_Support.Bump_Ptr;
 with Liblktlang_Support.Cheap_Sets;
 with Liblktlang_Support.File_Readers; use Liblktlang_Support.File_Readers;
+with Liblktlang_Support.Hashes;       use Liblktlang_Support.Hashes;
 with Liblktlang_Support.Internal.Analysis;
 with Liblktlang_Support.Lexical_Envs; use Liblktlang_Support.Lexical_Envs;
 with Liblktlang_Support.Lexical_Envs_Impl;
@@ -57,6 +59,7 @@ with Liblktlang.Common;  use Liblktlang.Common;
 
 private package Liblktlang.Implementation is
 
+   pragma Extensions_Allowed (On);
    pragma Suppress (Container_Checks);
 
    use Support.Diagnostics, Support.Slocs, Support.Text;
@@ -100,6 +103,7 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_Call, --  __call__
                Precomputed_Sym_Char, --  Char
                Precomputed_Sym_Dedent, --  dedent
+               Precomputed_Sym_Default_Metadata, --  __default_metadata
                Precomputed_Sym_Domain, --  domain
                Precomputed_Sym_Dont_Skip, --  dont_skip
                Precomputed_Sym_Entity, --  Entity
@@ -113,7 +117,6 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_Indent, --  indent
                Precomputed_Sym_Indexable, --  Indexable
                Precomputed_Sym_Int, --  Int
-               Precomputed_Sym_Internal, --  __internal
                Precomputed_Sym_Invalid, --  invalid
                Precomputed_Sym_Iterator, --  Iterator
                Precomputed_Sym_Keep, --  keep
@@ -122,11 +125,11 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_List_Elements, --  list_elements
                Precomputed_Sym_Logicvar, --  LogicVar
                Precomputed_Sym_Metadata, --  Metadata
-               Precomputed_Sym_Metadata_47, --  metadata
+               Precomputed_Sym_Metadata_49, --  metadata
                Precomputed_Sym_Newline, --  newline
                Precomputed_Sym_No_Case, --  no_case
                Precomputed_Sym_Node, --  Node
-               Precomputed_Sym_Node_50, --  node
+               Precomputed_Sym_Node_52, --  node
                Precomputed_Sym_Nodebuilder, --  NodeBuilder
                Precomputed_Sym_Null_Field, --  null_field
                Precomputed_Sym_Nullable, --  nullable
@@ -145,6 +148,7 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_Send, --  send
                Precomputed_Sym_Skip, --  skip
                Precomputed_Sym_Stop_Cut, --  stop_cut
+               Precomputed_Sym_Stream, --  Stream
                Precomputed_Sym_String, --  String
                Precomputed_Sym_Super, --  super
                Precomputed_Sym_Symbol, --  Symbol
@@ -153,6 +157,7 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_Tokennode, --  TokenNode
                Precomputed_Sym_True, --  true
                Precomputed_Sym_Update, --  update
+               Precomputed_Sym_User_Metadata, --  __user_metadata
                Precomputed_Sym_Var, --  var
                Precomputed_Sym_With_Dynvars --  with_dynvars
          )
@@ -1038,6 +1043,10 @@ private package Liblktlang.Implementation is
             with Dynamic_Predicate =>
                Is_Null (Bare_Pattern_Detail)
                or else Kind (Bare_Pattern_Detail) in Lkt_Pattern_Detail;
+         subtype Bare_Destructuring_Pattern_Detail is Bare_Lkt_Node
+            with Dynamic_Predicate =>
+               Is_Null (Bare_Destructuring_Pattern_Detail)
+               or else Kind (Bare_Destructuring_Pattern_Detail) in Lkt_Destructuring_Pattern_Detail_Range;
          subtype Bare_Field_Pattern_Detail is Bare_Lkt_Node
             with Dynamic_Predicate =>
                Is_Null (Bare_Field_Pattern_Detail)
@@ -1327,6 +1336,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Inner_Env_Assoc_Array_Record, Internal_Inner_Env_Assoc_Array_Access);
 
+      package Internal_Inner_Env_Assoc_Vectors is new Liblktlang_Support.Vectors (Internal_Inner_Env_Assoc);
+
+
       
 
    
@@ -1447,9 +1459,13 @@ private package Liblktlang.Implementation is
    pragma Pack (Ref_Categories);
 
    function Properties_May_Raise
-     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean;
-   --  Return if ``Exc`` is one of the exceptions that properties are allowed
+     (Id : Ada.Exceptions.Exception_Id) return Boolean;
+   --  Return if ``Id`` is one of the exceptions that properties are allowed
    --  to raise.
+
+   function Properties_May_Raise
+     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean
+   is (Properties_May_Raise (Ada.Exceptions.Exception_Identity (Exc)));
 
    package AST_Envs is new Liblktlang_Support.Lexical_Envs_Impl
      (Get_Unit_Version         => Unit_Version,
@@ -1470,9 +1486,32 @@ private package Liblktlang.Implementation is
       Inner_Env_Assoc_Array    => Internal_Inner_Env_Assoc_Array_Access,
       Get                      => Inner_Env_Assoc_Get);
 
-   use AST_Envs;
+   subtype Entity_Resolver is AST_Envs.Entity_Resolver;
+   subtype Inner_Env_Assocs_Resolver is AST_Envs.Inner_Env_Assocs_Resolver;
    subtype Internal_Entity is AST_Envs.Entity;
    subtype Internal_Entity_Info is AST_Envs.Entity_Info;
+   subtype Lexical_Env_Access is AST_Envs.Lexical_Env_Access;
+   subtype Lexical_Env_Resolver is AST_Envs.Lexical_Env_Resolver;
+
+   package Internal_Map_Node_Vectors
+     renames AST_Envs.Internal_Map_Node_Vectors;
+
+   function "=" (Left, Right : Internal_Entity) return Boolean
+     renames AST_Envs."=";
+   function Equivalent (Left, Right : Internal_Entity) return Boolean
+     renames AST_Envs.Equivalent;
+
+   function "=" (Left, Right : Internal_Entity_Info) return Boolean
+     renames AST_Envs."=";
+   function Equivalent (Left, Right : Internal_Entity_Info) return Boolean
+     renames AST_Envs.Equivalent;
+
+   procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
+   procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
+   function Equivalent (Left, Right : Lexical_Env) return Boolean
+     renames AST_Envs.Equivalent;
+
+   Empty_Env : Lexical_Env renames AST_Envs.Empty_Env;
 
    No_Entity_Info : constant Internal_Entity_Info :=
      (No_Metadata, null, False);
@@ -1498,6 +1537,8 @@ private package Liblktlang.Implementation is
       Sym_Table         : Symbol_Table) return Lexical_Env;
    --  Helper for properties code generation: wrapper around
    --  AST_Envs.Create_Dynamic_Lexical_Env.
+
+
 
       function Hash (B : Boolean) return Hash_Type;
 
@@ -1551,6 +1592,7 @@ private package Liblktlang.Implementation is
    function "-" (Left, Right : Big_Integer_Type) return Big_Integer_Type;
    function "-" (Value : Big_Integer_Type) return Big_Integer_Type;
 
+
    function Trace_Image (I : Big_Integer_Type) return String;
 
       function Trace_Image
@@ -1577,8 +1619,18 @@ private package Liblktlang.Implementation is
       Ref_Count : Integer;
       --  Negative values are interpreted as "always living singleton".
       --  Non-negative values have the usual ref-counting semantics.
+
+      Hash : Hash_Type;
+      --  Cached hash for this node builder. It is computed at node builder
+      --  creation.
    end record;
    type Node_Builder_Type is access all Node_Builder_Record'Class;
+
+   procedure Validate
+     (Self : Node_Builder_Record; Self_Node : Bare_Lkt_Node)
+   is null;
+   --  Raise a property error if it is invalid to instantiate this node builder
+   --  from ``Self_Node``'s unit (assumed not to be null).
 
    function Build
      (Self              : Node_Builder_Record;
@@ -1592,15 +1644,46 @@ private package Liblktlang.Implementation is
    --  This function is meant to be called in a property: ``Self_Node`` must be
    --  the ``Self`` of the calling property.
 
+   function Is_Equivalent
+     (Left  : Node_Builder_Record;
+      Right : Node_Builder_Record'Class) return Boolean
+   is abstract;
    function Trace_Image (Self : Node_Builder_Record) return String is abstract;
 
    procedure Release (Self : in out Node_Builder_Record) is null;
    --  Free resources for this node builder
 
+   function Hash (Self : Node_Builder_Type) return Hash_Type
+   is (if Self = null then Initial_Hash else Self.Hash);
+
+   function Equivalent (Left, Right : Node_Builder_Type) return Boolean
+   is (if Left = null
+       then Right = null
+       else Right /= null
+            and then Left.all'Tag = Right.all'Tag
+            and then Left.Is_Equivalent (Right.all));
+
    function Trace_Image (Self : Node_Builder_Type) return String
    is (if Self = null
        then "<NodeBuilder null>"
        else Self.Trace_Image);
+
+   function Node_Builder_Build_Wrapper
+     (Self              : Node_Builder_Type;
+      Parent, Self_Node : Bare_Lkt_Node) return Bare_Lkt_Node;
+   --  Wrapper around ``Node_Builder_Record.Build`` that performs validaty
+   --  check before running any node synthetization.
+
+   procedure Validate_Check_Child
+     (Desc      : String;
+      Builder   : Node_Builder_Type;
+      Nullable  : Boolean;
+      Self_Node : Bare_Lkt_Node);
+   --  Helper for the implementation of ``Node_Builder_Record.Validate`` for
+   --  synthetizing builders.
+   --
+   --  Ensure that ``Builder`` does not return a foreign node, and if
+   --  ``Nullable`` is false, that it does not return a null node.
 
    type Copy_Node_Builder_Record is new Node_Builder_Record with record
       Value : Bare_Lkt_Node;
@@ -1612,12 +1695,17 @@ private package Liblktlang.Implementation is
       Parent, Self_Node : Bare_Lkt_Node) return Bare_Lkt_Node
    is (Self.Value);
 
+   overriding function Is_Equivalent
+     (Left  : Copy_Node_Builder_Record;
+      Right : Node_Builder_Record'Class) return Boolean
+   is (Left.Value = Copy_Node_Builder_Record (Right).Value);
+
    overriding function Trace_Image
      (Self : Copy_Node_Builder_Record) return String
    is ("<NodeBuilder to copy " & Trace_Image (Self.Value) & ">");
 
    Null_Node_Builder_Record : aliased Copy_Node_Builder_Record :=
-     (Ref_Count => -1, Value => null);
+     (Ref_Count => -1, Hash => Initial_Hash, Value => null);
    Null_Node_Builder        : constant Node_Builder_Type :=
      Null_Node_Builder_Record'Access;
 
@@ -1629,6 +1717,11 @@ private package Liblktlang.Implementation is
 
    function Create_Copy_Node_Builder
      (Value : Bare_Lkt_Node) return Node_Builder_Type;
+
+   function Is_Synthetizing (Self : Node_Builder_Type) return Boolean
+   is (Self.all not in Copy_Node_Builder_Record'Class);
+   --  Return whether this node builder synthetizes nodes (i.e. it is not
+   --  copying existing nodes).
 
       subtype Bare_Synthetic_Type_Ref_List_Node_Builder is Node_Builder_Type;
       subtype Bare_Type_Ref_Node_Builder is Node_Builder_Type;
@@ -1650,7 +1743,7 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Complete_Item;
-      --  Completion item for language servers
+      --  Completion item for language servers.
 
          
       type Internal_Decoded_Char_Value;
@@ -1920,6 +2013,14 @@ private package Liblktlang.Implementation is
       
 
          
+      type Internal_Entity_Pattern_Detail;
+      
+
+         
+      type Internal_Entity_Destructuring_Pattern_Detail;
+      
+
+         
       type Internal_Entity_Dot_Expr;
       
 
@@ -2013,10 +2114,6 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Entity_Field_Decl;
-      
-
-         
-      type Internal_Entity_Pattern_Detail;
       
 
          
@@ -2585,7 +2682,7 @@ private package Liblktlang.Implementation is
 
          
       type Internal_Ref_Result;
-      --  Reference result struct
+      --  Reference result struct.
 
          
       type Internal_Solver_Diagnostic;
@@ -2873,6 +2970,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Decl) return Boolean;
 
    
       function Hash (R : Internal_Entity_Decl) return Hash_Type;
@@ -2896,6 +2994,7 @@ private package Liblktlang.Implementation is
 
 
 
+      function Equivalent (L, R : Internal_Complete_Item) return Boolean;
 
    
 
@@ -3023,6 +3122,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Expr) return Boolean;
 
    
 
@@ -3051,6 +3151,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Any_Of; Info : Internal_Entity_Info)
          return Internal_Entity_Any_Of;
 
+      function Equivalent (L, R : Internal_Entity_Any_Of) return Boolean;
 
    
 
@@ -3079,6 +3180,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lkt_Node_Base_List; Info : Internal_Entity_Info)
          return Internal_Entity_Lkt_Node_Base_List;
 
+      function Equivalent (L, R : Internal_Entity_Lkt_Node_Base_List) return Boolean;
 
    
 
@@ -3107,6 +3209,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Expr_List; Info : Internal_Entity_Info)
          return Internal_Entity_Expr_List;
 
+      function Equivalent (L, R : Internal_Entity_Expr_List) return Boolean;
 
    
 
@@ -3135,6 +3238,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Any_Of_List; Info : Internal_Entity_Info)
          return Internal_Entity_Any_Of_List;
 
+      function Equivalent (L, R : Internal_Entity_Any_Of_List) return Boolean;
 
    
 
@@ -3163,6 +3267,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Type_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Type_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Type_Decl) return Boolean;
 
    
       function Hash (R : Internal_Entity_Type_Decl) return Hash_Type;
@@ -3192,6 +3297,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Any_Type_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Any_Type_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Any_Type_Decl) return Boolean;
 
    
 
@@ -3220,6 +3326,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Pattern) return Boolean;
 
    
 
@@ -3248,6 +3355,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Any_Type_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Any_Type_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Any_Type_Pattern) return Boolean;
 
    
 
@@ -3276,6 +3384,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Argument; Info : Internal_Entity_Info)
          return Internal_Entity_Argument;
 
+      function Equivalent (L, R : Internal_Entity_Argument) return Boolean;
 
    
 
@@ -3304,6 +3413,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Argument_List; Info : Internal_Entity_Info)
          return Internal_Entity_Argument_List;
 
+      function Equivalent (L, R : Internal_Entity_Argument_List) return Boolean;
 
    
       function Hash (R : Internal_Entity_Argument_List) return Hash_Type;
@@ -3333,6 +3443,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Array_Literal; Info : Internal_Entity_Info)
          return Internal_Entity_Array_Literal;
 
+      function Equivalent (L, R : Internal_Entity_Array_Literal) return Boolean;
 
    
 
@@ -3361,6 +3472,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Base_Call_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Base_Call_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Base_Call_Expr) return Boolean;
 
    
 
@@ -3389,6 +3501,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Base_Grammar_Rule_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Base_Grammar_Rule_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Base_Grammar_Rule_Decl) return Boolean;
 
    
 
@@ -3417,6 +3530,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Base_Import; Info : Internal_Entity_Info)
          return Internal_Entity_Base_Import;
 
+      function Equivalent (L, R : Internal_Entity_Base_Import) return Boolean;
 
    
 
@@ -3445,6 +3559,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Base_Import_List; Info : Internal_Entity_Info)
          return Internal_Entity_Base_Import_List;
 
+      function Equivalent (L, R : Internal_Entity_Base_Import_List) return Boolean;
 
    
 
@@ -3473,6 +3588,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Base_Lexer_Case_Rule_Alt; Info : Internal_Entity_Info)
          return Internal_Entity_Base_Lexer_Case_Rule_Alt;
 
+      function Equivalent (L, R : Internal_Entity_Base_Lexer_Case_Rule_Alt) return Boolean;
 
    
 
@@ -3501,6 +3617,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Base_Lexer_Case_Rule_Alt_List; Info : Internal_Entity_Info)
          return Internal_Entity_Base_Lexer_Case_Rule_Alt_List;
 
+      function Equivalent (L, R : Internal_Entity_Base_Lexer_Case_Rule_Alt_List) return Boolean;
 
    
 
@@ -3529,6 +3646,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Base_Match_Branch; Info : Internal_Entity_Info)
          return Internal_Entity_Base_Match_Branch;
 
+      function Equivalent (L, R : Internal_Entity_Base_Match_Branch) return Boolean;
 
    
 
@@ -3557,6 +3675,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Base_Match_Branch_List; Info : Internal_Entity_Info)
          return Internal_Entity_Base_Match_Branch_List;
 
+      function Equivalent (L, R : Internal_Entity_Base_Match_Branch_List) return Boolean;
 
    
 
@@ -3585,6 +3704,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Base_Val_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Base_Val_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Base_Val_Decl) return Boolean;
 
    
 
@@ -3613,6 +3733,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Named_Type_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Named_Type_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Named_Type_Decl) return Boolean;
 
    
 
@@ -3641,6 +3762,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Basic_Class_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Basic_Class_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Basic_Class_Decl) return Boolean;
 
    
 
@@ -3669,6 +3791,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Lit) return Boolean;
 
    
 
@@ -3697,6 +3820,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Big_Num_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Big_Num_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Big_Num_Lit) return Boolean;
 
    
 
@@ -3725,6 +3849,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Bin_Op; Info : Internal_Entity_Info)
          return Internal_Entity_Bin_Op;
 
+      function Equivalent (L, R : Internal_Entity_Bin_Op) return Boolean;
 
    
 
@@ -3753,6 +3878,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_User_Val_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_User_Val_Decl;
 
+      function Equivalent (L, R : Internal_Entity_User_Val_Decl) return Boolean;
 
    
 
@@ -3781,6 +3907,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Binding_Val_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Binding_Val_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Binding_Val_Decl) return Boolean;
 
    
 
@@ -3809,6 +3936,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Block_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Block_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Block_Expr) return Boolean;
 
    
 
@@ -3837,6 +3965,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Block_Expr_Clause; Info : Internal_Entity_Info)
          return Internal_Entity_Block_Expr_Clause;
 
+      function Equivalent (L, R : Internal_Entity_Block_Expr_Clause) return Boolean;
 
    
 
@@ -3865,6 +3994,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Block_String_Line; Info : Internal_Entity_Info)
          return Internal_Entity_Block_String_Line;
 
+      function Equivalent (L, R : Internal_Entity_Block_String_Line) return Boolean;
 
    
 
@@ -3893,6 +4023,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Block_String_Line_List; Info : Internal_Entity_Info)
          return Internal_Entity_Block_String_Line_List;
 
+      function Equivalent (L, R : Internal_Entity_Block_String_Line_List) return Boolean;
 
    
 
@@ -3921,6 +4052,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_String_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_String_Lit;
 
+      function Equivalent (L, R : Internal_Entity_String_Lit) return Boolean;
 
    
 
@@ -3949,6 +4081,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Block_String_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Block_String_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Block_String_Lit) return Boolean;
 
    
 
@@ -3977,6 +4110,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Bool_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Bool_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Bool_Pattern) return Boolean;
 
    
 
@@ -4005,6 +4139,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Bool_Pattern_False; Info : Internal_Entity_Info)
          return Internal_Entity_Bool_Pattern_False;
 
+      function Equivalent (L, R : Internal_Entity_Bool_Pattern_False) return Boolean;
 
    
 
@@ -4033,6 +4168,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Bool_Pattern_True; Info : Internal_Entity_Info)
          return Internal_Entity_Bool_Pattern_True;
 
+      function Equivalent (L, R : Internal_Entity_Bool_Pattern_True) return Boolean;
 
    
 
@@ -4061,6 +4197,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Call_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Call_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Call_Expr) return Boolean;
 
    
 
@@ -4089,6 +4226,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Call_Expr_List; Info : Internal_Entity_Info)
          return Internal_Entity_Call_Expr_List;
 
+      function Equivalent (L, R : Internal_Entity_Call_Expr_List) return Boolean;
 
    
 
@@ -4117,6 +4255,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Cast_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Cast_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Cast_Expr) return Boolean;
 
    
 
@@ -4145,6 +4284,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Char_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Char_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Char_Lit) return Boolean;
 
    
 
@@ -4173,6 +4313,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Class_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Class_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Class_Decl) return Boolean;
 
    
 
@@ -4201,6 +4342,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Class_Qualifier; Info : Internal_Entity_Info)
          return Internal_Entity_Class_Qualifier;
 
+      function Equivalent (L, R : Internal_Entity_Class_Qualifier) return Boolean;
 
    
 
@@ -4229,6 +4371,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Class_Qualifier_Absent; Info : Internal_Entity_Info)
          return Internal_Entity_Class_Qualifier_Absent;
 
+      function Equivalent (L, R : Internal_Entity_Class_Qualifier_Absent) return Boolean;
 
    
 
@@ -4257,6 +4400,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Class_Qualifier_Present; Info : Internal_Entity_Info)
          return Internal_Entity_Class_Qualifier_Present;
 
+      function Equivalent (L, R : Internal_Entity_Class_Qualifier_Present) return Boolean;
 
    
 
@@ -4285,6 +4429,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Complex_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Complex_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Complex_Pattern) return Boolean;
 
    
 
@@ -4313,6 +4458,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Explicitly_Typed_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Explicitly_Typed_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Explicitly_Typed_Decl) return Boolean;
 
    
 
@@ -4341,6 +4487,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Component_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Component_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Component_Decl) return Boolean;
 
    
 
@@ -4369,6 +4516,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Decl_Annotation; Info : Internal_Entity_Info)
          return Internal_Entity_Decl_Annotation;
 
+      function Equivalent (L, R : Internal_Entity_Decl_Annotation) return Boolean;
 
    
 
@@ -4397,6 +4545,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Decl_Annotation_Args; Info : Internal_Entity_Info)
          return Internal_Entity_Decl_Annotation_Args;
 
+      function Equivalent (L, R : Internal_Entity_Decl_Annotation_Args) return Boolean;
 
    
 
@@ -4425,6 +4574,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Decl_Annotation_List; Info : Internal_Entity_Info)
          return Internal_Entity_Decl_Annotation_List;
 
+      function Equivalent (L, R : Internal_Entity_Decl_Annotation_List) return Boolean;
 
    
 
@@ -4453,6 +4603,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Full_Decl_List; Info : Internal_Entity_Info)
          return Internal_Entity_Full_Decl_List;
 
+      function Equivalent (L, R : Internal_Entity_Full_Decl_List) return Boolean;
 
    
 
@@ -4481,6 +4632,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Decl_Block; Info : Internal_Entity_Info)
          return Internal_Entity_Decl_Block;
 
+      function Equivalent (L, R : Internal_Entity_Decl_Block) return Boolean;
 
    
 
@@ -4509,6 +4661,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Id; Info : Internal_Entity_Info)
          return Internal_Entity_Id;
 
+      function Equivalent (L, R : Internal_Entity_Id) return Boolean;
 
    
 
@@ -4537,6 +4690,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Def_Id; Info : Internal_Entity_Info)
          return Internal_Entity_Def_Id;
 
+      function Equivalent (L, R : Internal_Entity_Def_Id) return Boolean;
 
    
 
@@ -4565,6 +4719,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Type_Ref; Info : Internal_Entity_Info)
          return Internal_Entity_Type_Ref;
 
+      function Equivalent (L, R : Internal_Entity_Type_Ref) return Boolean;
 
    
 
@@ -4593,11 +4748,70 @@ private package Liblktlang.Implementation is
         (Node : Bare_Default_List_Type_Ref; Info : Internal_Entity_Info)
          return Internal_Entity_Default_List_Type_Ref;
 
+      function Equivalent (L, R : Internal_Entity_Default_List_Type_Ref) return Boolean;
 
    
 
 
       function Trace_Image (R : Internal_Entity_Default_List_Type_Ref) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Pattern_Detail is record
+
+               Node : aliased Bare_Pattern_Detail;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Pattern_Detail : constant Internal_Entity_Pattern_Detail;
+
+
+      function Create_Internal_Entity_Pattern_Detail
+        (Node : Bare_Pattern_Detail; Info : Internal_Entity_Info)
+         return Internal_Entity_Pattern_Detail;
+
+      function Equivalent (L, R : Internal_Entity_Pattern_Detail) return Boolean;
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Pattern_Detail) return String;
+
+
+         
+
+      
+
+      type Internal_Entity_Destructuring_Pattern_Detail is record
+
+               Node : aliased Bare_Destructuring_Pattern_Detail;
+               --  The stored AST node
+               
+               Info : aliased Internal_Entity_Info;
+               --  Entity info for this node
+               
+      end record
+        with Convention => C;
+      No_Entity_Destructuring_Pattern_Detail : constant Internal_Entity_Destructuring_Pattern_Detail;
+
+
+      function Create_Internal_Entity_Destructuring_Pattern_Detail
+        (Node : Bare_Destructuring_Pattern_Detail; Info : Internal_Entity_Info)
+         return Internal_Entity_Destructuring_Pattern_Detail;
+
+      function Equivalent (L, R : Internal_Entity_Destructuring_Pattern_Detail) return Boolean;
+
+   
+
+
+      function Trace_Image (R : Internal_Entity_Destructuring_Pattern_Detail) return String;
 
 
          
@@ -4621,6 +4835,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Dot_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Dot_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Dot_Expr) return Boolean;
 
    
 
@@ -4649,6 +4864,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Dyn_Env_Wrapper; Info : Internal_Entity_Info)
          return Internal_Entity_Dyn_Env_Wrapper;
 
+      function Equivalent (L, R : Internal_Entity_Dyn_Env_Wrapper) return Boolean;
 
    
 
@@ -4677,6 +4893,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Dyn_Var_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Dyn_Var_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Dyn_Var_Decl) return Boolean;
 
    
 
@@ -4705,6 +4922,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Ellipsis_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Ellipsis_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Ellipsis_Pattern) return Boolean;
 
    
 
@@ -4733,6 +4951,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Elsif_Branch; Info : Internal_Entity_Info)
          return Internal_Entity_Elsif_Branch;
 
+      function Equivalent (L, R : Internal_Entity_Elsif_Branch) return Boolean;
 
    
 
@@ -4761,6 +4980,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Elsif_Branch_List; Info : Internal_Entity_Info)
          return Internal_Entity_Elsif_Branch_List;
 
+      function Equivalent (L, R : Internal_Entity_Elsif_Branch_List) return Boolean;
 
    
 
@@ -4789,6 +5009,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Enum_Class_Alt_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Enum_Class_Alt_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Enum_Class_Alt_Decl) return Boolean;
 
    
 
@@ -4817,6 +5038,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Enum_Class_Alt_Decl_List; Info : Internal_Entity_Info)
          return Internal_Entity_Enum_Class_Alt_Decl_List;
 
+      function Equivalent (L, R : Internal_Entity_Enum_Class_Alt_Decl_List) return Boolean;
 
    
 
@@ -4845,6 +5067,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Enum_Class_Case; Info : Internal_Entity_Info)
          return Internal_Entity_Enum_Class_Case;
 
+      function Equivalent (L, R : Internal_Entity_Enum_Class_Case) return Boolean;
 
    
 
@@ -4873,6 +5096,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Enum_Class_Case_List; Info : Internal_Entity_Info)
          return Internal_Entity_Enum_Class_Case_List;
 
+      function Equivalent (L, R : Internal_Entity_Enum_Class_Case_List) return Boolean;
 
    
 
@@ -4901,6 +5125,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Enum_Class_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Enum_Class_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Enum_Class_Decl) return Boolean;
 
    
 
@@ -4929,6 +5154,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Enum_Lit_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Enum_Lit_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Enum_Lit_Decl) return Boolean;
 
    
 
@@ -4957,6 +5183,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Enum_Lit_Decl_List; Info : Internal_Entity_Info)
          return Internal_Entity_Enum_Lit_Decl_List;
 
+      function Equivalent (L, R : Internal_Entity_Enum_Lit_Decl_List) return Boolean;
 
    
 
@@ -4985,6 +5212,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Enum_Type_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Enum_Type_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Enum_Type_Decl) return Boolean;
 
    
 
@@ -5013,6 +5241,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Env_Spec_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Env_Spec_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Env_Spec_Decl) return Boolean;
 
    
 
@@ -5041,6 +5270,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Error_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Error_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Error_Decl) return Boolean;
 
    
 
@@ -5069,6 +5299,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Expr) return Boolean;
 
    
 
@@ -5097,6 +5328,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Error_Grammar_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Error_Grammar_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Error_Grammar_Expr) return Boolean;
 
    
 
@@ -5125,6 +5357,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Error_Lexer_Case_Rule_Alt; Info : Internal_Entity_Info)
          return Internal_Entity_Error_Lexer_Case_Rule_Alt;
 
+      function Equivalent (L, R : Internal_Entity_Error_Lexer_Case_Rule_Alt) return Boolean;
 
    
 
@@ -5153,6 +5386,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Error_On_Null; Info : Internal_Entity_Info)
          return Internal_Entity_Error_On_Null;
 
+      function Equivalent (L, R : Internal_Entity_Error_On_Null) return Boolean;
 
    
 
@@ -5181,6 +5415,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Excludes_Null; Info : Internal_Entity_Info)
          return Internal_Entity_Excludes_Null;
 
+      function Equivalent (L, R : Internal_Entity_Excludes_Null) return Boolean;
 
    
 
@@ -5209,6 +5444,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Excludes_Null_Absent; Info : Internal_Entity_Info)
          return Internal_Entity_Excludes_Null_Absent;
 
+      function Equivalent (L, R : Internal_Entity_Excludes_Null_Absent) return Boolean;
 
    
 
@@ -5237,6 +5473,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Excludes_Null_Present; Info : Internal_Entity_Info)
          return Internal_Entity_Excludes_Null_Present;
 
+      function Equivalent (L, R : Internal_Entity_Excludes_Null_Present) return Boolean;
 
    
 
@@ -5265,39 +5502,12 @@ private package Liblktlang.Implementation is
         (Node : Bare_Field_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Field_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Field_Decl) return Boolean;
 
    
 
 
       function Trace_Image (R : Internal_Entity_Field_Decl) return String;
-
-
-         
-
-      
-
-      type Internal_Entity_Pattern_Detail is record
-
-               Node : aliased Bare_Pattern_Detail;
-               --  The stored AST node
-               
-               Info : aliased Internal_Entity_Info;
-               --  Entity info for this node
-               
-      end record
-        with Convention => C;
-      No_Entity_Pattern_Detail : constant Internal_Entity_Pattern_Detail;
-
-
-      function Create_Internal_Entity_Pattern_Detail
-        (Node : Bare_Pattern_Detail; Info : Internal_Entity_Info)
-         return Internal_Entity_Pattern_Detail;
-
-
-   
-
-
-      function Trace_Image (R : Internal_Entity_Pattern_Detail) return String;
 
 
          
@@ -5321,6 +5531,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Field_Pattern_Detail; Info : Internal_Entity_Info)
          return Internal_Entity_Field_Pattern_Detail;
 
+      function Equivalent (L, R : Internal_Entity_Field_Pattern_Detail) return Boolean;
 
    
 
@@ -5349,6 +5560,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Full_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Full_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Full_Decl) return Boolean;
 
    
 
@@ -5377,6 +5589,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Fun_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Fun_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Fun_Decl) return Boolean;
 
    
 
@@ -5405,6 +5618,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Fun_Param_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Fun_Param_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Fun_Param_Decl) return Boolean;
 
    
 
@@ -5433,6 +5647,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Fun_Param_Decl_List; Info : Internal_Entity_Info)
          return Internal_Entity_Fun_Param_Decl_List;
 
+      function Equivalent (L, R : Internal_Entity_Fun_Param_Decl_List) return Boolean;
 
    
 
@@ -5461,6 +5676,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Function_Type; Info : Internal_Entity_Info)
          return Internal_Entity_Function_Type;
 
+      function Equivalent (L, R : Internal_Entity_Function_Type) return Boolean;
 
    
 
@@ -5489,6 +5705,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Function_Type_Ref; Info : Internal_Entity_Info)
          return Internal_Entity_Function_Type_Ref;
 
+      function Equivalent (L, R : Internal_Entity_Function_Type_Ref) return Boolean;
 
    
 
@@ -5517,6 +5734,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Generic_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Generic_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Generic_Decl) return Boolean;
 
    
 
@@ -5545,6 +5763,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Generic_Instantiation; Info : Internal_Entity_Info)
          return Internal_Entity_Generic_Instantiation;
 
+      function Equivalent (L, R : Internal_Entity_Generic_Instantiation) return Boolean;
 
    
 
@@ -5573,6 +5792,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Generic_Param_Decl_List; Info : Internal_Entity_Info)
          return Internal_Entity_Generic_Param_Decl_List;
 
+      function Equivalent (L, R : Internal_Entity_Generic_Param_Decl_List) return Boolean;
 
    
 
@@ -5601,6 +5821,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Generic_Param_Type_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Generic_Param_Type_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Generic_Param_Type_Decl) return Boolean;
 
    
 
@@ -5629,6 +5850,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Generic_Type_Ref; Info : Internal_Entity_Info)
          return Internal_Entity_Generic_Type_Ref;
 
+      function Equivalent (L, R : Internal_Entity_Generic_Type_Ref) return Boolean;
 
    
 
@@ -5657,6 +5879,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Cut; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Cut;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Cut) return Boolean;
 
    
 
@@ -5685,6 +5908,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Decl) return Boolean;
 
    
 
@@ -5713,6 +5937,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Discard; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Discard;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Discard) return Boolean;
 
    
 
@@ -5741,6 +5966,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Dont_Skip; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Dont_Skip;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Dont_Skip) return Boolean;
 
    
 
@@ -5769,6 +5995,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Expr_List; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Expr_List;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Expr_List) return Boolean;
 
    
 
@@ -5797,6 +6024,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Expr_List_List; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Expr_List_List;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Expr_List_List) return Boolean;
 
    
 
@@ -5825,6 +6053,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Pick; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Pick;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Pick) return Boolean;
 
    
 
@@ -5853,6 +6082,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Implicit_Pick; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Implicit_Pick;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Implicit_Pick) return Boolean;
 
    
 
@@ -5881,6 +6111,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_List; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_List;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_List) return Boolean;
 
    
 
@@ -5909,6 +6140,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_List_Sep; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_List_Sep;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_List_Sep) return Boolean;
 
    
 
@@ -5937,6 +6169,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Null; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Null;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Null) return Boolean;
 
    
 
@@ -5965,6 +6198,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Opt; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Opt;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Opt) return Boolean;
 
    
 
@@ -5993,6 +6227,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Opt_Error; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Opt_Error;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Opt_Error) return Boolean;
 
    
 
@@ -6021,6 +6256,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Opt_Error_Group; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Opt_Error_Group;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Opt_Error_Group) return Boolean;
 
    
 
@@ -6049,6 +6285,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Opt_Group; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Opt_Group;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Opt_Group) return Boolean;
 
    
 
@@ -6077,6 +6314,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Or_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Or_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Or_Expr) return Boolean;
 
    
 
@@ -6105,6 +6343,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Predicate; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Predicate;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Predicate) return Boolean;
 
    
 
@@ -6133,6 +6372,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Rule_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Rule_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Rule_Decl) return Boolean;
 
    
 
@@ -6161,6 +6401,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Rule_Ref; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Rule_Ref;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Rule_Ref) return Boolean;
 
    
 
@@ -6189,6 +6430,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Skip; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Skip;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Skip) return Boolean;
 
    
 
@@ -6217,6 +6459,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Grammar_Stop_Cut; Info : Internal_Entity_Info)
          return Internal_Entity_Grammar_Stop_Cut;
 
+      function Equivalent (L, R : Internal_Entity_Grammar_Stop_Cut) return Boolean;
 
    
 
@@ -6245,6 +6488,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_If_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_If_Expr;
 
+      function Equivalent (L, R : Internal_Entity_If_Expr) return Boolean;
 
    
 
@@ -6273,6 +6517,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Import; Info : Internal_Entity_Info)
          return Internal_Entity_Import;
 
+      function Equivalent (L, R : Internal_Entity_Import) return Boolean;
 
    
 
@@ -6301,6 +6546,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Import_All_From; Info : Internal_Entity_Info)
          return Internal_Entity_Import_All_From;
 
+      function Equivalent (L, R : Internal_Entity_Import_All_From) return Boolean;
 
    
 
@@ -6329,6 +6575,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Import_From; Info : Internal_Entity_Info)
          return Internal_Entity_Import_From;
 
+      function Equivalent (L, R : Internal_Entity_Import_From) return Boolean;
 
    
 
@@ -6357,6 +6604,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Imported_Id; Info : Internal_Entity_Info)
          return Internal_Entity_Imported_Id;
 
+      function Equivalent (L, R : Internal_Entity_Imported_Id) return Boolean;
 
    
 
@@ -6385,6 +6633,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Imported_Name; Info : Internal_Entity_Info)
          return Internal_Entity_Imported_Name;
 
+      function Equivalent (L, R : Internal_Entity_Imported_Name) return Boolean;
 
    
 
@@ -6413,6 +6662,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Imported_Name_List; Info : Internal_Entity_Info)
          return Internal_Entity_Imported_Name_List;
 
+      function Equivalent (L, R : Internal_Entity_Imported_Name_List) return Boolean;
 
    
 
@@ -6441,6 +6691,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Integer_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Integer_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Integer_Pattern) return Boolean;
 
    
 
@@ -6469,6 +6720,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Isa; Info : Internal_Entity_Info)
          return Internal_Entity_Isa;
 
+      function Equivalent (L, R : Internal_Entity_Isa) return Boolean;
 
    
 
@@ -6497,6 +6749,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Keep_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Keep_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Keep_Expr) return Boolean;
 
    
 
@@ -6525,6 +6778,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lambda_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Lambda_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Lambda_Expr) return Boolean;
 
    
 
@@ -6553,6 +6807,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lambda_Param_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Lambda_Param_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Lambda_Param_Decl) return Boolean;
 
    
 
@@ -6581,6 +6836,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lambda_Param_Decl_List; Info : Internal_Entity_Info)
          return Internal_Entity_Lambda_Param_Decl_List;
 
+      function Equivalent (L, R : Internal_Entity_Lambda_Param_Decl_List) return Boolean;
 
    
 
@@ -6609,6 +6865,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Langkit_Root; Info : Internal_Entity_Info)
          return Internal_Entity_Langkit_Root;
 
+      function Equivalent (L, R : Internal_Entity_Langkit_Root) return Boolean;
 
    
 
@@ -6637,6 +6894,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lexer_Case_Rule; Info : Internal_Entity_Info)
          return Internal_Entity_Lexer_Case_Rule;
 
+      function Equivalent (L, R : Internal_Entity_Lexer_Case_Rule) return Boolean;
 
    
 
@@ -6665,6 +6923,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lexer_Case_Rule_Cond_Alt; Info : Internal_Entity_Info)
          return Internal_Entity_Lexer_Case_Rule_Cond_Alt;
 
+      function Equivalent (L, R : Internal_Entity_Lexer_Case_Rule_Cond_Alt) return Boolean;
 
    
 
@@ -6693,6 +6952,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lexer_Case_Rule_Default_Alt; Info : Internal_Entity_Info)
          return Internal_Entity_Lexer_Case_Rule_Default_Alt;
 
+      function Equivalent (L, R : Internal_Entity_Lexer_Case_Rule_Default_Alt) return Boolean;
 
    
 
@@ -6721,6 +6981,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lexer_Case_Rule_Send; Info : Internal_Entity_Info)
          return Internal_Entity_Lexer_Case_Rule_Send;
 
+      function Equivalent (L, R : Internal_Entity_Lexer_Case_Rule_Send) return Boolean;
 
    
 
@@ -6749,6 +7010,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lexer_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Lexer_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Lexer_Decl) return Boolean;
 
    
 
@@ -6777,6 +7039,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lexer_Family_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Lexer_Family_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Lexer_Family_Decl) return Boolean;
 
    
 
@@ -6805,6 +7068,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_List_Kind; Info : Internal_Entity_Info)
          return Internal_Entity_List_Kind;
 
+      function Equivalent (L, R : Internal_Entity_List_Kind) return Boolean;
 
    
 
@@ -6833,6 +7097,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_List_Kind_One; Info : Internal_Entity_Info)
          return Internal_Entity_List_Kind_One;
 
+      function Equivalent (L, R : Internal_Entity_List_Kind_One) return Boolean;
 
    
 
@@ -6861,6 +7126,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_List_Kind_Zero; Info : Internal_Entity_Info)
          return Internal_Entity_List_Kind_Zero;
 
+      function Equivalent (L, R : Internal_Entity_List_Kind_Zero) return Boolean;
 
    
 
@@ -6889,6 +7155,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_List_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_List_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_List_Pattern) return Boolean;
 
    
 
@@ -6917,6 +7184,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Lkt_Node_List; Info : Internal_Entity_Info)
          return Internal_Entity_Lkt_Node_List;
 
+      function Equivalent (L, R : Internal_Entity_Lkt_Node_List) return Boolean;
 
    
 
@@ -6945,6 +7213,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Logic_Assign; Info : Internal_Entity_Info)
          return Internal_Entity_Logic_Assign;
 
+      function Equivalent (L, R : Internal_Entity_Logic_Assign) return Boolean;
 
    
 
@@ -6973,6 +7242,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Logic_Call_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Logic_Call_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Logic_Call_Expr) return Boolean;
 
    
 
@@ -7001,6 +7271,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Logic_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Logic_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Logic_Expr) return Boolean;
 
    
 
@@ -7029,6 +7300,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Logic_Predicate; Info : Internal_Entity_Info)
          return Internal_Entity_Logic_Predicate;
 
+      function Equivalent (L, R : Internal_Entity_Logic_Predicate) return Boolean;
 
    
 
@@ -7057,6 +7329,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Logic_Propagate; Info : Internal_Entity_Info)
          return Internal_Entity_Logic_Propagate;
 
+      function Equivalent (L, R : Internal_Entity_Logic_Propagate) return Boolean;
 
    
 
@@ -7085,6 +7358,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Logic_Propagate_Call; Info : Internal_Entity_Info)
          return Internal_Entity_Logic_Propagate_Call;
 
+      function Equivalent (L, R : Internal_Entity_Logic_Propagate_Call) return Boolean;
 
    
 
@@ -7113,6 +7387,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Logic_Unify; Info : Internal_Entity_Info)
          return Internal_Entity_Logic_Unify;
 
+      function Equivalent (L, R : Internal_Entity_Logic_Unify) return Boolean;
 
    
 
@@ -7141,6 +7416,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Match_Branch; Info : Internal_Entity_Info)
          return Internal_Entity_Match_Branch;
 
+      function Equivalent (L, R : Internal_Entity_Match_Branch) return Boolean;
 
    
 
@@ -7169,6 +7445,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Match_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Match_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Match_Expr) return Boolean;
 
    
 
@@ -7197,6 +7474,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Match_Val_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Match_Val_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Match_Val_Decl) return Boolean;
 
    
 
@@ -7225,6 +7503,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Module_Doc_String_Line; Info : Internal_Entity_Info)
          return Internal_Entity_Module_Doc_String_Line;
 
+      function Equivalent (L, R : Internal_Entity_Module_Doc_String_Line) return Boolean;
 
    
 
@@ -7253,6 +7532,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Module_Doc_String_Line_List; Info : Internal_Entity_Info)
          return Internal_Entity_Module_Doc_String_Line_List;
 
+      function Equivalent (L, R : Internal_Entity_Module_Doc_String_Line_List) return Boolean;
 
    
 
@@ -7281,6 +7561,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Module_Doc_String_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Module_Doc_String_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Module_Doc_String_Lit) return Boolean;
 
    
 
@@ -7309,6 +7590,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Module_Id; Info : Internal_Entity_Info)
          return Internal_Entity_Module_Id;
 
+      function Equivalent (L, R : Internal_Entity_Module_Id) return Boolean;
 
    
 
@@ -7337,6 +7619,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Node_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Node_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Node_Decl) return Boolean;
 
    
 
@@ -7365,6 +7648,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Not_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Not_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Not_Expr) return Boolean;
 
    
 
@@ -7393,6 +7677,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Not_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Not_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Not_Pattern) return Boolean;
 
    
 
@@ -7421,6 +7706,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Null_Cond_Qualifier; Info : Internal_Entity_Info)
          return Internal_Entity_Null_Cond_Qualifier;
 
+      function Equivalent (L, R : Internal_Entity_Null_Cond_Qualifier) return Boolean;
 
    
 
@@ -7449,6 +7735,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Null_Cond_Qualifier_Absent; Info : Internal_Entity_Info)
          return Internal_Entity_Null_Cond_Qualifier_Absent;
 
+      function Equivalent (L, R : Internal_Entity_Null_Cond_Qualifier_Absent) return Boolean;
 
    
 
@@ -7477,6 +7764,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Null_Cond_Qualifier_Present; Info : Internal_Entity_Info)
          return Internal_Entity_Null_Cond_Qualifier_Present;
 
+      function Equivalent (L, R : Internal_Entity_Null_Cond_Qualifier_Present) return Boolean;
 
    
 
@@ -7505,6 +7793,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Null_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Null_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Null_Lit) return Boolean;
 
    
 
@@ -7533,6 +7822,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Null_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Null_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Null_Pattern) return Boolean;
 
    
 
@@ -7561,6 +7851,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Num_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Num_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Num_Lit) return Boolean;
 
    
 
@@ -7589,6 +7880,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op; Info : Internal_Entity_Info)
          return Internal_Entity_Op;
 
+      function Equivalent (L, R : Internal_Entity_Op) return Boolean;
 
    
 
@@ -7617,6 +7909,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Amp; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Amp;
 
+      function Equivalent (L, R : Internal_Entity_Op_Amp) return Boolean;
 
    
 
@@ -7645,6 +7938,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_And; Info : Internal_Entity_Info)
          return Internal_Entity_Op_And;
 
+      function Equivalent (L, R : Internal_Entity_Op_And) return Boolean;
 
    
 
@@ -7673,6 +7967,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Div; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Div;
 
+      function Equivalent (L, R : Internal_Entity_Op_Div) return Boolean;
 
    
 
@@ -7701,6 +7996,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Eq; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Eq;
 
+      function Equivalent (L, R : Internal_Entity_Op_Eq) return Boolean;
 
    
 
@@ -7729,6 +8025,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Gt; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Gt;
 
+      function Equivalent (L, R : Internal_Entity_Op_Gt) return Boolean;
 
    
 
@@ -7757,6 +8054,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Gte; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Gte;
 
+      function Equivalent (L, R : Internal_Entity_Op_Gte) return Boolean;
 
    
 
@@ -7785,6 +8083,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Logic_And; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Logic_And;
 
+      function Equivalent (L, R : Internal_Entity_Op_Logic_And) return Boolean;
 
    
 
@@ -7813,6 +8112,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Logic_Or; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Logic_Or;
 
+      function Equivalent (L, R : Internal_Entity_Op_Logic_Or) return Boolean;
 
    
 
@@ -7841,6 +8141,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Lt; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Lt;
 
+      function Equivalent (L, R : Internal_Entity_Op_Lt) return Boolean;
 
    
 
@@ -7869,6 +8170,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Lte; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Lte;
 
+      function Equivalent (L, R : Internal_Entity_Op_Lte) return Boolean;
 
    
 
@@ -7897,6 +8199,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Minus; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Minus;
 
+      function Equivalent (L, R : Internal_Entity_Op_Minus) return Boolean;
 
    
 
@@ -7925,6 +8228,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Mult; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Mult;
 
+      function Equivalent (L, R : Internal_Entity_Op_Mult) return Boolean;
 
    
 
@@ -7953,6 +8257,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Ne; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Ne;
 
+      function Equivalent (L, R : Internal_Entity_Op_Ne) return Boolean;
 
    
 
@@ -7981,6 +8286,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Or; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Or;
 
+      function Equivalent (L, R : Internal_Entity_Op_Or) return Boolean;
 
    
 
@@ -8009,6 +8315,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Or_Int; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Or_Int;
 
+      function Equivalent (L, R : Internal_Entity_Op_Or_Int) return Boolean;
 
    
 
@@ -8037,6 +8344,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Plus; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Plus;
 
+      function Equivalent (L, R : Internal_Entity_Op_Plus) return Boolean;
 
    
 
@@ -8065,6 +8373,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Stream_Concat; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Stream_Concat;
 
+      function Equivalent (L, R : Internal_Entity_Op_Stream_Concat) return Boolean;
 
    
 
@@ -8093,6 +8402,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Op_Stream_Cons; Info : Internal_Entity_Info)
          return Internal_Entity_Op_Stream_Cons;
 
+      function Equivalent (L, R : Internal_Entity_Op_Stream_Cons) return Boolean;
 
    
 
@@ -8121,6 +8431,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Or_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Or_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Or_Pattern) return Boolean;
 
    
 
@@ -8149,6 +8460,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Paren_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Paren_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Paren_Expr) return Boolean;
 
    
 
@@ -8177,6 +8489,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Paren_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Paren_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Paren_Pattern) return Boolean;
 
    
 
@@ -8205,6 +8518,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Parse_Node_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Parse_Node_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Parse_Node_Expr) return Boolean;
 
    
 
@@ -8233,6 +8547,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Pattern_Detail_List; Info : Internal_Entity_Info)
          return Internal_Entity_Pattern_Detail_List;
 
+      function Equivalent (L, R : Internal_Entity_Pattern_Detail_List) return Boolean;
 
    
 
@@ -8261,6 +8576,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Pattern_List; Info : Internal_Entity_Info)
          return Internal_Entity_Pattern_List;
 
+      function Equivalent (L, R : Internal_Entity_Pattern_List) return Boolean;
 
    
 
@@ -8289,6 +8605,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Pattern_Match_Branch; Info : Internal_Entity_Info)
          return Internal_Entity_Pattern_Match_Branch;
 
+      function Equivalent (L, R : Internal_Entity_Pattern_Match_Branch) return Boolean;
 
    
 
@@ -8317,6 +8634,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Single_Line_String_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Single_Line_String_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Single_Line_String_Lit) return Boolean;
 
    
 
@@ -8345,6 +8663,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Pattern_Single_Line_String_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Pattern_Single_Line_String_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Pattern_Single_Line_String_Lit) return Boolean;
 
    
 
@@ -8373,6 +8692,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Property_Pattern_Detail; Info : Internal_Entity_Info)
          return Internal_Entity_Property_Pattern_Detail;
 
+      function Equivalent (L, R : Internal_Entity_Property_Pattern_Detail) return Boolean;
 
    
 
@@ -8401,6 +8721,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Query; Info : Internal_Entity_Info)
          return Internal_Entity_Query;
 
+      function Equivalent (L, R : Internal_Entity_Query) return Boolean;
 
    
 
@@ -8429,6 +8750,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Raise_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Raise_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Raise_Expr) return Boolean;
 
    
 
@@ -8457,6 +8779,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Ref_Id; Info : Internal_Entity_Info)
          return Internal_Entity_Ref_Id;
 
+      function Equivalent (L, R : Internal_Entity_Ref_Id) return Boolean;
 
    
 
@@ -8485,6 +8808,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Ref_Id_List; Info : Internal_Entity_Info)
          return Internal_Entity_Ref_Id_List;
 
+      function Equivalent (L, R : Internal_Entity_Ref_Id_List) return Boolean;
 
    
 
@@ -8513,6 +8837,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Regex_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Regex_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Regex_Pattern) return Boolean;
 
    
 
@@ -8541,6 +8866,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Renaming_Complex_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Renaming_Complex_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Renaming_Complex_Pattern) return Boolean;
 
    
 
@@ -8569,6 +8895,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Self_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Self_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Self_Decl) return Boolean;
 
    
 
@@ -8597,6 +8924,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Simple_Type_Ref; Info : Internal_Entity_Info)
          return Internal_Entity_Simple_Type_Ref;
 
+      function Equivalent (L, R : Internal_Entity_Simple_Type_Ref) return Boolean;
 
    
 
@@ -8625,6 +8953,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Struct_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Struct_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Struct_Decl) return Boolean;
 
    
 
@@ -8653,6 +8982,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Subscript_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Subscript_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Subscript_Expr) return Boolean;
 
    
 
@@ -8681,6 +9011,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Synth_Fun_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Synth_Fun_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Synth_Fun_Decl) return Boolean;
 
    
 
@@ -8709,6 +9040,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Synth_Param_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Synth_Param_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Synth_Param_Decl) return Boolean;
 
    
 
@@ -8737,6 +9069,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Synthetic_Lexer_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Synthetic_Lexer_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Synthetic_Lexer_Decl) return Boolean;
 
    
 
@@ -8765,6 +9098,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Type_Ref_List; Info : Internal_Entity_Info)
          return Internal_Entity_Type_Ref_List;
 
+      function Equivalent (L, R : Internal_Entity_Type_Ref_List) return Boolean;
 
    
 
@@ -8793,6 +9127,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Synthetic_Type_Ref_List; Info : Internal_Entity_Info)
          return Internal_Entity_Synthetic_Type_Ref_List;
 
+      function Equivalent (L, R : Internal_Entity_Synthetic_Type_Ref_List) return Boolean;
 
    
 
@@ -8821,6 +9156,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Token_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Token_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Token_Lit) return Boolean;
 
    
 
@@ -8849,6 +9185,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Token_No_Case_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Token_No_Case_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Token_No_Case_Lit) return Boolean;
 
    
 
@@ -8877,6 +9214,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Token_Pattern_Concat; Info : Internal_Entity_Info)
          return Internal_Entity_Token_Pattern_Concat;
 
+      function Equivalent (L, R : Internal_Entity_Token_Pattern_Concat) return Boolean;
 
    
 
@@ -8905,6 +9243,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Token_Pattern_Lit; Info : Internal_Entity_Info)
          return Internal_Entity_Token_Pattern_Lit;
 
+      function Equivalent (L, R : Internal_Entity_Token_Pattern_Lit) return Boolean;
 
    
 
@@ -8933,6 +9272,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Token_Ref; Info : Internal_Entity_Info)
          return Internal_Entity_Token_Ref;
 
+      function Equivalent (L, R : Internal_Entity_Token_Ref) return Boolean;
 
    
 
@@ -8961,6 +9301,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Trait_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Trait_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Trait_Decl) return Boolean;
 
    
 
@@ -8989,6 +9330,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Try_Expr; Info : Internal_Entity_Info)
          return Internal_Entity_Try_Expr;
 
+      function Equivalent (L, R : Internal_Entity_Try_Expr) return Boolean;
 
    
 
@@ -9017,6 +9359,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Type_Pattern; Info : Internal_Entity_Info)
          return Internal_Entity_Type_Pattern;
 
+      function Equivalent (L, R : Internal_Entity_Type_Pattern) return Boolean;
 
    
 
@@ -9045,6 +9388,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Un_Op; Info : Internal_Entity_Info)
          return Internal_Entity_Un_Op;
 
+      function Equivalent (L, R : Internal_Entity_Un_Op) return Boolean;
 
    
 
@@ -9073,6 +9417,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Val_Decl; Info : Internal_Entity_Info)
          return Internal_Entity_Val_Decl;
 
+      function Equivalent (L, R : Internal_Entity_Val_Decl) return Boolean;
 
    
 
@@ -9101,6 +9446,7 @@ private package Liblktlang.Implementation is
         (Node : Bare_Var_Bind; Info : Internal_Entity_Info)
          return Internal_Entity_Var_Bind;
 
+      function Equivalent (L, R : Internal_Entity_Var_Bind) return Boolean;
 
    
 
@@ -9160,6 +9506,7 @@ private package Liblktlang.Implementation is
 
 
 
+      function Equivalent (L, R : Internal_Logic_Context) return Boolean;
 
    
 
@@ -9194,6 +9541,7 @@ private package Liblktlang.Implementation is
 
 
 
+      function Equivalent (L, R : Internal_Resolved_Param) return Boolean;
 
    
       function Hash (R : Internal_Resolved_Param) return Hash_Type;
@@ -9223,6 +9571,7 @@ private package Liblktlang.Implementation is
 
 
 
+      function Equivalent (L, R : Internal_Param_Match) return Boolean;
 
    
 
@@ -9245,6 +9594,7 @@ private package Liblktlang.Implementation is
 
 
 
+      function Equivalent (L, R : Internal_Ref_Result) return Boolean;
 
    
 
@@ -9381,6 +9731,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Bare_Id_Array_Record, Bare_Id_Array_Access);
 
+      package Bare_Id_Vectors is new Liblktlang_Support.Vectors (Bare_Id);
+
+
          
 
    
@@ -9437,6 +9790,8 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Bare_Lkt_Node_Array_Record, Bare_Lkt_Node_Array_Access);
 
+
+
          
 
    
@@ -9489,9 +9844,12 @@ private package Liblktlang.Implementation is
       function Trace_Image (A : Bare_Type_Ref_Node_Builder_Array_Access) return String;
 
 
+      function Hash (R : Bare_Type_Ref_Node_Builder_Array_Access) return Hash_Type;
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Bare_Type_Ref_Node_Builder_Array_Record, Bare_Type_Ref_Node_Builder_Array_Access);
+
+
 
          
 
@@ -9549,6 +9907,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Integer_Array_Record, Integer_Array_Access);
 
+      package Integer_Vectors is new Liblktlang_Support.Vectors (Integer);
+
+
          
 
    
@@ -9605,6 +9966,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Complete_Item_Array_Record, Internal_Complete_Item_Array_Access);
 
+      package Internal_Complete_Item_Vectors is new Liblktlang_Support.Vectors (Internal_Complete_Item);
+
+
          
 
    
@@ -9660,6 +10024,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Argument_Array_Record, Internal_Entity_Argument_Array_Access);
+
+      package Internal_Entity_Argument_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Argument);
+
 
          
 
@@ -9719,6 +10086,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Array_Record, Internal_Entity_Array_Access);
 
+      package Internal_Entity_Vectors is new Liblktlang_Support.Vectors (Internal_Entity);
+
+
          
 
    
@@ -9774,6 +10144,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Def_Id_Array_Record, Internal_Entity_Def_Id_Array_Access);
+
+      package Internal_Entity_Def_Id_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Def_Id);
+
 
          
 
@@ -9831,6 +10204,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Enum_Class_Alt_Decl_Array_Record, Internal_Entity_Enum_Class_Alt_Decl_Array_Access);
 
+      package Internal_Entity_Enum_Class_Alt_Decl_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Enum_Class_Alt_Decl);
+
+
          
 
    
@@ -9886,6 +10262,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Expr_Array_Record, Internal_Entity_Expr_Array_Access);
+
+      package Internal_Entity_Expr_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Expr);
+
 
          
 
@@ -9943,6 +10322,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Field_Decl_Array_Record, Internal_Entity_Field_Decl_Array_Access);
 
+      package Internal_Entity_Field_Decl_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Field_Decl);
+
+
          
 
    
@@ -9998,6 +10380,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Full_Decl_Array_Record, Internal_Entity_Full_Decl_Array_Access);
+
+      package Internal_Entity_Full_Decl_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Full_Decl);
+
 
          
 
@@ -10055,6 +10440,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Fun_Decl_Array_Record, Internal_Entity_Fun_Decl_Array_Access);
 
+      package Internal_Entity_Fun_Decl_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Fun_Decl);
+
+
          
 
    
@@ -10110,6 +10498,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Fun_Param_Decl_Array_Record, Internal_Entity_Fun_Param_Decl_Array_Access);
+
+      package Internal_Entity_Fun_Param_Decl_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Fun_Param_Decl);
+
 
          
 
@@ -10167,6 +10558,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Generic_Param_Type_Decl_Array_Record, Internal_Entity_Generic_Param_Type_Decl_Array_Access);
 
+      package Internal_Entity_Generic_Param_Type_Decl_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Generic_Param_Type_Decl);
+
+
          
 
    
@@ -10222,6 +10616,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Ref_Id_Array_Record, Internal_Entity_Ref_Id_Array_Access);
+
+      package Internal_Entity_Ref_Id_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Ref_Id);
+
 
          
 
@@ -10280,6 +10677,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Entity_Type_Decl_Array_Record, Internal_Entity_Type_Decl_Array_Access);
 
+      package Internal_Entity_Type_Decl_Vectors is new Liblktlang_Support.Vectors (Internal_Entity_Type_Decl);
+
+
          
 
    
@@ -10335,6 +10735,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Env_Assoc_Array_Record, Internal_Env_Assoc_Array_Access);
+
+      package Internal_Env_Assoc_Vectors is new Liblktlang_Support.Vectors (Internal_Env_Assoc);
+
 
          
 
@@ -10392,6 +10795,8 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Logic_Context_Array_Record, Internal_Logic_Context_Array_Access);
 
+
+
          
 
    
@@ -10448,6 +10853,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Param_Match_Array_Record, Internal_Param_Match_Array_Access);
 
+      package Internal_Param_Match_Vectors is new Liblktlang_Support.Vectors (Internal_Param_Match);
+
+
          
 
    
@@ -10503,6 +10911,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Ref_Result_Array_Record, Internal_Ref_Result_Array_Access);
+
+      package Internal_Ref_Result_Vectors is new Liblktlang_Support.Vectors (Internal_Ref_Result);
+
 
          
 
@@ -10561,6 +10972,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Resolved_Param_Array_Record, Internal_Resolved_Param_Array_Access);
 
+      package Internal_Resolved_Param_Vectors is new Liblktlang_Support.Vectors (Internal_Resolved_Param);
+
+
          
 
    
@@ -10616,6 +11030,8 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Solver_Diagnostic_Array_Record, Internal_Solver_Diagnostic_Array_Access);
+
+
 
          
 
@@ -10673,6 +11089,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Internal_Unit_Array_Record, Internal_Unit_Array_Access);
 
+      package Internal_Unit_Vectors is new Liblktlang_Support.Vectors (Internal_Unit);
+
+
          
 
    
@@ -10728,6 +11147,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Lexical_Env_Array_Record, Lexical_Env_Array_Access);
+
+      package Lexical_Env_Vectors is new Liblktlang_Support.Vectors (Lexical_Env);
+
 
          
 
@@ -10785,6 +11207,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (Logic_Equation_Array_Record, Logic_Equation_Array_Access);
 
+      package Logic_Equation_Vectors is new Liblktlang_Support.Vectors (Logic_Equation);
+
+
          
 
    
@@ -10840,6 +11265,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Logic_Var_Array_Record, Logic_Var_Array_Access);
+
+      package Logic_Var_Vectors is new Liblktlang_Support.Vectors (Logic_Var);
+
 
          
 
@@ -10902,6 +11330,9 @@ private package Liblktlang.Implementation is
   procedure Free is new Ada.Unchecked_Deallocation
     (String_Type_Array_Record, String_Type_Array_Access);
 
+      package String_Type_Vectors is new Liblktlang_Support.Vectors (String_Type);
+
+
          
 
    
@@ -10957,6 +11388,9 @@ private package Liblktlang.Implementation is
 
   procedure Free is new Ada.Unchecked_Deallocation
     (Symbol_Type_Array_Record, Symbol_Type_Array_Access);
+
+      package Symbol_Type_Vectors is new Liblktlang_Support.Vectors (Symbol_Type);
+
 
 
    --------------------
@@ -11476,6 +11910,7 @@ Lkt_Or_Pattern => 2,
 Lkt_Paren_Pattern => 1, 
 Lkt_Regex_Pattern => 0, 
 Lkt_Type_Pattern => 1, 
+Lkt_Destructuring_Pattern_Detail => 1, 
 Lkt_Field_Pattern_Detail => 2, 
 Lkt_Property_Pattern_Detail => 2, 
 Lkt_Default_List_Type_Ref => 0, 
@@ -12283,9 +12718,9 @@ Lkt_Var_Bind => 2);
                No_Bare_Lkt_Node;
             Langkit_Root_F_Decls : aliased Bare_Full_Decl_List :=
                No_Bare_Lkt_Node;
-            Internal_Bare_Langkit_Root_Lf_State_Empty_Type_Ref_List_26 : aliased Initialization_State :=
+            Internal_Bare_Langkit_Root_Lf_State_Empty_Type_Ref_List_27 : aliased Initialization_State :=
                Uninitialized;
-            Internal_Bare_Langkit_Root_Lf_Stg_Empty_Type_Ref_List_27 : aliased Bare_Synthetic_Type_Ref_List :=
+            Internal_Bare_Langkit_Root_Lf_Stg_Empty_Type_Ref_List_28 : aliased Bare_Synthetic_Type_Ref_List :=
                No_Bare_Lkt_Node;
 
          
@@ -12584,9 +13019,9 @@ Lkt_Var_Bind => 2);
                No_Symbol_Type_Array_Type;
             Dyn_Env_Wrapper_F_Types : aliased Internal_Entity_Type_Decl_Array_Access :=
                No_Internal_Entity_Type_Decl_Array_Type;
-            Internal_Bare_Dyn_Env_Wrapper_Lf_State_Dynenvwrapper_Instantiation_Env_28 : aliased Initialization_State :=
+            Internal_Bare_Dyn_Env_Wrapper_Lf_State_Dynenvwrapper_Instantiation_Env_29 : aliased Initialization_State :=
                Uninitialized;
-            Internal_Bare_Dyn_Env_Wrapper_Lf_Stg_Dynenvwrapper_Instantiation_Env_29 : aliased Lexical_Env :=
+            Internal_Bare_Dyn_Env_Wrapper_Lf_Stg_Dynenvwrapper_Instantiation_Env_30 : aliased Lexical_Env :=
                Empty_Env;
 
          
@@ -14630,6 +15065,19 @@ Lkt_Var_Bind => 2);
 
 
             case Kind is
+                  when Lkt_Destructuring_Pattern_Detail_Range =>
+                     
+         
+
+
+            Destructuring_Pattern_Detail_F_Decl : aliased Bare_Binding_Val_Decl :=
+               No_Bare_Lkt_Node;
+
+         
+
+
+
+      
                   when Lkt_Field_Pattern_Detail_Range =>
                      
          
@@ -14650,7 +15098,7 @@ Lkt_Var_Bind => 2);
          
 
 
-            Property_Pattern_Detail_F_Call : aliased Bare_Expr :=
+            Property_Pattern_Detail_F_Call : aliased Bare_Call_Expr :=
                No_Bare_Lkt_Node;
             Property_Pattern_Detail_F_Expected_Value : aliased Bare_Pattern :=
                No_Bare_Lkt_Node;
@@ -15021,7 +15469,7 @@ Lkt_Var_Bind => 2);
 
 
 
-         
+      
 
 
 
@@ -15034,11 +15482,14 @@ function Node_Env
   )
 
    return Lexical_Env
+
+   
    ;
 --  For nodes that introduce a new environment, return the parent lexical
 --  environment. Return the "inherited" environment otherwise.
 
-         
+
+      
 
 
 
@@ -15051,11 +15502,14 @@ function Children_Env
   )
 
    return Lexical_Env
+
+   
    ;
 --  For nodes that introduce a new environment, return it. Return the
 --  "inherited" environment otherwise.
 
-         
+
+      
 
 
 
@@ -15068,10 +15522,13 @@ function Parent
   )
 
    return Internal_Entity
+
+   
    ;
 --  Return the syntactic parent for this node. Return null for the root node.
 
-         
+
+      
 
 
 
@@ -15086,11 +15543,14 @@ function Parents
   )
 
    return Internal_Entity_Array_Access
+
+   
    ;
 --  Return an array that contains the lexical parents, this node included iff
 --  ``with_self`` is True. Nearer parents are first in the list.
 
-         
+
+      
 
 
 
@@ -15103,13 +15563,16 @@ function Children
   )
 
    return Internal_Entity_Array_Access
+
+   
    ;
 --  Return an array that contains the direct lexical children.
 --
 --  .. warning:: This constructs a whole array every-time you call it, and as
 --     such is less efficient than calling the ``Child`` built-in.
 
-         
+
+      
 
 
 
@@ -15120,10 +15583,13 @@ function Token_Start
   )
 
    return Token_Reference
+
+   
    ;
 --  Return the first token used to parse this node.
 
-         
+
+      
 
 
 
@@ -15134,10 +15600,13 @@ function Token_End
   )
 
    return Token_Reference
+
+   
    ;
 --  Return the last token used to parse this node.
 
-         
+
+      
 
 
 
@@ -15148,10 +15617,13 @@ function Child_Index
   )
 
    return Integer
+
+   
    ;
 --  Return the 0-based index for Node in its parent's children.
 
-         
+
+      
 
 
 
@@ -15164,10 +15636,13 @@ function Previous_Sibling
   )
 
    return Internal_Entity
+
+   
    ;
 --  Return the node's previous sibling, or null if there is no such sibling.
 
-         
+
+      
 
 
 
@@ -15180,10 +15655,13 @@ function Next_Sibling
   )
 
    return Internal_Entity
+
+   
    ;
 --  Return the node's next sibling, or null if there is no such sibling.
 
-         
+
+      
 
 
 
@@ -15194,10 +15672,13 @@ function Unit
   )
 
    return Internal_Unit
+
+   
    ;
 --  Return the analysis unit owning this node.
 
-         
+
+      
 
 
 
@@ -15208,11 +15689,14 @@ function Ple_Root
   )
 
    return Bare_Lkt_Node
+
+   
    ;
 --  Return the PLE root that owns this node, or the unit root node if this unit
 --  has no PLE root.
 
-         
+
+      
 
 
 
@@ -15223,6 +15707,8 @@ function Is_Ghost
   )
 
    return Boolean
+
+   
    ;
 --  Return whether the node is a ghost.
 --
@@ -15231,7 +15717,8 @@ function Is_Ghost
 --  and the ``token_end`` of all ghost nodes is the token right after this
 --  logical position.
 
-         
+
+      
 
 
 
@@ -15242,11 +15729,14 @@ function Text
   )
 
    return String_Type
+
+   
    ;
 --  Return the text corresponding to this node. Private property (for internal
 --  DSL use).
 
-         
+
+      
 
 
 
@@ -15257,11 +15747,14 @@ function Full_Sloc_Image
   )
 
    return String_Type
+
+   
    ;
 --  Return a string containing the filename + the sloc in GNU conformant
 --  format. Useful to create diagnostics from a node.
 
-         
+
+      
 
 
 
@@ -15273,919 +15766,14 @@ function Completion_Item_Kind_To_Int
   )
 
    return Integer
+
+   
    ;
 --  Convert a CompletionItemKind enum to its corresponding integer value.
 
-         
-
-
-
-
-function Lkt_Node_P_Prelude_Env
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Lexical_Env
-   ;
---  Return the lexical env that contains all definitions from the prelude.
-
-         
-
-
-
-
-function Lkt_Node_P_Is_From_Prelude
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Boolean
-   ;
---  Return wether this node belongs to the Lkt prelude unit.
-
-         
-
-
-
-
-function Lkt_Node_P_Root_Env
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Lexical_Env
-   ;
-
-
-         
-
-
-
-
-function Lkt_Node_P_Root_Get
-   
-  (Node : Bare_Lkt_Node
-      ; Entity_Name : Symbol_Type
-  )
-
-   return Internal_Entity_Decl
-   ;
-
-
-         
-
-
-
-
-function Lkt_Node_P_Get_Builtin_Type
-   
-  (Node : Bare_Lkt_Node
-      ; Entity_Name : Symbol_Type
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
-
-
-         
-
-
-
-
-function Lkt_Node_P_Get_Builtin_Gen_Decl
-   
-  (Node : Bare_Lkt_Node
-      ; Entity_Name : Symbol_Type
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
-
-
-         
-
-
-
-
-function Lkt_Node_P_Basic_Trait_Gen
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ``BasicTrait`` builtin generic trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Basic_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the ``BasicTrait`` builtin trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Node_Gen_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ``Node`` builtin generic trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Node_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the ``Node`` builtin trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Indexable_Gen_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ``Node`` builtin generic trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Indexable_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the ``Node`` builtin trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Token_Node_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the ``TokenNode`` builtin trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Error_Node_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the ``ErrorNode`` builtin trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Char_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the character builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Int_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the integer builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Bool_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the boolean builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Bigint_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the big integer builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_String_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the string builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Symbol_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the string builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Property_Error_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the property error builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Regexp_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the regexp builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Entity_Gen_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the logicvar builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Entity_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the logicvar builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Logicvar_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the logicvar builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Equation_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the logicvar builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Array_Gen_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the array builtin generic type.
-
-         
-
-
-
-
-function Lkt_Node_P_Array_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the array builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Astlist_Gen_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ASTList builtin generic type.
-
-         
-
-
-
-
-function Lkt_Node_P_Astlist_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the ASTList builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Node_Builder_Gen_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the NodeBuilder builtin generic type.
-
-         
-
-
-
-
-function Lkt_Node_P_Node_Builder_Type
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Named_Type_Decl
-   ;
---  Unit method. Return the NodeBuilder builtin type.
-
-         
-
-
-
-
-function Lkt_Node_P_Iterator_Gen_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the Iterator builtin generic trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Iterator_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the Iterator builtin trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Analysis_Unit_Gen_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Generic_Decl
-   ;
---  Unit method. Return the ``AnalysisUnit`` builtin generic trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Analysis_Unit_Trait
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Internal_Entity_Trait_Decl
-   ;
---  Unit method. Return the ``AnalysisUnit`` builtin trait.
-
-         
-
-
-
-
-function Lkt_Node_P_Get_Empty_Type_Ref_List
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Bare_Synthetic_Type_Ref_List
-   ;
---  Return an empty synthetic TypeRef list node. Used to generate synthetic
---  type declarations.
-
-         
-
-
-
-
-function Lkt_Node_P_Any_Type
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Create a AnyTypeDecl.
-
-         
-
-
-
-
-function Lkt_Node_P_Referenced_Module
-   
-  (Node : Bare_Lkt_Node
-      ; Module_Name : Bare_Id
-  )
-
-   return Internal_Entity
-   ;
---  Static method. Convenience wrapper around
---  ``internal_fetch_referenced_unit`` to get the ``LangkitRoot`` as an entity
---  for a given module. Used to write lexical env resolvers.
-
-         
-
-
-
-
-function Lkt_Node_P_Topmost_Invalid_Decl
-   
-  (Node : Bare_Lkt_Node
-  )
-
-   return Bare_Lkt_Node
-   ;
---  Return the topmost (from ``Self`` to the root node) FullDecl annotated with
---  ``@invalid``, null otherwise.
-
-         
-
-
-
-
-function Lkt_Node_P_Nameres_Diagnostics
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Solver_Diagnostic_Array_Access
-   ;
---  If name resolution on this lkt compilation unit fails, this returns all the
---  diagnostics that were produced while resolving it.
-
-         
-
-
-
-
-function Lkt_Node_P_Solve_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Solver_Result
-   ;
---  Solve the equation created by this node. This should be used on entry
---  points only.
-
-         
-
-
-
-
-function Lkt_Node_P_Solve_Enclosing_Context
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Solver_Result
-   ;
---  Finds the nearest parent that is an xref_entry_point and solve its
---  equation.
-
-         
-
-
-
-
-function Lkt_Node_P_Expected_Type_Entry_Point
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Lkt_Node_P_Solve_Expected_Types
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Lkt_Node_P_Generic_Type_Entry_Point
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Lkt_Node_P_Solve_Generic_Types
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Lkt_Node_P_Function_Type_Helper
-   
-  (Node : Bare_Lkt_Node
-      ; Param_Types : Internal_Entity_Type_Decl_Array_Access
-      ; Return_Type : Internal_Entity_Type_Decl
-      ; Origin : Internal_Entity_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
---  Helper function to create a memoized FunctionType.
-
-         
-
-
-
-
-function Lkt_Node_P_Shed_Rebindings
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity
-   ;
---  Return this same entity but with its rebindings shed according to its
---  children lexical environment.
-
-         
-
-
-
-
-function Dispatcher_Lkt_Node_P_Xref_Entry_Point
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   with Inline_Always
-   ;
---  Designates entities that are entry point for the xref solving
---  infrastructure. If this returns true, then nameres_diagnostics can be
---  called on it.
-
-         
-
-
-
-
-function Dispatcher_Lkt_Node_P_Xref_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   with Inline_Always
-   ;
---  Base property for constructing equations that will resolve names and types
---  when resolved for every sub expression.
-
-         
-
-
-
-
-function Dispatcher_Lkt_Node_P_Expected_Type_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   with Inline_Always
-   ;
---  Creates an equation that wil resolve expected types for children nodes.
-
-         
-
-
-
-
-function Dispatcher_Lkt_Node_P_Generic_Type_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   with Inline_Always
-   ;
---  Creates an equation that will resolve generic types for children nodes.
-
-         
-
-
-
-
-function Dispatcher_Lkt_Node_P_Complete
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Complete_Item_Array_Access
-   with Inline_Always
-   ;
---  Return an array of completion item for language server clients
-
-         
-
-
-
-
-function Lkt_Node_P_Can_Reach
-   
-  (Node : Bare_Lkt_Node
-      ; From_Node : Bare_Lkt_Node
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Lkt_Node_P_Xref_Entry_Point
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Designates entities that are entry point for the xref solving
---  infrastructure. If this returns true, then nameres_diagnostics can be
---  called on it.
-
-         
-
-
-
-
-function Lkt_Node_P_Xref_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Base property for constructing equations that will resolve names and types
---  when resolved for every sub expression.
-
-         
-
-
-
-
-function Lkt_Node_P_Expected_Type_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Creates an equation that wil resolve expected types for children nodes.
-
-         
-
-
-
-
-function Lkt_Node_P_Generic_Type_Equation
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Creates an equation that will resolve generic types for children nodes.
-
-         
-
-
-
-
-function Lkt_Node_P_Complete
-   
-  (Node : Bare_Lkt_Node
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Complete_Item_Array_Access
-   ;
---  Return an array of completion item for language server clients
 
 
    
-
 
 
 
@@ -16209,41 +15797,8 @@ function Lkt_Node_P_Complete
      (Node : Bare_Argument) return Bare_Expr;
 
 
-         
-
-
-
-
-function Argument_P_Expected_Type_Equation
-   
-  (Node : Bare_Argument
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Argument_P_Xref_Equation
-   
-  (Node : Bare_Argument
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -16253,60 +15808,8 @@ function Argument_P_Xref_Equation
 
 
 
-         
-
-
-
-
-function Base_Import_P_Referenced_Units
-   
-  (Node : Bare_Base_Import
-  )
-
-   return Internal_Unit_Array_Access
-   ;
---  Return the list of units that contain the modules that this clause imports.
---  Load them if needed.
-
-         
-
-
-
-
-function Dispatcher_Base_Import_P_Referenced_Modules
-   
-  (Node : Bare_Base_Import
-  )
-
-   return Bare_Id_Array_Access
-   with Inline_Always
-   ;
---  Return identifiers for the list of modules that this clause imports.
-
-         
-
-
-
-
-function Internal_Env_Do_16
-   
-  (Node : Bare_Base_Import
-  )
-
-   return Internal_Unit_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Base_Import_Pre_Env_Actions
-           (Self            : Bare_Base_Import;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -16325,44 +15828,8 @@ function Internal_Env_Do_16
      (Node : Bare_Import) return Bare_Imported_Name_List;
 
 
-         
-
-
-
-
-function Import_P_Referenced_Modules
-   
-  (Node : Bare_Import
-  )
-
-   return Bare_Id_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_17
-   
-  (Node : Bare_Import
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Import_Pre_Env_Actions
-           (Self            : Bare_Import;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -16381,58 +15848,8 @@ function Internal_Env_Mappings_17
      (Node : Bare_Import_All_From) return Bare_Module_Id;
 
 
-         
-
-
-
-
-function Import_All_From_P_Referenced_Modules
-   
-  (Node : Bare_Import_All_From
-  )
-
-   return Bare_Id_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Import_All_From_P_Referenced_Scope
-   
-  (Node : Bare_Import_All_From
-  )
-
-   return Lexical_Env
-   ;
---  Return the module scope for the module that this clause designates.
-
-         
-
-
-
-
-function Internal_Ref_Env_Nodes_19
-   
-  (Node : Bare_Import_All_From
-  )
-
-   return Bare_Lkt_Node_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Import_All_From_Pre_Env_Actions
-           (Self            : Bare_Import_All_From;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -16456,44 +15873,8 @@ function Internal_Ref_Env_Nodes_19
      (Node : Bare_Import_From) return Bare_Imported_Name_List;
 
 
-         
-
-
-
-
-function Import_From_P_Referenced_Modules
-   
-  (Node : Bare_Import_From
-  )
-
-   return Bare_Id_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_18
-   
-  (Node : Bare_Import_From
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Import_From_Pre_Env_Actions
-           (Self            : Bare_Import_From;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -16508,7 +15889,6 @@ function Internal_Env_Mappings_18
 
 
 
-
       
 
    
@@ -16517,7 +15897,6 @@ function Internal_Env_Mappings_18
 
 
    
-
 
 
 
@@ -16546,7 +15925,6 @@ function Internal_Env_Mappings_18
 
 
 
-
       
 
    
@@ -16567,7 +15945,6 @@ function Internal_Env_Mappings_18
 
 
 
-
       
 
    
@@ -16578,34 +15955,8 @@ function Internal_Env_Mappings_18
      (Node : Bare_Base_Match_Branch) return Bare_Expr;
 
 
-         
-
-
-
-
-function Dispatcher_Base_Match_Branch_P_Match_Part
-   
-  (Node : Bare_Base_Match_Branch
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity
-   with Inline_Always
-   ;
---  Return the "match" part of the branch, either a pattern branch or a legacy
---  match branch with variable declaration.
-
 
    
-
-
-
-         procedure Base_Match_Branch_Pre_Env_Actions
-           (Self            : Bare_Base_Match_Branch;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -16625,25 +15976,8 @@ function Dispatcher_Base_Match_Branch_P_Match_Part
      (Node : Bare_Match_Branch) return Bare_Match_Val_Decl;
 
 
-         
-
-
-
-
-function Match_Branch_P_Match_Part
-   
-  (Node : Bare_Match_Branch
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity
-   ;
-
-
 
    
-
 
 
 
@@ -16663,25 +15997,8 @@ function Match_Branch_P_Match_Part
      (Node : Bare_Pattern_Match_Branch) return Bare_Pattern;
 
 
-         
-
-
-
-
-function Pattern_Match_Branch_P_Match_Part
-   
-  (Node : Bare_Pattern_Match_Branch
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity
-   ;
-
-
 
    
-
 
 
 
@@ -16705,6 +16022,16 @@ function Pattern_Match_Branch_P_Match_Part
 
 
 
+      
+
+   
+
+
+
+
+   
+
+
 
       
 
@@ -16717,31 +16044,14 @@ function Pattern_Match_Branch_P_Match_Part
 
 
 
-
       
 
    
 
 
 
-         
-
-
-
-
-function Dispatcher_Class_Qualifier_P_As_Bool
-   
-  (Node : Bare_Class_Qualifier
-  )
-
-   return Boolean
-   with Inline_Always
-   ;
---  Return whether this node is present
-
 
    
-
 
 
 
@@ -16751,49 +16061,8 @@ function Dispatcher_Class_Qualifier_P_As_Bool
 
 
 
-         
-
-
-
-
-function Class_Qualifier_Absent_P_As_Bool
-   
-  (Node : Bare_Class_Qualifier_Absent
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
-
-
-
-      
-
-   
-
-
-
-         
-
-
-
-
-function Class_Qualifier_Present_P_As_Bool
-   
-  (Node : Bare_Class_Qualifier_Present
-  )
-
-   return Boolean
-   ;
-
-
-
-   
-
 
 
 
@@ -16807,750 +16076,8 @@ function Class_Qualifier_Present_P_As_Bool
      (Node : Bare_Decl) return Bare_Def_Id;
 
 
-         
-
-
-
-
-function Dispatcher_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   with Inline_Always
-   ;
---  Return the name of the declaration type, as it should be seen by
---  users/shown in diagnostics.
-
-         
-
-
-
-
-function Decl_P_Full_Decl
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Full_Decl
-   ;
-
-
-         
-
-
-
-
-function Decl_P_Def_Ids
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Def_Id_Array_Access
-   ;
---  Return all the defining names that this declaration defines.
-
-         
-
-
-
-
-function Decl_P_Implements_Node
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Checks if this decl implements the Node trait TODO: rework this.
-
-         
-
-
-
-
-function Decl_P_As_Bare_Decl
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Get this declaration without rebindings information.
-
-         
-
-
-
-
-function Decl_P_Is_Type_Decl
-   
-  (Node : Bare_Decl
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Decl_P_Is_Defined
-   
-  (Node : Bare_Decl
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Decl_P_Infer_Function_Type
-   
-  (Node : Bare_Decl
-      ; Expected_Call : Internal_Entity_Function_Type
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
---  Infer the type of the function from the expected_call if Entity is a
---  generic declaration.
---
---  This iterates through the generic parameters of the decl to find all types
---  that try to replace it and find their common_ancestor.
---
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Decl_P_Function_Type
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
---  Build and return a FunctionType corresponding to the current FunDecl.
-
-         
-
-
-
-
-function Decl_P_Logic_Function_Type
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
---  Build and return a FunctionType corresponding to the current FunDecl with
---  an extra LogicVar at the beginning. Moreover, if the function is a dynamic
---  combiner, set its parameters to an array of logic variables.
-
-         
-
-
-
-
-function Decl_P_Get_Type
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the type of the Decl.
-
-         
-
-
-
-
-function Decl_P_Get_Cast_Type
-   
-  (Node : Bare_Decl
-      ; Cast_To : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  If we are casting an entity (Self) to something that is not an entity, make
---  it an entity.
-
-         
-
-
-
-
-function Decl_P_Get_Keep_Type
-   
-  (Node : Bare_Decl
-      ; Keep_Type : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the type of Entity when we only keep elements of type keep_type. If
---  we are casting an entity (Self) to something that is not an entity, make it
---  an entity.
-
-         
-
-
-
-
-function Decl_P_Get_Suffix_Type
-   
-  (Node : Bare_Decl
-      ; Prefix_Type : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  If we are accessing a ParseField of an entity, then that field's type also
---  needs to be an entity.
-
-         
-
-
-
-
-function Decl_P_Type_Var_Suffix_Ref
-   
-  (Node : Bare_Decl
-      ; Current_Name : Internal_Entity_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Return the declaration corresponding to current_name's name inside when
---  Self is used as an expression: .. code:
---
---  .. code::
---
---     property().name
---                ^^^^
---
---  If property() returns an Enum value, we should not be able to access the
---  enum fields.
-
-         
-
-
-
-
-function Decl_P_Ref_Var_Suffix_Ref
-   
-  (Node : Bare_Decl
-      ; Type_Var : Internal_Entity_Type_Decl
-      ; Current_Name : Internal_Entity_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Return the declaration corresponding to current_name's name inside when
---  Self is used as a declaration.
-
-         
-
-
-
-
-function Decl_P_Get_Params
-   
-  (Node : Bare_Decl
-      ; Is_Logic : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Resolved_Param_Array_Access
-   ;
---  Return an array of ResolvedParam corresponding to the called function's
---  parameters.
-
-         
-
-
-
-
-function Decl_P_Subdecl_If_Generic
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Return the subdeclaration if Self is a GenericDecl, otherwise return
---  itself.
-
-         
-
-
-
-
-function Decl_P_Is_Generic
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Returns whether the Decl is generic.
-
-         
-
-
-
-
-function Decl_P_Return_Type_Is_Instantiated
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return True if the return type of this function is instantiated.
-
-         
-
-
-
-
-function Decl_P_Is_Instantiated
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return True if Self is an instantiated declaration, meaning that it does
---  not use any of its declared generic types.
-
-         
-
-
-
-
-function Decl_P_Has_Correct_Type_Arg_Number
-   
-  (Node : Bare_Decl
-      ; Nb_Types : Integer
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Check that the parent GenericDecl has nb_types parameter types
-
-         
-
-
-
-
-function Decl_P_Could_Infer
-   
-  (Node : Bare_Decl
-      ; Generic_Type : Internal_Entity_Function_Type
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Predicate used to verify if we were able to find the type of the callee.
-
-         
-
-
-
-
-function Decl_P_Instantiate_Generic_Decl
-   
-  (Node : Bare_Decl
-      ; Param_Types : Internal_Entity_Type_Decl_Array_Access
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Create a DynEnvWrapper to instantiate a DynamicEnvironment to use as
---  rebindings when creating a new Entity from the current type.
-
-         
-
-
-
-
-function Decl_P_Get_Rebinded_Decl
-   
-  (Node : Bare_Decl
-      ; Rebindings_Env : Lexical_Env
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Create a new Entity from Self using rebindings_env as the new environment
---  to handle generics.
-
-         
-
-
-
-
-function Decl_P_Is_Dynvar
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Dispatcher_Decl_P_Name
-   
-  (Node : Bare_Decl
-  )
-
-   return Symbol_Type
-   with Inline_Always
-   ;
---  Return the symbol corresponding to the name of this declaration.
-
-         
-
-
-
-
-function Dispatcher_Decl_P_Full_Name_Internal
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   with Inline_Always
-   ;
---  Return the full name of this decl, as it should be seen by users/shown in
---  diagnostics. This property is not public: using it avoids calling PLE when
---  used with ``custom_image``
-
-         
-
-
-
-
-function Dispatcher_Decl_P_Full_Name
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   with Inline_Always
-   ;
---  Return the full name of this decl, as it should be seen by users/shown in
---  diagnostics.
-
-         
-
-
-
-
-function Dispatcher_Decl_P_Defined_Scope
-   
-  (Node : Bare_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   with Inline_Always
-   ;
---  Return the lexical environment defined by the declaration (ie. fields of a
---  StructDecl).
---
---  ``Origin``: Origin node of the request.
-
-         
-
-
-
-
-function Dispatcher_Decl_P_Defined_Scope_As_Entity
-   
-  (Node : Bare_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   with Inline_Always
-   ;
---  Return the lexical environment defined by the declaration as if it was
---  contained inside an entity.
---
---  Entity creates a special case for the ASTList class and Node trait:
---
---  .. code::
---
---     @builtin generic[T]
---     class ASTList : ....... Indexable[T], Iterator[T]
---
---  If the type ASTList is contained inside the Entity type (eg.
---  Entity[FooNode.list]), then the properties inherited from its traits need
---  to return entities. When this property is called on ASTList, we rebind T to
---  ``Entity[T]`` and get the defined environments of the newly rebound
---  entities instead.
---
---  ``Origin``: Origin node of the request.
-
-         
-
-
-
-
-function Decl_P_Is_Directly_Referenceable
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Decl_P_Extraneous_Parameter
-   
-  (Node : Bare_Decl
-      ; Callee_Type : Internal_Entity_Type_Decl
-      ; Callee : Internal_Entity_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Predicate used to emit an error when when a CallExpr has a named argument
---  undefined in the callee.
---
---  If ``callee`` is null, return true: an other diagnostic should have been
---  emitted to raise that issue.
-
-         
-
-
-
-
-function Decl_P_Unmatched_Argument
-   
-  (Node : Bare_Decl
-      ; Callee_Type : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Predicate used to emit an error when a CallExpr argument could not be
---  matched with a parameter.
-
-         
-
-
-
-
-function Internal_Env_Mappings_1
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Decl_P_Name
-   
-  (Node : Bare_Decl
-  )
-
-   return Symbol_Type
-   ;
---  Return the symbol corresponding to the name of this declaration.
-
-         
-
-
-
-
-function Decl_P_Full_Name_Internal
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
---  Return the full name of this decl, as it should be seen by users/shown in
---  diagnostics. This property is not public: using it avoids calling PLE when
---  used with ``custom_image``
-
-         
-
-
-
-
-function Decl_P_Full_Name
-   
-  (Node : Bare_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
---  Return the full name of this decl, as it should be seen by users/shown in
---  diagnostics.
-
-         
-
-
-
-
-function Decl_P_Defined_Scope
-   
-  (Node : Bare_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  Return the lexical environment defined by the declaration (ie. fields of a
---  StructDecl).
-
-         
-
-
-
-
-function Decl_P_Defined_Scope_As_Entity
-   
-  (Node : Bare_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  Return the lexical environment defined by the declaration as if it was
---  contained inside an entity.
---
---  Entity creates a special case for the ASTList class and Node trait:
---
---  .. code::
---
---     @builtin generic[T]
---     class ASTList : ....... Indexable[T], Iterator[T]
---
---  If the type ASTList is contained inside the Entity type (eg.
---  Entity[FooNode.list]), then the properties inherited from its traits need
---  to return entities. When this property is called on ASTList, we rebind T to
---  ``Entity[T]`` and get the defined environments of the newly rebound
---  entities instead.
-
 
    
-
-
-
-         procedure Decl_Pre_Env_Actions
-           (Self            : Bare_Decl;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -17569,7 +16096,6 @@ function Decl_P_Defined_Scope_As_Entity
 
 
 
-
       
 
    
@@ -17582,25 +16108,8 @@ function Decl_P_Defined_Scope_As_Entity
         );
 
 
-         
-
-
-
-
-function Grammar_Rule_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Grammar_Rule_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -17614,39 +16123,8 @@ function Grammar_Rule_Decl_P_Decl_Type_Name
         );
 
 
-         
-
-
-
-
-function Synthetic_Lexer_Decl_P_Name
-   
-  (Node : Bare_Synthetic_Lexer_Decl
-  )
-
-   return Symbol_Type
-   ;
-
-
-         
-
-
-
-
-function Synthetic_Lexer_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Synthetic_Lexer_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -17656,26 +16134,8 @@ function Synthetic_Lexer_Decl_P_Decl_Type_Name
 
 
 
-         
-
-
-
-
-function Base_Val_Decl_P_Defined_Scope
-   
-  (Node : Bare_Base_Val_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
 
    
-
 
 
 
@@ -17685,55 +16145,8 @@ function Base_Val_Decl_P_Defined_Scope
 
 
 
-         
-
-
-
-
-function Node_Decl_P_Name
-   
-  (Node : Bare_Node_Decl
-  )
-
-   return Symbol_Type
-   ;
-
-
-         
-
-
-
-
-function Node_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Node_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Node_Decl_P_Owning_Type
-   
-  (Node : Bare_Node_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
-
-
 
    
-
 
 
 
@@ -17743,55 +16156,8 @@ function Node_Decl_P_Owning_Type
 
 
 
-         
-
-
-
-
-function Self_Decl_P_Name
-   
-  (Node : Bare_Self_Decl
-  )
-
-   return Symbol_Type
-   ;
-
-
-         
-
-
-
-
-function Self_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Self_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Self_Decl_P_Owning_Type
-   
-  (Node : Bare_Self_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
-
-
 
    
-
 
 
 
@@ -17801,25 +16167,8 @@ function Self_Decl_P_Owning_Type
 
 
 
-         
-
-
-
-
-function User_Val_Decl_P_Xref_Entry_Point
-   
-  (Node : Bare_User_Val_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -17834,41 +16183,8 @@ function User_Val_Decl_P_Xref_Entry_Point
         );
 
 
-         
-
-
-
-
-function Binding_Val_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Binding_Val_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Binding_Val_Decl_P_Xref_Entry_Point
-   
-  (Node : Bare_Binding_Val_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -17883,77 +16199,8 @@ function Binding_Val_Decl_P_Xref_Entry_Point
         );
 
 
-         
-
-
-
-
-function Enum_Lit_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Enum_Lit_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Enum_Lit_Decl_P_Xref_Entry_Point
-   
-  (Node : Bare_Enum_Lit_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Enum_Lit_Decl_P_Defined_Scope
-   
-  (Node : Bare_Enum_Lit_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
-         
-
-
-
-
-function Enum_Lit_Decl_P_Parent_Type
-   
-  (Node : Bare_Enum_Lit_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the parent EnumTypeDecl.
-
 
    
-
-
-
-
 
 
 
@@ -17972,7 +16219,6 @@ function Enum_Lit_Decl_P_Parent_Type
 
 
 
-
       
 
    
@@ -17983,41 +16229,8 @@ function Enum_Lit_Decl_P_Parent_Type
      (Node : Bare_Component_Decl) return Bare_Expr;
 
 
-         
-
-
-
-
-function Component_Decl_P_Xref_Equation
-   
-  (Node : Bare_Component_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Component_Decl_P_To_Generic_Param
-   
-  (Node : Bare_Component_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Resolved_Param
-   ;
---  Create a ResolvedParam from the current ComponentDecl.
-
 
    
-
 
 
 
@@ -18039,95 +16252,8 @@ function Component_Decl_P_To_Generic_Param
      (Node : Bare_Field_Decl) return Bare_Dot_Expr;
 
 
-         
-
-
-
-
-function Field_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Field_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Field_Decl_P_Owning_Type
-   
-  (Node : Bare_Field_Decl
-  )
-
-   return Bare_Type_Decl
-   ;
-
-
-         
-
-
-
-
-function Field_Decl_P_Lazy_Field_Function_Type
-   
-  (Node : Bare_Field_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
---  Lazy fields can be seen as memoized properties that do not take arguments.
---  Return a function type corresponding to that supposed property.
-
-         
-
-
-
-
-function Internal_Env_Mappings_2
-   
-  (Node : Bare_Field_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_3
-   
-  (Node : Bare_Field_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Field_Decl_Pre_Env_Actions
-           (Self            : Bare_Field_Decl;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -18149,25 +16275,8 @@ function Internal_Env_Mappings_3
      (Node : Bare_Fun_Param_Decl) return Bare_Decl_Annotation_List;
 
 
-         
-
-
-
-
-function Fun_Param_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Fun_Param_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -18184,25 +16293,8 @@ function Fun_Param_Decl_P_Decl_Type_Name
         );
 
 
-         
-
-
-
-
-function Lambda_Param_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Lambda_Param_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -18218,41 +16310,8 @@ function Lambda_Param_Decl_P_Decl_Type_Name
         );
 
 
-         
-
-
-
-
-function Dyn_Var_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Dyn_Var_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Dyn_Var_Decl_P_Xref_Entry_Point
-   
-  (Node : Bare_Dyn_Var_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -18268,57 +16327,8 @@ function Dyn_Var_Decl_P_Xref_Entry_Point
         );
 
 
-         
-
-
-
-
-function Match_Val_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Match_Val_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Match_Val_Decl_P_Xref_Entry_Point
-   
-  (Node : Bare_Match_Val_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Match_Val_Decl_P_Match_Expr
-   
-  (Node : Bare_Match_Val_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Expr
-   ;
-
-
 
    
-
 
 
 
@@ -18339,41 +16349,8 @@ function Match_Val_Decl_P_Match_Expr
      (Node : Bare_Val_Decl) return Bare_Expr;
 
 
-         
-
-
-
-
-function Val_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Val_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Val_Decl_P_Xref_Equation
-   
-  (Node : Bare_Val_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -18408,177 +16385,8 @@ function Val_Decl_P_Xref_Equation
      (Node : Bare_Fun_Decl) return Bare_Expr;
 
 
-         
-
-
-
-
-function Fun_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Fun_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Fun_Decl_P_Owning_Type
-   
-  (Node : Bare_Fun_Decl
-  )
-
-   return Bare_Type_Decl
-   ;
-
-
-         
-
-
-
-
-function Fun_Decl_P_Is_Dynamic_Combiner
-   
-  (Node : Bare_Fun_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  When this property is called by a LogicCallExpr, return whether it expects
---  a dynamic number of arguments. In other words, it expects an array of
---  entities as its first argument.
-
-         
-
-
-
-
-function Fun_Decl_P_Xref_Equation
-   
-  (Node : Bare_Fun_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Fun_Decl_P_Function_Type_Aux
-   
-  (Node : Bare_Fun_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
---  Build and return a FunctionType corresponding to the current FunDecl.
-
-         
-
-
-
-
-function Fun_Decl_P_Find_All_Overrides_Helper
-   
-  (Node : Bare_Fun_Decl
-      ; Current_Node : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Fun_Decl_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Fun_Decl_P_Find_All_Overrides
-   
-  (Node : Bare_Fun_Decl
-      ; Units : Internal_Unit_Array_Access
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Fun_Decl_Array_Access
-   ;
---  Return the list of all RefId that refer to this DefId.
-
-         
-
-
-
-
-function Fun_Decl_P_Base_Fun_Decls
-   
-  (Node : Bare_Fun_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Fun_Decl_Array_Access
-   ;
---  Return a list of all the parent function declarations that ``self``
---  overrides, including itself.
-
-         
-
-
-
-
-function Internal_Env_Mappings_4
-   
-  (Node : Bare_Fun_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_5
-   
-  (Node : Bare_Fun_Decl
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Fun_Decl_Pre_Env_Actions
-           (Self            : Bare_Fun_Decl;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -18598,92 +16406,8 @@ function Internal_Env_Mappings_5
      (Node : Bare_Env_Spec_Decl) return Bare_Call_Expr_List;
 
 
-         
-
-
-
-
-function Env_Spec_Decl_P_Owning_Type
-   
-  (Node : Bare_Env_Spec_Decl
-  )
-
-   return Bare_Type_Decl
-   ;
-
-
-         
-
-
-
-
-function Env_Spec_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Env_Spec_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Env_Spec_Decl_P_Xref_Entry_Point
-   
-  (Node : Bare_Env_Spec_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Env_Spec_Decl_P_Xref_Equation
-   
-  (Node : Bare_Env_Spec_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_6
-   
-  (Node : Bare_Env_Spec_Decl
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Env_Spec_Decl_Pre_Env_Actions
-           (Self            : Bare_Env_Spec_Decl;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -18693,25 +16417,8 @@ function Internal_Env_Mappings_6
 
 
 
-         
-
-
-
-
-function Error_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Error_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -18735,126 +16442,8 @@ function Error_Decl_P_Decl_Type_Name
      (Node : Bare_Generic_Decl) return Bare_Decl;
 
 
-         
-
-
-
-
-function Generic_Decl_P_Name
-   
-  (Node : Bare_Generic_Decl
-  )
-
-   return Symbol_Type
-   ;
-
-
-         
-
-
-
-
-function Generic_Decl_P_Image_Suffix
-   
-  (Node : Bare_Generic_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
---  Return the suffix of the node's image that contains the type parameters.
-
-         
-
-
-
-
-function Generic_Decl_P_Generic_Params
-   
-  (Node : Bare_Generic_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Generic_Param_Type_Decl_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Generic_Decl_P_Generic_Params_Names
-   
-  (Node : Bare_Generic_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Symbol_Type_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Generic_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Generic_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Generic_Decl_P_Instantiated_Generic_Params
-   
-  (Node : Bare_Generic_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_7
-   
-  (Node : Bare_Generic_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc
-   ;
-
-
 
    
-
-
-
-         procedure Generic_Decl_Pre_Env_Actions
-           (Self            : Bare_Generic_Decl;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -18874,48 +16463,8 @@ function Internal_Env_Mappings_7
      (Node : Bare_Grammar_Decl) return Bare_Full_Decl_List;
 
 
-         
-
-
-
-
-function Grammar_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Grammar_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_8
-   
-  (Node : Bare_Grammar_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc
-   ;
-
-
 
    
-
-
-
-         procedure Grammar_Decl_Pre_Env_Actions
-           (Self            : Bare_Grammar_Decl;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -18944,183 +16493,8 @@ function Internal_Env_Mappings_8
      (Node : Bare_Langkit_Root) return Bare_Full_Decl_List;
 
 
-         
-
-
-
-
-function Langkit_Root_P_Decl_Type_Name
-   
-  (Node : Bare_Langkit_Root
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Langkit_Root_P_Name
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Symbol_Type
-   ;
-
-
-         
-
-
-
-
-function Langkit_Root_P_Defined_Scope
-   
-  (Node : Bare_Langkit_Root
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
-         
-
-
-
-
-function Langkit_Root_P_Internal_Env
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Lexical_Env
-   ;
---  Get the hidden environment in the prelude containing a default declaration
---  of the Metadata type, for when it is not defined by the specification.
-
-         
-
-
-
-
-function Langkit_Root_F_Empty_Type_Ref_List
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Bare_Synthetic_Type_Ref_List
-   ;
---  An empty synthetic TypeRef list node. Used to generate synthetic type
---  declarations.
---
---  This lazy field is on ``LangkitRoot`` so that at most a single synthetic
---  node is created by Lkt unit. Use ``LktNode.get_empty_type_ref_list`` for
---  convenience.
-
-         
-
-
-
-
-function Internal_Env_Do_20
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Internal_Unit
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_21
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Internal_Env_Assoc
-   ;
-
-
-         
-
-
-
-
-function Internal_Ref_Env_Nodes_22
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Bare_Lkt_Node_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Internal_Ref_Cond_23
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Internal_Ref_Env_Nodes_24
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Bare_Lkt_Node_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Internal_Ref_Cond_25
-   
-  (Node : Bare_Langkit_Root
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
-
-
-         procedure Langkit_Root_Pre_Env_Actions
-           (Self            : Bare_Langkit_Root;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
-         procedure Langkit_Root_Post_Env_Actions
-           (Self : Bare_Langkit_Root; State : in out PLE_Node_State);
 
 
 
@@ -19140,76 +16514,8 @@ function Internal_Ref_Cond_25
      (Node : Bare_Lexer_Decl) return Bare_Lkt_Node_List;
 
 
-         
-
-
-
-
-function Lexer_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Lexer_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Lexer_Decl_P_Builtin_Decls
-   
-  (Node : Bare_Lexer_Decl
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_9
-   
-  (Node : Bare_Lexer_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_10
-   
-  (Node : Bare_Lexer_Decl
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Lexer_Decl_Pre_Env_Actions
-           (Self            : Bare_Lexer_Decl;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -19229,25 +16535,8 @@ function Internal_Env_Mappings_10
      (Node : Bare_Lexer_Family_Decl) return Bare_Full_Decl_List;
 
 
-         
-
-
-
-
-function Lexer_Family_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Lexer_Family_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -19261,41 +16550,8 @@ function Lexer_Family_Decl_P_Decl_Type_Name
         );
 
 
-         
-
-
-
-
-function Synth_Fun_Decl_P_Function_Type_Aux
-   
-  (Node : Bare_Synth_Fun_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
-
-
-         
-
-
-
-
-function Synth_Fun_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Synth_Fun_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -19305,41 +16561,8 @@ function Synth_Fun_Decl_P_Decl_Type_Name
 
 
 
-         
-
-
-
-
-function Synth_Param_Decl_P_Full_Name_Internal
-   
-  (Node : Bare_Synth_Param_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Synth_Param_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Synth_Param_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -19357,742 +16580,8 @@ function Synth_Param_Decl_P_Decl_Type_Name
      (Node : Bare_Type_Decl) return Bare_Type_Ref;
 
 
-         
-
-
-
-
-function Type_Decl_P_Self_Decl
-   
-  (Node : Bare_Type_Decl
-  )
-
-   return Bare_Self_Decl
-   ;
-
-
-         
-
-
-
-
-function Type_Decl_P_Node_Decl
-   
-  (Node : Bare_Type_Decl
-  )
-
-   return Bare_Node_Decl
-   ;
-
-
-         
-
-
-
-
-function Type_Decl_P_Full_Name
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Type_Decl_P_Def_Id
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Def_Id
-   ;
---  Return the defining name of this type declaration
-
-         
-
-
-
-
-function Type_Decl_P_Base_Type
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Ref
-   ;
---  Return the base type for this node, if any.
-
-         
-
-
-
-
-function Type_Decl_P_Base_Type_If_Entity
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the base type for this node, if any.
-
-         
-
-
-
-
-function Type_Decl_P_Is_Equation
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Predicate used to verify that operands of equation logic operators are of
---  equation type.
-
-         
-
-
-
-
-function Type_Decl_P_Is_Bool
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Predicate used to verify that operands of boolean logic operators are of
---  boolean type.
-
-         
-
-
-
-
-function Type_Decl_P_Is_String_Or_Array_Type
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Type_Decl_P_Is_Int_Type
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Type_Decl_P_Is_Int_Or_Node
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Type_Decl_P_Get_Entity_Node_Type
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Get the type parameter used to rebind the Entity type declaration if Self
---  is the entity type.
-
-         
-
-
-
-
-function Type_Decl_P_Is_Subtype_Or_Eq
-   
-  (Node : Bare_Type_Decl
-      ; Rhs : Internal_Entity_Type_Decl
-      ; Allow_Entity : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return True if rhs is equal to or is a subtype of Self. If allow_entity is
---  True, Entity and/or rhs are entities, get the node type.
-
-         
-
-
-
-
-function Type_Decl_P_Common_Ancestor_Helper
-   
-  (Node : Bare_Type_Decl
-      ; Other_Types : Internal_Entity_Type_Decl_Array_Access
-      ; Idx : Integer
-      ; Imprecise : Boolean
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
-
-
-         
-
-
-
-
-function Type_Decl_P_Imprecise_Common_Ancestor_List
-   
-  (Node : Bare_Type_Decl
-      ; Other_Types : Internal_Entity_Type_Decl_Array_Access
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the nearest common ancestor of Self and other_types, ignoring any
---  type that does not share a common ancestor with the rest of the types. If
---  one of the type is Entity, the result will also be wrapped by Entity.
-
-         
-
-
-
-
-function Type_Decl_P_Commutative_Matching_Type
-   
-  (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
-      ; Allow_Common_Ancestor : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return true if Self and other are matching type that can be permutated.
-
-         
-
-
-
-
-function Type_Decl_P_Could_Determine_Type
-   
-  (Node : Bare_Type_Decl
-  )
-
-   return Boolean
-   ;
---  Return true if Self and other are matching types.
-
-         
-
-
-
-
-function Type_Decl_P_Matching_Generic_Types
-   
-  (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return true if Self and other are matcing generic types.
-
-         
-
-
-
-
-function Type_Decl_P_Matching_Type
-   
-  (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return true if Self and other are matching types.
-
-         
-
-
-
-
-function Type_Decl_P_Matching_Logic_Type
-   
-  (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return True if the types match or we are expecting an Entity and get a
---  LogicVar.
-
-         
-
-
-
-
-function Type_Decl_P_Is_Of_Array_Type
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Predicate used to verify that a type is an array (implements the Indexable
---  trait).
-
-         
-
-
-
-
-function Type_Decl_P_Is_Callable
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Predicate used to emit an error when the type of an expression is not
---  callable.
-
-         
-
-
-
-
-function Type_Decl_P_Match_Param_Get_Type
-   
-  (Node : Bare_Type_Decl
-      ; Current_Name : Internal_Entity_Argument
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Return the parameter type corresponding to current_name's declaration.
---
---  ``Current_Name``: Call argument used to find the corresponding FunParamDecl
---  during type resolution of function calls.
---
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Type_Decl_P_Match_Param_Get_Decl
-   
-  (Node : Bare_Type_Decl
-      ; Current_Name : Internal_Entity_Argument
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Return the parameter declaration corresponding to current_name.
---
---  ``Current_Name``: Call argument used to find the corresponding FunParamDecl
---  during type resolution of function calls.
---
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Type_Decl_P_Lambda_Param_Get_Type
-   
-  (Node : Bare_Type_Decl
-      ; Param_Decl : Internal_Entity_Lambda_Param_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the type declaration corresponding to param_decl's type.
-
-         
-
-
-
-
-function Type_Decl_P_Is_Valid_Call
-   
-  (Node : Bare_Type_Decl
-      ; Args : Internal_Entity_Argument_List
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Check whether the call to Self is valid and all parameters are paired or
---  have a default value.
---
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Type_Decl_P_Get_Return_Type
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the return type of the FunctionType.
-
-         
-
-
-
-
-function Type_Decl_P_Create_Function_Type
-   
-  (Node : Bare_Type_Decl
-      ; Params : Internal_Entity_Type_Decl_Array_Access
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Create a FunctionType, using Self as the return type and params for the
---  parameter types.
-
-         
-
-
-
-
-function Type_Decl_P_Make_Array_Type
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Create a rebinded Array type declaration, using Self as the type parameter.
-
-         
-
-
-
-
-function Type_Decl_P_Get_Array_Content_Type
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Get the type parameter used to rebind the Array type declaration.
-
-         
-
-
-
-
-function Type_Decl_P_Get_Super_Of_Parent
-   
-  (Node : Bare_Type_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  ``Origin``: Origin node of the request.
-
-         
-
-
-
-
-function Type_Decl_P_Basic_Trait_From_Self
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return a rebinded version of BasicTrait, in order to allow for all types to
---  have builtins (do, singleton...) in their environment.
-
-         
-
-
-
-
-function Type_Decl_P_Find_Types_That_Replace_Ty
-   
-  (Node : Bare_Type_Decl
-      ; Ty : Internal_Entity_Type_Decl
-      ; Origin : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl_Array_Access
-   ;
---  Traverse ``Entity`` and ``origin`` simultaneously and list all all types
---  found in origin that would replace ty in Entity.
---
---  .. code::
---
---     ((Entity[T], Array[Entity[T]]) => T).find_types_that_replace_ty(
---         (T),
---         ((Entity[A], Array[Entity[B[C]]]) => D)
---     ) ==> [A, B[C], D]
-
-         
-
-
-
-
-function Type_Decl_P_As_Node_Builder_Type
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the corresponding NodeBuilder type for Entity. If Entity is not a
---  class (hence not a Node), return Entity as is.
-
-         
-
-
-
-
-function Dispatcher_Type_Decl_P_Base_Types
-   
-  (Node : Bare_Type_Decl
-      ; Include_Self : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl_Array_Access
-   with Inline_Always
-   ;
---  Return an array containing all subclasses of the type.
-
-         
-
-
-
-
-function Dispatcher_Type_Decl_P_Is_Subtype
-   
-  (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   with Inline_Always
-   ;
---  Return true if Self is a subtype of other.
-
-         
-
-
-
-
-function Dispatcher_Type_Decl_P_Common_Ancestor
-   
-  (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
-      ; Imprecise : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   with Inline_Always
-   ;
---  Return the nearest common ancestor between Self and other. If imprecise is
---  True, return either type that is non-null. If both types are the Entity
---  type, use their wrapped type instead.
-
-         
-
-
-
-
-function Type_Decl_P_Node_Builder_Scope
-   
-  (Node : Bare_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  Create an environment with the builder() function associated to the node
---  type parameter. If the type is not a class, return an empty environment.
-
-         
-
-
-
-
-function Type_Decl_P_Base_Types
-   
-  (Node : Bare_Type_Decl
-      ; Include_Self : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl_Array_Access
-   ;
---  Return an array containing all subclasses of the type.
-
-         
-
-
-
-
-function Type_Decl_P_Is_Subtype
-   
-  (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return true if Self is a subtype of other.
-
-         
-
-
-
-
-function Type_Decl_P_Common_Ancestor
-   
-  (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
-      ; Imprecise : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the nearest common ancestor between Self and other. If imprecise is
---  True, return either type that is non-null. If both types are the Entity
---  type, use their wrapped type instead.
-
 
    
-
 
 
 
@@ -20107,41 +16596,8 @@ function Type_Decl_P_Common_Ancestor
         );
 
 
-         
-
-
-
-
-function Any_Type_Decl_P_Full_Name_Internal
-   
-  (Node : Bare_Any_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Any_Type_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Any_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -20157,96 +16613,8 @@ function Any_Type_Decl_P_Decl_Type_Name
         );
 
 
-         
-
-
-
-
-function Enum_Class_Alt_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Enum_Class_Alt_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Enum_Class_Alt_Decl_P_Is_Subtype
-   
-  (Node : Bare_Enum_Class_Alt_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Enum_Class_Alt_Decl_P_Defined_Scope
-   
-  (Node : Bare_Enum_Class_Alt_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
-         
-
-
-
-
-function Enum_Class_Alt_Decl_P_Parent_Type
-   
-  (Node : Bare_Enum_Class_Alt_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the parent EnumTypeDecl.
-
-         
-
-
-
-
-function Enum_Class_Alt_Decl_P_Base_Types
-   
-  (Node : Bare_Enum_Class_Alt_Decl
-      ; Include_Self : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl_Array_Access
-   ;
---  Return an array containing all subclasses of the type.
-
 
    
-
-
-
-
 
 
 
@@ -20261,106 +16629,8 @@ function Enum_Class_Alt_Decl_P_Base_Types
         );
 
 
-         
-
-
-
-
-function Function_Type_P_Full_Name_Internal
-   
-  (Node : Bare_Function_Type
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Function_Type_P_Decl_Type_Name
-   
-  (Node : Bare_Function_Type
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Function_Type_P_Defined_Scope
-   
-  (Node : Bare_Function_Type
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
-         
-
-
-
-
-function Function_Type_P_Should_Ignore_Constructor_Arg
-   
-  (Node : Bare_Function_Type
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return True if the arguments should be ignored.
-
-         
-
-
-
-
-function Function_Type_P_Returns_Entity
-   
-  (Node : Bare_Function_Type
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Function_Type_P_Returns_Bool
-   
-  (Node : Bare_Function_Type
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -20381,25 +16651,8 @@ function Function_Type_P_Returns_Bool
      (Node : Bare_Generic_Param_Type_Decl) return Bare_Class_Qualifier;
 
 
-         
-
-
-
-
-function Generic_Param_Type_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Generic_Param_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
 
    
-
 
 
 
@@ -20413,26 +16666,8 @@ function Generic_Param_Type_Decl_P_Decl_Type_Name
      (Node : Bare_Named_Type_Decl) return Bare_Decl_Block;
 
 
-         
-
-
-
-
-function Named_Type_Decl_P_Defined_Scope
-   
-  (Node : Bare_Named_Type_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
 
    
-
 
 
 
@@ -20449,79 +16684,8 @@ function Named_Type_Decl_P_Defined_Scope
         );
 
 
-         
-
-
-
-
-function Basic_Class_Decl_P_Is_Subtype
-   
-  (Node : Bare_Basic_Class_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Basic_Class_Decl_P_Defined_Scope
-   
-  (Node : Bare_Basic_Class_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
-         
-
-
-
-
-function Basic_Class_Decl_P_Defined_Scope_As_Entity
-   
-  (Node : Bare_Basic_Class_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
-         
-
-
-
-
-function Basic_Class_Decl_P_Common_Ancestor
-   
-  (Node : Bare_Basic_Class_Decl
-      ; Other : Internal_Entity_Type_Decl
-      ; Imprecise : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
-
-
 
    
-
 
 
 
@@ -20539,59 +16703,8 @@ function Basic_Class_Decl_P_Common_Ancestor
         );
 
 
-         
-
-
-
-
-function Class_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Class_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Class_Decl_P_Constructor_Fields
-   
-  (Node : Bare_Class_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Field_Decl_Array_Access
-   ;
---  Return a list of all fields that are necessaru in the constructor of the
---  class.
-
-         
-
-
-
-
-function Class_Decl_P_Function_Type_Aux
-   
-  (Node : Bare_Class_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
---  Build and return a FunctionType corresponding to the constructor of this
---  current ClassDecl.
-
 
    
-
 
 
 
@@ -20614,82 +16727,8 @@ function Class_Decl_P_Function_Type_Aux
      (Node : Bare_Enum_Class_Decl) return Bare_Enum_Class_Case_List;
 
 
-         
-
-
-
-
-function Enum_Class_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Enum_Class_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Enum_Class_Decl_P_Alts
-   
-  (Node : Bare_Enum_Class_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Enum_Class_Alt_Decl_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_11
-   
-  (Node : Bare_Enum_Class_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_12
-   
-  (Node : Bare_Enum_Class_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Enum_Class_Decl_Pre_Env_Actions
-           (Self            : Bare_Enum_Class_Decl;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
-         procedure Enum_Class_Decl_Post_Env_Actions
-           (Self : Bare_Enum_Class_Decl; State : in out PLE_Node_State);
 
 
 
@@ -20711,82 +16750,8 @@ function Internal_Env_Mappings_12
      (Node : Bare_Enum_Type_Decl) return Bare_Enum_Lit_Decl_List;
 
 
-         
-
-
-
-
-function Enum_Type_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Enum_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_13
-   
-  (Node : Bare_Enum_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_14
-   
-  (Node : Bare_Enum_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Internal_Env_Mappings_15
-   
-  (Node : Bare_Enum_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Env_Assoc_Array_Access
-   ;
-
-
 
    
-
-
-
-         procedure Enum_Type_Decl_Pre_Env_Actions
-           (Self            : Bare_Enum_Type_Decl;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
-         procedure Enum_Type_Decl_Post_Env_Actions
-           (Self : Bare_Enum_Type_Decl; State : in out PLE_Node_State);
 
 
 
@@ -20803,91 +16768,8 @@ function Internal_Env_Mappings_15
         );
 
 
-         
-
-
-
-
-function Struct_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Struct_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Struct_Decl_P_Function_Type_Aux
-   
-  (Node : Bare_Struct_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Function_Type
-   ;
---  Build and return a FunctionType corresponding to the current FunDecl.
-
-         
-
-
-
-
-function Struct_Decl_P_Entity_Scope
-   
-  (Node : Bare_Struct_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  If Self is the Entity struct, add the scope defined by the type parameter.
-
-         
-
-
-
-
-function Struct_Decl_P_Update_Func_Env
-   
-  (Node : Bare_Struct_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  Return a LexicalEnv containing a synthetic declaration of the ``update``
---  function for the StructDecl.
-
-         
-
-
-
-
-function Struct_Decl_P_Defined_Scope
-   
-  (Node : Bare_Struct_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
 
    
-
 
 
 
@@ -20904,42 +16786,8 @@ function Struct_Decl_P_Defined_Scope
         );
 
 
-         
-
-
-
-
-function Trait_Decl_P_Decl_Type_Name
-   
-  (Node : Bare_Trait_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
-
-
-         
-
-
-
-
-function Trait_Decl_P_Defined_Scope_As_Entity
-   
-  (Node : Bare_Trait_Decl
-      ; Origin : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Lexical_Env
-   ;
---  ``Origin``: Origin node of the request.
-
 
    
-
 
 
 
@@ -20963,59 +16811,8 @@ function Trait_Decl_P_Defined_Scope_As_Entity
      (Node : Bare_Decl_Annotation) return Bare_Decl_Annotation_Args;
 
 
-         
-
-
-
-
-function Decl_Annotation_P_Xref_Entry_Point
-   
-  (Node : Bare_Decl_Annotation
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Decl_Annotation_P_With_Dynvars_Equation
-   
-  (Node : Bare_Decl_Annotation
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Build an equation for solving type and name resolution of the
---  'with_dynvars' annotation.
-
-         
-
-
-
-
-function Decl_Annotation_P_Xref_Equation
-   
-  (Node : Bare_Decl_Annotation
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Only create an equation for annotations that really require typing and name
---  resolution (such as @with_dynvars).
-
 
    
-
 
 
 
@@ -21039,7 +16836,6 @@ function Decl_Annotation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -21050,40 +16846,8 @@ function Decl_Annotation_P_Xref_Equation
         );
 
 
-         
-
-
-
-
-function Dyn_Env_Wrapper_F_Dynenvwrapper_Instantiation_Env
-   
-  (Node : Bare_Dyn_Env_Wrapper
-  )
-
-   return Lexical_Env
-   ;
---  Instantiate the corresponding LexicalEnv containing the declarations with
---  their corresponding name.
-
-         
-
-
-
-
-function Dyn_Env_Wrapper_P_Instantiation_Bindings
-   
-  (Node : Bare_Dyn_Env_Wrapper
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Inner_Env_Assoc_Array_Access
-   ;
-
-
 
    
-
 
 
 
@@ -21112,7 +16876,6 @@ function Dyn_Env_Wrapper_P_Instantiation_Bindings
 
 
 
-
       
 
    
@@ -21133,31 +16896,14 @@ function Dyn_Env_Wrapper_P_Instantiation_Bindings
 
 
 
-
       
 
    
 
 
 
-         
-
-
-
-
-function Dispatcher_Excludes_Null_P_As_Bool
-   
-  (Node : Bare_Excludes_Null
-  )
-
-   return Boolean
-   with Inline_Always
-   ;
---  Return whether this node is present
-
 
    
-
 
 
 
@@ -21167,23 +16913,8 @@ function Dispatcher_Excludes_Null_P_As_Bool
 
 
 
-         
-
-
-
-
-function Excludes_Null_Absent_P_As_Bool
-   
-  (Node : Bare_Excludes_Null_Absent
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -21193,23 +16924,8 @@ function Excludes_Null_Absent_P_As_Bool
 
 
 
-         
-
-
-
-
-function Excludes_Null_Present_P_As_Bool
-   
-  (Node : Bare_Excludes_Null_Present
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -21223,298 +16939,8 @@ function Excludes_Null_Present_P_As_Bool
         );
 
 
-         
-
-
-
-
-function Expr_P_Is_Simple_Call_Expr
-   
-  (Node : Bare_Expr
-  )
-
-   return Boolean
-   ;
---  Simple predicate used to filter during parsing. Used to only allow simple
---  call expressions in PropertyPatternDetail.
-
-         
-
-
-
-
-function Expr_P_Xref_Entry_Point
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Dispatcher_Expr_P_Get_Type
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   with Inline_Always
-   ;
---  Return the type of this expression.
-
-         
-
-
-
-
-function Expr_P_Get_Generic_Type
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the expected type of this expression.
-
-         
-
-
-
-
-function Expr_P_Get_Expected_Type
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the expected type of this expression.
-
-         
-
-
-
-
-function Expr_P_Get_Rightmost_Refid
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Ref_Id
-   ;
---  Return the right-most RefId of an expression (i.e. the expression itself if
---  it already is a RefId or the suffix if it is a DotExpr).
-
-         
-
-
-
-
-function Expr_P_Expected_Type_Equation
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Expr_P_Match_Params
-   
-  (Node : Bare_Expr
-      ; Params : Internal_Resolved_Param_Array_Access
-      ; Args : Internal_Entity_Argument_List
-  )
-
-   return Internal_Param_Match_Array_Access
-   ;
---  Match a function's parameters with the arguments of the CallExpr.
-
-         
-
-
-
-
-function Dispatcher_Expr_P_Xlogic_Equation
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   with Inline_Always
-   ;
---  Build an equation to solve type and name resolution for logic expressions.
-
-         
-
-
-
-
-function Dispatcher_Expr_P_Xtype_Equation
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   with Inline_Always
-   ;
---  Build an equation to solve type and name resolution for type referencement.
-
-         
-
-
-
-
-function Dispatcher_Expr_P_Referenced_Decl
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   with Inline_Always
-   ;
---  Return the declaration referenced by this expression, if applicable, else
---  null.
---
---  The property is memoized in order to avoid use the value inside logic
---  variables on every redundent call, causing faulty behavior when used with
---  rebindings. TODO: Do like LAL to avoid memoization for more safety.
-
-         
-
-
-
-
-function Dispatcher_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   with Inline_Always
-   ;
---  Returns True if the expression's actual type can be determined without
---  using its expected type.
-
-         
-
-
-
-
-function Expr_P_Get_Type
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the type of this expression.
-
-         
-
-
-
-
-function Expr_P_Xlogic_Equation
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Build an equation to solve type and name resolution for logic expressions.
-
-         
-
-
-
-
-function Expr_P_Xtype_Equation
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Build an equation to solve type and name resolution for type referencement.
-
-         
-
-
-
-
-function Expr_P_Referenced_Decl
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Return the declaration referenced by this expression, if applicable, else
---  null.
---
---  The property is memoized in order to avoid use the value inside logic
---  variables on every redundent call, causing faulty behavior when used with
---  rebindings. TODO: Do like LAL to avoid memoization for more safety.
-
-         
-
-
-
-
-function Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Returns True if the expression's actual type can be determined without
---  using its expected type.
-
 
    
-
 
 
 
@@ -21538,41 +16964,8 @@ function Expr_P_Has_Context_Free_Type
      (Node : Bare_Any_Of) return Bare_Any_Of_List;
 
 
-         
-
-
-
-
-function Any_Of_P_Xref_Equation
-   
-  (Node : Bare_Any_Of
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Any_Of_P_Has_Context_Free_Type
-   
-  (Node : Bare_Any_Of
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -21596,57 +16989,8 @@ function Any_Of_P_Has_Context_Free_Type
      (Node : Bare_Array_Literal) return Bare_Type_Ref;
 
 
-         
-
-
-
-
-function Array_Literal_P_Has_Context_Free_Type
-   
-  (Node : Bare_Array_Literal
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Array_Literal_P_Expected_Exprs_Type_Equation
-   
-  (Node : Bare_Array_Literal
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Array_Literal_P_Xref_Equation
-   
-  (Node : Bare_Array_Literal
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -21670,169 +17014,8 @@ function Array_Literal_P_Xref_Equation
      (Node : Bare_Base_Call_Expr) return Bare_Argument_List;
 
 
-         
-
-
-
-
-function Base_Call_Expr_P_Generic_Type_Equation_Helper
-   
-  (Node : Bare_Base_Call_Expr
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Base_Call_Expr_P_Generic_Type_Equation
-   
-  (Node : Bare_Base_Call_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Base_Call_Expr_P_Expected_Type_Equation
-   
-  (Node : Bare_Base_Call_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Compute the expected type of name and expressions in args.
-
-         
-
-
-
-
-function Base_Call_Expr_P_Xref_Call_Args_Equation
-   
-  (Node : Bare_Base_Call_Expr
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Build an equation to match arguments of the call to the parameters of the
---  called entity.
---
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Base_Call_Expr_P_Xref_Call_Equation
-   
-  (Node : Bare_Base_Call_Expr
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Build an equation to solve type and name resolution for calling this
---  BaseCallExpr
---
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Base_Call_Expr_P_Xref_Equation
-   
-  (Node : Bare_Base_Call_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Base_Call_Expr_P_Xlogic_Unknown
-   
-  (Node : Bare_Base_Call_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Build an equation that emits a diagnostic for when the name of the name
---  tries to call an unknown logic function.
-
-         
-
-
-
-
-function Base_Call_Expr_P_Xlogic_Any_All
-   
-  (Node : Bare_Base_Call_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Base_Call_Expr_P_Xlogic_Equation
-   
-  (Node : Bare_Base_Call_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Called when a CallExpr is used inside a LogicExpr.
-
 
    
-
 
 
 
@@ -21853,7 +17036,6 @@ function Base_Call_Expr_P_Xlogic_Equation
 
 
 
-
       
 
    
@@ -21871,7 +17053,6 @@ function Base_Call_Expr_P_Xlogic_Equation
 
 
 
-
       
 
    
@@ -21884,41 +17065,8 @@ function Base_Call_Expr_P_Xlogic_Equation
         );
 
 
-         
-
-
-
-
-function Logic_Predicate_P_Generic_Type_Equation
-   
-  (Node : Bare_Logic_Predicate
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Logic_Predicate_P_Xref_Equation
-   
-  (Node : Bare_Logic_Predicate
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -21936,7 +17084,6 @@ function Logic_Predicate_P_Xref_Equation
 
 
    
-
 
 
 
@@ -21965,41 +17112,8 @@ function Logic_Predicate_P_Xref_Equation
      (Node : Bare_Bin_Op) return Bare_Expr;
 
 
-         
-
-
-
-
-function Bin_Op_P_Xref_Equation
-   
-  (Node : Bare_Bin_Op
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Bin_Op_P_Has_Context_Free_Type
-   
-  (Node : Bare_Bin_Op
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -22018,64 +17132,8 @@ function Bin_Op_P_Has_Context_Free_Type
      (Node : Bare_Block_Expr) return Bare_Lkt_Node_List;
 
 
-         
-
-
-
-
-function Block_Expr_P_Expr
-   
-  (Node : Bare_Block_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Expr
-   ;
-
-
-         
-
-
-
-
-function Block_Expr_P_Xref_Equation
-   
-  (Node : Bare_Block_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Block_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Block_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
-
-
-         procedure Block_Expr_Pre_Env_Actions
-           (Self            : Bare_Block_Expr;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -22109,41 +17167,8 @@ function Block_Expr_P_Has_Context_Free_Type
      (Node : Bare_Cast_Expr) return Bare_Type_Ref;
 
 
-         
-
-
-
-
-function Cast_Expr_P_Expected_Type_Equation
-   
-  (Node : Bare_Cast_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Cast_Expr_P_Xref_Equation
-   
-  (Node : Bare_Cast_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -22172,190 +17197,8 @@ function Cast_Expr_P_Xref_Equation
      (Node : Bare_Dot_Expr) return Bare_Ref_Id;
 
 
-         
-
-
-
-
-function Dot_Expr_P_Referenced_Decl
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
-
-
-         
-
-
-
-
-function Dot_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Dot_Expr_P_First_Var_In_Prefix_Env
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Bind dest's logic variables to the correct declaration depending on its
---  prefix(Self).
-
-         
-
-
-
-
-function Dot_Expr_P_Xtype_Equation
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Dot_Expr_P_Is_Call_To_Super
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return True if this DotExpr is a reference to super (meaning it matches the
---  patterns ``self.super`` or ``node.super``).
-
-         
-
-
-
-
-function Dot_Expr_P_Generic_Type_Equation
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Dot_Expr_P_Expected_Type_Equation
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Dot_Expr_P_Xref_Typing_Equation
-   
-  (Node : Bare_Dot_Expr
-      ; In_Logic_Call : Boolean
-         := False
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  ``In_Logic_Call``: Whether we are currently solving a LogicPropage or a
---  LogicPredicate.
-
-         
-
-
-
-
-function Dot_Expr_P_Xref_Equation
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Dot_Expr_P_Xlogic_Equation
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Dot_Expr_P_Complete
-   
-  (Node : Bare_Dot_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Complete_Item_Array_Access
-   ;
-
-
 
    
-
 
 
 
@@ -22374,41 +17217,8 @@ function Dot_Expr_P_Complete
      (Node : Bare_Error_On_Null) return Bare_Expr;
 
 
-         
-
-
-
-
-function Error_On_Null_P_Xref_Equation
-   
-  (Node : Bare_Error_On_Null
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Error_On_Null_P_Has_Context_Free_Type
-   
-  (Node : Bare_Error_On_Null
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -22432,25 +17242,8 @@ function Error_On_Null_P_Has_Context_Free_Type
      (Node : Bare_Generic_Instantiation) return Bare_Type_Ref_List;
 
 
-         
-
-
-
-
-function Generic_Instantiation_P_Xref_Equation
-   
-  (Node : Bare_Generic_Instantiation
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -22469,7 +17262,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22485,7 +17277,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22498,7 +17289,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22519,7 +17309,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22545,7 +17334,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22584,7 +17372,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22602,7 +17389,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22626,7 +17412,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22644,7 +17429,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22668,7 +17452,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22686,7 +17469,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22710,7 +17492,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22731,7 +17512,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22745,7 +17525,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22774,7 +17553,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22792,7 +17570,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22816,7 +17593,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22834,7 +17610,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22863,7 +17638,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22876,7 +17650,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22897,7 +17670,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22926,7 +17698,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22939,7 +17710,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
    
-
 
 
 
@@ -22968,7 +17738,6 @@ function Generic_Instantiation_P_Xref_Equation
 
 
 
-
       
 
    
@@ -22979,23 +17748,8 @@ function Generic_Instantiation_P_Xref_Equation
         );
 
 
-         
-
-
-
-
-function Id_P_Is_Not_Type_Name
-   
-  (Node : Bare_Id
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -23009,157 +17763,8 @@ function Id_P_Is_Not_Type_Name
         );
 
 
-         
-
-
-
-
-function Def_Id_P_Decl
-   
-  (Node : Bare_Def_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Return the Decl that defines this identifier.
-
-         
-
-
-
-
-function Def_Id_P_Name
-   
-  (Node : Bare_Def_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
---  Return the name defined by this DefId.
-
-         
-
-
-
-
-function Def_Id_P_Get_Type
-   
-  (Node : Bare_Def_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Return the type of the symbol defined by this DefId.
-
-         
-
-
-
-
-function Def_Id_P_Get_Implementatinons
-   
-  (Node : Bare_Def_Id
-      ; Units : Internal_Unit_Array_Access
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Def_Id_Array_Access
-   ;
---  Return the implementations of this name.
-
-         
-
-
-
-
-function Def_Id_P_Decl_Detail
-   
-  (Node : Bare_Def_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
---  Return the details to display in the language server client when it
---  requests for completion or hovering information.
-
-         
-
-
-
-
-function Def_Id_P_Completion_Item_Kind
-   
-  (Node : Bare_Def_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Integer
-   ;
---  Return the kind of completion item for this DefId.
-
-         
-
-
-
-
-function Def_Id_P_Doc
-   
-  (Node : Bare_Def_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return String_Type
-   ;
---  Return the documentation associated to this DefId.
-
-         
-
-
-
-
-function Def_Id_P_Find_All_References_Helper
-   
-  (Node : Bare_Def_Id
-      ; Current_Node : Internal_Entity
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Ref_Id_Array_Access
-   ;
-
-
-         
-
-
-
-
-function Def_Id_P_Find_All_References
-   
-  (Node : Bare_Def_Id
-      ; Units : Internal_Unit_Array_Access
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Ref_Result_Array_Access
-   ;
---  Return the list of all RefId that refer to this DefId.
-
 
    
-
 
 
 
@@ -23178,7 +17783,6 @@ function Def_Id_P_Find_All_References
 
 
 
-
       
 
    
@@ -23194,7 +17798,6 @@ function Def_Id_P_Find_All_References
 
 
 
-
       
 
    
@@ -23205,187 +17808,8 @@ function Def_Id_P_Find_All_References
         );
 
 
-         
-
-
-
-
-function Ref_Id_P_From_Node
-   
-  (Node : Bare_Ref_Id
-  )
-
-   return Bare_Lkt_Node
-   ;
---  Find the limiting node to search in the environment to avoid variables that
---  reference themselves or future variables.
-
-         
-
-
-
-
-function Ref_Id_P_First_Var_In_Env
-   
-  (Node : Bare_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
---  Get the first declaration found for this RefId. This first tries to get
---  variables declared before Self.from_node, if no variable was found, find a
---  type or function anywhere in the node environment.
-
-         
-
-
-
-
-function Ref_Id_P_Is_Being_Called
-   
-  (Node : Bare_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Return True if this RefId is used to refer to a function being called.
-
-         
-
-
-
-
-function Ref_Id_P_Referenced_Decl
-   
-  (Node : Bare_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Decl
-   ;
-
-
-         
-
-
-
-
-function Ref_Id_P_Xtype_Equation
-   
-  (Node : Bare_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Ref_Id_P_Referenced_Defining_Name
-   
-  (Node : Bare_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Def_Id
-   ;
---  Return the referenced defining name.
-
-         
-
-
-
-
-function Ref_Id_P_Generic_Type_Equation
-   
-  (Node : Bare_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Ref_Id_P_Bind_Actual_Type_Equation
-   
-  (Node : Bare_Ref_Id
-      ; First_Var : Internal_Entity_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Bind the corresponding type of first_var to the RefId.
-
-         
-
-
-
-
-function Ref_Id_P_Xref_Equation
-   
-  (Node : Bare_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Ref_Id_P_Xlogic_Equation
-   
-  (Node : Bare_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Ref_Id_P_Complete
-   
-  (Node : Bare_Ref_Id
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Complete_Item_Array_Access
-   ;
-
-
 
    
-
 
 
 
@@ -23419,91 +17843,8 @@ function Ref_Id_P_Complete
      (Node : Bare_If_Expr) return Bare_Expr;
 
 
-         
-
-
-
-
-function If_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_If_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function If_Expr_P_Branch_Exprs
-   
-  (Node : Bare_If_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Expr_Array_Access
-   ;
---  Return an array containing the expression of all branches.
-
-         
-
-
-
-
-function If_Expr_P_Expected_Branch_Type_Equation
-   
-  (Node : Bare_If_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Find the expected type for all branches by computing the common ancestor of
---  the type of all context free expressions, or the expected type of the
---  IfExpr if no expression is context free.
-
-         
-
-
-
-
-function If_Expr_P_Xref_Equation
-   
-  (Node : Bare_If_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function If_Expr_P_Cond_Branches_Equation
-   
-  (Node : Bare_If_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Create an equation verifying that all conditions are valid.
-
 
    
-
 
 
 
@@ -23527,57 +17868,8 @@ function If_Expr_P_Cond_Branches_Equation
      (Node : Bare_Isa) return Bare_Pattern;
 
 
-         
-
-
-
-
-function Isa_P_Expected_Type_Equation
-   
-  (Node : Bare_Isa
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Isa_P_Xref_Equation
-   
-  (Node : Bare_Isa
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Isa_P_Has_Context_Free_Type
-   
-  (Node : Bare_Isa
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -23606,25 +17898,8 @@ function Isa_P_Has_Context_Free_Type
      (Node : Bare_Keep_Expr) return Bare_Type_Ref;
 
 
-         
-
-
-
-
-function Keep_Expr_P_Xref_Equation
-   
-  (Node : Bare_Keep_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -23653,80 +17928,8 @@ function Keep_Expr_P_Xref_Equation
      (Node : Bare_Lambda_Expr) return Bare_Expr;
 
 
-         
-
-
-
-
-function Lambda_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Lambda_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Lambda_Expr_P_Expected_Type_Equation
-   
-  (Node : Bare_Lambda_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Lambda_Expr_P_Generic_Type_Equation
-   
-  (Node : Bare_Lambda_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Lambda_Expr_P_Xref_Equation
-   
-  (Node : Bare_Lambda_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
-
-
-         procedure Lambda_Expr_Pre_Env_Actions
-           (Self            : Bare_Lambda_Expr;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
 
 
 
@@ -23745,7 +17948,6 @@ function Lambda_Expr_P_Xref_Equation
 
 
 
-
       
 
    
@@ -23756,25 +17958,8 @@ function Lambda_Expr_P_Xref_Equation
         );
 
 
-         
-
-
-
-
-function Big_Num_Lit_P_Xref_Equation
-   
-  (Node : Bare_Big_Num_Lit
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -23788,25 +17973,8 @@ function Big_Num_Lit_P_Xref_Equation
         );
 
 
-         
-
-
-
-
-function Char_Lit_P_Xref_Equation
-   
-  (Node : Bare_Char_Lit
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -23825,41 +17993,8 @@ function Char_Lit_P_Xref_Equation
      (Node : Bare_Null_Lit) return Bare_Type_Ref;
 
 
-         
-
-
-
-
-function Null_Lit_P_Xref_Equation
-   
-  (Node : Bare_Null_Lit
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Null_Lit_P_Has_Context_Free_Type
-   
-  (Node : Bare_Null_Lit
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -23873,25 +18008,8 @@ function Null_Lit_P_Has_Context_Free_Type
         );
 
 
-         
-
-
-
-
-function Num_Lit_P_Xref_Equation
-   
-  (Node : Bare_Num_Lit
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -23905,86 +18023,8 @@ function Num_Lit_P_Xref_Equation
         );
 
 
-         
-
-
-
-
-function Dispatcher_String_Lit_P_Denoted_Value
-   
-  (Node : Bare_String_Lit
-  )
-
-   return Internal_Decoded_String_Value
-   with Inline_Always
-   ;
---  Return the content of the given string literal node.
-
-         
-
-
-
-
-function Dispatcher_String_Lit_P_Is_Prefixed_String
-   
-  (Node : Bare_String_Lit
-  )
-
-   return Boolean
-   with Inline_Always
-   ;
---  Return whether this string is prefixed or not.
-
-         
-
-
-
-
-function Dispatcher_String_Lit_P_Prefix
-   
-  (Node : Bare_String_Lit
-  )
-
-   return Character_Type
-   with Inline_Always
-   ;
---  Return the prefix of this string, or the null character if there is no
---  prefix.
-
-         
-
-
-
-
-function String_Lit_P_Is_Regexp_Literal
-   
-  (Node : Bare_String_Lit
-  )
-
-   return Boolean
-   ;
---  Return whether this string literal is actually a regexp literal, by
---  checking that this string is prefixed by 'p'.
-
-         
-
-
-
-
-function String_Lit_P_Xref_Equation
-   
-  (Node : Bare_String_Lit
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -24003,37 +18043,8 @@ function String_Lit_P_Xref_Equation
      (Node : Bare_Block_String_Lit) return Bare_Block_String_Line_List;
 
 
-         
-
-
-
-
-function Block_String_Lit_P_Is_Prefixed_String
-   
-  (Node : Bare_Block_String_Lit
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Block_String_Lit_P_Prefix
-   
-  (Node : Bare_Block_String_Lit
-  )
-
-   return Character_Type
-   ;
-
-
 
    
-
 
 
 
@@ -24052,37 +18063,8 @@ function Block_String_Lit_P_Prefix
      (Node : Bare_Module_Doc_String_Lit) return Bare_Module_Doc_String_Line_List;
 
 
-         
-
-
-
-
-function Module_Doc_String_Lit_P_Is_Prefixed_String
-   
-  (Node : Bare_Module_Doc_String_Lit
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Module_Doc_String_Lit_P_Prefix
-   
-  (Node : Bare_Module_Doc_String_Lit
-  )
-
-   return Character_Type
-   ;
-
-
 
    
-
 
 
 
@@ -24101,7 +18083,6 @@ function Module_Doc_String_Lit_P_Prefix
 
 
 
-
       
 
    
@@ -24114,7 +18095,6 @@ function Module_Doc_String_Lit_P_Prefix
 
 
    
-
 
 
 
@@ -24138,25 +18118,8 @@ function Module_Doc_String_Lit_P_Prefix
      (Node : Bare_Logic_Assign) return Bare_Expr;
 
 
-         
-
-
-
-
-function Logic_Assign_P_Xref_Equation
-   
-  (Node : Bare_Logic_Assign
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -24175,25 +18138,8 @@ function Logic_Assign_P_Xref_Equation
      (Node : Bare_Logic_Expr) return Bare_Expr;
 
 
-         
-
-
-
-
-function Logic_Expr_P_Xref_Equation
-   
-  (Node : Bare_Logic_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -24217,41 +18163,8 @@ function Logic_Expr_P_Xref_Equation
      (Node : Bare_Logic_Propagate) return Bare_Logic_Propagate_Call;
 
 
-         
-
-
-
-
-function Logic_Propagate_P_Generic_Type_Equation
-   
-  (Node : Bare_Logic_Propagate
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Logic_Propagate_P_Xref_Equation
-   
-  (Node : Bare_Logic_Propagate
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -24275,25 +18188,8 @@ function Logic_Propagate_P_Xref_Equation
      (Node : Bare_Logic_Unify) return Bare_Expr;
 
 
-         
-
-
-
-
-function Logic_Unify_P_Xref_Equation
-   
-  (Node : Bare_Logic_Unify
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -24317,75 +18213,8 @@ function Logic_Unify_P_Xref_Equation
      (Node : Bare_Match_Expr) return Bare_Base_Match_Branch_List;
 
 
-         
-
-
-
-
-function Match_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Match_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Match_Expr_P_Branch_Exprs
-   
-  (Node : Bare_Match_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Expr_Array_Access
-   ;
---  Return an array containing the expression of all branches.
-
-         
-
-
-
-
-function Match_Expr_P_Expected_Branch_Type_Equation
-   
-  (Node : Bare_Match_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Find the expected type for all branches by computing the common ancestor of
---  the type of all context free expressions, or the expected type of the
---  MatchExpr if no expression is context free.
-
-         
-
-
-
-
-function Match_Expr_P_Xref_Equation
-   
-  (Node : Bare_Match_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -24404,25 +18233,8 @@ function Match_Expr_P_Xref_Equation
      (Node : Bare_Not_Expr) return Bare_Expr;
 
 
-         
-
-
-
-
-function Not_Expr_P_Xref_Equation
-   
-  (Node : Bare_Not_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -24441,57 +18253,8 @@ function Not_Expr_P_Xref_Equation
      (Node : Bare_Paren_Expr) return Bare_Expr;
 
 
-         
-
-
-
-
-function Paren_Expr_P_Expected_Type_Equation
-   
-  (Node : Bare_Paren_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Paren_Expr_P_Xref_Equation
-   
-  (Node : Bare_Paren_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Paren_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Paren_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -24530,7 +18293,6 @@ function Paren_Expr_P_Has_Context_Free_Type
 
 
 
-
       
 
    
@@ -24551,41 +18313,8 @@ function Paren_Expr_P_Has_Context_Free_Type
      (Node : Bare_Raise_Expr) return Bare_Expr;
 
 
-         
-
-
-
-
-function Raise_Expr_P_Xref_Equation
-   
-  (Node : Bare_Raise_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Raise_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Raise_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -24614,41 +18343,8 @@ function Raise_Expr_P_Has_Context_Free_Type
      (Node : Bare_Subscript_Expr) return Bare_Expr;
 
 
-         
-
-
-
-
-function Subscript_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Subscript_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Subscript_Expr_P_Xref_Equation
-   
-  (Node : Bare_Subscript_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -24672,75 +18368,8 @@ function Subscript_Expr_P_Xref_Equation
      (Node : Bare_Try_Expr) return Bare_Expr;
 
 
-         
-
-
-
-
-function Try_Expr_P_Exprs
-   
-  (Node : Bare_Try_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Expr_Array_Access
-   ;
---  Return an array containing all expressions.
-
-         
-
-
-
-
-function Try_Expr_P_Expected_Exprs_Type_Equation
-   
-  (Node : Bare_Try_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
---  Find the expected type for all branches by computing the common ancestor of
---  the type of all context free expressions, or the expected type of the
---  TryExpr if no expression is context free.
-
-         
-
-
-
-
-function Try_Expr_P_Xref_Equation
-   
-  (Node : Bare_Try_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
-         
-
-
-
-
-function Try_Expr_P_Has_Context_Free_Type
-   
-  (Node : Bare_Try_Expr
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
 
    
-
 
 
 
@@ -24764,25 +18393,8 @@ function Try_Expr_P_Has_Context_Free_Type
      (Node : Bare_Un_Op) return Bare_Expr;
 
 
-         
-
-
-
-
-function Un_Op_P_Xref_Equation
-   
-  (Node : Bare_Un_Op
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -24811,39 +18423,8 @@ function Un_Op_P_Xref_Equation
      (Node : Bare_Full_Decl) return Bare_Decl;
 
 
-         
-
-
-
-
-function Full_Decl_P_Has_Annotation
-   
-  (Node : Bare_Full_Decl
-      ; Name : Symbol_Type
-  )
-
-   return Boolean
-   ;
---  Return whether this node has an annotation with name ``name``.
-
-         
-
-
-
-
-function Full_Decl_P_Get_Annotation
-   
-  (Node : Bare_Full_Decl
-      ; Name : Symbol_Type
-  )
-
-   return Bare_Decl_Annotation
-   ;
---  Return the annotation with name ``name``.
-
 
    
-
 
 
 
@@ -24872,7 +18453,6 @@ function Full_Decl_P_Get_Annotation
 
 
 
-
       
 
    
@@ -24893,51 +18473,8 @@ function Full_Decl_P_Get_Annotation
      (Node : Bare_Imported_Name) return Bare_Def_Id;
 
 
-         
-
-
-
-
-function Imported_Name_P_Resolve_Simple_Import
-   
-  (Node : Bare_Imported_Name
-  )
-
-   return Internal_Entity
-   ;
---  Lexical env resolver for imported names from ``import`` nodes.
-
-         
-
-
-
-
-function Imported_Name_P_Resolve_Import_From
-   
-  (Node : Bare_Imported_Name
-  )
-
-   return Internal_Entity
-   ;
---  Lexical env resolver for imported names from ``from M import ...`` nodes.
-
-         
-
-
-
-
-function Imported_Name_P_Env_Assoc
-   
-  (Node : Bare_Imported_Name
-  )
-
-   return Internal_Env_Assoc
-   ;
---  Helper for env specs: return an env association for this imported name.
-
 
    
-
 
 
 
@@ -24966,7 +18503,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -24992,7 +18528,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25001,19 +18536,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25028,7 +18550,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25037,19 +18558,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25064,7 +18572,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25073,19 +18580,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25100,7 +18594,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25109,19 +18602,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25136,7 +18616,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25145,19 +18624,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25172,7 +18638,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25181,19 +18646,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25208,7 +18660,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25217,26 +18668,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-         procedure Decl_Block_Pre_Env_Actions
-           (Self            : Bare_Decl_Block;
-            State           : in out PLE_Node_State;
-            Add_To_Env_Only : Boolean := False);
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25251,7 +18682,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25260,19 +18690,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25287,7 +18704,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25296,19 +18712,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25323,7 +18726,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25332,19 +18734,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25359,7 +18748,6 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
@@ -25368,19 +18756,6 @@ function Imported_Name_P_Env_Assoc
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25395,151 +18770,14 @@ function Imported_Name_P_Env_Assoc
 
 
 
-
       
 
    
 
 
 
-         
-
-
-
-
-function Dispatcher_Null_Cond_Qualifier_P_As_Bool
-   
-  (Node : Bare_Null_Cond_Qualifier
-  )
-
-   return Boolean
-   with Inline_Always
-   ;
---  Return whether this node is present
-
 
    
-
-
-
-
-      
-
-   
-
-
-
-         
-
-
-
-
-function Null_Cond_Qualifier_Absent_P_As_Bool
-   
-  (Node : Bare_Null_Cond_Qualifier_Absent
-  )
-
-   return Boolean
-   ;
-
-
-
-   
-
-
-
-
-      
-
-   
-
-
-
-         
-
-
-
-
-function Null_Cond_Qualifier_Present_P_As_Bool
-   
-  (Node : Bare_Null_Cond_Qualifier_Present
-  )
-
-   return Boolean
-   ;
-
-
-
-   
-
-
-
-
-      
-
-   
-
-
-
-         
-
-
-
-
-function Op_P_Is_Equation_Op
-   
-  (Node : Bare_Op
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Op_P_Is_Bool_Op
-   
-  (Node : Bare_Op
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Op_P_Is_Arith_Op
-   
-  (Node : Bare_Op
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Op_P_Is_Order_Op
-   
-  (Node : Bare_Op
-  )
-
-   return Boolean
-   ;
-
-
-
-   
-
 
 
 
@@ -25554,7 +18792,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25563,19 +18800,6 @@ function Op_P_Is_Order_Op
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25590,7 +18814,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25599,19 +18822,6 @@ function Op_P_Is_Order_Op
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25626,7 +18836,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25635,19 +18844,6 @@ function Op_P_Is_Order_Op
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25662,7 +18858,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25671,19 +18866,6 @@ function Op_P_Is_Order_Op
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25698,7 +18880,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25707,19 +18888,6 @@ function Op_P_Is_Order_Op
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25734,7 +18902,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25743,19 +18910,6 @@ function Op_P_Is_Order_Op
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25770,7 +18924,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25779,19 +18932,6 @@ function Op_P_Is_Order_Op
 
 
    
-
-
-
-
-      
-
-   
-
-
-
-
-   
-
 
 
 
@@ -25806,6 +18946,16 @@ function Op_P_Is_Order_Op
 
 
 
+      
+
+   
+
+
+
+
+   
+
+
 
       
 
@@ -25816,6 +18966,225 @@ function Op_P_Is_Order_Op
 
    
 
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
+
+
+
+      
+
+   
+
+
+
+
+   
 
 
 
@@ -25854,7 +19223,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25871,7 +19239,6 @@ function Op_P_Is_Order_Op
 
 
    
-
 
 
 
@@ -25895,7 +19262,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25904,7 +19270,6 @@ function Op_P_Is_Order_Op
 
 
    
-
 
 
 
@@ -25928,7 +19293,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25949,7 +19313,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -25958,7 +19321,6 @@ function Op_P_Is_Order_Op
 
 
    
-
 
 
 
@@ -25987,7 +19349,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -26008,7 +19369,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -26017,7 +19377,6 @@ function Op_P_Is_Order_Op
 
 
    
-
 
 
 
@@ -26041,7 +19400,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -26051,6 +19409,25 @@ function Op_P_Is_Order_Op
 
    
 
+
+
+      
+
+   
+
+      
+      procedure Initialize_Fields_For_Destructuring_Pattern_Detail
+        (Self : Bare_Destructuring_Pattern_Detail
+         ; Destructuring_Pattern_Detail_F_Decl : Bare_Binding_Val_Decl
+        );
+
+      
+   function Destructuring_Pattern_Detail_F_Decl
+     (Node : Bare_Destructuring_Pattern_Detail) return Bare_Binding_Val_Decl;
+
+
+
+   
 
 
 
@@ -26079,7 +19456,6 @@ function Op_P_Is_Order_Op
 
 
 
-
       
 
    
@@ -26087,13 +19463,13 @@ function Op_P_Is_Order_Op
       
       procedure Initialize_Fields_For_Property_Pattern_Detail
         (Self : Bare_Property_Pattern_Detail
-         ; Property_Pattern_Detail_F_Call : Bare_Expr
+         ; Property_Pattern_Detail_F_Call : Bare_Call_Expr
          ; Property_Pattern_Detail_F_Expected_Value : Bare_Pattern
         );
 
       
    function Property_Pattern_Detail_F_Call
-     (Node : Bare_Property_Pattern_Detail) return Bare_Expr;
+     (Node : Bare_Property_Pattern_Detail) return Bare_Call_Expr;
 
       
    function Property_Pattern_Detail_F_Expected_Value
@@ -26102,7 +19478,6 @@ function Op_P_Is_Order_Op
 
 
    
-
 
 
 
@@ -26116,43 +19491,8 @@ function Op_P_Is_Order_Op
         );
 
 
-         
-
-
-
-
-function Type_Ref_P_Xref_Entry_Point
-   
-  (Node : Bare_Type_Ref
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
---  Designates entities that are entry point for the xref solving
---  infrastructure. If this returns true, then nameres_diagnostics can be
---  called on it.
-
-         
-
-
-
-
-function Type_Ref_P_Referenced_Decl
-   
-  (Node : Bare_Type_Ref
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Internal_Entity_Type_Decl
-   ;
---  Returns the referenced type declaration.
-
 
    
-
 
 
 
@@ -26168,7 +19508,6 @@ function Type_Ref_P_Referenced_Decl
 
 
    
-
 
 
 
@@ -26192,25 +19531,8 @@ function Type_Ref_P_Referenced_Decl
      (Node : Bare_Function_Type_Ref) return Bare_Type_Ref;
 
 
-         
-
-
-
-
-function Function_Type_Ref_P_Xref_Equation
-   
-  (Node : Bare_Function_Type_Ref
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -26234,25 +19556,8 @@ function Function_Type_Ref_P_Xref_Equation
      (Node : Bare_Generic_Type_Ref) return Bare_Type_Ref_List;
 
 
-         
-
-
-
-
-function Generic_Type_Ref_P_Xref_Equation
-   
-  (Node : Bare_Generic_Type_Ref
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -26271,25 +19576,8 @@ function Generic_Type_Ref_P_Xref_Equation
      (Node : Bare_Simple_Type_Ref) return Bare_Expr;
 
 
-         
-
-
-
-
-function Simple_Type_Ref_P_Xref_Equation
-   
-  (Node : Bare_Simple_Type_Ref
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -26313,41 +19601,8 @@ function Simple_Type_Ref_P_Xref_Equation
      (Node : Bare_Var_Bind) return Bare_Expr;
 
 
-         
-
-
-
-
-function Var_Bind_P_Xref_Entry_Point
-   
-  (Node : Bare_Var_Bind
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-   ;
-
-
-         
-
-
-
-
-function Var_Bind_P_Xref_Equation
-   
-  (Node : Bare_Var_Bind
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Logic_Equation
-   ;
-
-
 
    
-
 
 
 
@@ -26412,10 +19667,12 @@ type Mmz_Property is (
      ,  Mmz_Bare_Lkt_Node_Lkt_Node_P_Solve_Equation
      ,  Mmz_Bare_Lkt_Node_Lkt_Node_P_Solve_Expected_Types
      ,  Mmz_Bare_Lkt_Node_Lkt_Node_P_Solve_Generic_Types
+     ,  Mmz_Bare_Module_Id_Module_Id_P_Referenced_Decl
      ,  Mmz_Bare_Ref_Id_Ref_Id_P_First_Var_In_Env
      ,  Mmz_Bare_Ref_Id_Ref_Id_P_Referenced_Decl
      ,  Mmz_Bare_Struct_Decl_Struct_Decl_P_Update_Func_Env
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Make_Array_Type
+     ,  Mmz_Bare_Type_Decl_Type_Decl_P_Make_Stream_Type
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Node_Builder_Scope
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Node_Decl
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Self_Decl
@@ -26429,6 +19686,7 @@ type Mmz_Key_Kind is (
      ,  Mmz_Bare_Expr
      ,  Mmz_Bare_Lexer_Decl
      ,  Mmz_Bare_Lkt_Node
+     ,  Mmz_Bare_Module_Id
      ,  Mmz_Bare_Ref_Id
      ,  Mmz_Bare_Struct_Decl
      ,  Mmz_Bare_Type_Decl
@@ -26478,6 +19736,8 @@ type Mmz_Key_Item (Kind : Mmz_Key_Kind := Mmz_Bare_Argument_List) is record
             As_Bare_Lexer_Decl : Bare_Lexer_Decl;
          when Mmz_Bare_Lkt_Node =>
             As_Bare_Lkt_Node : Bare_Lkt_Node;
+         when Mmz_Bare_Module_Id =>
+            As_Bare_Module_Id : Bare_Module_Id;
          when Mmz_Bare_Ref_Id =>
             As_Bare_Ref_Id : Bare_Ref_Id;
          when Mmz_Bare_Struct_Decl =>
@@ -26818,6 +20078,12 @@ with No_Return;
       Context  : Internal_Context;
       Unit     : Internal_Unit;
       Reparsed : Boolean) is null;
+
+   procedure Unit_Diagnostic_Callback
+     (Self    : in out Internal_Event_Handler;
+      Context : Internal_Context;
+      Unit    : Internal_Unit;
+      Message : Text_Type) is null;
 
    procedure Dec_Ref (Self : in out Internal_Event_Handler_Access);
 
@@ -27465,6 +20731,13 @@ with No_Return;
      (Unit : Internal_Unit; Str : String) return String_Access;
    --  This function allocates a string whose lifetime will be associated with
    --  ``Unit``.
+
+   function To_Lookup_Kind_Type (K : Lookup_Kind) return Lookup_Kind_Type
+   is
+     (Lookup_Kind_Type'Val (Lookup_Kind'Pos (K)));
+
+   function Construct_Entity_Array
+     (V : AST_Envs.Entity_Vectors.Vector) return Internal_Entity_Array_Access;
 
 private
    --  We only have a private part to defer the initialization of struct
@@ -28231,6 +21504,30 @@ private
       
 
 
+      No_Entity_Pattern_Detail : constant Internal_Entity_Pattern_Detail :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
+      No_Entity_Destructuring_Pattern_Detail : constant Internal_Entity_Destructuring_Pattern_Detail :=
+      (
+               Node =>
+                  No_Bare_Lkt_Node, 
+               Info =>
+                  No_Entity_Info
+      );
+
+         
+      
+
+
       No_Entity_Dot_Expr : constant Internal_Entity_Dot_Expr :=
       (
                Node =>
@@ -28508,18 +21805,6 @@ private
 
 
       No_Entity_Field_Decl : constant Internal_Entity_Field_Decl :=
-      (
-               Node =>
-                  No_Bare_Lkt_Node, 
-               Info =>
-                  No_Entity_Info
-      );
-
-         
-      
-
-
-      No_Entity_Pattern_Detail : constant Internal_Entity_Pattern_Detail :=
       (
                Node =>
                   No_Bare_Lkt_Node, 

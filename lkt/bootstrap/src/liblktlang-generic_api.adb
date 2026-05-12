@@ -567,6 +567,8 @@ package body Liblktlang.Generic_API is
                      return Lkt_Regex_Pattern;
                   when Type_Index_For_Type_Pattern =>
                      return Lkt_Type_Pattern;
+                  when Type_Index_For_Destructuring_Pattern_Detail =>
+                     return Lkt_Destructuring_Pattern_Detail;
                   when Type_Index_For_Field_Pattern_Detail =>
                      return Lkt_Field_Pattern_Detail;
                   when Type_Index_For_Property_Pattern_Detail =>

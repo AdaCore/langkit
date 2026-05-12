@@ -1,41 +1,38 @@
 with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded;
 
-with Liblktlang_Support.Text; use Liblktlang_Support.Text;
-
+with Liblktlang.Common;         use Liblktlang.Common;
 with Liblktlang.Implementation; use Liblktlang.Implementation;
+with Liblktlang_Support.Text;   use Liblktlang_Support.Text;
 
---  This package provides the default unit provider for Lkt contexts. This
---  provider behaves similarly to CPython's mechanism to find modules: use an
---  environment variable (LKT_PATH) that contains a list of directories in
---  which to find Lkt source files.
+--  This package provides the default unit provider for Lkt and LKQL contexts.
+--  This provider behaves similarly to CPython's mechanism to find modules:
+--  first the current working directory is searched, then the provider uses an
+--  environment variable that contains a list of directories in which to find
+--  source files.
 
 private package Liblktlang.Default_Provider is
 
    package US renames Ada.Strings.Unbounded;
 
-   Path_Var_Name : constant String := "LKT_PATH";
-   --  Name of the environment variable that contains the path to Lkt source
-   --  files.
+   package String_Vectors is new
+     Ada.Containers.Vectors
+       (Index_Type   => Positive,
+        Element_Type => US.Unbounded_String,
+        "="          => US."=");
 
-   function Unit_Base_Filename (Name : Text_Type) return String;
-   --  Return the base filename corresponding to this unit name, or an empty
-   --  string if Name is not a valid unit name.
+   function Create
+      (Mode : Language_Mode) return Internal_Unit_Provider_Access;
+   --  Create a new default unit provider instance with the provided language
+   --  mode.
 
-   function Create return Internal_Unit_Provider_Access;
-   --  Create a new default unit provider instance from the ``LKT_PATH``
-   --  environment variable.
-
-   package String_Vectors is new Ada.Containers.Vectors
-     (Index_Type   => Positive,
-      Element_Type => US.Unbounded_String,
-      "="          => US."=");
+   function Create_Lkt return Internal_Unit_Provider_Access is (Create (Lkt));
+   --  Create a new default unit provider instance for the Lkt language
 
    function Create_From_Dirs
-     (Directories : String_Vectors.Vector)
+     (Mode : Language_Mode; Directories : String_Vectors.Vector)
       return Internal_Unit_Provider_Access;
    --  Create a new default unit provider instance from an explicit list of
    --  directories. Note that the current directory is still implicitly looked
    --  at first.
-
 end Liblktlang.Default_Provider;
