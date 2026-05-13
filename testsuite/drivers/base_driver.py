@@ -4,7 +4,6 @@ import os.path
 
 from e3.fs import mkdir, mv, sync_tree
 from e3.testsuite.control import YAMLTestControlCreator
-from e3.testsuite.driver.classic import TestAbortWithError
 from e3.testsuite.driver.diff import (
     DiffTestDriver,
     OutputRefiner,
@@ -250,38 +249,6 @@ class BaseDriver(DiffTestDriver):
         See the documentation for --with-python.
         """
         return self.env.options.with_python or "python"
-
-    def check_file(self, filename):
-        """
-        Check file presence.
-
-        If the file does not exist test is aborted.
-        """
-        if not os.path.isfile(self.test_dir(filename)):
-            raise TestAbortWithError(
-                "Missing mandatory file: {}".format(filename)
-            )
-
-    def check_file_list(self, what, file_list, can_be_empty=True):
-        """Raise a SetupError if `file_list` is not a list of existing files.
-
-        Also raise an error if it is an empty list while `can_be_empty` is
-        False.
-        """
-        # First check we have a list of strings
-        if (
-            not isinstance(file_list, list)
-            or (not can_be_empty and len(file_list) == 0)
-            or not all(isinstance(fn, str) for fn in file_list)
-        ):
-            empty_msg = "non-empty "
-            raise TestAbortWithError(
-                "{} must be a {}list of strings".format(what, empty_msg)
-            )
-
-        # Then check that these are existing files
-        for filename in file_list:
-            self.check_file(filename)
 
     def add_path(self, env, env_var, path):
         """

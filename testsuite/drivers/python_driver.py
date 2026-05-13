@@ -12,19 +12,6 @@ class PythonDriver(BaseDriver):
     # Driver entry poins
     #
 
-    def set_up(self):
-        super().set_up()
-        for f in self.mandatory_files:
-            self.check_file(f)
-
-    @property
-    def mandatory_files(self):
-        """
-        Return the set of mandatory files for this driver. Meant to be
-        overloaded by subclasses.
-        """
-        return ["test.py"]
-
     @property
     def script_and_args(self):
         """
