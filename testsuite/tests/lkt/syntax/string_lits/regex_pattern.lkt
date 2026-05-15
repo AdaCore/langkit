@@ -1,0 +1,3 @@
+val _ = match "foo" {
+    case "foo" => "bar"
+}

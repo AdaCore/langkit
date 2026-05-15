@@ -56,6 +56,10 @@ package Liblktlang.Implementation.Extensions is
      (Node : Bare_Module_Doc_String_Lit) return Internal_Decoded_String_Value;
    --  Return the content of the given module doc string literal node
 
+   function Regex_Pattern_P_Denoted_Value
+     (Node : Bare_Regex_Pattern) return Internal_Decoded_String_Value;
+   --  Return the equivalent string for this regular expression
+
    function Single_Line_String_Lit_P_Denoted_Value
      (Node : Bare_Single_Line_String_Lit) return Internal_Decoded_String_Value;
    --  Return the content of the given single line string literal node

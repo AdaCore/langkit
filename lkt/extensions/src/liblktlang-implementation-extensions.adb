@@ -613,6 +613,16 @@ package body Liblktlang.Implementation.Extensions is
       return Block_Denoted_String (Node.Module_Doc_String_Lit_F_Lines);
    end Module_Doc_String_Lit_P_Denoted_Value;
 
+   -----------------------------------
+   -- Regex_Pattern_P_Denoted_Value --
+   -----------------------------------
+
+   function Regex_Pattern_P_Denoted_Value
+     (Node : Bare_Regex_Pattern) return Internal_Decoded_String_Value is
+   begin
+      return Common_Denoted_String (Node);
+   end Regex_Pattern_P_Denoted_Value;
+
    --------------------------------------------
    -- Single_Line_String_Lit_P_Denoted_Value --
    --------------------------------------------
