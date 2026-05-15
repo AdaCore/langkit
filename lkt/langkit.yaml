@@ -7,7 +7,7 @@ library:
   standalone: true
   defaults:
     unit_provider: Liblktlang.Default_Provider.Create
-    unparsing_config: default_unparsing_config.json
+    unparsing_config: default_unparsing_config.lkt
 mains:
   source_dirs: [extensions/mains]
   main_programs: [lkt_toolbox]

@@ -1,7 +1,6 @@
 import glob
 import os
 import os.path
-import sys
 
 from e3.fs import mkdir, mv, sync_tree
 from e3.testsuite.control import YAMLTestControlCreator
@@ -163,13 +162,12 @@ class BaseDriver(DiffTestDriver):
     @property
     def langkit_root_dir(self):
         """Return the absolute path to the repository root directory."""
-        return os.path.abspath(os.path.join(self.testsuite_dir, ".."))
+        return self.env.langkit_root_dir
 
     @property
     def testsuite_dir(self):
         """Return the absolute path to the testsuite root directory."""
-        result = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-        return os.path.abspath(result)
+        return self.env.testsuite_dir
 
     @property
     def coverage_enabled(self):
@@ -200,7 +198,7 @@ class BaseDriver(DiffTestDriver):
         """
         See the documentation for --with-langkit-python.
         """
-        return self.env.options.with_langkit_python or sys.executable
+        return self.env.langkit_python_interpreter
 
     @property
     def python_interpreter(self):

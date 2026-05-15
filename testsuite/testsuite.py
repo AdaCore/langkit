@@ -190,6 +190,13 @@ class LangkitTestsuite(Testsuite):
             "os": self.env.build.os.name,
             "valgrind": args.valgrind,
         }
+        self.env.langkit_python_interpreter = (
+            args.with_langkit_python or sys.executable
+        )
+        self.env.testsuite_dir = os.path.dirname(os.path.abspath(__file__))
+        self.env.langkit_root_dir = os.path.abspath(
+            os.path.join(self.env.testsuite_dir, "..")
+        )
 
         def set_up_empty_dir(*path):
             """
@@ -330,6 +337,10 @@ class LangkitTestsuite(Testsuite):
             1
             if len(dag.vertex_data) >= self.main.args.jobs
             else self.main.args.jobs
+        )
+
+        drivers.lkt_unparse_driver.LktUnparseDriver.adjust_dag_dependencies(
+            self.env, dag
         )
 
     def dump_testsuite_result(self) -> None:
