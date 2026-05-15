@@ -1,16 +1,30 @@
-# Test creating an array literal whose element_type is the node type defined by
-# the enclosing class.
-
 from lexer_example import foo_lexer
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- Example("example")
+    @main_rule main_rule <- list*(Example("example"))
 }
 
 class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
+    # Test creating an array literal whose element_type is the node type
+    # defined by the enclosing class.
     @exported fun entities_array(): Array[Entity[Example]] = [self, self, self]
+
+    fun id_root_array(items: Array[FooNode]): Array[FooNode] = items
+
+    # Test creating an array literal whose element_type is the common ancestor
+    # of its items.
+    @exported fun unify_arry(): Array[Entity[FooNode]] = {
+        val ex = null[Example];
+        val exl = null[ASTList[Example]];
+
+        val arr1 = node.id_root_array([exl, ex]);
+        val arr2 = node.id_root_array([ex, exl]);
+        val arr3 = node.id_root_array([ex, exl]: FooNode);
+
+        (arr1 & arr2 & arr3).map((n) => n.as_bare_entity)
+    }
 }

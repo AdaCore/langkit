@@ -7,7 +7,13 @@ test.lkt:4:38: error: Missing element type for empty array literal
 == empty_ok/test.lkt ==
 Code generation was successful
 
-== multiple_incompatible/test.lkt ==
+== incompatible_explicit/test.lkt ==
+test.lkt:4:45: error: Element of type Bool expected, got Example
+4 |     @exported fun p(): Array[Bool] = [true, node]: Bool
+  |                                             ^^^^
+
+
+== incompatible_implicit/test.lkt ==
 test.lkt:4:45: error: Element of type Bool expected, got Example
 4 |     @exported fun p(): Array[Bool] = [true, node]
   |                                             ^^^^
