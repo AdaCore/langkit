@@ -204,9 +204,11 @@ class LibraryDefaults:
 
     unparsing_config: str | None = None
     """
-    Filename relative to the extensions directory, containing the default JSON
+    Filename relative to the extensions directory, containing the default
     unparsing configuration for the generated library. Use an empty
-    configuration if omitted.
+    configuration if omitted. Otherwise, it must be either a "*.json" filename
+    (for a JSON configuration), or a "*.lkt" filename (for a Lkt configuration,
+    automatically translated to JSON).
     """
 
     format_options: FormatOptions = FormatOptions()
@@ -433,8 +435,12 @@ class LibraryConfig:
     library.
 
     This mapping associates an entity name (camel with underscore convention)
-    in ``$.Generic_API.Unparsing.Builtin_Overridings`` to the corresponding
-    overriding information.
+    in ``$.Generic_API.Unparsing.Builtin_Overridings`` to filenames for the
+    corresponding overriding information.
+
+    Each filename must be either a "*.json" filename (for a JSON
+    configuration), or a "*.lkt" filename (for a Lkt configuration,
+    automatically translated to JSON).
     """
 
     @property

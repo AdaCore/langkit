@@ -1,0 +1,7 @@
+driver: lkt_build_and_run
+config:
+  library:
+    defaults:
+      unparsing_config: default_cfg.lkt
+gpr_mains:
+    - main.adb example.txt

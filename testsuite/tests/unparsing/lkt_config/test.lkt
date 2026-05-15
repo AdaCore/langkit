@@ -1,0 +1,26 @@
+# Check that the automatic translation from Lkt to JSON for the unparsing
+# configuration works as expected.
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+@with_unparsers
+grammar foo_grammar {
+    @main_rule sequence <- Sequence("(" list*(item) ")")
+    item <- or(sequence | Name(@Identifier) | Number(@Number))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Number: FooNode implements TokenNode {
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Sequence: FooNode {
+   @parse_field
+   items: ASTList[FooNode]
+}

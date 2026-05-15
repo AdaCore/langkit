@@ -23,7 +23,7 @@ from langkit.compile_context import (
 )
 from langkit.config import cache_summary
 from langkit.coverage import InstrumentationMetadata
-from langkit.diagnostics import Location, error
+from langkit.diagnostics import DiagnosticError, Location, error
 from langkit.generic_api import GenericAPI
 from langkit.lexer.regexp import DFACodeGenHolder
 import langkit.names as names
@@ -336,18 +336,45 @@ class Emitter:
         """
         Register the builtin files for unparsing configuration and overridings.
         """
+
+        def extract(filename: str) -> bytes:
+            """
+            Get the JSON unparsing configuration from the given filename.
+            """
+            filename = os.path.join(ctx.extensions_dir, filename)
+
+            # If given a Lkt file, translate it to JSON
+            if filename.endswith(".lkt"):
+                # To make bootstrap possible, do not import liblktlang unless
+                # necessary.
+                import langkit.scripts.unparsing2lkt as unparsing2lkt
+
+                try:
+                    return unparsing2lkt.to_json(filename).encode("utf-8")
+                except unparsing2lkt.FatalError:
+                    raise DiagnosticError()
+
+            # Otherwise, we expect a JSON file directly
+            elif not filename.endswith(".json"):
+                error(
+                    "invalid unparsing configuration file:"
+                    f" {os.path.basename(filename)}",
+                    location=Location.nowhere,
+                    ok_for_codegen=True,
+                )
+            else:
+                with open(filename, "rb") as fp:
+                    return fp.read()
+
         # First register a builtin file for the default unparsing configuration
         unparsing_cfg_filename = ctx.config.library.defaults.unparsing_config
-        if unparsing_cfg_filename is None:
-            unparsing_cfg = b'{"node_configs": {}}'
-        else:
-            with open(
-                os.path.join(ctx.extensions_dir, unparsing_cfg_filename), "rb"
-            ) as fp:
-                unparsing_cfg = fp.read()
-
         self.default_unparsing_config_filename = self.register_builtin_file(
-            "unparsing/default_config.json", unparsing_cfg
+            "unparsing/default_config.json",
+            (
+                b'{"node_configs": {}}'
+                if unparsing_cfg_filename is None
+                else extract(unparsing_cfg_filename)
+            ),
         )
 
         # Then register builtin files for each built-in unparsing configuration
@@ -356,13 +383,10 @@ class Emitter:
             name,
             info,
         ) in ctx.config.library.builtin_unparsing_overridings.items():
-            with open(
-                os.path.join(ctx.extensions_dir, info.filename), "rb"
-            ) as fp:
-                cfg = fp.read()
             self.builtin_unparsing_overridings[name] = (
                 self.register_builtin_file(
-                    f"unparsing/overriding_{name.lower}", cfg
+                    f"unparsing/overriding_{name.lower}",
+                    extract(info.filename),
                 )
             )
 

@@ -1,0 +1,7 @@
+== test.lkt ==
+default_cfg.lkt:3:21: error: unexpected template
+3 |    val sep = [line, rrecurse]
+  |                     ^^^^^^^^
+
+
+lkt_compile: Done
