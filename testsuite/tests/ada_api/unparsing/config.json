@@ -5,19 +5,17 @@
     },
     "Block": {
        "fields": {
-         "f_items": [
-           {
-             "kind": "ifEmpty",
-             "then": ["hardline", "recurse"],
-             "else": [
-               {
-                 "kind": "indent",
-                 "contents": ["hardline", "recurse"]
-               },
-               "hardline"
-             ]
-           }
-         ]
+         "f_items": {
+           "kind": "ifEmpty",
+           "then": ["hardline", "recurse"],
+           "else": [
+             {
+               "kind": "indent",
+               "contents": ["hardline", "recurse"]
+             },
+             "hardline"
+           ]
+         }
        }
     },
     "CallArgList": {
@@ -90,7 +88,7 @@
       "sep": ["recurse", "whitespace"]
     },
     "Stmt": {
-      "node": ["recurse"]
+      "node": "recurse"
     },
     "AssignStmt": {
       "node": {"kind": "group", "document": "recurse"},

@@ -3,9 +3,7 @@
     "SyncNode": {
       "node": "recurse",
       "fields": {
-        "f_child_1": [
-          "recurse"
-        ],
+        "f_child_1": "recurse",
         "f_child_2": [
           {"kind": "text", "text": "kwD"},
           "recurse",
