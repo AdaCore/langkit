@@ -18,6 +18,8 @@ from langkit.utils import PluginLoader
 
 from drivers.valgrind import valgrind_cmd
 
+from python_support.java_api_helper import JavaApiHelper
+
 
 python_support_dir = P.dirname(P.abspath(__file__))
 c_support_dir = P.join(python_support_dir, "..", "c_support")
@@ -317,6 +319,11 @@ def build_and_run(
 
     env = m.derived_env()
 
+    # Create a helper instance to run Java tools
+    java_helper = JavaApiHelper(
+        m.context.config.library.language_name.lower, m.dirs.build_dir("java")
+    )
+
     def run(*argv, **kwargs):
         subp_env = kwargs.pop("env", env)
         valgrind = kwargs.pop("valgrind", False)
@@ -444,9 +451,8 @@ def build_and_run(
         )
 
     if java_main is not None:
-        java_exec = P.realpath(P.join(env["JAVA_HOME"], "bin", "java"))
         cmd = [
-            java_exec,
+            java_helper.java_exe,
             "-Dfile.encoding=UTF-8",
             # Enable the Java application to load and use native libraries
             "--enable-native-access=ALL-UNNAMED",
@@ -457,71 +463,16 @@ def build_and_run(
 
     if ni_main is not None:
         # Compile the Java tests
-        javac_exec = P.realpath(P.join(env["JAVA_HOME"], "bin", "javac"))
-        run(javac_exec, "-encoding", "utf8", ni_main.source_file)
+        java_helper.javac(ni_main.source_file)
 
         # Run native-image to compile the tests.  Building Java bindings does
         # not go through GPRbuild, so we must explicitly give access to the
         # generated C header.
-        java_env = m.derived_env()
-        ni_exec = P.realpath(
-            P.join(
-                os.environ["GRAAL_HOME"],
-                "bin",
-                ("native-image.cmd" if os.name == "nt" else "native-image"),
-            )
-        )
-        class_path = os.path.pathsep.join(
-            [
-                P.realpath("."),
-                m.dirs.build_dir(
-                    "java", "target", f"{m.lib_name.lower()}.jar"
-                ),
-                m.dirs.build_dir(
-                    "java", "target", "lib", "langkit_support.jar"
-                ),
-                m.dirs.build_dir("java", "target", "lib", "truffle-api.jar"),
-                m.dirs.build_dir("java", "target", "lib", "polyglot.jar"),
-            ]
-        )
-        os_specific_options = []
-        if os.name != "nt":
-            # Provide GCC options to retrieve the currently tested library
-            lib_path = m.dirs.build_lib_dir("relocatable", "dev")
-            os_specific_options.extend(
-                [
-                    f"--native-compiler-options=-I{m.dirs.build_dir("src")}",
-                    f"--native-compiler-options=-L{lib_path}",
-                ]
-            )
-
-            # In order to compile with native-image, we need to provide the
-            # path to "zlib.so".
-            for dir in os.environ.get("LIBRARY_PATH", "").split(os.pathsep):
-                if os.path.isfile(os.path.join(dir, "libz.so")):
-                    os_specific_options.append(
-                        f"--native-compiler-options=-L{dir}",
-                    )
-                    break
-        else:
-            # Ensure the compiler isn't emitting warnings about CPU features
-            os_specific_options.append("-march=native")
-        run(
-            ni_exec,
-            "-cp",
-            class_path,
-            "--no-fallback",
-            "-Ob",
-            "--silent",
-            "--parallelism=2",
-            "-H:+UnlockExperimentalVMOptions",
-            "-H:-StrictQueryCodeCompilation",
-            *os_specific_options,
-            os.path.splitext(ni_main.source_file)[0],
-            "main",
-            env=java_env,
-            encoding=ni_main.encoding,
-            forward_output=False,
+        java_helper.native_image(
+            main_class=P.splitext(ni_main.source_file)[0],
+            output_file="main",
+            classpath=[os.getcwd()],
+            env=env,
         )
 
         # Run the newly created main
