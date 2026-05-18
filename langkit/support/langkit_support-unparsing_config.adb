@@ -729,6 +729,26 @@ package body Langkit_Support.Unparsing_Config is
       --  Check that symbol usage for both templates is compatible. Names are
       --  used for error message formatting.
 
+      function Mandatory_Key
+        (JSON           : JSON_Value;
+         Key            : String;
+         Context        : Template_Parsing_Context;
+         Message_Suffix : String) return JSON_Value;
+      --  Assuming that JSON is an object, check that it has a field "Key"
+      --  (calling Abort_Parsing if that is not the case) and return the value
+      --  of that field.
+      --
+      --  Message_Suffix is appended to the error message if the field is
+      --  absent.
+
+      procedure Check_Kind
+        (JSON    : JSON_Value;
+         Kind    : JSON_Value_Type;
+         Context : Template_Parsing_Context;
+         What    : String);
+      --  Call Abort_Parsing if the kind of JSON does not match Kind. What is
+      --  used to describe what is checked in the error message.
+
       procedure Abort_Parsing
         (Context : Template_Parsing_Context; Message : String)
       with No_Return;
@@ -1419,6 +1439,7 @@ package body Langkit_Support.Unparsing_Config is
          Context : in out Template_Parsing_Context) return Document_Type
       is
          Symbol_Map : Symbol_Parsing_Maps.Map renames Context.Symbols;
+         Tmp        : JSON_Value;
       begin
          case JSON.Kind is
          when JSON_Array_Type =>
@@ -1479,27 +1500,18 @@ package body Langkit_Support.Unparsing_Config is
             end;
 
          when JSON_Object_Type =>
-            if not JSON.Has_Field ("kind") then
-               Abort_Parsing (Context, "missing ""kind"" key");
-            elsif JSON.Get ("kind").Kind /= JSON_String_Type then
-               Abort_Parsing
-                 (Context,
-                  "invalid ""kind"": " & JSON.Get ("kind").Kind'Image);
-            end if;
-
+            Tmp := Mandatory_Key (JSON, "kind", Context, "");
+            Check_Kind (Tmp, JSON_String_Type, Context, """kind""");
             declare
-               Kind : constant String := JSON.Get ("kind");
+               Kind : constant String := Tmp.Get;
             begin
                if Kind = "align" then
                   declare
                      Width : JSON_Value;
                      Data  : Prettier.Alignment_Data_Type;
                   begin
-                     if not JSON.Has_Field ("width") then
-                        Abort_Parsing
-                          (Context, "missing ""width"" key for align");
-                     end if;
-                     Width := JSON.Get ("width");
+                     Width :=
+                       Mandatory_Key (JSON, "width", Context, "for align");
                      case Width.Kind is
                         when JSON_Int_Type =>
                            Data := (Kind => Prettier.Width, N => Width.Get);
@@ -1510,15 +1522,12 @@ package body Langkit_Support.Unparsing_Config is
                              (Context, "invalid ""width"" key for align");
                      end case;
 
-                     if not JSON.Has_Field ("contents") then
-                        Abort_Parsing
-                          (Context, "missing ""contents"" key for align");
-                     end if;
+                     Tmp :=
+                       Mandatory_Key (JSON, "contents", Context, "for align");
 
                      return Pool.Create_Align
                        (Data,
-                        Parse_Template_Helper
-                          (JSON.Get ("contents"), Context),
+                        Parse_Template_Helper (Tmp, Context),
                         Bubble_Up_Config (Context, Align, JSON));
                   end;
 
@@ -1529,10 +1538,8 @@ package body Langkit_Support.Unparsing_Config is
                   | "innerRoot"
                   | "continuationLineIndent"
                then
-                  if not JSON.Has_Field ("contents") then
-                     Abort_Parsing
-                       (Context, "missing ""contents"" key for " & Kind);
-                  end if;
+                  Tmp :=
+                    Mandatory_Key (JSON, "contents", Context, "for " & Kind);
                   return Pool.Create_Align
                     (Data     => (if Kind = "dedent"
                                   then (Kind => Prettier.Dedent)
@@ -1546,24 +1553,14 @@ package body Langkit_Support.Unparsing_Config is
                                   then
                                     (Kind => Prettier.Continuation_Line_Indent)
                                   else raise Program_Error),
-                     Contents  => Parse_Template_Helper
-                                    (JSON.Get ("contents"), Context),
+                     Contents  => Parse_Template_Helper (Tmp, Context),
                      Bubble_Up => Bubble_Up_Config (Context, Align, JSON));
 
                elsif Kind = "fill" then
-                  declare
-                     Document : Document_Type;
-                  begin
-                     if not JSON.Has_Field ("document") then
-                        Abort_Parsing
-                          (Context, "missing ""document"" key for fill");
-                     end if;
-                     Document :=
-                       Parse_Template_Helper (JSON.Get ("document"), Context);
-
-                     return Pool.Create_Fill
-                       (Document, Bubble_Up_Config (Context, Fill, JSON));
-                  end;
+                  Tmp := Mandatory_Key (JSON, "document", Context, "for fill");
+                  return Pool.Create_Fill
+                    (Parse_Template_Helper (Tmp, Context),
+                     Bubble_Up_Config (Context, Fill, JSON));
 
                elsif Kind = "group" then
                   declare
@@ -1571,51 +1568,34 @@ package body Langkit_Support.Unparsing_Config is
                      Should_Break : Boolean := False;
                      Id           : Template_Symbol := No_Template_Symbol;
                   begin
-                     if not JSON.Has_Field ("document") then
-                        Abort_Parsing
-                          (Context, "missing ""document"" key for group");
-                     end if;
-                     Document :=
-                       Parse_Template_Helper (JSON.Get ("document"), Context);
+                     Tmp :=
+                       Mandatory_Key (JSON, "document", Context, "for group");
+                     Document := Parse_Template_Helper (Tmp, Context);
 
                      if JSON.Has_Field ("shouldBreak") then
-                        declare
-                           JSON_Should_Break : constant JSON_Value :=
-                             JSON.Get ("shouldBreak");
-                        begin
-                           if JSON_Should_Break.Kind /= JSON_Boolean_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid group shouldBreak: "
-                                 & JSON_Should_Break.Kind'Image);
-                           end if;
-                           Should_Break := JSON_Should_Break.Get;
-                        end;
+                        Tmp := JSON.Get ("shouldBreak");
+                        Check_Kind
+                          (Tmp,
+                           JSON_Boolean_Type,
+                           Context,
+                           "group shouldBreak");
+                        Should_Break := Tmp.Get;
                      end if;
 
                      --  If a symbol is given to identify this group, create an
                      --  internal symbol for it.
 
                      if JSON.Has_Field ("id") then
-                        declare
-                           JSON_Id : constant JSON_Value := JSON.Get ("id");
-                        begin
-                           if JSON_Id.Kind /= JSON_String_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid group id: "
-                                 & JSON_Id.Kind'Image);
-                           end if;
+                        Tmp := JSON.Get ("id");
+                        Check_Kind
+                          (Tmp, JSON_String_Type, Context, "group id");
 
-                           begin
-                              Id := Declare_Symbol
-                                (JSON_Id.Get, Symbols, Symbol_Map);
-                           exception
-                              when Duplicate_Symbol_Definition =>
-                                 Abort_Parsing
-                                   (Context,
-                                    "duplicate group id: " & JSON_Id.Get);
-                           end;
+                        begin
+                           Id := Declare_Symbol (Tmp.Get, Symbols, Symbol_Map);
+                        exception
+                           when Duplicate_Symbol_Definition =>
+                              Abort_Parsing
+                                (Context, "duplicate group id: " & Tmp.Get);
                         end;
                      end if;
 
@@ -1636,15 +1616,11 @@ package body Langkit_Support.Unparsing_Config is
 
                      Group_Id : Template_Symbol := No_Template_Symbol;
                   begin
-                     if not JSON.Has_Field ("breakContents") then
-                        Abort_Parsing
-                          (Context,
-                           "missing ""breakContents"" key for ifBreak");
-                     end if;
-
                      Contents :=
                        Parse_Template_Helper
-                         (JSON.Get ("breakContents"), Contents_Context);
+                         (Mandatory_Key
+                            (JSON, "breakContents", Context, "for ifBreak"),
+                          Contents_Context);
 
                      Flat_Contents :=
                        (if JSON.Has_Field ("flatContents")
@@ -1666,21 +1642,11 @@ package body Langkit_Support.Unparsing_Config is
                      --  If present, get the symbol for the given group id
 
                      if JSON.Has_Field ("groupId") then
-                        declare
-                           JSON_Id : constant JSON_Value :=
-                             JSON.Get ("groupId");
-                        begin
-                           if JSON_Id.Kind /= JSON_String_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid group id: "
-                                 & JSON_Id.Kind'Image);
-                           end if;
-
-                           Group_Id :=
-                             Reference_Symbol
-                               (JSON_Id.Get, Symbols, Symbol_Map);
-                        end;
+                        Tmp := JSON.Get ("groupId");
+                        Check_Kind
+                          (Tmp, JSON_String_Type, Context, "group id");
+                        Group_Id :=
+                          Reference_Symbol (Tmp.Get, Symbols, Symbol_Map);
                      end if;
 
                      return Pool.Create_If_Break
@@ -1701,21 +1667,15 @@ package body Langkit_Support.Unparsing_Config is
                      Then_Context : Template_Parsing_Context := Context;
                      Else_Context : Template_Parsing_Context := Context;
                   begin
-                     if not JSON.Has_Field ("then") then
-                        Abort_Parsing
-                          (Context,
-                           "missing ""then"" key for ifEmpty");
-                     end if;
+                     Tmp :=
+                       Mandatory_Key (JSON, "then", Context, "for ifEmpty");
                      Then_Contents :=
-                       Parse_Template_Helper (JSON.Get ("then"), Then_Context);
+                       Parse_Template_Helper (Tmp, Then_Context);
 
-                     if not JSON.Has_Field ("else") then
-                        Abort_Parsing
-                          (Context,
-                           "missing ""else"" key for ifEmpty");
-                     end if;
+                     Tmp :=
+                       Mandatory_Key (JSON, "else", Context, "for ifEmpty");
                      Else_Contents :=
-                       Parse_Template_Helper (JSON.Get ("else"), Else_Context);
+                       Parse_Template_Helper (Tmp, Else_Context);
 
                      --  Unify the parsing state for both branches and update
                      --  Context accordingly.
@@ -1744,9 +1704,9 @@ package body Langkit_Support.Unparsing_Config is
                      Field_JSON    : constant JSON_Value :=
                        JSON.Get ("field");
                      Matchers_JSON : constant JSON_Value :=
-                       JSON.Get ("matchers");
+                       Mandatory_Key (JSON, "matchers", Context, "for ifKind");
                      Default_JSON  : constant JSON_Value :=
-                       JSON.Get ("default");
+                       Mandatory_Key (JSON, "default", Context, "for ifKind");
                      Absent_JSON   : constant JSON_Value :=
                        JSON.Get ("absent");
 
@@ -1781,24 +1741,11 @@ package body Langkit_Support.Unparsing_Config is
                         Field_Ref := Context.Field;
                      end if;
 
-                     if Default_JSON.Kind = JSON_Null_Type then
-                        Abort_Parsing
-                          (Context, "missing ""default"" key for ifKind");
-                     end if;
-
-                     if Matchers_JSON.Kind = JSON_Null_Type then
-                        Abort_Parsing
-                          (Context, "missing ""matchers"" key for ifKind");
-
-                     elsif Matchers_JSON.Kind /= JSON_Array_Type then
-                        Abort_Parsing
-                          (Context,
-                           "invalid ""matchers"" key kind for ifKind: "
-                           & "found "
-                           & Matchers_JSON.Kind'Image
-                           & "; expected "
-                           & JSON_Array_Type'Image);
-                     end if;
+                     Check_Kind
+                       (Matchers_JSON,
+                        JSON_Array_Type,
+                        Context,
+                        """matchers"" key kind for ifKind");
 
                      declare
                         --  Before parsing the "matchers", "default" or
@@ -1835,9 +1782,17 @@ package body Langkit_Support.Unparsing_Config is
                         procedure Process_Matcher (Matcher_JSON : JSON_Value)
                         is
                            Kind           : constant JSON_Value :=
-                             Matcher_JSON.Get ("kind");
+                             Mandatory_Key
+                               (Matcher_JSON,
+                                "kind",
+                                Context,
+                                "ifKind matcher");
                            Document_JSON  : constant JSON_Value :=
-                             Matcher_JSON.Get ("document");
+                             Mandatory_Key
+                               (Matcher_JSON,
+                                "document",
+                                Context,
+                                "ifKind matcher");
                            Types          : Type_Ref_Vectors.Vector;
                            Nested_Context : Template_Parsing_Context :=
                              Initial_Context;
@@ -1883,15 +1838,11 @@ package body Langkit_Support.Unparsing_Config is
                         function Parse_Type_Ref
                           (JSON : JSON_Value) return Type_Ref is
                         begin
-                           if JSON.Kind /= JSON_String_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid matcher ""kind"" field for "
-                                 & """ifKind"" - found "
-                                 & JSON.Kind'Image
-                                 & "; expected "
-                                 & JSON_String_Type'Image);
-                           end if;
+                           Check_Kind
+                             (JSON,
+                              JSON_String_Type,
+                              Context,
+                              "matcher ""kind"" field for ifKind");
                            return From_Index
                              (Language, To_Type_Index (JSON.Get));
                         end Parse_Type_Ref;
@@ -1924,16 +1875,11 @@ package body Langkit_Support.Unparsing_Config is
                         for Matcher_JSON of
                           JSON_Array'(Get (Matchers_JSON))
                         loop
-                           if Matcher_JSON.Kind /= JSON_Object_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid ""matchers"" element kind for "
-                                 & """ifKind"" - found "
-                                 & Matcher_JSON.Kind'Image
-                                 & "; expected "
-                                 & JSON_Object_Type'Image);
-                           end if;
-
+                           Check_Kind
+                             (Matcher_JSON,
+                              JSON_Object_Type,
+                              Context,
+                              """matchers"" element kind for ifKind");
                            Process_Matcher (Matcher_JSON);
                         end loop;
 
@@ -1947,55 +1893,43 @@ package body Langkit_Support.Unparsing_Config is
                   end;
 
                elsif Kind = "indent" then
-                  if not JSON.Has_Field ("contents") then
-                     Abort_Parsing
-                       (Context, "missing ""contents"" key for indent");
-                  end if;
+                  Tmp := Mandatory_Key
+                    (JSON, "contents", Context, "for indent");
                   return Pool.Create_Indent
-                    (Parse_Template_Helper (JSON.Get ("contents"), Context),
+                    (Parse_Template_Helper (Tmp, Context),
                      Bubble_Up_Config (Context, Indent, JSON));
 
                elsif Kind = "recurse_field" then
+                  Tmp := Mandatory_Key
+                    (JSON, "field", Context, "for recurse_field");
+                  Check_Kind
+                    (Tmp,
+                     JSON_String_Type,
+                     Context,
+                     """field"" for recurse_field");
+
+                  --  Validate that "recurse_field" can appear in this template
+                  --  at this place. Let Process_Linear_Template_Item give us
+                  --  the field position: initialize it with Positive'Last (an
+                  --  obviously invalid position) to make it clear that this
+                  --  component needs an update.
+
                   declare
-                     F : JSON_Value;
+                     Item : Linear_Template_Item :=
+                       (Kind           => Field_Item,
+                        Field_Ref      => From_Index
+                                            (Language,
+                                             To_Struct_Member_Index
+                                               (Tmp.Get, Context.Node)),
+                        Field_Position => Positive'Last);
                   begin
-                     if not JSON.Has_Field ("field") then
-                        Abort_Parsing
-                          (Context, "missing ""field"" key for recurse_field");
-                     end if;
-
-                     F := JSON.Get ("field");
-                     if F.Kind /= JSON_String_Type then
-                        Abort_Parsing
-                          (Context,
-                           "invalid recurse_field field: " & F.Kind'Image);
-                     end if;
-
-                     --  Validate that "recurse_field" can appear in this
-                     --  template at this place. Let
-                     --  Process_Linear_Template_Item give us the field
-                     --  position: initialize it with Positive'Last (an
-                     --  obviously invalid position) to make it clear that this
-                     --  component needs an update.
-
-                     declare
-                        Item : Linear_Template_Item :=
-                          (Kind           => Field_Item,
-                           Field_Ref      => From_Index
-                                               (Language,
-                                                To_Struct_Member_Index
-                                                  (F.Get, Context.Node)),
-                           Field_Position => Positive'Last);
-                     begin
-                        Process_Linear_Template_Item (Item, Context);
-                        return Pool.Create_Recurse_Field
-                                 (Item.Field_Ref, Item.Field_Position);
-                     end;
+                     Process_Linear_Template_Item (Item, Context);
+                     return Pool.Create_Recurse_Field
+                              (Item.Field_Ref, Item.Field_Position);
                   end;
 
                elsif Kind = "recurse_flatten" then
                   declare
-                     L     : JSON_Value;
                      T     : Type_Ref;
                      Types : Type_Vectors.Vector;
                   begin
@@ -2003,20 +1937,18 @@ package body Langkit_Support.Unparsing_Config is
                      --  the root node to flatten for all nodes.
 
                      if JSON.Has_Field ("if") then
-                        L := JSON.Get ("if");
-                        if L.Kind /= JSON_Array_Type then
-                           Abort_Parsing
-                             (Context,
-                              "invalid recurse_flatten if: " & L.Kind'Image);
-                        end if;
-                        for Name of JSON_Array'(L.Get) loop
-                           if Name.Kind /= JSON_String_Type then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid item in recurse_flatten if: "
-                                 & Name.Kind'Image);
-                           end if;
-
+                        Tmp := JSON.Get ("if");
+                        Check_Kind
+                          (Tmp,
+                           JSON_Array_Type,
+                           Context,
+                           """if"" for recurse_flatten");
+                        for Name of JSON_Array'(Tmp.Get) loop
+                           Check_Kind
+                             (Name,
+                              JSON_String_Type,
+                              Context,
+                              "item in recurse_flatten ""if""");
                            T := Map.Lookup_Type (To_Symbol (Name.Get));
                            if T = No_Type_Ref or else not Is_Node_Type (T) then
                               Abort_Parsing
@@ -2035,75 +1967,54 @@ package body Langkit_Support.Unparsing_Config is
                   end;
 
                elsif Kind in "tableSeparator" | "text" then
+                  Tmp := Mandatory_Key (JSON, "text", Context, "for " & Kind);
+                  Check_Kind (Tmp, JSON_String_Type, Context, "text field");
+
+                  --  Validate that this text template can appear in this
+                  --  template at this place. Let Process_Linear_Template_Item
+                  --  give us the token type: initialize it with
+                  --  No_Token_Kind_Ref (an obviously invalid position) to make
+                  --  it clear that this component needs an update.
+                  --
+                  --  There is one special case: we allow empty table
+                  --  separators, so that they can be put in table join
+                  --  templates.
+
+                  if Kind = "tableSeparator"
+                     and then Length (Unbounded_String'(Tmp.Get)) = 0
+                  then
+                     return Pool.Create_Empty_Table_Separator;
+                  end if;
+
                   declare
-                     T : JSON_Value;
+                     Item : Linear_Template_Item :=
+                       (Kind           => Token_Item,
+                        Token_Kind     => No_Token_Kind_Ref,
+                        Token_Text     => To_Unbounded_Text
+                                            (From_UTF8 (Tmp.Get)),
+                        Token_Unparser => <>);
                   begin
-                     if not JSON.Has_Field ("text") then
-                        Abort_Parsing
-                          (Context, "missing ""text"" key for " & Kind);
+                     Process_Linear_Template_Item (Item, Context);
+
+                     if Kind = "text" then
+                        return Pool.Create_Token
+                                 (Item.Token_Kind,
+                                  Item.Token_Text,
+                                  Item.Token_Unparser);
+                     else
+                        return Pool.Create_Table_Separator
+                                 (Item.Token_Kind,
+                                  Item.Token_Text,
+                                  Item.Token_Unparser);
                      end if;
-
-                     T := JSON.Get ("text");
-                     if T.Kind /= JSON_String_Type then
-                        Abort_Parsing
-                          (Context, "invalid text field: " & T.Kind'Image);
-                     end if;
-
-                     --  Validate that this text template can appear in this
-                     --  template at this place. Let
-                     --  Process_Linear_Template_Item give us the token type:
-                     --  initialize it with No_Token_Kind_Ref (an obviously
-                     --  invalid position) to make it clear that this component
-                     --  needs an update.
-                     --
-                     --  There is one special case: we allow empty table
-                     --  separators, so that they can be put in table join
-                     --  templates.
-
-                     if Kind = "tableSeparator"
-                        and then Length (Unbounded_String'(T.Get)) = 0
-                     then
-                        return Pool.Create_Empty_Table_Separator;
-                     end if;
-
-                     declare
-                        Item : Linear_Template_Item :=
-                          (Kind           => Token_Item,
-                           Token_Kind     => No_Token_Kind_Ref,
-                           Token_Text     => To_Unbounded_Text
-                                               (From_UTF8 (T.Get)),
-                           Token_Unparser => <>);
-                     begin
-                        Process_Linear_Template_Item (Item, Context);
-
-                        if Kind = "text" then
-                           return Pool.Create_Token
-                                    (Item.Token_Kind,
-                                     Item.Token_Text,
-                                     Item.Token_Unparser);
-                        else
-                           return Pool.Create_Table_Separator
-                                    (Item.Token_Kind,
-                                     Item.Token_Text,
-                                     Item.Token_Unparser);
-                        end if;
-                     end;
                   end;
 
                elsif Kind = "whitespace" then
-                  if not JSON.Has_Field ("length") then
-                     Abort_Parsing (Context, "missing ""length"" key");
-                  end if;
-                  declare
-                     Length : constant JSON_Value := JSON.Get ("length");
-                  begin
-                     if Length.Kind /= JSON_Int_Type then
-                        Abort_Parsing
-                          (Context,
-                           "invalid whitespace length: " & Length.Kind'Image);
-                     end if;
-                     return Pool.Create_Whitespace (Length.Get);
-                  end;
+                  Tmp := Mandatory_Key
+                    (JSON, "length", Context, "for whitespace");
+                  Check_Kind
+                    (Tmp, JSON_Int_Type, Context, """length"" for whitespace");
+                  return Pool.Create_Whitespace (Tmp.Get);
 
                else
                   Abort_Parsing
@@ -2299,6 +2210,46 @@ package body Langkit_Support.Unparsing_Config is
          Result.Trailing := Get ("bubbleUpTrailingTrivias", Result.Trailing);
          return Result;
       end Bubble_Up_Config;
+
+      -------------------
+      -- Mandatory_Key --
+      -------------------
+
+      function Mandatory_Key
+        (JSON           : JSON_Value;
+         Key            : String;
+         Context        : Template_Parsing_Context;
+         Message_Suffix : String) return JSON_Value is
+      begin
+         if not JSON.Has_Field (Key) then
+            declare
+               Actual_Suffix : constant String :=
+                 (if Message_Suffix = "" then "" else " " & Message_Suffix);
+            begin
+               Abort_Parsing
+                 (Context, "missing """ & Key & """ key" & Actual_Suffix);
+            end;
+         end if;
+         return JSON.Get (Key);
+      end Mandatory_Key;
+
+      ----------------
+      -- Check_Kind --
+      ----------------
+
+      procedure Check_Kind
+        (JSON    : JSON_Value;
+         Kind    : JSON_Value_Type;
+         Context : Template_Parsing_Context;
+         What    : String) is
+      begin
+         if JSON.Kind /= Kind then
+            Abort_Parsing
+              (Context,
+               "invalid " & What & ": " & Kind'Image & " expected, but "
+               & JSON.Kind'Image & " found");
+         end if;
+      end Check_Kind;
 
       -------------------
       -- Abort_Parsing --
