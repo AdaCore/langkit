@@ -137,17 +137,6 @@ package body Langkit_Support.Unparsing_Config is
                Replace (Self.If_Break_Contents);
                Replace (Self.If_Break_Flat_Contents);
 
-            when If_Empty =>
-               Replace (Self.If_Empty_Then);
-               Replace (Self.If_Empty_Else);
-
-            when If_Kind =>
-               Replace (Self.If_Kind_Default);
-               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
-                  Replace (Self.If_Kind_Matchers (I).Document);
-               end loop;
-               Replace (Self.If_Kind_Absent);
-
             when Indent =>
                Replace (Self.Indent_Document);
 
@@ -179,6 +168,17 @@ package body Langkit_Support.Unparsing_Config is
 
             when Table_Separator | Token | Trim | Whitespace =>
                null;
+
+            when If_Empty =>
+               Replace (Self.If_Empty_Then);
+               Replace (Self.If_Empty_Else);
+
+            when If_Kind =>
+               Replace (Self.If_Kind_Default);
+               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
+                  Replace (Self.If_Kind_Matchers (I).Document);
+               end loop;
+               Replace (Self.If_Kind_Absent);
          end case;
       end Replace;
 

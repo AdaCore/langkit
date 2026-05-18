@@ -965,31 +965,6 @@ package body Langkit_Support.Prettier_Utils is
                Recurse (Self.If_Break_Flat_Contents),
                Self.If_Break_Group_Id);
 
-         when If_Empty =>
-            return Pool.Create_If_Empty
-              (Recurse (Self.If_Empty_Then), Recurse (Self.If_Empty_Else));
-
-         when If_Kind =>
-            declare
-               Matchers : Matcher_Vectors.Vector;
-            begin
-               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
-                  declare
-                     M : constant Matcher_Record := Self.If_Kind_Matchers (I);
-                  begin
-                     Matchers.Append
-                       (Matcher_Record'
-                          (M.Matched_Types, Recurse (M.Document)));
-                  end;
-               end loop;
-
-               return Pool.Create_If_Kind
-                 (Self.If_Kind_Field,
-                  Matchers,
-                  Recurse (Self.If_Kind_Default),
-                  Recurse (Self.If_Kind_Absent));
-            end;
-
          when Indent =>
             return Pool.Create_Indent
               (Recurse (Self.Indent_Document), Self.Indent_Bubble_Up);
@@ -1028,6 +1003,31 @@ package body Langkit_Support.Prettier_Utils is
 
          when Whitespace =>
             return Self;
+
+         when If_Empty =>
+            return Pool.Create_If_Empty
+              (Recurse (Self.If_Empty_Then), Recurse (Self.If_Empty_Else));
+
+         when If_Kind =>
+            declare
+               Matchers : Matcher_Vectors.Vector;
+            begin
+               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
+                  declare
+                     M : constant Matcher_Record := Self.If_Kind_Matchers (I);
+                  begin
+                     Matchers.Append
+                       (Matcher_Record'
+                          (M.Matched_Types, Recurse (M.Document)));
+                  end;
+               end loop;
+
+               return Pool.Create_If_Kind
+                 (Self.If_Kind_Field,
+                  Matchers,
+                  Recurse (Self.If_Kind_Default),
+                  Recurse (Self.If_Kind_Absent));
+            end;
       end case;
    end Deep_Copy;
 
@@ -1249,50 +1249,6 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_If_Break;
-
-   ---------------------
-   -- Create_If_Empty --
-   ---------------------
-
-   function Create_If_Empty
-     (Self          : in out Document_Pool;
-      Then_Contents : Document_Type;
-      Else_Contents : Document_Type) return Document_Type is
-   begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind          => If_Empty,
-           If_Empty_Then => Then_Contents,
-           If_Empty_Else => Else_Contents)
-      do
-         Self.Register (Result);
-      end return;
-   end Create_If_Empty;
-
-   --------------------
-   -- Create_If_Kind --
-   --------------------
-
-   function Create_If_Kind
-     (Self             : in out Document_Pool;
-      If_Kind_Field    : Struct_Member_Ref;
-      If_Kind_Matchers : in out Matcher_Vectors.Vector;
-      If_Kind_Default  : Document_Type;
-      If_Kind_Absent   : Document_Type) return Document_Type
-   is
-   begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind             => If_Kind,
-           If_Kind_Field    => If_Kind_Field,
-           If_Kind_Matchers => Matcher_Vectors.Empty_Vector,
-           If_Kind_Default  => If_Kind_Default,
-           If_Kind_Absent   => If_Kind_Absent)
-      do
-         Result.If_Kind_Matchers.Move (If_Kind_Matchers);
-         Self.Register (Result);
-      end return;
-   end Create_If_Kind;
 
    -------------------
    -- Create_Indent --
@@ -1607,6 +1563,50 @@ package body Langkit_Support.Prettier_Utils is
 
       return Self.Whitespaces (Length);
    end Create_Whitespace;
+
+   ---------------------
+   -- Create_If_Empty --
+   ---------------------
+
+   function Create_If_Empty
+     (Self          : in out Document_Pool;
+      Then_Contents : Document_Type;
+      Else_Contents : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind          => If_Empty,
+           If_Empty_Then => Then_Contents,
+           If_Empty_Else => Else_Contents)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_If_Empty;
+
+   --------------------
+   -- Create_If_Kind --
+   --------------------
+
+   function Create_If_Kind
+     (Self             : in out Document_Pool;
+      If_Kind_Field    : Struct_Member_Ref;
+      If_Kind_Matchers : in out Matcher_Vectors.Vector;
+      If_Kind_Default  : Document_Type;
+      If_Kind_Absent   : Document_Type) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind             => If_Kind,
+           If_Kind_Field    => If_Kind_Field,
+           If_Kind_Matchers => Matcher_Vectors.Empty_Vector,
+           If_Kind_Default  => If_Kind_Default,
+           If_Kind_Absent   => If_Kind_Absent)
+      do
+         Result.If_Kind_Matchers.Move (If_Kind_Matchers);
+         Self.Register (Result);
+      end return;
+   end Create_If_Kind;
 
    -----------------------
    -- Bubble_Up_Trivias --
@@ -2055,55 +2055,6 @@ package body Langkit_Support.Prettier_Utils is
                Process (Document.If_Break_Contents, Prefix & List_Indent);
                Process (Document.If_Break_Flat_Contents, Prefix & List_Indent);
 
-            when If_Empty =>
-               Write (Prefix & "ifEmpty:");
-               Process (Document.If_Empty_Then, Prefix & List_Indent);
-               Process (Document.If_Empty_Else, Prefix & List_Indent);
-
-            when If_Kind =>
-               Write (Prefix & "ifKind:");
-               Write (Prefix & Simple_Indent & "default:");
-               Process
-                 (Document.If_Kind_Default,
-                  Prefix & Simple_Indent & Simple_Indent);
-               Write (Prefix & Simple_Indent & "absent:");
-               Process
-                 (Document.If_Kind_Absent,
-                  Prefix & Simple_Indent & Simple_Indent);
-               Write (Prefix & Simple_Indent & "matchers:");
-               declare
-                  Matcher_Kind_Indent     : constant Unbounded_String :=
-                    Prefix & Simple_Indent & Simple_Indent;
-                  Matcher_Document_Indent : constant Unbounded_String :=
-                    Prefix & Simple_Indent & Simple_Indent & Simple_Indent;
-
-               begin
-                  for Matcher_Index in
-                    Document.If_Kind_Matchers.First_Index
-                    .. Document.If_Kind_Matchers.Last_Index
-                  loop
-                     declare
-                        Types     : constant Type_Ref_Vectors.Vector :=
-                          Document
-                            .If_Kind_Matchers (Matcher_Index)
-                            .Matched_Types;
-                        Types_Str : Unbounded_String;
-                     begin
-                        for Kind_Index in Types.First_Index .. Types.Last_Index
-                        loop
-                           if Kind_Index > Types.First_Index then
-                              Append (Types_Str, " | ");
-                           end if;
-                           Append (Types_Str, Debug_Name (Types (Kind_Index)));
-                        end loop;
-                        Write (Matcher_Kind_Indent & Types_Str);
-                     end;
-                     Process
-                       (Document.If_Kind_Matchers (Matcher_Index).Document,
-                        Matcher_Document_Indent);
-                  end loop;
-               end;
-
             when Indent =>
                Write (Prefix & "indent:");
                Write_Bubble_Up
@@ -2189,6 +2140,55 @@ package body Langkit_Support.Prettier_Utils is
                Write
                  (Prefix & "whitespace(" & Document.Whitespace_Length'Image
                   & ")");
+
+            when If_Empty =>
+               Write (Prefix & "ifEmpty:");
+               Process (Document.If_Empty_Then, Prefix & List_Indent);
+               Process (Document.If_Empty_Else, Prefix & List_Indent);
+
+            when If_Kind =>
+               Write (Prefix & "ifKind:");
+               Write (Prefix & Simple_Indent & "default:");
+               Process
+                 (Document.If_Kind_Default,
+                  Prefix & Simple_Indent & Simple_Indent);
+               Write (Prefix & Simple_Indent & "absent:");
+               Process
+                 (Document.If_Kind_Absent,
+                  Prefix & Simple_Indent & Simple_Indent);
+               Write (Prefix & Simple_Indent & "matchers:");
+               declare
+                  Matcher_Kind_Indent     : constant Unbounded_String :=
+                    Prefix & Simple_Indent & Simple_Indent;
+                  Matcher_Document_Indent : constant Unbounded_String :=
+                    Prefix & Simple_Indent & Simple_Indent & Simple_Indent;
+
+               begin
+                  for Matcher_Index in
+                    Document.If_Kind_Matchers.First_Index
+                    .. Document.If_Kind_Matchers.Last_Index
+                  loop
+                     declare
+                        Types     : constant Type_Ref_Vectors.Vector :=
+                          Document
+                            .If_Kind_Matchers (Matcher_Index)
+                            .Matched_Types;
+                        Types_Str : Unbounded_String;
+                     begin
+                        for Kind_Index in Types.First_Index .. Types.Last_Index
+                        loop
+                           if Kind_Index > Types.First_Index then
+                              Append (Types_Str, " | ");
+                           end if;
+                           Append (Types_Str, Debug_Name (Types (Kind_Index)));
+                        end loop;
+                        Write (Matcher_Kind_Indent & Types_Str);
+                     end;
+                     Process
+                       (Document.If_Kind_Matchers (Matcher_Index).Document,
+                        Matcher_Document_Indent);
+                  end loop;
+               end;
          end case;
       end Process;
    begin

@@ -1610,63 +1610,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                     (State.Symbols.all, Template.If_Break_Group_Id));
             end;
 
-         when If_Empty =>
-            declare
-               --  Consider that a list node with no child but with attached
-               --  comments is *not* empty. This makes more sense for
-               --  formatting concerns, as we unparse these comments as list
-               --  children.
-
-               Child       : constant Lk_Node :=
-                 State.Arguments.With_Recurse_Doc.Node;
-               Subtemplate : constant Document_Type :=
-                 (if Is_Empty_List (Child)
-                  then Template.If_Empty_Then
-                  else Template.If_Empty_Else);
-            begin
-               return Instantiate_Template_Helper
-                        (Pool, State, Subtemplate);
-            end;
-
-         when If_Kind =>
-            declare
-               Field_Node       : constant Lk_Node :=
-                 Eval_Syntax_Field (State.Node, Template.If_Kind_Field);
-               Matched_Template : Document_Type := Template.If_Kind_Default;
-
-            begin
-               --  If the field is present, pick the document for the first
-               --  matcher that accepts it.
-
-               if Is_Field_Present
-                    (Field_Node,
-                     Syntax_Field_Index
-                       (Template.If_Kind_Field, Type_Of (State.Node)))
-               then
-                  for I in
-                    Template.If_Kind_Matchers.First_Index
-                    .. Template.If_Kind_Matchers.Last_Index
-                  loop
-                     if Matches
-                          (Field_Node, Template.If_Kind_Matchers.Reference (I))
-                     then
-                        Matched_Template :=
-                          Template.If_Kind_Matchers (I).Document;
-                        exit;
-                     end if;
-                  end loop;
-
-               --  Otherwise, use the null template, if present. For all
-               --  other cases, use the default template.
-
-               elsif Template.If_Kind_Absent /= null then
-                  Matched_Template := Template.If_Kind_Absent;
-               end if;
-
-               return Instantiate_Template_Helper
-                        (Pool, State, Matched_Template);
-            end;
-
          when Indent =>
             return Pool.Create_Indent
               (Instantiate_Template_Helper
@@ -1801,6 +1744,63 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when Trim | Whitespace =>
             return Template;
+
+         when If_Empty =>
+            declare
+               --  Consider that a list node with no child but with attached
+               --  comments is *not* empty. This makes more sense for
+               --  formatting concerns, as we unparse these comments as list
+               --  children.
+
+               Child       : constant Lk_Node :=
+                 State.Arguments.With_Recurse_Doc.Node;
+               Subtemplate : constant Document_Type :=
+                 (if Is_Empty_List (Child)
+                  then Template.If_Empty_Then
+                  else Template.If_Empty_Else);
+            begin
+               return Instantiate_Template_Helper
+                        (Pool, State, Subtemplate);
+            end;
+
+         when If_Kind =>
+            declare
+               Field_Node       : constant Lk_Node :=
+                 Eval_Syntax_Field (State.Node, Template.If_Kind_Field);
+               Matched_Template : Document_Type := Template.If_Kind_Default;
+
+            begin
+               --  If the field is present, pick the document for the first
+               --  matcher that accepts it.
+
+               if Is_Field_Present
+                    (Field_Node,
+                     Syntax_Field_Index
+                       (Template.If_Kind_Field, Type_Of (State.Node)))
+               then
+                  for I in
+                    Template.If_Kind_Matchers.First_Index
+                    .. Template.If_Kind_Matchers.Last_Index
+                  loop
+                     if Matches
+                          (Field_Node, Template.If_Kind_Matchers.Reference (I))
+                     then
+                        Matched_Template :=
+                          Template.If_Kind_Matchers (I).Document;
+                        exit;
+                     end if;
+                  end loop;
+
+               --  Otherwise, use the null template, if present. For all
+               --  other cases, use the default template.
+
+               elsif Template.If_Kind_Absent /= null then
+                  Matched_Template := Template.If_Kind_Absent;
+               end if;
+
+               return Instantiate_Template_Helper
+                        (Pool, State, Matched_Template);
+            end;
       end case;
    end Instantiate_Template_Helper;
 

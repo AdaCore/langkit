@@ -162,8 +162,11 @@ private package Langkit_Support.Prettier_Utils is
 
    end Trivias_Bubble_Up;
 
-   type Document_Kind is
-     (Align,
+   type Document_Kind is (
+
+      --  Template/document nodes
+
+      Align,
       Break_Parent,
       Empty_Table_Separator,
       Expected_Line_Breaks,
@@ -174,8 +177,6 @@ private package Langkit_Support.Prettier_Utils is
       Hard_Line,
       Hard_Line_Without_Break_Parent,
       If_Break,
-      If_Empty,
-      If_Kind,
       Indent,
       Line,
       List,
@@ -190,7 +191,18 @@ private package Langkit_Support.Prettier_Utils is
       Table_Separator,
       Token,
       Trim,
-      Whitespace);
+      Whitespace,
+
+      --  Conditionals
+
+      If_Empty,
+      If_Kind
+   );
+
+   subtype Template_Conditional_Kind is
+     Document_Kind range If_Empty .. If_Kind;
+   --  Kind for a document that materializes conditionals for template
+   --  instantiation.
 
    subtype Template_Document_Kind is Document_Kind
    with Static_Predicate =>
@@ -198,17 +210,18 @@ private package Langkit_Support.Prettier_Utils is
        Expected_Line_Breaks
      | Expected_Whitespaces
      | Table;
+   --  Kind for a document template (i.e. before instantiation)
 
    subtype Instantiated_Template_Document_Kind is Document_Kind
    with Static_Predicate =>
      Instantiated_Template_Document_Kind not in
-       If_Empty
-     | If_Kind
+       Template_Conditional_Kind
      | Recurse
      | Recurse_Field
      | Recurse_Flatten
      | Recurse_Left
      | Recurse_Right;
+   --  Kind for an instantiated document
 
    subtype Final_Document_Kind is Instantiated_Template_Document_Kind
    with Static_Predicate =>
@@ -216,9 +229,11 @@ private package Langkit_Support.Prettier_Utils is
        Expected_Line_Breaks
      | Expected_Whitespaces
      | Flush_Line_Breaks;
+   --  Kind for a document ready to be handed to Prettier
 
    subtype Token_Document_Kind is Document_Kind
    with Static_Predicate => Token_Document_Kind in Table_Separator | Token;
+   --  Kind for a document that maps a single source token
 
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
 
@@ -271,16 +286,6 @@ private package Langkit_Support.Prettier_Utils is
             If_Break_Contents      : Document_Type;
             If_Break_Flat_Contents : Document_Type;
             If_Break_Group_Id      : Template_Symbol;
-
-         when If_Empty =>
-            If_Empty_Then : Document_Type;
-            If_Empty_Else : Document_Type;
-
-         when If_Kind =>
-            If_Kind_Field    : Struct_Member_Ref;
-            If_Kind_Matchers : Matcher_Vectors.Vector;
-            If_Kind_Default  : Document_Type;
-            If_Kind_Absent   : Document_Type;
 
          when Indent =>
             Indent_Document  : Document_Type;
@@ -336,6 +341,16 @@ private package Langkit_Support.Prettier_Utils is
          when Whitespace =>
             Whitespace_Length       : Positive;
             Whitespace_Prettier_Doc : Prettier.Document_Type;
+
+         when If_Empty =>
+            If_Empty_Then : Document_Type;
+            If_Empty_Else : Document_Type;
+
+         when If_Kind =>
+            If_Kind_Field    : Struct_Member_Ref;
+            If_Kind_Matchers : Matcher_Vectors.Vector;
+            If_Kind_Default  : Document_Type;
+            If_Kind_Absent   : Document_Type;
       end case;
    end record;
 
@@ -464,20 +479,6 @@ private package Langkit_Support.Prettier_Utils is
       return Document_Type;
    --  Return an ``If_Break`` node
 
-   function Create_If_Empty
-     (Self          : in out Document_Pool;
-      Then_Contents : Document_Type;
-      Else_Contents : Document_Type) return Document_Type;
-   --  Return an ``If_Empty`` node
-
-   function Create_If_Kind
-     (Self             : in out Document_Pool;
-      If_Kind_Field    : Struct_Member_Ref;
-      If_Kind_Matchers : in out Matcher_Vectors.Vector;
-      If_Kind_Default  : Document_Type;
-      If_Kind_Absent   : Document_Type) return Document_Type;
-   --  Return an ``If_Kind`` node
-
    function Create_Indent
      (Self      : in out Document_Pool;
       Document  : Document_Type;
@@ -568,6 +569,20 @@ private package Langkit_Support.Prettier_Utils is
      (Self   : in out Document_Pool;
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
+
+   function Create_If_Empty
+     (Self          : in out Document_Pool;
+      Then_Contents : Document_Type;
+      Else_Contents : Document_Type) return Document_Type;
+   --  Return an ``If_Empty`` node
+
+   function Create_If_Kind
+     (Self             : in out Document_Pool;
+      If_Kind_Field    : Struct_Member_Ref;
+      If_Kind_Matchers : in out Matcher_Vectors.Vector;
+      If_Kind_Default  : Document_Type;
+      If_Kind_Absent   : Document_Type) return Document_Type;
+   --  Return an ``If_Kind`` node
 
    procedure Bubble_Up_Trivias
      (Pool : in out Document_Pool; Document : in out Document_Type);
