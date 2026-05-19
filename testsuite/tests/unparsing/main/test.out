@@ -268,6 +268,28 @@ def f2(a: Int, ): Int
     template for VarDecl.f_name: invalid bubbleUpLeadingTrivias: JSON_INT_TYPE
 # invalid_this_field.json
     "node" template for VarDecl: "this_field" is valid only in field templates
+# invalid_eval_member.json
+    "node" template for VarDecl: missing "prefix" key for eval_member
+# invalid_eval_member2.json
+    "node" template for VarDecl: missing "member" key for eval_member
+# invalid_eval_member3.json
+    eval_member: VarDecl has no f_items member
+# invalid_eval_member4.json
+    "node" template for VarDecl: eval_member: too many arguments passed to FooNode.parent
+# invalid_eval_member5.json
+    "node" template for VarDecl: eval_member: no argument passed to arg2 (for FooNode.p_eval_member_test)
+# invalid_eval_member6.json
+    "node" template for VarDecl: eval_member: multiple arguments passed to arg1 (for FooNode.p_eval_member_test)
+# invalid_eval_member7.json
+    "node" template for VarDecl: eval_member: invalid argument name: ARG2 (for FooNode.p_eval_member_test)
+# invalid_eval_member8.json
+    "node" template for VarDecl: eval_member: invalid argument name: arg3 (for FooNode.p_eval_member_test)
+# invalid_eval_member9.json
+    "node" template for VarDecl: eval_member: Bool passed to arg2 but Decl expected (for FooNode.p_eval_member_test)
+# invalid_eval_member10.json
+    "node" template for VarDecl: eval_member: FooNode passed to arg2 but Decl expected (for FooNode.p_eval_member_test)
+# invalid_eval_member11.json
+    "node" template for VarDecl: is_empty expects a node, got a AnalysisUnit
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -2494,6 +2516,79 @@ Done.
       "id": 2,
       "kind": "text",
       "text": " var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_eval_member.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=0; "
+    }
+  ]
+}
+
+== cmd_eval_member.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0;"
+    }
+  ]
+}
+
+== cmd_eval_member1.json ==
+
+[LANGKIT.UNPARSING.EXPANSION_ERRORS] Exception caught during the expansion of <VarDecl foo.txt:1:1-1:16>
+[LANGKIT.UNPARSING.EXPANSION_ERRORS] raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : PropertyError exception
+_LANGKIT.UNPARSING.EXPANSION_ERRORS_ [...STACK TRACE...]
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0;"
+    }
+  ]
+}
+
+== cmd_eval_member2.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0;"
+    }
+  ]
+}
+
+== cmd_eval_member3.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0; "
     }
   ]
 }

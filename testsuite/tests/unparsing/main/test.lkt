@@ -94,6 +94,18 @@ class FooNode implements Node[FooNode] {
     @exported
     @memoized
     fun get_synth_node(): SynthNode = SynthNode()
+
+    @exported
+    fun eval_member_test(
+        arg1: Entity[FooNode],
+        @ignored arg2: Entity[Decl]
+    ): Entity[FooNode] = arg1.parent
+
+    @exported
+    fun eval_member_default_arg_val(arg: Bool = false): Bool = arg
+
+    @exported
+    fun eval_member_raise(): Bool = raise[Bool] PropertyError()
 }
 
 @synthetic

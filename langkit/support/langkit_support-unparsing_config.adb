@@ -1530,6 +1530,8 @@ package body Langkit_Support.Unparsing_Config is
                         """this_field"" is valid only in field templates");
                   end if;
                   return Pool.Create_This_Field;
+               elsif Value = "this_node" then
+                  return Pool.Create_This_Node;
                else
                   Abort_Parsing
                     (Context,
@@ -2021,6 +2023,211 @@ package body Langkit_Support.Unparsing_Config is
                     (Tmp, JSON_Int_Type, Context, """length"" for whitespace");
                   return Pool.Create_Whitespace (Tmp.Get);
 
+               elsif Kind = "eval_member" then
+                  declare
+                     Prefix     : Document_Type;
+                     T          : Type_Ref;
+                     Member     : Struct_Member_Ref;
+                     Final_Args : Document_Vectors.Vector;
+
+                     procedure Abort_Eval_Member (Message : String)
+                     with No_Return;
+                     --  Convenience wrapper around Abort_Parsing to provide
+                     --  context information about eval_member and Member.
+
+                     procedure Set_Arg (Expr : JSON_Value; Index : Positive);
+                     --  Parse the given expression and set it as the Index'th
+                     --  argument for the call. This rejects arguments passed
+                     --  twice and typing issues.
+
+                     procedure Process_Kwarg
+                       (Name : String; Expr : JSON_Value);
+                     --  Find the argument that corresponds to Name and call
+                     --  Set_Arg for it.
+
+                     function Arg_Name (Index : Argument_Index) return String
+                     is (To_UTF8
+                           (Format_Name
+                              (Member_Argument_Name (Member, Index), Lower)));
+
+                     -----------------------
+                     -- Abort_Eval_Member --
+                     -----------------------
+
+                     procedure Abort_Eval_Member (Message : String) is
+                     begin
+                        Abort_Parsing
+                          (Context,
+                           "eval_member: " & Message & " (for "
+                           & Debug_Name (Member) & ")");
+                     end Abort_Eval_Member;
+
+                     -------------
+                     -- Set_Arg --
+                     -------------
+
+                     procedure Set_Arg (Expr : JSON_Value; Index : Positive) is
+                        I             : constant Argument_Index :=
+                          Argument_Index (Index);
+                        Arg           : Document_Type;
+                        Expected_Type : Type_Ref;
+                     begin
+                        --  Check that Index corresponds to an argument that is
+                        --  yet to pass.
+
+                        if Index > Final_Args.Last_Index then
+                           Abort_Parsing
+                             (Context,
+                              "eval_member: too many arguments passed to "
+                              & Debug_Name (Member));
+                        elsif Final_Args (Index) /= null then
+                           Abort_Eval_Member
+                             ("multiple arguments passed to " & Arg_Name (I));
+                        end if;
+
+                        --  Check that it has the expected tye
+
+                        Expected_Type := Member_Argument_Type (Member, I);
+                        Arg := Parse_Expression (Expr, Context, T);
+                        if Expected_Type /= T
+                           and then not
+                             (Is_Node_Type (Expected_Type)
+                              and then Is_Node_Type (T)
+                              and then Is_Derived_From (T, Expected_Type))
+                        then
+                           Abort_Eval_Member
+                             (Debug_Name (T)
+                              & " passed to "
+                              & Arg_Name (I)
+                              & " but "
+                              & Debug_Name (Expected_Type)
+                              & " expected");
+                        end if;
+
+                        Final_Args (Index) := Arg;
+                     end Set_Arg;
+
+                     -------------------
+                     -- Process_Kwarg --
+                     -------------------
+
+                     procedure Process_Kwarg (Name : String; Expr : JSON_Value)
+                     is
+                        N : Name_Type;
+                     begin
+                        N := Create_Name (From_UTF8 (Name), Lower);
+
+                        --  Find the argument corresponding to the given name.
+                        --  Argument lists are never long (5 at most, most
+                        --  often 1 or 2) and we do this only when parsing the
+                        --  configuration, so the linear lookup is fine.
+
+                        for I in 1 .. Member_Last_Argument (Member)
+                        loop
+                           if Member_Argument_Name (Member, I) = N then
+                              Set_Arg (Expr, Positive (I));
+                              return;
+                           end if;
+                        end loop;
+                        Abort_Eval_Member ("invalid argument name: " & Name);
+                     exception
+                        when Invalid_Name_Error =>
+                           Abort_Eval_Member
+                             ("invalid argument name: " & Name);
+                     end Process_Kwarg;
+
+                  begin
+                     --  Parse the prefix expression
+
+                     Tmp := Mandatory_Key
+                              (JSON, "prefix", Context, "for eval_member");
+                     Prefix := Parse_Expression (Tmp, Context, T);
+
+                     --  Look for the requested member in that prefix
+
+                     Tmp := Mandatory_Key
+                              (JSON, "member", Context, "for eval_member");
+                     Check_Kind
+                       (Tmp,
+                        JSON_String_Type,
+                        Context,
+                        """member"" for eval_prefix");
+                     if not Is_Base_Struct_Type (T) then
+                        Abort_Parsing
+                          ("eval_member: "
+                           & Debug_Name (T) & " has no member");
+                     end if;
+                     Member :=
+                       Map.Lookup_Struct_Member (T, To_Symbol (Tmp.Get));
+                     if Member = No_Struct_Member_Ref then
+                        Abort_Parsing
+                          ("eval_member: " & Debug_Name (T)
+                           & " has no " & Tmp.Get & " member");
+                     end if;
+
+                     --  Prepare Final_Args to hold the arguments to pass
+
+                     Final_Args.Set_Length
+                       (Ada.Containers.Count_Type
+                          (Member_Last_Argument (Member)));
+
+                     --  Assign positional arguments
+
+                     if JSON.Has_Field ("args") then
+                        Tmp := JSON.Get ("args");
+                        Check_Kind
+                          (Tmp,
+                           JSON_Array_Type,
+                           Context,
+                           """args"" for eval_prefix");
+                        declare
+                           I : Positive := 1;
+                        begin
+                           for Arg of JSON_Array'(Tmp.Get) loop
+                              Set_Arg (Arg, I);
+                              I := I + 1;
+                           end loop;
+                        end;
+                     end if;
+
+                     --  Assign keyword arguments
+
+                     if JSON.Has_Field ("kwargs") then
+                        Tmp := JSON.Get ("kwargs");
+                        Check_Kind
+                          (Tmp,
+                           JSON_Object_Type,
+                           Context,
+                           """kwargs"" for eval_prefix");
+                        Tmp.Map_JSON_Object (Process_Kwarg'Access);
+                     end if;
+
+                     --  Ensure non-assigned arguments have a default value
+
+                     for Index in
+                        Final_Args.First_Index .. Final_Args.Last_Index
+                     loop
+                        declare
+                           I : constant Argument_Index :=
+                             Argument_Index (Index);
+                        begin
+                           if Final_Args (Index) = null
+                              and then Member_Argument_Default_Value
+                                         (Member, I) = No_Value_Ref
+                           then
+                              Abort_Parsing
+                                (Context,
+                                 "eval_member: no argument passed to "
+                                 & Arg_Name (I)
+                                 & " (for " & Debug_Name (Member) & ")");
+                           end if;
+                        end;
+                     end loop;
+
+                     return Pool.Create_Eval_Member
+                              (Prefix, Member, Final_Args);
+                  end;
+
                elsif Kind = "is_a" then
                   Tmp := Mandatory_Key (JSON, "node", Context, "for is_a");
                   declare
@@ -2110,11 +2317,17 @@ package body Langkit_Support.Unparsing_Config is
             end if;
 
             case Template_Expression_Kind (Result.Kind) is
+               when Eval_Member =>
+                  Expr_Type := Member_Type (Result.Eval_Member_Ref);
+
                when Is_A | Is_Empty =>
                   Expr_Type := Boolean_Type;
 
                when This_Field =>
                   Expr_Type := Member_Type (Context.Field);
+
+               when This_Node =>
+                  Expr_Type := Context.Node;
             end case;
          end return;
       end Parse_Expression;

@@ -469,11 +469,17 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  template instantiation: ``Instantiate_Template`` takes care of the
    --  template unwrapping.
 
+   function Evaluate_Condition
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Boolean;
+   --  Helper for ``Instantiate_Template_Helper``. Evaluate a condition tree
+   --  and return its result.
+
    function Evaluate_Expression
      (State      : in out Instantiation_State;
       Expression : Document_Type) return Value_Ref;
-   --  Helper for ``Instantiate_Template_Helper``. Evaluate an expression tree
-   --  and return the resulting value.
+   --  Helper for ``Evaluate_Condition``. Evaluate an expression tree
+   --  and return the resulting value. This may propagate a managed exception.
 
    -----------------------
    -- Check_Same_Tokens --
@@ -1751,10 +1757,8 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when If_Then_Else =>
             declare
-               Condition   : constant Value_Ref :=
-                 Evaluate_Expression (State, Template.If_Condition);
                Subtemplate : constant Document_Type :=
-                 (if Condition.As_Bool
+                 (if Evaluate_Condition (State, Template.If_Condition)
                   then Template.If_Then
                   else Template.If_Else);
             begin
@@ -1802,6 +1806,54 @@ package body Langkit_Support.Generic_API.Unparsing is
       end case;
    end Instantiate_Template_Helper;
 
+   ------------------------
+   -- Evaluate_Condition --
+   ------------------------
+
+   function Evaluate_Condition
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Boolean
+   is
+      Result : Value_Ref;
+   begin
+      --  Evaluate the condition itself
+
+      begin
+         Result := Evaluate_Expression (State, Expression);
+      exception
+         when Exc : others =>
+
+            --  Let unmanaged exceptions propagate: they are true bugs
+
+            if not Is_Managed_Exception
+                     (State.Language, Exception_Identity (Exc))
+            then
+               raise;
+
+            --  If requested, log managed exceptions
+
+            elsif Expansion_Errors_Trace.Is_Active then
+               declare
+                  Context : constant String :=
+                    (if State.Field.Is_Null
+                     then ""
+                     else "field " & State.Field.Image & " of ")
+                    & State.Node.Image;
+               begin
+                  Expansion_Errors_Trace.Trace
+                    ("Exception caught during the expansion of " & Context);
+                  Expansion_Errors_Trace.Trace
+                    (Exception_Information (Exc));
+               end;
+            end if;
+
+            --  Consider that the condition evaluates to false in case of error
+
+            return False;
+      end;
+      return As_Bool (Result);
+   end Evaluate_Condition;
+
    -------------------------
    -- Evaluate_Expression --
    -------------------------
@@ -1811,6 +1863,30 @@ package body Langkit_Support.Generic_API.Unparsing is
       Expression : Document_Type) return Value_Ref is
    begin
       case Template_Expression_Kind (Expression.Kind) is
+         when Eval_Member =>
+            declare
+               Prefix : constant Value_Ref :=
+                 Evaluate_Expression (State, Expression.Eval_Member_Prefix);
+               Member : constant Struct_Member_Ref :=
+                 Expression.Eval_Member_Ref;
+               Arguments : Value_Ref_Array
+                 (1 ..  Expression.Eval_Member_Args.Last_Index);
+            begin
+               for I in Arguments'Range loop
+                  declare
+                     A : constant Document_Type :=
+                       Expression.Eval_Member_Args (I);
+                  begin
+                     Arguments (I) :=
+                       (if A = null
+                        then Member_Argument_Default_Value
+                               (Member, Argument_Index (I))
+                        else Evaluate_Expression (State, A));
+                  end;
+               end loop;
+               return Eval_Member (Prefix, Member, Arguments);
+            end;
+
          when Is_A =>
             declare
                Node : constant Lk_Node :=
@@ -1832,6 +1908,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when This_Field =>
             return From_Node (State.Language, State.Field);
+
+         when This_Node =>
+            return From_Node (State.Language, State.Node);
       end case;
    end Evaluate_Expression;
 

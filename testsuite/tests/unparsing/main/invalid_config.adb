@@ -162,6 +162,17 @@ begin
    Check ("invalid_table_join5.json");
    Check ("invalid_bubble_up.json");
    Check ("invalid_this_field.json");
+   Check ("invalid_eval_member.json");
+   Check ("invalid_eval_member2.json");
+   Check ("invalid_eval_member3.json");
+   Check ("invalid_eval_member4.json");
+   Check ("invalid_eval_member5.json");
+   Check ("invalid_eval_member6.json");
+   Check ("invalid_eval_member7.json");
+   Check ("invalid_eval_member8.json");
+   Check ("invalid_eval_member9.json");
+   Check ("invalid_eval_member10.json");
+   Check ("invalid_eval_member11.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");

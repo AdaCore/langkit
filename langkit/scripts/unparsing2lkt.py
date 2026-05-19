@@ -419,6 +419,7 @@ def to_json(input_file: str) -> str:
                 "trim",
                 "whitespace",
                 "this_field",
+                "this_node",
             ):
                 return e.text
 
@@ -426,19 +427,49 @@ def to_json(input_file: str) -> str:
             if e.f_null_cond.p_as_bool:
                 error(e.f_null_cond, "unexpected non-cond marker")
 
+            prefix = parse_template(e.f_prefix)
             match e.f_suffix.text:
                 case "is_empty":
-                    return {
-                        "kind": "is_empty",
-                        "node": parse_template(e.f_prefix),
-                    }
+                    return {"kind": "is_empty", "node": prefix}
 
-                case _:
-                    error(e.f_suffix, "unknown attribute")
+                case member:
+                    return {
+                        "kind": "eval_member",
+                        "prefix": prefix,
+                        "member": member,
+                    }
 
         elif isinstance(e, L.CallExpr):
             callee = e.f_name
-            if not isinstance(callee, L.RefId):
+            if isinstance(callee, L.DotExpr):
+                call_args = []
+                call_kwargs = {}
+                result = {
+                    "kind": "eval_member",
+                    "prefix": parse_template(callee.f_prefix),
+                    "member": callee.f_suffix.text,
+                }
+                for arg in e.f_args:
+                    value = parse_template(arg.f_value)
+                    if arg.f_name:
+                        arg_name = arg.f_name.text
+                        if arg_name in call_kwargs:
+                            error(arg.f_name, "argument passed multiple times")
+                        call_kwargs[arg_name] = value
+                    elif call_kwargs:
+                        error(
+                            arg,
+                            "positional argument forbidden after a keyword"
+                            " argument",
+                        )
+                    else:
+                        call_args.append(value)
+                if call_kwargs:
+                    result["kwargs"] = call_kwargs
+                if call_args or not call_kwargs:
+                    result["args"] = call_args
+                return result
+            elif not isinstance(callee, L.RefId):
                 error(callee, "identifier expected")
             name = callee.text
 
@@ -861,6 +892,7 @@ def to_lkt(input_file: str) -> str:
                 | "trim"
                 | "whitespace"
                 | "this_field"
+                | "this_node"
             ):
                 lines.append(doc)
 
@@ -983,6 +1015,36 @@ def to_lkt(input_file: str) -> str:
 
             case {"kind": "text", "text": text}:
                 lines.append(lkt_lit(text))
+
+            case {
+                "kind": "eval_member",
+                "prefix": prefix_doc,
+                "member": member,
+            }:
+                process_template(prefix_doc)
+                lines.append(f".{member}")
+                has_args = False
+                if "args" in doc:
+                    for value in doc["args"]:
+                        if has_args:
+                            lines.append(",")
+                        else:
+                            lines.append("(")
+                            has_args = True
+                        process_template(value)
+                if "kwargs" in doc:
+                    for name, value in doc["kwargs"].items():
+                        if has_args:
+                            lines.append(",")
+                        else:
+                            lines.append("(")
+                            has_args = True
+                        lines.append(f"{name}=")
+                        process_template(value)
+                if has_args:
+                    lines.append(")")
+                elif "args" in doc or "kwargs" in doc:
+                    lines.append("()")
 
             case {"kind": "is_a", "node": node_doc, "kinds": [*kinds]}:
                 process_template(node_doc)

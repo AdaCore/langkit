@@ -200,9 +200,11 @@ private package Langkit_Support.Prettier_Utils is
 
       --  Expressions
 
+      Eval_Member,
       Is_A,
       Is_Empty,
-      This_Field
+      This_Field,
+      This_Node
    );
 
    subtype Template_Conditional_Kind is
@@ -211,7 +213,7 @@ private package Langkit_Support.Prettier_Utils is
    --  instantiation.
 
    subtype Template_Expression_Kind is
-     Document_Kind range Is_A .. This_Field;
+     Document_Kind range Eval_Member .. This_Node;
    --  Kind for a document that materializes an expression for conditions in
    --  template instantiation.
 
@@ -373,6 +375,11 @@ private package Langkit_Support.Prettier_Utils is
             Match_Default  : Document_Type;
             Match_Absent   : Document_Type;
 
+         when Eval_Member =>
+            Eval_Member_Prefix : Document_Type;
+            Eval_Member_Ref    : Struct_Member_Ref;
+            Eval_Member_Args   : Document_Vectors.Vector;
+
          when Is_A =>
             Is_A_Node  : Document_Type;
             Is_A_Kinds : Type_Vectors.Vector;
@@ -380,7 +387,7 @@ private package Langkit_Support.Prettier_Utils is
          when Is_Empty =>
             Is_Empty_Node : Document_Type;
 
-         when This_Field =>
+         when This_Field | This_Node =>
             null;
       end case;
    end record;
@@ -617,6 +624,13 @@ private package Langkit_Support.Prettier_Utils is
       Match_Absent   : Document_Type) return Document_Type;
    --  Return an ``Match`` node
 
+   function Create_Eval_Member
+     (Self   : in out Document_Pool;
+      Prefix : Document_Type;
+      Member : Struct_Member_Ref;
+      Args   : in out Document_Vectors.Vector) return Document_Type;
+   --  Return an ``Eval_Node`` node
+
    function Create_Is_A
      (Self  : in out Document_Pool;
       Node  : Document_Type;
@@ -631,6 +645,10 @@ private package Langkit_Support.Prettier_Utils is
    function Create_This_Field
      (Self : in out Document_Pool) return Document_Type;
    --  Return a ``This_Field`` node
+
+   function Create_This_Node
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``This_Node`` node
 
    procedure Bubble_Up_Trivias
      (Pool : in out Document_Pool; Document : in out Document_Type);

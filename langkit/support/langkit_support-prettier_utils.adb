@@ -1609,6 +1609,26 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Match;
 
+   ------------------------
+   -- Create_Eval_Member --
+   ------------------------
+
+   function Create_Eval_Member
+     (Self   : in out Document_Pool;
+      Prefix : Document_Type;
+      Member : Struct_Member_Ref;
+      Args   : in out Document_Vectors.Vector) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Eval_Member)
+      do
+         Result.Eval_Member_Prefix := Prefix;
+         Result.Eval_Member_Ref := Member;
+         Result.Eval_Member_Args.Move (Args);
+         Self.Register (Result);
+      end return;
+   end Create_Eval_Member;
+
    -----------------
    -- Create_Is_A --
    -----------------
@@ -1658,6 +1678,20 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_This_Field;
+
+   ----------------------
+   -- Create_This_Node --
+   ----------------------
+
+   function Create_This_Node
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => This_Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_This_Node;
 
    -----------------------
    -- Bubble_Up_Trivias --
@@ -2234,6 +2268,24 @@ package body Langkit_Support.Prettier_Utils is
                   end loop;
                end;
 
+            when Eval_Member =>
+               Write (Prefix & "eval_member:");
+
+               Write (Prefix & Simple_Indent & "prefix:");
+               Process (Document.Eval_Member_Prefix, Prefix & List_Indent);
+
+               Write
+                 (Prefix
+                  & Simple_Indent
+                  & "member: "
+                  & Debug_Name (Document.Eval_Member_Ref));
+
+               for I in 1 .. Document.Eval_Member_Args.Last_Index loop
+                  Write (Prefix & Simple_Indent & "arg:");
+                  Process
+                    (Document.Eval_Member_Args (I), Prefix & List_Indent);
+               end loop;
+
             when Is_A =>
                Write (Prefix & "is_a:");
                for I in 1 .. Document.Is_A_Kinds.Last_Index loop
@@ -2251,6 +2303,9 @@ package body Langkit_Support.Prettier_Utils is
 
             when This_Field =>
                Write (Prefix & "this_field");
+
+            when This_Node =>
+               Write (Prefix & "this_node");
          end case;
       end Process;
    begin

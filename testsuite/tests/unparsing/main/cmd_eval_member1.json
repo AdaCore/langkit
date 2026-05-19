@@ -1,0 +1,16 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": {
+        "kind": "if",
+        "condition": {
+           "kind": "eval_member",
+           "prefix": "this_node",
+           "member": "p_eval_member_raise"
+        },
+        "then": ["recurse", "whitespace"],
+        "else": "recurse"
+      }
+    }
+  }
+}

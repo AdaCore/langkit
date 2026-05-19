@@ -1,4 +1,5 @@
 driver: lkt_build_and_run
+collapse_unparsing_error_traces: true
 config:
   library:
     builtin_unparsing_overridings:

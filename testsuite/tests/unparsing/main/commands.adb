@@ -4,6 +4,7 @@ with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 
 with GNATCOLL.JSON; use GNATCOLL.JSON;
+with GNATCOLL.Traces;
 with Prettier_Ada.Documents;
 with Prettier_Ada.Documents.Json;
 
@@ -147,6 +148,8 @@ procedure Commands is
    end Reset_Ids;
 
 begin
+   GNATCOLL.Traces.Parse_Config_File (".gnatdebug");
+
    Check ("cmd_align.json");
    Check ("cmd_align2.json");
    Check ("cmd_breakparent.json");
@@ -207,6 +210,11 @@ begin
    Check ("cmd_trim.json");
    Check ("cmd_whitespace_3.json");
    Check ("cmd_whitespace_default.json");
+   Check ("cmd_eval_member.json", "var v1: T = 0;");
+   Check ("cmd_eval_member.json", "var v1: T = v0;");
+   Check ("cmd_eval_member1.json", "var v1: T = v0;");
+   Check ("cmd_eval_member2.json", "var v1: T = v0;");
+   Check ("cmd_eval_member3.json", "var v1: T = v0;");
 
    Put_Line ("Done.");
 end Commands;
