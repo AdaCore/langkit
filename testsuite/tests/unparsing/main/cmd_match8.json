@@ -7,7 +7,7 @@
           "text": "-"
         },
         {
-          "kind": "ifKind",
+          "kind": "match",
           "field": "f_args",
           "default": {
             "kind": "recurse_field",

@@ -1010,13 +1010,13 @@ package body Langkit_Support.Prettier_Utils is
                Recurse (Self.If_Then),
                Recurse (Self.If_Else));
 
-         when If_Kind =>
+         when Match =>
             declare
                Matchers : Matcher_Vectors.Vector;
             begin
-               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
+               for I in 1 .. Self.Match_Matchers.Last_Index loop
                   declare
-                     M : constant Matcher_Record := Self.If_Kind_Matchers (I);
+                     M : constant Matcher_Record := Self.Match_Matchers (I);
                   begin
                      Matchers.Append
                        (Matcher_Record'
@@ -1024,11 +1024,11 @@ package body Langkit_Support.Prettier_Utils is
                   end;
                end loop;
 
-               return Pool.Create_If_Kind
-                 (Self.If_Kind_Field,
+               return Pool.Create_Match
+                 (Self.Match_Field,
                   Matchers,
-                  Recurse (Self.If_Kind_Default),
-                  Recurse (Self.If_Kind_Absent));
+                  Recurse (Self.Match_Default),
+                  Recurse (Self.Match_Absent));
             end;
       end case;
    end Deep_Copy;
@@ -1587,30 +1587,30 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_If;
 
-   --------------------
-   -- Create_If_Kind --
-   --------------------
+   ------------------
+   -- Create_Match --
+   ------------------
 
-   function Create_If_Kind
-     (Self             : in out Document_Pool;
-      If_Kind_Field    : Struct_Member_Ref;
-      If_Kind_Matchers : in out Matcher_Vectors.Vector;
-      If_Kind_Default  : Document_Type;
-      If_Kind_Absent   : Document_Type) return Document_Type
+   function Create_Match
+     (Self           : in out Document_Pool;
+      Match_Field    : Struct_Member_Ref;
+      Match_Matchers : in out Matcher_Vectors.Vector;
+      Match_Default  : Document_Type;
+      Match_Absent   : Document_Type) return Document_Type
    is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind             => If_Kind,
-           If_Kind_Field    => If_Kind_Field,
-           If_Kind_Matchers => Matcher_Vectors.Empty_Vector,
-           If_Kind_Default  => If_Kind_Default,
-           If_Kind_Absent   => If_Kind_Absent)
+          (Kind           => Match,
+           Match_Field    => Match_Field,
+           Match_Matchers => Matcher_Vectors.Empty_Vector,
+           Match_Default  => Match_Default,
+           Match_Absent   => Match_Absent)
       do
-         Result.If_Kind_Matchers.Move (If_Kind_Matchers);
+         Result.Match_Matchers.Move (Match_Matchers);
          Self.Register (Result);
       end return;
-   end Create_If_Kind;
+   end Create_Match;
 
    ---------------------
    -- Create_Is_Empty --
@@ -2180,15 +2180,15 @@ package body Langkit_Support.Prettier_Utils is
                Process (Document.If_Then, Prefix & List_Indent);
                Process (Document.If_Else, Prefix & List_Indent);
 
-            when If_Kind =>
-               Write (Prefix & "ifKind:");
+            when Match =>
+               Write (Prefix & "match");
                Write (Prefix & Simple_Indent & "default:");
                Process
-                 (Document.If_Kind_Default,
+                 (Document.Match_Default,
                   Prefix & Simple_Indent & Simple_Indent);
                Write (Prefix & Simple_Indent & "absent:");
                Process
-                 (Document.If_Kind_Absent,
+                 (Document.Match_Absent,
                   Prefix & Simple_Indent & Simple_Indent);
                Write (Prefix & Simple_Indent & "matchers:");
                declare
@@ -2199,13 +2199,13 @@ package body Langkit_Support.Prettier_Utils is
 
                begin
                   for Matcher_Index in
-                    Document.If_Kind_Matchers.First_Index
-                    .. Document.If_Kind_Matchers.Last_Index
+                    Document.Match_Matchers.First_Index
+                    .. Document.Match_Matchers.Last_Index
                   loop
                      declare
                         Types     : constant Type_Ref_Vectors.Vector :=
                           Document
-                            .If_Kind_Matchers (Matcher_Index)
+                            .Match_Matchers (Matcher_Index)
                             .Matched_Types;
                         Types_Str : Unbounded_String;
                      begin
@@ -2219,7 +2219,7 @@ package body Langkit_Support.Prettier_Utils is
                         Write (Matcher_Kind_Indent & Types_Str);
                      end;
                      Process
-                       (Document.If_Kind_Matchers (Matcher_Index).Document,
+                       (Document.Match_Matchers (Matcher_Index).Document,
                         Matcher_Document_Indent);
                   end loop;
                end;

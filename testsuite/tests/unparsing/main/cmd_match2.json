@@ -9,7 +9,7 @@
             "field": "f_lhs"
           },
           {
-            "kind": "ifKind",
+            "kind": "match",
             "field": "f_rhs",
             "matchers": [
               {

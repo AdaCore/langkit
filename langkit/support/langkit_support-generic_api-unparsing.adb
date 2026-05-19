@@ -1775,11 +1775,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                return Instantiate_Template_Helper (Pool, State, Subtemplate);
             end;
 
-         when If_Kind =>
+         when Match =>
             declare
                Field_Node       : constant Lk_Node :=
-                 Eval_Syntax_Field (State.Node, Template.If_Kind_Field);
-               Matched_Template : Document_Type := Template.If_Kind_Default;
+                 Eval_Syntax_Field (State.Node, Template.Match_Field);
+               Matched_Template : Document_Type := Template.Match_Default;
 
             begin
                --  If the field is present, pick the document for the first
@@ -1788,17 +1788,17 @@ package body Langkit_Support.Generic_API.Unparsing is
                if Is_Field_Present
                     (Field_Node,
                      Syntax_Field_Index
-                       (Template.If_Kind_Field, Type_Of (State.Node)))
+                       (Template.Match_Field, Type_Of (State.Node)))
                then
                   for I in
-                    Template.If_Kind_Matchers.First_Index
-                    .. Template.If_Kind_Matchers.Last_Index
+                    Template.Match_Matchers.First_Index
+                    .. Template.Match_Matchers.Last_Index
                   loop
                      if Matches
-                          (Field_Node, Template.If_Kind_Matchers.Reference (I))
+                          (Field_Node, Template.Match_Matchers.Reference (I))
                      then
                         Matched_Template :=
-                          Template.If_Kind_Matchers (I).Document;
+                          Template.Match_Matchers (I).Document;
                         exit;
                      end if;
                   end loop;
@@ -1806,8 +1806,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  Otherwise, use the null template, if present. For all
                --  other cases, use the default template.
 
-               elsif Template.If_Kind_Absent /= null then
-                  Matched_Template := Template.If_Kind_Absent;
+               elsif Template.Match_Absent /= null then
+                  Matched_Template := Template.Match_Absent;
                end if;
 
                return Instantiate_Template_Helper

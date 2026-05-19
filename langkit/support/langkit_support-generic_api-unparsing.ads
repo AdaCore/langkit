@@ -174,7 +174,7 @@
 --        "else": <sub-template>
 --      }
 --
---  * The "ifKind" template is valid only inside a node configuration.  The
+--  * The "match" template is valid only inside a node configuration.  The
 --    "absent" entry is optional. If "field" is not present, "absent" is
 --    yielded if defined, otherwise fallback to "default".
 --
@@ -184,7 +184,7 @@
 --    is used. The "default" template is used if there is no match::
 --
 --      {
---        "kind": "ifKind",
+--        "kind": "match",
 --        "field": "<field-name>",
 --        "matchers": [
 --          {"kind": <node-name>, "document": <sub-template>},

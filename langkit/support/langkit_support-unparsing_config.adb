@@ -173,12 +173,12 @@ package body Langkit_Support.Unparsing_Config is
                Replace (Self.If_Then);
                Replace (Self.If_Else);
 
-            when If_Kind =>
-               Replace (Self.If_Kind_Default);
-               for I in 1 .. Self.If_Kind_Matchers.Last_Index loop
-                  Replace (Self.If_Kind_Matchers (I).Document);
+            when Match =>
+               Replace (Self.Match_Default);
+               for I in 1 .. Self.Match_Matchers.Last_Index loop
+                  Replace (Self.Match_Matchers (I).Document);
                end loop;
-               Replace (Self.If_Kind_Absent);
+               Replace (Self.Match_Absent);
          end case;
       end Replace;
 
@@ -1723,11 +1723,11 @@ package body Langkit_Support.Unparsing_Config is
                               (Condition, Then_Contents, Else_Contents);
                   end;
 
-               elsif Kind = "ifKind" then
+               elsif Kind = "match" then
                   if Context.Kind not in Node_Template | Field_Template then
                      Abort_Parsing
                        (Context,
-                        """ifKind"" is valid in node templates and field"
+                        """match"" is valid in node templates and field"
                         & " templates only");
                   end if;
 
@@ -1735,9 +1735,9 @@ package body Langkit_Support.Unparsing_Config is
                      Field_JSON    : constant JSON_Value :=
                        JSON.Get ("field");
                      Matchers_JSON : constant JSON_Value :=
-                       Mandatory_Key (JSON, "matchers", Context, "for ifKind");
+                       Mandatory_Key (JSON, "matchers", Context, "for match");
                      Default_JSON  : constant JSON_Value :=
-                       Mandatory_Key (JSON, "default", Context, "for ifKind");
+                       Mandatory_Key (JSON, "default", Context, "for match");
                      Absent_JSON   : constant JSON_Value :=
                        JSON.Get ("absent");
 
@@ -1749,12 +1749,12 @@ package body Langkit_Support.Unparsing_Config is
                      if Context.Kind = Node_Template then
                         if Field_JSON.Kind = JSON_Null_Type then
                            Abort_Parsing
-                             (Context, "missing ""field"" key for ifKind");
+                             (Context, "missing ""field"" key for match");
 
                         elsif Field_JSON.Kind /= JSON_String_Type then
                            Abort_Parsing
                              (Context,
-                              "invalid ""field"" key kind for ifKind: found "
+                              "invalid ""field"" key kind for match: found "
                               & Field_JSON.Kind'Image
                               & "; expected "
                               & JSON_String_Type'Image);
@@ -1767,7 +1767,7 @@ package body Langkit_Support.Unparsing_Config is
 
                      elsif Field_JSON.Kind /= JSON_Null_Type then
                         Abort_Parsing
-                          (Context, "invalid ""field"" key for ifKind");
+                          (Context, "invalid ""field"" key for match");
                      else
                         Field_Ref := Context.Field;
                      end if;
@@ -1776,7 +1776,7 @@ package body Langkit_Support.Unparsing_Config is
                        (Matchers_JSON,
                         JSON_Array_Type,
                         Context,
-                        """matchers"" key kind for ifKind");
+                        """matchers"" key kind for match");
 
                      declare
                         --  Before parsing the "matchers", "default" or
@@ -1791,9 +1791,9 @@ package body Langkit_Support.Unparsing_Config is
                         Initial_Context : constant Template_Parsing_Context :=
                           Context;
 
-                        If_Kind_Default  : Document_Type;
-                        If_Kind_Absent   : Document_Type := null;
-                        If_Kind_Matchers : Matcher_Vectors.Vector;
+                        Match_Default  : Document_Type;
+                        Match_Absent   : Document_Type := null;
+                        Match_Matchers : Matcher_Vectors.Vector;
 
                         procedure Process_Matcher (Matcher_JSON : JSON_Value);
                         --  Process Matcher_JSON with their own nested context
@@ -1817,13 +1817,13 @@ package body Langkit_Support.Unparsing_Config is
                                (Matcher_JSON,
                                 "kind",
                                 Context,
-                                "ifKind matcher");
+                                "match matcher");
                            Document_JSON  : constant JSON_Value :=
                              Mandatory_Key
                                (Matcher_JSON,
                                 "document",
                                 Context,
-                                "ifKind matcher");
+                                "match matcher");
                            Types          : Type_Ref_Vectors.Vector;
                            Nested_Context : Template_Parsing_Context :=
                              Initial_Context;
@@ -1838,14 +1838,14 @@ package body Langkit_Support.Unparsing_Config is
                               Abort_Parsing
                                 (Context,
                                  "invalid matcher ""kind"" field for "
-                                 & """ifKind"" - found "
+                                 & """match"" - found "
                                  & Kind.Kind'Image
                                  & "; expected a string or array of strings");
                            end if;
 
                            --  Parse the matcher and store it in the table
 
-                           If_Kind_Matchers.Append
+                           Match_Matchers.Append
                              (Matcher_Record'
                                (Types,
                                 Parse_Subtemplate
@@ -1857,7 +1857,7 @@ package body Langkit_Support.Unparsing_Config is
                            if Nested_Context.State /= Context.State then
                               Abort_Parsing
                                 (Context,
-                                 "ifKind matcher """ & Kind.Get & """ has an "
+                                 "match matcher """ & Kind.Get & """ has an "
                                  & "inconsistent recurse structure");
                            end if;
                         end Process_Matcher;
@@ -1873,31 +1873,31 @@ package body Langkit_Support.Unparsing_Config is
                              (JSON,
                               JSON_String_Type,
                               Context,
-                              "matcher ""kind"" field for ifKind");
+                              "matcher ""kind"" field for match");
                            return From_Index
                              (Language, To_Type_Index (JSON.Get));
                         end Parse_Type_Ref;
 
                      begin
-                        If_Kind_Default :=
+                        Match_Default :=
                           Parse_Subtemplate (Default_JSON, Context);
 
                         if Absent_JSON.Kind /= JSON_Null_Type then
                            declare
-                              If_Kind_Absent_Context :
+                              Match_Absent_Context :
                                 Template_Parsing_Context :=
                                   Initial_Context;
 
                            begin
-                              If_Kind_Absent :=
+                              Match_Absent :=
                                 Parse_Subtemplate
-                                  (Absent_JSON, If_Kind_Absent_Context);
+                                  (Absent_JSON, Match_Absent_Context);
 
-                              if If_Kind_Absent_Context.State /= Context.State
+                              if Match_Absent_Context.State /= Context.State
                               then
                                  Abort_Parsing
                                    (Context,
-                                    "ifKind ""absent"" matcher has an "
+                                    "match ""absent"" matcher has an "
                                     & "inconsistent recurse structure");
                               end if;
                            end;
@@ -1910,16 +1910,16 @@ package body Langkit_Support.Unparsing_Config is
                              (Matcher_JSON,
                               JSON_Object_Type,
                               Context,
-                              """matchers"" element kind for ifKind");
+                              """matchers"" element kind for match");
                            Process_Matcher (Matcher_JSON);
                         end loop;
 
                         return
-                          Pool.Create_If_Kind
+                          Pool.Create_Match
                             (Field_Ref,
-                             If_Kind_Matchers,
-                             If_Kind_Default,
-                             If_Kind_Absent);
+                             Match_Matchers,
+                             Match_Default,
+                             Match_Absent);
                      end;
                   end;
 

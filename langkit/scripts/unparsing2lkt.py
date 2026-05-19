@@ -569,7 +569,7 @@ def to_json(input_file: str) -> str:
                 error(e.f_match_expr, "identifier expected")
 
             result = {
-                "kind": "ifKind",
+                "kind": "match",
                 "matchers": [],
             }
             if field_name != "node":
@@ -938,7 +938,7 @@ def to_lkt(input_file: str) -> str:
                 process_template(else_doc)
 
             case {
-                "kind": "ifKind",
+                "kind": "match",
                 "matchers": matchers,
                 "default": default_doc,
             }:

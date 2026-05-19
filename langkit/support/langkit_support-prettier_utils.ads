@@ -196,7 +196,7 @@ private package Langkit_Support.Prettier_Utils is
       --  Conditionals
 
       If_Then_Else,
-      If_Kind,
+      Match,
 
       --  Expressions
 
@@ -205,7 +205,7 @@ private package Langkit_Support.Prettier_Utils is
    );
 
    subtype Template_Conditional_Kind is
-     Document_Kind range If_Then_Else .. If_Kind;
+     Document_Kind range If_Then_Else .. Match;
    --  Kind for a document that materializes conditionals for template
    --  instantiation.
 
@@ -366,11 +366,11 @@ private package Langkit_Support.Prettier_Utils is
             If_Then      : Document_Type;
             If_Else      : Document_Type;
 
-         when If_Kind =>
-            If_Kind_Field    : Struct_Member_Ref;
-            If_Kind_Matchers : Matcher_Vectors.Vector;
-            If_Kind_Default  : Document_Type;
-            If_Kind_Absent   : Document_Type;
+         when Match =>
+            Match_Field    : Struct_Member_Ref;
+            Match_Matchers : Matcher_Vectors.Vector;
+            Match_Default  : Document_Type;
+            Match_Absent   : Document_Type;
 
          when Is_Empty =>
             Is_Empty_Node : Document_Type;
@@ -605,13 +605,13 @@ private package Langkit_Support.Prettier_Utils is
       Else_Contents : Document_Type) return Document_Type;
    --  Return an ``If_Then_Else`` node
 
-   function Create_If_Kind
-     (Self             : in out Document_Pool;
-      If_Kind_Field    : Struct_Member_Ref;
-      If_Kind_Matchers : in out Matcher_Vectors.Vector;
-      If_Kind_Default  : Document_Type;
-      If_Kind_Absent   : Document_Type) return Document_Type;
-   --  Return an ``If_Kind`` node
+   function Create_Match
+     (Self           : in out Document_Pool;
+      Match_Field    : Struct_Member_Ref;
+      Match_Matchers : in out Matcher_Vectors.Vector;
+      Match_Default  : Document_Type;
+      Match_Absent   : Document_Type) return Document_Type;
+   --  Return an ``Match`` node
 
    function Create_Is_Empty
      (Self : in out Document_Pool;

@@ -170,32 +170,32 @@ def f2(a: Int, ): Int
     template for VarDecl.f_name: expression expected, got a template
 # invalid_isempty3.json
     template for VarDecl.f_name: is_empty requires a node, got a Bool
-# invalid_ifkind.json
-    "node" template for Addition: ifKind matcher "Number" has an inconsistent recurse structure
-# invalid_ifkind2.json
+# invalid_match.json
+    "node" template for Addition: match matcher "Number" has an inconsistent recurse structure
+# invalid_match2.json
     "node" template for Addition: missing field f_rhs
     Expected:
     * field f_lhs
     * token "+"
     * field f_rhs
-# invalid_ifkind3.json
-    "node" template for Addition: missing "field" key for ifKind
-# invalid_ifkind4.json
-    "node" template for Addition: missing "matchers" key for ifKind
-# invalid_ifkind5.json
-    "node" template for Addition: missing "default" key for ifKind
-# invalid_ifkind6.json
-    "node" template for Addition: invalid "field" key kind for ifKind: found JSON_ARRAY_TYPE; expected JSON_STRING_TYPE
-# invalid_ifkind7.json
-    "node" template for Addition: invalid "matchers" key kind for ifKind: JSON_ARRAY_TYPE expected, but JSON_OBJECT_TYPE found
-# invalid_ifkind8.json
+# invalid_match3.json
+    "node" template for Addition: missing "field" key for match
+# invalid_match4.json
+    "node" template for Addition: missing "matchers" key for match
+# invalid_match5.json
+    "node" template for Addition: missing "default" key for match
+# invalid_match6.json
+    "node" template for Addition: invalid "field" key kind for match: found JSON_ARRAY_TYPE; expected JSON_STRING_TYPE
+# invalid_match7.json
+    "node" template for Addition: invalid "matchers" key kind for match: JSON_ARRAY_TYPE expected, but JSON_OBJECT_TYPE found
+# invalid_match8.json
     "node" template for Addition: invalid string template document kind: invalid
-# invalid_ifkind9.json
+# invalid_match9.json
     invalid field for Addition: f_invalid
-# invalid_ifkind10.json
-    "sep" template for FooNodeList: "ifKind" is valid in node templates and field templates only
-# invalid_ifkind11.json
-    template for VarDecl.f_name: invalid "field" key for ifKind
+# invalid_match10.json
+    "sep" template for FooNodeList: "match" is valid in node templates and field templates only
+# invalid_match11.json
+    template for VarDecl.f_name: invalid "field" key for match
 # invalid_indent.json
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json
@@ -1444,7 +1444,7 @@ Done.
   ]
 }
 
-== cmd_ifkind.json ==
+== cmd_match.json ==
 
 {
   "id": 1,
@@ -1511,7 +1511,7 @@ Done.
   ]
 }
 
-== cmd_ifkind.json ==
+== cmd_match.json ==
 
 {
   "id": 1,
@@ -1578,7 +1578,7 @@ Done.
   ]
 }
 
-== cmd_ifkind2.json ==
+== cmd_match2.json ==
 
 {
   "id": 1,
@@ -1665,7 +1665,7 @@ Done.
   ]
 }
 
-== cmd_ifkind3.json ==
+== cmd_match3.json ==
 
 {
   "id": 1,
@@ -1704,7 +1704,7 @@ Done.
   ]
 }
 
-== cmd_ifkind4.json ==
+== cmd_match4.json ==
 
 {
   "id": 1,
@@ -1766,7 +1766,7 @@ Done.
   ]
 }
 
-== cmd_ifkind5.json ==
+== cmd_match5.json ==
 
 {
   "id": 1,
@@ -1805,7 +1805,7 @@ Done.
   ]
 }
 
-== cmd_ifkind6.json ==
+== cmd_match6.json ==
 
 {
   "id": 1,
@@ -1847,7 +1847,7 @@ Done.
   ]
 }
 
-== cmd_ifkind7.json ==
+== cmd_match7.json ==
 
 {
   "id": 1,
@@ -1861,7 +1861,7 @@ Done.
   ]
 }
 
-== cmd_ifkind8.json ==
+== cmd_match8.json ==
 
 {
   "id": 1,

@@ -5,7 +5,7 @@
         "kind": "group",
         "document": [
           {
-            "kind": "ifKind",
+            "kind": "match",
             "field": "f_name",
             "matchers": [
               {
