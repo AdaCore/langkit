@@ -255,6 +255,11 @@ generic[T]
 struct Set implements Sized, Iterable[T] {
 }
 
+@builtin
+generic[T]
+struct Stream implements Indexable[T], Iterable[T] {
+}
+
 |" Base class for iterator types.
 @builtin
 generic[T]

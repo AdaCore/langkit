@@ -1,0 +1,17 @@
+fun zeros() : Stream[Int] = 0 :: zeros()
+fun xs() : Stream[String] = "x" :: xs()
+
+val s1 : Stream[Int] = 1 :: 2 :: 3 :: zeros()
+val s2 : Stream[String] = "foo" :: "bar" :: xs()
+
+val i1 : Int = s1[0]
+val i2 : String = s2[0]
+
+val propagation1 = 1 :: null
+val propagation2 = null :: s1
+val propagation3 = s2 ::: null
+val propagation4 = null ::: s2
+
+val invalid1 : Stream[Int] = "" :: s1
+val invalid2 = s1 ::: s2
+val invalid3 = 1 ::: 2

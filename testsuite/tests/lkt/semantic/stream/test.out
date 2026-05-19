@@ -1,0 +1,267 @@
+Resolving test.lkt
+==================
+Decl <FunDecl "zeros" test.lkt:1:1-1:41>
+     has_type <FunctionType "() -> Stream[Int]" test.lkt>
+
+   Id   <RefId "Stream" test.lkt:1:15-1:21>
+        has_type None
+        references <StructDecl prelude: "Stream[T]">
+
+   Id   <RefId "Int" test.lkt:1:22-1:25>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:1:29-1:41>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NumLit test.lkt:1:29-1:30>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <CallExpr test.lkt:1:34-1:41>
+           has_type <StructDecl prelude: "Stream[Int]">
+
+         Id   <RefId "zeros" test.lkt:1:34-1:39>
+              has_type <FunctionType "() -> Stream[Int]" test.lkt>
+              references <FunDecl "zeros" test.lkt:1:1-1:41>
+
+Decl <FunDecl "xs" test.lkt:2:1-2:40>
+     has_type <FunctionType "() -> Stream[String]" test.lkt>
+
+   Id   <RefId "Stream" test.lkt:2:12-2:18>
+        has_type None
+        references <StructDecl prelude: "Stream[T]">
+
+   Id   <RefId "String" test.lkt:2:19-2:25>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:2:29-2:40>
+        has_type <StructDecl prelude: "Stream[String]">
+
+      Expr <SingleLineStringLit test.lkt:2:29-2:32>
+           has_type <StructDecl prelude: "String">
+
+      Expr <CallExpr test.lkt:2:36-2:40>
+           has_type <StructDecl prelude: "Stream[String]">
+
+         Id   <RefId "xs" test.lkt:2:36-2:38>
+              has_type <FunctionType "() -> Stream[String]" test.lkt>
+              references <FunDecl "xs" test.lkt:2:1-2:40>
+
+Decl <ValDecl "s1" test.lkt:4:1-4:46>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Id   <RefId "Stream" test.lkt:4:10-4:16>
+        has_type None
+        references <StructDecl prelude: "Stream[T]">
+
+   Id   <RefId "Int" test.lkt:4:17-4:20>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:4:24-4:46>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NumLit test.lkt:4:24-4:25>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <BinOp test.lkt:4:29-4:46>
+           has_type <StructDecl prelude: "Stream[Int]">
+
+         Expr <NumLit test.lkt:4:29-4:30>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <BinOp test.lkt:4:34-4:46>
+              has_type <StructDecl prelude: "Stream[Int]">
+
+            Expr <NumLit test.lkt:4:34-4:35>
+                 has_type <StructDecl prelude: "Int">
+
+            Expr <CallExpr test.lkt:4:39-4:46>
+                 has_type <StructDecl prelude: "Stream[Int]">
+
+               Id   <RefId "zeros" test.lkt:4:39-4:44>
+                    has_type <FunctionType "() -> Stream[Int]" test.lkt>
+                    references <FunDecl "zeros" test.lkt:1:1-1:41>
+
+Decl <ValDecl "s2" test.lkt:5:1-5:49>
+     has_type <StructDecl prelude: "Stream[String]">
+
+   Id   <RefId "Stream" test.lkt:5:10-5:16>
+        has_type None
+        references <StructDecl prelude: "Stream[T]">
+
+   Id   <RefId "String" test.lkt:5:17-5:23>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:5:27-5:49>
+        has_type <StructDecl prelude: "Stream[String]">
+
+      Expr <SingleLineStringLit test.lkt:5:27-5:32>
+           has_type <StructDecl prelude: "String">
+
+      Expr <BinOp test.lkt:5:36-5:49>
+           has_type <StructDecl prelude: "Stream[String]">
+
+         Expr <SingleLineStringLit test.lkt:5:36-5:41>
+              has_type <StructDecl prelude: "String">
+
+         Expr <CallExpr test.lkt:5:45-5:49>
+              has_type <StructDecl prelude: "Stream[String]">
+
+            Id   <RefId "xs" test.lkt:5:45-5:47>
+                 has_type <FunctionType "() -> Stream[String]" test.lkt>
+                 references <FunDecl "xs" test.lkt:2:1-2:40>
+
+Decl <ValDecl "i1" test.lkt:7:1-7:21>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:7:10-7:13>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <SubscriptExpr test.lkt:7:16-7:21>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "s1" test.lkt:7:16-7:18>
+           has_type <StructDecl prelude: "Stream[Int]">
+           references <ValDecl "s1" test.lkt:4:1-4:46>
+
+      Expr <NumLit test.lkt:7:19-7:20>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "i2" test.lkt:8:1-8:24>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:8:10-8:16>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <SubscriptExpr test.lkt:8:19-8:24>
+        has_type <StructDecl prelude: "String">
+
+      Id   <RefId "s2" test.lkt:8:19-8:21>
+           has_type <StructDecl prelude: "Stream[String]">
+           references <ValDecl "s2" test.lkt:5:1-5:49>
+
+      Expr <NumLit test.lkt:8:22-8:23>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "propagation1" test.lkt:10:1-10:29>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Expr <BinOp test.lkt:10:20-10:29>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NumLit test.lkt:10:20-10:21>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NullLit test.lkt:10:25-10:29>
+           has_type <StructDecl prelude: "Stream[Int]">
+
+Decl <ValDecl "propagation2" test.lkt:11:1-11:30>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Expr <BinOp test.lkt:11:20-11:30>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NullLit test.lkt:11:20-11:24>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "s1" test.lkt:11:28-11:30>
+           has_type <StructDecl prelude: "Stream[Int]">
+           references <ValDecl "s1" test.lkt:4:1-4:46>
+
+Decl <ValDecl "propagation3" test.lkt:12:1-12:31>
+     has_type <StructDecl prelude: "Stream[String]">
+
+   Expr <BinOp test.lkt:12:20-12:31>
+        has_type <StructDecl prelude: "Stream[String]">
+
+      Id   <RefId "s2" test.lkt:12:20-12:22>
+           has_type <StructDecl prelude: "Stream[String]">
+           references <ValDecl "s2" test.lkt:5:1-5:49>
+
+      Expr <NullLit test.lkt:12:27-12:31>
+           has_type <StructDecl prelude: "Stream[String]">
+
+Decl <ValDecl "propagation4" test.lkt:13:1-13:31>
+     has_type <StructDecl prelude: "Stream[String]">
+
+   Expr <BinOp test.lkt:13:20-13:31>
+        has_type <StructDecl prelude: "Stream[String]">
+
+      Expr <NullLit test.lkt:13:20-13:24>
+           has_type <StructDecl prelude: "Stream[String]">
+
+      Id   <RefId "s2" test.lkt:13:29-13:31>
+           has_type <StructDecl prelude: "Stream[String]">
+           references <ValDecl "s2" test.lkt:5:1-5:49>
+
+<ValDecl "invalid1" test.lkt:15:1-15:38> failed nameres:
+test.lkt:15:30-15:32: error: String is not a subtype of Int
+ 15 | val invalid1 : Stream[Int] = "" :: s1
+    |                              ^^ 
+
+Decl <ValDecl "invalid1" test.lkt:15:1-15:38>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Id   <RefId "Stream" test.lkt:15:16-15:22>
+        has_type None
+        references <StructDecl prelude: "Stream[T]">
+
+   Id   <RefId "Int" test.lkt:15:23-15:26>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:15:30-15:38>
+        has_type None
+
+      Expr <SingleLineStringLit test.lkt:15:30-15:32>
+           has_type None
+
+      Id   <RefId "s1" test.lkt:15:36-15:38>
+           has_type None
+           references None
+
+<ValDecl "invalid2" test.lkt:16:1-16:25> failed nameres:
+test.lkt:16:23-16:25: error: expected Stream[Int], got Stream[String]
+ 16 | val invalid2 = s1 ::: s2
+    |                       ^^ 
+
+Decl <ValDecl "invalid2" test.lkt:16:1-16:25>
+     has_type None
+
+   Expr <BinOp test.lkt:16:16-16:25>
+        has_type None
+
+      Id   <RefId "s1" test.lkt:16:16-16:18>
+           has_type None
+           references None
+
+      Id   <RefId "s2" test.lkt:16:23-16:25>
+           has_type None
+           references None
+
+<ValDecl "invalid3" test.lkt:17:1-17:23> failed nameres:
+test.lkt:17:16-17:17: error: expression must be a stream, got Int
+ 17 | val invalid3 = 1 ::: 2
+    |                ^ 
+
+test.lkt:17:22-17:23: error: expression must be a stream, got Int
+ 17 | val invalid3 = 1 ::: 2
+    |                      ^ 
+
+Decl <ValDecl "invalid3" test.lkt:17:1-17:23>
+     has_type None
+
+   Expr <BinOp test.lkt:17:16-17:23>
+        has_type None
+
+      Expr <NumLit test.lkt:17:16-17:17>
+           has_type None
+
+      Expr <NumLit test.lkt:17:22-17:23>
+           has_type None
+
