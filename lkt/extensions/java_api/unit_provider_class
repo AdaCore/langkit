@@ -1,0 +1,66 @@
+## vim: ft=makojava
+
+<%
+    nat = c_api.get_name
+    language_mode_type = java_api.wrapping_type(T.LanguageMode)
+%>
+
+        ${java_doc("liblktlang.create_default_provider", 8)}
+        public static UnitProvider createDefault(${language_mode_type} mode) {
+            ${java_api.ni_unwrap(
+                T.LanguageMode,
+                "mode",
+                "nativeMode",
+                [],
+            )}
+            if (ImageInfo.inImageCode()) {
+                UnitProviderNative resNative =
+                    NI_LIB.${nat("create_default_provider")}(
+                        nativeMode
+                    );
+                checkException();
+                return UnitProvider.wrap(resNative);
+            } else {
+                return JNI_LIB.${nat("create_default_provider")}(nativeMode);
+            }
+        }
+
+        ${java_doc("liblktlang.create_default_provider_from_directories", 8)}
+        public static UnitProvider createFromDirectories(
+            ${language_mode_type} mode,
+            String[] directories
+        ) {
+            ${java_api.ni_unwrap(
+                T.LanguageMode,
+                "mode",
+                "nativeMode",
+                [],
+            )}
+            if (ImageInfo.inImageCode()) {
+                try (
+                    CCharPointerPointerHolder directoriesNative =
+                        directories == null ?
+                        null :
+                        CTypeConversion.toCStrings(directories);
+                ) {
+                    UnitProviderNative resNative =
+                        NI_LIB.${nat(
+                            "create_default_provider_from_directories"
+                        )}(
+                            nativeMode,
+                            (directories == null ?
+                                WordFactory.nullPointer() :
+                                directoriesNative.get()),
+                            (directories == null ? 0 : directories.length)
+                        );
+                    checkException();
+                    return UnitProvider.wrap(resNative);
+                }
+            } else {
+                return
+                JNI_LIB.${nat("create_default_provider_from_directories")}(
+                    nativeMode,
+                    directories
+                );
+            }
+        }

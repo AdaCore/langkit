@@ -1,0 +1,60 @@
+## vim: ft=makocpp
+
+<%
+    api = java_api
+    nat = c_api.get_name
+%>
+
+${api.jni_func_sig("create_default_provider", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jint language_mode
+) {
+    ${unit_provider_type} c_res = ${nat("create_default_provider")}(
+        (int) language_mode
+    );
+    check_exception(env);
+    return UnitProvider_wrap(env, c_res);
+}
+
+${api.jni_func_sig("create_default_provider_from_directories", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jint language_mode,
+    jobjectArray directories
+) {
+    // Create the native directories array
+    jsize dir_count = 0;
+    const char **c_directories = NULL;
+    if (directories != NULL) {
+        dir_count = (*env)->GetArrayLength (env, directories);
+        c_directories = (const char **) calloc (dir_count, sizeof (char *));
+    }
+
+    // Fill the native directories array
+    for (int i = 0; i < dir_count; ++i) {
+        jstring dir =
+            (jstring) (*env)->GetObjectArrayElement (env, directories, i);
+        c_directories[i] = (*env)->GetStringUTFChars (env, dir, NULL);
+    }
+
+    // Call the native function
+    ${unit_provider_type} c_res =
+        ${nat("create_default_provider_from_directories")}(
+            (int) language_mode,
+            (char **) c_directories,
+            (int) dir_count
+        );
+
+    // Release directories array
+    for (int i = 0; i < dir_count; ++i) {
+        jstring dir =
+            (jstring) (*env)->GetObjectArrayElement (env, directories, i);
+        (*env)->ReleaseStringUTFChars (env, dir, c_directories[i]);
+    }
+    free (c_directories);
+
+    // Check exception and return the wrapped result
+    check_exception(env);
+    return UnitProvider_wrap(env, c_res);
+}
