@@ -25,7 +25,11 @@ class Pattern {
 }
 
 class ComplexPattern {
-    val f_pattern = group(recurse_flatten(OrPattern))
+    val f_pattern = group(
+        if this_field is OrPattern
+        then recurse_flatten
+        else recurse
+    )
     val f_details =
         if this_field.is_empty
         then recurse
@@ -43,8 +47,18 @@ class NullPattern {
 
 class OrPattern {
     val node = group(recurse)
-    val f_left_sub_pattern = [recurse_flatten(OrPattern), line]
-    val f_right_sub_pattern = [whitespace, recurse_flatten(OrPattern)]
+    val f_left_sub_pattern = [
+        if this_field is OrPattern
+        then recurse_flatten
+        else recurse,
+        line
+    ]
+    val f_right_sub_pattern = [
+        whitespace,
+        if this_field is OrPattern
+        then recurse_flatten
+        else recurse
+    ]
 }
 
 class ParenPattern {
@@ -83,7 +97,11 @@ class DestructuringPatternDetail {
 
 class BaseCallExpr {
     val node = group(recurse)
-    val f_name = group(recurse_flatten(DotExpr, KeepExpr, CastExpr, CallExpr))
+    val f_name = group(
+        if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+        then recurse_flatten
+        else recurse
+    )
     val f_args =
       if this_field.is_empty
       then recurse
@@ -133,8 +151,12 @@ class CallExprList {
 
 class CastExpr {
     val node = group(recurse)
-    val f_expr =
-        [recurse_flatten(DotExpr, KeepExpr, CastExpr, CallExpr), softline]
+    val f_expr = [
+        if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+        then recurse_flatten
+        else recurse,
+        softline
+    ]
 }
 
 class CharLit {
@@ -182,8 +204,12 @@ class DefaultListTypeRef {
 
 class DotExpr {
     val node = group(recurse)
-    val f_prefix =
-        [recurse_flatten(DotExpr, KeepExpr, CastExpr, CallExpr), softline]
+    val f_prefix = [
+        if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+        then recurse_flatten
+        else recurse,
+        softline
+    ]
 }
 
 class DynVarDecl {
@@ -590,8 +616,12 @@ class Isa {
 }
 
 class KeepExpr {
-    val f_expr =
-        [recurse_flatten(DotExpr, KeepExpr, CastExpr, CallExpr), softline]
+    val f_expr = [
+        if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+        then recurse_flatten
+        else recurse,
+        softline
+    ]
 }
 
 class LambdaParamDecl {

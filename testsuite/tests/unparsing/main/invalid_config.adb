@@ -149,10 +149,12 @@ begin
    Check ("invalid_recurse_field8.json");
    Check ("invalid_recurse_field9.json");
    Check ("invalid_recurse_field10.json");
-   Check ("invalid_recurse_field11.json");
-   Check ("invalid_recurse_flatten.json");
-   Check ("invalid_recurse_flatten2.json");
-   Check ("invalid_recurse_flatten3.json");
+   Check ("invalid_is_a.json");
+   Check ("invalid_is_a2.json");
+   Check ("invalid_is_a3.json");
+   Check ("invalid_is_a4.json");
+   Check ("invalid_is_a5.json");
+   Check ("invalid_is_a6.json");
    Check ("invalid_table_join.json");
    Check ("invalid_table_join2.json");
    Check ("invalid_table_join3.json");

@@ -374,10 +374,6 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Document to substitute to "recurse*" nodes when instantiating a
       --  template.
 
-      Node : Lk_Node;
-      --  Node from which ``Document`` was generated. Keeping track of this is
-      --  necessary in order to implement instantiation for "recurse_flatten".
-
       Next_Token : Lk_Token;
       --  Token that follows ``Node``, i.e. the token to assign to
       --  ``Current_Token`` after this template argument has been processed.
@@ -1673,47 +1669,37 @@ package body Langkit_Support.Generic_API.Unparsing is
                Next_Token => State.Current_Token);
 
          when Recurse_Flatten =>
-            declare
-               Arg : constant Single_Template_Instantiation_Argument :=
-                 State.Arguments.With_Recurse_Doc;
-            begin
-               return Result : Document_Type :=
-                  Use_Template_Argument
-                    (Pool       => Pool,
-                     Argument   => State.Arguments.With_Recurse_Doc,
-                     Next_Token => State.Current_Token)
-               do
-                  --  As long as Result is a document we can flatten and that
-                  --  was created by a node that passes the flattening guard,
-                  --  unwrap it.
+            return Result : Document_Type :=
+               Use_Template_Argument
+                 (Pool       => Pool,
+                  Argument   => State.Arguments.With_Recurse_Doc,
+                  Next_Token => State.Current_Token)
+            do
+               --  As long as Result is a document we can flatten, unwrap it
 
-                  while not Arg.Node.Is_Null
-                        and then Node_Matches
-                                   (Arg.Node, Template.Recurse_Flatten_Types)
-                  loop
-                     case Result.Kind is
-                        when Align =>
-                           Result := Result.Align_Contents;
+               loop
+                  case Result.Kind is
+                     when Align =>
+                        Result := Result.Align_Contents;
 
-                        when Fill =>
-                           Result := Result.Fill_Document;
+                     when Fill =>
+                        Result := Result.Fill_Document;
 
-                        when Group =>
-                           Result := Result.Group_Document;
+                     when Group =>
+                        Result := Result.Group_Document;
 
-                        when Indent =>
-                           Result := Result.Indent_Document;
+                     when Indent =>
+                        Result := Result.Indent_Document;
 
-                        when List =>
-                           exit when Result.List_Documents.Length /= 1;
-                           Result := Result.List_Documents.First_Element;
+                     when List =>
+                        exit when Result.List_Documents.Length /= 1;
+                        Result := Result.List_Documents.First_Element;
 
-                        when others =>
-                           exit;
-                     end case;
-                  end loop;
-               end return;
-            end;
+                     when others =>
+                        exit;
+                  end case;
+               end loop;
+            end return;
 
          when Recurse_Left =>
             return Use_Shared_Document (Pool, State.Arguments.Join_Left);
@@ -1825,6 +1811,17 @@ package body Langkit_Support.Generic_API.Unparsing is
       Expression : Document_Type) return Value_Ref is
    begin
       case Template_Expression_Kind (Expression.Kind) is
+         when Is_A =>
+            declare
+               Node : constant Lk_Node :=
+                 Evaluate_Expression (State, Expression.Is_A_Node).As_Node;
+               Result : constant Boolean :=
+                 not Node.Is_Null
+                 and then Node_Matches (Node, Expression.Is_A_Kinds);
+            begin
+               return From_Bool (State.Language, Result);
+            end;
+
          when Is_Empty =>
             declare
                Node : constant Lk_Node :=
@@ -2209,7 +2206,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                            Args.With_Recurse_Doc :=
                              (Document   => Create_Shared_Document
                                               (Pool.Create_List (Sep_Items)),
-                              Node       => N,
                               Next_Token => Next_Token);
                            Token := Instantiate_Template
                              (Pool          => Pool,
@@ -2470,7 +2466,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                      With_Recurse_Doc =>
                        (Document   => Create_Shared_Document
                                         (Pool.Create_List (Items)),
-                        Node       => N,
                         Next_Token => Current_Token)));
 
             when With_Recurse_Field =>
@@ -2540,7 +2535,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                         Arguments.Field_Docs.Append
                           (Single_Template_Instantiation_Argument'
                              (Document   => Create_Shared_Document (Child_Doc),
-                              Node       => Child,
                               Next_Token => Field_Token));
 
                         if Current_Token_Trace.Is_Active then
@@ -2685,7 +2679,6 @@ package body Langkit_Support.Generic_API.Unparsing is
          begin
             Field_Template_Args.With_Recurse_Doc :=
               (Document   => Create_Shared_Document (Field_Doc),
-               Node       => Child,
                Next_Token => Next_Token);
          end;
 

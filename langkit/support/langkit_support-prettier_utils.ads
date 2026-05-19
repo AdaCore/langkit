@@ -200,6 +200,7 @@ private package Langkit_Support.Prettier_Utils is
 
       --  Expressions
 
+      Is_A,
       Is_Empty,
       This_Field
    );
@@ -210,7 +211,7 @@ private package Langkit_Support.Prettier_Utils is
    --  instantiation.
 
    subtype Template_Expression_Kind is
-     Document_Kind range Is_Empty .. This_Field;
+     Document_Kind range Is_A .. This_Field;
    --  Kind for a document that materializes an expression for conditions in
    --  template instantiation.
 
@@ -336,7 +337,7 @@ private package Langkit_Support.Prettier_Utils is
             --  related to fields: more simple and probably more efficient.
 
          when Recurse_Flatten =>
-            Recurse_Flatten_Types : Type_Vectors.Vector;
+            null;
 
          when Recurse_Left | Recurse_Right =>
             null;
@@ -371,6 +372,10 @@ private package Langkit_Support.Prettier_Utils is
             Match_Matchers : Matcher_Vectors.Vector;
             Match_Default  : Document_Type;
             Match_Absent   : Document_Type;
+
+         when Is_A =>
+            Is_A_Node  : Document_Type;
+            Is_A_Kinds : Type_Vectors.Vector;
 
          when Is_Empty =>
             Is_Empty_Node : Document_Type;
@@ -543,8 +548,7 @@ private package Langkit_Support.Prettier_Utils is
    --  Return a ``Recurse_Field`` node
 
    function Create_Recurse_Flatten
-     (Self  : in out Document_Pool;
-      Types : in out Type_Vectors.Vector) return Document_Type;
+     (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Recurse_Flatten`` node
 
    function Create_Recurse_Left
@@ -612,6 +616,12 @@ private package Langkit_Support.Prettier_Utils is
       Match_Default  : Document_Type;
       Match_Absent   : Document_Type) return Document_Type;
    --  Return an ``Match`` node
+
+   function Create_Is_A
+     (Self  : in out Document_Pool;
+      Node  : Document_Type;
+      Kinds : in out Type_Vectors.Vector) return Document_Type;
+   --  Return an ``Is_A`` node
 
    function Create_Is_Empty
      (Self : in out Document_Pool;

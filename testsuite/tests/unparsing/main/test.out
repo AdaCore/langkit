@@ -169,7 +169,7 @@ def f2(a: Int, ): Int
 # invalid_isempty2.json
     template for VarDecl.f_name: expression expected, got a template
 # invalid_isempty3.json
-    template for VarDecl.f_name: is_empty requires a node, got a Bool
+    template for VarDecl.f_name: is_empty expects a node, got a Bool
 # invalid_match.json
     "node" template for Addition: match matcher "Number" has an inconsistent recurse structure
 # invalid_match2.json
@@ -242,23 +242,18 @@ def f2(a: Int, ): Int
     * token "="
     * field f_value
     * token ";"
-# invalid_recurse_field11.json
-    "node" template for VarDecl: unexpected extra template item: token "def"
-    Expected:
-    * field f_is_null
-    * token "var"
-    * field f_name
-    * token ":"
-    * field f_type_expr
-    * token "="
-    * field f_value
-    * token ";"
-# invalid_recurse_flatten.json
-    template for VarDecl.f_name: invalid "if" for recurse_flatten: JSON_ARRAY_TYPE expected, but JSON_NULL_TYPE found
-# invalid_recurse_flatten2.json
-    template for VarDecl.f_name: invalid item in recurse_flatten "if": JSON_STRING_TYPE expected, but JSON_NULL_TYPE found
-# invalid_recurse_flatten3.json
-    template for VarDecl.f_name: invalid node type in recurse_flatten if: NoSuchNode
+# invalid_is_a.json
+    template for VarDecl.f_name: missing "node" key for is_a
+# invalid_is_a2.json
+    template for VarDecl.f_name: is_a expects a node, got a Bool
+# invalid_is_a3.json
+    template for VarDecl.f_name: missing "kinds" key for is_a
+# invalid_is_a4.json
+    template for VarDecl.f_name: invalid "kinds" for is_a: JSON_ARRAY_TYPE expected, but JSON_STRING_TYPE found
+# invalid_is_a5.json
+    template for VarDecl.f_name: invalid item in kinds of is_a: JSON_STRING_TYPE expected, but JSON_NULL_TYPE found
+# invalid_is_a6.json
+    template for VarDecl.f_name: invalid node type in kinds of is_a: NoSuchNode
 # invalid_table_join.json
     FooNode has no p_no_such_predicate member
 # invalid_table_join2.json

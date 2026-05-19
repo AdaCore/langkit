@@ -249,14 +249,7 @@
 --  * The "recurse_flatten" template acts like "recurse" but refines its result
 --    so that the document nested in "align", "fill", "group", "indent"
 --    templates and in 1-item document lists is returned instead
---    (recursively)::
---
---      {"kind": "recurse_flatten", "if": ["Node1" ,"Node2", ...]}
---
---    The "if" entry is optional. If provided, it must contain a list of node
---    type names; in this case the flattening is applied only for templates
---    that were instantiated for nodes that match at least one of the node
---    types.
+--    (recursively).
 --
 --  * The "tableSeparator" template yields the corresponding Prettier
 --    document::
@@ -296,7 +289,12 @@
 --
 --  An expression can be one of the following:
 --
---  * The "is_empty" expression return whether its operand is considered as
+--  * The "is_a" expression returns whether its operand matches the given node
+--    kinds::
+--
+--      {"kind": "is_a", "node": <sub-expression>, "kinds": ["Node1", "Node2"]}
+--
+--  * The "is_empty" expression returns whether its operand is considered as
 --    empty for unparsing purposes::
 --
 --      {"kind": "is_empty", "node": <sub-expression>}

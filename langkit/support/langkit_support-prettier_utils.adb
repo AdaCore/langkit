@@ -1383,14 +1383,11 @@ package body Langkit_Support.Prettier_Utils is
    ----------------------------
 
    function Create_Recurse_Flatten
-     (Self  : in out Document_Pool;
-      Types : in out Type_Vectors.Vector) return Document_Type
-   is
+     (Self  : in out Document_Pool) return Document_Type is
    begin
       return Result : constant Document_Type :=
-        new Document_Record (Recurse_Flatten)
+        new Document_Record'(Kind => Recurse_Flatten)
       do
-         Result.Recurse_Flatten_Types.Move (Types);
          Self.Register (Result);
       end return;
    end Create_Recurse_Flatten;
@@ -1611,6 +1608,27 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_Match;
+
+   -----------------
+   -- Create_Is_A --
+   -----------------
+
+   function Create_Is_A
+     (Self  : in out Document_Pool;
+      Node  : Document_Type;
+      Kinds : in out Type_Vectors.Vector) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind       => Is_A,
+           Is_A_Node  => Node,
+           Is_A_Kinds => Type_Vectors.Empty_Vector)
+      do
+         Result.Is_A_Kinds.Move (Kinds);
+         Self.Register (Result);
+      end return;
+   end Create_Is_A;
 
    ---------------------
    -- Create_Is_Empty --
@@ -2120,14 +2138,6 @@ package body Langkit_Support.Prettier_Utils is
 
             when Recurse_Flatten =>
                Write (Prefix & "recurse_flatten:");
-               for I in 1 .. Document.Recurse_Flatten_Types.Last_Index loop
-                  declare
-                     T : constant Type_Ref :=
-                       Document.Recurse_Flatten_Types.Element (I);
-                  begin
-                     Write (Prefix & Simple_Indent & Debug_Name (T));
-                  end;
-               end loop;
 
             when Recurse_Left =>
                Write (Prefix & "recurse_left");
@@ -2223,6 +2233,17 @@ package body Langkit_Support.Prettier_Utils is
                         Matcher_Document_Indent);
                   end loop;
                end;
+
+            when Is_A =>
+               Write (Prefix & "is_a:");
+               for I in 1 .. Document.Is_A_Kinds.Last_Index loop
+                  declare
+                     T : constant Type_Ref := Document.Is_A_Kinds.Element (I);
+                  begin
+                     Write (Prefix & Simple_Indent & Debug_Name (T));
+                  end;
+               end loop;
+               Process (Document.Is_A_Node, Prefix & List_Indent);
 
             when Is_Empty =>
                Write (Prefix & "is_empty:");

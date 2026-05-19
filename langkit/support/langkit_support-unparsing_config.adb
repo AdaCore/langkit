@@ -717,6 +717,15 @@ package body Langkit_Support.Unparsing_Config is
       --  returned node materializes an expression (i.e. not a document
       --  template), and that determines its type.
 
+      function Parse_Node_Expression
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context;
+         What    : String) return Document_Type;
+      --  Wrapper around ``Parse_Expression`` that ensures that the expressions
+      --  computes a node.
+      --
+      --  ``What`` is used to described what is checked in the error message.
+
       procedure Process_Recurse (Context : in out Template_Parsing_Context);
       --  Record in ``Context.State``` that a "recurse" or "recurse_flatten"
       --  template item has been found. This raises an error if one has already
@@ -1491,6 +1500,9 @@ package body Langkit_Support.Unparsing_Config is
                elsif Value = "recurse" then
                   Process_Recurse (Context);
                   return Pool.Create_Recurse;
+               elsif Value = "recurse_flatten" then
+                  Process_Recurse (Context);
+                  return Pool.Create_Recurse_Flatten;
                elsif Value = "recurse_left" then
                   declare
                      Item : Linear_Template_Item := (Kind => Recurse_Left);
@@ -1959,44 +1971,6 @@ package body Langkit_Support.Unparsing_Config is
                               (Item.Field_Ref, Item.Field_Position);
                   end;
 
-               elsif Kind = "recurse_flatten" then
-                  declare
-                     T     : Type_Ref;
-                     Types : Type_Vectors.Vector;
-                  begin
-                     --  Use the given type guard for the flattening, or use
-                     --  the root node to flatten for all nodes.
-
-                     if JSON.Has_Field ("if") then
-                        Tmp := JSON.Get ("if");
-                        Check_Kind
-                          (Tmp,
-                           JSON_Array_Type,
-                           Context,
-                           """if"" for recurse_flatten");
-                        for Name of JSON_Array'(Tmp.Get) loop
-                           Check_Kind
-                             (Name,
-                              JSON_String_Type,
-                              Context,
-                              "item in recurse_flatten ""if""");
-                           T := Map.Lookup_Type (To_Symbol (Name.Get));
-                           if T = No_Type_Ref or else not Is_Node_Type (T) then
-                              Abort_Parsing
-                                (Context,
-                                 "invalid node type in recurse_flatten if: "
-                                 & Name.Get);
-                           end if;
-
-                           Types.Append (T);
-                        end loop;
-                     else
-                        Types.Append (Root_Node_Type (Language));
-                     end if;
-                     Process_Recurse (Context);
-                     return Pool.Create_Recurse_Flatten (Types);
-                  end;
-
                elsif Kind in "tableSeparator" | "text" then
                   Tmp := Mandatory_Key (JSON, "text", Context, "for " & Kind);
                   Check_Kind (Tmp, JSON_String_Type, Context, "text field");
@@ -2047,21 +2021,44 @@ package body Langkit_Support.Unparsing_Config is
                     (Tmp, JSON_Int_Type, Context, """length"" for whitespace");
                   return Pool.Create_Whitespace (Tmp.Get);
 
+               elsif Kind = "is_a" then
+                  Tmp := Mandatory_Key (JSON, "node", Context, "for is_a");
+                  declare
+                     Node  : constant Document_Type :=
+                       Parse_Node_Expression (Tmp, Context, "is_a");
+                     T     : Type_Ref;
+                     Types : Type_Vectors.Vector;
+                  begin
+                     Tmp := Mandatory_Key (JSON, "kinds", Context, "for is_a");
+                     Check_Kind
+                       (Tmp,
+                        JSON_Array_Type,
+                        Context,
+                        """kinds"" for is_a");
+                     for Name of JSON_Array'(Tmp.Get) loop
+                        Check_Kind
+                          (Name,
+                           JSON_String_Type,
+                           Context,
+                           "item in kinds of is_a");
+                        T := Map.Lookup_Type (To_Symbol (Name.Get));
+                        if T = No_Type_Ref or else not Is_Node_Type (T) then
+                           Abort_Parsing
+                             (Context,
+                              "invalid node type in kinds of is_a: "
+                              & Name.Get);
+                        end if;
+
+                        Types.Append (T);
+                     end loop;
+
+                     return Pool.Create_Is_A (Node, Types);
+                  end;
+
                elsif Kind = "is_empty" then
                   Tmp := Mandatory_Key (JSON, "node", Context, "for is_empty");
-                  declare
-                     T    : Type_Ref;
-                     Expr : constant Document_Type :=
-                        Parse_Expression (Tmp, Context, T);
-                  begin
-                     if not Is_Node_Type (T) then
-                        Abort_Parsing
-                          (Context,
-                           "is_empty requires a node, got a "
-                           & Debug_Name (T));
-                     end if;
-                     return Pool.Create_Is_Empty (Expr);
-                  end;
+                  return Pool.Create_Is_Empty
+                           (Parse_Node_Expression (Tmp, Context, "is_empty"));
 
                else
                   Abort_Parsing
@@ -2113,7 +2110,7 @@ package body Langkit_Support.Unparsing_Config is
             end if;
 
             case Template_Expression_Kind (Result.Kind) is
-               when Is_Empty =>
+               when Is_A | Is_Empty =>
                   Expr_Type := Boolean_Type;
 
                when This_Field =>
@@ -2121,6 +2118,27 @@ package body Langkit_Support.Unparsing_Config is
             end case;
          end return;
       end Parse_Expression;
+
+      ---------------------------
+      -- Parse_Node_Expression --
+      ---------------------------
+
+      function Parse_Node_Expression
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context;
+         What    : String) return Document_Type
+      is
+         T : Type_Ref;
+      begin
+         return Result : constant Document_Type :=
+            Parse_Expression (JSON, Context, T)
+         do
+            if not Is_Node_Type (T) then
+               Abort_Parsing
+                 (Context, What & " expects a node, got a " & Debug_Name (T));
+            end if;
+         end return;
+      end Parse_Node_Expression;
 
       ---------------------
       -- Process_Recurse --
