@@ -195,27 +195,46 @@ private package Langkit_Support.Prettier_Utils is
 
       --  Conditionals
 
-      If_Empty,
-      If_Kind
+      If_Then_Else,
+      If_Kind,
+
+      --  Expressions
+
+      Is_Empty,
+      This_Field
    );
 
    subtype Template_Conditional_Kind is
-     Document_Kind range If_Empty .. If_Kind;
+     Document_Kind range If_Then_Else .. If_Kind;
    --  Kind for a document that materializes conditionals for template
    --  instantiation.
+
+   subtype Template_Expression_Kind is
+     Document_Kind range Is_Empty .. This_Field;
+   --  Kind for a document that materializes an expression for conditions in
+   --  template instantiation.
+
+   subtype Template_Non_Expression_Kind is Document_Kind
+   with Static_Predicate =>
+     Template_Non_Expression_Kind not in Template_Expression_Kind;
+   --  Any node that is not an expression, i.e. a document that will in the end
+   --  be expanded and turned into a Prettier document. This is anything but an
+   --  expression.
 
    subtype Template_Document_Kind is Document_Kind
    with Static_Predicate =>
      Template_Document_Kind not in
        Expected_Line_Breaks
      | Expected_Whitespaces
-     | Table;
+     | Table
+     | Template_Expression_Kind;
    --  Kind for a document template (i.e. before instantiation)
 
    subtype Instantiated_Template_Document_Kind is Document_Kind
    with Static_Predicate =>
      Instantiated_Template_Document_Kind not in
        Template_Conditional_Kind
+     | Template_Expression_Kind
      | Recurse
      | Recurse_Field
      | Recurse_Flatten
@@ -342,15 +361,22 @@ private package Langkit_Support.Prettier_Utils is
             Whitespace_Length       : Positive;
             Whitespace_Prettier_Doc : Prettier.Document_Type;
 
-         when If_Empty =>
-            If_Empty_Then : Document_Type;
-            If_Empty_Else : Document_Type;
+         when If_Then_Else =>
+            If_Condition : Document_Type;
+            If_Then      : Document_Type;
+            If_Else      : Document_Type;
 
          when If_Kind =>
             If_Kind_Field    : Struct_Member_Ref;
             If_Kind_Matchers : Matcher_Vectors.Vector;
             If_Kind_Default  : Document_Type;
             If_Kind_Absent   : Document_Type;
+
+         when Is_Empty =>
+            Is_Empty_Node : Document_Type;
+
+         when This_Field =>
+            null;
       end case;
    end record;
 
@@ -420,7 +446,9 @@ private package Langkit_Support.Prettier_Utils is
    --
    --  Note: as a light optimization, leaf nodes that are considered as
    --  constant (singletons and tokens) are not duplicated: they are returned
-   --  as-is instead.
+   --  as-is instead. Also, expressions (i.e. non-template nodes) are also
+   --  considered as constant: unlike templates, once created, we never need to
+   --  mutate expressions.
 
    function Create_Align
      (Self      : in out Document_Pool;
@@ -570,11 +598,12 @@ private package Langkit_Support.Prettier_Utils is
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
 
-   function Create_If_Empty
+   function Create_If
      (Self          : in out Document_Pool;
+      Condition     : Document_Type;
       Then_Contents : Document_Type;
       Else_Contents : Document_Type) return Document_Type;
-   --  Return an ``If_Empty`` node
+   --  Return an ``If_Then_Else`` node
 
    function Create_If_Kind
      (Self             : in out Document_Pool;
@@ -583,6 +612,15 @@ private package Langkit_Support.Prettier_Utils is
       If_Kind_Default  : Document_Type;
       If_Kind_Absent   : Document_Type) return Document_Type;
    --  Return an ``If_Kind`` node
+
+   function Create_Is_Empty
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type;
+   --  Return an ``Is_Empty`` node
+
+   function Create_This_Field
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``This_Field`` node
 
    procedure Bubble_Up_Trivias
      (Pool : in out Document_Pool; Document : in out Document_Type);

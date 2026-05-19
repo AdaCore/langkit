@@ -27,7 +27,9 @@ class Pattern {
 class ComplexPattern {
     val f_pattern = group(recurse_flatten(OrPattern))
     val f_details =
-        ifEmpty(recurse, group(indent(softline, recurse), softline))
+        if this_field.is_empty
+        then recurse
+        else group(indent(softline, recurse), softline)
 }
 
 class TypePattern {
@@ -82,7 +84,10 @@ class DestructuringPatternDetail {
 class BaseCallExpr {
     val node = group(recurse)
     val f_name = group(recurse_flatten(DotExpr, KeepExpr, CastExpr, CallExpr))
-    val f_args = ifEmpty(recurse, group(indent(softline, recurse), softline))
+    val f_args =
+      if this_field.is_empty
+      then recurse
+      else group(indent(softline, recurse), softline)
 }
 
 class BaseLexerCaseRuleAlt {
@@ -150,7 +155,9 @@ class ClassDecl {
     val f_syn_base_type = [":", whitespace, recurse]
     val f_traits = [whitespace, "implements", recurse]
     val f_decls =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class ClassQualifier {
@@ -236,8 +243,14 @@ class EnumClassDecl {
             "}"
         ]
     val f_syn_base_type = [":", whitespace, recurse]
-    val f_branches = ifEmpty([recurse], [hardline, recurse])
-    val f_decls = ifEmpty([recurse], [hardline, recurse])
+    val f_branches =
+        if this_field.is_empty
+        then [recurse]
+        else [hardline, recurse]
+    val f_decls =
+        if this_field.is_empty
+        then [recurse]
+        else [hardline, recurse]
 }
 
 class EnumLitDecl {
@@ -264,12 +277,23 @@ class EnumTypeDecl {
             hardline,
             "}"
         ]
-    val f_decls = ifEmpty([recurse], [hardline, recurse])
+    val f_decls =
+        if this_field.is_empty
+        then [recurse]
+        else [hardline, recurse]
 }
 
 class EnvSpecDecl {
     val f_syn_name = [recurse, whitespace]
-    val f_actions = [indent(ifEmpty([], hardline), recurse), hardline]
+    val f_actions = [
+        indent(
+            if this_field.is_empty
+            then []
+            else hardline,
+            recurse
+        ),
+        hardline
+    ]
 }
 
 class ErrorOnNull {
@@ -396,7 +420,9 @@ class GrammarDecl {
             "}"
         ]
     val f_rules =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class GrammarDiscard {
@@ -609,7 +635,12 @@ class LambdaExpr {
 }
 
 class LangkitRoot {
-    val f_imports = [recurse, ifEmpty([], hardline)]
+    val f_imports = [
+        recurse,
+        if this_field.is_empty
+        then []
+        else hardline
+    ]
 }
 
 class LexerCaseRule {
@@ -626,14 +657,18 @@ class LexerDecl {
     val node =
         ["lexer", recurse(f_syn_name), whitespace, "{", recurse(f_rules), "}"]
     val f_rules =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class LexerFamilyDecl {
     val node =
         ["family", recurse(f_syn_name), whitespace, "{", recurse(f_rules), "}"]
     val f_rules =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class ListKind {
@@ -782,7 +817,9 @@ class StructDecl {
             "}"
         ]
     val f_decls =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class SubscriptExpr {
@@ -818,7 +855,9 @@ class TraitDecl {
             "}"
         ]
     val f_decls =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class TryExpr {

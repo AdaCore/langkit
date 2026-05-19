@@ -416,6 +416,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       Symbols       : in out Symbol_Instantiation_Context;
       Config        : Unparsing_Configuration_Record;
       Node          : Lk_Node;
+      Field         : Lk_Node;
       Current_Token : in out Lk_Token;
       Trivias       : Trivias_Info;
       Template      : Template_Type;
@@ -425,7 +426,8 @@ package body Langkit_Support.Generic_API.Unparsing is
    --
    --  ``Node`` must be the node for which we instantiate this template: it is
    --  used to correctly initialize the ``Node`` component of instantiated
-   --  documents.
+   --  documents. When instantiating a field template, ``Field`` must be the
+   --  corresponding field node.
    --
    --  ``Current_Token`` must be the first token for ``Node``, and is updated
    --  to account for all the tokens that are processed by this template.
@@ -433,9 +435,16 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Information in ``Trivias`` is used to process trivias as expected.
 
    type Instantiation_State is record
+      Language : Language_Id;
+      --  Language for processed sources
+
       Node : Lk_Node;
       --  Node for which we instantiate a template (see the ``Node`` argument
       --  of ``Instantiate_Template``).
+
+      Field : Lk_Node;
+      --  When instantiating a field template, this is set to the corresponding
+      --  field. Uninitialized for other templates.
 
       Current_Token : Lk_Token;
       --  Token that is about to be unparsed by this template instantiation.
@@ -463,6 +472,12 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Helper for ``Instantiate_Template``. Implement the recursive part of
    --  template instantiation: ``Instantiate_Template`` takes care of the
    --  template unwrapping.
+
+   function Evaluate_Expression
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Value_Ref;
+   --  Helper for ``Instantiate_Template_Helper``. Evaluate an expression tree
+   --  and return the resulting value.
 
    -----------------------
    -- Check_Same_Tokens --
@@ -1522,13 +1537,16 @@ package body Langkit_Support.Generic_API.Unparsing is
       Symbols       : in out Symbol_Instantiation_Context;
       Config        : Unparsing_Configuration_Record;
       Node          : Lk_Node;
+      Field         : Lk_Node;
       Current_Token : in out Lk_Token;
       Trivias       : Trivias_Info;
       Template      : Template_Type;
       Arguments     : Template_Instantiation_Args) return Document_Type
    is
       State : Instantiation_State :=
-        (Node,
+        (Node.Language,
+         Node,
+         Field,
          Current_Token,
          Symbols'Unrestricted_Access,
          Arguments'Unrestricted_Access,
@@ -1745,22 +1763,16 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Trim | Whitespace =>
             return Template;
 
-         when If_Empty =>
+         when If_Then_Else =>
             declare
-               --  Consider that a list node with no child but with attached
-               --  comments is *not* empty. This makes more sense for
-               --  formatting concerns, as we unparse these comments as list
-               --  children.
-
-               Child       : constant Lk_Node :=
-                 State.Arguments.With_Recurse_Doc.Node;
+               Condition   : constant Value_Ref :=
+                 Evaluate_Expression (State, Template.If_Condition);
                Subtemplate : constant Document_Type :=
-                 (if Is_Empty_List (Child)
-                  then Template.If_Empty_Then
-                  else Template.If_Empty_Else);
+                 (if Condition.As_Bool
+                  then Template.If_Then
+                  else Template.If_Else);
             begin
-               return Instantiate_Template_Helper
-                        (Pool, State, Subtemplate);
+               return Instantiate_Template_Helper (Pool, State, Subtemplate);
             end;
 
          when If_Kind =>
@@ -1803,6 +1815,28 @@ package body Langkit_Support.Generic_API.Unparsing is
             end;
       end case;
    end Instantiate_Template_Helper;
+
+   -------------------------
+   -- Evaluate_Expression --
+   -------------------------
+
+   function Evaluate_Expression
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Value_Ref is
+   begin
+      case Template_Expression_Kind (Expression.Kind) is
+         when Is_Empty =>
+            declare
+               Node : constant Lk_Node :=
+                 Evaluate_Expression (State, Expression.Is_Empty_Node).As_Node;
+            begin
+               return From_Bool (State.Language, Is_Empty_List (Node));
+            end;
+
+         when This_Field =>
+            return From_Node (State.Language, State.Field);
+      end case;
+   end Evaluate_Expression;
 
    -------------------------
    -- Unparse_To_Prettier --
@@ -2182,6 +2216,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                               Symbols       => Symbols,
                               Config        => Config.Value.all,
                               Node          => N,
+                              Field         => No_Lk_Node,
                               Current_Token => Current_Token,
                               Trivias       => Trivias,
                               Template      => Sep_Template,
@@ -2365,6 +2400,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                                   (Pool          => Pool,
                                    Symbols       => Symbols,
                                    Node          => N,
+                                   Field         => No_Lk_Node,
                                    Config        => Config.Value.all,
                                    Current_Token => Current_Token,
                                    Trivias       => Trivias,
@@ -2425,6 +2461,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   Symbols       => Symbols,
                   Config        => Config.Value.all,
                   Node          => N,
+                  Field         => No_Lk_Node,
                   Trivias       => Trivias,
                   Current_Token => Current_Token,
                   Template      => Template,
@@ -2533,6 +2570,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                      Symbols       => Symbols,
                      Config        => Config.Value.all,
                      Node          => N,
+                     Field         => No_Lk_Node,
                      Current_Token => Current_Token,
                      Trivias       => Trivias,
                      Template      => Template,
@@ -2660,6 +2698,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                Symbols       => Symbols,
                Config        => Config.Value.all,
                Node          => Node,
+               Field         => Child,
                Current_Token => Current_Token,
                Trivias       => Trivias,
                Template      => Field_Template,

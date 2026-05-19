@@ -2,7 +2,8 @@
   "node_configs": {
     "VarDecl": {
       "node": {
-        "kind": "ifEmpty",
+        "kind": "if",
+        "condition": {"kind": "is_empty", "node": "this_field"},
         "then": "recurse",
         "else": "recurse"
       }

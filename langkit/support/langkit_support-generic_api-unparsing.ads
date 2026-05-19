@@ -294,6 +294,16 @@
 --  * innerRoot,
 --  * markAsRoot.
 --
+--  An expression can be one of the following:
+--
+--  * The "is_empty" expression return whether its operand is considered as
+--    empty for unparsing purposes::
+--
+--      {"kind": "is_empty", "node": <sub-expression>}
+--
+--  * "this_field" is valid only inside fields configuration. It returns the
+--    child node of the node used to instantiate the current template.
+--
 --  The configuration file has the following format::
 --
 --    {

@@ -924,7 +924,7 @@ package body Langkit_Support.Prettier_Utils is
       function Recurse (Self : Document_Type) return Document_Type
       is (Deep_Copy (Pool, Self));
    begin
-      case Self.Kind is
+      case Template_Non_Expression_Kind (Self.Kind) is
          when Align =>
             return Pool.Create_Align
               (Self.Align_Data,
@@ -1004,9 +1004,11 @@ package body Langkit_Support.Prettier_Utils is
          when Whitespace =>
             return Self;
 
-         when If_Empty =>
-            return Pool.Create_If_Empty
-              (Recurse (Self.If_Empty_Then), Recurse (Self.If_Empty_Else));
+         when If_Then_Else =>
+            return Pool.Create_If
+              (Self.If_Condition,
+               Recurse (Self.If_Then),
+               Recurse (Self.If_Else));
 
          when If_Kind =>
             declare
@@ -1564,24 +1566,26 @@ package body Langkit_Support.Prettier_Utils is
       return Self.Whitespaces (Length);
    end Create_Whitespace;
 
-   ---------------------
-   -- Create_If_Empty --
-   ---------------------
+   ---------------
+   -- Create_If --
+   ---------------
 
-   function Create_If_Empty
+   function Create_If
      (Self          : in out Document_Pool;
+      Condition     : Document_Type;
       Then_Contents : Document_Type;
       Else_Contents : Document_Type) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind          => If_Empty,
-           If_Empty_Then => Then_Contents,
-           If_Empty_Else => Else_Contents)
+          (Kind         => If_Then_Else,
+           If_Condition => Condition,
+           If_Then      => Then_Contents,
+           If_Else      => Else_Contents)
       do
          Self.Register (Result);
       end return;
-   end Create_If_Empty;
+   end Create_If;
 
    --------------------
    -- Create_If_Kind --
@@ -1607,6 +1611,35 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_If_Kind;
+
+   ---------------------
+   -- Create_Is_Empty --
+   ---------------------
+
+   function Create_Is_Empty
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Is_Empty, Is_Empty_Node => Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Is_Empty;
+
+   -----------------------
+   -- Create_This_Field --
+   -----------------------
+
+   function Create_This_Field
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => This_Field)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_This_Field;
 
    -----------------------
    -- Bubble_Up_Trivias --
@@ -2141,10 +2174,11 @@ package body Langkit_Support.Prettier_Utils is
                  (Prefix & "whitespace(" & Document.Whitespace_Length'Image
                   & ")");
 
-            when If_Empty =>
-               Write (Prefix & "ifEmpty:");
-               Process (Document.If_Empty_Then, Prefix & List_Indent);
-               Process (Document.If_Empty_Else, Prefix & List_Indent);
+            when If_Then_Else =>
+               Write (Prefix & "if:");
+               Process (Document.If_Condition, Prefix & List_Indent);
+               Process (Document.If_Then, Prefix & List_Indent);
+               Process (Document.If_Else, Prefix & List_Indent);
 
             when If_Kind =>
                Write (Prefix & "ifKind:");
@@ -2189,6 +2223,13 @@ package body Langkit_Support.Prettier_Utils is
                         Matcher_Document_Indent);
                   end loop;
                end;
+
+            when Is_Empty =>
+               Write (Prefix & "is_empty:");
+               Process (Document.Is_Empty_Node, Prefix & List_Indent);
+
+            when This_Field =>
+               Write (Prefix & "this_field");
          end case;
       end Process;
    begin

@@ -210,10 +210,6 @@ signatures = {
         Positional("flatContents", optional=True),
         OptKw("groupId"),
     ),
-    "ifEmpty": Signature(
-        Positional("then"),
-        Positional("else"),
-    ),
     "indent": dedent_sig,
     "markAsRoot": dedent_sig,
     "innerRoot": dedent_sig,
@@ -422,8 +418,23 @@ def to_json(input_file: str) -> str:
                 "flushLineBreaks",
                 "trim",
                 "whitespace",
+                "this_field",
             ):
                 return e.text
+
+        elif isinstance(e, L.DotExpr):
+            if e.f_null_cond.p_as_bool:
+                error(e.f_null_cond, "unexpected non-cond marker")
+
+            match e.f_suffix.text:
+                case "is_empty":
+                    return {
+                        "kind": "is_empty",
+                        "node": parse_template(e.f_prefix),
+                    }
+
+                case _:
+                    error(e.f_suffix, "unknown attribute")
 
         elif isinstance(e, L.CallExpr):
             callee = e.f_name
@@ -492,13 +503,6 @@ def to_json(input_file: str) -> str:
                     result["groupId"] = parse_str(bound["groupId"])
                 return result
 
-            elif name == "ifEmpty":
-                return {
-                    "kind": "ifEmpty",
-                    "then": parse_template(bound["then"]),
-                    "else": parse_template(bound["else"]),
-                }
-
             elif name in (
                 "indent",
                 "markAsRoot",
@@ -541,6 +545,22 @@ def to_json(input_file: str) -> str:
                 error(e.f_element_type, "unexpected type")
             result = [parse_template(item) for item in e.f_exprs]
             return result[0] if len(result) == 1 else result
+
+        elif isinstance(e, L.IfExpr):
+            else_part = parse_template(e.f_else_expr)
+            for alt in reversed(e.f_alternatives):
+                else_part = {
+                    "kind": "if",
+                    "condition": parse_template(alt.f_cond_expr),
+                    "then": parse_template(alt.f_then_expr),
+                    "else": else_part,
+                }
+            return {
+                "kind": "if",
+                "condition": parse_template(e.f_cond_expr),
+                "then": parse_template(e.f_then_expr),
+                "else": else_part,
+            }
 
         elif isinstance(e, L.MatchExpr):
             if isinstance(e.f_match_expr, L.RefId):
@@ -838,6 +858,7 @@ def to_lkt(input_file: str) -> str:
                 | "flushLineBreaks"
                 | "trim"
                 | "whitespace"
+                | "this_field"
             ):
                 lines.append(doc)
 
@@ -891,12 +912,30 @@ def to_lkt(input_file: str) -> str:
                     lines.append(f", groupId={lkt_lit(doc['groupId'])}")
                 lines.append(")")
 
-            case {"kind": "ifEmpty", "then": then_doc, "else": else_doc}:
-                lines.append("ifEmpty(")
+            case {
+                "kind": "if",
+                "condition": cond_doc,
+                "then": then_doc,
+                "else": else_doc,
+            }:
+                alts: list[tuple[Any, Any]] = []
+                while (
+                    isinstance(else_doc, dict) and else_doc.get("kind") == "if"
+                ):
+                    alts.append((else_doc["condition"], else_doc["then"]))
+                    else_doc = else_doc["else"]
+
+                lines.append("if")
+                process_template(cond_doc)
+                lines.append("then")
                 process_template(then_doc)
-                lines.append(",")
+                for cond_doc, then_doc in alts:
+                    lines.append("elif")
+                    process_template(cond_doc)
+                    lines.append("then")
+                    process_template(then_doc)
+                lines.append("else")
                 process_template(else_doc)
-                lines.append(")")
 
             case {
                 "kind": "ifKind",
@@ -948,6 +987,10 @@ def to_lkt(input_file: str) -> str:
 
             case {"kind": "text", "text": text}:
                 lines.append(lkt_lit(text))
+
+            case {"kind": "is_empty", "node": node_doc}:
+                process_template(node_doc)
+                lines.append(".is_empty")
 
             case _:
                 raise FatalError(f"invalid template: {doc}")

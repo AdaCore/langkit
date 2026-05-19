@@ -4,8 +4,8 @@
       "fields": {
         "f_name": {
           "kind": "if",
-          "condition": {"kind": "is_empty", "node": "this_field"},
-          "then": "line",
+          "condition": {"kind": "is_empty"},
+          "then": "recurse",
           "else": "recurse"
         }
       }

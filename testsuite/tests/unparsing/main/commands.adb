@@ -167,8 +167,8 @@ begin
    Check ("cmd_hardline.json");
    Check ("cmd_hardlinewithoutbreakparent.json");
    Check ("cmd_ifbreak.json");
-   Check ("cmd_ifempty.json", "def f(): Int {i;}");
-   Check ("cmd_ifempty.json", "def f(i: Int): Int {i;}");
+   Check ("cmd_isempty.json", "def f(): Int {i;}");
+   Check ("cmd_isempty.json", "def f(i: Int): Int {i;}");
    Check ("cmd_ifkind.json", "var i: Int = 2+2;");
    Check ("cmd_ifkind.json", "var i: Int = 2+j;");
    Check ("cmd_ifkind2.json", "var i: Int = 2+j;");

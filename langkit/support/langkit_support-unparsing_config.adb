@@ -110,7 +110,7 @@ package body Langkit_Support.Unparsing_Config is
             return;
          end if;
 
-         case Self.Kind is
+         case Template_Non_Expression_Kind (Self.Kind) is
             when Align =>
                Replace (Self.Align_Contents);
 
@@ -169,9 +169,9 @@ package body Langkit_Support.Unparsing_Config is
             when Table_Separator | Token | Trim | Whitespace =>
                null;
 
-            when If_Empty =>
-               Replace (Self.If_Empty_Then);
-               Replace (Self.If_Empty_Else);
+            when If_Then_Else =>
+               Replace (Self.If_Then);
+               Replace (Self.If_Else);
 
             when If_Kind =>
                Replace (Self.If_Kind_Default);
@@ -538,6 +538,10 @@ package body Langkit_Support.Unparsing_Config is
       is (Find (Symbols, To_Text (Name)));
       --  Convert a name to the corresponding symbol in Symbols
 
+      Boolean_Type : constant Type_Ref :=
+        Type_Of (From_Bool (Language, False));
+      pragma Assert (Boolean_Type /= No_Type_Ref);
+
       function To_Type_Index (Name : String) return Type_Index;
       --  Return the type index for the node type that has the given
       --  camel-case Name. Raise an Invalid_Input exception if there is no such
@@ -696,6 +700,22 @@ package body Langkit_Support.Unparsing_Config is
       --  Helper for ``Parse_Template``. Implement the recursive part of
       --  templates parsing: ``Parse_Template`` takes care of the post-parsing
       --  validation.
+
+      function Parse_Subtemplate
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context) return Document_Type;
+      --  Wrapper around ``Parse_Template_Helper`` that ensures that the
+      --  returned node materializes a document template (i.e. not an
+      --  expression).
+
+      function Parse_Expression
+        (JSON      : JSON_Value;
+         Context   : in out Template_Parsing_Context;
+         Expr_Type : out Type_Ref) return Document_Type
+      with Post => Expr_Type /= No_Type_Ref;
+      --  Wrapper around ``Parse_Template_Helper`` that ensures that the
+      --  returned node materializes an expression (i.e. not a document
+      --  template), and that determines its type.
 
       procedure Process_Recurse (Context : in out Template_Parsing_Context);
       --  Record in ``Context.State``` that a "recurse" or "recurse_flatten"
@@ -1335,7 +1355,7 @@ package body Langkit_Support.Unparsing_Config is
             Info.Is_Referenced := False;
          end loop;
 
-         Root := Parse_Template_Helper (JSON, Context);
+         Root := Parse_Subtemplate (JSON, Context);
 
          --  Now, sanity check symbol usage and compute symbol usage that is
          --  specific to this template (Result_Symbols).
@@ -1447,8 +1467,7 @@ package body Langkit_Support.Unparsing_Config is
                Items : Document_Vectors.Vector;
             begin
                for D of JSON_Array'(JSON.Get) loop
-                  Items.Append
-                    (Parse_Template_Helper (D, Context));
+                  Items.Append (Parse_Subtemplate (D, Context));
                end loop;
                return Pool.Create_List (Items);
             end;
@@ -1492,6 +1511,13 @@ package body Langkit_Support.Unparsing_Config is
                   return Pool.Create_Trim;
                elsif Value = "whitespace" then
                   return Pool.Create_Whitespace;
+               elsif Value = "this_field" then
+                  if Context.Kind /= Field_Template then
+                     Abort_Parsing
+                       (Context,
+                        """this_field"" is valid only in field templates");
+                  end if;
+                  return Pool.Create_This_Field;
                else
                   Abort_Parsing
                     (Context,
@@ -1527,7 +1553,7 @@ package body Langkit_Support.Unparsing_Config is
 
                      return Pool.Create_Align
                        (Data,
-                        Parse_Template_Helper (Tmp, Context),
+                        Parse_Subtemplate (Tmp, Context),
                         Bubble_Up_Config (Context, Align, JSON));
                   end;
 
@@ -1553,13 +1579,13 @@ package body Langkit_Support.Unparsing_Config is
                                   then
                                     (Kind => Prettier.Continuation_Line_Indent)
                                   else raise Program_Error),
-                     Contents  => Parse_Template_Helper (Tmp, Context),
+                     Contents  => Parse_Subtemplate (Tmp, Context),
                      Bubble_Up => Bubble_Up_Config (Context, Align, JSON));
 
                elsif Kind = "fill" then
                   Tmp := Mandatory_Key (JSON, "document", Context, "for fill");
                   return Pool.Create_Fill
-                    (Parse_Template_Helper (Tmp, Context),
+                    (Parse_Subtemplate (Tmp, Context),
                      Bubble_Up_Config (Context, Fill, JSON));
 
                elsif Kind = "group" then
@@ -1570,7 +1596,7 @@ package body Langkit_Support.Unparsing_Config is
                   begin
                      Tmp :=
                        Mandatory_Key (JSON, "document", Context, "for group");
-                     Document := Parse_Template_Helper (Tmp, Context);
+                     Document := Parse_Subtemplate (Tmp, Context);
 
                      if JSON.Has_Field ("shouldBreak") then
                         Tmp := JSON.Get ("shouldBreak");
@@ -1617,14 +1643,14 @@ package body Langkit_Support.Unparsing_Config is
                      Group_Id : Template_Symbol := No_Template_Symbol;
                   begin
                      Contents :=
-                       Parse_Template_Helper
+                       Parse_Subtemplate
                          (Mandatory_Key
                             (JSON, "breakContents", Context, "for ifBreak"),
                           Contents_Context);
 
                      Flat_Contents :=
                        (if JSON.Has_Field ("flatContents")
-                        then Parse_Template_Helper
+                        then Parse_Subtemplate
                                (JSON.Get ("flatContents"), Flat_Context)
                         else null);
 
@@ -1653,14 +1679,10 @@ package body Langkit_Support.Unparsing_Config is
                               (Contents, Flat_Contents, Group_Id);
                   end;
 
-               elsif Kind = "ifEmpty" then
-                  if Context.Kind /= Field_Template then
-                     Abort_Parsing
-                       (Context,
-                        """ifEmpty"" is valid only in field templates");
-                  end if;
-
+               elsif Kind = "if" then
                   declare
+                     T             : Type_Ref;
+                     Condition     : Document_Type;
                      Then_Contents : Document_Type;
                      Else_Contents : Document_Type;
 
@@ -1668,14 +1690,23 @@ package body Langkit_Support.Unparsing_Config is
                      Else_Context : Template_Parsing_Context := Context;
                   begin
                      Tmp :=
-                       Mandatory_Key (JSON, "then", Context, "for ifEmpty");
-                     Then_Contents :=
-                       Parse_Template_Helper (Tmp, Then_Context);
+                       Mandatory_Key (JSON, "condition", Context, "for if");
+                     Condition := Parse_Expression (Tmp, Context, T);
+                     if T /= Boolean_Type then
+                        Abort_Parsing
+                          (Context,
+                           "if condition requires a boolean, got a "
+                           & Debug_Name (T));
+                     end if;
 
                      Tmp :=
-                       Mandatory_Key (JSON, "else", Context, "for ifEmpty");
+                       Mandatory_Key (JSON, "then", Context, "for if");
+                     Then_Contents := Parse_Subtemplate (Tmp, Then_Context);
+
+                     Tmp :=
+                       Mandatory_Key (JSON, "else", Context, "for if");
                      Else_Contents :=
-                       Parse_Template_Helper (Tmp, Else_Context);
+                       Parse_Subtemplate (Tmp, Else_Context);
 
                      --  Unify the parsing state for both branches and update
                      --  Context accordingly.
@@ -1688,8 +1719,8 @@ package body Langkit_Support.Unparsing_Config is
                      end if;
                      Context.State := Else_Context.State;
 
-                     return Pool.Create_If_Empty
-                              (Then_Contents, Else_Contents);
+                     return Pool.Create_If
+                              (Condition, Then_Contents, Else_Contents);
                   end;
 
                elsif Kind = "ifKind" then
@@ -1817,7 +1848,7 @@ package body Langkit_Support.Unparsing_Config is
                            If_Kind_Matchers.Append
                              (Matcher_Record'
                                (Types,
-                                Parse_Template_Helper
+                                Parse_Subtemplate
                                  (Document_JSON, Nested_Context)));
 
                            --  Confirm that the final linear position is
@@ -1849,7 +1880,7 @@ package body Langkit_Support.Unparsing_Config is
 
                      begin
                         If_Kind_Default :=
-                          Parse_Template_Helper (Default_JSON, Context);
+                          Parse_Subtemplate (Default_JSON, Context);
 
                         if Absent_JSON.Kind /= JSON_Null_Type then
                            declare
@@ -1859,7 +1890,7 @@ package body Langkit_Support.Unparsing_Config is
 
                            begin
                               If_Kind_Absent :=
-                                Parse_Template_Helper
+                                Parse_Subtemplate
                                   (Absent_JSON, If_Kind_Absent_Context);
 
                               if If_Kind_Absent_Context.State /= Context.State
@@ -1896,7 +1927,7 @@ package body Langkit_Support.Unparsing_Config is
                   Tmp := Mandatory_Key
                     (JSON, "contents", Context, "for indent");
                   return Pool.Create_Indent
-                    (Parse_Template_Helper (Tmp, Context),
+                    (Parse_Subtemplate (Tmp, Context),
                      Bubble_Up_Config (Context, Indent, JSON));
 
                elsif Kind = "recurse_field" then
@@ -2016,6 +2047,22 @@ package body Langkit_Support.Unparsing_Config is
                     (Tmp, JSON_Int_Type, Context, """length"" for whitespace");
                   return Pool.Create_Whitespace (Tmp.Get);
 
+               elsif Kind = "is_empty" then
+                  Tmp := Mandatory_Key (JSON, "node", Context, "for is_empty");
+                  declare
+                     T    : Type_Ref;
+                     Expr : constant Document_Type :=
+                        Parse_Expression (Tmp, Context, T);
+                  begin
+                     if not Is_Node_Type (T) then
+                        Abort_Parsing
+                          (Context,
+                           "is_empty requires a node, got a "
+                           & Debug_Name (T));
+                     end if;
+                     return Pool.Create_Is_Empty (Expr);
+                  end;
+
                else
                   Abort_Parsing
                     (Context, "invalid template document kind: " & Kind);
@@ -2027,6 +2074,53 @@ package body Langkit_Support.Unparsing_Config is
               (Context, "invalid template JSON node: " & JSON.Kind'Image);
          end case;
       end Parse_Template_Helper;
+
+      -----------------------
+      -- Parse_Subtemplate --
+      -----------------------
+
+      function Parse_Subtemplate
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context) return Document_Type is
+      begin
+         return Result : constant Document_Type :=
+           Parse_Template_Helper (JSON, Context)
+         do
+            if Result.Kind in Template_Expression_Kind then
+               Abort_Parsing (Context, "template expected, got an expression");
+            end if;
+         end return;
+      end Parse_Subtemplate;
+
+      ----------------------
+      -- Parse_Expression --
+      ----------------------
+
+      function Parse_Expression
+        (JSON      : JSON_Value;
+         Context   : in out Template_Parsing_Context;
+         Expr_Type : out Type_Ref) return Document_Type is
+      begin
+         return Result : constant Document_Type :=
+           Parse_Template_Helper (JSON, Context)
+         do
+            --  First check manually that we have an expression so that adding
+            --  new expression node kinds do trigger a compilation error in the
+            --  case statement below until the new kind is handled there.
+
+            if Result.Kind not in Template_Expression_Kind then
+               Abort_Parsing (Context, "expression expected, got a template");
+            end if;
+
+            case Template_Expression_Kind (Result.Kind) is
+               when Is_Empty =>
+                  Expr_Type := Boolean_Type;
+
+               when This_Field =>
+                  Expr_Type := Member_Type (Context.Field);
+            end case;
+         end return;
+      end Parse_Expression;
 
       ---------------------
       -- Process_Recurse --

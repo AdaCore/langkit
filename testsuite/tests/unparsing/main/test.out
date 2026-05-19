@@ -156,12 +156,20 @@ def f2(a: Int, ): Int
     template for VarDecl.f_name: undefined symbol: myGroup
 # invalid_ifbreak4.json
     VarDecl: group id myGroup is referenced in the "Decl.f_name" template but not defined in the "node" template
-# invalid_ifempty.json
-    template for VarDecl.f_name: missing "else" key for ifEmpty
-# invalid_ifempty2.json
-    template for VarDecl.f_name: missing "then" key for ifEmpty
-# invalid_ifempty3.json
-    "node" template for VarDecl: "ifEmpty" is valid only in field templates
+# invalid_if.json
+    template for VarDecl.f_name: missing "condition" key for if
+# invalid_if2.json
+    template for VarDecl.f_name: expression expected, got a template
+# invalid_if3.json
+    template for VarDecl.f_name: if condition requires a boolean, got a Name
+# invalid_if4.json
+    template for VarDecl.f_name: missing "then" key for if
+# invalid_isempty.json
+    template for VarDecl.f_name: missing "node" key for is_empty
+# invalid_isempty2.json
+    template for VarDecl.f_name: expression expected, got a template
+# invalid_isempty3.json
+    template for VarDecl.f_name: is_empty requires a node, got a Bool
 # invalid_ifkind.json
     "node" template for Addition: ifKind matcher "Number" has an inconsistent recurse structure
 # invalid_ifkind2.json
@@ -263,6 +271,8 @@ def f2(a: Int, ): Int
     f_name is not a property for Decl
 # invalid_bubble_up.json
     template for VarDecl.f_name: invalid bubbleUpLeadingTrivias: JSON_INT_TYPE
+# invalid_this_field.json
+    "node" template for VarDecl: "this_field" is valid only in field templates
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -1322,7 +1332,7 @@ Done.
   ]
 }
 
-== cmd_ifempty.json ==
+== cmd_isempty.json ==
 
 {
   "id": 1,
@@ -1351,7 +1361,7 @@ Done.
   ]
 }
 
-== cmd_ifempty.json ==
+== cmd_isempty.json ==
 
 {
   "id": 1,

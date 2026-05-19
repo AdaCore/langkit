@@ -117,9 +117,13 @@ begin
    Check ("invalid_ifbreak2.json");
    Check ("invalid_ifbreak3.json");
    Check ("invalid_ifbreak4.json");
-   Check ("invalid_ifempty.json");
-   Check ("invalid_ifempty2.json");
-   Check ("invalid_ifempty3.json");
+   Check ("invalid_if.json");
+   Check ("invalid_if2.json");
+   Check ("invalid_if3.json");
+   Check ("invalid_if4.json");
+   Check ("invalid_isempty.json");
+   Check ("invalid_isempty2.json");
+   Check ("invalid_isempty3.json");
    Check ("invalid_ifkind.json");
    Check ("invalid_ifkind2.json");
    Check ("invalid_ifkind3.json");
@@ -155,6 +159,7 @@ begin
    Check ("invalid_table_join4.json");
    Check ("invalid_table_join5.json");
    Check ("invalid_bubble_up.json");
+   Check ("invalid_this_field.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");
