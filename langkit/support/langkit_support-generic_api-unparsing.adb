@@ -460,9 +460,9 @@ package body Langkit_Support.Generic_API.Unparsing is
      (Pool     : in out Document_Pool;
       State    : in out Instantiation_State;
       Template : Document_Type) return Document_Type;
-   --  Helper for ``Instantiate_Template_Helper``. Implement the recursive part
-   --  of template instantiation: ``Instantiate_Template_Helper`` takes care of
-   --  the template unwrapping.
+   --  Helper for ``Instantiate_Template``. Implement the recursive part of
+   --  template instantiation: ``Instantiate_Template`` takes care of the
+   --  template unwrapping.
 
    -----------------------
    -- Check_Same_Tokens --
