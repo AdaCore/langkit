@@ -157,7 +157,7 @@ class LangkitTestsuite(Testsuite):
         )
 
         #
-        # Convenience options for developpers
+        # Convenience options for developers
         #
 
         parser.add_argument(
