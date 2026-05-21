@@ -1,0 +1,5 @@
+== test.lkt ==
+warning: The Support.My_Exception external exception lacks documentation
+Code generation was successful
+
+lkt_compile: Done

@@ -75,6 +75,17 @@ class DocDatabase:
         Set of names for documentation database that were actually used.
         """
 
+    def ensure_doc(self, key: str) -> bool:
+        """
+        Return whether the given entity lacks documentation.
+
+        If needed, create an empty doc for it.
+        """
+        undocumented = key not in self._dict
+        if undocumented:
+            self._dict[key] = Template("")
+        return undocumented
+
     def __getitem__(self, key: str) -> Template:
         self._used.add(key)
         return self._dict[key]

@@ -536,6 +536,11 @@ class WarningSet:
     undocumented_nodes = WarningDescriptor(
         "undocumented-nodes", True, "Warn if a node is left undocumented."
     )
+    undocumented_exceptions = WarningDescriptor(
+        "undocumented-exceptions",
+        True,
+        "Warn if an external exception is left undocumented.",
+    )
     imprecise_field_type_annotations = WarningDescriptor(
         "imprecise-field-type-annotations",
         True,
@@ -548,6 +553,7 @@ class WarningSet:
         unused_node_type,
         undocumented_public_properties,
         undocumented_nodes,
+        undocumented_exceptions,
         imprecise_field_type_annotations,
     ]
 

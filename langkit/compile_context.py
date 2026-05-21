@@ -226,7 +226,9 @@ class GeneratedException:
         """
         Fully qualified name to the exception declaration (in Ada).
         """
-        return "{}.{}".format(".".join(self.package), self.name)
+        return "{}.{}".format(
+            ".".join(self.package), self.name.camel_with_underscores
+        )
 
     @property
     def kind_name(self) -> names.Name:
@@ -481,6 +483,12 @@ class CompileCtx:
         """
         Whether the language specification was compiled. This is used to avoid
         doing it multiple times.
+        """
+
+        self.emission_started = False
+        """
+        Whether code emission started. Used in assertions for code that must
+        run before code emission starts.
         """
 
         self.lkt_units: list[L.AnalysisUnit] = []
@@ -903,12 +911,6 @@ class CompileCtx:
         ``langkit.compiled_types.MemberNames``.
         """
 
-        self.emission_started = False
-        """
-        Whether code emission started. Used in assertions for code that must
-        run before code emission starts.
-        """
-
     @property
     def lib_name(self) -> names.Name:
         """
@@ -1006,9 +1008,20 @@ class CompileCtx:
                 "Implementation.C", AdaSourceKind.body, ".".join(package)
             )
 
-        self.exception_types[exception_name] = GeneratedException(
-            doc_section, package, name, generate_renaming
-        )
+        exc = GeneratedException(doc_section, package, name, generate_renaming)
+        self.exception_types[exception_name] = exc
+
+        # For code generation purposes, we need a documentation entry for each
+        # external exception. Warn if we don't have one and just provide an
+        # empty one in this case.
+        if not is_builtin and self.documentations.ensure_doc(exc.doc_entity):
+            with global_context(self):
+                WarningSet.undocumented_exceptions.warn_if(
+                    True,
+                    f"The {exc.qualname} external exception lacks"
+                    " documentation",
+                    location=Location.nowhere,
+                )
 
     def _register_builtin_exception_types(self) -> None:
         """
