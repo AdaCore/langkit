@@ -172,6 +172,7 @@ begin
    Check ("cmd_ifbreak.json");
    Check ("cmd_isempty.json", "def f(): Int {i;}");
    Check ("cmd_isempty.json", "def f(i: Int): Int {i;}");
+   Check ("cmd_isempty2.json", "def f(i: Int): Int {i;}");
    Check ("cmd_match.json", "var i: Int = 2+2;");
    Check ("cmd_match.json", "var i: Int = 2+j;");
    Check ("cmd_match2.json", "var i: Int = 2+j;");

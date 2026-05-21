@@ -1,0 +1,19 @@
+{
+  "node_configs": {
+    "ParamSpec": {
+      "node": {
+        "kind": "if",
+        "condition": {
+          "kind": "is_empty",
+          "node": {
+            "kind": "eval_member",
+            "prefix": "this_node",
+            "member": "f_default_expr"
+          }
+        },
+        "then": "recurse",
+        "else": ["recurse", "whitespace"]
+      }
+    }
+  }
+}

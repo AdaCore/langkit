@@ -1071,7 +1071,9 @@ package body Langkit_Support.Generic_API.Unparsing is
    function Is_Empty_List (Node : Lk_Node) return Boolean is
       T : Lk_Token;
    begin
-      if not Node.Is_List_Node or else Node.Children_Count > 0 then
+      if Node.Is_Null then
+         return True;
+      elsif not Node.Is_List_Node or else Node.Children_Count > 0 then
          return False;
       end if;
 
