@@ -3490,10 +3490,10 @@ package body ${ada_lib_name}.Implementation is
    --------------------------
 
    function Properties_May_Raise
-     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean is
+     (Id : Ada.Exceptions.Exception_Id) return Boolean is
    begin
-      return Ada.Exceptions.Exception_Identity (Exc) in
-        ${ctx.property_exception_matcher(9)};
+      return Id in
+        ${ctx.property_exception_matcher(9, identity=True)};
    end Properties_May_Raise;
 
    ----------------------

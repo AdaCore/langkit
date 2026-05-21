@@ -371,9 +371,13 @@ private package ${ada_lib_name}.Implementation is
    pragma Pack (Ref_Categories);
 
    function Properties_May_Raise
-     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean;
-   --  Return if ``Exc`` is one of the exceptions that properties are allowed
+     (Id : Ada.Exceptions.Exception_Id) return Boolean;
+   --  Return if ``Id`` is one of the exceptions that properties are allowed
    --  to raise.
+
+   function Properties_May_Raise
+     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean
+   is (Properties_May_Raise (Ada.Exceptions.Exception_Identity (Exc)));
 
    package AST_Envs is new Langkit_Support.Lexical_Envs_Impl
      (Get_Unit_Version         => Unit_Version,

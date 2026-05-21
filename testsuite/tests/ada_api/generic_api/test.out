@@ -1,3 +1,13 @@
+== except.adb ==
+PROGRAM_ERROR:
+  Is managed? FALSE
+LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR:
+  Is managed? TRUE
+LIBFOOLANG_SUPPORT.MY_EXCEPTION_1:
+  Is managed? TRUE
+LIBFOOLANG_SUPPORT.MY_EXCEPTION_2:
+  Is managed? FALSE
+
 == analysis.adb ==
 
 Language name: Foo
