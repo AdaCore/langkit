@@ -394,7 +394,7 @@ package body ${ada_lib_name}.Parsers_Impl is
       Import_Diagnostics (Parser);
       return Parsed_Node (Result);
    exception
-      when Exc : ${ctx.property_exception_matcher} =>
+      when Exc : ${ctx.property_exception_matcher(18)} =>
          Import_Diagnostics (Parser);
          Append
            (Parser.Diagnostics,

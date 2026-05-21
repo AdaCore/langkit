@@ -1,0 +1,12 @@
+lkt_spec:
+  entry_point: foo.lkt
+  source_dirs: [.]
+library:
+  language_name: Foo
+  external_exceptions:
+    - exception: Foo.My_Exception
+      doc_section: foo
+  property_exceptions:
+    - my_exception
+extra_docs:
+  foo.my_exception: Doc for My_Exception.

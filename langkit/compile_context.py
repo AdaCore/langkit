@@ -857,6 +857,51 @@ class CompileCtx:
                 doc_section=ext_exc.doc_section,
             )
 
+        # Determine the set of exceptions that properties can propagate
+        self.property_exceptions = []
+        with global_context(self):
+            for exc_name in sorted(
+                set(config.library.property_exceptions) | {"Property_Error"}
+            ):
+                try:
+                    exc_name = names.Name(exc_name).lower
+                except ValueError as exc:
+                    error(
+                        f"property_exceptions: {exc}",
+                        location=Location.nowhere,
+                    )
+
+                try:
+                    gen_exc = self.exception_types[exc_name]
+                except KeyError:
+                    error(
+                        f"property_exceptions: unknown exception {exc_name}",
+                        location=Location.nowhere,
+                    )
+                self.property_exceptions.append(gen_exc)
+
+        self.property_exception_packages: set[str] = {
+            ".".join(exc.package) for exc in self.property_exceptions
+        }
+        """
+        Set of Ada packages in which property exceptions are defined.
+
+        Used to produce the right set of Ada context clauses in generated code.
+        """
+
+        # Now that all exceptions are known, add context clauses to the unit
+        # that need to refer to them.
+        for from_package in [
+            "Analysis",
+            "Implementation",
+            "Implementation.C",
+            "Parsers_Impl",
+        ]:
+            for to_package in self.property_exception_packages:
+                self.add_with_clause(
+                    from_package, AdaSourceKind.body, to_package
+                )
+
         # Register extra use clauses from the configuration
         for unit, unit_clauses in config.library.extra_context_clauses.items():
             for kind, clauses in [
@@ -882,16 +927,6 @@ class CompileCtx:
         """
         Mapping from called properties to sets of caller properties. None when
         not yet computed or invalidated.
-        """
-
-        self.property_exceptions: list[str] = sorted(
-            set(config.library.property_exceptions) | {"Property_Error"}
-        )
-
-        self.property_exception_matcher = " | ".join(self.property_exceptions)
-        """
-        Helper to generate Ada exception handlers to catch errors that
-        properties are allowed to raise.
         """
 
         # Register requested RST passthrough roles
@@ -1028,6 +1063,7 @@ class CompileCtx:
         Register exception types for all builtin exceptions.
         """
         for namespace, exception_name in [
+            (None, "program_error"),
             (None, "native_exception"),
             (None, "precondition_failure"),
             (None, "property_error"),
@@ -1062,6 +1098,28 @@ class CompileCtx:
         # in the C API.
         self.add_with_clause(
             "Implementation.C", AdaSourceKind.body, "Langkit_Support.Errors"
+        )
+
+    def property_exception_matcher(
+        self,
+        column: int,
+        identity: bool = False,
+    ) -> str:
+        """
+        Code generation helper: return a |-separated matcher for all exceptions
+        that properties are allowed to propagate.
+
+        :param column: Indentation level for the result (if it is multi-line).
+        :param identity: Whether the matcher should work on exception
+            identities.
+        """
+        indent = " " * column
+        return "\n".join(
+            "{}{}".format(
+                f"{indent}| " if i > 0 else "",
+                f"{exc.qualname}'Identity" if identity else exc.qualname,
+            )
+            for i, exc in enumerate(self.property_exceptions)
         )
 
     def resolve_interface(self, name: str) -> GenericInterface:
@@ -1187,18 +1245,12 @@ class CompileCtx:
 
         # Since it contains signatures for properties and env specs, add to the
         # $.All_Properties spec "with" clauses necessary for properties.
-        self.add_with_clauses_for_properties(
-            "All_Properties", AdaSourceKind.spec
-        )
+        self.add_with_clauses_for_properties("All_Properties")
 
-    def add_with_clauses_for_properties(
-        self,
-        from_pkg: str,
-        source_kind: AdaSourceKind,
-    ) -> None:
+    def add_with_clauses_for_properties(self, from_pkg: str) -> None:
         """
-        Add to the given unit (``from_pkg``/``source_kind``) all ``with``
-        clauses considered necessary for every property.
+        Add to the given unit (``from_pkg``) all ``with`` clauses considered
+        necessary for every property.
         """
         lib_name = self.ada_api_settings.lib_name
         for name in [
@@ -1212,12 +1264,18 @@ class CompileCtx:
             f"{lib_name}.Common",
             f"{lib_name}.Implementation",
         ]:
-            self.add_with_clause(from_pkg, source_kind, name, use_clause=True)
+            self.add_with_clause(
+                from_pkg, AdaSourceKind.spec, name, use_clause=True
+            )
         for name in [
             "Langkit_Support.Token_Data_Handlers",
             "System",
         ]:
-            self.add_with_clause(from_pkg, source_kind, name)
+            self.add_with_clause(from_pkg, AdaSourceKind.spec, name)
+
+        # Allow exception handlers in properties to refer to managed exceptions
+        for name in self.property_exception_packages:
+            self.add_with_clause(from_pkg, AdaSourceKind.body, name)
 
     def get_free_impl_package(
         self,
@@ -1242,9 +1300,7 @@ class CompileCtx:
                 self, f"{prefix.camel_with_underscores}_{len(impl_packages)}"
             )
             impl_packages.append(impl_pkg)
-            self.add_with_clauses_for_properties(
-                impl_pkg.name, AdaSourceKind.spec
-            )
+            self.add_with_clauses_for_properties(impl_pkg.name)
         return impl_packages[-1]
 
     def add_to_impl_package(self, prop: PropertyDef) -> None:

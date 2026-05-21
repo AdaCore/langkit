@@ -21,7 +21,11 @@ from typing import (
 import funcy
 
 from langkit.common import ascii_repr
-from langkit.compile_context import AdaSourceKind, CompileCtx
+from langkit.compile_context import (
+    AdaSourceKind,
+    CompileCtx,
+    GeneratedException,
+)
 from langkit.compiled_types import (
     ASTNodeType,
     AbstractNodeData,
@@ -695,29 +699,29 @@ class ErrorExpr(Expr):
         self,
         debug_info: ExprDebugInfo | None,
         expr_type: CompiledType,
-        exception_name: names.Name,
+        exception: GeneratedException,
         message: str | None = None,
     ):
         """
         :param expr_type: Placeholder type for this expression, as if this
             expression would return a value.
-        :param exception_name: Name of the Ada exception to raise.
+        :param exception: Ada exception to raise.
         :param message: Optional error message.
         """
         self.static_type = expr_type
-        self.exception_name = exception_name
+        self.exception = exception
         self.message = message
         super().__init__(None, skippable_refcount=True)
 
     def _render_expr(self) -> str:
-        result = "raise {}".format(self.exception_name)
+        result = "raise {}".format(self.exception.qualname)
         if self.message:
             result += " with {}".format(ascii_repr(self.message))
         return result
 
     def __repr__(self) -> str:
         return "<ErrorExpr {} with {}>".format(
-            self.exception_name, repr(self.message)
+            self.exception.name.camel, repr(self.message)
         )
 
 
@@ -730,7 +734,7 @@ class UnreachableExpr(ErrorExpr):
         super().__init__(
             None,
             expr_type,
-            names.Name("Program_Error"),
+            get_context().exception_types["program_error"],
             "Executing supposedly unreachable code",
         )
 

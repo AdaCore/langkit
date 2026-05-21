@@ -237,6 +237,9 @@ base_langkit_docs = {
     "langkit.invalid_unit_name_error": """
         Raised when an invalid unit name is provided.
     """,
+    "langkit.program_error": """
+        Internal exception, raised in case of a bug in the library.
+    """,
     "langkit.native_exception": """
         Exception raised in language bindings when the underlying C API reports
         an unexpected error that occurred in the library.

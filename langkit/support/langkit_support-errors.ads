@@ -8,6 +8,7 @@
 
 package Langkit_Support.Errors with Preelaborate is
 
+   Program_Error           : exception renames Standard.Program_Error;
    Native_Exception        : exception;
    Precondition_Failure    : exception;
    Property_Error          : exception;

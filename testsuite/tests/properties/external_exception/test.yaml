@@ -1,0 +1,13 @@
+driver: lkt_build_and_run
+gpr_mains:
+  - main.adb
+config:
+  library:
+    external_exceptions:
+      - exception: Libfoolang_Support.My_Exception
+        doc_section: foo
+    property_exceptions:
+      - My_Exception
+      - Property_Error
+  extra_docs:
+    foo.my_exception: Doc for My_Exception.

@@ -4,7 +4,7 @@ import abc
 import dataclasses
 from typing import Callable, ClassVar
 
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import CompileCtx, GeneratedException
 from langkit.compiled_types import CompiledType
 from langkit.diagnostics import Location, WarningSet, error
 from langkit.envs import RefKind
@@ -215,6 +215,8 @@ class Scope:
         """
         Exception type, always created automatically by Lkt.
         """
+
+        exception: GeneratedException
 
         @property
         def diagnostic_name(self) -> str:

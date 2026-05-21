@@ -1233,7 +1233,7 @@ private package ${ada_lib_name}.Implementation is
    type Initialization_State is
    ${ada_block_with_parens(
       ["Uninitialized", "Initialized"]
-      + [f"Raised_{exc}" for exc in ctx.property_exceptions],
+      + [f"Raised_{exc.name}" for exc in ctx.property_exceptions],
       3,
    )};
    --  Initialization status:
@@ -1245,8 +1245,8 @@ private package ${ada_lib_name}.Implementation is
 
    subtype Error_Initialization_State is
      Initialization_State range
-       Raised_${ctx.property_exceptions[0]}
-       .. Raised_${ctx.property_exceptions[-1]};
+       Raised_${ctx.property_exceptions[0].name}
+       .. Raised_${ctx.property_exceptions[-1].name};
 
    function Initialization_Error
      (Exc : Ada.Exceptions.Exception_Occurrence)
