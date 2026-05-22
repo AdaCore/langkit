@@ -218,6 +218,19 @@ begin
    Check ("cmd_eval_member3.json", "var v1: T = v0;");
    Check ("cmd_node_text.json", "var v1: T = v0;");
    Check ("cmd_node_text2.json", "def f(x: Int, y: Int = 1): Int {x;}");
+   Check ("cmd_and.json",
+          "  var vff: T = 1 + 1;"
+          & "var vft: T = 1 + v0;"
+          & "var vtf: T = v0 + 1;"
+          & "var vtt: T = v0 + v0;");
+   Check ("cmd_and2.json", "var v1: T = 1 + 1;");
+   Check ("cmd_or.json",
+          "  var vff: T = 1 + 1;"
+          & "var vft: T = 1 + v0;"
+          & "var vtf: T = v0 + 1;"
+          & "var vtt: T = v0 + v0;");
+   Check ("cmd_or2.json", "var v1: T = v0 + 1;");
+   Check ("cmd_not.json", "var v1: T = v0 + 1; var v2: T = 1 + v0;");
 
    Put_Line ("Done.");
 end Commands;

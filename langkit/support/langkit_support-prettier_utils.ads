@@ -162,7 +162,7 @@ private package Langkit_Support.Prettier_Utils is
 
    end Trivias_Bubble_Up;
 
-   type Binary_Operator is (Equal);
+   type Binary_Operator is (Equal, And_Then, Or_Else);
 
    type Document_Kind is (
 
@@ -207,6 +207,7 @@ private package Langkit_Support.Prettier_Utils is
       Is_A,
       Is_Empty,
       Node_Text,
+      Not_Expr,
       String_Lit,
       This_Field,
       This_Node
@@ -399,6 +400,9 @@ private package Langkit_Support.Prettier_Utils is
 
          when Node_Text =>
             Node_Text_Node : Document_Type;
+
+         when Not_Expr =>
+            Not_Expr_Operand : Document_Type;
 
          when String_Lit =>
             String_Lit_Value : Value_Ref;
@@ -672,6 +676,11 @@ private package Langkit_Support.Prettier_Utils is
      (Self : in out Document_Pool;
       Node : Document_Type) return Document_Type;
    --  Return a ``Node_Text`` node
+
+   function Create_Not_Expr
+     (Self    : in out Document_Pool;
+      Operand : Document_Type) return Document_Type;
+   --  Return a ``Not_Expr`` node
 
    function Create_String_Lit
      (Self : in out Document_Pool; Value : Text_Type) return Document_Type;

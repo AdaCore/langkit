@@ -304,6 +304,8 @@
 --      arbitrary nodes that do not need to be the same type, or the same type
 --      exactly), and the result is a boolean.
 --
+--    * "and"/"or", the short-circuiting boolean operators.
+--
 --  * The "eval_member" expression evaluates the member (field or property) of
 --    a given value (struct or node), with potential arguments, and returns the
 --    field value or property result. Property arguments can be passed as
@@ -342,6 +344,10 @@
 --      {"kind": "node_text", "node": <sub-expression>}
 --
 --    Note that it returns the empty string for null nodes.
+--
+--  * The "not" expression takes a boolean and returns its opposite::
+--
+--      {"kind": "not", "operand": <sub-expression>}
 --
 --  * The "string" expression materializes a string literal::
 --

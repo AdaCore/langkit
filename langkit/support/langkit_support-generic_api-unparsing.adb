@@ -1877,6 +1877,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                case Expression.Bin_Op_Op is
                   when Equal =>
                      return From_Bool (Lang, LHS = RHS);
+                  when And_Then =>
+                     return From_Bool
+                              (Lang, As_Bool (LHS) and then As_Bool (RHS));
+                  when Or_Else =>
+                     return From_Bool
+                              (Lang, As_Bool (LHS) or else As_Bool (RHS));
                end case;
             end;
 
@@ -1934,6 +1940,14 @@ package body Langkit_Support.Generic_API.Unparsing is
                   else Node.Text);
             begin
                return From_String (Lang, Text);
+            end;
+
+         when Not_Expr =>
+            declare
+               Operand : constant Value_Ref :=
+                 Evaluate_Expression (State, Expression.Not_Expr_Operand);
+            begin
+               return From_Bool (Lang, not As_Bool (Operand));
             end;
 
          when String_Lit =>

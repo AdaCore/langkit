@@ -187,6 +187,10 @@ begin
    Check ("invalid_bin_op_eq.json");
    Check ("invalid_bin_op_eq2.json");
    Check ("invalid_bin_op_eq3.json");
+   Check ("invalid_bin_op_and.json");
+   Check ("invalid_not.json");
+   Check ("invalid_not2.json");
+   Check ("invalid_not3.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");

@@ -2043,6 +2043,10 @@ package body Langkit_Support.Unparsing_Config is
                      begin
                         if T = "=" then
                            Op := Equal;
+                        elsif T = "and" then
+                           Op := And_Then;
+                        elsif T = "or" then
+                           Op := Or_Else;
                         else
                            Abort_Parsing
                              (Context, "invalid op of bin_op: " & T);
@@ -2059,16 +2063,36 @@ package body Langkit_Support.Unparsing_Config is
 
                      --  Check type compatibility
 
-                     if not (Is_Node_Type (LHS_T)
-                             and then Is_Node_Type (RHS_T))
-                        and then LHS_T /= RHS_T
-                     then
-                        Abort_Parsing
-                          (Context,
-                           "incompatible types for equality: "
-                           & Debug_Name (LHS_T)
-                           & " and " & Debug_Name (RHS_T));
-                     end if;
+                     case Op is
+                        when Equal =>
+                           if not (Is_Node_Type (LHS_T)
+                                   and then Is_Node_Type (RHS_T))
+                              and then LHS_T /= RHS_T
+                           then
+                              Abort_Parsing
+                                (Context,
+                                 "incompatible types for equality: "
+                                 & Debug_Name (LHS_T)
+                                 & " and " & Debug_Name (RHS_T));
+                           end if;
+
+                        when And_Then | Or_Else =>
+                           if LHS_T /= Boolean_Type then
+                              Abort_Parsing
+                                (Context,
+                                 Debug_Name (Boolean_Type)
+                                 & " expected for the LHS of ""and"", got "
+                                 & Debug_Name (LHS_T)
+                                 & " instead");
+                           elsif RHS_T /= Boolean_Type then
+                              Abort_Parsing
+                                (Context,
+                                 Debug_Name (Boolean_Type)
+                                 & " expected for the RHS of ""and"", got "
+                                 & Debug_Name (RHS_T)
+                                 & " instead");
+                           end if;
+                     end case;
 
                      return Pool.Create_Bin_Op (Op, LHS, RHS);
                   end;
@@ -2323,6 +2347,22 @@ package body Langkit_Support.Unparsing_Config is
                   return Pool.Create_Node_Text
                            (Parse_Node_Expression (Tmp, Context, "node_text"));
 
+               elsif Kind = "not" then
+                  Tmp := Mandatory_Key
+                           (JSON, "operand", Context, "for not");
+                  declare
+                     T : Type_Ref;
+                     E : constant Document_Type :=
+                       Parse_Expression (Tmp, Context, T);
+                  begin
+                     if T /= Boolean_Type then
+                        Abort_Parsing
+                          (Context,
+                           "not requires a boolean, got a " & Debug_Name (T));
+                     end if;
+                     return Pool.Create_Not_Expr (E);
+                  end;
+
                elsif Kind = "string" then
                   Tmp := Mandatory_Key (JSON, "value", Context, "for string");
                   Check_Kind (Tmp, JSON_String_Type, Context, "value field");
@@ -2380,7 +2420,7 @@ package body Langkit_Support.Unparsing_Config is
             case Template_Expression_Kind (Result.Kind) is
                when Bin_Op =>
                   case Result.Bin_Op_Op is
-                     when Equal =>
+                     when Equal | And_Then | Or_Else =>
                         Expr_Type := Boolean_Type;
                   end case;
 
@@ -2390,7 +2430,13 @@ package body Langkit_Support.Unparsing_Config is
                when Is_A | Is_Empty =>
                   Expr_Type := Boolean_Type;
 
-               when Node_Text | String_Lit =>
+               when Node_Text =>
+                  Expr_Type := String_Type;
+
+               when Not_Expr =>
+                  Expr_Type := Boolean_Type;
+
+               when String_Lit =>
                   Expr_Type := String_Type;
 
                when This_Field =>

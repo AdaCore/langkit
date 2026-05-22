@@ -1711,6 +1711,21 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Node_Text;
 
+   ---------------------
+   -- Create_Not_Expr --
+   ---------------------
+
+   function Create_Not_Expr
+     (Self    : in out Document_Pool;
+      Operand : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Not_Expr, Not_Expr_Operand => Operand)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Not_Expr;
+
    -----------------------
    -- Create_String_Lit --
    -----------------------
@@ -2376,6 +2391,10 @@ package body Langkit_Support.Prettier_Utils is
             when Node_Text =>
                Write (Prefix & "node_text:");
                Process (Document.Node_Text_Node, Prefix & List_Indent);
+
+            when Not_Expr =>
+               Write (Prefix & "not_expr:");
+               Process (Document.Not_Expr_Operand, Prefix & List_Indent);
 
             when String_Lit =>
                Write (Prefix & "string_lit:");

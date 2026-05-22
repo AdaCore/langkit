@@ -437,13 +437,18 @@ def to_json(input_file: str) -> str:
                 return e.text
 
         elif isinstance(e, L.BinOp):
+            match e.f_op:
+                case L.OpEq():
+                    op = "="
+                case L.OpAnd():
+                    op = "and"
+                case L.OpOr():
+                    op = "or"
+                case _:
+                    error(e.f_op, "unexpected binary operator")
             return {
                 "kind": "bin_op",
-                "op": (
-                    "="
-                    if isinstance(e.f_op, L.OpEq)
-                    else error(e.f_op, "unexpected binary operator")
-                ),
+                "op": op,
                 "lhs": parse_expression(e.f_left),
                 "rhs": parse_expression(e.f_right),
             }
@@ -672,6 +677,9 @@ def to_json(input_file: str) -> str:
                 error(e, "default case missing")
 
             return result
+
+        elif isinstance(e, L.NotExpr):
+            return {"kind": "not", "operand": parse_expression(e.f_expr)}
 
         elif isinstance(e, L.StringLit):
             return e.p_denoted_value
@@ -1061,6 +1069,8 @@ def to_lkt(input_file: str) -> str:
                 lines.append(
                     {
                         "=": "==",
+                        "and": "and",
+                        "or": "or",
                     }[op]
                 )
                 process_template(rhs_doc)
@@ -1107,6 +1117,10 @@ def to_lkt(input_file: str) -> str:
             case {"kind": "node_text", "node": node_doc}:
                 process_template(node_doc)
                 lines.append(".text")
+
+            case {"kind": "not", "operand": operand_doc}:
+                lines.append("not")
+                process_template(operand_doc)
 
             case {"kind": "string", "value": str_val}:
                 lines.append(lkt_lit(str_val))

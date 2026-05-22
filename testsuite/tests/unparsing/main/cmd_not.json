@@ -1,0 +1,28 @@
+{
+  "node_configs": {
+    "Addition": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_lhs"},
+        {
+          "kind": "if",
+          "condition": {
+            "kind": "not",
+            "operand": {
+              "kind": "is_a",
+              "node": {
+                "kind": "eval_member",
+                "prefix": "this_node",
+                "member": "f_lhs"
+              },
+              "kinds": ["Ref"]
+            }
+          },
+          "then": "whitespace",
+          "else": []
+        },
+        {"kind": "text", "text": "+"},
+        {"kind": "recurse_field", "field": "f_rhs"}
+      ]
+    }
+  }
+}
