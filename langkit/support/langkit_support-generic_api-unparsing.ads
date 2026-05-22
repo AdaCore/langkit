@@ -289,6 +289,21 @@
 --
 --  An expression can be one of the following:
 --
+--  * The "bin_op" expression performs a binary operator on two operands::
+--
+--      {
+--        "kind": "bin_op",
+--        "op": <operator>
+--        "lhs": <sub-expression>,
+--        "rhs": <sub-expression>
+--      }
+--
+--    "op" can be one of the following:
+--
+--    * "=", to test equality. Both operands must have compatible types (two
+--      arbitrary nodes that do not need to be the same type, or the same type
+--      exactly), and the result is a boolean.
+--
 --  * The "eval_member" expression evaluates the member (field or property) of
 --    a given value (struct or node), with potential arguments, and returns the
 --    field value or property result. Property arguments can be passed as
@@ -321,6 +336,16 @@
 --    empty for unparsing purposes::
 --
 --      {"kind": "is_empty", "node": <sub-expression>}
+--
+--  * The "node_text" expression takes a node and returns its text::
+--
+--      {"kind": "node_text", "node": <sub-expression>}
+--
+--    Note that it returns the empty string for null nodes.
+--
+--  * The "string" expression materializes a string literal::
+--
+--      {"kind": "string", "value": "some string value"}
 --
 --  * "this_node", which returns the node that instantiates the current
 --    template.

@@ -1862,9 +1862,24 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    function Evaluate_Expression
      (State      : in out Instantiation_State;
-      Expression : Document_Type) return Value_Ref is
+      Expression : Document_Type) return Value_Ref
+   is
+      Lang : Language_Id renames State.Language;
    begin
       case Template_Expression_Kind (Expression.Kind) is
+         when Bin_Op =>
+            declare
+               function LHS return Value_Ref is
+                 (Evaluate_Expression (State, Expression.Bin_Op_LHS));
+               function RHS return Value_Ref is
+                 (Evaluate_Expression (State, Expression.Bin_Op_RHS));
+            begin
+               case Expression.Bin_Op_Op is
+                  when Equal =>
+                     return From_Bool (Lang, LHS = RHS);
+               end case;
+            end;
+
          when Eval_Member =>
             declare
                Prefix : constant Value_Ref :=
@@ -1897,7 +1912,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                  not Node.Is_Null
                  and then Node_Matches (Node, Expression.Is_A_Kinds);
             begin
-               return From_Bool (State.Language, Result);
+               return From_Bool (Lang, Result);
             end;
 
          when Is_Empty =>
@@ -1905,14 +1920,30 @@ package body Langkit_Support.Generic_API.Unparsing is
                Node : constant Lk_Node :=
                  Evaluate_Expression (State, Expression.Is_Empty_Node).As_Node;
             begin
-               return From_Bool (State.Language, Is_Empty_List (Node));
+               return From_Bool (Lang, Is_Empty_List (Node));
             end;
 
+         when Node_Text =>
+            declare
+               Node : constant Lk_Node :=
+                 Evaluate_Expression
+                   (State, Expression.Node_Text_Node).As_Node;
+               Text : constant Text_Type :=
+                 (if Node.Is_Null
+                  then ""
+                  else Node.Text);
+            begin
+               return From_String (Lang, Text);
+            end;
+
+         when String_Lit =>
+            return Expression.String_Lit_Value;
+
          when This_Field =>
-            return From_Node (State.Language, State.Field);
+            return From_Node (Lang, State.Field);
 
          when This_Node =>
-            return From_Node (State.Language, State.Node);
+            return From_Node (Lang, State.Node);
       end case;
    end Evaluate_Expression;
 
@@ -2794,6 +2825,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       elsif Node.Unit.Has_Diagnostics then
          raise Precondition_Failure with "node's unit has parsing errors";
       end if;
+
+      Pool.Initialize (Config.Value.Language);
 
       --  Refresh memoized Prettier documents stored in the unparsing
       --  configuration, since they use Prettier's document IDs that may be

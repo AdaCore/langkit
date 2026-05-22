@@ -542,6 +542,10 @@ package body Langkit_Support.Unparsing_Config is
         Type_Of (From_Bool (Language, False));
       pragma Assert (Boolean_Type /= No_Type_Ref);
 
+      String_Type : constant Type_Ref :=
+        Type_Of (From_String (Language, ""));
+      pragma Assert (String_Type /= No_Type_Ref);
+
       function To_Type_Index (Name : String) return Type_Index;
       --  Return the type index for the node type that has the given
       --  camel-case Name. Raise an Invalid_Input exception if there is no such
@@ -2023,6 +2027,52 @@ package body Langkit_Support.Unparsing_Config is
                     (Tmp, JSON_Int_Type, Context, """length"" for whitespace");
                   return Pool.Create_Whitespace (Tmp.Get);
 
+               elsif Kind = "bin_op" then
+                  declare
+                     Op           : Binary_Operator;
+                     LHS, RHS     : Document_Type;
+                     LHS_T, RHS_T : Type_Ref;
+                  begin
+                     --  Parse the operator
+
+                     Tmp := Mandatory_Key (JSON, "op", Context, "for bin_op");
+                     Check_Kind
+                       (Tmp, JSON_String_Type, Context, "op of bin_op");
+                     declare
+                        T : constant String := Tmp.Get;
+                     begin
+                        if T = "=" then
+                           Op := Equal;
+                        else
+                           Abort_Parsing
+                             (Context, "invalid op of bin_op: " & T);
+                        end if;
+                     end;
+
+                     --  Parse the two operands
+
+                     Tmp := Mandatory_Key (JSON, "lhs", Context, "for bin_op");
+                     LHS := Parse_Expression (Tmp, Context, LHS_T);
+
+                     Tmp := Mandatory_Key (JSON, "rhs", Context, "for bin_op");
+                     RHS := Parse_Expression (Tmp, Context, RHS_T);
+
+                     --  Check type compatibility
+
+                     if not (Is_Node_Type (LHS_T)
+                             and then Is_Node_Type (RHS_T))
+                        and then LHS_T /= RHS_T
+                     then
+                        Abort_Parsing
+                          (Context,
+                           "incompatible types for equality: "
+                           & Debug_Name (LHS_T)
+                           & " and " & Debug_Name (RHS_T));
+                     end if;
+
+                     return Pool.Create_Bin_Op (Op, LHS, RHS);
+                  end;
+
                elsif Kind = "eval_member" then
                   declare
                      Prefix     : Document_Type;
@@ -2267,6 +2317,17 @@ package body Langkit_Support.Unparsing_Config is
                   return Pool.Create_Is_Empty
                            (Parse_Node_Expression (Tmp, Context, "is_empty"));
 
+               elsif Kind = "node_text" then
+                  Tmp := Mandatory_Key
+                           (JSON, "node", Context, "for node_text");
+                  return Pool.Create_Node_Text
+                           (Parse_Node_Expression (Tmp, Context, "node_text"));
+
+               elsif Kind = "string" then
+                  Tmp := Mandatory_Key (JSON, "value", Context, "for string");
+                  Check_Kind (Tmp, JSON_String_Type, Context, "value field");
+                  return Pool.Create_String_Lit (From_UTF8 (Tmp.Get));
+
                else
                   Abort_Parsing
                     (Context, "invalid template document kind: " & Kind);
@@ -2317,11 +2378,20 @@ package body Langkit_Support.Unparsing_Config is
             end if;
 
             case Template_Expression_Kind (Result.Kind) is
+               when Bin_Op =>
+                  case Result.Bin_Op_Op is
+                     when Equal =>
+                        Expr_Type := Boolean_Type;
+                  end case;
+
                when Eval_Member =>
                   Expr_Type := Member_Type (Result.Eval_Member_Ref);
 
                when Is_A | Is_Empty =>
                   Expr_Type := Boolean_Type;
+
+               when Node_Text | String_Lit =>
+                  Expr_Type := String_Type;
 
                when This_Field =>
                   Expr_Type := Member_Type (Context.Field);
@@ -2635,6 +2705,7 @@ package body Langkit_Support.Unparsing_Config is
       Result.Ref_Count := 1;
       Result.Language := Language;
       Result.Symbols := Symbols;
+      Pool.Initialize (Language);
 
       --  First, parse the main JSON document and the overridings
 

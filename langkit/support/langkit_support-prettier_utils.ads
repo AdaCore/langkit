@@ -162,6 +162,8 @@ private package Langkit_Support.Prettier_Utils is
 
    end Trivias_Bubble_Up;
 
+   type Binary_Operator is (Equal);
+
    type Document_Kind is (
 
       --  Template/document nodes
@@ -200,9 +202,12 @@ private package Langkit_Support.Prettier_Utils is
 
       --  Expressions
 
+      Bin_Op,
       Eval_Member,
       Is_A,
       Is_Empty,
+      Node_Text,
+      String_Lit,
       This_Field,
       This_Node
    );
@@ -213,7 +218,7 @@ private package Langkit_Support.Prettier_Utils is
    --  instantiation.
 
    subtype Template_Expression_Kind is
-     Document_Kind range Eval_Member .. This_Node;
+     Document_Kind range Bin_Op .. This_Node;
    --  Kind for a document that materializes an expression for conditions in
    --  template instantiation.
 
@@ -375,6 +380,11 @@ private package Langkit_Support.Prettier_Utils is
             Match_Default  : Document_Type;
             Match_Absent   : Document_Type;
 
+         when Bin_Op =>
+            Bin_Op_Op  : Binary_Operator;
+            Bin_Op_LHS : Document_Type;
+            Bin_Op_RHS : Document_Type;
+
          when Eval_Member =>
             Eval_Member_Prefix : Document_Type;
             Eval_Member_Ref    : Struct_Member_Ref;
@@ -386,6 +396,12 @@ private package Langkit_Support.Prettier_Utils is
 
          when Is_Empty =>
             Is_Empty_Node : Document_Type;
+
+         when Node_Text =>
+            Node_Text_Node : Document_Type;
+
+         when String_Lit =>
+            String_Lit_Value : Value_Ref;
 
          when This_Field | This_Node =>
             null;
@@ -441,6 +457,9 @@ private package Langkit_Support.Prettier_Utils is
 
    type Document_Pool is limited private;
    --  Allocation pool for ``Document_Type`` nodes
+
+   procedure Initialize (Self : in out Document_Pool; Language : Language_Id);
+   --  Associate a pool to a given language
 
    procedure Refresh_Prettier_Documents (Pool : in out Document_Pool);
    --  Recompute the Prettier ``Document_Type`` values for all nodes in
@@ -624,6 +643,13 @@ private package Langkit_Support.Prettier_Utils is
       Match_Absent   : Document_Type) return Document_Type;
    --  Return an ``Match`` node
 
+   function Create_Bin_Op
+     (Self  : in out Document_Pool;
+      Op    : Binary_Operator;
+      LHS   : Document_Type;
+      RHS   : Document_Type) return Document_Type;
+   --  Return a ``Bin_Op`` node
+
    function Create_Eval_Member
      (Self   : in out Document_Pool;
       Prefix : Document_Type;
@@ -641,6 +667,15 @@ private package Langkit_Support.Prettier_Utils is
      (Self : in out Document_Pool;
       Node : Document_Type) return Document_Type;
    --  Return an ``Is_Empty`` node
+
+   function Create_Node_Text
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type;
+   --  Return a ``Node_Text`` node
+
+   function Create_String_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type;
+   --  Return a ``String_Lit`` node
 
    function Create_This_Field
      (Self : in out Document_Pool) return Document_Type;
@@ -785,6 +820,7 @@ private
 
    type Document_Pool is limited record
       Documents : Document_Vectors.Vector;
+      Language  : Language_Id;
 
       --  Some leaf nodes are used so often that allocating singletons rather
       --  than allocating once instance per use saves a lot of memory. We store

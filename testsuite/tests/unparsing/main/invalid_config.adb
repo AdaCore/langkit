@@ -173,6 +173,20 @@ begin
    Check ("invalid_eval_member9.json");
    Check ("invalid_eval_member10.json");
    Check ("invalid_eval_member11.json");
+   Check ("invalid_node_text.json");
+   Check ("invalid_node_text2.json");
+   Check ("invalid_node_text3.json");
+   Check ("invalid_node_text4.json");
+   Check ("invalid_string_lit.json");
+   Check ("invalid_string_lit2.json");
+   Check ("invalid_bin_op.json");
+   Check ("invalid_bin_op2.json");
+   Check ("invalid_bin_op3.json");
+   Check ("invalid_bin_op4.json");
+   Check ("invalid_bin_op5.json");
+   Check ("invalid_bin_op_eq.json");
+   Check ("invalid_bin_op_eq2.json");
+   Check ("invalid_bin_op_eq3.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");

@@ -216,6 +216,8 @@ begin
    Check ("cmd_eval_member1.json", "var v1: T = v0;");
    Check ("cmd_eval_member2.json", "var v1: T = v0;");
    Check ("cmd_eval_member3.json", "var v1: T = v0;");
+   Check ("cmd_node_text.json", "var v1: T = v0;");
+   Check ("cmd_node_text2.json", "def f(x: Int, y: Int = 1): Int {x;}");
 
    Put_Line ("Done.");
 end Commands;

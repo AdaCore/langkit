@@ -1,0 +1,12 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": {
+        "kind": "if",
+        "condition": {"kind": "node_text", "node": "this_node"},
+        "then": "recurse",
+        "else": "recurse"
+      }
+    }
+  }
+}

@@ -820,6 +820,16 @@ package body Langkit_Support.Prettier_Utils is
       return Recurse (Document);
    end To_Prettier_Document;
 
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize (Self : in out Document_Pool; Language : Language_Id)
+   is
+   begin
+      Self.Language := Language;
+   end Initialize;
+
    --------------------------------
    -- Refresh_Prettier_Documents --
    --------------------------------
@@ -1609,6 +1619,27 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Match;
 
+   -------------------
+   -- Create_Bin_Op --
+   -------------------
+
+   function Create_Bin_Op
+     (Self  : in out Document_Pool;
+      Op    : Binary_Operator;
+      LHS   : Document_Type;
+      RHS   : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind       => Bin_Op,
+           Bin_Op_Op  => Op,
+           Bin_Op_LHS => LHS,
+           Bin_Op_RHS => RHS)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Bin_Op;
+
    ------------------------
    -- Create_Eval_Member --
    ------------------------
@@ -1664,6 +1695,37 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_Is_Empty;
+
+   ----------------------
+   -- Create_Node_Text --
+   ----------------------
+
+   function Create_Node_Text
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Node_Text, Node_Text_Node => Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Node_Text;
+
+   -----------------------
+   -- Create_String_Lit --
+   -----------------------
+
+   function Create_String_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind             => String_Lit,
+           String_Lit_Value => From_String (Self.Language, Value))
+      do
+         Self.Register (Result);
+      end return;
+   end Create_String_Lit;
 
    -----------------------
    -- Create_This_Field --
@@ -2268,6 +2330,16 @@ package body Langkit_Support.Prettier_Utils is
                   end loop;
                end;
 
+            when Bin_Op =>
+               Write (Prefix & "bin_op:");
+               Write
+                 (Prefix
+                  & Simple_Indent
+                  & "op: "
+                  & Document.Bin_Op_Op'Image);
+               Process (Document.Bin_Op_LHS, Prefix & List_Indent);
+               Process (Document.Bin_Op_RHS, Prefix & List_Indent);
+
             when Eval_Member =>
                Write (Prefix & "eval_member:");
 
@@ -2300,6 +2372,16 @@ package body Langkit_Support.Prettier_Utils is
             when Is_Empty =>
                Write (Prefix & "is_empty:");
                Process (Document.Is_Empty_Node, Prefix & List_Indent);
+
+            when Node_Text =>
+               Write (Prefix & "node_text:");
+               Process (Document.Node_Text_Node, Prefix & List_Indent);
+
+            when String_Lit =>
+               Write (Prefix & "string_lit:");
+               Write
+                 (Prefix & List_Indent
+                  & Image (As_String (Document.String_Lit_Value)));
 
             when This_Field =>
                Write (Prefix & "this_field");
