@@ -112,12 +112,12 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     fun node_trait(): Entity[TraitDecl] =
         node.node_gen_trait().decl.as[TraitDecl]
 
-    |" Unit method. Return the ``Node`` builtin generic trait.
+    |" Unit method. Return the ``Indexable`` builtin generic trait.
     @exported
     fun indexable_gen_trait(): Entity[GenericDecl] =
         node.get_builtin_gen_decl(s"Indexable")
 
-    |" Unit method. Return the ``Node`` builtin trait.
+    |" Unit method. Return the ``Indexable`` builtin trait.
     @exported
     fun indexable_trait(): Entity[TraitDecl] =
         node.indexable_gen_trait().decl.as[TraitDecl]
