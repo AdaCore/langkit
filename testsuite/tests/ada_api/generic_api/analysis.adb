@@ -263,7 +263,7 @@ begin
    declare
       Dummy : Integer;
    begin
-      Dummy := No_Lk_Node.Text'Length;
+      Dummy := No_Lk_Unit.Text'Length;
    exception
       when Exc : Precondition_Failure =>
          Put_Line ("Got a Precondition_Failure exception: "
