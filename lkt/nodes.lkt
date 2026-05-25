@@ -2064,18 +2064,24 @@ class TypeDecl: Decl implements TypeInterface {
         )
         or self.matching_type(other)
 
+    |" Return whether this type declaration implements the provided trait.
+    @predicate_error("$Self does not implement the $tr trait")
+    fun has_trait(tr: Entity[TraitDecl]): Bool =
+        self.is_null
+        or self.traits.any(
+            (tref) => tref.referenced_decl().node == tr.node
+        )
+        or self.base_type()?.has_trait(tr)
+
+        # In the case of an entity type, we look in the inner node type for
+        # the searched trait.
+        or self.get_entity_node_type().do(
+            (nt) => nt != self and nt.has_trait(tr)
+        )
+
     |" Predicate used to verify that a type implements the Indexable trait.
     @predicate_error("$Self is not Indexable")
-    fun is_indexable_type(): Bool =
-        self.is_null
-        or {
-            bind origin = self;
-
-            self.defined_scope().get_first(s"__call__")
-            .as[FunDecl]
-            ?.owning_type()
-        }
-        == node.indexable_trait().node
+    fun is_indexable_type(): Bool = self.has_trait(node.indexable_trait())
 
     |" Predicate used to emit an error when the type of an expression is not
     |" callable.
