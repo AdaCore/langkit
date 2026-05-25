@@ -568,6 +568,15 @@ package body ${ada_lib_name}.Generic_Impl is
       return Implementation.Text (+Node);
    end Node_Text;
 
+   -----------------
+   -- Node_Symbol --
+   -----------------
+
+   function Node_Symbol (Node : Internal_Node) return Symbol_Type is
+   begin
+      return Implementation.Get_Symbol (+Node);
+   end Node_Symbol;
+
    ---------------------
    -- Node_Sloc_Range --
    ---------------------

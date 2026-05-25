@@ -363,6 +363,11 @@ package Langkit_Support.Generic_API.Analysis is
    --
    --  Note that this returns the empty string for synthetic nodes.
 
+   function Symbol (Self : Lk_Node) return Text_Type;
+   --  Return the symbol corresponding to this token node.
+   --
+   --  This raises a ``Precondition_Failure`` if ``Self`` is not a token node.
+
    function Sloc_Range (Self : Lk_Node) return Source_Location_Range;
    --  Return the spanning source location range for this node.
    --

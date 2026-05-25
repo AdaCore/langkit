@@ -12,6 +12,7 @@ with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
+with Langkit_Support.Symbols;           use Langkit_Support.Symbols;
 with Langkit_Support.Text;              use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
@@ -196,6 +197,7 @@ private package ${ada_lib_name}.Generic_Impl is
    function Node_Token_Start (Node : Internal_Node) return Internal_Token;
    function Node_Token_End (Node : Internal_Node) return Internal_Token;
    function Node_Text (Node : Internal_Node) return Text_Type;
+   function Node_Symbol (Node : Internal_Node) return Symbol_Type;
    function Node_Sloc_Range
      (Node : Internal_Node) return Source_Location_Range;
    function Node_Lookup
@@ -308,6 +310,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Node_Token_Start          => Node_Token_Start'Access,
       Node_Token_End            => Node_Token_End'Access,
       Node_Text                 => Node_Text'Access,
+      Node_Symbol               => Node_Symbol'Access,
       Node_Sloc_Range           => Node_Sloc_Range'Access,
       Node_Lookup               => Node_Lookup'Access,
       Node_Last_Attempted_Child => Node_Last_Attempted_Child'Access,

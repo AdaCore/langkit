@@ -19,6 +19,7 @@ with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Names;        use Langkit_Support.Names;
+with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 with Langkit_Support.Types;        use Langkit_Support.Types;
 
 package body Langkit_Support.Generic_API.Analysis is
@@ -1216,6 +1217,24 @@ package body Langkit_Support.Generic_API.Analysis is
       Reject_Null_Node (Self);
       return Self.Desc.Node_Text (Self.Internal.Node);
    end Text;
+
+   ------------
+   -- Symbol --
+   ------------
+
+   function Symbol (Self : Lk_Node) return Text_Type is
+      Result : Symbol_Type;
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+      if not Self.Is_Token_Node then
+         raise Precondition_Failure with "non-token node";
+      end if;
+      Result := Self.Desc.Node_Symbol (Self.Internal.Node);
+      return (if Result = No_Symbol
+              then ""
+              else Get (Result).all);
+   end Symbol;
 
    ----------------
    -- Sloc_Range --

@@ -15,6 +15,7 @@ use Langkit_Support.Internal.Introspection;
 with Langkit_Support.Internal.Unparsing;
 use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
+with Langkit_Support.Symbols;           use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;             use Langkit_Support.Types;
@@ -128,6 +129,8 @@ package Langkit_Support.Internal.Descriptor is
      (Node : Analysis.Internal_Node) return Analysis.Internal_Token;
    type Node_Text_Type is access function
      (Node : Analysis.Internal_Node) return Text_Type;
+   type Node_Symbol_Type is access function
+     (Node : Analysis.Internal_Node) return Symbol_Type;
    type Node_Sloc_Range_Type is access function
      (Node : Analysis.Internal_Node) return Source_Location_Range;
    type Node_Lookup_Type is access function
@@ -263,6 +266,7 @@ package Langkit_Support.Internal.Descriptor is
       Node_Token_Start          : Node_Token_Getter_Type;
       Node_Token_End            : Node_Token_Getter_Type;
       Node_Text                 : Node_Text_Type;
+      Node_Symbol               : Node_Symbol_Type;
       Node_Sloc_Range           : Node_Sloc_Range_Type;
       Node_Lookup               : Node_Lookup_Type;
       Node_Last_Attempted_Child : Node_Last_Attempted_Child_Type;
