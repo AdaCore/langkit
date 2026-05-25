@@ -338,6 +338,20 @@ def f2(a: Int, ): Int
     "node" template for VarDecl: invalid template JSON node: JSON_BOOLEAN_TYPE
 # invalid_node_symbol3.json
     "node" template for VarDecl: node_symbol expects a token node, got a VarDecl
+# invalid_cast.json
+    template for VarDecl.f_name: missing "prefix" key for cast
+# invalid_cast2.json
+    template for VarDecl.f_name: invalid template JSON node: JSON_BOOLEAN_TYPE
+# invalid_cast3.json
+    template for VarDecl.f_name: invalid prefix for cast: Bool
+# invalid_cast4.json
+    template for VarDecl.f_name: missing "type" key for cast
+# invalid_cast5.json
+    template for VarDecl.f_name: invalid type of cast: JSON_STRING_TYPE expected, but JSON_BOOLEAN_TYPE found
+# invalid_cast6.json
+    template for VarDecl.f_name: invalid node type in cast: NoSuchNode
+# invalid_cast7.json
+    template for VarDecl.f_name: invalid cast from VarDecl to Name
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -2763,6 +2777,20 @@ _LANGKIT.UNPARSING.EXPANSION_ERRORS_ [...STACK TRACE...]
       "id": 2,
       "kind": "text",
       "text": "var v1:T=foo ;var v2:T=Foo;var v3:T=casing_Foo  ;"
+    }
+  ]
+}
+
+== cmd_cast.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "def f(x:Int ):Int{x;}def g(x:Int):Int{x;}"
     }
   ]
 }

@@ -306,6 +306,11 @@
 --
 --    * "and"/"or", the short-circuiting boolean operators.
 --
+--  * The "cast" expression takes a node and converts it to another node type.
+--    If the conversion fails, this yields a null node::
+--
+--      {"kind": "cast", "node": <sub-expression>, "type": "NodeType"}
+--
 --  * The "eval_member" expression evaluates the member (field or property) of
 --    a given value (struct or node), with potential arguments, and returns the
 --    field value or property result. Property arguments can be passed as

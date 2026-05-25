@@ -1,0 +1,36 @@
+{
+  "node_configs": {
+    "ParamSpec": {
+      "node": {
+        "kind": "if",
+        "condition": {
+          "kind": "bin_op",
+          "op": "=",
+          "lhs": {
+            "kind": "node_symbol",
+            "node": {
+              "kind": "eval_member",
+              "prefix": {
+                "kind": "cast",
+                "prefix": {
+                  "kind": "eval_member",
+                  "prefix": {
+                    "kind": "eval_member",
+                    "prefix": "this_node",
+                    "member": "parent"
+                  },
+                  "member": "parent"
+                },
+                "type": "FunDecl"
+              },
+              "member": "f_name"
+            }
+          },
+          "rhs": {"kind": "symbol", "value": "f"}
+        },
+        "then": ["recurse", "whitespace"],
+        "else": "recurse"
+      }
+    }
+  }
+}

@@ -197,6 +197,13 @@ begin
    Check ("invalid_node_symbol.json");
    Check ("invalid_node_symbol2.json");
    Check ("invalid_node_symbol3.json");
+   Check ("invalid_cast.json");
+   Check ("invalid_cast2.json");
+   Check ("invalid_cast3.json");
+   Check ("invalid_cast4.json");
+   Check ("invalid_cast5.json");
+   Check ("invalid_cast6.json");
+   Check ("invalid_cast7.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");

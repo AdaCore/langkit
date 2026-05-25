@@ -233,6 +233,7 @@ begin
    Check ("cmd_not.json", "var v1: T = v0 + 1; var v2: T = 1 + v0;");
    Check ("cmd_node_symbol.json",
           "var v1: T = foo; var v2: T = Foo; var v3: T = casing_Foo;");
+   Check ("cmd_cast.json", "def f(x: Int): Int {x;} def g(x: Int): Int {x;}");
 
    Put_Line ("Done.");
 end Commands;

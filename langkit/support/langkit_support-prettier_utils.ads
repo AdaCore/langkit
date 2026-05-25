@@ -203,6 +203,7 @@ private package Langkit_Support.Prettier_Utils is
       --  Expressions
 
       Bin_Op,
+      Cast,
       Eval_Member,
       Is_A,
       Is_Empty,
@@ -387,6 +388,10 @@ private package Langkit_Support.Prettier_Utils is
             Bin_Op_Op  : Binary_Operator;
             Bin_Op_LHS : Document_Type;
             Bin_Op_RHS : Document_Type;
+
+         when Cast =>
+            Cast_Prefix : Document_Type;
+            Cast_Type   : Type_Ref;
 
          when Eval_Member =>
             Eval_Member_Prefix : Document_Type;
@@ -661,6 +666,12 @@ private package Langkit_Support.Prettier_Utils is
       LHS   : Document_Type;
       RHS   : Document_Type) return Document_Type;
    --  Return a ``Bin_Op`` node
+
+   function Create_Cast
+     (Self    : in out Document_Pool;
+      Prefix  : Document_Type;
+      To_Type : Type_Ref) return Document_Type;
+   --  Return a ``Cast`` node
 
    function Create_Eval_Member
      (Self   : in out Document_Pool;

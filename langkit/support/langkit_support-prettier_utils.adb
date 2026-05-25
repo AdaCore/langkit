@@ -1661,6 +1661,25 @@ package body Langkit_Support.Prettier_Utils is
    end Create_Eval_Member;
 
    -----------------
+   -- Create_Cast --
+   -----------------
+
+   function Create_Cast
+     (Self    : in out Document_Pool;
+      Prefix  : Document_Type;
+      To_Type : Type_Ref) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind        => Cast,
+           Cast_Prefix => Prefix,
+           Cast_Type   => To_Type)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Cast;
+
+   -----------------
    -- Create_Is_A --
    -----------------
 
@@ -2403,6 +2422,12 @@ package body Langkit_Support.Prettier_Utils is
                   Process
                     (Document.Eval_Member_Args (I), Prefix & List_Indent);
                end loop;
+
+            when Cast =>
+               Write (Prefix & "cast:");
+               Write
+                 (Prefix & Simple_Indent & Debug_Name (Document.Cast_Type));
+               Process (Document.Cast_Prefix, Prefix & List_Indent);
 
             when Is_A =>
                Write (Prefix & "is_a:");

@@ -1886,6 +1886,19 @@ package body Langkit_Support.Generic_API.Unparsing is
                end case;
             end;
 
+         when Cast =>
+            declare
+               Prefix : constant Lk_Node :=
+                 Evaluate_Expression (State, Expression.Cast_Prefix).As_Node;
+               Result : constant Lk_Node :=
+                 (if Prefix.Is_Null
+                     or else not Type_Matches (Prefix, Expression.Cast_Type)
+                  then No_Lk_Node
+                  else Prefix);
+            begin
+               return From_Node (Lang, Result);
+            end;
+
          when Eval_Member =>
             declare
                Prefix : constant Value_Ref :=

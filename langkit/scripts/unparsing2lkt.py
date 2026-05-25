@@ -458,6 +458,19 @@ def to_json(input_file: str) -> str:
                 "rhs": parse_expression(e.f_right),
             }
 
+        elif isinstance(e, L.CastExpr):
+            if e.f_null_cond.p_as_bool:
+                error(e.f_null_cond, "unexpected non-cond marker")
+            elif e.f_excludes_null.p_as_bool:
+                error(e.f_null_cond, "unexpected null-excluding marker")
+            elif not isinstance(e.f_dest_type, L.SimpleTypeRef):
+                error(e.f_null_cond, "invalid type expression")
+            return {
+                "kind": "cast",
+                "prefix": parse_expression(e.f_expr),
+                "type": e.f_dest_type.f_type_name.text,
+            }
+
         elif isinstance(e, L.DotExpr):
             if e.f_null_cond.p_as_bool:
                 error(e.f_null_cond, "unexpected non-cond marker")
@@ -1082,6 +1095,10 @@ def to_lkt(input_file: str) -> str:
                     }[op]
                 )
                 process_template(rhs_doc)
+
+            case {"kind": "cast", "prefix": prefix_doc, "type": type_str}:
+                process_template(prefix_doc)
+                lines.append(f".as[{type_str}]")
 
             case {
                 "kind": "eval_member",

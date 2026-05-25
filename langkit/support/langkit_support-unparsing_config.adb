@@ -2101,6 +2101,43 @@ package body Langkit_Support.Unparsing_Config is
                      return Pool.Create_Bin_Op (Op, LHS, RHS);
                   end;
 
+               elsif Kind = "cast" then
+                  Tmp := Mandatory_Key (JSON, "prefix", Context, "for cast");
+                  declare
+                     Prefix_Type : Type_Ref;
+                     Prefix      : constant Document_Type :=
+                       Parse_Expression (Tmp, Context, Prefix_Type);
+                     Cast_Type   : Type_Ref;
+                  begin
+                     Tmp := Mandatory_Key (JSON, "type", Context, "for cast");
+                     Check_Kind
+                       (Tmp,
+                        JSON_String_Type,
+                        Context,
+                        "type of cast");
+                     Cast_Type := Map.Lookup_Type (To_Symbol (Tmp.Get));
+                     if not Is_Node_Type (Prefix_Type) then
+                        Abort_Parsing
+                          (Context,
+                           "invalid prefix for cast: "
+                           & Debug_Name (Prefix_Type));
+                     elsif Cast_Type = No_Type_Ref
+                        or else not Is_Node_Type (Cast_Type)
+                     then
+                        Abort_Parsing
+                          (Context, "invalid node type in cast: " & Tmp.Get);
+                     elsif not Is_Derived_From (Cast_Type, Prefix_Type)
+                        and then not Is_Derived_From (Prefix_Type, Cast_Type)
+                     then
+                        Abort_Parsing
+                          (Context,
+                           "invalid cast from " & Debug_Name (Prefix_Type)
+                           & " to " & Debug_Name (Cast_Type));
+                     end if;
+
+                     return Pool.Create_Cast (Prefix, Cast_Type);
+                  end;
+
                elsif Kind = "eval_member" then
                   declare
                      Prefix     : Document_Type;
@@ -2463,6 +2500,9 @@ package body Langkit_Support.Unparsing_Config is
                      when Equal | And_Then | Or_Else =>
                         Expr_Type := Boolean_Type;
                   end case;
+
+               when Cast =>
+                  Expr_Type := Result.Cast_Type;
 
                when Eval_Member =>
                   Expr_Type := Member_Type (Result.Eval_Member_Ref);
