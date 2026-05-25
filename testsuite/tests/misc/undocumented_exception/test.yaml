@@ -1,0 +1,6 @@
+driver: lkt_compile
+config:
+  library:
+    external_exceptions:
+      - exception: Support.My_Exception
+        doc_section: foo

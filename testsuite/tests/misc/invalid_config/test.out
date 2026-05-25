@@ -8,6 +8,16 @@ Errors, exiting
 error: invalid_name.yaml:library:language_name: words must start with an upper case character followed by lower case characters: 'foo'
 Errors, exiting
 
+== invalid_prop_exc.yaml ==
+
+error: property_exceptions: unknown exception no_such_exception
+Errors, exiting
+
+== invalid_prop_exc_casing.yaml ==
+
+error: property_exceptions: words must start with an upper case character followed by lower case characters: 'my_exception'
+Errors, exiting
+
 == missing_lkt.yaml ==
 
 error: missing_lkt.yaml: missing 'lkt_spec' entry

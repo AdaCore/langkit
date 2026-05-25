@@ -3791,7 +3791,7 @@ class ExpressionCompiler:
         return E.ErrorExpr(
             debug_info(expr, "RaiseException"),
             dest_type,
-            names.Name.from_camel(entity.name),
+            entity.exception,
             msg,
         )
 

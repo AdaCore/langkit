@@ -371,9 +371,13 @@ private package ${ada_lib_name}.Implementation is
    pragma Pack (Ref_Categories);
 
    function Properties_May_Raise
-     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean;
-   --  Return if ``Exc`` is one of the exceptions that properties are allowed
+     (Id : Ada.Exceptions.Exception_Id) return Boolean;
+   --  Return if ``Id`` is one of the exceptions that properties are allowed
    --  to raise.
+
+   function Properties_May_Raise
+     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean
+   is (Properties_May_Raise (Ada.Exceptions.Exception_Identity (Exc)));
 
    package AST_Envs is new Langkit_Support.Lexical_Envs_Impl
      (Get_Unit_Version         => Unit_Version,
@@ -1233,7 +1237,7 @@ private package ${ada_lib_name}.Implementation is
    type Initialization_State is
    ${ada_block_with_parens(
       ["Uninitialized", "Initialized"]
-      + [f"Raised_{exc}" for exc in ctx.property_exceptions],
+      + [f"Raised_{exc.name}" for exc in ctx.property_exceptions],
       3,
    )};
    --  Initialization status:
@@ -1245,8 +1249,8 @@ private package ${ada_lib_name}.Implementation is
 
    subtype Error_Initialization_State is
      Initialization_State range
-       Raised_${ctx.property_exceptions[0]}
-       .. Raised_${ctx.property_exceptions[-1]};
+       Raised_${ctx.property_exceptions[0].name}
+       .. Raised_${ctx.property_exceptions[-1].name};
 
    function Initialization_Error
      (Exc : Ada.Exceptions.Exception_Occurrence)

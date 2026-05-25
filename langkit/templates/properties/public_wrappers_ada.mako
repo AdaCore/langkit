@@ -137,7 +137,7 @@ ${public_prototype(property)} is
    ## Free resources when the property fails
    % if needs_refcounting:
       exception
-         when ${ctx.property_exception_matcher} =>
+         when ${ctx.property_exception_matcher(15)} =>
             Free_Internal;
             raise;
    % endif

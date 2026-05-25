@@ -1,6 +1,19 @@
 driver: lkt_build_and_run
 gpr_mains:
+  - except.adb
   - analysis.adb
   - introspection_types.adb
   - introspection_values.adb
   - hash.adb
+config:
+  library:
+    external_exceptions:
+      - exception: Libfoolang_Support.My_Exception_1
+        doc_section: foo
+      - exception: Libfoolang_Support.My_Exception_2
+        doc_section: foo
+    property_exceptions:
+      - My_Exception_1
+  extra_docs:
+    foo.my_exception_1: Doc for My_Exception_1.
+    foo.my_exception_2: Doc for My_Exception_2.

@@ -46,15 +46,9 @@ class Builtins:
         error_location: Scope.BuiltinDynVar
         logic_context: Scope.BuiltinDynVar
 
-    @dataclasses.dataclass(frozen=True)
-    class Exceptions:
-        precondition_failure: Scope.Exception
-        property_error: Scope.Exception
-
     generics: Generics
     functions: Functions
     dyn_vars: DynVars
-    exceptions: Exceptions
 
     @classmethod
     def create(cls, context: CompileCtx, root_scope: Scope) -> Builtins:
@@ -78,10 +72,6 @@ class Builtins:
                     "logic_context",
                     E.DynamicVariable(Location.builtin, "logic_context"),
                 ),
-            ),
-            cls.Exceptions(
-                Scope.Exception("PreconditionFailure"),
-                Scope.Exception("PropertyError"),
             ),
         )
 
@@ -134,8 +124,6 @@ class Builtins:
             Scope.BuiltinValue("true", E.BooleanLiteralExpr(None, True)),
             result.dyn_vars.error_location,
             result.dyn_vars.logic_context,
-            result.exceptions.precondition_failure,
-            result.exceptions.property_error,
             result.generics.ast_list,
             result.generics.array,
             result.generics.entity,
@@ -148,6 +136,11 @@ class Builtins:
             result.functions.dynamic_lexical_env,
         ]:
             root_scope.mapping[builtin.name] = builtin
+
+        # Register external exceptions that properties are allowed to raise
+        for exc in context.property_exceptions:
+            exc_name = exc.name.camel
+            root_scope.mapping[exc_name] = Scope.Exception(exc_name, exc)
 
         return result
 

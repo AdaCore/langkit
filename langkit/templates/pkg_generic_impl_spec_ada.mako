@@ -319,10 +319,10 @@ private package ${ada_lib_name}.Generic_Impl is
 
       Extract_Tokens => Extract_Tokens'Access,
 
-      Create_Enum      => Create_Enum'Access,
-      Create_Array     => Create_Array'Access,
-      Create_Struct    => Create_Struct'Access,
-      Eval_Node_Member => Eval_Node_Member'Access,
-      Is_Managed_Error => Implementation.Properties_May_Raise'Access);
+      Create_Enum          => Create_Enum'Access,
+      Create_Array         => Create_Array'Access,
+      Create_Struct        => Create_Struct'Access,
+      Eval_Node_Member     => Eval_Node_Member'Access,
+      Is_Managed_Exception => Implementation.Properties_May_Raise'Access);
 
 end ${ada_lib_name}.Generic_Impl;

@@ -75,6 +75,17 @@ class DocDatabase:
         Set of names for documentation database that were actually used.
         """
 
+    def ensure_doc(self, key: str) -> bool:
+        """
+        Return whether the given entity lacks documentation.
+
+        If needed, create an empty doc for it.
+        """
+        undocumented = key not in self._dict
+        if undocumented:
+            self._dict[key] = Template("")
+        return undocumented
+
     def __getitem__(self, key: str) -> Template:
         self._used.add(key)
         return self._dict[key]
@@ -225,6 +236,9 @@ base_langkit_docs = {
     """,
     "langkit.invalid_unit_name_error": """
         Raised when an invalid unit name is provided.
+    """,
+    "langkit.program_error": """
+        Internal exception, raised in case of a bug in the library.
     """,
     "langkit.native_exception": """
         Exception raised in language bindings when the underlying C API reports

@@ -265,7 +265,7 @@ begin
          ${scopes.finalize_scope(property.vars.root_scope)}
 
       exception
-         when Exc : ${ctx.property_exception_matcher} =>
+         when Exc : ${ctx.property_exception_matcher(21)} =>
             ## For managed exceptions, free property expression resources
             ## before letting the exception propagate.
             % if property.vars.root_scope.has_refcounted_vars(True):

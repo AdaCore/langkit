@@ -730,7 +730,7 @@ package body ${ada_lib_name}.Implementation is
            (Context, Name, Kind, Charset, Reparse, Result, Dummy_Index);
          return Result;
       exception
-         when ${ctx.property_exception_matcher} =>
+         when ${ctx.property_exception_matcher(15)} =>
             raise Invalid_Unit_Name_Error with
                "Invalid unit name: " & Image (Name, With_Quotes => True)
                & " (" & Analysis_Unit_Kind'Image (Kind) & ")";
@@ -2751,7 +2751,7 @@ package body ${ada_lib_name}.Implementation is
 
             Post_Env_Actions (Node, State);
          exception
-            when Exc : ${ctx.property_exception_matcher} =>
+            when Exc : ${ctx.property_exception_matcher(24)} =>
                if PLE_Errors_Trace.Is_Active then
                    GNATCOLL.Traces.Trace
                      (PLE_Errors_Trace,
@@ -3490,16 +3490,10 @@ package body ${ada_lib_name}.Implementation is
    --------------------------
 
    function Properties_May_Raise
-     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean is
+     (Id : Ada.Exceptions.Exception_Id) return Boolean is
    begin
-      return Ada.Exceptions.Exception_Identity (Exc) in
-         % for i, exc in enumerate(ctx.property_exceptions):
-            % if i > 0:
-               |
-            % endif
-            ${exc}'Identity
-         % endfor
-      ;
+      return Id in
+        ${ctx.property_exception_matcher(9, identity=True)};
    end Properties_May_Raise;
 
    ----------------------
@@ -4843,9 +4837,9 @@ package body ${ada_lib_name}.Implementation is
       if
       % for i, exc in enumerate(ctx.property_exceptions):
          ${"" if i == 0 else "elsif"}
-            Exception_Identity (Exc) = ${exc}'Identity
+            Exception_Identity (Exc) = ${exc.qualname}'Identity
          then
-            return Raised_${exc};
+            return Raised_${exc.name};
       % endfor
       else
          raise Program_Error;
@@ -4865,8 +4859,8 @@ package body ${ada_lib_name}.Implementation is
    begin
       case State is
          % for exc in ctx.property_exceptions:
-            when Raised_${exc} =>
-               Exc := ${exc}'Identity;
+            when Raised_${exc.name} =>
+               Exc := ${exc.qualname}'Identity;
          % endfor
       end case;
       Raise_Property_Exception (Node, Exc, Message);
