@@ -5176,42 +5176,38 @@ class SubscriptExpr: Expr {
     fun has_context_free_type(): Bool = self.prefix.has_context_free_type()
 
     fun xref_equation(): Equation =
-        (
-            (
-                (
-                    (
-                        (
-                            self.prefix.xref_equation()
-                            %and self.index.xref_equation()
-                        )
-                        %and self.actual_type_var
-                        <- TypeDecl.get_indexable_content_type%(
-                            self.prefix.actual_type_var
-                        )
-                    )
-                    %and (
-                        # The index should be an integer
-                        self.index.expected_type_var <- self.int_type()
-                    )
-                )
-                %and (
-                    if not self.xref_entry_point()
-                    then
-                        self.prefix.expected_type_var
-                        <- TypeDecl.make_array_type%(self.expected_type_var)
-                    elif self.prefix.has_context_free_type()
-                    then
-                        self.prefix.expected_type_var <- null[Entity[TypeDecl]]
-                    else
-                        self.prefix.expected_type_var
-                        <- self.get_expected_type()?.make_array_type()
-                )
-            )
+        self.prefix.xref_equation()
+        %and self.index.xref_equation()
+
+        # The type of this expression is the content of the indexed array
+        %and self.actual_type_var
+        <- TypeDecl.get_indexable_content_type%(
+            self.prefix.actual_type_var
+        )
+
+        # The index should be an integer
+        %and (
+            self.index.expected_type_var <- self.int_type()
             %and {
                 bind error_location = node.index;
                 TypeDecl.is_int_type%(self.index.actual_type_var)
             }
         )
+
+        # Propagate the expected type of this expression to the prefix
+        # expresion if this is required.
+        %and (
+            if not self.xref_entry_point() then
+                self.prefix.expected_type_var
+                <- TypeDecl.make_array_type%(self.expected_type_var)
+            elif self.prefix.has_context_free_type() then
+                self.prefix.expected_type_var <- null[Entity[TypeDecl]]
+            else
+                self.prefix.expected_type_var
+                <- self.get_expected_type()?.make_array_type()
+        )
+
+        # Ensure the prefix is an indexable value
         %and {
             bind error_location = node.prefix;
             TypeDecl.is_indexable_type%(self.prefix.actual_type_var)
