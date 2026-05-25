@@ -5582,7 +5582,7 @@ class PatternMatchBranch: BaseMatchBranch {
 }
 
 |" Query comprehension.
-|" ``from <expr> match <pattern> [if <expr>]``
+|" ``from <source> match <pattern> [select <mapping>] [if <guard>]``
 class Query: Expr {
     @parse_field
     source: Expr
