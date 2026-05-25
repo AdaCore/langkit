@@ -339,6 +339,13 @@
 --
 --      {"kind": "is_empty", "node": <sub-expression>}
 --
+--  * The "node_symbol" expression takes a token node and returns the
+--    corresponding symbol::
+--
+--      {"kind": "node_symbol", "node": <sub-expression>}
+--
+--    Note that it returns the empty symbol for null nodes.
+--
 --  * The "node_text" expression takes a node and returns its text::
 --
 --      {"kind": "node_text", "node": <sub-expression>}
@@ -352,6 +359,10 @@
 --  * The "string" expression materializes a string literal::
 --
 --      {"kind": "string", "value": "some string value"}
+--
+--  * The "symbol" expression materializes a symbol literal::
+--
+--      {"kind": "symbol", "value": "some string value"}
 --
 --  * "this_node", which returns the node that instantiates the current
 --    template.

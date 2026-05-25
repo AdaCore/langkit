@@ -5,7 +5,6 @@ with System;
 with Ada.Unchecked_Deallocation;
 
 with ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Lexer_Implementation;
 with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
 package body ${ada_lib_name}.Generic_Impl is

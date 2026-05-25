@@ -410,11 +410,16 @@ def to_json(input_file: str) -> str:
             return result[0] if len(result) == 1 else result
 
         elif isinstance(e, L.SingleLineStringLit):
-            return (
-                {"kind": "string", "value": parse_str(e)}
-                if expression
-                else {"kind": "text", "text": parse_str(e)}
-            )
+            if expression:
+                if not e.p_is_prefixed_string:
+                    return {"kind": "string", "value": parse_str(e)}
+                elif e.p_prefix == "s":
+                    return {"kind": "symbol", "value": parse_str(e)}
+                else:
+                    error(e, "unexpected string prefix")
+            elif e.p_is_prefixed_string:
+                error(e, "unexpected string prefix")
+            return {"kind": "text", "text": parse_str(e)}
 
         elif isinstance(e, L.RefId):
             if e.text in (
@@ -461,6 +466,9 @@ def to_json(input_file: str) -> str:
             match e.f_suffix.text:
                 case "is_empty":
                     return {"kind": "is_empty", "node": prefix}
+
+                case "symbol":
+                    return {"kind": "node_symbol", "node": prefix}
 
                 case "text":
                     return {"kind": "node_text", "node": prefix}
@@ -1114,6 +1122,10 @@ def to_lkt(input_file: str) -> str:
                 process_template(node_doc)
                 lines.append(".is_empty")
 
+            case {"kind": "node_symbol", "node": node_doc}:
+                process_template(node_doc)
+                lines.append(".symbol")
+
             case {"kind": "node_text", "node": node_doc}:
                 process_template(node_doc)
                 lines.append(".text")
@@ -1124,6 +1136,9 @@ def to_lkt(input_file: str) -> str:
 
             case {"kind": "string", "value": str_val}:
                 lines.append(lkt_lit(str_val))
+
+            case {"kind": "symbol", "value": str_val}:
+                lines.append("s" + lkt_lit(str_val))
 
             case _:
                 raise FatalError(f"invalid template: {doc}")

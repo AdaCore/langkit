@@ -1929,17 +1929,25 @@ package body Langkit_Support.Generic_API.Unparsing is
                return From_Bool (Lang, Is_Empty_List (Node));
             end;
 
-         when Node_Text =>
+         when Node_Symbol | Node_Text =>
             declare
+               Expr : constant Document_Type :=
+                 (if Expression.Kind = Node_Symbol
+                  then Expression.Node_Symbol_Node
+                  else Expression.Node_Text_Node);
                Node : constant Lk_Node :=
-                 Evaluate_Expression
-                   (State, Expression.Node_Text_Node).As_Node;
+                 Evaluate_Expression (State, Expr).As_Node;
                Text : constant Text_Type :=
                  (if Node.Is_Null
                   then ""
+                  elsif Expression.Kind = Node_Symbol
+                  then Node.Symbol
                   else Node.Text);
             begin
-               return From_String (Lang, Text);
+               return
+                 (if Expression.Kind = Node_Symbol
+                  then From_Symbol (Lang, Text)
+                  else From_String (Lang, Text));
             end;
 
          when Not_Expr =>
@@ -1952,6 +1960,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when String_Lit =>
             return Expression.String_Lit_Value;
+
+         when Symbol_Lit =>
+            return Expression.Symbol_Lit_Value;
 
          when This_Field =>
             return From_Node (Lang, State.Field);

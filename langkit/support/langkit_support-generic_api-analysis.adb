@@ -19,7 +19,6 @@ with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Names;        use Langkit_Support.Names;
-with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 with Langkit_Support.Types;        use Langkit_Support.Types;
 
 package body Langkit_Support.Generic_API.Analysis is

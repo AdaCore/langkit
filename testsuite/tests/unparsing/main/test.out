@@ -326,6 +326,18 @@ def f2(a: Int, ): Int
     "node" template for VarDecl: invalid template JSON node: JSON_BOOLEAN_TYPE
 # invalid_not3.json
     "node" template for VarDecl: not requires a boolean, got a VarDecl
+# invalid_symbol.json
+    "node" template for VarDecl: missing "value" key for symbol
+# invalid_symbol2.json
+    "node" template for VarDecl: invalid value field: JSON_STRING_TYPE expected, but JSON_BOOLEAN_TYPE found
+# invalid_symbol3.json
+    "node" template for VarDecl: invalid symbol: "invalid_symbol": this is an invalid symbol
+# invalid_node_symbol.json
+    "node" template for VarDecl: missing "node" key for node_symbol
+# invalid_node_symbol2.json
+    "node" template for VarDecl: invalid template JSON node: JSON_BOOLEAN_TYPE
+# invalid_node_symbol3.json
+    "node" template for VarDecl: node_symbol expects a token node, got a VarDecl
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -2737,6 +2749,20 @@ _LANGKIT.UNPARSING.EXPANSION_ERRORS_ [...STACK TRACE...]
       "id": 2,
       "kind": "text",
       "text": "var v1:T=v0+1;var v2:T=1 +v0;"
+    }
+  ]
+}
+
+== cmd_node_symbol.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=foo ;var v2:T=Foo;var v3:T=casing_Foo  ;"
     }
   ]
 }

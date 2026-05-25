@@ -1696,6 +1696,21 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Is_Empty;
 
+   ------------------------
+   -- Create_Node_Symbol --
+   ------------------------
+
+   function Create_Node_Symbol
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Node_Symbol, Node_Symbol_Node => Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Node_Symbol;
+
    ----------------------
    -- Create_Node_Text --
    ----------------------
@@ -1741,6 +1756,22 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_String_Lit;
+
+   -----------------------
+   -- Create_Symbol_Lit --
+   -----------------------
+
+   function Create_Symbol_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind             => Symbol_Lit,
+           Symbol_Lit_Value => From_Symbol (Self.Language, Value))
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Symbol_Lit;
 
    -----------------------
    -- Create_This_Field --
@@ -2388,6 +2419,10 @@ package body Langkit_Support.Prettier_Utils is
                Write (Prefix & "is_empty:");
                Process (Document.Is_Empty_Node, Prefix & List_Indent);
 
+            when Node_Symbol =>
+               Write (Prefix & "node_symbol:");
+               Process (Document.Node_Symbol_Node, Prefix & List_Indent);
+
             when Node_Text =>
                Write (Prefix & "node_text:");
                Process (Document.Node_Text_Node, Prefix & List_Indent);
@@ -2401,6 +2436,12 @@ package body Langkit_Support.Prettier_Utils is
                Write
                  (Prefix & List_Indent
                   & Image (As_String (Document.String_Lit_Value)));
+
+            when Symbol_Lit =>
+               Write (Prefix & "symbol_lit:");
+               Write
+                 (Prefix & List_Indent
+                  & Image (As_Symbol (Document.Symbol_Lit_Value)));
 
             when This_Field =>
                Write (Prefix & "this_field");

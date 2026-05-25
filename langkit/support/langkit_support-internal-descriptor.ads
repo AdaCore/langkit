@@ -169,6 +169,8 @@ package Langkit_Support.Internal.Descriptor is
       Arguments : Internal_Value_Array) return Internal_Value_Access;
    type Is_Managed_Exception_Type is access function
      (Id : Exception_Id) return Boolean;
+   type Canonicalize_Symbol_Type is access function
+     (Symbol : Text_Type) return Symbolization_Result;
 
    type Language_Descriptor is limited record
       Language_Name : Text_Access;
@@ -285,6 +287,7 @@ package Langkit_Support.Internal.Descriptor is
       Create_Struct        : Create_Struct_Type;
       Eval_Node_Member     : Eval_Node_Member_Type;
       Is_Managed_Exception : Is_Managed_Exception_Type;
+      Canonicalize_Symbol  : Canonicalize_Symbol_Type;
    end record;
 
    function "+" is new Ada.Unchecked_Conversion

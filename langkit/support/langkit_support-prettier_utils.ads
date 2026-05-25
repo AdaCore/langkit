@@ -206,9 +206,11 @@ private package Langkit_Support.Prettier_Utils is
       Eval_Member,
       Is_A,
       Is_Empty,
+      Node_Symbol,
       Node_Text,
       Not_Expr,
       String_Lit,
+      Symbol_Lit,
       This_Field,
       This_Node
    );
@@ -398,6 +400,9 @@ private package Langkit_Support.Prettier_Utils is
          when Is_Empty =>
             Is_Empty_Node : Document_Type;
 
+         when Node_Symbol =>
+            Node_Symbol_Node : Document_Type;
+
          when Node_Text =>
             Node_Text_Node : Document_Type;
 
@@ -406,6 +411,9 @@ private package Langkit_Support.Prettier_Utils is
 
          when String_Lit =>
             String_Lit_Value : Value_Ref;
+
+         when Symbol_Lit =>
+            Symbol_Lit_Value : Value_Ref;
 
          when This_Field | This_Node =>
             null;
@@ -672,6 +680,11 @@ private package Langkit_Support.Prettier_Utils is
       Node : Document_Type) return Document_Type;
    --  Return an ``Is_Empty`` node
 
+   function Create_Node_Symbol
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type;
+   --  Return a ``Node_Symbol`` node
+
    function Create_Node_Text
      (Self : in out Document_Pool;
       Node : Document_Type) return Document_Type;
@@ -685,6 +698,10 @@ private package Langkit_Support.Prettier_Utils is
    function Create_String_Lit
      (Self : in out Document_Pool; Value : Text_Type) return Document_Type;
    --  Return a ``String_Lit`` node
+
+   function Create_Symbol_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type;
+   --  Return a ``Symbol_Lit`` node
 
    function Create_This_Field
      (Self : in out Document_Pool) return Document_Type;

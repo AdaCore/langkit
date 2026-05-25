@@ -546,6 +546,10 @@ package body Langkit_Support.Unparsing_Config is
         Type_Of (From_String (Language, ""));
       pragma Assert (String_Type /= No_Type_Ref);
 
+      Symbol_Type_Ref : constant Type_Ref :=
+        Type_Of (From_Symbol (Language, ""));
+      pragma Assert (Symbol_Type_Ref /= No_Type_Ref);
+
       function To_Type_Index (Name : String) return Type_Index;
       --  Return the type index for the node type that has the given
       --  camel-case Name. Raise an Invalid_Input exception if there is no such
@@ -2341,6 +2345,23 @@ package body Langkit_Support.Unparsing_Config is
                   return Pool.Create_Is_Empty
                            (Parse_Node_Expression (Tmp, Context, "is_empty"));
 
+               elsif Kind = "node_symbol" then
+                  declare
+                     T    : Type_Ref;
+                     Node : Document_Type;
+                  begin
+                     Tmp := Mandatory_Key
+                              (JSON, "node", Context, "for node_symbol");
+                     Node := Parse_Expression (Tmp, Context, T);
+                     if not Is_Node_Type (T) or else not Is_Token_Node (T) then
+                        Abort_Parsing
+                          (Context,
+                           "node_symbol expects a token node, got a "
+                           & Debug_Name (T));
+                     end if;
+                     return Pool.Create_Node_Symbol (Node);
+                  end;
+
                elsif Kind = "node_text" then
                   Tmp := Mandatory_Key
                            (JSON, "node", Context, "for node_text");
@@ -2367,6 +2388,25 @@ package body Langkit_Support.Unparsing_Config is
                   Tmp := Mandatory_Key (JSON, "value", Context, "for string");
                   Check_Kind (Tmp, JSON_String_Type, Context, "value field");
                   return Pool.Create_String_Lit (From_UTF8 (Tmp.Get));
+
+               elsif Kind = "symbol" then
+                  Tmp := Mandatory_Key (JSON, "value", Context, "for symbol");
+                  Check_Kind (Tmp, JSON_String_Type, Context, "value field");
+                  declare
+                     Text : constant Text_Type := From_UTF8 (Tmp.Get);
+                     Symbol : constant Symbolization_Result :=
+                       Canonicalize_Symbol (Language, Text);
+                  begin
+                     if Symbol.Success then
+                        return Pool.Create_Symbol_Lit (Symbol.Symbol);
+                     else
+                        Abort_Parsing
+                          (Context,
+                           "invalid symbol: "
+                           & Image (Text, With_Quotes => True) & ": "
+                           & Image (Symbol.Error_Message));
+                     end if;
+                  end;
 
                else
                   Abort_Parsing
@@ -2430,6 +2470,9 @@ package body Langkit_Support.Unparsing_Config is
                when Is_A | Is_Empty =>
                   Expr_Type := Boolean_Type;
 
+               when Node_Symbol =>
+                  Expr_Type := Symbol_Type_Ref;
+
                when Node_Text =>
                   Expr_Type := String_Type;
 
@@ -2438,6 +2481,9 @@ package body Langkit_Support.Unparsing_Config is
 
                when String_Lit =>
                   Expr_Type := String_Type;
+
+               when Symbol_Lit =>
+                  Expr_Type := Symbol_Type_Ref;
 
                when This_Field =>
                   Expr_Type := Member_Type (Context.Field);

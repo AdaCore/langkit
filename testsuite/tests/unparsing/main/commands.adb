@@ -231,6 +231,8 @@ begin
           & "var vtt: T = v0 + v0;");
    Check ("cmd_or2.json", "var v1: T = v0 + 1;");
    Check ("cmd_not.json", "var v1: T = v0 + 1; var v2: T = 1 + v0;");
+   Check ("cmd_node_symbol.json",
+          "var v1: T = foo; var v2: T = Foo; var v3: T = casing_Foo;");
 
    Put_Line ("Done.");
 end Commands;

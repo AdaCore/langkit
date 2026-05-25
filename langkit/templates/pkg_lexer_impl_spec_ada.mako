@@ -2,6 +2,7 @@
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
+with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Token_Data_Handlers;
@@ -23,6 +24,10 @@ private package ${ada_lib_name}.Lexer_Implementation is
    --
    --  In addition, set ``Same_Contents`` to whether if ``Old_TDH`` is not null
    --  and its contents is identical to the content of ``Input``.
+
+   function Canonicalize_Symbol
+     (Symbol : Text_Type) return Symbolization_Result;
+   --  Convenience wrapper around the symbol canonicalizer for this language
 
    function Get_Symbol
      (Token : Token_Or_Trivia_Index;
