@@ -1,0 +1,23 @@
+class A {}
+class B: A {}
+class C: A {}
+
+val int_arr = [1, 2, 3]
+val str_arr = ["a", "b", "c"]
+
+val valid1 = from int_arr match 1
+val valid2 = from str_arr match "a"
+val valid3 = from int_arr match 1 if 1 == 1
+val valid4 = from int_arr match 1 select "Hello!"
+val valid5 = from valid1 match 2
+
+val explicit1: Stream[Int] = from int_arr match 1 select 1
+val explicit2: Stream[A] = from int_arr match 1 select A()
+val explicit3: Stream[A] = from int_arr match 1 select B()
+val explicit4: Stream[A] = from int_arr match 1 select C()
+
+val propagate1: Stream[String] = from int_arr match 1 select null
+val propagate2: Stream[A] = from int_arr match 1 select null
+
+val not_iterable_source = from 42 match 1
+val not_bool_guard = from int_arr match 1 if "not a bool"
