@@ -975,7 +975,7 @@ class Decl: LktNode implements DeclarationInterface {
             )
 
     |" Check that the parent GenericDecl has nb_types parameter types
-    @predicate_error("Incorrect number of parameter types")
+    @predicate_error("incorrect number of parameter types")
     fun has_correct_type_arg_number(nb_types: Int): Bool =
         self.is_null
         or match self.parent {
@@ -2624,11 +2624,11 @@ class FunctionType: TypeDecl {
     fun should_ignore_constructor_arg(): Bool =
         self?.origin?.full_decl()?.has_annotation(s"ignore_constructor_arg")
 
-    @predicate_error("Propagate functions must return entities")
+    @predicate_error("propagate functions must return entities")
     fun returns_entity(): Bool =
         self.is_null or self.return_type.node == self.entity_type().node
 
-    @predicate_error("Predicate functions must return booleans")
+    @predicate_error("predicate functions must return booleans")
     fun returns_bool(): Bool =
         self.is_null or self.return_type.matching_type(self.bool_type())
 
