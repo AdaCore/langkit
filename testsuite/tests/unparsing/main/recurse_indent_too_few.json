@@ -4,7 +4,7 @@
     "StmtList": {
       "sep": {
         "kind": "indent",
-        "contents": ["hardline"]
+        "contents": "hardline"
       }
     }
   }

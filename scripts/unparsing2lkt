@@ -1,0 +1,6 @@
+#! /usr/bin/env python3
+
+from langkit.scripts.unparsing2lkt import main
+
+
+main()

@@ -1,0 +1,4 @@
+class FooNodeList {
+   val node = group(indent(recurse))
+   val sep = [line, recurse]
+}

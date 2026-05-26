@@ -46,4 +46,7 @@ s = ERROR: 1:11: space missing
 
 s = ERROR: 1:11: empty line must not end with a space
 
+== regex_pattern.lkt ==
+
+"foo" = 'foo'
 Done

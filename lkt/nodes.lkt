@@ -3057,6 +3057,10 @@ class ParenPattern: Pattern {
 |" Pattern that considers the value as text and matches it against the
 |" given regular expression.
 class RegexPattern: Pattern implements TokenNode {
+    |" Return the equivalent string for this regular expression.
+    @exported
+    @external()
+    fun denoted_value(): DecodedStringValue
 }
 
 |" Pattern to match any remaining number of elements in a list pattern.

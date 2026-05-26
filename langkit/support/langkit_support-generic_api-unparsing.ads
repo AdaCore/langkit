@@ -171,12 +171,12 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --    * The "dedent" template yields a "dedent" Prettier document::
    --
-   --        {"kind": "dedent", "document": <sub-template>}
+   --        {"kind": "dedent", "contents": <sub-template>}
    --
    --    * The "dedentToRoot" template yields a "dedentToRoot" Prettier
    --      document::
    --
-   --        {"kind": "dedentToRoot", "document": <sub-template>}
+   --        {"kind": "dedentToRoot", "contents": <sub-template>}
    --
    --    * The "fill" template yields a "fill" Prettier document::
    --
@@ -343,7 +343,8 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --    {
    --      "node_configs": {<node-name>: <node-config>},
-   --      "max_empty_lines": <natural-number>
+   --      "max_empty_lines": <natural-number>,
+   --      "token_configs": {...}
    --    }
    --
    --  For each node to configure, the inner "node_configs" mapping associates
@@ -357,7 +358,8 @@ package Langkit_Support.Generic_API.Unparsing is
    --      "leading_sep": <template>,
    --      "trailing_sep": <template>,
    --      "flush_before_children": <boolean>
-   --      "independent_lines": <boolean>
+   --      "independent_lines": <boolean>,
+   --      "table": <table-config>
    --    }
    --
    --  The "node" component is optional. If present, it contains a document
@@ -398,14 +400,14 @@ package Langkit_Support.Generic_API.Unparsing is
    --    each list child has and that returns whether to join rows, as a
    --    boolean.
    --
-   --    The optional "sep" entry must be a template that describes how to join
-   --    two rows: the first row is substituted to the "recurse_left" template
-   --    and the second row is substituted to the "recurse_right" template. For
-   --    example::
+   --    The optional "template" entry must be a template that describes how to
+   --    join two rows: the first row is substituted to the "recurse_left"
+   --    template and the second row is substituted to the "recurse_right"
+   --    template. For example::
    --
    --      "join": {
    --        "predicate": "p_my_predicate",
-   --        "sep": [
+   --        "template": [
    --          "recurse_left",
    --          {"kind": "tableSeparator", "text": ""},
    --          {"kind": "group", "document": ["line", "recurse_right"]}
