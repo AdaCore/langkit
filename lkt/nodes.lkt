@@ -589,7 +589,7 @@ class Decl: LktNode implements DeclarationInterface {
                     )
                     .as_entity
                 else
-                    # Add a new argument at the begining of the function type
+                    # Add a new argument at the beginning of the function type
                     # when it is a static combiner. It must accept an entity of
                     # the function's owning type.
                     FunctionType(
@@ -713,7 +713,7 @@ class Decl: LktNode implements DeclarationInterface {
         elt_type?.make_array_type()
     }
 
-    |" Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+    |" Return the type of ``E.F`` when ``self`` is the declaration of the ``F``
     |" member and ``prefix_type`` is the type of ``E``.
     @exported
     fun get_suffix_type(prefix_type: Entity[TypeDecl]): Entity[TypeDecl] = {
@@ -977,12 +977,12 @@ class Decl: LktNode implements DeclarationInterface {
             )
             .do(
                 (dew) =>
-                self.get_rebinded_decl(dew.dynenvwrapper_instantiation_env)
+                self.get_rebound_decl(dew.dynenvwrapper_instantiation_env)
             )
 
     |" Create a new Entity from Self using rebindings_env as the new
     |" environment to handle generics.
-    fun get_rebinded_decl(rebindings_env: LexicalEnv): Entity[Decl] = {
+    fun get_rebound_decl(rebindings_env: LexicalEnv): Entity[Decl] = {
         val shed_current = node.parent.node_env.shed_rebindings(self.info);
 
         if self.is_null or not self.parent is GenericDecl
@@ -1706,7 +1706,7 @@ class GenericDecl: Decl {
     |" Return the suffix of the node's image that contains the type parameters.
     fun image_suffix(): String =
         "[" & (
-            # When no rebinindings are present, use the generic_param_decls of
+            # When no rebindings are present, use the generic_param_decls of
             # the GenericDecl to avoid using the environment as for
             # instantiated type parameters: The result would be the same either
             # way.
@@ -2013,7 +2013,7 @@ class TypeDecl: Decl implements TypeInterface {
         else
             self.common_ancestor_helper(other_types, 0, true)
 
-    |" Return true if Self and other are matching type that can be permutated.
+    |" Return true if Self and other are matching type that can be permuted.
     @predicate_error("expected $Self, got $other")
     fun commutative_matching_type(
         other: Entity[TypeDecl],
@@ -2228,7 +2228,7 @@ class TypeDecl: Decl implements TypeInterface {
         .as[Decl]
         ?.subdecl_if_generic()
 
-    |" Return a rebinded version of BasicTrait, in order to allow for all
+    |" Return a rebound version of BasicTrait, in order to allow for all
     |" types to have builtins (do, singleton...) in their environment.
     fun basic_trait_from_self(): Entity[TypeDecl] =
         self.basic_trait().instantiate_generic_type_decl([self])
@@ -2339,7 +2339,7 @@ class TypeDecl: Decl implements TypeInterface {
                     (t) => t.node == self.astlist_type().node
                 )
                 .do(
-                    # When the class is an ASTList, its ``buider`` method needs
+                    # When the class is an ASTList, its ``builder`` method needs
                     # to accept an array of the list's element as a NodeBuilder
                     # type for the first argument.
                     (list_type) => {
