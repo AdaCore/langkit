@@ -1,0 +1,21 @@
+class A {}
+class B: A {}
+class C: A {}
+
+# Test the stream concatenation operator
+val concat_int: Stream[Int] = (1 :: null[Stream[Int]])
+    ::: (2 :: null[Stream[Int]])
+val concat_string: Stream[String] = ("a" :: null[Stream[String]])
+    ::: ("b" :: null[Stream[String]])
+val concat_cls: Stream[B] = (B() :: null[Stream[B]])
+    ::: (B() :: null[Stream[B]])
+val concat_inferred = (1 :: null) ::: (2 :: null)
+val concat_propagated_l_to_r = (1 :: null) ::: null
+val concat_propagated_r_to_l = null ::: (1 :: null)
+val concat_propagated_down: Stream[Int] = null ::: null
+val concat_covariant = (B() :: null) ::: (A() :: null)
+val concat_contravariant = (A() :: null) ::: (B() :: null)
+val concat_common_ancestor = (B() :: null) ::: (C() :: null)
+val not_same_type_operands = (1 :: null) ::: ("" :: null)
+val not_stream_operand = 1 ::: 1
+val null_operands = null ::: null

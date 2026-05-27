@@ -1,0 +1,13 @@
+# Test arithmetic operations
+val arith_plus: Int = 1 + 1
+val arith_sub: Int = 1 - 1
+val arith_mul: Int = 1 * 1
+val arith_div: Int = 1 / 1
+val arith_big_int: BigInt = BigInt() + BigInt()
+val arith_inferred = 1 + 1
+val arith_propagated_l_to_r = 1 + null
+val arith_propagated_r_to_l = null + 1
+val arith_propagated_down: Int = null + null
+val not_same_type_operands = 1 + BigInt()
+val not_int_operand = 1 + ""
+val null_operands = null + null

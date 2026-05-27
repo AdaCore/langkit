@@ -1,0 +1,259 @@
+Resolving test.lkt
+==================
+Id   <RefId "A" test.lkt:2:10-2:11>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Id   <RefId "A" test.lkt:3:10-3:11>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "concat_str" test.lkt:6:1-6:33>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:6:17-6:23>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:6:26-6:33>
+        has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:6:26-6:28>
+           has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:6:31-6:33>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "concat_arr" test.lkt:7:1-7:39>
+     has_type <StructDecl prelude: "Array[Int]">
+
+   Id   <RefId "Array" test.lkt:7:17-7:22>
+        has_type None
+        references <StructDecl prelude: "Array[T]">
+
+   Id   <RefId "Int" test.lkt:7:23-7:26>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:7:30-7:39>
+        has_type <StructDecl prelude: "Array[Int]">
+
+      Expr <ArrayLiteral test.lkt:7:30-7:33>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <NumLit test.lkt:7:31-7:32>
+              has_type <StructDecl prelude: "Int">
+
+      Expr <ArrayLiteral test.lkt:7:36-7:39>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <NumLit test.lkt:7:37-7:38>
+              has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "concat_cls_arr" test.lkt:8:1-8:45>
+     has_type <StructDecl prelude: "Array[B]">
+
+   Id   <RefId "Array" test.lkt:8:21-8:26>
+        has_type None
+        references <StructDecl prelude: "Array[T]">
+
+   Id   <RefId "B" test.lkt:8:27-8:28>
+        has_type None
+        references <ClassDecl "B" test.lkt:2:1-2:14>
+
+   Expr <BinOp test.lkt:8:32-8:45>
+        has_type <StructDecl prelude: "Array[B]">
+
+      Expr <ArrayLiteral test.lkt:8:32-8:37>
+           has_type <StructDecl prelude: "Array[B]">
+
+         Expr <CallExpr test.lkt:8:33-8:36>
+              has_type <ClassDecl "B" test.lkt:2:1-2:14>
+
+            Id   <RefId "B" test.lkt:8:33-8:34>
+                 has_type <FunctionType "() -> B" test.lkt>
+                 references <ClassDecl "B" test.lkt:2:1-2:14>
+
+      Expr <ArrayLiteral test.lkt:8:40-8:45>
+           has_type <StructDecl prelude: "Array[B]">
+
+         Expr <CallExpr test.lkt:8:41-8:44>
+              has_type <ClassDecl "B" test.lkt:2:1-2:14>
+
+            Id   <RefId "B" test.lkt:8:41-8:42>
+                 has_type <FunctionType "() -> B" test.lkt>
+                 references <ClassDecl "B" test.lkt:2:1-2:14>
+
+Decl <ValDecl "concat_inferred" test.lkt:9:1-9:30>
+     has_type <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:9:23-9:30>
+        has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:9:23-9:25>
+           has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:9:28-9:30>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "concat_propagated_l_to_r" test.lkt:10:1-10:41>
+     has_type <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:10:32-10:41>
+        has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:10:32-10:34>
+           has_type <StructDecl prelude: "String">
+
+      Expr <NullLit test.lkt:10:37-10:41>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "concat_propagated_r_to_l" test.lkt:11:1-11:42>
+     has_type <StructDecl prelude: "Array[Int]">
+
+   Expr <BinOp test.lkt:11:32-11:42>
+        has_type <StructDecl prelude: "Array[Int]">
+
+      Expr <NullLit test.lkt:11:32-11:36>
+           has_type <StructDecl prelude: "Array[Int]">
+
+      Expr <ArrayLiteral test.lkt:11:39-11:42>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <NumLit test.lkt:11:40-11:41>
+              has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "concat_propagated_down" test.lkt:12:1-12:49>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:12:29-12:35>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:12:38-12:49>
+        has_type <StructDecl prelude: "String">
+
+      Expr <NullLit test.lkt:12:38-12:42>
+           has_type <StructDecl prelude: "String">
+
+      Expr <NullLit test.lkt:12:45-12:49>
+           has_type <StructDecl prelude: "String">
+
+<ValDecl "not_same_type_operands" test.lkt:13:1-13:38> failed nameres:
+test.lkt:13:36-13:38: error: expected Array[Int], got String
+ 13 | val not_same_type_operands = [1] & ""
+    |                                    ^^ 
+
+Decl <ValDecl "not_same_type_operands" test.lkt:13:1-13:38>
+     has_type None
+
+   Expr <BinOp test.lkt:13:30-13:38>
+        has_type None
+
+      Expr <ArrayLiteral test.lkt:13:30-13:33>
+           has_type None
+
+         Expr <NumLit test.lkt:13:31-13:32>
+              has_type None
+
+      Expr <SingleLineStringLit test.lkt:13:36-13:38>
+           has_type None
+
+<ValDecl "not_valid_operands" test.lkt:14:1-14:31> failed nameres:
+test.lkt:14:26-14:27: error: expression must be a string or an array, got Int
+ 14 | val not_valid_operands = 1 & 2
+    |                          ^ 
+
+Decl <ValDecl "not_valid_operands" test.lkt:14:1-14:31>
+     has_type None
+
+   Expr <BinOp test.lkt:14:26-14:31>
+        has_type None
+
+      Expr <NumLit test.lkt:14:26-14:27>
+           has_type None
+
+      Expr <NumLit test.lkt:14:30-14:31>
+           has_type None
+
+<ValDecl "no_covariance" test.lkt:15:1-15:34> failed nameres:
+test.lkt:15:29-15:34: error: expected Array[B], got Array[A]
+ 15 | val no_covariance = [B()] & [A()]
+    |                             ^^^^^ 
+
+Decl <ValDecl "no_covariance" test.lkt:15:1-15:34>
+     has_type None
+
+   Expr <BinOp test.lkt:15:21-15:34>
+        has_type None
+
+      Expr <ArrayLiteral test.lkt:15:21-15:26>
+           has_type None
+
+         Expr <CallExpr test.lkt:15:22-15:25>
+              has_type None
+
+            Id   <RefId "B" test.lkt:15:22-15:23>
+                 has_type None
+                 references None
+
+      Expr <ArrayLiteral test.lkt:15:29-15:34>
+           has_type None
+
+         Expr <CallExpr test.lkt:15:30-15:33>
+              has_type None
+
+            Id   <RefId "A" test.lkt:15:30-15:31>
+                 has_type None
+                 references None
+
+<ValDecl "not_valid_propagated_down" test.lkt:16:1-16:49> failed nameres:
+test.lkt:16:38-16:42: error: expression must be a string or an array, got Int
+ 16 | val not_valid_propagated_down: Int = null & null
+    |                                      ^^^^ 
+
+test.lkt:16:38-16:42: error: could not determine type
+ 16 | val not_valid_propagated_down: Int = null & null
+    |                                      ^^^^ 
+
+Decl <ValDecl "not_valid_propagated_down" test.lkt:16:1-16:49>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:16:32-16:35>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:16:38-16:49>
+        has_type None
+
+      Expr <NullLit test.lkt:16:38-16:42>
+           has_type None
+
+      Expr <NullLit test.lkt:16:45-16:49>
+           has_type None
+
+<ValDecl "null_operands" test.lkt:17:1-17:32> failed nameres:
+test.lkt:17:21-17:25: error: could not determine type
+ 17 | val null_operands = null & null
+    |                     ^^^^ 
+
+test.lkt:17:28-17:32: error: could not determine type
+ 17 | val null_operands = null & null
+    |                            ^^^^ 
+
+test.lkt:17:5-17:18: error: could not determine type
+ 17 | val null_operands = null & null
+    |     ^^^^^^^^^^^^^ 
+
+Decl <ValDecl "null_operands" test.lkt:17:1-17:32>
+     has_type None
+
+   Expr <BinOp test.lkt:17:21-17:32>
+        has_type None
+
+      Expr <NullLit test.lkt:17:21-17:25>
+           has_type None
+
+      Expr <NullLit test.lkt:17:28-17:32>
+           has_type None
+

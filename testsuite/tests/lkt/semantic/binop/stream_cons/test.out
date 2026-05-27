@@ -1,0 +1,407 @@
+Resolving test.lkt
+==================
+Id   <RefId "A" test.lkt:2:10-2:11>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Id   <RefId "A" test.lkt:3:10-3:11>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "cons_int" test.lkt:6:1-6:56>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Id   <RefId "Stream" test.lkt:6:15-6:21>
+        has_type None
+        references <StructDecl prelude: "Stream[T]">
+
+   Id   <RefId "Int" test.lkt:6:22-6:25>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:6:29-6:56>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NumLit test.lkt:6:29-6:30>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <BinOp test.lkt:6:34-6:56>
+           has_type <StructDecl prelude: "Stream[Int]">
+
+         Expr <NumLit test.lkt:6:34-6:35>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <NullLit test.lkt:6:39-6:56>
+              has_type <StructDecl prelude: "Stream[Int]">
+
+            Id   <RefId "Stream" test.lkt:6:44-6:50>
+                 has_type None
+                 references <StructDecl prelude: "Stream[T]">
+
+            Id   <RefId "Int" test.lkt:6:51-6:54>
+                 has_type None
+                 references <StructDecl prelude: "Int">
+
+Decl <ValDecl "cons_string" test.lkt:7:1-7:69>
+     has_type <StructDecl prelude: "Stream[String]">
+
+   Id   <RefId "Stream" test.lkt:7:18-7:24>
+        has_type None
+        references <StructDecl prelude: "Stream[T]">
+
+   Id   <RefId "String" test.lkt:7:25-7:31>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:7:35-7:69>
+        has_type <StructDecl prelude: "Stream[String]">
+
+      Expr <SingleLineStringLit test.lkt:7:35-7:38>
+           has_type <StructDecl prelude: "String">
+
+      Expr <BinOp test.lkt:7:42-7:69>
+           has_type <StructDecl prelude: "Stream[String]">
+
+         Expr <SingleLineStringLit test.lkt:7:42-7:45>
+              has_type <StructDecl prelude: "String">
+
+         Expr <NullLit test.lkt:7:49-7:69>
+              has_type <StructDecl prelude: "Stream[String]">
+
+            Id   <RefId "Stream" test.lkt:7:54-7:60>
+                 has_type None
+                 references <StructDecl prelude: "Stream[T]">
+
+            Id   <RefId "String" test.lkt:7:61-7:67>
+                 has_type None
+                 references <StructDecl prelude: "String">
+
+Decl <ValDecl "cons_cls" test.lkt:8:1-8:56>
+     has_type <StructDecl prelude: "Stream[B]">
+
+   Id   <RefId "Stream" test.lkt:8:15-8:21>
+        has_type None
+        references <StructDecl prelude: "Stream[T]">
+
+   Id   <RefId "B" test.lkt:8:22-8:23>
+        has_type None
+        references <ClassDecl "B" test.lkt:2:1-2:14>
+
+   Expr <BinOp test.lkt:8:27-8:56>
+        has_type <StructDecl prelude: "Stream[B]">
+
+      Expr <CallExpr test.lkt:8:27-8:30>
+           has_type <ClassDecl "B" test.lkt:2:1-2:14>
+
+         Id   <RefId "B" test.lkt:8:27-8:28>
+              has_type <FunctionType "() -> B" test.lkt>
+              references <ClassDecl "B" test.lkt:2:1-2:14>
+
+      Expr <BinOp test.lkt:8:34-8:56>
+           has_type <StructDecl prelude: "Stream[B]">
+
+         Expr <CallExpr test.lkt:8:34-8:37>
+              has_type <ClassDecl "B" test.lkt:2:1-2:14>
+
+            Id   <RefId "B" test.lkt:8:34-8:35>
+                 has_type <FunctionType "() -> B" test.lkt>
+                 references <ClassDecl "B" test.lkt:2:1-2:14>
+
+         Expr <NullLit test.lkt:8:41-8:56>
+              has_type <StructDecl prelude: "Stream[B]">
+
+            Id   <RefId "Stream" test.lkt:8:46-8:52>
+                 has_type None
+                 references <StructDecl prelude: "Stream[T]">
+
+            Id   <RefId "B" test.lkt:8:53-8:54>
+                 has_type None
+                 references <ClassDecl "B" test.lkt:2:1-2:14>
+
+Decl <ValDecl "cons_inferred" test.lkt:9:1-9:43>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Expr <BinOp test.lkt:9:21-9:43>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NumLit test.lkt:9:21-9:22>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NullLit test.lkt:9:26-9:43>
+           has_type <StructDecl prelude: "Stream[Int]">
+
+         Id   <RefId "Stream" test.lkt:9:31-9:37>
+              has_type None
+              references <StructDecl prelude: "Stream[T]">
+
+         Id   <RefId "Int" test.lkt:9:38-9:41>
+              has_type None
+              references <StructDecl prelude: "Int">
+
+Decl <ValDecl "cons_propagated_l_to_r" test.lkt:10:1-10:39>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Expr <BinOp test.lkt:10:30-10:39>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NumLit test.lkt:10:30-10:31>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NullLit test.lkt:10:35-10:39>
+           has_type <StructDecl prelude: "Stream[Int]">
+
+Decl <ValDecl "cons_propagated_l_to_r_deep" test.lkt:11:1-11:60>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Expr <BinOp test.lkt:11:35-11:60>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NumLit test.lkt:11:35-11:36>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <BinOp test.lkt:11:40-11:60>
+           has_type <StructDecl prelude: "Stream[Int]">
+
+         Expr <NullLit test.lkt:11:40-11:44>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <BinOp test.lkt:11:48-11:60>
+              has_type <StructDecl prelude: "Stream[Int]">
+
+            Expr <NullLit test.lkt:11:48-11:52>
+                 has_type <StructDecl prelude: "Int">
+
+            Expr <NullLit test.lkt:11:56-11:60>
+                 has_type <StructDecl prelude: "Stream[Int]">
+
+Decl <ValDecl "cons_propagated_r_to_l" test.lkt:12:1-12:55>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Expr <BinOp test.lkt:12:30-12:55>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NullLit test.lkt:12:30-12:34>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NullLit test.lkt:12:38-12:55>
+           has_type <StructDecl prelude: "Stream[Int]">
+
+         Id   <RefId "Stream" test.lkt:12:43-12:49>
+              has_type None
+              references <StructDecl prelude: "Stream[T]">
+
+         Id   <RefId "Int" test.lkt:12:50-12:53>
+              has_type None
+              references <StructDecl prelude: "Int">
+
+Decl <ValDecl "cons_propagated_down" test.lkt:13:1-13:53>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Id   <RefId "Stream" test.lkt:13:27-13:33>
+        has_type None
+        references <StructDecl prelude: "Stream[T]">
+
+   Id   <RefId "Int" test.lkt:13:34-13:37>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:13:41-13:53>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Expr <NullLit test.lkt:13:41-13:45>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NullLit test.lkt:13:49-13:53>
+           has_type <StructDecl prelude: "Stream[Int]">
+
+Decl <ValDecl "cons_covariant" test.lkt:14:1-14:51>
+     has_type <StructDecl prelude: "Stream[A]">
+
+   Expr <BinOp test.lkt:14:22-14:51>
+        has_type <StructDecl prelude: "Stream[A]">
+
+      Expr <CallExpr test.lkt:14:22-14:25>
+           has_type <ClassDecl "B" test.lkt:2:1-2:14>
+
+         Id   <RefId "B" test.lkt:14:22-14:23>
+              has_type <FunctionType "() -> B" test.lkt>
+              references <ClassDecl "B" test.lkt:2:1-2:14>
+
+      Expr <BinOp test.lkt:14:29-14:51>
+           has_type <StructDecl prelude: "Stream[A]">
+
+         Expr <CallExpr test.lkt:14:29-14:32>
+              has_type <ClassDecl "B" test.lkt:2:1-2:14>
+
+            Id   <RefId "B" test.lkt:14:29-14:30>
+                 has_type <FunctionType "() -> B" test.lkt>
+                 references <ClassDecl "B" test.lkt:2:1-2:14>
+
+         Expr <NullLit test.lkt:14:36-14:51>
+              has_type <StructDecl prelude: "Stream[A]">
+
+            Id   <RefId "Stream" test.lkt:14:41-14:47>
+                 has_type None
+                 references <StructDecl prelude: "Stream[T]">
+
+            Id   <RefId "A" test.lkt:14:48-14:49>
+                 has_type None
+                 references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "cons_contravariant" test.lkt:15:1-15:44>
+     has_type <StructDecl prelude: "Stream[A]">
+
+   Expr <BinOp test.lkt:15:26-15:44>
+        has_type <StructDecl prelude: "Stream[A]">
+
+      Expr <CallExpr test.lkt:15:26-15:29>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+         Id   <RefId "A" test.lkt:15:26-15:27>
+              has_type <FunctionType "() -> A" test.lkt>
+              references <ClassDecl "A" test.lkt:1:1-1:11>
+
+      Expr <BinOp test.lkt:15:33-15:44>
+           has_type <StructDecl prelude: "Stream[B]">
+
+         Expr <CallExpr test.lkt:15:33-15:36>
+              has_type <ClassDecl "B" test.lkt:2:1-2:14>
+
+            Id   <RefId "B" test.lkt:15:33-15:34>
+                 has_type <FunctionType "() -> B" test.lkt>
+                 references <ClassDecl "B" test.lkt:2:1-2:14>
+
+         Expr <NullLit test.lkt:15:40-15:44>
+              has_type <StructDecl prelude: "Stream[B]">
+
+Decl <ValDecl "cons_common_ancestor" test.lkt:16:1-16:46>
+     has_type <StructDecl prelude: "Stream[A]">
+
+   Expr <BinOp test.lkt:16:28-16:46>
+        has_type <StructDecl prelude: "Stream[A]">
+
+      Expr <CallExpr test.lkt:16:28-16:31>
+           has_type <ClassDecl "C" test.lkt:3:1-3:14>
+
+         Id   <RefId "C" test.lkt:16:28-16:29>
+              has_type <FunctionType "() -> C" test.lkt>
+              references <ClassDecl "C" test.lkt:3:1-3:14>
+
+      Expr <BinOp test.lkt:16:35-16:46>
+           has_type <StructDecl prelude: "Stream[B]">
+
+         Expr <CallExpr test.lkt:16:35-16:38>
+              has_type <ClassDecl "B" test.lkt:2:1-2:14>
+
+            Id   <RefId "B" test.lkt:16:35-16:36>
+                 has_type <FunctionType "() -> B" test.lkt>
+                 references <ClassDecl "B" test.lkt:2:1-2:14>
+
+         Expr <NullLit test.lkt:16:42-16:46>
+              has_type <StructDecl prelude: "Stream[B]">
+
+<ValDecl "not_stream_res" test.lkt:17:1-17:36> failed nameres:
+test.lkt:17:27-17:36: error: expected Int, got Stream[Int]
+ 17 | val not_stream_res: Int = 1 :: null
+    |                           ^^^^^^^^^ 
+
+test.lkt:17:32-17:36: error: could not determine type
+ 17 | val not_stream_res: Int = 1 :: null
+    |                                ^^^^ 
+
+Decl <ValDecl "not_stream_res" test.lkt:17:1-17:36>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:17:21-17:24>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:17:27-17:36>
+        has_type None
+
+      Expr <NumLit test.lkt:17:27-17:28>
+           has_type None
+
+      Expr <NullLit test.lkt:17:32-17:36>
+           has_type None
+
+<ValDecl "not_stream_r" test.lkt:18:1-18:26> failed nameres:
+test.lkt:18:25-18:26: error: expected Stream[Int], got Int
+ 18 | val not_stream_r = 1 :: 1
+    |                         ^ 
+
+test.lkt:18:5-18:17: error: could not determine type
+ 18 | val not_stream_r = 1 :: 1
+    |     ^^^^^^^^^^^^ 
+
+Decl <ValDecl "not_stream_r" test.lkt:18:1-18:26>
+     has_type None
+
+   Expr <BinOp test.lkt:18:20-18:26>
+        has_type None
+
+      Expr <NumLit test.lkt:18:20-18:21>
+           has_type None
+
+      Expr <NumLit test.lkt:18:25-18:26>
+           has_type None
+
+<ValDecl "not_same_type_operands" test.lkt:19:1-19:47> failed nameres:
+test.lkt:19:35-19:47: error: expected Stream[Int], got Stream[String]
+ 19 | val not_same_type_operands = 1 :: ("" :: null)
+    |                                   ^^^^^^^^^^^^ 
+
+test.lkt:19:42-19:46: error: could not determine type
+ 19 | val not_same_type_operands = 1 :: ("" :: null)
+    |                                          ^^^^ 
+
+test.lkt:19:5-19:27: error: could not determine type
+ 19 | val not_same_type_operands = 1 :: ("" :: null)
+    |     ^^^^^^^^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "not_same_type_operands" test.lkt:19:1-19:47>
+     has_type None
+
+   Expr <BinOp test.lkt:19:30-19:47>
+        has_type None
+
+      Expr <NumLit test.lkt:19:30-19:31>
+           has_type None
+
+      Expr <ParenExpr test.lkt:19:35-19:47>
+           has_type None
+
+         Expr <BinOp test.lkt:19:36-19:46>
+              has_type None
+
+            Expr <SingleLineStringLit test.lkt:19:36-19:38>
+                 has_type None
+
+            Expr <NullLit test.lkt:19:42-19:46>
+                 has_type None
+
+<ValDecl "null_operands" test.lkt:20:1-20:33> failed nameres:
+test.lkt:20:21-20:25: error: could not determine type
+ 20 | val null_operands = null :: null
+    |                     ^^^^ 
+
+test.lkt:20:29-20:33: error: could not determine type
+ 20 | val null_operands = null :: null
+    |                             ^^^^ 
+
+test.lkt:20:5-20:18: error: could not determine type
+ 20 | val null_operands = null :: null
+    |     ^^^^^^^^^^^^^ 
+
+Decl <ValDecl "null_operands" test.lkt:20:1-20:33>
+     has_type None
+
+   Expr <BinOp test.lkt:20:21-20:33>
+        has_type None
+
+      Expr <NullLit test.lkt:20:21-20:25>
+           has_type None
+
+      Expr <NullLit test.lkt:20:29-20:33>
+           has_type None
+

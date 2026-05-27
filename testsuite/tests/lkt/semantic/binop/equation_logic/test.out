@@ -1,0 +1,128 @@
+Resolving test.lkt
+==================
+Decl <ValDecl "equation_and" test.lkt:2:1-2:47>
+     has_type <StructDecl prelude: "Equation">
+
+   Id   <RefId "Equation" test.lkt:2:19-2:27>
+        has_type None
+        references <StructDecl prelude: "Equation">
+
+   Expr <BinOp test.lkt:2:30-2:47>
+        has_type <StructDecl prelude: "Equation">
+
+      Expr <LogicExpr test.lkt:2:30-2:35>
+           has_type <StructDecl prelude: "Equation">
+
+         Id   <RefId "true" test.lkt:2:31-2:35>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "true">
+
+      Expr <LogicExpr test.lkt:2:41-2:47>
+           has_type <StructDecl prelude: "Equation">
+
+         Id   <RefId "false" test.lkt:2:42-2:47>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "false">
+
+Decl <ValDecl "equation_or" test.lkt:3:1-3:45>
+     has_type <StructDecl prelude: "Equation">
+
+   Id   <RefId "Equation" test.lkt:3:18-3:26>
+        has_type None
+        references <StructDecl prelude: "Equation">
+
+   Expr <BinOp test.lkt:3:29-3:45>
+        has_type <StructDecl prelude: "Equation">
+
+      Expr <LogicExpr test.lkt:3:29-3:34>
+           has_type <StructDecl prelude: "Equation">
+
+         Id   <RefId "true" test.lkt:3:30-3:34>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "true">
+
+      Expr <LogicExpr test.lkt:3:39-3:45>
+           has_type <StructDecl prelude: "Equation">
+
+         Id   <RefId "false" test.lkt:3:40-3:45>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "false">
+
+Decl <ValDecl "equation_inferred" test.lkt:4:1-4:42>
+     has_type <StructDecl prelude: "Equation">
+
+   Expr <BinOp test.lkt:4:25-4:42>
+        has_type <StructDecl prelude: "Equation">
+
+      Expr <LogicExpr test.lkt:4:25-4:30>
+           has_type <StructDecl prelude: "Equation">
+
+         Id   <RefId "true" test.lkt:4:26-4:30>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "true">
+
+      Expr <LogicExpr test.lkt:4:36-4:42>
+           has_type <StructDecl prelude: "Equation">
+
+         Id   <RefId "false" test.lkt:4:37-4:42>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "false">
+
+Decl <ValDecl "equation_propagated" test.lkt:5:1-5:41>
+     has_type <StructDecl prelude: "Equation">
+
+   Expr <BinOp test.lkt:5:27-5:41>
+        has_type <StructDecl prelude: "Equation">
+
+      Expr <NullLit test.lkt:5:27-5:31>
+           has_type <StructDecl prelude: "Equation">
+
+      Expr <NullLit test.lkt:5:37-5:41>
+           has_type <StructDecl prelude: "Equation">
+
+<ValDecl "not_equation_operand" test.lkt:6:1-6:39> failed nameres:
+test.lkt:6:38-6:39: error: operands of %and and %or must be equations, got Int
+ 6 | val not_equation_operand = null %and 1
+   |                                      ^ 
+
+Decl <ValDecl "not_equation_operand" test.lkt:6:1-6:39>
+     has_type None
+
+   Expr <BinOp test.lkt:6:28-6:39>
+        has_type None
+
+      Expr <NullLit test.lkt:6:28-6:32>
+           has_type None
+
+      Expr <NumLit test.lkt:6:38-6:39>
+           has_type None
+
+<ValDecl "not_bool_res" test.lkt:7:1-7:42> failed nameres:
+test.lkt:7:25-7:42: error: expected Int, got Equation
+ 7 | val not_bool_res: Int = %true %and %false
+   |                         ^^^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "not_bool_res" test.lkt:7:1-7:42>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:7:19-7:22>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:7:25-7:42>
+        has_type None
+
+      Expr <LogicExpr test.lkt:7:25-7:30>
+           has_type None
+
+         Id   <RefId "true" test.lkt:7:26-7:30>
+              has_type None
+              references None
+
+      Expr <LogicExpr test.lkt:7:36-7:42>
+           has_type None
+
+         Id   <RefId "false" test.lkt:7:37-7:42>
+              has_type None
+              references None
+

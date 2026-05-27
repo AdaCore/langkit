@@ -1,0 +1,221 @@
+Resolving test.lkt
+==================
+Id   <RefId "Node" test.lkt:1:26-1:30>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "FooNode" test.lkt:1:31-1:38>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+Id   <RefId "FooNode" test.lkt:2:16-2:23>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+Decl <ValDecl "ord_lt" test.lkt:5:1-5:25>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "Bool" test.lkt:5:13-5:17>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:5:20-5:25>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <NumLit test.lkt:5:20-5:21>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:5:24-5:25>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "ord_leq" test.lkt:6:1-6:27>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "Bool" test.lkt:6:14-6:18>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:6:21-6:27>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <NumLit test.lkt:6:21-6:22>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:6:26-6:27>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "ord_gt" test.lkt:7:1-7:25>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "Bool" test.lkt:7:13-7:17>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:7:20-7:25>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <NumLit test.lkt:7:20-7:21>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:7:24-7:25>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "ord_geq" test.lkt:8:1-8:27>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "Bool" test.lkt:8:14-8:18>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:8:21-8:27>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <NumLit test.lkt:8:21-8:22>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:8:26-8:27>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "ord_nodes" test.lkt:9:1-9:44>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "Bool" test.lkt:9:16-9:20>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:9:23-9:44>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <CallExpr test.lkt:9:23-9:32>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "FooNode" test.lkt:9:23-9:30>
+              has_type <FunctionType "() -> FooNode" test.lkt>
+              references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+      Expr <CallExpr test.lkt:9:35-9:44>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "FooNode" test.lkt:9:35-9:42>
+              has_type <FunctionType "() -> FooNode" test.lkt>
+              references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+Decl <ValDecl "ord_node_and_sub" test.lkt:10:1-10:51>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "Bool" test.lkt:10:23-10:27>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:10:30-10:51>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <CallExpr test.lkt:10:30-10:39>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "FooNode" test.lkt:10:30-10:37>
+              has_type <FunctionType "() -> FooNode" test.lkt>
+              references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+      Expr <CallExpr test.lkt:10:42-10:51>
+           has_type <ClassDecl "SubNode" test.lkt:2:1-2:26>
+
+         Id   <RefId "SubNode" test.lkt:10:42-10:49>
+              has_type <FunctionType "() -> SubNode" test.lkt>
+              references <ClassDecl "SubNode" test.lkt:2:1-2:26>
+
+Decl <ValDecl "ord_inferred" test.lkt:11:1-11:25>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:11:20-11:25>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <NumLit test.lkt:11:20-11:21>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:11:24-11:25>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "ord_propagated_l_to_r" test.lkt:12:1-12:37>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:12:29-12:37>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <NumLit test.lkt:12:29-12:30>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NullLit test.lkt:12:33-12:37>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "ord_propagated_r_to_l" test.lkt:13:1-13:37>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:13:29-13:37>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <NullLit test.lkt:13:29-13:33>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:13:36-13:37>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "not_bool_res" test.lkt:14:1-14:30> failed nameres:
+test.lkt:14:25-14:30: error: expected Int, got Bool
+ 14 | val not_bool_res: Int = 1 < 1
+    |                         ^^^^^ 
+
+Decl <ValDecl "not_bool_res" test.lkt:14:1-14:30>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:14:19-14:22>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:14:25-14:30>
+        has_type None
+
+      Expr <NumLit test.lkt:14:25-14:26>
+           has_type None
+
+      Expr <NumLit test.lkt:14:29-14:30>
+           has_type None
+
+<ValDecl "not_same_type_operands" test.lkt:15:1-15:43> failed nameres:
+test.lkt:15:34-15:43: error: expected Int, got FooNode
+ 15 | val not_same_type_operands = 1 < FooNode()
+    |                                  ^^^^^^^^^ 
+
+Decl <ValDecl "not_same_type_operands" test.lkt:15:1-15:43>
+     has_type None
+
+   Expr <BinOp test.lkt:15:30-15:43>
+        has_type None
+
+      Expr <NumLit test.lkt:15:30-15:31>
+           has_type None
+
+      Expr <CallExpr test.lkt:15:34-15:43>
+           has_type None
+
+         Id   <RefId "FooNode" test.lkt:15:34-15:41>
+              has_type None
+              references None
+
+<ValDecl "not_valid_operands" test.lkt:16:1-16:43> failed nameres:
+test.lkt:16:26-16:33: error: expression must be of type Int, BigInt or Node, got String
+ 16 | val not_valid_operands = "Hello" < "World"
+    |                          ^^^^^^^ 
+
+Decl <ValDecl "not_valid_operands" test.lkt:16:1-16:43>
+     has_type None
+
+   Expr <BinOp test.lkt:16:26-16:43>
+        has_type None
+
+      Expr <SingleLineStringLit test.lkt:16:26-16:33>
+           has_type None
+
+      Expr <SingleLineStringLit test.lkt:16:36-16:43>
+           has_type None
+

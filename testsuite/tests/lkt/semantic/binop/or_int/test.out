@@ -1,0 +1,140 @@
+Resolving test.lkt
+==================
+Id   <RefId "Node" test.lkt:1:26-1:30>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "FooNode" test.lkt:1:31-1:38>
+     has_type None
+     references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+Decl <ValDecl "or_int_string" test.lkt:4:1-4:40>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:4:20-4:26>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:4:29-4:40>
+        has_type <StructDecl prelude: "String">
+
+      Expr <NullLit test.lkt:4:29-4:33>
+           has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:4:38-4:40>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "or_int_node" test.lkt:5:1-5:46>
+     has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+   Id   <RefId "FooNode" test.lkt:5:18-5:25>
+        has_type None
+        references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+   Expr <BinOp test.lkt:5:28-5:46>
+        has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+      Expr <NullLit test.lkt:5:28-5:32>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+      Expr <CallExpr test.lkt:5:37-5:46>
+           has_type <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+         Id   <RefId "FooNode" test.lkt:5:37-5:44>
+              has_type <FunctionType "() -> FooNode" test.lkt>
+              references <ClassDecl "FooNode" test.lkt:1:1-1:42>
+
+Decl <ValDecl "or_int_inferred" test.lkt:6:1-6:34>
+     has_type <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:6:23-6:34>
+        has_type <StructDecl prelude: "String">
+
+      Expr <NullLit test.lkt:6:23-6:27>
+           has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:6:32-6:34>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "or_int_propagated_l_to_r" test.lkt:7:1-7:43>
+     has_type <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:7:32-7:43>
+        has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:7:32-7:34>
+           has_type <StructDecl prelude: "String">
+
+      Expr <NullLit test.lkt:7:39-7:43>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "or_int_propagated_r_to_l" test.lkt:8:1-8:43>
+     has_type <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:8:32-8:43>
+        has_type <StructDecl prelude: "String">
+
+      Expr <NullLit test.lkt:8:32-8:36>
+           has_type <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:8:41-8:43>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "or_int_propagated_down" test.lkt:9:1-9:51>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:9:29-9:35>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <BinOp test.lkt:9:38-9:51>
+        has_type <StructDecl prelude: "String">
+
+      Expr <NullLit test.lkt:9:38-9:42>
+           has_type <StructDecl prelude: "String">
+
+      Expr <NullLit test.lkt:9:47-9:51>
+           has_type <StructDecl prelude: "String">
+
+<ValDecl "not_same_type_operands" test.lkt:10:1-10:38> failed nameres:
+test.lkt:10:37-10:38: error: expected String, got Int
+ 10 | val not_same_type_operands = "" or? 1
+    |                                     ^ 
+
+Decl <ValDecl "not_same_type_operands" test.lkt:10:1-10:38>
+     has_type None
+
+   Expr <BinOp test.lkt:10:30-10:38>
+        has_type None
+
+      Expr <SingleLineStringLit test.lkt:10:30-10:32>
+           has_type None
+
+      Expr <NumLit test.lkt:10:37-10:38>
+           has_type None
+
+<ValDecl "null_operands" test.lkt:11:1-11:34> failed nameres:
+test.lkt:11:21-11:25: error: could not determine type
+ 11 | val null_operands = null or? null
+    |                     ^^^^ 
+
+test.lkt:11:30-11:34: error: could not determine type
+ 11 | val null_operands = null or? null
+    |                              ^^^^ 
+
+test.lkt:11:5-11:18: error: could not determine type
+ 11 | val null_operands = null or? null
+    |     ^^^^^^^^^^^^^ 
+
+Decl <ValDecl "null_operands" test.lkt:11:1-11:34>
+     has_type None
+
+   Expr <BinOp test.lkt:11:21-11:34>
+        has_type None
+
+      Expr <NullLit test.lkt:11:21-11:25>
+           has_type None
+
+      Expr <NullLit test.lkt:11:30-11:34>
+           has_type None
+

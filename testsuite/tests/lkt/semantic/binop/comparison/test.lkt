@@ -1,0 +1,12 @@
+class A {}
+class B: A {}
+
+# Test comparison operation
+val comp_eq: Bool = 1 == 1
+val comp_neq: Bool = 1 != 1
+val comp_subtype = A() == B()
+val comp_inferred = 1 == 1
+val comp_propagated_l_to_r = 1 == null
+val comp_propagated_r_to_l = null == 1
+val not_same_type_operands = 1 == ""
+val not_bool_res: Int = 1 == 1

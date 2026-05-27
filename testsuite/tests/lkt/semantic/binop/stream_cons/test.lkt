@@ -1,0 +1,20 @@
+class A {}
+class B: A {}
+class C: A {}
+
+# Test the stream cons operator
+val cons_int: Stream[Int] = 1 :: 2 :: null[Stream[Int]]
+val cons_string: Stream[String] = "a" :: "b" :: null[Stream[String]]
+val cons_cls: Stream[B] = B() :: B() :: null[Stream[B]]
+val cons_inferred = 1 :: null[Stream[Int]]
+val cons_propagated_l_to_r = 1 :: null
+val cons_propagated_l_to_r_deep = 1 :: null :: null :: null
+val cons_propagated_r_to_l = null :: null[Stream[Int]]
+val cons_propagated_down: Stream[Int] = null :: null
+val cons_covariant = B() :: B() :: null[Stream[A]]
+val cons_contravariant = A() :: B() :: null
+val cons_common_ancestor = C() :: B() :: null
+val not_stream_res: Int = 1 :: null
+val not_stream_r = 1 :: 1
+val not_same_type_operands = 1 :: ("" :: null)
+val null_operands = null :: null

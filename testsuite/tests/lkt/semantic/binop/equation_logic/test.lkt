@@ -1,0 +1,7 @@
+# Test logic operations on equations
+val equation_and: Equation = %true %and %false
+val equation_or: Equation = %true %or %false
+val equation_inferred = %true %and %false
+val equation_propagated = null %and null
+val not_equation_operand = null %and 1
+val not_bool_res: Int = %true %and %false
