@@ -15,7 +15,7 @@
                 "prefix": "this_node",
                 "member": "f_lhs"
               },
-              "kinds": ["Ref"]
+              "pattern": {"kind": "node", "type": "Ref"}
             },
             "rhs": {
               "kind": "eval_member",

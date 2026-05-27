@@ -1684,18 +1684,16 @@ package body Langkit_Support.Prettier_Utils is
    -----------------
 
    function Create_Is_A
-     (Self  : in out Document_Pool;
-      Node  : Document_Type;
-      Kinds : in out Type_Vectors.Vector) return Document_Type
-   is
+     (Self    : in out Document_Pool;
+      Node    : Document_Type;
+      Pattern : Document_Type) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind       => Is_A,
-           Is_A_Node  => Node,
-           Is_A_Kinds => Type_Vectors.Empty_Vector)
+          (Kind         => Is_A,
+           Is_A_Node    => Node,
+           Is_A_Pattern => Pattern)
       do
-         Result.Is_A_Kinds.Move (Kinds);
          Self.Register (Result);
       end return;
    end Create_Is_A;
@@ -1819,6 +1817,105 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_This_Node;
+
+   ----------------------------
+   -- Create_Default_Pattern --
+   ----------------------------
+
+   function Create_Default_Pattern
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Default_Pattern)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Default_Pattern;
+
+   ----------------------------
+   -- Create_Literal_Pattern --
+   ----------------------------
+
+   function Create_Literal_Pattern
+     (Self : in out Document_Pool; Value : Value_Ref) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind                  => Literal_Pattern,
+           Literal_Pattern_Value => Value)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Literal_Pattern;
+
+   ---------------------------
+   -- Create_Member_Pattern --
+   ---------------------------
+
+   function Create_Member_Pattern
+     (Self   : in out Document_Pool;
+      Member : Struct_Member_Ref;
+      Args   : in out Document_Vectors.Vector;
+      Sub    : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Member_Pattern)
+      do
+         Result.Member_Pattern_Ref := Member;
+         Result.Member_Pattern_Args.Move (Args);
+         Result.Member_Pattern_Sub := Sub;
+         Self.Register (Result);
+      end return;
+   end Create_Member_Pattern;
+
+   -------------------------
+   -- Create_Node_Pattern --
+   -------------------------
+
+   function Create_Node_Pattern
+     (Self      : in out Document_Pool;
+      Node_Type : Type_Ref;
+      Members   : in out Document_Vectors.Vector) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Node_Pattern)
+      do
+         Result.Node_Pattern_Type := Node_Type;
+         Result.Node_Pattern_Members.Move (Members);
+         Self.Register (Result);
+      end return;
+   end Create_Node_Pattern;
+
+   ------------------------
+   -- Create_Not_Pattern --
+   ------------------------
+
+   function Create_Not_Pattern
+     (Self    : in out Document_Pool;
+      Pattern : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Not_Pattern, Not_Pattern_Sub => Pattern)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Not_Pattern;
+
+   -----------------------
+   -- Create_Or_Pattern --
+   -----------------------
+
+   function Create_Or_Pattern
+     (Self     : in out Document_Pool;
+      Patterns : in out Document_Vectors.Vector) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Or_Pattern)
+      do
+         Result.Or_Pattern_List.Move (Patterns);
+         Self.Register (Result);
+      end return;
+   end Create_Or_Pattern;
 
    -----------------------
    -- Bubble_Up_Trivias --
@@ -2102,6 +2199,29 @@ package body Langkit_Support.Prettier_Utils is
       Process (Self, Max_Empty_Lines);
       Dump (Self, Broken_Groups_Trace);
    end Detect_Broken_Groups;
+
+   ------------------------
+   -- Is_Default_Pattern --
+   ------------------------
+
+   function Is_Default_Pattern (Document : Document_Type) return Boolean is
+   begin
+      case Template_Pattern_Kind (Document.Kind) is
+         when Default_Pattern =>
+            return True;
+
+         when Literal_Pattern | Member_Pattern | Node_Pattern | Not_Pattern =>
+            return False;
+
+         when Or_Pattern =>
+            for I in 1 .. Document.Or_Pattern_List.Last_Index loop
+               if Is_Default_Pattern (Document.Or_Pattern_List (I)) then
+                  return True;
+               end if;
+            end loop;
+            return False;
+      end case;
+   end Is_Default_Pattern;
 
    ----------
    -- Dump --
@@ -2431,14 +2551,12 @@ package body Langkit_Support.Prettier_Utils is
 
             when Is_A =>
                Write (Prefix & "is_a:");
-               for I in 1 .. Document.Is_A_Kinds.Last_Index loop
-                  declare
-                     T : constant Type_Ref := Document.Is_A_Kinds.Element (I);
-                  begin
-                     Write (Prefix & Simple_Indent & Debug_Name (T));
-                  end;
-               end loop;
-               Process (Document.Is_A_Node, Prefix & List_Indent);
+
+               Write (Prefix & Simple_Indent & "node:");
+               Process (Document.Is_A_Node, List_Indent);
+
+               Write (Prefix & Simple_Indent & "pattern:");
+               Process (Document.Is_A_Pattern, List_Indent);
 
             when Is_Empty =>
                Write (Prefix & "is_empty:");
@@ -2473,6 +2591,51 @@ package body Langkit_Support.Prettier_Utils is
 
             when This_Node =>
                Write (Prefix & "this_node");
+
+            when Default_Pattern =>
+               Write (Prefix & "default_pattern");
+
+            when Literal_Pattern =>
+               Write (Prefix & "literal_pattern:");
+               Write
+                 (Prefix & List_Indent
+                  & Image (Document.Literal_Pattern_Value));
+
+            when Member_Pattern =>
+               Write (Prefix & "member_pattern:");
+               Write
+                 (Prefix
+                  & Simple_Indent
+                  & "member: "
+                  & Debug_Name (Document.Member_Pattern_Ref));
+
+               for I in 1 .. Document.Member_Pattern_Args.Last_Index loop
+                  Write (Prefix & Simple_Indent & "arg:");
+                  Process
+                    (Document.Member_Pattern_Args (I), Prefix & List_Indent);
+               end loop;
+
+               Write (Prefix & Simple_Indent & "sub:");
+               Process (Document.Member_Pattern_Sub, Prefix & List_Indent);
+
+            when Node_Pattern =>
+               Write (Prefix & "node_pattern:");
+               Write (Prefix & Simple_Indent
+                      & Debug_Name (Document.Node_Pattern_Type));
+               for I in 1 .. Document.Node_Pattern_Members.Last_Index loop
+                  Process
+                    (Document.Node_Pattern_Members (I), Prefix & List_Indent);
+               end loop;
+
+            when Not_Pattern =>
+               Write (Prefix & "not_pattern:");
+               Process (Document.Not_Pattern_Sub, Prefix & List_Indent);
+
+            when Or_Pattern =>
+               Write (Prefix & "or_pattern:");
+               for I in 1 .. Document.Or_Pattern_List.Last_Index loop
+                  Process (Document.Or_Pattern_List (I), Prefix & List_Indent);
+               end loop;
          end case;
       end Process;
    begin

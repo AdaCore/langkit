@@ -245,15 +245,11 @@ def f2(a: Int, ): Int
 # invalid_is_a.json
     template for VarDecl.f_name: missing "node" key for is_a
 # invalid_is_a2.json
-    template for VarDecl.f_name: is_a expects a node, got a Bool
+    template for VarDecl.f_name: node expected for is_a, got Bool
 # invalid_is_a3.json
-    template for VarDecl.f_name: missing "kinds" key for is_a
+    template for VarDecl.f_name: missing "pattern" key for is_a
 # invalid_is_a4.json
-    template for VarDecl.f_name: invalid "kinds" for is_a: JSON_ARRAY_TYPE expected, but JSON_STRING_TYPE found
-# invalid_is_a5.json
-    template for VarDecl.f_name: invalid item in kinds of is_a: JSON_STRING_TYPE expected, but JSON_NULL_TYPE found
-# invalid_is_a6.json
-    template for VarDecl.f_name: invalid node type in kinds of is_a: NoSuchNode
+    template for VarDecl.f_name: invalid pattern JSON node: JSON_INT_TYPE
 # invalid_table_join.json
     FooNode has no p_no_such_predicate member
 # invalid_table_join2.json
@@ -352,6 +348,50 @@ def f2(a: Int, ): Int
     template for VarDecl.f_name: invalid node type in cast: NoSuchNode
 # invalid_cast7.json
     template for VarDecl.f_name: invalid cast from VarDecl to Name
+# invalid_pattern.json
+    template for VarDecl.f_name: invalid pattern JSON node: JSON_INT_TYPE
+# invalid_pattern2.json
+    invalid pattern: invalid
+# invalid_pattern3.json
+    template for VarDecl.f_name: symbol literal pattern is invalid for VarDecl
+# invalid_pattern4.json
+    template for VarDecl.f_name: missing "value" key for symbol_literal pattern
+# invalid_pattern5.json
+    template for VarDecl.f_name: missing "type" key for node pattern
+# invalid_pattern6.json
+    invalid node name: NoSuchNode
+# invalid_pattern7.json
+    Success
+# invalid_pattern8.json
+    template for VarDecl.f_name: invalid "members" key for node pattern: JSON_ARRAY_TYPE expected, but JSON_NULL_TYPE found
+# invalid_pattern9.json
+    template for VarDecl.f_name: invalid "members" item for node pattern: JSON_OBJECT_TYPE expected, but JSON_STRING_TYPE found
+# invalid_pattern10.json
+    template for VarDecl.f_name: missing "member" key in "members" item for node pattern
+# invalid_pattern11.json
+    template for VarDecl.f_name: invalid "member" key for item in node pattern: JSON_STRING_TYPE expected, but JSON_INT_TYPE found
+# invalid_pattern12.json
+    template for VarDecl.f_name: VarDecl has no no_such_field member
+# invalid_pattern13.json
+    template for VarDecl.f_name: missing "pattern" key in "members" item for node pattern
+# invalid_pattern14.json
+    template for VarDecl.f_name: invalid pattern JSON node: JSON_INT_TYPE
+# invalid_pattern15.json
+    template for VarDecl.f_name: eval_member: too many arguments passed to Decl.f_name
+# invalid_pattern16.json
+    template for VarDecl.f_name: null pattern is invalid for Symbol
+# invalid_pattern17.json
+    template for VarDecl.f_name: node pattern is invalid for Symbol
+# invalid_pattern18.json
+    template for VarDecl.f_name: missing "patterns" key for or pattern
+# invalid_pattern19.json
+    template for VarDecl.f_name: invalid patterns for or pattern: JSON_ARRAY_TYPE expected, but JSON_NULL_TYPE found
+# invalid_pattern20.json
+    template for VarDecl.f_name: invalid pattern JSON node: JSON_INT_TYPE
+# invalid_pattern21.json
+    template for VarDecl.f_name: missing "pattern" key for not pattern
+# invalid_pattern22.json
+    invalid pattern: foo
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -2791,6 +2831,132 @@ _LANGKIT.UNPARSING.EXPANSION_ERRORS_ [...STACK TRACE...]
       "id": 2,
       "kind": "text",
       "text": "def f(x:Int ):Int{x;}def g(x:Int):Int{x;}"
+    }
+  ]
+}
+
+== cmd_pattern.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "def f(x:Int ,y:Int=1 ):Int{x;}"
+    }
+  ]
+}
+
+== cmd_pattern2.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "def f(x:Int ,y:Int=1):Int{x;}"
+    }
+  ]
+}
+
+== cmd_pattern3.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var x:Int=1; var y:Int=2;"
+    }
+  ]
+}
+
+== cmd_pattern4.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var x:Int=1; var y:Int=x;"
+    }
+  ]
+}
+
+== cmd_pattern5.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var x:Int=1; var x:Int=x;var y:Int=1;"
+    }
+  ]
+}
+
+== cmd_pattern6.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var x:Int=1; var y:Int=x;"
+    }
+  ]
+}
+
+== cmd_pattern7.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var x:Int=1; var y:Int=2; var z:Int=3;"
+    }
+  ]
+}
+
+== cmd_pattern8.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var x:Int=1;"
+    }
+  ]
+}
+
+== cmd_pattern9.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var x:Int=1;var y:Int=x; "
     }
   ]
 }

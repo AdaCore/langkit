@@ -315,6 +315,29 @@ def to_json(input_file: str) -> str:
                 result[name] = parse_bool(bound[name])
         return result
 
+    def parse_args(e: L.CallExpr, doc: Any) -> None:
+        args = []
+        kwargs = {}
+        for arg in e.f_args:
+            value = parse_expression(arg.f_value)
+            if arg.f_name:
+                arg_name = arg.f_name.text
+                if arg_name in call_kwargs:
+                    error(arg.f_name, "argument passed multiple times")
+                kwargs[arg_name] = value
+            elif kwargs:
+                error(
+                    arg,
+                    "positional argument forbidden after a keyword"
+                    " argument",
+                )
+            else:
+                args.append(value)
+        if kwargs:
+            doc["kwargs"] = kwargs
+        if args or not kwargs:
+            doc["args"] = args
+
     @dataclasses.dataclass(frozen=True)
     class MatchPattern:
         """
@@ -395,6 +418,102 @@ def to_json(input_file: str) -> str:
 
     def parse_expression(e: L.Expr | list[L.Expr]) -> Any:
         return parse_template_helper(e, expression=True)
+
+    def parse_pattern(p: L.Pattern) -> Any:
+        match p:
+            case L.RenamingComplexPattern(
+                f_decl=L.BindingValDecl(f_syn_name=L.DefId() as def_id),
+                f_pattern=None,
+                f_details=L.PatternDetailList() as details,
+                f_predicate=None,
+            ) if len(details) == 0 and def_id.text == "_":
+                return "*"
+
+            case L.ComplexPattern(
+                f_decl=None,
+                f_pattern=L.NullPattern(),
+                f_details=L.PatternDetailList() as details,
+                f_predicate=None,
+            ) if len(details) == 0:
+                return None
+
+            case L.ComplexPattern(
+                f_decl=None,
+                f_pattern=L.RegexPattern() as regex,
+                f_details=L.PatternDetailList() as details,
+                f_predicate=None,
+            ) if len(details) == 0:
+                return {
+                    "kind": "symbol_literal",
+                    "value": parse_str(regex),
+                }
+
+            case L.ComplexPattern(
+                f_decl=None,
+                f_pattern=L.TypePattern(
+                    f_type_name=L.SimpleTypeRef(
+                        f_type_name=L.RefId() as type_name
+                    )
+                ),
+                f_details=L.PatternDetailList() as details,
+                f_predicate=None,
+            ):
+                members = []
+                for d in details:
+                    match d:
+                        case L.FieldPatternDetail(
+                            f_id=L.Id() as field_name,
+                            f_expected_value=sub_pattern,
+                        ):
+                            members.append(
+                                {
+                                    "member": field_name.text,
+                                    "pattern": parse_pattern(sub_pattern),
+                                }
+                            )
+
+                        case L.PropertyPatternDetail(
+                            f_call=L.CallExpr(
+                                f_name=L.RefId() as property_name
+                            ) as call_expr,
+                            f_expected_value=sub_pattern,
+                        ):
+                            m = {
+                                "member": property_name.text,
+                                "pattern": parse_pattern(sub_pattern),
+                            }
+                            parse_args(call_expr, m)
+                            members.append(m)
+
+                        case _:
+                            error(p, "invalid member pattern")
+
+                result = {"kind": "node", "type": type_name.text}
+                if members:
+                    result["members"] = members
+                return result
+
+            case L.NotPattern():
+                return {
+                    "kind": "not",
+                    "pattern": parse_pattern(p.f_sub_pattern),
+                }
+
+            case L.OrPattern():
+                patterns = []
+
+                def visit(p: L.Pattern):
+                    if isinstance(p, L.OrPattern):
+                        visit(p.f_left_sub_pattern)
+                        visit(p.f_right_sub_pattern)
+                    else:
+                        patterns.append(parse_pattern(p))
+
+                visit(p)
+                return {"kind": "or", "patterns": patterns}
+
+            case _:
+                error(p, "invalid pattern")
 
     def parse_template_helper(
         e: L.Expr | list[L.Expr],
@@ -503,25 +622,7 @@ def to_json(input_file: str) -> str:
                     "prefix": parse_expression(callee.f_prefix),
                     "member": callee.f_suffix.text,
                 }
-                for arg in e.f_args:
-                    value = parse_expression(arg.f_value)
-                    if arg.f_name:
-                        arg_name = arg.f_name.text
-                        if arg_name in call_kwargs:
-                            error(arg.f_name, "argument passed multiple times")
-                        call_kwargs[arg_name] = value
-                    elif call_kwargs:
-                        error(
-                            arg,
-                            "positional argument forbidden after a keyword"
-                            " argument",
-                        )
-                    else:
-                        call_args.append(value)
-                if call_kwargs:
-                    result["kwargs"] = call_kwargs
-                if call_args or not call_kwargs:
-                    result["args"] = call_args
+                parse_args(e, result)
                 return result
             elif not isinstance(callee, L.RefId):
                 error(callee, "identifier expected")
@@ -642,15 +743,10 @@ def to_json(input_file: str) -> str:
             }
 
         elif isinstance(e, L.Isa):
-            kinds = []
-            for p in parse_match_pattern(e.f_pattern):
-                if not isinstance(p, NodeMatchPattern):
-                    error(p.node, "node type expected")
-                kinds.append(p.type_name)
             return {
                 "kind": "is_a",
                 "node": parse_expression(e.f_expr),
-                "kinds": kinds,
+                "pattern": parse_pattern(e.f_pattern),
             }
 
         elif isinstance(e, L.MatchExpr):
@@ -930,6 +1026,73 @@ def to_lkt(input_file: str) -> str:
             if name in doc:
                 lines.append(f", {name}={lkt_lit(doc[name])}")
 
+    def process_args(doc: Any) -> None:
+        """
+        Translate call arguments (args and kwargs) to Lkt in ``lines``.
+        """
+        has_args = False
+        if "args" in doc:
+            for value in doc["args"]:
+                if has_args:
+                    lines.append(",")
+                else:
+                    lines.append("(")
+                    has_args = True
+                process_template(value)
+        if "kwargs" in doc:
+            for name, value in doc["kwargs"].items():
+                if has_args:
+                    lines.append(",")
+                else:
+                    lines.append("(")
+                    has_args = True
+                lines.append(f"{name}=")
+                process_template(value)
+        if has_args:
+            lines.append(")")
+        elif "args" in doc or "kwargs" in doc:
+            lines.append("()")
+
+    def process_pattern(doc: Any) -> None:
+        """
+        Translate the ``doc`` pattern template to Lkt in ``lines``.
+        """
+        match doc:
+            case None:
+                lines.append("null")
+
+            case "*":
+                lines.append("_")
+
+            case {"kind": "symbol_literal", "value": str_value}:
+                lines.append(lkt_lit(str_value))
+
+            case {"kind": "node", "type": type_name}:
+                lines.append(type_name)
+                if "members" in doc:
+                    lines.append("(")
+                    for i, m in enumerate(doc["members"]):
+                        if i > 0:
+                            lines.append(",")
+                        lines.append(m["member"])
+                        process_args(m)
+                        lines.append(":")
+                        process_pattern(m["pattern"])
+                    lines.append(")")
+
+            case {"kind": "not", "pattern": p}:
+                lines.append("not")
+                process_pattern(p)
+
+            case {"kind": "or", "patterns": patterns}:
+                for i, p in enumerate(patterns):
+                    if i > 0:
+                        lines.append("|")
+                    process_pattern(p)
+
+            case _:
+                raise FatalError(f"invalid template: {doc}")
+
     def process_template(doc: Any, unwrap_list: bool = False) -> None:
         """
         Translate the ``doc`` template expression to Lkt in ``lines``.
@@ -1130,10 +1293,10 @@ def to_lkt(input_file: str) -> str:
                 elif "args" in doc or "kwargs" in doc:
                     lines.append("()")
 
-            case {"kind": "is_a", "node": node_doc, "kinds": [*kinds]}:
+            case {"kind": "is_a", "node": node_doc, "pattern": pattern_doc}:
                 process_template(node_doc)
                 lines.append("is")
-                lines.append(" | ".join(kinds))
+                process_pattern(pattern_doc)
 
             case {"kind": "is_empty", "node": node_doc}:
                 process_template(node_doc)

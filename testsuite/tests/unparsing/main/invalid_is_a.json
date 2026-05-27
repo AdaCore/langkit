@@ -6,7 +6,7 @@
           "kind": "if",
           "condition": {
             "kind": "is_a",
-            "kinds": ["DottedName"]
+            "pattern": "*"
           },
           "then": "recurse_flatten",
           "else": "recurse"

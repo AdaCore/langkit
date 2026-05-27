@@ -734,6 +734,37 @@ package body Langkit_Support.Unparsing_Config is
       --
       --  ``What`` is used to described what is checked in the error message.
 
+      procedure Parse_Member_Call_Args
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context;
+         Member  : Struct_Member_Ref;
+         Args    : out Document_Vectors.Vector);
+      --  Parse arguments for a call to a struct member.
+      --
+      --  JSON is assumed to be an object, which has optional "args" and
+      --  "kwargs" keys (for positional and keyword arguments).
+      --
+      --  Member is the reference to the member to call.
+      --
+      --  When successful, ``Args`` is set to the array of arguments to pass to
+      --  ``Member``, which unspecified arguments (valid only for those with
+      --  default values) left to null (``Args`` still always has the same
+      --  number of elements as ``Member``'s arguments).
+
+      function Parse_Symbol_Literal
+        (JSON    : JSON_Value;
+         Context : Template_Parsing_Context;
+         What    : String) return Text_Type;
+      --  Parse a JSON string as a symbol literal and return the canonical text
+      --  for that symbol.
+
+      function Parse_Pattern
+        (JSON       : JSON_Value;
+         Context    : in out Template_Parsing_Context;
+         Input_Type : Type_Ref) return Document_Type;
+      --  Parse a pattern in a template, that must match a value of the given
+      --  type.
+
       procedure Process_Recurse (Context : in out Template_Parsing_Context);
       --  Record in ``Context.State``` that a "recurse" or "recurse_flatten"
       --  template item has been found. This raises an error if one has already
@@ -2140,117 +2171,10 @@ package body Langkit_Support.Unparsing_Config is
 
                elsif Kind = "eval_member" then
                   declare
-                     Prefix     : Document_Type;
-                     T          : Type_Ref;
-                     Member     : Struct_Member_Ref;
-                     Final_Args : Document_Vectors.Vector;
-
-                     procedure Abort_Eval_Member (Message : String)
-                     with No_Return;
-                     --  Convenience wrapper around Abort_Parsing to provide
-                     --  context information about eval_member and Member.
-
-                     procedure Set_Arg (Expr : JSON_Value; Index : Positive);
-                     --  Parse the given expression and set it as the Index'th
-                     --  argument for the call. This rejects arguments passed
-                     --  twice and typing issues.
-
-                     procedure Process_Kwarg
-                       (Name : String; Expr : JSON_Value);
-                     --  Find the argument that corresponds to Name and call
-                     --  Set_Arg for it.
-
-                     function Arg_Name (Index : Argument_Index) return String
-                     is (To_UTF8
-                           (Format_Name
-                              (Member_Argument_Name (Member, Index), Lower)));
-
-                     -----------------------
-                     -- Abort_Eval_Member --
-                     -----------------------
-
-                     procedure Abort_Eval_Member (Message : String) is
-                     begin
-                        Abort_Parsing
-                          (Context,
-                           "eval_member: " & Message & " (for "
-                           & Debug_Name (Member) & ")");
-                     end Abort_Eval_Member;
-
-                     -------------
-                     -- Set_Arg --
-                     -------------
-
-                     procedure Set_Arg (Expr : JSON_Value; Index : Positive) is
-                        I             : constant Argument_Index :=
-                          Argument_Index (Index);
-                        Arg           : Document_Type;
-                        Expected_Type : Type_Ref;
-                     begin
-                        --  Check that Index corresponds to an argument that is
-                        --  yet to pass.
-
-                        if Index > Final_Args.Last_Index then
-                           Abort_Parsing
-                             (Context,
-                              "eval_member: too many arguments passed to "
-                              & Debug_Name (Member));
-                        elsif Final_Args (Index) /= null then
-                           Abort_Eval_Member
-                             ("multiple arguments passed to " & Arg_Name (I));
-                        end if;
-
-                        --  Check that it has the expected tye
-
-                        Expected_Type := Member_Argument_Type (Member, I);
-                        Arg := Parse_Expression (Expr, Context, T);
-                        if Expected_Type /= T
-                           and then not
-                             (Is_Node_Type (Expected_Type)
-                              and then Is_Node_Type (T)
-                              and then Is_Derived_From (T, Expected_Type))
-                        then
-                           Abort_Eval_Member
-                             (Debug_Name (T)
-                              & " passed to "
-                              & Arg_Name (I)
-                              & " but "
-                              & Debug_Name (Expected_Type)
-                              & " expected");
-                        end if;
-
-                        Final_Args (Index) := Arg;
-                     end Set_Arg;
-
-                     -------------------
-                     -- Process_Kwarg --
-                     -------------------
-
-                     procedure Process_Kwarg (Name : String; Expr : JSON_Value)
-                     is
-                        N : Name_Type;
-                     begin
-                        N := Create_Name (From_UTF8 (Name), Lower);
-
-                        --  Find the argument corresponding to the given name.
-                        --  Argument lists are never long (5 at most, most
-                        --  often 1 or 2) and we do this only when parsing the
-                        --  configuration, so the linear lookup is fine.
-
-                        for I in 1 .. Member_Last_Argument (Member)
-                        loop
-                           if Member_Argument_Name (Member, I) = N then
-                              Set_Arg (Expr, Positive (I));
-                              return;
-                           end if;
-                        end loop;
-                        Abort_Eval_Member ("invalid argument name: " & Name);
-                     exception
-                        when Invalid_Name_Error =>
-                           Abort_Eval_Member
-                             ("invalid argument name: " & Name);
-                     end Process_Kwarg;
-
+                     Prefix : Document_Type;
+                     T      : Type_Ref;
+                     Member : Struct_Member_Ref;
+                     Args   : Document_Vectors.Vector;
                   begin
                      --  Parse the prefix expression
 
@@ -2280,101 +2204,30 @@ package body Langkit_Support.Unparsing_Config is
                            & " has no " & Tmp.Get & " member");
                      end if;
 
-                     --  Prepare Final_Args to hold the arguments to pass
-
-                     Final_Args.Set_Length
-                       (Ada.Containers.Count_Type
-                          (Member_Last_Argument (Member)));
-
-                     --  Assign positional arguments
-
-                     if JSON.Has_Field ("args") then
-                        Tmp := JSON.Get ("args");
-                        Check_Kind
-                          (Tmp,
-                           JSON_Array_Type,
-                           Context,
-                           """args"" for eval_prefix");
-                        declare
-                           I : Positive := 1;
-                        begin
-                           for Arg of JSON_Array'(Tmp.Get) loop
-                              Set_Arg (Arg, I);
-                              I := I + 1;
-                           end loop;
-                        end;
-                     end if;
-
-                     --  Assign keyword arguments
-
-                     if JSON.Has_Field ("kwargs") then
-                        Tmp := JSON.Get ("kwargs");
-                        Check_Kind
-                          (Tmp,
-                           JSON_Object_Type,
-                           Context,
-                           """kwargs"" for eval_prefix");
-                        Tmp.Map_JSON_Object (Process_Kwarg'Access);
-                     end if;
-
-                     --  Ensure non-assigned arguments have a default value
-
-                     for Index in
-                        Final_Args.First_Index .. Final_Args.Last_Index
-                     loop
-                        declare
-                           I : constant Argument_Index :=
-                             Argument_Index (Index);
-                        begin
-                           if Final_Args (Index) = null
-                              and then Member_Argument_Default_Value
-                                         (Member, I) = No_Value_Ref
-                           then
-                              Abort_Parsing
-                                (Context,
-                                 "eval_member: no argument passed to "
-                                 & Arg_Name (I)
-                                 & " (for " & Debug_Name (Member) & ")");
-                           end if;
-                        end;
-                     end loop;
-
-                     return Pool.Create_Eval_Member
-                              (Prefix, Member, Final_Args);
+                     Parse_Member_Call_Args (JSON, Context, Member, Args);
+                     return Pool.Create_Eval_Member (Prefix, Member, Args);
                   end;
 
                elsif Kind = "is_a" then
-                  Tmp := Mandatory_Key (JSON, "node", Context, "for is_a");
                   declare
-                     Node  : constant Document_Type :=
-                       Parse_Node_Expression (Tmp, Context, "is_a");
-                     T     : Type_Ref;
-                     Types : Type_Vectors.Vector;
+                     Node_Type : Type_Ref;
+                     Node      : Document_Type;
+                     Pattern   : Document_Type;
                   begin
-                     Tmp := Mandatory_Key (JSON, "kinds", Context, "for is_a");
-                     Check_Kind
-                       (Tmp,
-                        JSON_Array_Type,
-                        Context,
-                        """kinds"" for is_a");
-                     for Name of JSON_Array'(Tmp.Get) loop
-                        Check_Kind
-                          (Name,
-                           JSON_String_Type,
-                           Context,
-                           "item in kinds of is_a");
-                        T := Map.Lookup_Type (To_Symbol (Name.Get));
-                        if T = No_Type_Ref or else not Is_Node_Type (T) then
-                           Abort_Parsing
-                             (Context,
-                              "invalid node type in kinds of is_a: "
-                              & Name.Get);
-                        end if;
+                     Tmp := Mandatory_Key (JSON, "node", Context, "for is_a");
+                     Node := Parse_Expression (Tmp, Context, Node_Type);
+                     if not Is_Node_Type (Node_Type) then
+                        Abort_Parsing
+                          (Context,
+                           "node expected for is_a, got "
+                           & Debug_Name (Node_Type));
+                     end if;
 
-                        Types.Append (T);
-                     end loop;
+                     Tmp := Mandatory_Key
+                              (JSON, "pattern", Context, "for is_a");
+                     Pattern := Parse_Pattern (Tmp, Context, Node_Type);
 
-                     return Pool.Create_Is_A (Node, Types);
+                     return Pool.Create_Is_A (Node, Pattern);
                   end;
 
                elsif Kind = "is_empty" then
@@ -2427,23 +2280,12 @@ package body Langkit_Support.Unparsing_Config is
                   return Pool.Create_String_Lit (From_UTF8 (Tmp.Get));
 
                elsif Kind = "symbol" then
-                  Tmp := Mandatory_Key (JSON, "value", Context, "for symbol");
-                  Check_Kind (Tmp, JSON_String_Type, Context, "value field");
-                  declare
-                     Text : constant Text_Type := From_UTF8 (Tmp.Get);
-                     Symbol : constant Symbolization_Result :=
-                       Canonicalize_Symbol (Language, Text);
-                  begin
-                     if Symbol.Success then
-                        return Pool.Create_Symbol_Lit (Symbol.Symbol);
-                     else
-                        Abort_Parsing
-                          (Context,
-                           "invalid symbol: "
-                           & Image (Text, With_Quotes => True) & ": "
-                           & Image (Symbol.Error_Message));
-                     end if;
-                  end;
+                  return Pool.Create_Symbol_Lit
+                           (Parse_Symbol_Literal
+                              (Mandatory_Key
+                                 (JSON, "value", Context, "for symbol"),
+                               Context,
+                               "value field"));
 
                else
                   Abort_Parsing
@@ -2554,6 +2396,360 @@ package body Langkit_Support.Unparsing_Config is
             end if;
          end return;
       end Parse_Node_Expression;
+
+      ----------------------------
+      -- Parse_Member_Call_Args --
+      ----------------------------
+
+      procedure Parse_Member_Call_Args
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context;
+         Member  : Struct_Member_Ref;
+         Args    : out Document_Vectors.Vector)
+      is
+         procedure Set_Arg (Expr : JSON_Value; Index : Positive);
+         --  Parse the given expression and set it as the Index'th argument for
+         --  the call. This rejects arguments passed twice and typing issues.
+
+         procedure Process_Kwarg (Name : String; Expr : JSON_Value);
+         --  Find the argument that corresponds to Name and call Set_Arg for
+         --  it.
+
+         function Arg_Name (Index : Argument_Index) return String
+         is (To_UTF8
+               (Format_Name (Member_Argument_Name (Member, Index), Lower)));
+
+         procedure Abort_Eval_Member (Message : String)
+         with No_Return;
+         --  Convenience wrapper around Abort_Parsing to provide context
+         --  information about eval_member and Member.
+
+         -----------------------
+         -- Abort_Eval_Member --
+         -----------------------
+
+         procedure Abort_Eval_Member (Message : String) is
+         begin
+            Abort_Parsing
+              (Context,
+               "eval_member: " & Message & " (for "
+               & Debug_Name (Member) & ")");
+         end Abort_Eval_Member;
+
+         -------------
+         -- Set_Arg --
+         -------------
+
+         procedure Set_Arg (Expr : JSON_Value; Index : Positive) is
+            I             : constant Argument_Index := Argument_Index (Index);
+            Arg           : Document_Type;
+            T             : Type_Ref;
+            Expected_Type : Type_Ref;
+         begin
+            --  Check that Index corresponds to an argument that is yet to pass
+
+            if Index > Args.Last_Index then
+               Abort_Parsing
+                 (Context,
+                  "eval_member: too many arguments passed to "
+                  & Debug_Name (Member));
+            elsif Args (Index) /= null then
+               Abort_Eval_Member
+                 ("multiple arguments passed to " & Arg_Name (I));
+            end if;
+
+            --  Check that it has the expected tye
+
+            Expected_Type := Member_Argument_Type (Member, I);
+            Arg := Parse_Expression (Expr, Context, T);
+            if Expected_Type /= T
+               and then not
+                 (Is_Node_Type (Expected_Type)
+                  and then Is_Node_Type (T)
+                  and then Is_Derived_From (T, Expected_Type))
+            then
+               Abort_Eval_Member
+                 (Debug_Name (T)
+                  & " passed to "
+                  & Arg_Name (I)
+                  & " but "
+                  & Debug_Name (Expected_Type)
+                  & " expected");
+            end if;
+
+            Args (Index) := Arg;
+         end Set_Arg;
+
+         -------------------
+         -- Process_Kwarg --
+         -------------------
+
+         procedure Process_Kwarg (Name : String; Expr : JSON_Value)
+         is
+            N : Name_Type;
+         begin
+            N := Create_Name (From_UTF8 (Name), Lower);
+
+            --  Find the argument corresponding to the given name.
+            --  Argument lists are never long (5 at most, most
+            --  often 1 or 2) and we do this only when parsing the
+            --  configuration, so the linear lookup is fine.
+
+            for I in 1 .. Member_Last_Argument (Member)
+            loop
+               if Member_Argument_Name (Member, I) = N then
+                  Set_Arg (Expr, Positive (I));
+                  return;
+               end if;
+            end loop;
+            Abort_Eval_Member ("invalid argument name: " & Name);
+         exception
+            when Invalid_Name_Error =>
+               Abort_Eval_Member
+                 ("invalid argument name: " & Name);
+         end Process_Kwarg;
+
+         Tmp : JSON_Value;
+      begin
+         Args.Set_Length
+           (Ada.Containers.Count_Type (Member_Last_Argument (Member)));
+
+         --  Assign positional arguments
+
+         if JSON.Has_Field ("args") then
+            Tmp := JSON.Get ("args");
+            Check_Kind
+              (Tmp, JSON_Array_Type, Context, """args"" for eval_prefix");
+            declare
+               I : Positive := 1;
+            begin
+               for Arg of JSON_Array'(Tmp.Get) loop
+                  Set_Arg (Arg, I);
+                  I := I + 1;
+               end loop;
+            end;
+         end if;
+
+         --  Assign keyword arguments
+
+         if JSON.Has_Field ("kwargs") then
+            Tmp := JSON.Get ("kwargs");
+            Check_Kind
+              (Tmp, JSON_Object_Type, Context, """kwargs"" for eval_prefix");
+            Tmp.Map_JSON_Object (Process_Kwarg'Access);
+         end if;
+
+         --  Ensure non-assigned arguments have a default value
+
+         for Index in Args.First_Index .. Args.Last_Index loop
+            declare
+               I : constant Argument_Index := Argument_Index (Index);
+            begin
+               if Args (Index) = null
+                  and then Member_Argument_Default_Value (Member, I)
+                           = No_Value_Ref
+               then
+                  Abort_Parsing
+                    (Context,
+                     "eval_member: no argument passed to "
+                     & Arg_Name (I) & " (for " & Debug_Name (Member) & ")");
+               end if;
+            end;
+         end loop;
+      end Parse_Member_Call_Args;
+
+      --------------------------
+      -- Parse_Symbol_Literal --
+      --------------------------
+
+      function Parse_Symbol_Literal
+        (JSON    : JSON_Value;
+         Context : Template_Parsing_Context;
+         What    : String) return Text_Type is
+      begin
+         Check_Kind (JSON, JSON_String_Type, Context, What);
+         declare
+            Text   : constant Text_Type := From_UTF8 (JSON.Get);
+            Symbol : constant Symbolization_Result :=
+              Canonicalize_Symbol (Language, Text);
+         begin
+            if Symbol.Success then
+               return Symbol.Symbol;
+            else
+               Abort_Parsing
+                 (Context,
+                  "invalid symbol: "
+                  & Image (Text, With_Quotes => True) & ": "
+                  & Image (Symbol.Error_Message));
+            end if;
+         end;
+      end Parse_Symbol_Literal;
+
+      -------------------
+      -- Parse_Pattern --
+      -------------------
+
+      function Parse_Pattern
+        (JSON       : JSON_Value;
+         Context    : in out Template_Parsing_Context;
+         Input_Type : Type_Ref) return Document_Type
+      is
+         Kind : Unbounded_String;
+         Tmp  : JSON_Value;
+      begin
+         case JSON.Kind is
+         when JSON_Null_Type =>
+            if not Is_Node_Type (Input_Type) then
+               Abort_Parsing
+                 (Context,
+                  "null pattern is invalid for " & Debug_Name (Input_Type));
+            end if;
+            return Pool.Create_Literal_Pattern
+                     (From_Node (Language, No_Lk_Node));
+
+         when JSON_String_Type =>
+            declare
+               Value : constant Unbounded_String := JSON.Get;
+            begin
+               if Value = "*" then
+                  return Pool.Create_Default_Pattern;
+               else
+                  Abort_Parsing ("invalid pattern: " & To_String (Value));
+               end if;
+            end;
+
+         when JSON_Object_Type =>
+            Tmp := Mandatory_Key (JSON, "kind", Context, "");
+            Check_Kind (Tmp, JSON_String_Type, Context, """kind""");
+            Kind := Tmp.Get;
+
+            if Kind = "symbol_literal" then
+               if Input_Type /= Symbol_Type_Ref then
+                  Abort_Parsing
+                    (Context,
+                     "symbol literal pattern is invalid for "
+                     & Debug_Name (Input_Type));
+               end if;
+               declare
+                  Text : constant Text_Type :=
+                    Parse_Symbol_Literal
+                      (Mandatory_Key
+                         (JSON,
+                          "value",
+                          Context,
+                          "for symbol_literal pattern"),
+                       Context,
+                       "value field");
+               begin
+                  return Pool.Create_Literal_Pattern
+                           (From_Symbol (Language, Text));
+               end;
+
+            elsif Kind = "node" then
+               declare
+                  Node_Type : Type_Ref;
+                  Members   : Document_Vectors.Vector;
+
+                  M    : Struct_Member_Ref;
+                  Args : Document_Vectors.Vector;
+                  Sub  : Document_Type;
+               begin
+                  Tmp := Mandatory_Key
+                           (JSON, "type", Context, "for node pattern");
+                  Check_Kind
+                    (Tmp, JSON_String_Type, Context, "type for node pattern");
+                  Node_Type := From_Index (Language, To_Type_Index (Tmp.Get));
+                  if not Is_Node_Type (Input_Type) then
+                     Abort_Parsing
+                       (Context,
+                        "node pattern is invalid for "
+                        & Debug_Name (Input_Type));
+                  end if;
+
+                  if JSON.Has_Field ("members") then
+                     Tmp := JSON.Get ("members");
+                     Check_Kind
+                       (Tmp,
+                        JSON_Array_Type,
+                        Context,
+                        """members"" key for node pattern");
+                     for Member_JSON of JSON_Array'(Tmp.Get) loop
+                        Check_Kind
+                          (Member_JSON,
+                           JSON_Object_Type,
+                           Context,
+                           """members"" item for node pattern");
+                        Tmp := Mandatory_Key
+                                 (Member_JSON,
+                                  "member",
+                                  Context,
+                                  "in ""members"" item for node pattern");
+                        Check_Kind
+                          (Tmp,
+                           JSON_String_Type,
+                           Context,
+                           """member"" key for item in node pattern");
+                        M := Map.Lookup_Struct_Member
+                               (Node_Type, To_Symbol (Tmp.Get));
+                        if M = No_Struct_Member_Ref then
+                           Abort_Parsing
+                             (Context,
+                              Debug_Name (Node_Type)
+                              & " has no " & Tmp.Get & " member");
+                        end if;
+
+                        Parse_Member_Call_Args (Member_JSON, Context, M, Args);
+
+                        Sub := Parse_Pattern
+                                 (Mandatory_Key
+                                    (Member_JSON,
+                                     "pattern",
+                                     Context,
+                                     "in ""members"" item for node pattern"),
+                                  Context,
+                                  Member_Type (M));
+                        Members.Append
+                          (Pool.Create_Member_Pattern (M, Args, Sub));
+                     end loop;
+                  end if;
+
+                  return Pool.Create_Node_Pattern (Node_Type, Members);
+               end;
+
+            elsif Kind = "not" then
+               return Pool.Create_Not_Pattern
+                        (Parse_Pattern
+                           (Mandatory_Key
+                              (JSON, "pattern", Context, "for not pattern"),
+                            Context,
+                            Input_Type));
+
+            elsif Kind = "or" then
+               declare
+                  Patterns : Document_Vectors.Vector;
+               begin
+                  Tmp := Mandatory_Key
+                           (JSON, "patterns", Context, "for or pattern");
+                  Check_Kind
+                    (Tmp, JSON_Array_Type, Context, "patterns for or pattern");
+                  for Sub of JSON_Array'(Tmp.Get) loop
+                     Patterns.Append
+                       (Parse_Pattern (Sub, Context, Input_Type));
+                  end loop;
+
+                  return Pool.Create_Or_Pattern (Patterns);
+               end;
+
+            else
+               Abort_Parsing
+                 (Context, "invalid template document kind: " & Tmp.Get);
+            end if;
+
+         when others =>
+            Abort_Parsing
+              (Context, "invalid pattern JSON node: " & JSON.Kind'Image);
+         end case;
+      end Parse_Pattern;
 
       ---------------------
       -- Process_Recurse --

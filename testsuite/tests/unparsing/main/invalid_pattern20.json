@@ -6,8 +6,8 @@
           "kind": "if",
           "condition": {
             "kind": "is_a",
-            "node": "this_field",
-            "kinds": [null]
+            "node": "this_node",
+            "pattern": {"kind": "or", "patterns": [1]}
           },
           "then": "recurse_flatten",
           "else": "recurse"

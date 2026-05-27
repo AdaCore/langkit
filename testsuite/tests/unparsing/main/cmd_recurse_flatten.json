@@ -12,7 +12,7 @@
             "condition": {
               "kind": "is_a",
               "node": "this_field",
-              "kinds": ["DottedName"]
+              "pattern": {"kind": "node", "type": "DottedName"}
             },
             "then": "recurse_flatten",
             "else": "recurse"

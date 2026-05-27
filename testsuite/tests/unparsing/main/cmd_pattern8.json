@@ -1,0 +1,29 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": {
+        "kind": "if",
+        "condition": {
+          "kind": "is_a",
+          "node": "this_node",
+          "pattern": {
+            "kind": "node",
+            "type": "VarDecl",
+            "members": [
+              {
+                "member": "p_name_symbol",
+                "pattern": {"kind": "symbol_literal", "value": "x"}
+              },
+              {
+                "member": "p_name_symbol",
+                "pattern": {"kind": "symbol_literal", "value": "y"}
+              }
+            ]
+          }
+        },
+        "then": ["recurse", "whitespace"],
+        "else": "recurse"
+      }
+    }
+  }
+}

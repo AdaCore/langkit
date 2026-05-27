@@ -33,6 +33,7 @@ private package Langkit_Support.Prettier_Utils is
    use type Prettier.Symbol_Type;
 
    package Type_Vectors is new Ada.Containers.Vectors (Positive, Type_Ref);
+   package Value_Vectors is new Ada.Containers.Vectors (Positive, Value_Ref);
 
    function Node_Matches
      (Node : Lk_Node; Types : Type_Vectors.Vector) return Boolean
@@ -213,7 +214,16 @@ private package Langkit_Support.Prettier_Utils is
       String_Lit,
       Symbol_Lit,
       This_Field,
-      This_Node
+      This_Node,
+
+      --  Patterns
+
+      Default_Pattern,
+      Literal_Pattern,
+      Member_Pattern,
+      Node_Pattern,
+      Not_Pattern,
+      Or_Pattern
    );
 
    subtype Template_Conditional_Kind is
@@ -226,9 +236,16 @@ private package Langkit_Support.Prettier_Utils is
    --  Kind for a document that materializes an expression for conditions in
    --  template instantiation.
 
+   subtype Template_Pattern_Kind is
+     Document_Kind range Default_Pattern .. Or_Pattern;
+   --  Kind for a document that materializes a pattern for "match" templates
+   --  and "is_a" expressions.
+
    subtype Template_Non_Expression_Kind is Document_Kind
    with Static_Predicate =>
-     Template_Non_Expression_Kind not in Template_Expression_Kind;
+     Template_Non_Expression_Kind not in
+       Template_Expression_Kind
+     | Template_Pattern_Kind;
    --  Any node that is not an expression, i.e. a document that will in the end
    --  be expanded and turned into a Prettier document. This is anything but an
    --  expression.
@@ -239,7 +256,8 @@ private package Langkit_Support.Prettier_Utils is
        Expected_Line_Breaks
      | Expected_Whitespaces
      | Table
-     | Template_Expression_Kind;
+     | Template_Expression_Kind
+     | Template_Pattern_Kind;
    --  Kind for a document template (i.e. before instantiation)
 
    subtype Instantiated_Template_Document_Kind is Document_Kind
@@ -247,6 +265,7 @@ private package Langkit_Support.Prettier_Utils is
      Instantiated_Template_Document_Kind not in
        Template_Conditional_Kind
      | Template_Expression_Kind
+     | Template_Pattern_Kind
      | Recurse
      | Recurse_Field
      | Recurse_Flatten
@@ -399,8 +418,8 @@ private package Langkit_Support.Prettier_Utils is
             Eval_Member_Args   : Document_Vectors.Vector;
 
          when Is_A =>
-            Is_A_Node  : Document_Type;
-            Is_A_Kinds : Type_Vectors.Vector;
+            Is_A_Node    : Document_Type;
+            Is_A_Pattern : Document_Type;
 
          when Is_Empty =>
             Is_Empty_Node : Document_Type;
@@ -422,6 +441,27 @@ private package Langkit_Support.Prettier_Utils is
 
          when This_Field | This_Node =>
             null;
+
+         when Default_Pattern =>
+            null;
+
+         when Literal_Pattern =>
+            Literal_Pattern_Value : Value_Ref;
+
+         when Member_Pattern =>
+            Member_Pattern_Ref  : Struct_Member_Ref;
+            Member_Pattern_Args : Document_Vectors.Vector;
+            Member_Pattern_Sub  : Document_Type;
+
+         when Node_Pattern =>
+            Node_Pattern_Type    : Type_Ref;
+            Node_Pattern_Members : Document_Vectors.Vector;
+
+         when Not_Pattern =>
+            Not_Pattern_Sub : Document_Type;
+
+         when Or_Pattern =>
+            Or_Pattern_List : Document_Vectors.Vector;
       end case;
    end record;
 
@@ -681,9 +721,9 @@ private package Langkit_Support.Prettier_Utils is
    --  Return an ``Eval_Node`` node
 
    function Create_Is_A
-     (Self  : in out Document_Pool;
-      Node  : Document_Type;
-      Kinds : in out Type_Vectors.Vector) return Document_Type;
+     (Self    : in out Document_Pool;
+      Node    : Document_Type;
+      Pattern : Document_Type) return Document_Type;
    --  Return an ``Is_A`` node
 
    function Create_Is_Empty
@@ -722,6 +762,37 @@ private package Langkit_Support.Prettier_Utils is
      (Self : in out Document_Pool) return Document_Type;
    --  Return a ``This_Node`` node
 
+   function Create_Default_Pattern
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Default_Pattern`` node
+
+   function Create_Literal_Pattern
+     (Self : in out Document_Pool; Value : Value_Ref) return Document_Type;
+   --  Return a ``Literal_Pattern`` node
+
+   function Create_Member_Pattern
+     (Self   : in out Document_Pool;
+      Member : Struct_Member_Ref;
+      Args   : in out Document_Vectors.Vector;
+      Sub    : Document_Type) return Document_Type;
+   --  Return a ``Member_Pattern`` node
+
+   function Create_Node_Pattern
+     (Self      : in out Document_Pool;
+      Node_Type : Type_Ref;
+      Members   : in out Document_Vectors.Vector) return Document_Type;
+   --  Return a ``Node_Pattern`` node
+
+   function Create_Not_Pattern
+     (Self    : in out Document_Pool;
+      Pattern : Document_Type) return Document_Type;
+   --  Return a ``Not_Pattern`` node
+
+   function Create_Or_Pattern
+     (Self     : in out Document_Pool;
+      Patterns : in out Document_Vectors.Vector) return Document_Type;
+   --  Return a ``Or_Pattern`` node
+
    procedure Bubble_Up_Trivias
      (Pool : in out Document_Pool; Document : in out Document_Type);
    --  Recursively hoist the trivias up in the document tree in
@@ -744,6 +815,11 @@ private package Langkit_Support.Prettier_Utils is
    --
    --  See ``Unparsing_Configuration_Record.Max_Empty_Lines`` for the semantics
    --  of ``Max_Empty_Lines``.
+
+   function Is_Default_Pattern (Document : Document_Type) return Boolean
+   with Pre => Document.Kind in Template_Pattern_Kind;
+   --  Return whether ``Document`` is a pattern that matches all possible
+   --  values.
 
    procedure Dump
      (Document : Document_Type; Trace : GNATCOLL.Traces.Trace_Handle := null);

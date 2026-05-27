@@ -6,8 +6,14 @@
           "kind": "if",
           "condition": {
             "kind": "is_a",
-            "node": "this_field",
-            "pattern": 1
+            "node": "this_node",
+            "pattern": {
+              "kind": "node",
+              "type": "VarDecl",
+              "members": [
+                {"member": "f_name", "args": [""], "pattern": "*"}
+              ]
+            }
           },
           "then": "recurse_flatten",
           "else": "recurse"

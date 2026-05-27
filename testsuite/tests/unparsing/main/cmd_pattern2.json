@@ -1,6 +1,6 @@
 {
   "node_configs": {
-    "VarDecl": {
+    "ParamSpec": {
       "node": {
         "kind": "if",
         "condition": {
@@ -8,9 +8,9 @@
           "node": {
             "kind": "eval_member",
             "prefix": "this_node",
-            "member": "f_value"
+            "member": "f_default_expr"
           },
-          "pattern": {"kind": "node", "type": "Number"}
+          "pattern": null
         },
         "then": ["recurse", "whitespace"],
         "else": "recurse"

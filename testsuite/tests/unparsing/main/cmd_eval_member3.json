@@ -8,7 +8,11 @@
            "prefix": "this_node",
            "member": "p_eval_member_default_arg_val",
            "args": [
-             {"kind": "is_a", "node": "this_node", "kinds": ["VarDecl"]}
+             {
+               "kind": "is_a",
+               "node": "this_node",
+               "pattern": {"kind": "node", "type": "VarDecl"}
+             }
            ]
         },
         "then": ["recurse", "whitespace"],

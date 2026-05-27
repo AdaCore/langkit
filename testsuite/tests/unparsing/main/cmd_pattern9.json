@@ -10,7 +10,10 @@
             "prefix": "this_node",
             "member": "f_value"
           },
-          "pattern": {"kind": "node", "type": "Number"}
+          "pattern": {
+            "kind": "not",
+            "pattern": {"kind": "node", "type": "Number"}
+          }
         },
         "then": ["recurse", "whitespace"],
         "else": "recurse"

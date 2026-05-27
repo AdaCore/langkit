@@ -6,7 +6,7 @@
           "kind": "if",
           "condition": {
             "kind": "is_a",
-            "node": "this_field",
+            "node": "this_node",
             "pattern": 1
           },
           "then": "recurse_flatten",
