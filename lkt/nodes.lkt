@@ -1812,8 +1812,32 @@ class TypeDecl: Decl implements TypeInterface {
         self.syn_name
 
     |" Return the base type for this node, if any.
+    |"
+    |" Note that this includes "logic" base types for covariant types, like
+    |" ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
+    |" ``Entity[Child]``.
     @exported
-    fun base_type(): Entity[TypeDecl] = self.syn_base_type?.referenced_decl()
+    fun base_type(): Entity[TypeDecl] = {
+        # Unwrap the entity type (if present) to the corresponding bare node
+        # type.
+        val entity_type = self.entity_type();
+        val is_entity = node == entity_type.node;
+        val bare_type =
+            if is_entity
+            then self.get_entity_node_type()
+            else self;
+
+        # Get the base type
+        val base_bare_type = bare_type.syn_base_type?.referenced_decl();
+
+        # Rewrap the entity type if appropriate
+        if not base_bare_type.is_null and is_entity
+        then
+            entity_type
+                .instantiate_generic_decl([base_bare_type])
+                .as[TypeDecl]
+        else base_bare_type
+    }
 
     |" Return an array containing all base types of ``self`` (ancestors last).
     |"
@@ -1826,15 +1850,6 @@ class TypeDecl: Decl implements TypeInterface {
 
         self_part & self.base_type().do((b) => [b] & b.base_types())
     }
-
-    |" Return the base type for this node, if any.
-    @exported
-    fun base_type_if_entity(): Entity[TypeDecl] =
-        (
-            if node == node.entity_type().node then self.get_entity_node_type()
-            else self
-        )
-        .base_type()
 
     |" Predicate used to verify that operands of equation logic operators are
     |" of equation type.
@@ -1882,23 +1897,32 @@ class TypeDecl: Decl implements TypeInterface {
             )
         else self
 
-    |" Return True if rhs is equal to or is a subtype of Self.
-    |" If allow_entity is True, Entity and/or rhs are entities, get the node
-    |" type.
+    |" Return whether ``rhs`` is equal to or is a subtype of ``self``.
     @predicate_error("$rhs is not a subtype of $Self")
-    fun is_subtype_or_eq(
-        rhs: Entity[TypeDecl],
-        allow_entity: Bool = false
-    ): Bool =
-        if allow_entity and not (self.is_null or rhs.is_null)
-        then
-            self.get_entity_node_type().is_subtype_or_eq(
-                rhs.get_entity_node_type()
-            )
-        else
-            ((self.is_null or rhs.is_null) or self == rhs)
-            or rhs.base_types().contains(self)
+    fun is_subtype_or_eq(rhs: Entity[TypeDecl]): Bool =
+        self.is_null
+        or rhs.is_null
+        or self == rhs
+        or rhs.base_types().contains(self)
 
+    |" Return whether ``rhs`` is equal to or is a subtype of ``Entity[self]``.
+    @predicate_error("$rhs is not a subtype of $Self")
+    fun is_entity_subtype_or_eq(rhs: Entity[TypeDecl]): Bool =
+        node.is_null
+        or not (node is ClassDecl)
+        or rhs.is_null
+        or {
+            val entity_type =
+                self.entity_type().instantiate_generic_type_decl([self]);
+            entity_type == rhs
+            or rhs.base_types().contains(entity_type)
+        }
+
+    |" Wrapper around ``TypeDecl.common_ancestor`` that returns the nearest
+    |" common ancestor for ``self`` and all types for the ``other_types`` slice
+    |" between indexes ``idx`` and ``other_types.length() - 1`` (included).
+    |"
+    |" ``imprecise`` is forwarded to ``TypeDecl.common_ancestor``.
     fun common_ancestor_helper(
         other_types: Array[Entity[TypeDecl]],
         idx: Int,
@@ -1919,44 +1943,23 @@ class TypeDecl: Decl implements TypeInterface {
                 )
             )
 
-    |" Return the nearest common ancestor of Self and other_types, ignoring
-    |" any type that does not share a common ancestor with the rest of the
-    |" types.
-    |" If one of the type is Entity, the result will also be wrapped by
-    |" Entity.
+    |" Return the nearest common ancestor of ``self`` and ``other_types``,
+    |" ignoring any type that does not share a common ancestor with the rest of
+    |" the types.
     fun imprecise_common_ancestor_list(
         other_types: Array[Entity[TypeDecl]]
-    ): Entity[TypeDecl] = {
-        val no_entity_other_types =
-            other_types.map((t) => t?.get_entity_node_type());
+    ): Entity[TypeDecl] =
+        if other_types.length() == 0
+        then self
 
-        (
-            if other_types.length() == 0 then self
-            elif self.is_null
-            then
-                no_entity_other_types.find((t) => not t.is_null)
-                ?.imprecise_common_ancestor_list(no_entity_other_types)
-            else
-                self.get_entity_node_type().common_ancestor_helper(
-                    no_entity_other_types,
-                    0,
-                    true
-                )
-        )
-        .do(
-            (t) =>
-            if
-                t.node != t.entity_type().node
-                and (
-                    node == t.entity_type().node
-                    or other_types.any(
-                        (ot) => ot?.node == t.entity_type().node
-                    )
-                )
-            then t.entity_type().instantiate_generic_type_decl([t])
-            else t
-        )
-    }
+        elif self.is_null
+        then
+            other_types
+                .find((t) => not t.is_null)
+                ?.imprecise_common_ancestor_list(other_types)
+
+        else
+            self.common_ancestor_helper(other_types, 0, true)
 
     |" Return true if Self and other are matching type that can be permutated.
     @predicate_error("expected $Self, got $other")
@@ -2019,7 +2022,7 @@ class TypeDecl: Decl implements TypeInterface {
                         default_val=false
                     )
                 case _ =>
-                    (self == other or other.is_subtype(self))
+                    other.is_subtype(self)
                     or self.matching_generic_types(other)
             }
         )
@@ -2195,9 +2198,11 @@ class TypeDecl: Decl implements TypeInterface {
         )
         else null[Entity[TypeDecl]]
 
+    |" Return the declaration that ``origin`` overrides (i.e. the homonym
+    |" declaration in the base type, if any).
     @with_dynvars(origin)
     fun get_super_of_parent(): Entity[Decl] =
-        self?.base_type_if_entity()?.defined_scope().get_first(
+        self?.base_type()?.defined_scope().get_first(
             origin.as[FunDecl].name(),
             lookup=LookupKind.flat
         )
@@ -2276,29 +2281,31 @@ class TypeDecl: Decl implements TypeInterface {
         other: Entity[TypeDecl]
     ): Bool = false
 
-    |" Return the nearest common ancestor between Self and other.
-    |" If imprecise is True, return either type that is non-null.
-    |" If both types are the Entity type, use their wrapped type instead.
+    |" Return the nearest common ancestor between ``self`` and ``other``.
+    |"
+    |" When there is no common ancestor, return the null type (if ``imprecise``
+    |" is False) or either ``self`` or ``other`` that is non-null.
     fun common_ancestor(
         other: Entity[TypeDecl],
         imprecise: Bool = false
     ): Entity[TypeDecl] =
-        (
-            if
-                node == self.entity_type().node
-                and other.node == self.entity_type().node
-            then
-                self.get_entity_node_type().common_ancestor(
-                    other.get_entity_node_type()
-                )
-            elif self == other then self
-            else null[Entity[TypeDecl]]
-        )
-        .do(
-            (ca) => ca,
-            default_val=if imprecise then if self.is_null then other else self
-            else null[Entity[TypeDecl]]
-        )
+        if self.is_null
+        then other
+
+        elif other.is_null
+        then self
+
+        else {
+            # Considering chains of base types, return the nearest ancestor
+            # that is common to both types.
+            val other_bases = other?.base_types(true);
+
+            self?.base_types(true).find((b) => other_bases.contains(b))
+
+            # In imprecise mode, if no common ancestor was found, just return
+            # ``self``.
+            or? (if imprecise then self else null[Entity[TypeDecl]])
+        }
 
     |" Create an environment with the builder() function associated to the
     |" node type parameter. If the type is not a class, return an empty
@@ -2564,23 +2571,6 @@ class BasicClassDecl: NamedTypeDecl {
             else le
         )
     }
-
-    fun common_ancestor(
-        other: Entity[TypeDecl],
-        imprecise: Bool = false
-    ): Entity[TypeDecl] = {
-        val other_bases = other?.base_types(true);
-
-        (
-            if other.is_null then null[Entity[TypeDecl]]
-            else self?.base_types(true).find((b) => other_bases.contains(b))
-        )
-        .do(
-            (ca) => ca,
-            default_val=if imprecise then if self.is_null then other else self
-            else null[Entity[TypeDecl]]
-        )
-    }
 }
 
 |" Declaration for a LK class. This only cover node classes for the moment,
@@ -2591,8 +2581,8 @@ class ClassDecl: BasicClassDecl {
 
     fun decl_type_name(): String = "class declaration"
 
-    |" Return a list of all fields that are necessaru in the constructor of
-    |" the class.
+    |" Return the list of all fields that must have a corresponding parameter
+    |" in the class constructor.
     fun constructor_fields(): Array[Entity[FieldDecl]] =
         self.base_types(true).mapcat(
             (base) =>
@@ -2600,12 +2590,15 @@ class ClassDecl: BasicClassDecl {
                 (d) => d.decl.as[FieldDecl],
                 (d) =>
                 d.decl is FieldDecl
-                and (
-                    if d.has_annotation(s"parse_field")
-                    then
-                        not d.has_annotation(s"abstract")
-                        and not d.has_annotation(s"null_field")
-                    else true
+
+                # Do not include parse fields if they have either the @abstract
+                # or @null_field annotations.
+                and not (
+                    d.has_annotation(s"parse_field")
+                    and (
+                        d.has_annotation(s"abstract")
+                        or d.has_annotation(s"null_field")
+                    )
                 )
             )
         )
@@ -4606,8 +4599,11 @@ class KeepExpr: Expr {
             bind error_location = node.keep_type;
             TypeDecl.is_subtype_or_eq%(
                 self.array_element_type,
-                self.keep_type.type_var,
-                true
+                self.keep_type.type_var
+            )
+            %or TypeDecl.is_entity_subtype_or_eq%(
+                self.array_element_type,
+                self.keep_type.type_var
             )
         }
 }

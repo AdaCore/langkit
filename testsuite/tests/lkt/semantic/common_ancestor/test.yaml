@@ -1,1 +1,4 @@
 driver: lkt
+entry_points:
+  - test_nodes.lkt
+  - test_entities.lkt

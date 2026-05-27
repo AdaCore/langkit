@@ -1,0 +1,14 @@
+class A {}
+class B : A {}
+class C : A {}
+
+val node_arr = null[Array[A]]
+val node_lst = null[ASTList[A]]
+
+val entity_arr = null[Array[Entity[A]]]
+val entity_lst = null[Entity[ASTList[A]]]
+
+val v1 = node_arr.keep[B]
+val v2 = node_lst.keep[C]
+val v3 = entity_arr.keep[B]
+val v4 = entity_lst.keep[C]

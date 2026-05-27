@@ -1,0 +1,5 @@
+class A {}
+class B: A {}
+class C: A {}
+class D: B {}
+class E: B {}

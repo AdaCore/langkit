@@ -12,21 +12,21 @@ class LktToolboxDriver(BaseDriver):
         return self.test_env.get("check_only", False)
 
     @property
-    def entry_point(self) -> str:
+    def entry_points(self) -> str:
         """
-        Return the name of the source file on which to run "lkt_toolbox".
+        Return the names of the source files on which to run "lkt_toolbox".
         """
-        return self.test_env.get("entry_point", "test.lkt")
+        return self.test_env.get("entry_points", ["test.lkt"])
 
     def run(self):
-        args = ["lkt_toolbox", "--check-invalid-decls", self.entry_point]
-
+        base_args = ["lkt_toolbox", "--check-invalid-decls"]
         if self.check_only:
-            args.append("--check-only")
+            base_args.append("--check-only")
 
-        self.run_and_check(
-            args,
-            memcheck=self.memcheck_for_lkt,
-            valgrind_suppressions=["gnat"],
-            for_coverage=True,
-        )
+        for filename in self.entry_points:
+            self.run_and_check(
+                [*base_args, filename],
+                memcheck=self.memcheck_for_lkt,
+                valgrind_suppressions=["gnat"],
+                for_coverage=True,
+            )

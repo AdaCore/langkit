@@ -1,0 +1,10 @@
+class A {
+    fun f(): Int = 0
+}
+class B : A {
+    fun f(): Int = node.super() + 1
+}
+class C : A {
+    fun f(): Int = node.super() + 2
+    fun g(): Int = node.super() + 3
+}
