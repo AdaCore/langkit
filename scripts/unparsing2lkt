@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 
+import sys
+
 from langkit.scripts.unparsing2lkt import main
 
 
-main()
+sys.exit(main())

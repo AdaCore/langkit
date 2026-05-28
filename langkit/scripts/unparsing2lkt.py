@@ -322,7 +322,7 @@ def to_json(input_file: str) -> str:
             value = parse_expression(arg.f_value)
             if arg.f_name:
                 arg_name = arg.f_name.text
-                if arg_name in call_kwargs:
+                if arg_name in kwargs:
                     error(arg.f_name, "argument passed multiple times")
                 kwargs[arg_name] = value
             elif kwargs:
@@ -502,7 +502,7 @@ def to_json(input_file: str) -> str:
             case L.OrPattern():
                 patterns = []
 
-                def visit(p: L.Pattern):
+                def visit(p: L.Pattern) -> None:
                     if isinstance(p, L.OrPattern):
                         visit(p.f_left_sub_pattern)
                         visit(p.f_right_sub_pattern)
@@ -615,8 +615,6 @@ def to_json(input_file: str) -> str:
         elif isinstance(e, L.CallExpr):
             callee = e.f_name
             if isinstance(callee, L.DotExpr):
-                call_args = []
-                call_kwargs = {}
                 result = {
                     "kind": "eval_member",
                     "prefix": parse_expression(callee.f_prefix),
