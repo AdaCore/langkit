@@ -8,19 +8,39 @@
         },
         {
           "kind": "match",
-          "field": "f_args",
-          "default": {
-            "kind": "recurse_field",
-            "field": "f_prefix"
+          "node": {
+            "kind": "eval_member",
+            "prefix": "this_node",
+            "member": "f_args"
           },
-          "absent": [
-            "hardline",
+          "matchers": [
             {
-              "kind": "recurse_field",
-              "field": "f_prefix"
+              "pattern": {
+                "kind": "node",
+                "type": "NameList",
+                "members": [
+                  {
+                    "member": "is_empty_list",
+                    "pattern": true
+                  }
+                ]
+              },
+              "document": [
+                "hardline",
+                {
+                  "kind": "recurse_field",
+                  "field": "f_prefix"
+                }
+              ]
+            },
+            {
+              "pattern": "*",
+              "document": {
+                "kind": "recurse_field",
+                "field": "f_prefix"
+              }
             }
-          ],
-          "matchers": []
+          ]
         },
         {
           "kind": "recurse_field",

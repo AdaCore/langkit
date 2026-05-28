@@ -18,8 +18,6 @@ with GNATCOLL.Traces;
 with Prettier_Ada.Documents;
 
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
-with Langkit_Support.Generic_API.Analysis;
-use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal.Unparsing;
@@ -32,13 +30,7 @@ private package Langkit_Support.Prettier_Utils is
    package Prettier renames Prettier_Ada.Documents;
    use type Prettier.Symbol_Type;
 
-   package Type_Vectors is new Ada.Containers.Vectors (Positive, Type_Ref);
    package Value_Vectors is new Ada.Containers.Vectors (Positive, Value_Ref);
-
-   function Node_Matches
-     (Node : Lk_Node; Types : Type_Vectors.Vector) return Boolean
-   with Pre => not Node.Is_Null;
-   --  Return whether ``Node`` matches at least one type in ``Types``
 
    --  The Document_Type data structure serves two joint purposes:
    --
@@ -127,16 +119,10 @@ private package Langkit_Support.Prettier_Utils is
    package Document_Vectors is new Ada.Containers.Vectors
      (Positive, Document_Type);
 
-   package Type_Ref_Vectors is new Ada.Containers.Vectors (Positive, Type_Ref);
-
    type Matcher_Record is record
-      Matched_Types : Type_Ref_Vectors.Vector;
-      Document      : Document_Type;
+      Pattern  : Document_Type;
+      Document : Document_Type;
    end record;
-
-   function Matches (Node : Lk_Node; Matcher : Matcher_Record) return Boolean;
-   --  Return if ``Node`` matches at least one type in
-   --  ``Matcher.Matched_Types``.
 
    package Matcher_Vectors is new Ada.Containers.Vectors
      (Index_Type   => Positive,
@@ -398,10 +384,8 @@ private package Langkit_Support.Prettier_Utils is
             If_Else      : Document_Type;
 
          when Match =>
-            Match_Field    : Struct_Member_Ref;
+            Match_Node     : Document_Type;
             Match_Matchers : Matcher_Vectors.Vector;
-            Match_Default  : Document_Type;
-            Match_Absent   : Document_Type;
 
          when Bin_Op =>
             Bin_Op_Op  : Binary_Operator;
@@ -693,11 +677,9 @@ private package Langkit_Support.Prettier_Utils is
    --  Return an ``If_Then_Else`` node
 
    function Create_Match
-     (Self           : in out Document_Pool;
-      Match_Field    : Struct_Member_Ref;
-      Match_Matchers : in out Matcher_Vectors.Vector;
-      Match_Default  : Document_Type;
-      Match_Absent   : Document_Type) return Document_Type;
+     (Self     : in out Document_Pool;
+      Node     : Document_Type;
+      Matchers : in out Matcher_Vectors.Vector) return Document_Type;
    --  Return an ``Match`` node
 
    function Create_Bin_Op

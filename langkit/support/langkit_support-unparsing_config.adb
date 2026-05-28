@@ -174,11 +174,9 @@ package body Langkit_Support.Unparsing_Config is
                Replace (Self.If_Else);
 
             when Match =>
-               Replace (Self.Match_Default);
                for I in 1 .. Self.Match_Matchers.Last_Index loop
                   Replace (Self.Match_Matchers (I).Document);
                end loop;
-               Replace (Self.Match_Absent);
          end case;
       end Replace;
 
@@ -1777,203 +1775,95 @@ package body Langkit_Support.Unparsing_Config is
                   end;
 
                elsif Kind = "match" then
-                  if Context.Kind not in Node_Template | Field_Template then
-                     Abort_Parsing
-                       (Context,
-                        """match"" is valid in node templates and field"
-                        & " templates only");
-                  end if;
-
                   declare
-                     Field_JSON    : constant JSON_Value :=
-                       JSON.Get ("field");
-                     Matchers_JSON : constant JSON_Value :=
-                       Mandatory_Key (JSON, "matchers", Context, "for match");
-                     Default_JSON  : constant JSON_Value :=
-                       Mandatory_Key (JSON, "default", Context, "for match");
-                     Absent_JSON   : constant JSON_Value :=
-                       JSON.Get ("absent");
+                     --  First parse the expression for the controlling mode
 
-                     Field_Ref : Struct_Member_Ref;
+                     Node_Type : Type_Ref;
+                     Node      : constant Document_Type :=
+                       Parse_Expression
+                         (Mandatory_Key (JSON, "node", Context, "for match"),
+                          Context,
+                          Node_Type);
+
+                     Matchers    : Matcher_Vectors.Vector;
+                     Has_Default : Boolean := False;
+                     Pattern     : Document_Type;
+                     Sub_Doc     : Document_Type;
+
+                     --  Before parsing the matchers, save the current context,
+                     --  and then ensure that each sub-document resuls in the
+                     --  same state as the others (i.e. that regardless of the
+                     --  matcher that ends up being selected at runtime, the
+                     --  same slice of original source code gets unparsed).
+
+                     Initial_Context : constant Template_Parsing_Context :=
+                       Context;
+                     Current_Context : Template_Parsing_Context (Context.Kind);
+                     I               : Positive := 1;
                   begin
-                     --  Validate that the keys are present and have the
-                     --  correct type.
-
-                     if Context.Kind = Node_Template then
-                        if Field_JSON.Kind = JSON_Null_Type then
-                           Abort_Parsing
-                             (Context, "missing ""field"" key for match");
-
-                        elsif Field_JSON.Kind /= JSON_String_Type then
-                           Abort_Parsing
-                             (Context,
-                              "invalid ""field"" key kind for match: found "
-                              & Field_JSON.Kind'Image
-                              & "; expected "
-                              & JSON_String_Type'Image);
-                        end if;
-
-                        Field_Ref := From_Index
-                          (Language,
-                           To_Struct_Member_Index
-                             (Field_JSON.Get, Context.Node));
-
-                     elsif Field_JSON.Kind /= JSON_Null_Type then
+                     if not Is_Node_Type (Node_Type) then
                         Abort_Parsing
-                          (Context, "invalid ""field"" key for match");
-                     else
-                        Field_Ref := Context.Field;
+                          (Context,
+                           "node expected for the match controlling node, but"
+                           & " got " & Debug_Name (Node_Type));
                      end if;
 
+                     Tmp := Mandatory_Key
+                              (JSON, "matchers", Context, "for match");
                      Check_Kind
-                       (Matchers_JSON,
+                       (Tmp,
                         JSON_Array_Type,
                         Context,
                         """matchers"" key kind for match");
+                     for Matcher of JSON_Array'(Tmp.Get) loop
+                        Check_Kind
+                          (Matcher,
+                           JSON_Object_Type,
+                           Context,
+                           "item in match");
 
-                     declare
-                        --  Before parsing the "matchers", "default" or
-                        --  "absent" keys, save the current context.
-                        --
-                        --  Start by parsing the "default" key with the current
-                        --  context.
-                        --
-                        --  Then process each matcher with its own nested
-                        --  context confirming that all end on the same state.
+                        --  Parse the pattern guard for this matcher
 
-                        Initial_Context : constant Template_Parsing_Context :=
-                          Context;
+                        Pattern :=
+                          Parse_Pattern
+                            (Mandatory_Key
+                               (Matcher, "pattern", Context, "for match"),
+                             Context,
+                             Node_Type);
 
-                        Match_Default  : Document_Type;
-                        Match_Absent   : Document_Type := null;
-                        Match_Matchers : Matcher_Vectors.Vector;
+                        --  Parse this matcher's sub-template and check for
+                        --  linear template consistency.
 
-                        procedure Process_Matcher (Matcher_JSON : JSON_Value);
-                        --  Process Matcher_JSON with their own nested context
-                        --  context confirming that it ends in the same state
-                        --  as Context.
-
-                        function Parse_Type_Ref
-                          (JSON : JSON_Value) return Type_Ref;
-                        --  Return the type reference corresponding to JSON,
-                        --  expected to be a string. Abort parsing if this is
-                        --  not a valid type reference.
-
-                        ---------------------
-                        -- Process_Matcher --
-                        ---------------------
-
-                        procedure Process_Matcher (Matcher_JSON : JSON_Value)
-                        is
-                           Kind           : constant JSON_Value :=
-                             Mandatory_Key
-                               (Matcher_JSON,
-                                "kind",
-                                Context,
-                                "match matcher");
-                           Document_JSON  : constant JSON_Value :=
-                             Mandatory_Key
-                               (Matcher_JSON,
+                        Current_Context := Initial_Context;
+                        Sub_Doc :=
+                          Parse_Subtemplate
+                            (Mandatory_Key
+                               (Matcher,
                                 "document",
                                 Context,
-                                "match matcher");
-                           Types          : Type_Ref_Vectors.Vector;
-                           Nested_Context : Template_Parsing_Context :=
-                             Initial_Context;
-                        begin
-                           if Kind.Kind = JSON_String_Type then
-                              Types.Append (Parse_Type_Ref (Kind));
-                           elsif Kind.Kind = JSON_Array_Type then
-                              for K of JSON_Array'(Kind.Get) loop
-                                 Types.Append (Parse_Type_Ref (K));
-                              end loop;
-                           else
-                              Abort_Parsing
-                                (Context,
-                                 "invalid matcher ""kind"" field for "
-                                 & """match"" - found "
-                                 & Kind.Kind'Image
-                                 & "; expected a string or array of strings");
-                           end if;
-
-                           --  Parse the matcher and store it in the table
-
-                           Match_Matchers.Append
-                             (Matcher_Record'
-                               (Types,
-                                Parse_Subtemplate
-                                 (Document_JSON, Nested_Context)));
-
-                           --  Confirm that the final linear position is
-                           --  homogeneous between all matchers.
-
-                           if Nested_Context.State /= Context.State then
-                              Abort_Parsing
-                                (Context,
-                                 "match matcher """ & Kind.Get & """ has an "
-                                 & "inconsistent recurse structure");
-                           end if;
-                        end Process_Matcher;
-
-                        --------------------
-                        -- Parse_Type_Ref --
-                        --------------------
-
-                        function Parse_Type_Ref
-                          (JSON : JSON_Value) return Type_Ref is
-                        begin
-                           Check_Kind
-                             (JSON,
-                              JSON_String_Type,
-                              Context,
-                              "matcher ""kind"" field for match");
-                           return From_Index
-                             (Language, To_Type_Index (JSON.Get));
-                        end Parse_Type_Ref;
-
-                     begin
-                        Match_Default :=
-                          Parse_Subtemplate (Default_JSON, Context);
-
-                        if Absent_JSON.Kind /= JSON_Null_Type then
-                           declare
-                              Match_Absent_Context :
-                                Template_Parsing_Context :=
-                                  Initial_Context;
-
-                           begin
-                              Match_Absent :=
-                                Parse_Subtemplate
-                                  (Absent_JSON, Match_Absent_Context);
-
-                              if Match_Absent_Context.State /= Context.State
-                              then
-                                 Abort_Parsing
-                                   (Context,
-                                    "match ""absent"" matcher has an "
-                                    & "inconsistent recurse structure");
-                              end if;
-                           end;
+                                "match matcher"),
+                             Current_Context);
+                        if I = 1 then
+                           Context := Current_Context;
+                        elsif Current_Context.State /= Context.State then
+                           Abort_Parsing
+                             (Context,
+                              "match matcher number" & I'Image & """ has an "
+                              & "inconsistent recurse structure");
                         end if;
 
-                        for Matcher_JSON of
-                          JSON_Array'(Get (Matchers_JSON))
-                        loop
-                           Check_Kind
-                             (Matcher_JSON,
-                              JSON_Object_Type,
-                              Context,
-                              """matchers"" element kind for match");
-                           Process_Matcher (Matcher_JSON);
-                        end loop;
+                        Has_Default :=
+                          Has_Default or else Is_Default_Pattern (Pattern);
+                        Matchers.Append (Matcher_Record'(Pattern, Sub_Doc));
+                        I := I + 1;
+                     end loop;
 
-                        return
-                          Pool.Create_Match
-                            (Field_Ref,
-                             Match_Matchers,
-                             Match_Default,
-                             Match_Absent);
-                     end;
+                     if not Has_Default then
+                        Abort_Parsing
+                          (Context, "missing default pattern for match");
+                     end if;
+
+                     return Pool.Create_Match (Node, Matchers);
                   end;
 
                elsif Kind = "indent" then

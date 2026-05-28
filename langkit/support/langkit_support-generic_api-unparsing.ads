@@ -174,9 +174,8 @@
 --        "else": <sub-template>
 --      }
 --
---  * The "match" template is valid only inside a node configuration.  The
---    "absent" entry is optional. If "field" is not present, "absent" is
---    yielded if defined, otherwise fallback to "default".
+--  * The "match" template yields one of several alternative templates
+--    depending on a controlling node (what the "node" expression returns).
 --
 --    Each alternative template is guarded by a pattern: the expression yields
 --    the alternative template associated to the first pattern that matches the
@@ -187,17 +186,12 @@
 --
 --      {
 --        "kind": "match",
---        "field": "<field-name>",
+--        "node": <expression>,
 --        "matchers": [
---          {"kind": <node-name>, "document": <sub-template>},
+--          {"pattern": <pattern>, "document": <sub-template>},
 --          ...
---        ],
---        "default": <sub-template>
---        "absent": <sub-template>
+--        ]
 --      }
---
---    A variant is available in field templates. It has no "field" entry: the
---    alternative is picked depending on the field that owns this template.
 --
 --  * The "indent" template yields an "indent" Prettier document::
 --
@@ -333,6 +327,7 @@
 --        "kwargs": {
 --          "arg1": <sub-expression>,
 --          "arg2": <sub-expression>,
+--          ...
 --        }
 --      }
 --

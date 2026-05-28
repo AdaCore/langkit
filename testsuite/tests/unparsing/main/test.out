@@ -171,31 +171,31 @@ def f2(a: Int, ): Int
 # invalid_isempty3.json
     template for VarDecl.f_name: is_empty expects a node, got a Bool
 # invalid_match.json
-    "node" template for Addition: match matcher "Number" has an inconsistent recurse structure
+    "node" template for Addition: missing "node" key for match
 # invalid_match2.json
-    "node" template for Addition: missing field f_rhs
+    "node" template for Addition: node expected for the match controlling node, but got Bool
+# invalid_match3.json
+    "node" template for Addition: missing "matchers" key for match
+# invalid_match4.json
+    "node" template for Addition: invalid "matchers" key kind for match: JSON_ARRAY_TYPE expected, but JSON_STRING_TYPE found
+# invalid_match5.json
+    "node" template for Addition: missing default pattern for match
+# invalid_match6.json
+    "node" template for Addition: invalid item in match: JSON_OBJECT_TYPE expected, but JSON_STRING_TYPE found
+# invalid_match7.json
+    "node" template for Addition: missing "pattern" key for match
+# invalid_match8.json
+    "node" template for Addition: invalid pattern JSON node: JSON_INT_TYPE
+# invalid_match9.json
+    "node" template for Addition: missing "document" key match matcher
+# invalid_match10.json
+    "node" template for Addition: invalid string template document kind: invalid
+# invalid_match11.json
+    "node" template for Addition: field f_lhs expected, got token "+"
     Expected:
     * field f_lhs
     * token "+"
     * field f_rhs
-# invalid_match3.json
-    "node" template for Addition: missing "field" key for match
-# invalid_match4.json
-    "node" template for Addition: missing "matchers" key for match
-# invalid_match5.json
-    "node" template for Addition: missing "default" key for match
-# invalid_match6.json
-    "node" template for Addition: invalid "field" key kind for match: found JSON_ARRAY_TYPE; expected JSON_STRING_TYPE
-# invalid_match7.json
-    "node" template for Addition: invalid "matchers" key kind for match: JSON_ARRAY_TYPE expected, but JSON_OBJECT_TYPE found
-# invalid_match8.json
-    "node" template for Addition: invalid string template document kind: invalid
-# invalid_match9.json
-    invalid field for Addition: f_invalid
-# invalid_match10.json
-    "sep" template for FooNodeList: "match" is valid in node templates and field templates only
-# invalid_match11.json
-    template for VarDecl.f_name: invalid "field" key for match
 # invalid_indent.json
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json

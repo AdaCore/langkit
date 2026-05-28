@@ -370,49 +370,6 @@ def to_json(input_file: str) -> str:
 
         pass
 
-    def parse_match_pattern(p: L.Pattern) -> list[MatchPattern]:
-        """
-        Return the list of patterns that ``p`` contains.
-        """
-        match p:
-            case L.OrPattern():
-                return parse_match_pattern(
-                    p.f_left_sub_pattern
-                ) + parse_match_pattern(p.f_right_sub_pattern)
-
-            case L.ComplexPattern(
-                f_decl=None,
-                f_pattern=L.TypePattern(
-                    f_type_name=L.SimpleTypeRef(
-                        f_type_name=L.RefId() as type_name
-                    ),
-                ),
-                f_details=L.PatternDetailList() as details,
-                f_predicate=None,
-            ) if len(details) == 0:
-                return [NodeMatchPattern(p, type_name.text)]
-
-            case L.ComplexPattern(
-                f_decl=None,
-                f_pattern=L.NullPattern(),
-                f_details=L.PatternDetailList() as details,
-                f_predicate=None,
-            ) if len(details) == 0:
-                return [NullMatchPattern(p)]
-
-            case L.ComplexPattern(
-                f_decl=L.BindingValDecl(
-                    f_syn_name=L.DefId() as def_id,
-                ),
-                f_pattern=None,
-                f_details=L.PatternDetailList() as details,
-                f_predicate=None,
-            ) if len(details) == 0 and def_id.text == "_":
-                return [DefaultMatchPattern(p)]
-
-            case _:
-                error(p, "invalid pattern")
-
     def parse_subtemplate(e: L.Expr | list[L.Expr]) -> Any:
         return parse_template_helper(e, expression=False)
 
@@ -764,50 +721,21 @@ def to_json(input_file: str) -> str:
             }
 
         elif isinstance(e, L.MatchExpr):
-            if isinstance(e.f_match_expr, L.RefId):
-                field_name = e.f_match_expr.text
-            else:
-                error(e.f_match_expr, "identifier expected")
-
-            result = {
+            return {
                 "kind": "match",
-                "matchers": [],
+                "node": parse_expression(e.f_match_expr),
+                "matchers": [
+                    {
+                        "pattern": (
+                            parse_pattern(branch.f_pattern)
+                            if isinstance(branch, L.PatternMatchBranch)
+                            else error(branch, "unsupported branch syntax")
+                        ),
+                        "document": parse_subtemplate(branch.f_expr),
+                    }
+                    for branch in e.f_branches
+                ],
             }
-            if field_name != "node":
-                result["field"] = field_name
-
-            for branch in e.f_branches:
-                if not isinstance(branch, L.PatternMatchBranch):
-                    error(branch, "pattern match branch expected")
-                template = parse_subtemplate(branch.f_expr)
-
-                nodes = []
-                has_default = False
-                has_absent = False
-                for p in parse_match_pattern(branch.f_pattern):
-                    match p:
-                        case NodeMatchPattern():
-                            nodes.append(p.type_name)
-                        case NullMatchPattern():
-                            has_absent = True
-                        case DefaultMatchPattern():
-                            has_default = True
-                if nodes:
-                    result["matchers"].append(
-                        {
-                            "kind": nodes if len(nodes) > 1 else nodes[0],
-                            "document": template,
-                        }
-                    )
-                if has_default:
-                    result.setdefault("default", template)
-                if has_absent:
-                    result.setdefault("absent", template)
-
-            if "default" not in result:
-                error(e, "default case missing")
-
-            return result
 
         elif isinstance(e, L.NotExpr):
             return {"kind": "not", "operand": parse_expression(e.f_expr)}
@@ -1220,26 +1148,15 @@ def to_lkt(input_file: str) -> str:
                 lines.append("else")
                 process_template(else_doc)
 
-            case {
-                "kind": "match",
-                "matchers": matchers,
-                "default": default_doc,
-            }:
-                field = doc.get("field", "node")
-                lines.append(f"match {field} {{")
-                if "absent" in doc:
-                    lines.append("case null =>")
-                    process_template(doc["absent"])
+            case {"kind": "match", "node": node_doc, "matchers": matchers}:
+                lines.append("match")
+                process_template(node_doc)
+                lines.append("{")
                 for m in matchers:
                     lines.append("case")
-                    if isinstance(m["kind"], str):
-                        lines.append(m["kind"])
-                    else:
-                        lines.append(" | ".join(m["kind"]))
+                    process_pattern(m["pattern"])
                     lines.append("=>")
                     process_template(m["document"])
-                lines.append("case _ =>")
-                process_template(default_doc)
                 lines.append("}")
 
             case {

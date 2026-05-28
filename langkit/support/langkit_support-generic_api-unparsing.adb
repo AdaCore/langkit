@@ -1779,41 +1779,46 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when Match =>
             declare
-               Field_Node       : constant Lk_Node :=
-                 Eval_Syntax_Field (State.Node, Template.Match_Field);
-               Matched_Template : Document_Type := Template.Match_Default;
-
+               Doc  : Document_Type;
+               Node : Value_Ref := No_Value_Ref;
             begin
-               --  If the field is present, pick the document for the first
-               --  matcher that accepts it.
+               --  First evaluate the controlling node. If an exception occurs
+               --  at this point, we will use the default matcher below.
 
-               if Is_Field_Present
-                    (Field_Node,
-                     Syntax_Field_Index
-                       (Template.Match_Field, Type_Of (State.Node)))
-               then
-                  for I in
-                    Template.Match_Matchers.First_Index
-                    .. Template.Match_Matchers.Last_Index
-                  loop
-                     if Matches
-                          (Field_Node, Template.Match_Matchers.Reference (I))
+               begin
+                  Node := Evaluate_Expression (State, Template.Match_Node);
+               exception
+                  when Exc : others =>
+                     Process_Evaluation_Exception (State, Exc);
+               end;
+
+               --  Now find the first matcher that applies for this node, and
+               --  then instantiate the associated template.
+
+               for I in 1 .. Template.Match_Matchers.Last_Index loop
+                  declare
+                     M : Matcher_Record renames
+                       Template.Match_Matchers.Constant_Reference (I);
+                  begin
+                     if (Node = No_Value_Ref
+                         and then Is_Default_Pattern (M.Pattern))
+                         or else (Node /= No_Value_Ref
+                                  and then Pattern_Matches
+                                             (State, M.Pattern, Node))
                      then
-                        Matched_Template :=
-                          Template.Match_Matchers (I).Document;
+                        Doc := M.Document;
                         exit;
                      end if;
-                  end loop;
+                  end;
+               end loop;
 
-               --  Otherwise, use the null template, if present. For all
-               --  other cases, use the default template.
+               --  Configuration parsing is supposed to ensure that each
+               --  match template has a matcher with a default pattern, so
+               --  we must match one alternative in all cases.
 
-               elsif Template.Match_Absent /= null then
-                  Matched_Template := Template.Match_Absent;
-               end if;
+               pragma Assert (Doc /= null);
 
-               return Instantiate_Template_Helper
-                        (Pool, State, Matched_Template);
+               return Instantiate_Template_Helper (Pool, State, Doc);
             end;
       end case;
    end Instantiate_Template_Helper;

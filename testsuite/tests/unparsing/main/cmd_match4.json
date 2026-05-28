@@ -6,10 +6,14 @@
         "document": [
           {
             "kind": "match",
-            "field": "f_name",
+            "node": {
+              "kind": "eval_member",
+              "prefix": "this_node",
+              "member": "f_name"
+            },
             "matchers": [
               {
-                "kind": "Name",
+                "pattern": {"kind": "node", "type": "Name"},
                 "document": [
                   {
                     "kind": "recurse_field",
@@ -17,14 +21,17 @@
                   },
                   "whitespace"
                 ]
-              }
-            ],
-            "default": [
-              {
-                "kind": "recurse_field",
-                "field": "f_name"
               },
-              "hardline"
+              {
+                "pattern": "*",
+                "document": [
+                  {
+                    "kind": "recurse_field",
+                    "field": "f_name"
+                  },
+                  "hardline"
+                ]
+              }
             ]
           },
           {

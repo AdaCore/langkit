@@ -4,13 +4,17 @@
       "fields": {
         "f_is_null": {
           "kind": "match",
+          "node": "this_field",
           "matchers": [
             {
-              "kind": "NullQualPresent",
+              "pattern": {"kind": "node", "type": "NullQualPresent"},
               "document": ["recurse", "hardline"]
+            },
+            {
+              "pattern": "*",
+              "document": ["whitespace", "recurse"]
             }
-          ],
-          "default": ["whitespace", "recurse"]
+          ]
         }
       }
     }
