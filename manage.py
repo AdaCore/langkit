@@ -557,6 +557,8 @@ def make_lsp(args: Namespace) -> None:
     ]
     if args.native_lsp:
         argv.append("--native-lsp")
+    if args.maven_executable is not None:
+        argv.append(f"--maven-executable={args.maven_executable}")
 
     lkm.main([*BOOTSTRAP_LKM_RUN_BASE_ARGS, *argv])
 
@@ -655,6 +657,10 @@ if __name__ == "__main__":
         "--native-lsp",
         action="store_true",
         help="Enable the native image language server building.",
+    )
+    make_lsp_parser.add_argument(
+        "--maven-executable",
+        help='Specify the Maven executable to use. The default one is "mvn".',
     )
 
     create_subparser(subparsers, test, accept_unknown_args=True)
