@@ -3,7 +3,7 @@
     "VarDecl": {
       "fields": {
         "f_is_null": {
-          "kind": "ifKind",
+          "kind": "match",
           "matchers": [
             {
               "kind": "NullQualPresent",

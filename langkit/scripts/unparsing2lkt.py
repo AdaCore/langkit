@@ -210,16 +210,11 @@ signatures = {
         Positional("flatContents", optional=True),
         OptKw("groupId"),
     ),
-    "ifEmpty": Signature(
-        Positional("then"),
-        Positional("else"),
-    ),
     "indent": dedent_sig,
     "markAsRoot": dedent_sig,
     "innerRoot": dedent_sig,
     "continuationLineIndent": dedent_sig,
     "recurse": Signature(Positional("field")),
-    "recurse_flatten": Signature(Variadic("if")),
     "tableSeparator": Signature(Positional("text")),
 }
 
@@ -326,7 +321,7 @@ def to_json(input_file: str) -> str:
         Base class for node matching patterns.
         """
 
-        pass
+        node: L.LktNode
 
     @dataclasses.dataclass(frozen=True)
     class NodeMatchPattern(MatchPattern):
@@ -334,7 +329,7 @@ def to_json(input_file: str) -> str:
         Pattern that matches nodes of a given kind.
         """
 
-        node: str
+        type_name: str
 
     @dataclasses.dataclass(frozen=True)
     class NullMatchPattern(MatchPattern):
@@ -372,7 +367,7 @@ def to_json(input_file: str) -> str:
                 f_details=L.PatternDetailList() as details,
                 f_predicate=None,
             ) if len(details) == 0:
-                return [NodeMatchPattern(type_name.text)]
+                return [NodeMatchPattern(p, type_name.text)]
 
             case L.ComplexPattern(
                 f_decl=None,
@@ -380,7 +375,7 @@ def to_json(input_file: str) -> str:
                 f_details=L.PatternDetailList() as details,
                 f_predicate=None,
             ) if len(details) == 0:
-                return [NullMatchPattern()]
+                return [NullMatchPattern(p)]
 
             case L.ComplexPattern(
                 f_decl=L.BindingValDecl(
@@ -390,7 +385,7 @@ def to_json(input_file: str) -> str:
                 f_details=L.PatternDetailList() as details,
                 f_predicate=None,
             ) if len(details) == 0 and def_id.text == "_":
-                return [DefaultMatchPattern()]
+                return [DefaultMatchPattern(p)]
 
             case _:
                 error(p, "invalid pattern")
@@ -411,6 +406,7 @@ def to_json(input_file: str) -> str:
         elif isinstance(e, L.RefId):
             if e.text in (
                 "recurse",
+                "recurse_flatten",
                 "recurse_left",
                 "recurse_right",
                 "breakParent",
@@ -422,8 +418,23 @@ def to_json(input_file: str) -> str:
                 "flushLineBreaks",
                 "trim",
                 "whitespace",
+                "this_field",
             ):
                 return e.text
+
+        elif isinstance(e, L.DotExpr):
+            if e.f_null_cond.p_as_bool:
+                error(e.f_null_cond, "unexpected non-cond marker")
+
+            match e.f_suffix.text:
+                case "is_empty":
+                    return {
+                        "kind": "is_empty",
+                        "node": parse_template(e.f_prefix),
+                    }
+
+                case _:
+                    error(e.f_suffix, "unknown attribute")
 
         elif isinstance(e, L.CallExpr):
             callee = e.f_name
@@ -492,13 +503,6 @@ def to_json(input_file: str) -> str:
                     result["groupId"] = parse_str(bound["groupId"])
                 return result
 
-            elif name == "ifEmpty":
-                return {
-                    "kind": "ifEmpty",
-                    "then": parse_template(bound["then"]),
-                    "else": parse_template(bound["else"]),
-                }
-
             elif name in (
                 "indent",
                 "markAsRoot",
@@ -517,17 +521,6 @@ def to_json(input_file: str) -> str:
                     error(field, "field name expected")
                 return {"kind": "recurse_field", "field": field.text}
 
-            elif name == "recurse_flatten":
-                result = {"kind": "recurse_flatten"}
-                if varargs:
-                    kinds = []
-                    for a in varargs:
-                        if not isinstance(a, L.RefId):
-                            error(a, "node type name expected")
-                        kinds.append(a.text)
-                    result["if"] = kinds
-                return result
-
             elif name == "tableSeparator":
                 return {
                     "kind": "tableSeparator",
@@ -542,6 +535,34 @@ def to_json(input_file: str) -> str:
             result = [parse_template(item) for item in e.f_exprs]
             return result[0] if len(result) == 1 else result
 
+        elif isinstance(e, L.IfExpr):
+            else_part = parse_template(e.f_else_expr)
+            for alt in reversed(e.f_alternatives):
+                else_part = {
+                    "kind": "if",
+                    "condition": parse_template(alt.f_cond_expr),
+                    "then": parse_template(alt.f_then_expr),
+                    "else": else_part,
+                }
+            return {
+                "kind": "if",
+                "condition": parse_template(e.f_cond_expr),
+                "then": parse_template(e.f_then_expr),
+                "else": else_part,
+            }
+
+        elif isinstance(e, L.Isa):
+            kinds = []
+            for p in parse_match_pattern(e.f_pattern):
+                if not isinstance(p, NodeMatchPattern):
+                    error(p.node, "node type expected")
+                kinds.append(p.type_name)
+            return {
+                "kind": "is_a",
+                "node": parse_template(e.f_expr),
+                "kinds": kinds,
+            }
+
         elif isinstance(e, L.MatchExpr):
             if isinstance(e.f_match_expr, L.RefId):
                 field_name = e.f_match_expr.text
@@ -549,7 +570,7 @@ def to_json(input_file: str) -> str:
                 error(e.f_match_expr, "identifier expected")
 
             result = {
-                "kind": "ifKind",
+                "kind": "match",
                 "matchers": [],
             }
             if field_name != "node":
@@ -566,7 +587,7 @@ def to_json(input_file: str) -> str:
                 for p in parse_match_pattern(branch.f_pattern):
                     match p:
                         case NodeMatchPattern():
-                            nodes.append(p.node)
+                            nodes.append(p.type_name)
                         case NullMatchPattern():
                             has_absent = True
                         case DefaultMatchPattern():
@@ -829,6 +850,7 @@ def to_lkt(input_file: str) -> str:
                 "recurse"
                 | "recurse_left"
                 | "recurse_right"
+                | "recurse_flatten"
                 | "breakParent"
                 | "line"
                 | "hardline"
@@ -838,6 +860,7 @@ def to_lkt(input_file: str) -> str:
                 | "flushLineBreaks"
                 | "trim"
                 | "whitespace"
+                | "this_field"
             ):
                 lines.append(doc)
 
@@ -891,15 +914,33 @@ def to_lkt(input_file: str) -> str:
                     lines.append(f", groupId={lkt_lit(doc['groupId'])}")
                 lines.append(")")
 
-            case {"kind": "ifEmpty", "then": then_doc, "else": else_doc}:
-                lines.append("ifEmpty(")
+            case {
+                "kind": "if",
+                "condition": cond_doc,
+                "then": then_doc,
+                "else": else_doc,
+            }:
+                alts: list[tuple[Any, Any]] = []
+                while (
+                    isinstance(else_doc, dict) and else_doc.get("kind") == "if"
+                ):
+                    alts.append((else_doc["condition"], else_doc["then"]))
+                    else_doc = else_doc["else"]
+
+                lines.append("if")
+                process_template(cond_doc)
+                lines.append("then")
                 process_template(then_doc)
-                lines.append(",")
+                for cond_doc, then_doc in alts:
+                    lines.append("elif")
+                    process_template(cond_doc)
+                    lines.append("then")
+                    process_template(then_doc)
+                lines.append("else")
                 process_template(else_doc)
-                lines.append(")")
 
             case {
-                "kind": "ifKind",
+                "kind": "match",
                 "matchers": matchers,
                 "default": default_doc,
             }:
@@ -937,17 +978,20 @@ def to_lkt(input_file: str) -> str:
             case {"kind": "recurse_field", "field": field}:
                 lines.append(f"recurse({field})")
 
-            case {"kind": "recurse_flatten"}:
-                lines.append("recurse_flatten(")
-                if "if" in doc:
-                    lines.append(", ".join(k for k in doc["if"]))
-                lines.append(")")
-
             case {"kind": "tableSeparator", "text": text}:
                 lines.append(f"tableSeparator({lkt_lit(text)})")
 
             case {"kind": "text", "text": text}:
                 lines.append(lkt_lit(text))
+
+            case {"kind": "is_a", "node": node_doc, "kinds": [*kinds]}:
+                process_template(node_doc)
+                lines.append("is")
+                lines.append(" | ".join(kinds))
+
+            case {"kind": "is_empty", "node": node_doc}:
+                process_template(node_doc)
+                lines.append(".is_empty")
 
             case _:
                 raise FatalError(f"invalid template: {doc}")

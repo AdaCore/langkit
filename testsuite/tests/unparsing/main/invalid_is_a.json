@@ -4,8 +4,11 @@
       "fields": {
         "f_name": {
           "kind": "if",
-          "condition": {"kind": "is_empty", "node": "this_field"},
-          "then": "line",
+          "condition": {
+            "kind": "is_a",
+            "kinds": ["DottedName"]
+          },
+          "then": "recurse_flatten",
           "else": "recurse"
         }
       }

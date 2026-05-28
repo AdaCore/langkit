@@ -9,7 +9,8 @@
             "field": "f_lhs"
           },
           {
-            "kind": "ifKind",
+            "kind": "match",
+            "field": "f_rhs",
             "matchers": [
               {
                 "kind": "Number",
@@ -31,12 +32,12 @@
                 "kind": "text",
                 "text": "+"
               },
-              "hardline"
+              "hardline",
+              {
+                "kind": "recurse_field",
+                "field": "f_rhs"
+              }
             ]
-          },
-          {
-            "kind": "recurse_field",
-            "field": "f_rhs"
           }
         ]
       }

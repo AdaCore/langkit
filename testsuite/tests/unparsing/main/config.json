@@ -6,7 +6,8 @@
     "Block": {
        "fields": {
          "f_items": {
-           "kind": "ifEmpty",
+           "kind": "if",
+           "condition": {"kind": "is_empty", "node": "this_field"},
            "then": ["hardline", "recurse"],
            "else": [
              {
@@ -28,7 +29,8 @@
       "fields": {
         "f_return_type": ["whitespace", "recurse", "hardline"],
         "f_body": {
-          "kind": "ifEmpty",
+          "kind": "if",
+          "condition": {"kind": "is_empty", "node": "this_field"},
           "then": ["recurse", "hardline"],
           "else": [
             {
@@ -43,7 +45,8 @@
     "LabeledStmts": {
       "fields": {
         "f_stmts": {
-          "kind": "ifEmpty",
+          "kind": "if",
+          "condition": {"kind": "is_empty", "node": "this_field"},
           "then": ["recurse", "hardline"],
           "else": {
             "kind": "indent",

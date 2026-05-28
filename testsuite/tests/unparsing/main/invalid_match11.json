@@ -3,7 +3,7 @@
     "VarDecl": {
       "fields": {
         "f_name": {
-         "kind": "ifKind",
+         "kind": "match",
          "field": "f_name",
          "matchers": [],
          "default": "recurse"

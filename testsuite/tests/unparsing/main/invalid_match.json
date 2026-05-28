@@ -9,11 +9,20 @@
             "field": "f_lhs"
           },
           {
-            "kind": "ifKind",
+            "kind": "match",
             "field": "f_rhs",
-            "matchers": {
-              "invalid": "invalid"
-            },
+            "matchers": [
+              {
+                "kind": "Number",
+                "document": [
+                  "hardline",
+                  {
+                    "kind": "text",
+                    "text": "+"
+                  }
+                ]
+              }
+            ],
             "default": [
               {
                 "kind": "text",

@@ -3,7 +3,9 @@
     "VarDecl": {
       "fields": {
         "f_name": {
-          "kind": "ifEmpty",
+          "kind": "if",
+          "condition": "this_field",
+          "then": "recurse",
           "else": "recurse"
         }
       }

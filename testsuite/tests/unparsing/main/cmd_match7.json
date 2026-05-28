@@ -9,7 +9,7 @@
         {"kind": "recurse_field", "field": "f_type_expr"},
         {"kind": "text", "text": "="},
         {
-          "kind": "ifKind",
+          "kind": "match",
           "field": "f_value",
           "matchers": [
             {

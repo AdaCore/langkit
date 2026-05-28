@@ -117,13 +117,13 @@ def f2(a: Int, ): Int
 # invalid_kind_template.json
     template for VarDecl.f_name: missing "kind" key
 # invalid_kind_template2.json
-    template for VarDecl.f_name: invalid "kind": JSON_INT_TYPE
+    template for VarDecl.f_name: invalid "kind": JSON_STRING_TYPE expected, but JSON_INT_TYPE found
 # invalid_kind_template3.json
     template for VarDecl.f_name: invalid template document kind: foo
 # invalid_whitespace.json
-    template for VarDecl.f_name: invalid whitespace length: JSON_STRING_TYPE
+    template for VarDecl.f_name: invalid "length" for whitespace: JSON_INT_TYPE expected, but JSON_STRING_TYPE found
 # invalid_whitespace2.json
-    template for VarDecl.f_name: missing "length" key
+    template for VarDecl.f_name: missing "length" key for whitespace
 # invalid_align.json
     template for VarDecl.f_name: missing "width" key for align
 # invalid_align2.json
@@ -137,9 +137,9 @@ def f2(a: Int, ): Int
 # invalid_group.json
     template for VarDecl.f_name: missing "document" key for group
 # invalid_group2.json
-    template for VarDecl.f_name: invalid group shouldBreak: JSON_INT_TYPE
+    template for VarDecl.f_name: invalid group shouldBreak: JSON_BOOLEAN_TYPE expected, but JSON_INT_TYPE found
 # invalid_group3.json
-    template for VarDecl.f_name: invalid group id: JSON_INT_TYPE
+    template for VarDecl.f_name: invalid group id: JSON_STRING_TYPE expected, but JSON_INT_TYPE found
 # invalid_group4.json
     template for VarDecl.f_name: duplicate group id: myGroup
 # invalid_group5.json
@@ -151,43 +151,51 @@ def f2(a: Int, ): Int
 # invalid_ifbreak.json
     template for VarDecl.f_name: missing "breakContents" key for ifBreak
 # invalid_ifbreak2.json
-    template for VarDecl.f_name: invalid group id: JSON_INT_TYPE
+    template for VarDecl.f_name: invalid group id: JSON_STRING_TYPE expected, but JSON_INT_TYPE found
 # invalid_ifbreak3.json
     template for VarDecl.f_name: undefined symbol: myGroup
 # invalid_ifbreak4.json
     VarDecl: group id myGroup is referenced in the "Decl.f_name" template but not defined in the "node" template
-# invalid_ifempty.json
-    template for VarDecl.f_name: missing "else" key for ifEmpty
-# invalid_ifempty2.json
-    template for VarDecl.f_name: missing "then" key for ifEmpty
-# invalid_ifempty3.json
-    "node" template for VarDecl: "ifEmpty" is valid only in field templates
-# invalid_ifkind.json
-    "node" template for Addition: ifKind matcher "Number" has an inconsistent recurse structure
-# invalid_ifkind2.json
+# invalid_if.json
+    template for VarDecl.f_name: missing "condition" key for if
+# invalid_if2.json
+    template for VarDecl.f_name: expression expected, got a template
+# invalid_if3.json
+    template for VarDecl.f_name: if condition requires a boolean, got a Name
+# invalid_if4.json
+    template for VarDecl.f_name: missing "then" key for if
+# invalid_isempty.json
+    template for VarDecl.f_name: missing "node" key for is_empty
+# invalid_isempty2.json
+    template for VarDecl.f_name: expression expected, got a template
+# invalid_isempty3.json
+    template for VarDecl.f_name: is_empty expects a node, got a Bool
+# invalid_match.json
+    "node" template for Addition: match matcher "Number" has an inconsistent recurse structure
+# invalid_match2.json
     "node" template for Addition: missing field f_rhs
     Expected:
     * field f_lhs
     * token "+"
     * field f_rhs
-# invalid_ifkind3.json
-    "node" template for Addition: missing "field" key for ifKind
-# invalid_ifkind4.json
-    "node" template for Addition: missing "matchers" key for ifKind
-# invalid_ifkind5.json
-    "node" template for Addition: missing "default" key for ifKind
-# invalid_ifkind6.json
-    "node" template for Addition: invalid "field" key kind for ifKind: found JSON_ARRAY_TYPE; expected JSON_STRING_TYPE
-# invalid_ifkind7.json
-    "node" template for Addition: invalid "matchers" key kind for ifKind: found JSON_OBJECT_TYPE; expected JSON_ARRAY_TYPE
-# invalid_ifkind8.json
+# invalid_match3.json
+    "node" template for Addition: missing "field" key for match
+# invalid_match4.json
+    "node" template for Addition: missing "matchers" key for match
+# invalid_match5.json
+    "node" template for Addition: missing "default" key for match
+# invalid_match6.json
+    "node" template for Addition: invalid "field" key kind for match: found JSON_ARRAY_TYPE; expected JSON_STRING_TYPE
+# invalid_match7.json
+    "node" template for Addition: invalid "matchers" key kind for match: JSON_ARRAY_TYPE expected, but JSON_OBJECT_TYPE found
+# invalid_match8.json
     "node" template for Addition: invalid string template document kind: invalid
-# invalid_ifkind9.json
+# invalid_match9.json
     invalid field for Addition: f_invalid
-# invalid_ifkind10.json
-    "sep" template for FooNodeList: "ifKind" is valid in node templates and field templates only
-# invalid_ifkind11.json
-    template for VarDecl.f_name: invalid "field" key for ifKind
+# invalid_match10.json
+    "sep" template for FooNodeList: "match" is valid in node templates and field templates only
+# invalid_match11.json
+    template for VarDecl.f_name: invalid "field" key for match
 # invalid_indent.json
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json
@@ -201,7 +209,7 @@ def f2(a: Int, ): Int
 # invalid_recurse_field2.json
     "node" template for ExprStmt: missing "field" key for recurse_field
 # invalid_recurse_field3.json
-    "node" template for ExprStmt: invalid recurse_field field: JSON_NULL_TYPE
+    "node" template for ExprStmt: invalid "field" for recurse_field: JSON_STRING_TYPE expected, but JSON_NULL_TYPE found
 # invalid_recurse_field4.json
     "node" template for Decl: text/recurse_field are valid for concrete nodes only
 # invalid_recurse_field5.json
@@ -234,23 +242,18 @@ def f2(a: Int, ): Int
     * token "="
     * field f_value
     * token ";"
-# invalid_recurse_field11.json
-    "node" template for VarDecl: unexpected extra template item: token "def"
-    Expected:
-    * field f_is_null
-    * token "var"
-    * field f_name
-    * token ":"
-    * field f_type_expr
-    * token "="
-    * field f_value
-    * token ";"
-# invalid_recurse_flatten.json
-    template for VarDecl.f_name: invalid recurse_flatten if: JSON_NULL_TYPE
-# invalid_recurse_flatten2.json
-    template for VarDecl.f_name: invalid item in recurse_flatten if: JSON_NULL_TYPE
-# invalid_recurse_flatten3.json
-    template for VarDecl.f_name: invalid node type in recurse_flatten if: NoSuchNode
+# invalid_is_a.json
+    template for VarDecl.f_name: missing "node" key for is_a
+# invalid_is_a2.json
+    template for VarDecl.f_name: is_a expects a node, got a Bool
+# invalid_is_a3.json
+    template for VarDecl.f_name: missing "kinds" key for is_a
+# invalid_is_a4.json
+    template for VarDecl.f_name: invalid "kinds" for is_a: JSON_ARRAY_TYPE expected, but JSON_STRING_TYPE found
+# invalid_is_a5.json
+    template for VarDecl.f_name: invalid item in kinds of is_a: JSON_STRING_TYPE expected, but JSON_NULL_TYPE found
+# invalid_is_a6.json
+    template for VarDecl.f_name: invalid node type in kinds of is_a: NoSuchNode
 # invalid_table_join.json
     FooNode has no p_no_such_predicate member
 # invalid_table_join2.json
@@ -263,6 +266,8 @@ def f2(a: Int, ): Int
     f_name is not a property for Decl
 # invalid_bubble_up.json
     template for VarDecl.f_name: invalid bubbleUpLeadingTrivias: JSON_INT_TYPE
+# invalid_this_field.json
+    "node" template for VarDecl: "this_field" is valid only in field templates
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -1322,7 +1327,7 @@ Done.
   ]
 }
 
-== cmd_ifempty.json ==
+== cmd_isempty.json ==
 
 {
   "id": 1,
@@ -1351,7 +1356,7 @@ Done.
   ]
 }
 
-== cmd_ifempty.json ==
+== cmd_isempty.json ==
 
 {
   "id": 1,
@@ -1434,7 +1439,7 @@ Done.
   ]
 }
 
-== cmd_ifkind.json ==
+== cmd_match.json ==
 
 {
   "id": 1,
@@ -1501,7 +1506,7 @@ Done.
   ]
 }
 
-== cmd_ifkind.json ==
+== cmd_match.json ==
 
 {
   "id": 1,
@@ -1568,7 +1573,7 @@ Done.
   ]
 }
 
-== cmd_ifkind2.json ==
+== cmd_match2.json ==
 
 {
   "id": 1,
@@ -1655,7 +1660,7 @@ Done.
   ]
 }
 
-== cmd_ifkind3.json ==
+== cmd_match3.json ==
 
 {
   "id": 1,
@@ -1694,7 +1699,7 @@ Done.
   ]
 }
 
-== cmd_ifkind4.json ==
+== cmd_match4.json ==
 
 {
   "id": 1,
@@ -1756,7 +1761,7 @@ Done.
   ]
 }
 
-== cmd_ifkind5.json ==
+== cmd_match5.json ==
 
 {
   "id": 1,
@@ -1795,7 +1800,7 @@ Done.
   ]
 }
 
-== cmd_ifkind6.json ==
+== cmd_match6.json ==
 
 {
   "id": 1,
@@ -1837,7 +1842,7 @@ Done.
   ]
 }
 
-== cmd_ifkind7.json ==
+== cmd_match7.json ==
 
 {
   "id": 1,
@@ -1851,7 +1856,7 @@ Done.
   ]
 }
 
-== cmd_ifkind8.json ==
+== cmd_match8.json ==
 
 {
   "id": 1,

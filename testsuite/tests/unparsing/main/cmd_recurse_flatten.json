@@ -7,7 +7,16 @@
       "node": {"kind": "fill", "document": "recurse"},
       "fields": {
         "f_prefix": [
-          {"kind": "recurse_flatten", "if": ["DottedName"]},
+          {
+            "kind": "if",
+            "condition": {
+              "kind": "is_a",
+              "node": "this_field",
+              "kinds": ["DottedName"]
+            },
+            "then": "recurse_flatten",
+            "else": "recurse"
+          },
           "softline"
         ]
       }

@@ -1,0 +1,17 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "f_name": {
+          "kind": "if",
+          "condition": {
+            "kind": "is_empty",
+            "node": {"kind": "is_empty", "node": "this_field"}
+          },
+          "then": "recurse",
+          "else": "recurse"
+        }
+      }
+    }
+  }
+}

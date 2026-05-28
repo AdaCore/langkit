@@ -25,9 +25,15 @@ class Pattern {
 }
 
 class ComplexPattern {
-    val f_pattern = group(recurse_flatten(OrPattern))
+    val f_pattern = group(
+        if this_field is OrPattern
+        then recurse_flatten
+        else recurse
+    )
     val f_details =
-        ifEmpty(recurse, group(indent(softline, recurse), softline))
+        if this_field.is_empty
+        then recurse
+        else group(indent(softline, recurse), softline)
 }
 
 class TypePattern {
@@ -41,8 +47,18 @@ class NullPattern {
 
 class OrPattern {
     val node = group(recurse)
-    val f_left_sub_pattern = [recurse_flatten(OrPattern), line]
-    val f_right_sub_pattern = [whitespace, recurse_flatten(OrPattern)]
+    val f_left_sub_pattern = [
+        if this_field is OrPattern
+        then recurse_flatten
+        else recurse,
+        line
+    ]
+    val f_right_sub_pattern = [
+        whitespace,
+        if this_field is OrPattern
+        then recurse_flatten
+        else recurse
+    ]
 }
 
 class ParenPattern {
@@ -81,8 +97,15 @@ class DestructuringPatternDetail {
 
 class BaseCallExpr {
     val node = group(recurse)
-    val f_name = group(recurse_flatten(DotExpr, KeepExpr, CastExpr, CallExpr))
-    val f_args = ifEmpty(recurse, group(indent(softline, recurse), softline))
+    val f_name = group(
+        if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+        then recurse_flatten
+        else recurse
+    )
+    val f_args =
+      if this_field.is_empty
+      then recurse
+      else group(indent(softline, recurse), softline)
 }
 
 class BaseLexerCaseRuleAlt {
@@ -128,8 +151,12 @@ class CallExprList {
 
 class CastExpr {
     val node = group(recurse)
-    val f_expr =
-        [recurse_flatten(DotExpr, KeepExpr, CastExpr, CallExpr), softline]
+    val f_expr = [
+        if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+        then recurse_flatten
+        else recurse,
+        softline
+    ]
 }
 
 class CharLit {
@@ -150,7 +177,9 @@ class ClassDecl {
     val f_syn_base_type = [":", whitespace, recurse]
     val f_traits = [whitespace, "implements", recurse]
     val f_decls =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class ClassQualifier {
@@ -175,8 +204,12 @@ class DefaultListTypeRef {
 
 class DotExpr {
     val node = group(recurse)
-    val f_prefix =
-        [recurse_flatten(DotExpr, KeepExpr, CastExpr, CallExpr), softline]
+    val f_prefix = [
+        if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+        then recurse_flatten
+        else recurse,
+        softline
+    ]
 }
 
 class DynVarDecl {
@@ -236,8 +269,14 @@ class EnumClassDecl {
             "}"
         ]
     val f_syn_base_type = [":", whitespace, recurse]
-    val f_branches = ifEmpty([recurse], [hardline, recurse])
-    val f_decls = ifEmpty([recurse], [hardline, recurse])
+    val f_branches =
+        if this_field.is_empty
+        then [recurse]
+        else [hardline, recurse]
+    val f_decls =
+        if this_field.is_empty
+        then [recurse]
+        else [hardline, recurse]
 }
 
 class EnumLitDecl {
@@ -264,12 +303,23 @@ class EnumTypeDecl {
             hardline,
             "}"
         ]
-    val f_decls = ifEmpty([recurse], [hardline, recurse])
+    val f_decls =
+        if this_field.is_empty
+        then [recurse]
+        else [hardline, recurse]
 }
 
 class EnvSpecDecl {
     val f_syn_name = [recurse, whitespace]
-    val f_actions = [indent(ifEmpty([], hardline), recurse), hardline]
+    val f_actions = [
+        indent(
+            if this_field.is_empty
+            then []
+            else hardline,
+            recurse
+        ),
+        hardline
+    ]
 }
 
 class ErrorOnNull {
@@ -396,7 +446,9 @@ class GrammarDecl {
             "}"
         ]
     val f_rules =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class GrammarDiscard {
@@ -564,8 +616,12 @@ class Isa {
 }
 
 class KeepExpr {
-    val f_expr =
-        [recurse_flatten(DotExpr, KeepExpr, CastExpr, CallExpr), softline]
+    val f_expr = [
+        if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+        then recurse_flatten
+        else recurse,
+        softline
+    ]
 }
 
 class LambdaParamDecl {
@@ -609,7 +665,12 @@ class LambdaExpr {
 }
 
 class LangkitRoot {
-    val f_imports = [recurse, ifEmpty([], hardline)]
+    val f_imports = [
+        recurse,
+        if this_field.is_empty
+        then []
+        else hardline
+    ]
 }
 
 class LexerCaseRule {
@@ -626,14 +687,18 @@ class LexerDecl {
     val node =
         ["lexer", recurse(f_syn_name), whitespace, "{", recurse(f_rules), "}"]
     val f_rules =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class LexerFamilyDecl {
     val node =
         ["family", recurse(f_syn_name), whitespace, "{", recurse(f_rules), "}"]
     val f_rules =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class ListKind {
@@ -782,7 +847,9 @@ class StructDecl {
             "}"
         ]
     val f_decls =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class SubscriptExpr {
@@ -818,7 +885,9 @@ class TraitDecl {
             "}"
         ]
     val f_decls =
-        [ifEmpty([hardline, recurse], [indent(hardline, recurse), hardline])]
+        if this_field.is_empty
+        then [hardline, recurse]
+        else [indent(hardline, recurse), hardline]
 }
 
 class TryExpr {

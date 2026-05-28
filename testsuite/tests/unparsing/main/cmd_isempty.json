@@ -3,7 +3,8 @@
     "FunDecl": {
       "fields": {
         "f_args": {
-          "kind": "ifEmpty",
+          "kind": "if",
+          "condition": {"kind": "is_empty", "node": "this_field"},
           "then": ["softline", "recurse"],
           "else": [
             {

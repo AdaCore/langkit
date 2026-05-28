@@ -1,0 +1,18 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "f_name": {
+          "kind": "if",
+          "condition": {
+            "kind": "is_a",
+            "node": {"kind": "is_empty", "node": "this_field"},
+            "kinds": ["DottedName"]
+          },
+          "then": "recurse_flatten",
+          "else": "recurse"
+        }
+      }
+    }
+  }
+}

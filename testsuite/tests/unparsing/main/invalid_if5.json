@@ -5,8 +5,7 @@
         "f_name": {
           "kind": "if",
           "condition": {"kind": "is_empty", "node": "this_field"},
-          "then": "line",
-          "else": "recurse"
+          "then": "recurse"
         }
       }
     }

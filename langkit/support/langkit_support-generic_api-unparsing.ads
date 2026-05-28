@@ -78,6 +78,359 @@
 --           Put_Line (Formatted);
 --        end;
 --     end Unparse;
+--
+--  The unparsing configuration is a JSON file that provides "document
+--  templates", i.e. patterns to generate Prettier documents.
+--
+--  * The default template to unparse nodes or node fields is the "recurse"
+--    one. Instantiating it just yields the default unparsing for that
+--    node/field::
+--
+--      "recurse"
+--
+--  * The "breakParent" template yields a "breakParent" Prettier Document::
+--
+--      "breakParent"
+--
+--  * The "line"/"hardline"/"hardLineWithoutBreakParent"/"softline"/
+--    "literalline" templates yield the corresponding Prettier documents::
+--
+--      "line"
+--      "hardline"
+--      "hardlineWithoutBreakParent"
+--      "softline"
+--      "literalline"
+--
+--  * The "flushLineBreaks" template is used as a placeholder to emit potential
+--    line breaks that come from the source code to reformat::
+--
+--      "flushLineBreaks"
+--
+--  * The "trim" template yields a "trim" Prettier Document::
+--
+--      "trim"
+--
+--  * The "whitespace" template yields a "text" document with the specified
+--    amount of spaces::
+--
+--      {"kind": "whitespace", "length": 2}
+--
+--      /* or just, for length = 1 */
+--
+--      "whitespace"
+--
+--  * The "align" template yields a "align" Prettier document::
+--
+--      {
+--        "kind": "align",
+--        "width": <number or string>,
+--        "contents": <sub-template>
+--      }
+--
+--  * The "dedent" template yields a "dedent" Prettier document::
+--
+--      {"kind": "dedent", "contents": <sub-template>}
+--
+--  * The "dedentToRoot" template yields a "dedentToRoot" Prettier document::
+--
+--      {"kind": "dedentToRoot", "contents": <sub-template>}
+--
+--  * The "fill" template yields a "fill" Prettier document::
+--
+--      {"kind": "fill", "document": <sub-template>}
+--
+--  * The "group" template yields a "group" Prettier document::
+--
+--      {"kind": "group", "document": <sub-template>}
+--      {"kind": "group", "document": <sub-template>, "shouldBreak": true}
+--
+--    An optional "id" field makes it define a symbol to reference in the same
+--    template:
+--
+--      {"kind": "group", "document": <sub-template>, "id": "mySymbol"}
+--
+--  * The "ifBreak" template yields an "ifBreak" Prettier document::
+--
+--      {"kind": "ifBreak", "breakContents": <sub-template>}
+--      {
+--        "kind": "ifBreak",
+--        "breakContents": <sub-template>,
+--        "flatContents": <sub-template>
+--      }
+--      {
+--        "kind": "ifBreak",
+--        "breakContents": <sub-template>,
+--        "flatContents": <sub-template>,
+--        "groupId": <symbol>
+--      }
+--
+--  * The "ifEmpty" template is valid only inside a fields configuration.  It
+--    yields its "then" alternative if the field is an empty list, and its
+--    "else" alternative otherwise::
+--
+--      {
+--        "kind": "ifEmpty",
+--        "then": <sub-template>,
+--        "else": <sub-template>
+--      }
+--
+--  * The "match" template is valid only inside a node configuration.  The
+--    "absent" entry is optional. If "field" is not present, "absent" is
+--    yielded if defined, otherwise fallback to "default".
+--
+--    If "field" is present, the entry in "matchers" that corresponds to the
+--    field's kind is looked up ("kind" is either the name of a node, or a list
+--    of node names): the "document" template for the first entry that matches
+--    is used. The "default" template is used if there is no match::
+--
+--      {
+--        "kind": "match",
+--        "field": "<field-name>",
+--        "matchers": [
+--          {"kind": <node-name>, "document": <sub-template>},
+--          ...
+--        ],
+--        "default": <sub-template>
+--        "absent": <sub-template>
+--      }
+--
+--    A variant is available in field templates. It has no "field" entry: the
+--    alternative is picked depending on the field that owns this template.
+--
+--  * The "indent" template yields an "indent" Prettier document::
+--
+--      {"kind": "indent", "contents": <sub-template>}
+--
+--    It also accepts the optional "bubbleUpLeadingTrivias" and
+--    "bubbleUpTrailingTrivias" boolean entries to override the default
+--    behavior for trivias bubbling up.
+--
+--  * The "markAsRoot" template yields a "markAsRoot" Prettier document::
+--
+--      {"kind": "markAsRoot", "contents": <sub-template>}
+--
+--  * The "innerRoot" template yields a "innerRoot" Prettier document::
+--
+--      {"kind": "innerRoot", "contents": <sub-template>}
+--
+--  * The "continuationLineIndent" template yields a "continuationLineIndent"
+--    Prettier document::
+--
+--      {"kind": "continuationLineIndent", "contents": <sub-template>}
+--
+--  * The "recurse_field" template is valid only in "node" templates for
+--    concrete nodes that are neither abstract, token nor list nodes. When
+--    used, the whole template cannot contain any "recurse"/"recurse_flatten"
+--    template, and the template, once linearized, must reflect how the node is
+--    unparsed.
+--
+--    For example, let's consider that the ``VarDecl`` node is created parsing
+--    the following chunks::
+--
+--      "var" [f_name] ":" [f_type] ";"
+--
+--    Then its "node" template must contain two "recurse_field" templates for
+--    the two fields, in the same order, and with the same tokens in between.
+--    For instance::
+--
+--      [
+--        {"kind": "text", "text": "var"},
+--        {"kind": "recurse_field", "field": "f_name"},
+--        {
+--          "kind": "group",
+--          "document": [
+--            {"kind": "text", "text": ":"},
+--            {"kind": "recurse_field", "field": "f_type"}
+--          ]
+--        },
+--        {"kind": "text", "text": ";"},
+--      ]
+--
+--  * The "recurse_flatten" template acts like "recurse" but refines its result
+--    so that the document nested in "align", "fill", "group", "indent"
+--    templates and in 1-item document lists is returned instead
+--    (recursively).
+--
+--  * The "tableSeparator" template yields the corresponding Prettier
+--    document::
+--
+--      {"kind": "tableSeparator", "text": "some_text_to_unparse"}
+--
+--  * The "text" template yields a "text" Prettier document::
+--
+--      {"kind": "text", "text": "some_text_to_unparse"}
+--
+--    Using this template is valid in specific contexts only:
+--
+--    * For "node" templates, when used with "recurse_field" template: see the
+--      documentation for "recurse_field";
+--
+--    * For "fields" templates: in this case, the linearized template must
+--      reflect how the field is unparsed. See the documentation for
+--      "recurse_field" to have more information about linearization.
+--
+--  * A JSON list yields the corresponding "list" Prettier document::
+--
+--      [{"kind": "whitespace"}, {"kind": "recurse"}]
+--
+--  The following commands also accept the optional "bubbleUpLeadingTrivias"
+--  and "bubbleUpTrailingTrivias" boolean entries to override the default
+--  behavior for trivias bubbling up.
+--
+--  * align,
+--  * continuationLineIndent,
+--  * dedent,
+--  * dedentToRoot,
+--  * fill,
+--  * group,
+--  * indent,
+--  * innerRoot,
+--  * markAsRoot.
+--
+--  An expression can be one of the following:
+--
+--  * The "is_a" expression returns whether its operand matches the given node
+--    kinds::
+--
+--      {"kind": "is_a", "node": <sub-expression>, "kinds": ["Node1", "Node2"]}
+--
+--  * The "is_empty" expression returns whether its operand is considered as
+--    empty for unparsing purposes::
+--
+--      {"kind": "is_empty", "node": <sub-expression>}
+--
+--  * "this_field" is valid only inside fields configuration. It returns the
+--    child node of the node used to instantiate the current template.
+--
+--  The configuration file has the following format::
+--
+--    {
+--      "node_configs": {<node-name>: <node-config>},
+--      "max_empty_lines": <natural-number>,
+--      "token_configs": {...}
+--    }
+--
+--  For each node to configure, the inner "node_configs" mapping associates the
+--  name of the node (as a string key) to another mapping with the following
+--  format::
+--
+--    {
+--      "node": <template>,
+--      "fields": {<field-name>: <template>},
+--      "sep": <template>,
+--      "leading_sep": <template>,
+--      "trailing_sep": <template>,
+--      "flush_before_children": <boolean>
+--      "independent_lines": <boolean>,
+--      "table": <table-config>
+--    }
+--
+--  The "node" component is optional. If present, it contains a document
+--  template to wrap the basic unparsing of the node.
+--
+--  The "fields" component is optional. If present, it contains a mapping from
+--  field names to document templates.
+--
+--  The "sep" component is optional, valid for list nodes only. If present, it
+--  contains a document template to unparse the list separator.
+--
+--  The "table" component is optional, valid for list nodes only. If present,
+--  unparsing such lists yield a list of table documents, each list child being
+--  unparsing to a list row. If present, it must contain an object that accepts
+--  the following entries:
+--
+--  * "sep_before": Whether list separators must be inserted at the end of the
+--    previous row (``"sep_before": true``) or at the beginning of the next row
+--    (``"sep_before": false``). This is optional, and defaults to ``true``.
+--
+--  * "split": Determine which kind of trivia found between two list children
+--    trigger a table split (i.e. the presence of such trivias end the current
+--    table, and trigger the creation of a new table for the next children).
+--    This field is optional (by default: nothing splits table), and when
+--    present, must be an array of strings, with the following possible values:
+--    ``"empty_line"``, ``"line_comment"``.
+--
+--  * "must_break": Whether each row for this table must go on its own line.
+--    If false (the default), rows go on each line only when a break occurs in
+--    the table.
+--
+--  * "join": Determine whether a list child must be put on the previous table
+--    row, i.e. whether to join what would instead be two rows.
+--
+--    If present, this must be an object with a mandatory "predicate" entry,
+--    that must be a reference to a predicate property  i.e. a property that
+--    each list child has and that returns whether to join rows, as a boolean.
+--
+--    The optional "template" entry must be a template that describes how to
+--    join two rows: the first row is substituted to the "recurse_left"
+--    template and the second row is substituted to the "recurse_right"
+--    template. For example::
+--
+--      "join": {
+--        "predicate": "p_my_predicate",
+--        "template": [
+--          "recurse_left",
+--          {"kind": "tableSeparator", "text": ""},
+--          {"kind": "group", "document": ["line", "recurse_right"]}
+--        ]
+--      }
+--
+--  The "leading_sep" and "trailing_sep" components are optional, and valid
+--  only for list nodes that accept respectively leading and trailing
+--  separators. If present, they contain document templates to unparse
+--  leading/trailing separators.
+--
+--  The "flush_before_children" component is optional, and valid for list nodes
+--  only. It must be a boolean (true by default), that controls whether line
+--  breaks recovered from the source to reformat are flushed before each list
+--  element.
+--
+--  The "independent_lines" component is optional, and valid for list nodes
+--  only. It must be a boolean (false by default), that controls whether each
+--  list item is formatted on its own line. When true, the formatting of
+--  rewritten trees can stop reformating at the boundary of such nodes.
+--
+--  Standard node derivation rules apply to configurations: if node B derives
+--  from node A, and if node B does not specify a configuration for its field
+--  F, then the configuration of field F for node A applies (same for the list
+--  separator).
+--
+--  The "max_empty_lines" entry is optional. If provided, it must be a natural
+--  number that indicates the maximum number of consecutive empty lines to
+--  preserve during the source code reformatting. If omitted, all empty lines
+--  are preserved.
+--
+--  The "token_configs" entry is optional. If provided, it must be an object,
+--  and is used to control how static tokens used for parsing (keywords,
+--  punctuation, ...) must be formatted. This object can have the following
+--  entries:
+--
+--  * "default" (optional): Can be "lower" (format tokens as lower case),
+--    "upper" (format tokens as upper case), or "original" (keep the formatting
+--    found in the original sources). If omitted, "lower" is used. Note that
+--    for case-sensitive languages, "lower" and "upper" are equivalent: just
+--    use the casing defined by the language.
+--
+--  * "formattings" (optional): An object that maps default token formattings
+--    to the ones to use when unparsing with this configuration.  These
+--    formattings override the formattings implied by the "casing" setting. For
+--    associations to null, use the formatting found in the original source.
+--
+--  For example::
+--
+--    "token_configs": {
+--      "default": "upper",
+--      "formattings": {
+--        "|": "!",
+--        "abstract": "Abstract",
+--        "overriding": null
+--      }
+--    }
+--
+--  This configuration instructs the unparser to, by default, turn all keywords
+--  into uppercase, but unparse "|" tokens into "!" (valid if the lexer
+--  considers that the two are equivalent), unparse "abstract" as "Abstract",
+--  and preserve the original formatting for "overriding" keywords.
 
 private with Ada.Finalization;
 
@@ -118,360 +471,6 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --  If ``Check_All_Nodes`` is true, ensure that the configuration covers all
    --  possible parse nodes (creating an error if this is not the case).
-   --
-
-   --  The configuration is a JSON file that provides "document templates":
-   --  patterns to generate Prettier documents:
-   --
-   --    * The default template to unparse nodes or node fields is the
-   --      "recurse" one. Instantiating it just yields the default unparsing
-   --      for that node/field::
-   --
-   --        "recurse"
-   --
-   --    * The "breakParent" template yields a "breakParent" Prettier
-   --      Document::
-   --
-   --        "breakParent"
-   --
-   --    * The "line"/"hardline"/"hardLineWithoutBreakParent"/"softline"/
-   --      "literalline" templates yield the corresponding Prettier documents::
-   --
-   --        "line"
-   --        "hardline"
-   --        "hardlineWithoutBreakParent"
-   --        "softline"
-   --        "literalline"
-   --
-   --    * The "flushLineBreaks" template is used as a placeholder to emit
-   --      potential line breaks that come from the source code to reformat::
-   --
-   --        "flushLineBreaks"
-   --
-   --    * The "trim" template yields a "trim" Prettier Document::
-   --
-   --        "trim"
-   --
-   --    * The "whitespace" template yields a "text" document with the
-   --      specified amount of spaces::
-   --
-   --        {"kind": "whitespace", "length": 2}
-   --
-   --        /* or just, for length = 1 */
-   --
-   --        "whitespace"
-   --
-   --    * The "align" template yields a "align" Prettier document::
-   --
-   --        {
-   --          "kind": "align",
-   --          "width": <number or string>,
-   --          "contents": <sub-template>
-   --        }
-   --
-   --    * The "dedent" template yields a "dedent" Prettier document::
-   --
-   --        {"kind": "dedent", "contents": <sub-template>}
-   --
-   --    * The "dedentToRoot" template yields a "dedentToRoot" Prettier
-   --      document::
-   --
-   --        {"kind": "dedentToRoot", "contents": <sub-template>}
-   --
-   --    * The "fill" template yields a "fill" Prettier document::
-   --
-   --        {"kind": "fill", "document": <sub-template>}
-   --
-   --    * The "group" template yields a "group" Prettier document::
-   --
-   --        {"kind": "group", "document": <sub-template>}
-   --        {"kind": "group", "document": <sub-template>, "shouldBreak": true}
-   --
-   --      An optional "id" field makes it define a symbol to reference in the
-   --      same template:
-   --
-   --        {"kind": "group", "document": <sub-template>, "id": "mySymbol"}
-   --
-   --    * The "ifBreak" template yields an "ifBreak" Prettier document::
-   --
-   --        {"kind": "ifBreak", "breakContents": <sub-template>}
-   --        {
-   --          "kind": "ifBreak",
-   --          "breakContents": <sub-template>,
-   --          "flatContents": <sub-template>
-   --        }
-   --        {
-   --          "kind": "ifBreak",
-   --          "breakContents": <sub-template>,
-   --          "flatContents": <sub-template>,
-   --          "groupId": <symbol>
-   --        }
-   --
-   --    * The "ifEmpty" template is valid only inside a fields configuration.
-   --      It yields its "then" alternative if the field is an empty list, and
-   --      its "else" alternative otherwise::
-   --
-   --        {
-   --          "kind": "ifEmpty",
-   --          "then": <sub-template>,
-   --          "else": <sub-template>
-   --        }
-   --
-   --    * The "ifKind" template is valid only inside a node configuration.
-   --      The "absent" entry is optional. If "field" is not present, "absent"
-   --      is yielded if defined, otherwise fallback to "default".
-   --
-   --      If "field" is present, the entry in "matchers" that corresponds to
-   --      the field's kind is looked up ("kind" is either the name of a node,
-   --      or a list of node names): the "document" template for the first
-   --      entry that matches is used. The "default" template is used if there
-   --      is no match::
-   --
-   --        {
-   --          "kind": "ifKind",
-   --          "field": "<field-name>",
-   --          "matchers": [
-   --            {"kind": <node-name>, "document": <sub-template>},
-   --            ...
-   --          ],
-   --          "default": <sub-template>
-   --          "absent": <sub-template>
-   --        }
-   --
-   --      A variant is available in field templates. It has no "field" entry:
-   --      the alternative is picked depending on the field that owns this
-   --      template.
-   --
-   --    * The "indent" template yields an "indent" Prettier document::
-   --
-   --        {"kind": "indent", "contents": <sub-template>}
-   --
-   --      It also accepts the optional "bubbleUpLeadingTrivias" and
-   --      "bubbleUpTrailingTrivias" boolean entries to override the default
-   --      behavior for trivias bubbling up.
-   --
-   --    * The "markAsRoot" template yields a "markAsRoot" Prettier document::
-   --
-   --        {"kind": "markAsRoot", "contents": <sub-template>}
-   --
-   --    * The "innerRoot" template yields a "innerRoot" Prettier document::
-   --
-   --        {"kind": "innerRoot", "contents": <sub-template>}
-   --
-   --    * The "continuationLineIndent" template yields a
-   --      "continuationLineIndent" Prettier document::
-   --
-   --        {"kind": "continuationLineIndent", "contents": <sub-template>}
-   --
-   --    * The "recurse_field" template is valid only in "node" templates for
-   --      concrete nodes that are neither abstract, token nor list nodes. When
-   --      used, the whole template cannot contain any
-   --      "recurse"/"recurse_flatten" template, and the template, once
-   --      linearized, must reflect how the node is unparsed.
-   --
-   --      For example, let's consider that the ``VarDecl`` node is created
-   --      parsing the following chunks::
-   --
-   --        "var" [f_name] ":" [f_type] ";"
-   --
-   --      Then its "node" template must contain two "recurse_field" templates
-   --      for the two fields, in the same order, and with the same tokens in
-   --      between. For instance::
-   --
-   --        [
-   --          {"kind": "text", "text": "var"},
-   --          {"kind": "recurse_field", "field": "f_name"},
-   --          {
-   --            "kind": "group",
-   --            "document": [
-   --              {"kind": "text", "text": ":"},
-   --              {"kind": "recurse_field", "field": "f_type"}
-   --            ]
-   --          },
-   --          {"kind": "text", "text": ";"},
-   --        ]
-   --
-   --    * The "recurse_flatten" template acts like "recurse" but refines its
-   --      result so that the document nested in "align", "fill", "group",
-   --      "indent" templates and in 1-item document lists is returned
-   --      instead (recursively)::
-   --
-   --        {"kind": "recurse_flatten", "if": ["Node1" ,"Node2", ...]}
-   --
-   --      The "if" entry is optional. If provided, it must contain a list of
-   --      node type names; in this case the flattening is applied only for
-   --      templates that were instantiated for nodes that match at least one
-   --      of the node types.
-   --
-   --    * The "tableSeparator" template yields the corresponding Prettier
-   --      document::
-   --
-   --        {"kind": "tableSeparator", "text": "some_text_to_unparse"}
-   --
-   --    * The "text" template yields a "text" Prettier document::
-   --
-   --        {"kind": "text", "text": "some_text_to_unparse"}
-   --
-   --      Using this template is valid in specific contexts only:
-   --
-   --      * For "node" templates, when used with "recurse_field" template: see
-   --        the documentation for "recurse_field";
-   --
-   --      * For "fields" templates: in this case, the linearized template must
-   --        reflect how the field is unparsed. See the documentation for
-   --        "recurse_field" to have more information about linearization.
-   --
-   --    * A JSON list yields the corresponding "list" Prettier document::
-   --
-   --        [{"kind": "whitespace"}, {"kind": "recurse"}]
-   --
-   --  The following commands also accept the optional "bubbleUpLeadingTrivias"
-   --  and "bubbleUpTrailingTrivias" boolean entries to override the default
-   --  behavior for trivias bubbling up.
-   --
-   --  * align,
-   --  * continuationLineIndent,
-   --  * dedent,
-   --  * dedentToRoot,
-   --  * fill,
-   --  * group,
-   --  * indent,
-   --  * innerRoot,
-   --  * markAsRoot.
-   --
-   --  The configuration file has the following format::
-   --
-   --    {
-   --      "node_configs": {<node-name>: <node-config>},
-   --      "max_empty_lines": <natural-number>,
-   --      "token_configs": {...}
-   --    }
-   --
-   --  For each node to configure, the inner "node_configs" mapping associates
-   --  the name of the node (as a string key) to another mapping with the
-   --  following format::
-   --
-   --    {
-   --      "node": <template>,
-   --      "fields": {<field-name>: <template>},
-   --      "sep": <template>,
-   --      "leading_sep": <template>,
-   --      "trailing_sep": <template>,
-   --      "flush_before_children": <boolean>
-   --      "independent_lines": <boolean>,
-   --      "table": <table-config>
-   --    }
-   --
-   --  The "node" component is optional. If present, it contains a document
-   --  template to wrap the basic unparsing of the node.
-   --
-   --  The "fields" component is optional. If present, it contains a mapping
-   --  from field names to document templates.
-   --
-   --  The "sep" component is optional, valid for list nodes only. If present,
-   --  it contains a document template to unparse the list separator.
-   --
-   --  The "table" component is optional, valid for list nodes only. If
-   --  present, unparsing such lists yield a list of table documents, each list
-   --  child being unparsing to a list row. If present, it must contain an
-   --  object that accepts the following entries:
-   --
-   --  * "sep_before": Whether list separators must be inserted at the end of
-   --    the previous row (``"sep_before": true``) or at the beginning of the
-   --    next row (``"sep_before": false``). This is optional, and defaults to
-   --    ``true``.
-   --
-   --  * "split": Determine which kind of trivia found between two list
-   --    children trigger a table split (i.e. the presence of such trivias end
-   --    the current table, and trigger the creation of a new table for the
-   --    next children). This field is optional (by default: nothing splits
-   --    table), and when present, must be an array of strings, with the
-   --    following possible values: ``"empty_line"``, ``"line_comment"``.
-   --
-   --  * "must_break": Whether each row for this table must go on its own line.
-   --    If false (the default), rows go on each line only when a break occurs
-   --    in the table.
-   --
-   --  * "join": Determine whether a list child must be put on the previous
-   --    table row, i.e. whether to join what would instead be two rows.
-   --
-   --    If present, this must be an object with a mandatory "predicate" entry,
-   --    that must be a reference to a predicate property  i.e. a property that
-   --    each list child has and that returns whether to join rows, as a
-   --    boolean.
-   --
-   --    The optional "template" entry must be a template that describes how to
-   --    join two rows: the first row is substituted to the "recurse_left"
-   --    template and the second row is substituted to the "recurse_right"
-   --    template. For example::
-   --
-   --      "join": {
-   --        "predicate": "p_my_predicate",
-   --        "template": [
-   --          "recurse_left",
-   --          {"kind": "tableSeparator", "text": ""},
-   --          {"kind": "group", "document": ["line", "recurse_right"]}
-   --        ]
-   --      }
-   --
-   --  The "leading_sep" and "trailing_sep" components are optional, and valid
-   --  only for list nodes that accept respectively leading and trailing
-   --  separators. If present, they contain document templates to unparse
-   --  leading/trailing separators.
-   --
-   --  The "flush_before_children" component is optional, and valid for list
-   --  nodes only. It must be a boolean (true by default), that controls
-   --  whether line breaks recovered from the source to reformat are flushed
-   --  before each list element.
-   --
-   --  The "independent_lines" component is optional, and valid for list nodes
-   --  only. It must be a boolean (false by default), that controls whether
-   --  each list item is formatted on its own line. When true, the formatting
-   --  of rewritten trees can stop reformating at the boundary of such nodes.
-   --
-   --  Standard node derivation rules apply to configurations: if node B
-   --  derives from node A, and if node B does not specify a configuration for
-   --  its field F, then the configuration of field F for node A applies (same
-   --  for the list separator).
-   --
-   --  The "max_empty_lines" entry is optional. If provided, it must be a
-   --  natural number that indicates the maximum number of consecutive empty
-   --  lines to preserve during the source code reformatting. If omitted, all
-   --  empty lines are preserved.
-   --
-   --  The "token_configs" entry is optional. If provided, it must be an
-   --  object, and is used to control how static tokens used for parsing
-   --  (keywords, punctuation, ...) must be formatted. This object can have the
-   --  following entries:
-   --
-   --  * "default" (optional): Can be "lower" (format tokens as lower case),
-   --    "upper" (format tokens as upper case), or "original" (keep the
-   --    formatting found in the original sources). If omitted, "lower" is
-   --    used. Note that for case-sensitive languages, "lower" and "upper" are
-   --    equivalent: just use the casing defined by the language.
-   --
-   --  * "formattings" (optional): An object that maps default token
-   --    formattings to the ones to use when unparsing with this configuration.
-   --    These formattings override the formattings implied by the "casing"
-   --    setting. For associations to null, use the formatting found in the
-   --    original source.
-   --
-   --  For example::
-   --
-   --    "token_configs": {
-   --      "default": "upper",
-   --      "formattings": {
-   --        "|": "!",
-   --        "abstract": "Abstract",
-   --        "overriding": null
-   --      }
-   --    }
-   --
-   --  This configuration instructs the unparser to, by default, turn all
-   --  keywords into uppercase, but unparse "|" tokens into "!" (valid if the
-   --  lexer considers that the two are equivalent), unparse "abstract" as
-   --  "Abstract", and preserve the original formatting for "overriding"
-   --  keywords.
    --
    --  ``Overridings`` must be a (possibly empty) list of filenames that
    --  contain node configurations to complete/replace node configurations

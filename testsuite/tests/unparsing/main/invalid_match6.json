@@ -9,8 +9,10 @@
             "field": "f_lhs"
           },
           {
-            "kind": "ifKind",
-            "field": "f_rhs",
+            "kind": "match",
+            "field": [
+              "invalid"
+            ],
             "matchers": [
               {
                 "kind": "Number",
@@ -19,6 +21,10 @@
                   {
                     "kind": "text",
                     "text": "+"
+                  },
+                  {
+                    "kind": "recurse_field",
+                    "field": "f_rhs"
                   }
                 ]
               }
