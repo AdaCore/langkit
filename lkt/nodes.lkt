@@ -189,6 +189,16 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     fun array_type(): Entity[NamedTypeDecl] =
         node.array_gen_type().decl.as[NamedTypeDecl]
 
+    |" Unit method. Return the stream builtin generic type.
+    @exported
+    fun stream_gen_type(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"Stream")
+
+    |" Unit method. Return the stream builtin type.
+    @exported
+    fun stream_type(): Entity[NamedTypeDecl] =
+        node.stream_gen_type().decl.as[NamedTypeDecl]
+
     |" Unit method. Return the ``ASTList`` builtin generic type.
     @exported
     fun astlist_gen_type(): Entity[GenericDecl] =
@@ -685,7 +695,7 @@ class Decl: LktNode implements DeclarationInterface {
                     or (
                         node == node.array_type().node
                         and (
-                            self.as[TypeDecl].get_array_content_type().node
+                            self.as[TypeDecl].get_indexable_content_type().node
                             == node.entity_type().node
                         )
                     )
@@ -1479,7 +1489,7 @@ class FunDecl: UserValDecl {
         val array_type = self.params.at(0)?.get_type();
 
         array_type?.node == self.array_type().node
-            and array_type?.get_array_content_type().node
+            and array_type?.get_indexable_content_type().node
                 == self.entity_type().node
     }
 
@@ -1881,6 +1891,12 @@ class TypeDecl: Decl implements TypeInterface {
         .as[TypeDecl]
         .is_subtype_or_eq(self)
 
+    @predicate_error(
+        "expression must be a stream, got $Self"
+    )
+    fun is_stream(): Bool =
+        self.is_null or self.node == self.stream_type().node
+
     |" Get the type parameter used to rebind the Entity type declaration if
     |" Self is the entity type.
     fun get_entity_node_type(): Entity[TypeDecl] =
@@ -2040,10 +2056,9 @@ class TypeDecl: Decl implements TypeInterface {
         )
         or self.matching_type(other)
 
-    |" Predicate used to verify that a type is an array (implements the
-    |" Indexable trait).
-    @predicate_error("$Self is not an array")
-    fun is_of_array_type(): Bool =
+    |" Predicate used to verify that a type implements the Indexable trait.
+    @predicate_error("$Self is not Indexable")
+    fun is_indexable_type(): Bool =
         self.is_null
         or {
             bind origin = self;
@@ -2173,16 +2188,22 @@ class TypeDecl: Decl implements TypeInterface {
             )
         )
 
-    |" Create a rebinded Array type declaration, using Self as the type
+    |" Create a rebound ``Array`` type declaration, using ``self`` as the type
     |" parameter.
     @memoized
     fun make_array_type(): Entity[TypeDecl] =
         self?.array_type().instantiate_generic_type_decl([self])
 
+    |" Create a rebound ``Stream`` type declaration, using ``self`` as the type
+    |" parameter.
+    @memoized
+    fun make_stream_type(): Entity[TypeDecl] =
+        self?.stream_type().instantiate_generic_type_decl([self])
+
     |" Get the type parameter used to rebind the Array type declaration.
-    fun get_array_content_type(): Entity[TypeDecl] =
+    fun get_indexable_content_type(): Entity[TypeDecl] =
         if self.is_null then null[Entity[TypeDecl]]
-        elif self.is_of_array_type()
+        elif self.is_indexable_type()
         then (
             # The Indexable[T] trait declares a function "__call__"
             # representing the array indexing. Find that function and get its
@@ -2323,7 +2344,7 @@ class TypeDecl: Decl implements TypeInterface {
                     # to accept an array of the list's element as a NodeBuilder
                     # type for the first argument.
                     (list_type) => {
-                        val elt_t = list_type.get_array_content_type();
+                        val elt_t = list_type.get_indexable_content_type();
                         ResolvedParam(
                             name=s"list_elements",
                             param_type=elt_t.as_node_builder_type()
@@ -2979,7 +3000,7 @@ class ListPattern: Pattern {
 |"
 |" * a binding name
 |" * a value pattern
-|" * pattern details 
+|" * pattern details
 |" * a when clause
 |"
 |" For instance::
@@ -3290,10 +3311,10 @@ class ArrayLiteral: Expr {
         elif self.xref_entry_point()
         then
             self.expected_exprs_type_var
-            <- self.get_expected_type().get_array_content_type()
+            <- self.get_expected_type().get_indexable_content_type()
         else
             self.expected_exprs_type_var
-            <- TypeDecl.get_array_content_type%(self.expected_type_var)
+            <- TypeDecl.get_indexable_content_type%(self.expected_type_var)
     }
 
     fun xref_equation(): Equation =
@@ -3744,33 +3765,32 @@ class BinOp: Expr {
     @parse_field
     right: Expr
 
-    fun xref_equation(): Equation =
-        (
-            (
-                (
-                    (self.left.xref_equation() %and self.right.xref_equation())
-                    %and self.left.expected_type_var
-                    <-> self.right.actual_type_var
-                )
-                %and self.right.expected_type_var <-> self.left.actual_type_var
-            )
-            %and {
-                bind error_location = node.right;
-                TypeDecl.commutative_matching_type%(
-                    self.right.expected_type_var,
-                    self.right.actual_type_var,
-                    (
+    fun xref_equation(): Equation = {
+        val sub_constraints =
+            self.left.xref_equation() %and self.right.xref_equation();
+
+        val commutative_constraints =
+            if self.op.is_commutative() then
+                {
+                    bind error_location = node.right;
+                    TypeDecl.commutative_matching_type%(
+                        self.right.expected_type_var,
+                        self.right.actual_type_var,
                         # When dealing with order operators or the "or?"
                         # operator, we must allow common ancestors. This is
                         # unnecessary for "==" and "!=", because if one of the
                         # type is not a subtype of the other, the operands will
                         # always be different.
-                        self.op.is_order_op()
+                        self.op.is_order_op() or self.op is Op.OrInt
                     )
-                    or self.op is Op.OrInt
-                )
-            }
-        )
+                }
+                %and self.right.actual_type_var <-> self.left.expected_type_var
+                %and self.right.expected_type_var <-> self.left.actual_type_var
+            else
+                %true;
+
+        sub_constraints
+        %and commutative_constraints
         %and (
             # "and" "or"
             if self.op.is_bool_op()
@@ -3791,13 +3811,11 @@ class BinOp: Expr {
             # ">" ">=" "<" "<="
             elif self.op.is_order_op()
             then
-                (
-                    self.actual_type_var <- self.bool_type()
-                    %and {
-                        bind error_location = node.left;
-                        TypeDecl.is_int_or_node%(self.left.actual_type_var)
-                    }
-                )
+                self.actual_type_var <- self.bool_type()
+                %and {
+                    bind error_location = node.left;
+                    TypeDecl.is_int_or_node%(self.left.actual_type_var)
+                }
                 %and {
                     bind error_location = node.right;
                     TypeDecl.is_int_or_node%(self.right.actual_type_var)
@@ -3805,13 +3823,11 @@ class BinOp: Expr {
             # " +" "-" "*" "/"
             elif self.op.is_arith_op()
             then
-                (
-                    self.actual_type_var <-> self.left.actual_type_var
-                    %and {
-                        bind error_location = node.left;
-                        TypeDecl.is_int_type%(self.left.actual_type_var)
-                    }
-                )
+                self.actual_type_var <-> self.left.actual_type_var
+                %and {
+                    bind error_location = node.left;
+                    TypeDecl.is_int_type%(self.left.actual_type_var)
+                }
                 %and {
                     bind error_location = node.right;
                     TypeDecl.is_int_type%(self.right.actual_type_var)
@@ -3819,18 +3835,55 @@ class BinOp: Expr {
             # "&"
             elif self.op is Op.Amp
             then
-                (
-                    self.actual_type_var <-> self.left.actual_type_var
-                    %and {
-                        bind error_location = node.left;
-                        TypeDecl.is_string_or_array_type%(
-                            self.left.actual_type_var
-                        )
-                    }
-                )
+                self.actual_type_var <-> self.left.actual_type_var
+                %and {
+                    bind error_location = node.left;
+                    TypeDecl.is_string_or_array_type%(
+                        self.left.actual_type_var
+                    )
+                }
                 %and {
                     bind error_location = node.right;
                     TypeDecl.is_string_or_array_type%(
+                        self.right.actual_type_var
+                    )
+                }
+            # "::"
+            elif self.op is Op.StreamCons
+            then
+                self.actual_type_var <-> self.right.actual_type_var
+                %and
+                    self.right.expected_type_var
+                    <- TypeDecl.make_stream_type%(self.left.actual_type_var)
+                %and
+                    self.left.expected_type_var
+                    <- TypeDecl.get_indexable_content_type%(
+                        self.right.actual_type_var
+                    )
+                %and {
+                    bind error_location = node.right;
+                    TypeDecl.is_stream%(self.right.actual_type_var)
+                }
+                %and {
+                    bind error_location = node.left;
+                    TypeDecl.is_subtype_or_eq%(
+                        self.left.expected_type_var,
+                        self.left.actual_type_var
+                    )
+                }
+            # ":::"
+            elif self.op is Op.StreamConcat
+            then
+                self.actual_type_var <-> self.right.actual_type_var
+                %and {
+                    bind error_location = node.left;
+                    TypeDecl.is_stream%(
+                        self.left.actual_type_var
+                    )
+                }
+                %and {
+                    bind error_location = node.right;
+                    TypeDecl.is_stream%(
                         self.right.actual_type_var
                     )
                 }
@@ -3844,6 +3897,7 @@ class BinOp: Expr {
             # " ==" "!="
             else self.actual_type_var <- self.bool_type()
         )
+    }
 
     fun has_context_free_type(): Bool =
         self.left.has_context_free_type() or self.right.has_context_free_type()
@@ -4590,9 +4644,9 @@ class KeepExpr: Expr {
         %and self.expr.expected_type_var <- null[Entity[TypeDecl]]
         %and {
             bind error_location = node.expr;
-            TypeDecl.is_of_array_type%(self.expr.actual_type_var)
+            TypeDecl.is_indexable_type%(self.expr.actual_type_var)
         }
-        %and self.array_element_type <- TypeDecl.get_array_content_type%(
+        %and self.array_element_type <- TypeDecl.get_indexable_content_type%(
             self.expr.actual_type_var
         )
         %and {
@@ -5120,7 +5174,7 @@ class SubscriptExpr: Expr {
                             %and self.index.xref_equation()
                         )
                         %and self.actual_type_var
-                        <- TypeDecl.get_array_content_type%(
+                        <- TypeDecl.get_indexable_content_type%(
                             self.prefix.actual_type_var
                         )
                     )
@@ -5149,7 +5203,7 @@ class SubscriptExpr: Expr {
         )
         %and {
             bind error_location = node.prefix;
-            TypeDecl.is_of_array_type%(self.prefix.actual_type_var)
+            TypeDecl.is_indexable_type%(self.prefix.actual_type_var)
         }
 }
 
@@ -5579,6 +5633,8 @@ enum class Op: LktNode {
     fun is_arith_op(): Bool = node is Op.Plus | Op.Minus | Op.Mult | Op.Div
 
     fun is_order_op(): Bool = node is Op.Lt | Op.Lte | Op.Gt | Op.Gte
+
+    fun is_commutative(): Bool = not node is Op.StreamCons
 }
 
 |" Argument for function calls or for annotations.
