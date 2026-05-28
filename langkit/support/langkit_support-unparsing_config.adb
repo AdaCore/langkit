@@ -2607,6 +2607,15 @@ package body Langkit_Support.Unparsing_Config is
             return Pool.Create_Literal_Pattern
                      (From_Node (Language, No_Lk_Node));
 
+         when JSON_Boolean_Type =>
+            if Input_Type /= Boolean_Type then
+               Abort_Parsing
+                 (Context,
+                  "boolean pattern is invalid for " & Debug_Name (Input_Type));
+            end if;
+            return Pool.Create_Literal_Pattern
+                     (From_Bool (Language, JSON.Get));
+
          when JSON_String_Type =>
             declare
                Value : constant Unbounded_String := JSON.Get;

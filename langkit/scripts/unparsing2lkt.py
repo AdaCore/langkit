@@ -439,6 +439,22 @@ def to_json(input_file: str) -> str:
 
             case L.ComplexPattern(
                 f_decl=None,
+                f_pattern=L.BoolPatternFalse(),
+                f_details=L.PatternDetailList() as details,
+                f_predicate=None,
+            ) if len(details) == 0:
+                return False
+
+            case L.ComplexPattern(
+                f_decl=None,
+                f_pattern=L.BoolPatternTrue(),
+                f_details=L.PatternDetailList() as details,
+                f_predicate=None,
+            ) if len(details) == 0:
+                return True
+
+            case L.ComplexPattern(
+                f_decl=None,
                 f_pattern=L.RegexPattern() as regex,
                 f_details=L.PatternDetailList() as details,
                 f_predicate=None,
@@ -1058,6 +1074,9 @@ def to_lkt(input_file: str) -> str:
         match doc:
             case None:
                 lines.append("null")
+
+            case bool():
+                lines.append("true" if doc else "false")
 
             case "*":
                 lines.append("_")

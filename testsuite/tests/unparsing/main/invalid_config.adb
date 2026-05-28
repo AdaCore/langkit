@@ -224,6 +224,7 @@ begin
    Check ("invalid_pattern20.json");
    Check ("invalid_pattern21.json");
    Check ("invalid_pattern22.json");
+   Check ("invalid_pattern23.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");

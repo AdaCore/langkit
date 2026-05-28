@@ -245,6 +245,8 @@ begin
           "var x: Int = 1; var y: Int = 2; var z: Int = 3;");
    Check ("cmd_pattern8.json", "var x: Int = 1;");
    Check ("cmd_pattern9.json", "var x: Int = 1; var y: Int = x;");
+   Check ("cmd_pattern10.json", "{} {var x: Int = 1;}");
+   Check ("cmd_pattern11.json", "{} {var x: Int = 1;}");
 
    Put_Line ("Done.");
 end Commands;

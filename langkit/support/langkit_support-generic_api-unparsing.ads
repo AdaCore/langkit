@@ -389,6 +389,9 @@
 --  * The "null" pattern (JSON null), to check if a node is null, or is a list
 --    node that is considered as absent for unparsing purposes.
 --
+--  * The "false"/"true" pattern (JSON booleans), to check the value of a
+--    boolean.
+--
 --  * The "symbol_literal" pattern, to check if a symbol value is equal to a
 --    given constant::
 --

@@ -392,6 +392,8 @@ def f2(a: Int, ): Int
     template for VarDecl.f_name: missing "pattern" key for not pattern
 # invalid_pattern22.json
     invalid pattern: foo
+# invalid_pattern23.json
+    template for VarDecl.f_name: boolean pattern is invalid for VarDecl
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -2957,6 +2959,34 @@ _LANGKIT.UNPARSING.EXPANSION_ERRORS_ [...STACK TRACE...]
       "id": 2,
       "kind": "text",
       "text": "var x:Int=1;var y:Int=x; "
+    }
+  ]
+}
+
+== cmd_pattern10.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "{} {var x:Int=1;}"
+    }
+  ]
+}
+
+== cmd_pattern11.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "{}{var x:Int=1;} "
     }
   ]
 }
