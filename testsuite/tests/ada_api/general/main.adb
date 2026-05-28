@@ -89,5 +89,19 @@ begin
    end;
    New_Line;
 
+   Put_Line ("Testing Is_Empty_List on list nodes");
+   Put_Line ("===================================");
+   New_Line;
+   declare
+      N : Foo_Node_Base_List;
+   begin
+      N := U.Root.As_Foo_Node_Base_List;
+      Put_Line (N.Image & " is empty? " & N.Is_Empty_List'Image);
+
+      N := U2.Root.As_Foo_Node_Base_List;
+      Put_Line (N.Image & " is empty? " & N.Is_Empty_List'Image);
+   end;
+   New_Line;
+
    Put_Line ("main.adb: Done.");
 end Main;

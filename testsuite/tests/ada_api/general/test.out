@@ -86,5 +86,11 @@ T1 OP T2 |  T |  T |  F |  F
 T2 OP T1 |  F |  F |  T |  T
 T2 OP T2 |  F |  T |  F |  T
 
+Testing Is_Empty_List on list nodes
+===================================
+
+<DeclList main.txt:1:1-2:8> is empty? FALSE
+<DeclList main.txt:1:1-1:1> is empty? TRUE
+
 main.adb: Done.
 Done
