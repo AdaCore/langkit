@@ -808,3 +808,140 @@ Decl <ValDecl "v4" node_builder.lkt:8:1-8:38>
               has_type None
               references <ClassDecl "D" common.lkt:4:1-4:14>
 
+Resolving stream.lkt
+====================
+Id   <ModuleId "common" stream.lkt:1:6-1:12>
+     references <LangkitRoot "common" common.lkt:1:1-4:14>
+
+Id   <ImportedId "A" stream.lkt:1:20-1:21>
+     has_type None
+     references <ClassDecl "A" common.lkt:1:1-1:11>
+
+Id   <ImportedId "B" stream.lkt:1:23-1:24>
+     has_type None
+     references <ClassDecl "B" common.lkt:2:1-2:14>
+
+Id   <ImportedId "C" stream.lkt:1:26-1:27>
+     has_type None
+     references <ClassDecl "C" common.lkt:3:1-3:14>
+
+Id   <ImportedId "D" stream.lkt:1:29-1:30>
+     has_type None
+     references <ClassDecl "D" common.lkt:4:1-4:14>
+
+Decl <FunDecl "take_b" stream.lkt:3:1-3:38>
+     has_type <FunctionType "(Stream[B]) -> Bool" stream.lkt>
+
+   Decl <FunParamDecl "v" stream.lkt:3:12-3:24>
+        has_type <StructDecl prelude: "Stream[B]">
+
+      Id   <RefId "Stream" stream.lkt:3:15-3:21>
+           has_type None
+           references <StructDecl prelude: "Stream[T]">
+
+      Id   <RefId "B" stream.lkt:3:22-3:23>
+           has_type None
+           references <ClassDecl "B" common.lkt:2:1-2:14>
+
+   Id   <RefId "Bool" stream.lkt:3:27-3:31>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "true" stream.lkt:3:34-3:38>
+        has_type <EnumTypeDecl prelude: "Bool">
+        references <EnumLitDecl prelude: "true">
+
+<ValDecl "v1" stream.lkt:5:1-5:33> failed nameres:
+stream.lkt:5:17-5:32: error: expected Stream[B], got Stream[A]
+ 5 | val v1 = take_b(null[Stream[A]])
+   |                 ^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "v1" stream.lkt:5:1-5:33>
+     has_type None
+
+   Expr <CallExpr stream.lkt:5:10-5:33>
+        has_type None
+
+      Id   <RefId "take_b" stream.lkt:5:10-5:16>
+           has_type None
+           references None
+
+      Expr <NullLit stream.lkt:5:17-5:32>
+           has_type <StructDecl prelude: "Stream[A]">
+
+         Id   <RefId "Stream" stream.lkt:5:22-5:28>
+              has_type None
+              references <StructDecl prelude: "Stream[T]">
+
+         Id   <RefId "A" stream.lkt:5:29-5:30>
+              has_type None
+              references <ClassDecl "A" common.lkt:1:1-1:11>
+
+Decl <ValDecl "v2" stream.lkt:6:1-6:33>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <CallExpr stream.lkt:6:10-6:33>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "take_b" stream.lkt:6:10-6:16>
+           has_type <FunctionType "(Stream[B]) -> Bool" stream.lkt>
+           references <FunDecl "take_b" stream.lkt:3:1-3:38>
+
+      Expr <NullLit stream.lkt:6:17-6:32>
+           has_type <StructDecl prelude: "Stream[B]">
+
+         Id   <RefId "Stream" stream.lkt:6:22-6:28>
+              has_type None
+              references <StructDecl prelude: "Stream[T]">
+
+         Id   <RefId "B" stream.lkt:6:29-6:30>
+              has_type None
+              references <ClassDecl "B" common.lkt:2:1-2:14>
+
+Decl <ValDecl "v3" stream.lkt:7:1-7:33>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <CallExpr stream.lkt:7:10-7:33>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "take_b" stream.lkt:7:10-7:16>
+           has_type <FunctionType "(Stream[B]) -> Bool" stream.lkt>
+           references <FunDecl "take_b" stream.lkt:3:1-3:38>
+
+      Expr <NullLit stream.lkt:7:17-7:32>
+           has_type <StructDecl prelude: "Stream[C]">
+
+         Id   <RefId "Stream" stream.lkt:7:22-7:28>
+              has_type None
+              references <StructDecl prelude: "Stream[T]">
+
+         Id   <RefId "C" stream.lkt:7:29-7:30>
+              has_type None
+              references <ClassDecl "C" common.lkt:3:1-3:14>
+
+<ValDecl "v4" stream.lkt:8:1-8:33> failed nameres:
+stream.lkt:8:17-8:32: error: expected Stream[B], got Stream[D]
+ 8 | val v4 = take_b(null[Stream[D]])
+   |                 ^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "v4" stream.lkt:8:1-8:33>
+     has_type None
+
+   Expr <CallExpr stream.lkt:8:10-8:33>
+        has_type None
+
+      Id   <RefId "take_b" stream.lkt:8:10-8:16>
+           has_type None
+           references None
+
+      Expr <NullLit stream.lkt:8:17-8:32>
+           has_type <StructDecl prelude: "Stream[D]">
+
+         Id   <RefId "Stream" stream.lkt:8:22-8:28>
+              has_type None
+              references <StructDecl prelude: "Stream[T]">
+
+         Id   <RefId "D" stream.lkt:8:29-8:30>
+              has_type None
+              references <ClassDecl "D" common.lkt:4:1-4:14>
+

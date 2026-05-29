@@ -1,0 +1,8 @@
+from common import A, B, C, D
+
+fun take_b(v: Stream[B]): Bool = true
+
+val v1 = take_b(null[Stream[A]])
+val v2 = take_b(null[Stream[B]])
+val v3 = take_b(null[Stream[C]])
+val v4 = take_b(null[Stream[D]])

@@ -4,3 +4,4 @@ entry_points:
   - entity.lkt
   - function.lkt
   - node_builder.lkt
+  - stream.lkt

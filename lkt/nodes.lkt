@@ -1864,6 +1864,7 @@ class TypeDecl: Decl implements TypeInterface {
         # type.
         val entity_type = self.entity_type();
         val node_builder_type = self.node_builder_type();
+        val stream_type = self.stream_type();
 
         # If this is an Entity instantiation, return the Entity instantiation
         # correspoding to the node base type.
@@ -1876,6 +1877,12 @@ class TypeDecl: Decl implements TypeInterface {
         elif node == node_builder_type.node
         then self.get_node_builder_node_type().base_type().do(
             (t) => node_builder_type.instantiate_generic_decl([t]).as[TypeDecl]
+        )
+
+        # Likewise for Stream instantiations
+        elif node == stream_type.node
+        then self.get_stream_element_type().base_type().do(
+            (t) => stream_type.instantiate_generic_decl([t]).as[TypeDecl]
         )
 
         # Otherwise, just retreive the base type defined at the syntax level
@@ -1951,6 +1958,11 @@ class TypeDecl: Decl implements TypeInterface {
     |" which it was instantiated. Return ``self`` otherwise.
     fun get_node_builder_node_type(): Entity[TypeDecl] =
         self.get_instantiation_type(self.node_builder_type())
+
+    |" If ``self`` is an instantiation of ``Stream``, return the type with
+    |" which it was instantiated. Return ``self`` otherwise.
+    fun get_stream_element_type(): Entity[TypeDecl] =
+        self.get_instantiation_type(self.stream_type())
 
     |" Return whether ``rhs`` is equal to or is a subtype of ``self``.
     @predicate_error("$rhs is not a subtype of $Self")
