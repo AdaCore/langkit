@@ -130,7 +130,7 @@ package ${ada_lib_name}.Analysis is
       --  node type derived from the root type has a similar ``No_Node``
       --  constant.
       % else:
-      --% no-document: True
+      --  @private
       % endif
    % endfor
 
@@ -280,7 +280,7 @@ package ${ada_lib_name}.Analysis is
       Tab_Stop      : Positive := ${cfg.library.defaults.tab_stop})
       return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
-   --% belongs-to: Analysis_Context
+   --  @belongs-to Analysis_Context
 
    function Has_Unit
      (Context       : Analysis_Context'Class;
@@ -338,7 +338,7 @@ package ${ada_lib_name}.Analysis is
      (Context : Analysis_Context'Class) return Unit_Provider_Reference;
    --  Return the unit provider for ``Context``
    --
-   --% belongs-to: Analysis_Context
+   --  @belongs-to Analysis_Context
 
    function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type;
    ${ada_doc('langkit.context_hash', 3)}
@@ -764,7 +764,7 @@ package ${ada_lib_name}.Analysis is
    % for e in ctx.entity_types:
       function As_${e.element_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name};
-      --% no-document: True
+      --  @private
    % endfor
 
    function Hash

@@ -33,7 +33,7 @@
    function ${property.api_name}
 ${public_prototype(property)};
    ${ada_doc(property, 3)}
-   --% belongs-to: ${property.owner.entity.api_name}
+   --  @belongs-to ${property.owner.entity.api_name}
 </%def>
 
 <%def name="body(property)">

@@ -106,7 +106,7 @@ package ${ada_lib_name}.Common is
             with Static_Predicate => False;
       --  This abstract node has no concrete derivations
          % endif
-      --% no-document: True
+      --  @private
    % endfor
 
    ## Output a subtype to materialize the set of kinds for synthetic nodes
@@ -158,7 +158,7 @@ package ${ada_lib_name}.Common is
    )};
    --  Associate a token family to all token kinds
    --
-   --% document-value: False
+   --  @private-value
 
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    ${ada_doc('langkit.token_kind_name', 3)}

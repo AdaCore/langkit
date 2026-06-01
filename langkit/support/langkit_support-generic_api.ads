@@ -110,7 +110,7 @@ package Langkit_Support.Generic_API is
    --  :ada:ref:`Langkit_Support.Errors.Precondition_Failure` exception if
    --  ``Rule`` is not a valid grammar rule index for the given language.
    --
-   --% belongs-to: Grammar_Rule_Ref
+   --  @belongs-to Grammar_Rule_Ref
 
    function Last_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Index;
    --  Return the index of the last grammar rule for the given language
@@ -163,12 +163,12 @@ package Langkit_Support.Generic_API is
    --  :ada:ref:`Langkit_Support.Errors.Precondition_Failure` exception if
    --  ``Kind`` is not a valid token kind index for the given language.
    --
-   --% belongs-to: Token_Kind_Ref
+   --  @belongs-to Token_Kind_Ref
 
    function Last_Token_Kind (Id : Language_Id) return Token_Kind_Index;
    --  Return the index of the last token kind for the given language
    --
-   --% belongs-to: Token_Kind_Ref
+   --  @belongs-to Token_Kind_Ref
 
    --------------------
    -- Token families --
@@ -217,12 +217,12 @@ package Langkit_Support.Generic_API is
    --  :ada:ref:`Langkit_Support.Errors.Precondition_Failure` exception if
    --  ``Family`` is not a valid token family index for the given language.
    --
-   --% belongs-to: Token_Family_Ref
+   --  @belongs-to Token_Family_Ref
 
    function Last_Token_Family (Id : Language_Id) return Token_Family_Index;
    --  Return the index of the last token family for the given language
    --
-   --% belongs-to: Token_Family_Ref
+   --  @belongs-to Token_Family_Ref
 
 private
 

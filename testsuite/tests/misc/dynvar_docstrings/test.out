@@ -24,12 +24,12 @@ Reading property docs in generated code...
 --  * But...
 --
 --  .. attention:: This is just an example.
---% belongs-to: Foo_Node
+--  @belongs-to Foo_Node
 
 == Doc for P_P2 ==
 
 --  This is the doc for the property itself.
---% belongs-to: Foo_Node
+--  @belongs-to Foo_Node
 
 == Doc for P_P3 ==
 
