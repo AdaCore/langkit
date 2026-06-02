@@ -256,6 +256,7 @@ struct Set implements Sized, Iterable[T] {
 }
 
 @builtin
+@covariant
 generic[T]
 struct Stream implements Indexable[T], Iterable[T] {
 }
@@ -382,6 +383,7 @@ class ASTList: RootNode__ implements Sized, Indexable[T], Iterable[T] {
 }
 
 @builtin
+@covariant
 generic[class T]
 class NodeBuilder {
     @builtin
@@ -772,6 +774,7 @@ struct EntityInfo {
 
 |" Node type with assorted semantic information.
 @builtin
+@covariant
 generic[N]
 struct Entity {
     |" The stored AST node.
