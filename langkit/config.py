@@ -8,6 +8,7 @@ import argparse
 import dataclasses
 import enum
 import os.path
+import re
 import yaml
 
 from langkit.diagnostics import DiagnosticContext, Location, WarningSet, error
@@ -48,6 +49,8 @@ class LibraryEntity:
     Simple name for the entity that is referenced.
     """
 
+    identifier_pattern = re.compile(r"[a-zA-Z](_?[a-zA-Z0-9])*")
+
     @property
     def fqn(self) -> str:
         """
@@ -62,13 +65,13 @@ class LibraryEntity:
         """
         Create a library entity from its fully qualified name.
         """
-        if "." not in value:
-            raise ValueError(
-                f"invalid library entity: {value!r}, fully qualified name"
-                " expected"
-            )
-        unit, entity = value.rsplit(".", 1)
-        return cls(unit, entity)
+        # Make sure we have at least 2 valid Ada identifiers separated by dots
+        names = value.split(".")
+        if len(names) < 2 or any(
+            not cls.identifier_pattern.fullmatch(n) for n in names
+        ):
+            raise ValueError(f"invalid library entity: {value!r}")
+        return cls(".".join(names[:-1]), names[-1])
 
     @staticmethod
     def _deserialize(

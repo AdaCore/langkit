@@ -1,6 +1,16 @@
 == invalid_library_entity.yaml ==
 
-error: invalid_library_entity.yaml:library:symbol_canonicalizer: invalid library entity: 'Bar', fully qualified name expected
+error: invalid_library_entity.yaml:library:symbol_canonicalizer: invalid library entity: 'Bar'
+Errors, exiting
+
+== invalid_library_entity_2.yaml ==
+
+error: invalid_library_entity_2.yaml:library:symbol_canonicalizer: invalid library entity: 'Bar.Foo_'
+Errors, exiting
+
+== invalid_library_entity_3.yaml ==
+
+error: invalid_library_entity_3.yaml:library:symbol_canonicalizer: invalid library entity: 'Bar.Create_Foo (1)'
 Errors, exiting
 
 == invalid_name.yaml ==
