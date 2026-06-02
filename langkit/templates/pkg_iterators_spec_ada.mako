@@ -100,31 +100,31 @@ package ${ada_lib_name}.Iterators is
    --  Return a predicate that accepts only nodes that are *not* accepted by
    --  ``Predicate``.
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function "and" (Left, Right : ${pred_ref}) return ${pred_ref};
    --  Return a predicate that accepts only nodes that are accepted by both
    --  ``Left`` and ``Right``.
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function "or" (Left, Right : ${pred_ref}) return ${pred_ref};
    --  Return a predicate that accepts only nodes that are accepted by ``Left``
    --  or ``Right``.
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function For_All (Predicates : ${pred_ref}_Array) return ${pred_ref};
    --  Return a predicate that accepts only nodes that are accepted by all
    --  given ``Predicates``.
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function For_Some (Predicates : ${pred_ref}_Array) return ${pred_ref};
    --  Return a predicate that accepts only nodes that are accepted by at least
    --  one of the given ``Predicates``.
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function For_All_Children
      (Predicate : ${pred_ref}; Skip_Null : Boolean := True) return ${pred_ref};
@@ -132,7 +132,7 @@ package ${ada_lib_name}.Iterators is
    --  accepts all children. Unless ``Skip_Null`` is false, this does not
    --  evaluate the predicate on null children.
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function For_Some_Children
      (Predicate : ${pred_ref}; Skip_Null : Boolean := True) return ${pred_ref};
@@ -140,7 +140,7 @@ package ${ada_lib_name}.Iterators is
    --  accepts at least one child. Unless ``Skip_Null`` is false, this does not
    --  evaluate the predicate on null children.
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function Child_With
      (Field     : Struct_Member_Ref;
@@ -152,7 +152,7 @@ package ${ada_lib_name}.Iterators is
    --  Raise a ``Precondition_Failure`` if ``Field`` is not a valid node field
    --  reference.
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    ---------------------------
    -- Node search functions --
@@ -190,23 +190,23 @@ package ${ada_lib_name}.Iterators is
    function Kind_Is (Kind : ${T.node_kind}) return ${pred_ref};
    --  Return a predicate that accepts only nodes of the given ``Kind``
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function Kind_In (First, Last : ${T.node_kind}) return ${pred_ref};
    --  Return a predicate that accepts only nodes whose kind is in First ..
    --  Last.
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function Text_Is (Text : Text_Type) return ${pred_ref};
    --  Return a predicate that accepts only nodes that match the given ``Text``
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    function Node_Is_Null return ${pred_ref};
    --  Return a predicate that accepts only null nodes
    --
-   --% belongs-to: ${pred_ref}
+   --  @belongs-to ${pred_ref}
 
    ${exts.include_extension(ctx.ext('iterators', 'pred_public_decls'))}
 

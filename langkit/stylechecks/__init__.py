@@ -412,12 +412,18 @@ def check_generic(
         """
         nonempty_lines = [l for l in comment_block if l.strip()]
         if nonempty_lines:
-            # Remove common indentation for this block of comment.  Ignored
-            # lines starting with '%': they are directives for documentation
-            # generators.
+            # Remove common indentation for this block of comment.  In Ada,
+            # ignore lines starting with '%' (Python test directives) or '@'
+            # (documentation generator directives).
             indent = min(len(l) - len(l.lstrip()) for l in nonempty_lines)
+            is_ada = isinstance(lang, AdaLang)
             clean_lines = [
-                l[indent:] for l in comment_block if not l.startswith("%")
+                l[indent:]
+                for l in comment_block
+                if not (
+                    is_ada
+                    and (l.startswith("%") or l.lstrip().startswith("@"))
+                )
             ]
 
             # Copyright notices have a special formatting

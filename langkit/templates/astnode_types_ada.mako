@@ -68,21 +68,21 @@
      (Node : ${type_name}'Class) return ${ret_type.api_name};
    % if doc:
    ${doc}
-   --% belongs-to: ${field.owner.entity.api_name}
+   --  @belongs-to ${field.owner.entity.api_name}
    % else:
-   --% belongs-to: ${field.owner.entity.api_name}
+   --  @belongs-to ${field.owner.entity.api_name}
    % endif
 
    ## If this field return an enum node, generate a shortcut to get the
    ## symbolic value.
    % if field.type.is_bool_node:
       function ${field.api_name} (Node : ${type_name}'Class) return Boolean;
-      --% belongs-to: ${field.owner.entity.api_name}
+      --  @belongs-to ${field.owner.entity.api_name}
 
    % elif field.type.is_enum_node:
       function ${field.api_name}
         (Node : ${type_name}'Class) return ${field.type.ada_kind_name};
-      --% belongs-to: ${field.owner.entity.api_name}
+      --  @belongs-to ${field.owner.entity.api_name}
    % endif
 </%def>
 
