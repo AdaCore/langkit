@@ -130,7 +130,7 @@ package ${ada_lib_name}.Analysis is
       --  node type derived from the root type has a similar ``No_Node``
       --  constant.
       % else:
-      --  @private
+      --  @exclude
       % endif
    % endfor
 
@@ -764,7 +764,7 @@ package ${ada_lib_name}.Analysis is
    % for e in ctx.entity_types:
       function As_${e.element_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name};
-      --  @private
+      --  @exclude
    % endfor
 
    function Hash
