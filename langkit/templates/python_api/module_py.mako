@@ -30,6 +30,7 @@ import abc
 import argparse
 import collections
 import ctypes
+import enum
 import io
 import json
 import os
@@ -461,57 +462,21 @@ class _String:
     ))
 
 
-if TYPE_CHECKING:
-    _EnumType = TypeVar("_EnumType", bound=_Enum)
-
-
-class _Enum:
-
-    _name: ClassVar[str]
-    """
-    Name for this enumeration type.
-    """
-
-    _c_to_py: ClassVar[List[str]]
-    """
-    Mapping from C values to user-level Python values.
-    """
-
-    _py_to_c: ClassVar[Dict[str, int]]
-    """
-    Mapping from user-level Python values to C values.
-    """
-
-    @classmethod
-    def _unwrap(cls, py_value: str) -> int:
-        if not isinstance(py_value, str):
-            _raise_type_error('str', py_value)
-        try:
-            return cls._py_to_c[py_value]
-        except KeyError:
-            raise ValueError('Invalid {}: {}'.format(cls._name, py_value))
-
-    @classmethod
-    def _wrap(cls: Type[_EnumType], c_value: Any) -> _EnumType:
-        if isinstance(c_value, ctypes.c_int):
-            c_value = c_value.value
-        return cls._c_to_py[c_value]
-
-
 % for enum_type in ctx.enum_types:
-class ${enum_type.py_helper}(_Enum):
+<% name = pyapi.type_public_name(enum_type) %>
+class ${name}(enum.StrEnum):
     ${py_doc(enum_type, 4)}
 
     % for v in enum_type.values:
     ${v.name.lower} = ${repr(v.name.lower)}
     % endfor
 
-    _name = ${repr(enum_type.api_name.camel)}
-    _c_to_py = [
-        ${', '.join(v.name.lower for v in enum_type.values)}]
-    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
-% endfor
 
+_${name}_c_to_py = list(${name})
+_${name}_py_to_c = {name: index for index, name in enumerate(_${name}_c_to_py)}
+
+
+% endfor
 
 default_grammar_rule = GrammarRule.${ctx.main_rule_api_name.lower}
 
@@ -573,12 +538,14 @@ class _UnitProviderWrapper:
     def get_unit_location(
         self: _UnitProviderWrapper,
         name: _text,
-        kind: ctypes.c_int,
+        kind: int,
         filename_ptr: ctypes.POINTER(ctypes.c_char_p),
         ple_root_index_ptr: ctypes.POINTER(ctypes.c_int),
     ) -> None:
         py_name = name.contents._wrap()
-        py_kind = AnalysisUnitKind._c_to_py[kind]
+        py_kind = ${pyapi.wrap_value(
+            "kind", T.AnalysisUnitKind, from_field_access=True
+        )}
         try:
             py_filename, py_ple_root_index = self.unit_provider.unit_location(
                 py_name, py_kind
@@ -853,33 +820,45 @@ class AnalysisContext:
     def __hash__(self) -> int:
         return hash(self._c_value)
 
-    def get_from_file(self,
-                      filename: AnyStr,
-                      charset: Opt[str] = None,
-                      reparse: bool = False,
-                      rule: str = default_grammar_rule) -> AnalysisUnit:
+    def get_from_file(
+        self,
+        filename: AnyStr,
+        charset: Opt[str] = None,
+        reparse: bool = False,
+        rule: GrammarRule = default_grammar_rule,
+    ) -> AnalysisUnit:
         ${py_doc('langkit.get_unit_from_file', 8)}
         _filename = _unwrap_filename(filename)
         _charset = _unwrap_charset(charset)
-        c_value = _get_analysis_unit_from_file(self._c_value, _filename,
-                                               _charset, reparse,
-                                               GrammarRule._unwrap(rule))
+        c_value = _get_analysis_unit_from_file(
+            self._c_value,
+            _filename,
+            _charset,
+            reparse,
+            ${pyapi.unwrap_value("rule", T.GrammarRule, "")},
+        )
         return AnalysisUnit._wrap(c_value)
 
-    def get_from_buffer(self,
-                        filename: AnyStr,
-                        buffer: AnyStr,
-                        charset: Opt[str] = None,
-                        reparse: bool = False,
-                        rule: str = default_grammar_rule) -> AnalysisUnit:
+    def get_from_buffer(
+        self,
+        filename: AnyStr,
+        buffer: AnyStr,
+        charset: Opt[str] = None,
+        reparse: bool = False,
+        rule: GrammarRule = default_grammar_rule,
+    ) -> AnalysisUnit:
         ${py_doc('langkit.get_unit_from_buffer', 8)}
         _filename = _unwrap_filename(filename)
         _charset = _unwrap_charset(charset)
         _buffer, _charset = _canonicalize_buffer(buffer, _charset)
-        c_value = _get_analysis_unit_from_buffer(self._c_value, _filename,
-                                                 _charset,
-                                                 _buffer, len(_buffer),
-                                                 GrammarRule._unwrap(rule))
+        c_value = _get_analysis_unit_from_buffer(
+            self._c_value,
+            _filename,
+            _charset,
+            _buffer,
+            len(_buffer),
+            ${pyapi.unwrap_value("rule", T.GrammarRule, "")},
+        )
         return AnalysisUnit._wrap(c_value)
 
 % if cfg.library.defaults.unit_provider:

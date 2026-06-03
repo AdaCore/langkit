@@ -112,7 +112,10 @@ class PythonAPISettings(AbstractAPISettings):
             case T.AnalysisUnit:
                 return f"AnalysisUnit._wrap({value})"
             case ct.EnumType():
-                return f"{t.py_helper}._wrap({value})"
+                return (
+                    f"_{self.type_public_name(t)}_c_to_py"
+                    f"[{value}{value_suffix}]"
+                )
             case ct.ASTNodeType():
                 return (
                     f"{self.type_public_name(ct.T.root_node)}"
@@ -183,7 +186,8 @@ class PythonAPISettings(AbstractAPISettings):
             case T.AnalysisUnit:
                 return f"AnalysisUnit._unwrap({value})"
             case ct.EnumType():
-                return f"{t.py_helper}._unwrap({value})"
+                name = self.type_public_name(t)
+                return f"_{name}_py_to_c[{name}({value})]"
             case ct.ASTNodeType():
                 return f"{value}._node_c_value"
             case ct.EntityType():
@@ -343,7 +347,7 @@ class PythonAPISettings(AbstractAPISettings):
                 return "Sloc"
             case T.Token:
                 return "Token"
-            case T.Char | T.String | T.Symbol | ct.EnumType():
+            case T.Char | T.String | T.Symbol:
                 return "str"
             case ct.ASTNodeType():
                 return self.type_public_name(t.entity)
@@ -354,7 +358,7 @@ class PythonAPISettings(AbstractAPISettings):
             case ct.ArrayType():
                 elt_type = self.type_public_name(t.element_type)
                 return f"List[{elt_type}]"
-            case ct.IteratorType() | ct.StructType():
+            case ct.EnumType() | ct.IteratorType() | ct.StructType():
                 return t.api_name.camel
             case _:
                 raise AssertionError(

@@ -8,8 +8,15 @@ refs = u.root.findall(lkt.RefId)
 dots = u.root.findall(lkt.DotExpr)
 
 
+# Map integers returned by the p_completion_item_kind property to the
+# corresponding CompletionItemKind enumeration values.
+completion_kind_map = {
+    i + 1: value for i, value in enumerate(lkt.CompletionItemKind)
+}
+
+
 def complete_kind(name: lkt.DefId) -> str:
-    return lkt.CompletionItemKind._c_to_py[name.p_completion_item_kind - 1]
+    return completion_kind_map[name.p_completion_item_kind]
 
 
 def sorted_complete(n: lkt.LktNode) -> list[lkt.Decl]:
