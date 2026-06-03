@@ -1,0 +1,8 @@
+from common import A, B, C, D
+
+fun take_b(v: Array[B]): Bool = true
+
+val v1 = take_b(null[Array[A]])
+val v2 = take_b(null[Array[B]])
+val v3 = take_b(null[Array[C]])
+val v4 = take_b(null[Array[D]])

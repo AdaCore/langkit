@@ -1,0 +1,7 @@
+driver: lkt
+entry_points:
+  - array.lkt
+  - entity.lkt
+  - function.lkt
+  - node_builder.lkt
+  - stream.lkt

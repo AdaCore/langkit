@@ -1,0 +1,39 @@
+from common import A, B, C, D
+
+fun take(func: (B, B) -> B): Bool = true
+
+# Function has the exact required signature
+fun f1(x: B, y: B): B
+val v1 = take(f1)
+
+# One argument is a supertype: the function is a subtype
+fun f2(x: A, y: B): B
+val v2 = take(f2)
+
+# One argument is a subtype: the function is not a subtype
+fun f3(x: C, y: B): B
+val v3 = take(f3)
+
+# The return type is a supertype: the function is not a subtype
+fun f4(x: B, y: B): A
+val v4 = take(f4)
+
+# The return type is a subtype: the function is a subtype
+fun f5(x: B, y: B): C
+val v5 = take(f5)
+
+# Mix of variations that makes the function a subtype
+fun f6(x: A, y: B): C
+val v6 = take(f6)
+
+# Unrelated argument type: the function is not a subtype
+fun f7(x: D, y: B): B
+val v7 = take(f7)
+
+# Unrelated return type: the function is not a subtype
+fun f8(x: B, y: B): D
+val v8 = take(f8)
+
+# Not the same arity: the function is not a subtype
+fun f9(x: B, y: B, z: B): B
+val v9 = take(f9)

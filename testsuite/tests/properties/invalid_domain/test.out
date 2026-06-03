@@ -1,17 +1,23 @@
+== with_entity_subtype/test.lkt ==
+test.lkt:7:54: error: Expected type Array[Entity[FooNode]], got Array[Entity[Example]]
+7 |     fun get_eq(): Equation = %domain(self.get_var(), node.get_domain())
+  |                                                      ^^^^^^^^^^^^^^^^^
+
+
 == with_int/test.lkt ==
-test.lkt:5:54: error: Entity collection expected, got Int
+test.lkt:5:54: error: Expected type Array[Entity[FooNode]], got Int
 5 |     fun get_eq(): Equation = %domain(self.get_var(), 1)
   |                                                      ^
 
 
 == with_int_array/test.lkt ==
-test.lkt:5:54: error: Entity collection expected, got Array[Int]
+test.lkt:5:54: error: Expected type Array[Entity[FooNode]], got Array[Int]
 5 |     fun get_eq(): Equation = %domain(self.get_var(), [1])
   |                                                      ^^^
 
 
 == with_node/test.lkt ==
-test.lkt:6:54: error: Entity collection expected, got Array[FooNode]
+test.lkt:6:54: error: Expected type Array[Entity[FooNode]], got Array[FooNode]
 6 |     fun get_eq(): Equation = %domain(self.get_var(), node.get_domain())
   |                                                      ^^^^^^^^^^^^^^^^^
 

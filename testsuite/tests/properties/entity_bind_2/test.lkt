@@ -31,7 +31,7 @@ class Identifier: RootNode implements TokenNode {
     fun xref_eq(
         @ignored arg1: Entity[FooNode],
         @ignored arg2: Entity[FooNode]
-    ): Equation = %domain(node.var, [self])
+    ): Equation = %domain(node.var, [self.as[FooNode]])
 }
 
 class Literal: RootNode implements TokenNode {
