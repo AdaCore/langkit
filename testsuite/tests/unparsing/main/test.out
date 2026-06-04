@@ -268,6 +268,90 @@ def f2(a: Int, ): Int
     template for VarDecl.f_name: invalid bubbleUpLeadingTrivias: JSON_INT_TYPE
 # invalid_this_field.json
     "node" template for VarDecl: "this_field" is valid only in field templates
+# invalid_eval_member.json
+    "node" template for VarDecl: missing "prefix" key for eval_member
+# invalid_eval_member2.json
+    "node" template for VarDecl: missing "member" key for eval_member
+# invalid_eval_member3.json
+    eval_member: VarDecl has no f_items member
+# invalid_eval_member4.json
+    "node" template for VarDecl: eval_member: too many arguments passed to FooNode.parent
+# invalid_eval_member5.json
+    "node" template for VarDecl: eval_member: no argument passed to arg2 (for FooNode.p_eval_member_test)
+# invalid_eval_member6.json
+    "node" template for VarDecl: eval_member: multiple arguments passed to arg1 (for FooNode.p_eval_member_test)
+# invalid_eval_member7.json
+    "node" template for VarDecl: eval_member: invalid argument name: ARG2 (for FooNode.p_eval_member_test)
+# invalid_eval_member8.json
+    "node" template for VarDecl: eval_member: invalid argument name: arg3 (for FooNode.p_eval_member_test)
+# invalid_eval_member9.json
+    "node" template for VarDecl: eval_member: Bool passed to arg2 but Decl expected (for FooNode.p_eval_member_test)
+# invalid_eval_member10.json
+    "node" template for VarDecl: eval_member: FooNode passed to arg2 but Decl expected (for FooNode.p_eval_member_test)
+# invalid_eval_member11.json
+    "node" template for VarDecl: is_empty expects a node, got a AnalysisUnit
+# invalid_node_text.json
+    "node" template for VarDecl: missing "node" key for node_text
+# invalid_node_text2.json
+    "node" template for VarDecl: invalid template JSON node: JSON_BOOLEAN_TYPE
+# invalid_node_text3.json
+    "node" template for VarDecl: node_text expects a node, got a Bool
+# invalid_node_text4.json
+    "node" template for VarDecl: if condition requires a boolean, got a String
+# invalid_string_lit.json
+    "node" template for VarDecl: missing "value" key for string
+# invalid_string_lit2.json
+    "node" template for VarDecl: invalid value field: JSON_STRING_TYPE expected, but JSON_BOOLEAN_TYPE found
+# invalid_bin_op.json
+    "node" template for VarDecl: missing "op" key for bin_op
+# invalid_bin_op2.json
+    "node" template for VarDecl: invalid op of bin_op: JSON_STRING_TYPE expected, but JSON_BOOLEAN_TYPE found
+# invalid_bin_op3.json
+    "node" template for VarDecl: invalid op of bin_op: nosuchop
+# invalid_bin_op4.json
+    "node" template for VarDecl: missing "lhs" key for bin_op
+# invalid_bin_op5.json
+    "node" template for VarDecl: missing "rhs" key for bin_op
+# invalid_bin_op_eq.json
+    "node" template for VarDecl: incompatible types for equality: Bool and VarDecl
+# invalid_bin_op_eq2.json
+    "node" template for VarDecl: incompatible types for equality: VarDecl and Bool
+# invalid_bin_op_eq3.json
+    "node" template for VarDecl: incompatible types for equality: Bool and String
+# invalid_bin_op_and.json
+    "node" template for VarDecl: Bool expected for the RHS of "and", got VarDecl instead
+# invalid_not.json
+    "node" template for VarDecl: missing "operand" key for not
+# invalid_not2.json
+    "node" template for VarDecl: invalid template JSON node: JSON_BOOLEAN_TYPE
+# invalid_not3.json
+    "node" template for VarDecl: not requires a boolean, got a VarDecl
+# invalid_symbol.json
+    "node" template for VarDecl: missing "value" key for symbol
+# invalid_symbol2.json
+    "node" template for VarDecl: invalid value field: JSON_STRING_TYPE expected, but JSON_BOOLEAN_TYPE found
+# invalid_symbol3.json
+    "node" template for VarDecl: invalid symbol: "invalid_symbol": this is an invalid symbol
+# invalid_node_symbol.json
+    "node" template for VarDecl: missing "node" key for node_symbol
+# invalid_node_symbol2.json
+    "node" template for VarDecl: invalid template JSON node: JSON_BOOLEAN_TYPE
+# invalid_node_symbol3.json
+    "node" template for VarDecl: node_symbol expects a token node, got a VarDecl
+# invalid_cast.json
+    template for VarDecl.f_name: missing "prefix" key for cast
+# invalid_cast2.json
+    template for VarDecl.f_name: invalid template JSON node: JSON_BOOLEAN_TYPE
+# invalid_cast3.json
+    template for VarDecl.f_name: invalid prefix for cast: Bool
+# invalid_cast4.json
+    template for VarDecl.f_name: missing "type" key for cast
+# invalid_cast5.json
+    template for VarDecl.f_name: invalid type of cast: JSON_STRING_TYPE expected, but JSON_BOOLEAN_TYPE found
+# invalid_cast6.json
+    template for VarDecl.f_name: invalid node type in cast: NoSuchNode
+# invalid_cast7.json
+    template for VarDecl.f_name: invalid cast from VarDecl to Name
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -1439,6 +1523,20 @@ Done.
   ]
 }
 
+== cmd_isempty2.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "def f(i:Int):Int{i;}"
+    }
+  ]
+}
+
 == cmd_match.json ==
 
 {
@@ -2494,6 +2592,205 @@ Done.
       "id": 2,
       "kind": "text",
       "text": " var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_eval_member.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=0; "
+    }
+  ]
+}
+
+== cmd_eval_member.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0;"
+    }
+  ]
+}
+
+== cmd_eval_member1.json ==
+
+[LANGKIT.UNPARSING.EXPANSION_ERRORS] Exception caught during the expansion of <VarDecl foo.txt:1:1-1:16>
+[LANGKIT.UNPARSING.EXPANSION_ERRORS] raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : PropertyError exception
+_LANGKIT.UNPARSING.EXPANSION_ERRORS_ [...STACK TRACE...]
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0;"
+    }
+  ]
+}
+
+== cmd_eval_member2.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0;"
+    }
+  ]
+}
+
+== cmd_eval_member3.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0; "
+    }
+  ]
+}
+
+== cmd_node_text.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0 ;"
+    }
+  ]
+}
+
+== cmd_node_text2.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "def f(x:Int ,y:Int=1):Int{x;}"
+    }
+  ]
+}
+
+== cmd_and.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var vff:T=1+1;var vft:T=1+v0;var vtf:T=v0+1;var vtt:T=v0 +v0;"
+    }
+  ]
+}
+
+== cmd_and2.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=1+1;"
+    }
+  ]
+}
+
+== cmd_or.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var vff:T=1+1;var vft:T=1 +v0;var vtf:T=v0 +1;var vtt:T=v0 +v0;"
+    }
+  ]
+}
+
+== cmd_or2.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0 +1;"
+    }
+  ]
+}
+
+== cmd_not.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=v0+1;var v2:T=1 +v0;"
+    }
+  ]
+}
+
+== cmd_node_symbol.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T=foo ;var v2:T=Foo;var v3:T=casing_Foo  ;"
+    }
+  ]
+}
+
+== cmd_cast.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "def f(x:Int ):Int{x;}def g(x:Int):Int{x;}"
     }
   ]
 }

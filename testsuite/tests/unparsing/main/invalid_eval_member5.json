@@ -1,0 +1,21 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": {
+        "kind": "if",
+        "condition": {
+          "kind": "is_empty",
+          "node": {
+            "kind": "eval_member",
+            "prefix": "this_node",
+            "member": "p_eval_member_test",
+            "args": ["this_node"],
+            "kwargs": {}
+          }
+        },
+        "then": "recurse",
+        "else": "recurse"
+      }
+    }
+  }
+}

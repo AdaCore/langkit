@@ -390,17 +390,35 @@ def to_json(input_file: str) -> str:
             case _:
                 error(p, "invalid pattern")
 
-    def parse_template(e: L.Expr | list[L.Expr]) -> Any:
+    def parse_subtemplate(e: L.Expr | list[L.Expr]) -> Any:
+        return parse_template_helper(e, expression=False)
+
+    def parse_expression(e: L.Expr | list[L.Expr]) -> Any:
+        return parse_template_helper(e, expression=True)
+
+    def parse_template_helper(
+        e: L.Expr | list[L.Expr],
+        expression: bool,
+    ) -> Any:
         """
         Translate a template expression to JSON.
         """
         result: Any
 
         if isinstance(e, list):
-            result = [parse_template(item) for item in e]
+            result = [parse_template_helper(item, expression) for item in e]
             return result[0] if len(result) == 1 else result
 
         elif isinstance(e, L.SingleLineStringLit):
+            if expression:
+                if not e.p_is_prefixed_string:
+                    return {"kind": "string", "value": parse_str(e)}
+                elif e.p_prefix == "s":
+                    return {"kind": "symbol", "value": parse_str(e)}
+                else:
+                    error(e, "unexpected string prefix")
+            elif e.p_is_prefixed_string:
+                error(e, "unexpected string prefix")
             return {"kind": "text", "text": parse_str(e)}
 
         elif isinstance(e, L.RefId):
@@ -419,26 +437,93 @@ def to_json(input_file: str) -> str:
                 "trim",
                 "whitespace",
                 "this_field",
+                "this_node",
             ):
                 return e.text
+
+        elif isinstance(e, L.BinOp):
+            match e.f_op:
+                case L.OpEq():
+                    op = "="
+                case L.OpAnd():
+                    op = "and"
+                case L.OpOr():
+                    op = "or"
+                case _:
+                    error(e.f_op, "unexpected binary operator")
+            return {
+                "kind": "bin_op",
+                "op": op,
+                "lhs": parse_expression(e.f_left),
+                "rhs": parse_expression(e.f_right),
+            }
+
+        elif isinstance(e, L.CastExpr):
+            if e.f_null_cond.p_as_bool:
+                error(e.f_null_cond, "unexpected non-cond marker")
+            elif e.f_excludes_null.p_as_bool:
+                error(e.f_null_cond, "unexpected null-excluding marker")
+            elif not isinstance(e.f_dest_type, L.SimpleTypeRef):
+                error(e.f_null_cond, "invalid type expression")
+            return {
+                "kind": "cast",
+                "prefix": parse_expression(e.f_expr),
+                "type": e.f_dest_type.f_type_name.text,
+            }
 
         elif isinstance(e, L.DotExpr):
             if e.f_null_cond.p_as_bool:
                 error(e.f_null_cond, "unexpected non-cond marker")
 
+            prefix = parse_expression(e.f_prefix)
             match e.f_suffix.text:
                 case "is_empty":
-                    return {
-                        "kind": "is_empty",
-                        "node": parse_template(e.f_prefix),
-                    }
+                    return {"kind": "is_empty", "node": prefix}
 
-                case _:
-                    error(e.f_suffix, "unknown attribute")
+                case "symbol":
+                    return {"kind": "node_symbol", "node": prefix}
+
+                case "text":
+                    return {"kind": "node_text", "node": prefix}
+
+                case member:
+                    return {
+                        "kind": "eval_member",
+                        "prefix": prefix,
+                        "member": member,
+                    }
 
         elif isinstance(e, L.CallExpr):
             callee = e.f_name
-            if not isinstance(callee, L.RefId):
+            if isinstance(callee, L.DotExpr):
+                call_args = []
+                call_kwargs = {}
+                result = {
+                    "kind": "eval_member",
+                    "prefix": parse_expression(callee.f_prefix),
+                    "member": callee.f_suffix.text,
+                }
+                for arg in e.f_args:
+                    value = parse_expression(arg.f_value)
+                    if arg.f_name:
+                        arg_name = arg.f_name.text
+                        if arg_name in call_kwargs:
+                            error(arg.f_name, "argument passed multiple times")
+                        call_kwargs[arg_name] = value
+                    elif call_kwargs:
+                        error(
+                            arg,
+                            "positional argument forbidden after a keyword"
+                            " argument",
+                        )
+                    else:
+                        call_args.append(value)
+                if call_kwargs:
+                    result["kwargs"] = call_kwargs
+                if call_args or not call_kwargs:
+                    result["args"] = call_args
+                return result
+            elif not isinstance(callee, L.RefId):
                 error(callee, "identifier expected")
             name = callee.text
 
@@ -463,26 +548,29 @@ def to_json(input_file: str) -> str:
                         if isinstance(width, L.NumLit)
                         else parse_str(width)
                     ),
-                    "contents": parse_template(varargs),
+                    "contents": parse_subtemplate(varargs),
                     **bubble_up_args(bound),
                 }
 
             elif name in ("dedent", "dedentToRoot"):
                 return {
                     "kind": name,
-                    "contents": parse_template(varargs),
+                    "contents": parse_subtemplate(varargs),
                     **bubble_up_args(bound),
                 }
 
             elif name == "fill":
                 return {
                     "kind": "fill",
-                    "document": parse_template(varargs),
+                    "document": parse_subtemplate(varargs),
                     **bubble_up_args(bound),
                 }
 
             elif name == "group":
-                result = {"kind": "group", "document": parse_template(varargs)}
+                result = {
+                    "kind": "group",
+                    "document": parse_subtemplate(varargs),
+                }
                 if "shouldBreak" in bound:
                     result["shouldBreak"] = parse_bool(bound["shouldBreak"])
                 if "id" in bound:
@@ -493,10 +581,10 @@ def to_json(input_file: str) -> str:
             elif name == "ifBreak":
                 result = {
                     "kind": "ifBreak",
-                    "breakContents": parse_template(bound["breakContents"]),
+                    "breakContents": parse_subtemplate(bound["breakContents"]),
                 }
                 if "flatContents" in bound:
-                    result["flatContents"] = parse_template(
+                    result["flatContents"] = parse_subtemplate(
                         bound["flatContents"]
                     )
                 if "groupId" in bound:
@@ -511,7 +599,7 @@ def to_json(input_file: str) -> str:
             ):
                 return {
                     "kind": name,
-                    "contents": parse_template(varargs),
+                    "contents": parse_subtemplate(varargs),
                     **bubble_up_args(bound),
                 }
 
@@ -532,22 +620,24 @@ def to_json(input_file: str) -> str:
         elif isinstance(e, L.ArrayLiteral):
             if e.f_element_type:
                 error(e.f_element_type, "unexpected type")
-            result = [parse_template(item) for item in e.f_exprs]
+            result = [
+                parse_template_helper(item, expression) for item in e.f_exprs
+            ]
             return result[0] if len(result) == 1 else result
 
         elif isinstance(e, L.IfExpr):
-            else_part = parse_template(e.f_else_expr)
+            else_part = parse_subtemplate(e.f_else_expr)
             for alt in reversed(e.f_alternatives):
                 else_part = {
                     "kind": "if",
-                    "condition": parse_template(alt.f_cond_expr),
-                    "then": parse_template(alt.f_then_expr),
+                    "condition": parse_expression(alt.f_cond_expr),
+                    "then": parse_subtemplate(alt.f_then_expr),
                     "else": else_part,
                 }
             return {
                 "kind": "if",
-                "condition": parse_template(e.f_cond_expr),
-                "then": parse_template(e.f_then_expr),
+                "condition": parse_expression(e.f_cond_expr),
+                "then": parse_subtemplate(e.f_then_expr),
                 "else": else_part,
             }
 
@@ -559,7 +649,7 @@ def to_json(input_file: str) -> str:
                 kinds.append(p.type_name)
             return {
                 "kind": "is_a",
-                "node": parse_template(e.f_expr),
+                "node": parse_expression(e.f_expr),
                 "kinds": kinds,
             }
 
@@ -579,7 +669,7 @@ def to_json(input_file: str) -> str:
             for branch in e.f_branches:
                 if not isinstance(branch, L.PatternMatchBranch):
                     error(branch, "pattern match branch expected")
-                template = parse_template(branch.f_expr)
+                template = parse_subtemplate(branch.f_expr)
 
                 nodes = []
                 has_default = False
@@ -608,6 +698,12 @@ def to_json(input_file: str) -> str:
                 error(e, "default case missing")
 
             return result
+
+        elif isinstance(e, L.NotExpr):
+            return {"kind": "not", "operand": parse_expression(e.f_expr)}
+
+        elif isinstance(e, L.StringLit):
+            return e.p_denoted_value
 
         error(e, "unexpected template")
 
@@ -695,7 +791,7 @@ def to_json(input_file: str) -> str:
                     name = validate_val_decl(decl)
 
                     if name in ("node", "sep", "leading_sep", "trailing_sep"):
-                        node_cfg[name] = parse_template(decl.f_expr)
+                        node_cfg[name] = parse_subtemplate(decl.f_expr)
                     elif name in (
                         "flush_before_children",
                         "independent_lines",
@@ -705,7 +801,9 @@ def to_json(input_file: str) -> str:
                         error(decl.f_syn_name, "unknown parameter")
                     else:
                         node_cfg.setdefault("fields", {})
-                        node_cfg["fields"][name] = parse_template(decl.f_expr)
+                        node_cfg["fields"][name] = parse_subtemplate(
+                            decl.f_expr
+                        )
 
                 elif isinstance(decl, L.StructDecl):
                     if decl.f_syn_name.text != "table":
@@ -766,7 +864,9 @@ def to_json(input_file: str) -> str:
                                         error(expr, "predicate name expected")
                                     join_cfg["predicate"] = expr.text
                                 elif name == "template":
-                                    join_cfg["template"] = parse_template(expr)
+                                    join_cfg["template"] = parse_subtemplate(
+                                        expr
+                                    )
                                 else:
                                     error(decl.f_syn_name, "unknown parameter")
 
@@ -861,6 +961,7 @@ def to_lkt(input_file: str) -> str:
                 | "trim"
                 | "whitespace"
                 | "this_field"
+                | "this_node"
             ):
                 lines.append(doc)
 
@@ -984,6 +1085,51 @@ def to_lkt(input_file: str) -> str:
             case {"kind": "text", "text": text}:
                 lines.append(lkt_lit(text))
 
+            case {"kind": "bin_op", "op": op, "lhs": lhs_doc, "rhs": rhs_doc}:
+                process_template(lhs_doc)
+                lines.append(
+                    {
+                        "=": "==",
+                        "and": "and",
+                        "or": "or",
+                    }[op]
+                )
+                process_template(rhs_doc)
+
+            case {"kind": "cast", "prefix": prefix_doc, "type": type_str}:
+                process_template(prefix_doc)
+                lines.append(f".as[{type_str}]")
+
+            case {
+                "kind": "eval_member",
+                "prefix": prefix_doc,
+                "member": member,
+            }:
+                process_template(prefix_doc)
+                lines.append(f".{member}")
+                has_args = False
+                if "args" in doc:
+                    for value in doc["args"]:
+                        if has_args:
+                            lines.append(",")
+                        else:
+                            lines.append("(")
+                            has_args = True
+                        process_template(value)
+                if "kwargs" in doc:
+                    for name, value in doc["kwargs"].items():
+                        if has_args:
+                            lines.append(",")
+                        else:
+                            lines.append("(")
+                            has_args = True
+                        lines.append(f"{name}=")
+                        process_template(value)
+                if has_args:
+                    lines.append(")")
+                elif "args" in doc or "kwargs" in doc:
+                    lines.append("()")
+
             case {"kind": "is_a", "node": node_doc, "kinds": [*kinds]}:
                 process_template(node_doc)
                 lines.append("is")
@@ -992,6 +1138,24 @@ def to_lkt(input_file: str) -> str:
             case {"kind": "is_empty", "node": node_doc}:
                 process_template(node_doc)
                 lines.append(".is_empty")
+
+            case {"kind": "node_symbol", "node": node_doc}:
+                process_template(node_doc)
+                lines.append(".symbol")
+
+            case {"kind": "node_text", "node": node_doc}:
+                process_template(node_doc)
+                lines.append(".text")
+
+            case {"kind": "not", "operand": operand_doc}:
+                lines.append("not")
+                process_template(operand_doc)
+
+            case {"kind": "string", "value": str_val}:
+                lines.append(lkt_lit(str_val))
+
+            case {"kind": "symbol", "value": str_val}:
+                lines.append("s" + lkt_lit(str_val))
 
             case _:
                 raise FatalError(f"invalid template: {doc}")

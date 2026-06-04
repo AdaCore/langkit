@@ -469,11 +469,17 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  template instantiation: ``Instantiate_Template`` takes care of the
    --  template unwrapping.
 
+   function Evaluate_Condition
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Boolean;
+   --  Helper for ``Instantiate_Template_Helper``. Evaluate a condition tree
+   --  and return its result.
+
    function Evaluate_Expression
      (State      : in out Instantiation_State;
       Expression : Document_Type) return Value_Ref;
-   --  Helper for ``Instantiate_Template_Helper``. Evaluate an expression tree
-   --  and return the resulting value.
+   --  Helper for ``Evaluate_Condition``. Evaluate an expression tree
+   --  and return the resulting value. This may propagate a managed exception.
 
    -----------------------
    -- Check_Same_Tokens --
@@ -1065,7 +1071,9 @@ package body Langkit_Support.Generic_API.Unparsing is
    function Is_Empty_List (Node : Lk_Node) return Boolean is
       T : Lk_Token;
    begin
-      if not Node.Is_List_Node or else Node.Children_Count > 0 then
+      if Node.Is_Null then
+         return True;
+      elsif not Node.Is_List_Node or else Node.Children_Count > 0 then
          return False;
       end if;
 
@@ -1751,10 +1759,8 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when If_Then_Else =>
             declare
-               Condition   : constant Value_Ref :=
-                 Evaluate_Expression (State, Template.If_Condition);
                Subtemplate : constant Document_Type :=
-                 (if Condition.As_Bool
+                 (if Evaluate_Condition (State, Template.If_Condition)
                   then Template.If_Then
                   else Template.If_Else);
             begin
@@ -1802,15 +1808,121 @@ package body Langkit_Support.Generic_API.Unparsing is
       end case;
    end Instantiate_Template_Helper;
 
+   ------------------------
+   -- Evaluate_Condition --
+   ------------------------
+
+   function Evaluate_Condition
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Boolean
+   is
+      Result : Value_Ref;
+   begin
+      --  Evaluate the condition itself
+
+      begin
+         Result := Evaluate_Expression (State, Expression);
+      exception
+         when Exc : others =>
+
+            --  Let unmanaged exceptions propagate: they are true bugs
+
+            if not Is_Managed_Exception
+                     (State.Language, Exception_Identity (Exc))
+            then
+               raise;
+
+            --  If requested, log managed exceptions
+
+            elsif Expansion_Errors_Trace.Is_Active then
+               declare
+                  Context : constant String :=
+                    (if State.Field.Is_Null
+                     then ""
+                     else "field " & State.Field.Image & " of ")
+                    & State.Node.Image;
+               begin
+                  Expansion_Errors_Trace.Trace
+                    ("Exception caught during the expansion of " & Context);
+                  Expansion_Errors_Trace.Trace
+                    (Exception_Information (Exc));
+               end;
+            end if;
+
+            --  Consider that the condition evaluates to false in case of error
+
+            return False;
+      end;
+      return As_Bool (Result);
+   end Evaluate_Condition;
+
    -------------------------
    -- Evaluate_Expression --
    -------------------------
 
    function Evaluate_Expression
      (State      : in out Instantiation_State;
-      Expression : Document_Type) return Value_Ref is
+      Expression : Document_Type) return Value_Ref
+   is
+      Lang : Language_Id renames State.Language;
    begin
       case Template_Expression_Kind (Expression.Kind) is
+         when Bin_Op =>
+            declare
+               function LHS return Value_Ref is
+                 (Evaluate_Expression (State, Expression.Bin_Op_LHS));
+               function RHS return Value_Ref is
+                 (Evaluate_Expression (State, Expression.Bin_Op_RHS));
+            begin
+               case Expression.Bin_Op_Op is
+                  when Equal =>
+                     return From_Bool (Lang, LHS = RHS);
+                  when And_Then =>
+                     return From_Bool
+                              (Lang, As_Bool (LHS) and then As_Bool (RHS));
+                  when Or_Else =>
+                     return From_Bool
+                              (Lang, As_Bool (LHS) or else As_Bool (RHS));
+               end case;
+            end;
+
+         when Cast =>
+            declare
+               Prefix : constant Lk_Node :=
+                 Evaluate_Expression (State, Expression.Cast_Prefix).As_Node;
+               Result : constant Lk_Node :=
+                 (if Prefix.Is_Null
+                     or else not Type_Matches (Prefix, Expression.Cast_Type)
+                  then No_Lk_Node
+                  else Prefix);
+            begin
+               return From_Node (Lang, Result);
+            end;
+
+         when Eval_Member =>
+            declare
+               Prefix : constant Value_Ref :=
+                 Evaluate_Expression (State, Expression.Eval_Member_Prefix);
+               Member : constant Struct_Member_Ref :=
+                 Expression.Eval_Member_Ref;
+               Arguments : Value_Ref_Array
+                 (1 ..  Expression.Eval_Member_Args.Last_Index);
+            begin
+               for I in Arguments'Range loop
+                  declare
+                     A : constant Document_Type :=
+                       Expression.Eval_Member_Args (I);
+                  begin
+                     Arguments (I) :=
+                       (if A = null
+                        then Member_Argument_Default_Value
+                               (Member, Argument_Index (I))
+                        else Evaluate_Expression (State, A));
+                  end;
+               end loop;
+               return Eval_Member (Prefix, Member, Arguments);
+            end;
+
          when Is_A =>
             declare
                Node : constant Lk_Node :=
@@ -1819,7 +1931,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                  not Node.Is_Null
                  and then Node_Matches (Node, Expression.Is_A_Kinds);
             begin
-               return From_Bool (State.Language, Result);
+               return From_Bool (Lang, Result);
             end;
 
          when Is_Empty =>
@@ -1827,11 +1939,49 @@ package body Langkit_Support.Generic_API.Unparsing is
                Node : constant Lk_Node :=
                  Evaluate_Expression (State, Expression.Is_Empty_Node).As_Node;
             begin
-               return From_Bool (State.Language, Is_Empty_List (Node));
+               return From_Bool (Lang, Is_Empty_List (Node));
             end;
 
+         when Node_Symbol | Node_Text =>
+            declare
+               Expr : constant Document_Type :=
+                 (if Expression.Kind = Node_Symbol
+                  then Expression.Node_Symbol_Node
+                  else Expression.Node_Text_Node);
+               Node : constant Lk_Node :=
+                 Evaluate_Expression (State, Expr).As_Node;
+               Text : constant Text_Type :=
+                 (if Node.Is_Null
+                  then ""
+                  elsif Expression.Kind = Node_Symbol
+                  then Node.Symbol
+                  else Node.Text);
+            begin
+               return
+                 (if Expression.Kind = Node_Symbol
+                  then From_Symbol (Lang, Text)
+                  else From_String (Lang, Text));
+            end;
+
+         when Not_Expr =>
+            declare
+               Operand : constant Value_Ref :=
+                 Evaluate_Expression (State, Expression.Not_Expr_Operand);
+            begin
+               return From_Bool (Lang, not As_Bool (Operand));
+            end;
+
+         when String_Lit =>
+            return Expression.String_Lit_Value;
+
+         when Symbol_Lit =>
+            return Expression.Symbol_Lit_Value;
+
          when This_Field =>
-            return From_Node (State.Language, State.Field);
+            return From_Node (Lang, State.Field);
+
+         when This_Node =>
+            return From_Node (Lang, State.Node);
       end case;
    end Evaluate_Expression;
 
@@ -2713,6 +2863,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       elsif Node.Unit.Has_Diagnostics then
          raise Precondition_Failure with "node's unit has parsing errors";
       end if;
+
+      Pool.Initialize (Config.Value.Language);
 
       --  Refresh memoized Prettier documents stored in the unparsing
       --  configuration, since they use Prettier's document IDs that may be

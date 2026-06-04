@@ -1,0 +1,17 @@
+{
+  "node_configs": {
+    "Name": {
+      "node": {
+        "kind": "if",
+        "condition": {
+           "kind": "bin_op",
+           "op": "=",
+           "lhs": {"kind": "node_text", "node": "this_node"},
+           "rhs": {"kind": "string", "value": "v0"}
+        },
+        "then": ["recurse", "whitespace"],
+        "else": "recurse"
+      }
+    }
+  }
+}

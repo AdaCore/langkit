@@ -15,6 +15,7 @@ use Langkit_Support.Internal.Introspection;
 with Langkit_Support.Internal.Unparsing;
 use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
+with Langkit_Support.Symbols;           use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;             use Langkit_Support.Types;
@@ -128,6 +129,8 @@ package Langkit_Support.Internal.Descriptor is
      (Node : Analysis.Internal_Node) return Analysis.Internal_Token;
    type Node_Text_Type is access function
      (Node : Analysis.Internal_Node) return Text_Type;
+   type Node_Symbol_Type is access function
+     (Node : Analysis.Internal_Node) return Symbol_Type;
    type Node_Sloc_Range_Type is access function
      (Node : Analysis.Internal_Node) return Source_Location_Range;
    type Node_Lookup_Type is access function
@@ -166,6 +169,8 @@ package Langkit_Support.Internal.Descriptor is
       Arguments : Internal_Value_Array) return Internal_Value_Access;
    type Is_Managed_Exception_Type is access function
      (Id : Exception_Id) return Boolean;
+   type Canonicalize_Symbol_Type is access function
+     (Symbol : Text_Type) return Symbolization_Result;
 
    type Language_Descriptor is limited record
       Language_Name : Text_Access;
@@ -263,6 +268,7 @@ package Langkit_Support.Internal.Descriptor is
       Node_Token_Start          : Node_Token_Getter_Type;
       Node_Token_End            : Node_Token_Getter_Type;
       Node_Text                 : Node_Text_Type;
+      Node_Symbol               : Node_Symbol_Type;
       Node_Sloc_Range           : Node_Sloc_Range_Type;
       Node_Lookup               : Node_Lookup_Type;
       Node_Last_Attempted_Child : Node_Last_Attempted_Child_Type;
@@ -281,6 +287,7 @@ package Langkit_Support.Internal.Descriptor is
       Create_Struct        : Create_Struct_Type;
       Eval_Node_Member     : Eval_Node_Member_Type;
       Is_Managed_Exception : Is_Managed_Exception_Type;
+      Canonicalize_Symbol  : Canonicalize_Symbol_Type;
    end record;
 
    function "+" is new Ada.Unchecked_Conversion

@@ -526,6 +526,21 @@ package body ${ada_lib_name}.Lexer_Implementation is
       return Force_Symbol (TDH, Token_Data.all);
    end Get_Symbol;
 
+   -------------------------
+   -- Canonicalize_Symbol --
+   -------------------------
+
+   function Canonicalize_Symbol
+     (Symbol : Text_Type) return Symbolization_Result
+   is
+   begin
+      % if ctx.symbol_canonicalizer:
+         return ${ctx.symbol_canonicalizer.fqn} (Symbol);
+      % else:
+         return Create_Symbol (Symbol);
+      % endif
+   end Canonicalize_Symbol;
+
    ------------------
    -- Force_Symbol --
    ------------------
@@ -539,12 +554,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
             Text   : Text_Type renames
                TDH.Source_Buffer (T.Source_First ..  T.Source_Last);
             Symbol : constant Symbolization_Result :=
-               % if ctx.symbol_canonicalizer:
-                  ${ctx.symbol_canonicalizer.fqn} (Text)
-               % else:
-                  Create_Symbol (Text)
-               % endif
-            ;
+               Canonicalize_Symbol (Text);
          begin
             --  This function is run as part of semantic analysis: there is
             --  currently no way to report errors from here, so just discard

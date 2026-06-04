@@ -1217,6 +1217,24 @@ package body Langkit_Support.Generic_API.Analysis is
       return Self.Desc.Node_Text (Self.Internal.Node);
    end Text;
 
+   ------------
+   -- Symbol --
+   ------------
+
+   function Symbol (Self : Lk_Node) return Text_Type is
+      Result : Symbol_Type;
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+      if not Self.Is_Token_Node then
+         raise Precondition_Failure with "non-token node";
+      end if;
+      Result := Self.Desc.Node_Symbol (Self.Internal.Node);
+      return (if Result = No_Symbol
+              then ""
+              else Get (Result).all);
+   end Symbol;
+
    ----------------
    -- Sloc_Range --
    ----------------

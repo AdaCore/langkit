@@ -4,6 +4,7 @@ with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 
 with GNATCOLL.JSON; use GNATCOLL.JSON;
+with GNATCOLL.Traces;
 with Prettier_Ada.Documents;
 with Prettier_Ada.Documents.Json;
 
@@ -147,6 +148,8 @@ procedure Commands is
    end Reset_Ids;
 
 begin
+   GNATCOLL.Traces.Parse_Config_File (".gnatdebug");
+
    Check ("cmd_align.json");
    Check ("cmd_align2.json");
    Check ("cmd_breakparent.json");
@@ -169,6 +172,7 @@ begin
    Check ("cmd_ifbreak.json");
    Check ("cmd_isempty.json", "def f(): Int {i;}");
    Check ("cmd_isempty.json", "def f(i: Int): Int {i;}");
+   Check ("cmd_isempty2.json", "def f(i: Int): Int {i;}");
    Check ("cmd_match.json", "var i: Int = 2+2;");
    Check ("cmd_match.json", "var i: Int = 2+j;");
    Check ("cmd_match2.json", "var i: Int = 2+j;");
@@ -207,6 +211,29 @@ begin
    Check ("cmd_trim.json");
    Check ("cmd_whitespace_3.json");
    Check ("cmd_whitespace_default.json");
+   Check ("cmd_eval_member.json", "var v1: T = 0;");
+   Check ("cmd_eval_member.json", "var v1: T = v0;");
+   Check ("cmd_eval_member1.json", "var v1: T = v0;");
+   Check ("cmd_eval_member2.json", "var v1: T = v0;");
+   Check ("cmd_eval_member3.json", "var v1: T = v0;");
+   Check ("cmd_node_text.json", "var v1: T = v0;");
+   Check ("cmd_node_text2.json", "def f(x: Int, y: Int = 1): Int {x;}");
+   Check ("cmd_and.json",
+          "  var vff: T = 1 + 1;"
+          & "var vft: T = 1 + v0;"
+          & "var vtf: T = v0 + 1;"
+          & "var vtt: T = v0 + v0;");
+   Check ("cmd_and2.json", "var v1: T = 1 + 1;");
+   Check ("cmd_or.json",
+          "  var vff: T = 1 + 1;"
+          & "var vft: T = 1 + v0;"
+          & "var vtf: T = v0 + 1;"
+          & "var vtt: T = v0 + v0;");
+   Check ("cmd_or2.json", "var v1: T = v0 + 1;");
+   Check ("cmd_not.json", "var v1: T = v0 + 1; var v2: T = 1 + v0;");
+   Check ("cmd_node_symbol.json",
+          "var v1: T = foo; var v2: T = Foo; var v3: T = casing_Foo;");
+   Check ("cmd_cast.json", "def f(x: Int): Int {x;} def g(x: Int): Int {x;}");
 
    Put_Line ("Done.");
 end Commands;

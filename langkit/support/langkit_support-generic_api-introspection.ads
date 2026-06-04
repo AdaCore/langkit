@@ -21,7 +21,6 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 limited private with Langkit_Support.Internal.Introspection;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 
 package Langkit_Support.Generic_API.Introspection is
 

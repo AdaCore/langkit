@@ -1,0 +1,17 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": {
+        "kind": "if",
+        "condition": {
+          "kind": "bin_op",
+          "op": true,
+          "lhs": "this_node",
+          "rhs": "this_node"
+        },
+        "then": ["recurse", "whitespace"],
+        "else": "recurse"
+      }
+    }
+  }
+}

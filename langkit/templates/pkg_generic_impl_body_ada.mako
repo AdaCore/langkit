@@ -5,7 +5,6 @@ with System;
 with Ada.Unchecked_Deallocation;
 
 with ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Lexer_Implementation;
 with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
 package body ${ada_lib_name}.Generic_Impl is
@@ -567,6 +566,15 @@ package body ${ada_lib_name}.Generic_Impl is
    begin
       return Implementation.Text (+Node);
    end Node_Text;
+
+   -----------------
+   -- Node_Symbol --
+   -----------------
+
+   function Node_Symbol (Node : Internal_Node) return Symbol_Type is
+   begin
+      return Implementation.Get_Symbol (+Node);
+   end Node_Symbol;
 
    ---------------------
    -- Node_Sloc_Range --

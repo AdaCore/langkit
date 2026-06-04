@@ -289,6 +289,51 @@
 --
 --  An expression can be one of the following:
 --
+--  * The "bin_op" expression performs a binary operator on two operands::
+--
+--      {
+--        "kind": "bin_op",
+--        "op": <operator>
+--        "lhs": <sub-expression>,
+--        "rhs": <sub-expression>
+--      }
+--
+--    "op" can be one of the following:
+--
+--    * "=", to test equality. Both operands must have compatible types (two
+--      arbitrary nodes that do not need to be the same type, or the same type
+--      exactly), and the result is a boolean.
+--
+--    * "and"/"or", the short-circuiting boolean operators.
+--
+--  * The "cast" expression takes a node and converts it to another node type.
+--    If the conversion fails, this yields a null node::
+--
+--      {"kind": "cast", "node": <sub-expression>, "type": "NodeType"}
+--
+--  * The "eval_member" expression evaluates the member (field or property) of
+--    a given value (struct or node), with potential arguments, and returns the
+--    field value or property result. Property arguments can be passed as
+--    positional arguments (in the "args" list) or as keyword arguments (in the
+--    "kwargs" object), or both (keyword arguments are associated after the
+--    positional arguments)::
+--
+--      {
+--        "kind": "eval_member",
+--        "member": "some_field",
+--        "prefix": <sub-expression>
+--      }
+--      {
+--        "kind": "eval_member",
+--        "member": "some_property",
+--        "prefix": <sub-expression>,
+--        "args": [<sub-expression>, ...],
+--        "kwargs": {
+--          "arg1": <sub-expression>,
+--          "arg2": <sub-expression>,
+--        }
+--      }
+--
 --  * The "is_a" expression returns whether its operand matches the given node
 --    kinds::
 --
@@ -299,8 +344,40 @@
 --
 --      {"kind": "is_empty", "node": <sub-expression>}
 --
+--  * The "node_symbol" expression takes a token node and returns the
+--    corresponding symbol::
+--
+--      {"kind": "node_symbol", "node": <sub-expression>}
+--
+--    Note that it returns the empty symbol for null nodes.
+--
+--  * The "node_text" expression takes a node and returns its text::
+--
+--      {"kind": "node_text", "node": <sub-expression>}
+--
+--    Note that it returns the empty string for null nodes.
+--
+--  * The "not" expression takes a boolean and returns its opposite::
+--
+--      {"kind": "not", "operand": <sub-expression>}
+--
+--  * The "string" expression materializes a string literal::
+--
+--      {"kind": "string", "value": "some string value"}
+--
+--  * The "symbol" expression materializes a symbol literal::
+--
+--      {"kind": "symbol", "value": "some string value"}
+--
+--  * "this_node", which returns the node that instantiates the current
+--    template.
+--
 --  * "this_field" is valid only inside fields configuration. It returns the
---    child node of the node used to instantiate the current template.
+--    child node of "this_node" used to instantiate the current template.
+--
+--  In case of an error happening during expression evaluation, the evaluation
+--  is reported in the EXPANSION_ERRORS trace), and the encompassing condition
+--  evaluates to false.
 --
 --  The configuration file has the following format::
 --
@@ -521,6 +598,13 @@ package Langkit_Support.Generic_API.Unparsing is
        ("LANGKIT.UNPARSING.TRIVIAS",
         Default => GNATCOLL.Traces.From_Config);
    --  Trace to log information about the handling of trivias
+
+   Expansion_Errors_Trace : GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.UNPARSING.EXPANSION_ERRORS",
+        Default => GNATCOLL.Traces.From_Config);
+   --  Trace to log errors happening during expansion from parse tree and
+   --  templates.
 
    Expanded_Trace : GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create

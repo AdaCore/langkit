@@ -263,7 +263,7 @@ begin
    declare
       Dummy : Integer;
    begin
-      Dummy := No_Lk_Node.Text'Length;
+      Dummy := No_Lk_Unit.Text'Length;
    exception
       when Exc : Precondition_Failure =>
          Put_Line ("Got a Precondition_Failure exception: "
@@ -446,6 +446,40 @@ begin
    end;
    New_Line;
 
+   U := Ctx.Get_From_Buffer
+     (Filename => "example.txt",
+      Buffer   => "example Foo" & ASCII.LF
+                  & "example invalid_symbol" & ASCII.LF
+                  & "example casing_FOO" & ASCII.LF);
+   Put ("Root.Symbol -> ");
+   N := U.Root;
+   declare
+      Dummy : Integer;
+   begin
+      Dummy := N.Symbol'Length;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   Put ("No_Lk_Node.Symbol -> ");
+   declare
+      Dummy : Integer;
+   begin
+      Dummy := No_Lk_Node.Symbol'Length;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   for I in 1 .. 3 loop
+      N := U.Root.Child (I).Child (1);
+      Put ("Example[" & Image (N.Text, With_Quotes => True) & "].Symbol -> ");
+      Put_Line (Image (N.Symbol, With_Quotes => True));
+   end loop;
+   New_Line;
+
+   Reparse_Original;
    Put_Line ("Root.Sloc_Range -> " & Image (U.Root.Sloc_Range));
    Put ("No_Lk_Node.Sloc_Range -> ");
    declare

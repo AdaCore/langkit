@@ -73,6 +73,46 @@ class PythonTracebackCollapser(OutputRefiner[str]):
         return "".join(result)
 
 
+class UnparsingErrorTraceCollapser(OutputRefiner[str]):
+    """
+    Collapse stack traces from unparsing errors.
+
+    These traces contain addresses and stack traces, both of which are
+    unpredictable, so better left out of baselines.
+    """
+
+    trace_start_marker = "[LANGKIT.UNPARSING.EXPANSION_ERRORS] raised "
+    trace_prefix = "_LANGKIT.UNPARSING.EXPANSION_ERRORS_ "
+
+    def refine(self, output: str) -> str:
+        result = []
+        in_trace = False
+        trace_first_line = True
+        for l in output.splitlines():
+            remove = False
+            if l.startswith(self.trace_start_marker):
+                # This marks the beginning of the stack trace
+                in_trace = True
+                trace_first_line = True
+
+            elif l.startswith(self.trace_prefix) and in_trace:
+                # We are inside a stack trace. If this is the first line, add a
+                # comment to clarify in the baseline that we edited content.
+                if trace_first_line:
+                    result.append(self.trace_prefix + "[...STACK TRACE...]\n")
+                    trace_first_line = False
+                remove = True
+
+            else:
+                # It looks like we are out of a stack trace now
+                in_trace = False
+
+            if not remove:
+                result.append(l + "\n")
+
+        return "".join(result)
+
+
 class BaseDriver(DiffTestDriver):
     """
     Base class to provide common test driver helpers.
@@ -143,6 +183,10 @@ class BaseDriver(DiffTestDriver):
                     )
                 )
             )
+
+        # Likewise for Ada stack traces printed by the unparsing engine
+        if self.test_env.get("collapse_unparsing_error_traces"):
+            result.append(UnparsingErrorTraceCollapser())
 
         return result + [
             # Hide platform-specific details from Python traceback

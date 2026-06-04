@@ -11,8 +11,9 @@
 with Ada.Exceptions; use Ada.Exceptions;
 
 limited private with Langkit_Support.Internal.Descriptor;
-with Langkit_Support.Names; use Langkit_Support.Names;
-with Langkit_Support.Text;  use Langkit_Support.Text;
+with Langkit_Support.Names;   use Langkit_Support.Names;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Text;    use Langkit_Support.Text;
 
 package Langkit_Support.Generic_API is
 
@@ -54,6 +55,10 @@ package Langkit_Support.Generic_API is
      (Language : Language_Id; Exc : Exception_Id) return Boolean;
    --  Return whether ``id`` is one of the exceptions that properties in
    --  ``Language`` are allowed to raise.
+
+   function Canonicalize_Symbol
+     (Language : Language_Id; Symbol : Text_Type) return Symbolization_Result;
+   --  Run the given language's symbol canonicalizer and return the result
 
    -------------------
    -- Grammar rules --

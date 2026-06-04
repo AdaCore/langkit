@@ -1,6 +1,8 @@
 driver: lkt_build_and_run
+collapse_unparsing_error_traces: true
 config:
   library:
+    symbol_canonicalizer: Libfoolang.Symbols.Canonicalize
     builtin_unparsing_overridings:
       Some_Overriding:
         filename: overriding.json

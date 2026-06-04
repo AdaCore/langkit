@@ -1,0 +1,27 @@
+{
+  "node_configs": {
+    "Name": {
+      "node": {
+        "kind": "if",
+        "condition": {
+          "kind": "bin_op",
+          "op": "=",
+          "lhs": {"kind": "node_symbol", "node": "this_node"},
+          "rhs": {"kind": "symbol", "value": "foo"}
+        },
+        "then": ["recurse", {"kind": "whitespace", "length": 1}],
+        "else": {
+          "kind": "if",
+          "condition": {
+            "kind": "bin_op",
+            "op": "=",
+            "lhs": {"kind": "node_symbol", "node": "this_node"},
+            "rhs": {"kind": "symbol", "value": "casing_FOO"}
+          },
+          "then": ["recurse", {"kind": "whitespace", "length": 2}],
+          "else": "recurse"
+        }
+      }
+    }
+  }
+}

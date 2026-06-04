@@ -820,6 +820,16 @@ package body Langkit_Support.Prettier_Utils is
       return Recurse (Document);
    end To_Prettier_Document;
 
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize (Self : in out Document_Pool; Language : Language_Id)
+   is
+   begin
+      Self.Language := Language;
+   end Initialize;
+
    --------------------------------
    -- Refresh_Prettier_Documents --
    --------------------------------
@@ -1609,6 +1619,66 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Match;
 
+   -------------------
+   -- Create_Bin_Op --
+   -------------------
+
+   function Create_Bin_Op
+     (Self  : in out Document_Pool;
+      Op    : Binary_Operator;
+      LHS   : Document_Type;
+      RHS   : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind       => Bin_Op,
+           Bin_Op_Op  => Op,
+           Bin_Op_LHS => LHS,
+           Bin_Op_RHS => RHS)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Bin_Op;
+
+   ------------------------
+   -- Create_Eval_Member --
+   ------------------------
+
+   function Create_Eval_Member
+     (Self   : in out Document_Pool;
+      Prefix : Document_Type;
+      Member : Struct_Member_Ref;
+      Args   : in out Document_Vectors.Vector) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Eval_Member)
+      do
+         Result.Eval_Member_Prefix := Prefix;
+         Result.Eval_Member_Ref := Member;
+         Result.Eval_Member_Args.Move (Args);
+         Self.Register (Result);
+      end return;
+   end Create_Eval_Member;
+
+   -----------------
+   -- Create_Cast --
+   -----------------
+
+   function Create_Cast
+     (Self    : in out Document_Pool;
+      Prefix  : Document_Type;
+      To_Type : Type_Ref) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind        => Cast,
+           Cast_Prefix => Prefix,
+           Cast_Type   => To_Type)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Cast;
+
    -----------------
    -- Create_Is_A --
    -----------------
@@ -1645,6 +1715,83 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Is_Empty;
 
+   ------------------------
+   -- Create_Node_Symbol --
+   ------------------------
+
+   function Create_Node_Symbol
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Node_Symbol, Node_Symbol_Node => Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Node_Symbol;
+
+   ----------------------
+   -- Create_Node_Text --
+   ----------------------
+
+   function Create_Node_Text
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Node_Text, Node_Text_Node => Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Node_Text;
+
+   ---------------------
+   -- Create_Not_Expr --
+   ---------------------
+
+   function Create_Not_Expr
+     (Self    : in out Document_Pool;
+      Operand : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Not_Expr, Not_Expr_Operand => Operand)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Not_Expr;
+
+   -----------------------
+   -- Create_String_Lit --
+   -----------------------
+
+   function Create_String_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind             => String_Lit,
+           String_Lit_Value => From_String (Self.Language, Value))
+      do
+         Self.Register (Result);
+      end return;
+   end Create_String_Lit;
+
+   -----------------------
+   -- Create_Symbol_Lit --
+   -----------------------
+
+   function Create_Symbol_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind             => Symbol_Lit,
+           Symbol_Lit_Value => From_Symbol (Self.Language, Value))
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Symbol_Lit;
+
    -----------------------
    -- Create_This_Field --
    -----------------------
@@ -1658,6 +1805,20 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_This_Field;
+
+   ----------------------
+   -- Create_This_Node --
+   ----------------------
+
+   function Create_This_Node
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => This_Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_This_Node;
 
    -----------------------
    -- Bubble_Up_Trivias --
@@ -2234,6 +2395,40 @@ package body Langkit_Support.Prettier_Utils is
                   end loop;
                end;
 
+            when Bin_Op =>
+               Write (Prefix & "bin_op:");
+               Write
+                 (Prefix
+                  & Simple_Indent
+                  & "op: "
+                  & Document.Bin_Op_Op'Image);
+               Process (Document.Bin_Op_LHS, Prefix & List_Indent);
+               Process (Document.Bin_Op_RHS, Prefix & List_Indent);
+
+            when Eval_Member =>
+               Write (Prefix & "eval_member:");
+
+               Write (Prefix & Simple_Indent & "prefix:");
+               Process (Document.Eval_Member_Prefix, Prefix & List_Indent);
+
+               Write
+                 (Prefix
+                  & Simple_Indent
+                  & "member: "
+                  & Debug_Name (Document.Eval_Member_Ref));
+
+               for I in 1 .. Document.Eval_Member_Args.Last_Index loop
+                  Write (Prefix & Simple_Indent & "arg:");
+                  Process
+                    (Document.Eval_Member_Args (I), Prefix & List_Indent);
+               end loop;
+
+            when Cast =>
+               Write (Prefix & "cast:");
+               Write
+                 (Prefix & Simple_Indent & Debug_Name (Document.Cast_Type));
+               Process (Document.Cast_Prefix, Prefix & List_Indent);
+
             when Is_A =>
                Write (Prefix & "is_a:");
                for I in 1 .. Document.Is_A_Kinds.Last_Index loop
@@ -2249,8 +2444,35 @@ package body Langkit_Support.Prettier_Utils is
                Write (Prefix & "is_empty:");
                Process (Document.Is_Empty_Node, Prefix & List_Indent);
 
+            when Node_Symbol =>
+               Write (Prefix & "node_symbol:");
+               Process (Document.Node_Symbol_Node, Prefix & List_Indent);
+
+            when Node_Text =>
+               Write (Prefix & "node_text:");
+               Process (Document.Node_Text_Node, Prefix & List_Indent);
+
+            when Not_Expr =>
+               Write (Prefix & "not_expr:");
+               Process (Document.Not_Expr_Operand, Prefix & List_Indent);
+
+            when String_Lit =>
+               Write (Prefix & "string_lit:");
+               Write
+                 (Prefix & List_Indent
+                  & Image (As_String (Document.String_Lit_Value)));
+
+            when Symbol_Lit =>
+               Write (Prefix & "symbol_lit:");
+               Write
+                 (Prefix & List_Indent
+                  & Image (As_Symbol (Document.Symbol_Lit_Value)));
+
             when This_Field =>
                Write (Prefix & "this_field");
+
+            when This_Node =>
+               Write (Prefix & "this_node");
          end case;
       end Process;
    begin

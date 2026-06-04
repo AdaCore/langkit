@@ -35,6 +35,17 @@ package body Langkit_Support.Generic_API is
       return Language.Is_Managed_Exception.all (Exc);
    end Is_Managed_Exception;
 
+   -------------------------
+   -- Canonicalize_Symbol --
+   -------------------------
+
+   function Canonicalize_Symbol
+     (Language : Language_Id; Symbol : Text_Type) return Symbolization_Result
+   is
+   begin
+      return Language.Canonicalize_Symbol (Symbol);
+   end Canonicalize_Symbol;
+
    --------------
    -- Language --
    --------------
