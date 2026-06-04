@@ -464,12 +464,15 @@ class _String:
 
 % for enum_type in ctx.enum_types:
 <% name = pyapi.type_public_name(enum_type) %>
-class ${name}(enum.StrEnum):
+class ${name}(str, enum.Enum):
     ${py_doc(enum_type, 4)}
 
     % for v in enum_type.values:
     ${v.name.lower} = ${repr(v.name.lower)}
     % endfor
+
+    def __str__(self) -> str:
+        return self.value
 
 
 _${name}_c_to_py = list(${name})

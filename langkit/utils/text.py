@@ -47,12 +47,15 @@ def first_line_indentation(text: str) -> int:
     return 0
 
 
-class Language(enum.StrEnum):
+class Language(str, enum.Enum):
     ada = "ada"
     c_cpp = "c/c++"
     java = "java"
     ocaml = "ocaml"
     python = "python"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class SourcePostProcessor(abc.ABC):
