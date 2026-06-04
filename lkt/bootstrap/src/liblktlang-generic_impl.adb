@@ -3,10 +3,18 @@ with System;
 
 with Ada.Unchecked_Deallocation;
 
-with Liblktlang.Public_Converters;  use Liblktlang.Public_Converters;
 with Liblktlang.Implementation;
+with Liblktlang.Lexer_Implementation;
+with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
 
 package body Liblktlang.Generic_Impl is
+
+   package Builtin_Files is
+         Buffer_0   : constant Character
+         with Import, External_Name => "lkt_builtin_file_90be36e7e1d5ea4b9b2ca8863caa55a4";
+         Contents_0 : constant Memory_Buffer :=
+           (Buffer_0'Address, 48669);
+   end Builtin_Files;
 
    ---------
    -- "+" --
@@ -48,6 +56,18 @@ package body Liblktlang.Generic_Impl is
               From_Rebound => Entity.Info.From_Rebound,
               Metadata     => +Md);
    end "+";
+
+   ----------------------
+   -- Get_Builtin_File --
+   ----------------------
+
+   function Get_Builtin_File (Filename : String) return Memory_Buffer is
+   begin
+         if Filename = "unparsing/default_config.json" then
+            return Builtin_Files.Contents_0;
+         end if;
+      return No_Memory_Buffer;
+   end Get_Builtin_File;
 
    --------------------
    -- Create_Context --
@@ -625,5 +645,28 @@ package body Liblktlang.Generic_Impl is
         (Wrap_Token (Left_SN.Context, Left),
          Wrap_Token (Right_SN.Context, Right));
    end Token_Is_Equivalent;
+
+   --------------------
+   -- Extract_Tokens --
+   --------------------
+
+   procedure Extract_Tokens
+     (Input       : Analysis.Lexer_Input;
+      With_Trivia : Boolean;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      Same_Contents : Boolean;
+   begin
+      Lexer_Implementation.Extract_Tokens
+        (Input         => Input,
+         With_Trivia   => With_Trivia,
+         File_Reader   => null,
+         TDH           => TDH,
+         Diagnostics   => Diagnostics,
+         Old_TDH       => null,
+         Same_Contents => Same_Contents);
+      pragma Unreferenced (Same_Contents);
+   end Extract_Tokens;
 
 end Liblktlang.Generic_Impl;

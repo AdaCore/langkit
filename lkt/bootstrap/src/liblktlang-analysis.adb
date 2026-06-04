@@ -29,8 +29,11 @@ use Liblktlang.Private_Converters;
 with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
 
 
-          with Liblktlang.Implementation.Extensions;
-            use Liblktlang.Implementation.Extensions;
+       with Liblktlang_Support.Errors;
+       with Liblktlang.Impl_0;
+       with Liblktlang.Implementation;
+       with Liblktlang.Implementation.Extensions;
+         use Liblktlang.Implementation.Extensions;
 
 
 package body Liblktlang.Analysis is
@@ -2449,6 +2452,62 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Pattern_Detail
+        (Node : Lkt_Node'Class) return Pattern_Detail
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Pattern_Detail;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Pattern_Detail then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to PatternDetail";
+         
+            end if;
+      end;
+      function As_Destructuring_Pattern_Detail
+        (Node : Lkt_Node'Class) return Destructuring_Pattern_Detail
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Destructuring_Pattern_Detail;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Destructuring_Pattern_Detail_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to DestructuringPatternDetail";
+         
+            end if;
+      end;
       function As_Dot_Expr
         (Node : Lkt_Node'Class) return Dot_Expr
       is
@@ -3118,34 +3177,6 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to FieldDecl";
-         
-            end if;
-      end;
-      function As_Pattern_Detail
-        (Node : Lkt_Node'Class) return Pattern_Detail
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Pattern_Detail;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Pattern_Detail then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to PatternDetail";
          
             end if;
       end;
@@ -7943,7 +7974,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -7989,7 +8020,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -8245,7 +8276,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -8367,7 +8398,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Basic_Trait_Gen
+         Liblktlang.Impl_0.Lkt_Node_P_Basic_Trait_Gen
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
@@ -8397,7 +8428,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Basic_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Basic_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Trait_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Trait_Decl do
@@ -8427,7 +8458,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Node_Gen_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Node_Gen_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
@@ -8457,7 +8488,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Node_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Node_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Trait_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Trait_Decl do
@@ -8487,7 +8518,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Indexable_Gen_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Indexable_Gen_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
@@ -8517,7 +8548,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Indexable_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Indexable_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Trait_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Trait_Decl do
@@ -8547,7 +8578,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Token_Node_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Token_Node_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8577,7 +8608,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Error_Node_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Error_Node_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8607,7 +8638,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Char_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Char_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8637,7 +8668,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Int_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Int_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8667,7 +8698,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Bool_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Bool_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8697,7 +8728,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Bigint_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Bigint_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8727,7 +8758,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_String_Type
+         Liblktlang.Impl_0.Lkt_Node_P_String_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8757,7 +8788,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Symbol_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Symbol_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8787,7 +8818,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Property_Error_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Property_Error_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8817,7 +8848,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Regexp_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Regexp_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8847,7 +8878,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Entity_Gen_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Entity_Gen_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
@@ -8877,7 +8908,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Entity_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Entity_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8907,7 +8938,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Logicvar_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Logicvar_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8937,7 +8968,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Equation_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Equation_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -8967,7 +8998,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Array_Gen_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Array_Gen_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
@@ -8997,7 +9028,67 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Array_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Array_Type
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function P_Stream_Gen_Type
+     (Node : Lkt_Node'Class) return Generic_Decl is
+      
+
+
+      Property_Result : Internal_Entity_Generic_Decl;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Impl_0.Lkt_Node_P_Stream_Gen_Type
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function P_Stream_Type
+     (Node : Lkt_Node'Class) return Named_Type_Decl is
+      
+
+
+      Property_Result : Internal_Entity_Named_Type_Decl;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Impl_0.Lkt_Node_P_Stream_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -9027,7 +9118,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Astlist_Gen_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Astlist_Gen_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
@@ -9057,7 +9148,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Astlist_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Astlist_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -9087,7 +9178,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Node_Builder_Gen_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Node_Builder_Gen_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
@@ -9117,7 +9208,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Node_Builder_Type
+         Liblktlang.Impl_0.Lkt_Node_P_Node_Builder_Type
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Named_Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Named_Type_Decl do
@@ -9147,7 +9238,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Iterator_Gen_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Iterator_Gen_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
@@ -9177,7 +9268,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Iterator_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Iterator_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Trait_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Trait_Decl do
@@ -9207,7 +9298,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Analysis_Unit_Gen_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Analysis_Unit_Gen_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
@@ -9237,7 +9328,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Analysis_Unit_Trait
+         Liblktlang.Impl_0.Lkt_Node_P_Analysis_Unit_Trait
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Trait_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Trait_Decl do
@@ -9267,7 +9358,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Topmost_Invalid_Decl
+         Liblktlang.Impl_0.Lkt_Node_P_Topmost_Invalid_Decl
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Lkt_Node := Wrap_Node (Property_Result, No_Entity_Info) do
@@ -9311,7 +9402,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Nameres_Diagnostics
+         Liblktlang.Impl_0.Lkt_Node_P_Nameres_Diagnostics
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Solver_Diagnostic_Array := To_Public_Solver_Diagnostic_Array (Property_Result) do
@@ -9321,7 +9412,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -9357,7 +9448,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Lkt_Node_P_Solve_Enclosing_Context
+         Liblktlang.Impl_0.Lkt_Node_P_Solve_Enclosing_Context
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Solver_Result := To_Public_Solver_Result (Property_Result) do
@@ -9367,7 +9458,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -9391,7 +9482,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Xref_Entry_Point
+         Liblktlang.Impl_0.Dispatcher_Lkt_Node_P_Xref_Entry_Point
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Boolean := Property_Result do
@@ -9433,7 +9524,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Lkt_Node_P_Complete
+         Liblktlang.Impl_0.Dispatcher_Lkt_Node_P_Complete
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Complete_Item_Array := To_Public_Complete_Item_Array (Property_Result) do
@@ -9443,7 +9534,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -9517,7 +9608,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -9553,7 +9644,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Decl_P_Decl_Type_Name
+         Liblktlang.Impl_0.Dispatcher_Decl_P_Decl_Type_Name
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Text_Type := Property_Result.Content do
@@ -9563,7 +9654,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -9599,7 +9690,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Decl_P_Def_Ids
+         Liblktlang.Impl_0.Decl_P_Def_Ids
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Def_Id_Array := To_Public_Def_Id_Array (Property_Result) do
@@ -9609,7 +9700,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -9633,7 +9724,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Decl_P_As_Bare_Decl
+         Liblktlang.Impl_0.Decl_P_As_Bare_Decl
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Decl do
@@ -9663,7 +9754,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Decl_P_Get_Type
+         Liblktlang.Impl_0.Decl_P_Get_Type
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Decl do
@@ -9697,7 +9788,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Decl_P_Get_Cast_Type
+         Liblktlang.Impl_0.Decl_P_Get_Cast_Type
             (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Cast_To, E_Info => Node.Internal.Info);
 
       return Result : Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Decl do
@@ -9731,7 +9822,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Decl_P_Get_Keep_Type
+         Liblktlang.Impl_0.Decl_P_Get_Keep_Type
             (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Keep_Type, E_Info => Node.Internal.Info);
 
       return Result : Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Decl do
@@ -9765,7 +9856,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Decl_P_Get_Suffix_Type
+         Liblktlang.Impl_0.Decl_P_Get_Suffix_Type
             (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Prefix_Type, E_Info => Node.Internal.Info);
 
       return Result : Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Decl do
@@ -9795,7 +9886,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Decl_P_Is_Generic
+         Liblktlang.Impl_0.Decl_P_Is_Generic
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Boolean := Property_Result do
@@ -9825,7 +9916,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Decl_P_Return_Type_Is_Instantiated
+         Liblktlang.Impl_0.Decl_P_Return_Type_Is_Instantiated
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Boolean := Property_Result do
@@ -9855,7 +9946,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Decl_P_Is_Instantiated
+         Liblktlang.Impl_0.Decl_P_Is_Instantiated
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Boolean := Property_Result do
@@ -9885,7 +9976,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Decl_P_Name
+         Liblktlang.Impl_0.Dispatcher_Decl_P_Name
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Unbounded_Text_Type := To_Unbounded_Text (Image (Property_Result)) do
@@ -9927,7 +10018,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Decl_P_Full_Name
+         Liblktlang.Impl_0.Dispatcher_Decl_P_Full_Name
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Text_Type := Property_Result.Content do
@@ -9937,7 +10028,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -9966,7 +10057,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Expr_P_Get_Type
+         Liblktlang.Impl_0.Dispatcher_Expr_P_Get_Type
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Decl do
@@ -9996,7 +10087,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Expr_P_Get_Generic_Type
+         Liblktlang.Impl_0.Expr_P_Get_Generic_Type
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Decl do
@@ -10026,7 +10117,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Expr_P_Get_Expected_Type
+         Liblktlang.Impl_0.Expr_P_Get_Expected_Type
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Decl do
@@ -10056,7 +10147,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Expr_P_Referenced_Decl
+         Liblktlang.Impl_0.Dispatcher_Expr_P_Referenced_Decl
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Decl do
@@ -10263,7 +10354,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Type_Decl_P_Def_Id
+         Liblktlang.Impl_0.Type_Decl_P_Def_Id
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Def_Id := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Def_Id do
@@ -10276,36 +10367,6 @@ package body Liblktlang.Analysis is
 
          
    function P_Base_Type
-     (Node : Type_Decl'Class) return Type_Ref is
-      
-
-
-      Property_Result : Internal_Entity_Type_Ref;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Implementation.Type_Decl_P_Base_Type
-            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
-
-      return Result : Type_Ref := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Ref do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function P_Base_Type_If_Entity
      (Node : Type_Decl'Class) return Type_Decl is
       
 
@@ -10323,7 +10384,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Type_Decl_P_Base_Type_If_Entity
+         Liblktlang.Impl_0.Dispatcher_Type_Decl_P_Base_Type
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Decl do
@@ -10631,7 +10692,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Base_Import_P_Referenced_Units
+         Liblktlang.Impl_0.Base_Import_P_Referenced_Units
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Analysis_Unit_Array := To_Public_Analysis_Unit_Array (Property_Result) do
@@ -10641,7 +10702,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -10828,7 +10889,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Base_Match_Branch_P_Match_Part
+         Liblktlang.Impl_0.Dispatcher_Base_Match_Branch_P_Match_Part
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Lkt_Node := Wrap_Node (Property_Result.Node, Property_Result.Info) do
@@ -11201,7 +11262,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_String_Lit_P_Denoted_Value
+         Liblktlang.Impl_0.Dispatcher_String_Lit_P_Denoted_Value
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Decoded_String_Value := To_Public_Decoded_String_Value (Property_Result) do
@@ -11211,7 +11272,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -11235,7 +11296,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_String_Lit_P_Is_Prefixed_String
+         Liblktlang.Impl_0.Dispatcher_String_Lit_P_Is_Prefixed_String
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Boolean := Property_Result do
@@ -11265,7 +11326,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_String_Lit_P_Prefix
+         Liblktlang.Impl_0.Dispatcher_String_Lit_P_Prefix
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Character_Type := Property_Result do
@@ -11295,7 +11356,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.String_Lit_P_Is_Regexp_Literal
+         Liblktlang.Impl_0.String_Lit_P_Is_Regexp_Literal
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Boolean := Property_Result do
@@ -11570,7 +11631,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -11604,7 +11665,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Class_Qualifier_P_As_Bool
+         Liblktlang.Impl_0.Dispatcher_Class_Qualifier_P_As_Bool
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Boolean := Property_Result do
@@ -12038,7 +12099,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -12079,7 +12140,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Def_Id_P_Name
+         Liblktlang.Impl_0.Def_Id_P_Name
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Text_Type := Property_Result.Content do
@@ -12089,7 +12150,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -12130,7 +12191,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Def_Id_P_Get_Implementatinons
+         Liblktlang.Impl_0.Def_Id_P_Get_Implementatinons
             (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Units, E_Info => Node.Internal.Info);
 
       return Result : Def_Id_Array := To_Public_Def_Id_Array (Property_Result) do
@@ -12140,7 +12201,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -12176,7 +12237,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Def_Id_P_Decl_Detail
+         Liblktlang.Impl_0.Def_Id_P_Decl_Detail
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Text_Type := Property_Result.Content do
@@ -12186,7 +12247,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -12210,7 +12271,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Def_Id_P_Completion_Item_Kind
+         Liblktlang.Impl_0.Def_Id_P_Completion_Item_Kind
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Integer := Property_Result do
@@ -12252,7 +12313,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Def_Id_P_Doc
+         Liblktlang.Impl_0.Def_Id_P_Doc
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Text_Type := Property_Result.Content do
@@ -12262,7 +12323,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -12303,7 +12364,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Def_Id_P_Find_All_References
+         Liblktlang.Impl_0.Def_Id_P_Find_All_References
             (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Units, E_Info => Node.Internal.Info);
 
       return Result : Ref_Result_Array := To_Public_Ref_Result_Array (Property_Result) do
@@ -12313,7 +12374,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -12342,7 +12403,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Type_Ref_P_Referenced_Decl
+         Liblktlang.Impl_0.Type_Ref_P_Referenced_Decl
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Type_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Type_Decl do
@@ -12355,6 +12416,39 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+         
+   
+
+   function F_Decl
+     (Node : Destructuring_Pattern_Detail'Class) return Binding_Val_Decl
+   is
+      Result : Bare_Binding_Val_Decl;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Destructuring_Pattern_Detail_F_Decl (Node.Internal.Node);
+         if Result = null then
+            return No_Binding_Val_Decl;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Decl;
 
 
 
@@ -12979,7 +13073,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Excludes_Null_P_As_Bool
+         Liblktlang.Impl_0.Dispatcher_Excludes_Null_P_As_Bool
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Boolean := Property_Result do
@@ -13025,11 +13119,6 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Trait_Ref;
-
-
-
-
-
 
 
 
@@ -13181,7 +13270,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Full_Decl_P_Has_Annotation
+         Liblktlang.Impl_0.Full_Decl_P_Has_Annotation
             (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Name);
 
       return Result : Boolean := Property_Result do
@@ -13308,7 +13397,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Fun_Decl_P_Is_Dynamic_Combiner
+         Liblktlang.Impl_0.Fun_Decl_P_Is_Dynamic_Combiner
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Boolean := Property_Result do
@@ -13355,7 +13444,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Fun_Decl_P_Find_All_Overrides
+         Liblktlang.Impl_0.Fun_Decl_P_Find_All_Overrides
             (Bare_Lkt_Node (Node.Internal.Node), Internal_Arg_Units, E_Info => Node.Internal.Info);
 
       return Result : Fun_Decl_Array := To_Public_Fun_Decl_Array (Property_Result) do
@@ -13365,7 +13454,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -15916,7 +16005,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Dispatcher_Null_Cond_Qualifier_P_As_Bool
+         Liblktlang.Impl_0.Dispatcher_Null_Cond_Qualifier_P_As_Bool
             (Bare_Lkt_Node (Node.Internal.Node));
 
       return Result : Boolean := Property_Result do
@@ -16404,9 +16493,9 @@ package body Liblktlang.Analysis is
    
 
    function F_Call
-     (Node : Property_Pattern_Detail'Class) return Expr
+     (Node : Property_Pattern_Detail'Class) return Call_Expr
    is
-      Result : Bare_Expr;
+      Result : Bare_Call_Expr;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
@@ -16415,7 +16504,7 @@ package body Liblktlang.Analysis is
       Check_Safety_Net (Node);
       Result := Implementation.Property_Pattern_Detail_F_Call (Node.Internal.Node);
          if Result = null then
-            return No_Expr;
+            return No_Call_Expr;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -16619,7 +16708,7 @@ package body Liblktlang.Analysis is
 
       
       Property_Result :=
-         Liblktlang.Implementation.Ref_Id_P_Referenced_Defining_Name
+         Liblktlang.Impl_0.Ref_Id_P_Referenced_Defining_Name
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Def_Id := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Def_Id do
@@ -16699,6 +16788,52 @@ package body Liblktlang.Analysis is
 
 
 
+
+         
+   function P_Denoted_Value
+     (Node : Regex_Pattern'Class) return Decoded_String_Value is
+      
+
+
+      Property_Result : Internal_Decoded_String_Value;
+
+         procedure Free_Internal;
+         --  Dec-ref all internal arguments and the property result, when
+         --  applicable.
+
+         -------------------
+         -- Free_Internal --
+         -------------------
+
+         procedure Free_Internal is
+         begin
+               Dec_Ref (Property_Result);
+         end Free_Internal;
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Extensions.Regex_Pattern_P_Denoted_Value
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Decoded_String_Value := To_Public_Decoded_String_Value (Property_Result) do
+
+            Free_Internal;
+
+      end return;
+
+      exception
+         when Liblktlang_Support.Errors.Property_Error =>
+            Free_Internal;
+            raise;
+   end;
 
 
 
@@ -16952,7 +17087,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;
@@ -17082,7 +17217,7 @@ package body Liblktlang.Analysis is
       end return;
 
       exception
-         when Property_Error =>
+         when Liblktlang_Support.Errors.Property_Error =>
             Free_Internal;
             raise;
    end;

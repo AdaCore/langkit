@@ -18,6 +18,7 @@ from typing import IO
 from e3.testsuite import Testsuite, logger
 
 import drivers.adalog_driver
+import drivers.java_driver
 import drivers.langkit_support_driver
 import drivers.lkt_build_and_run_driver
 import drivers.lkt_compile_driver
@@ -42,6 +43,7 @@ class LangkitTestsuite(Testsuite):
     tests_subdir = "tests"
     test_driver_map = {
         "adalog": drivers.adalog_driver.AdalogDriver,
+        "java": drivers.java_driver.JavaDriver,
         "langkit_support": drivers.langkit_support_driver.LangkitSupportDriver,
         "lkt": drivers.lkt_toolbox_driver.LktToolboxDriver,
         "lkt_build_and_run": (
@@ -133,6 +135,12 @@ class LangkitTestsuite(Testsuite):
             help="Specify the Maven executable to use. The default one is"
             ' "mvn".',
         )
+        parser.add_argument(
+            "--with-lkt-java-bindings",
+            help="If provided, must be a path to the directory where the"
+            " Liblktlang Java bindings are located. Default one is fetched"
+            " relatively to the testsuite.py location.",
+        )
 
         parser.add_argument(
             "--disable-gdb",
@@ -149,7 +157,7 @@ class LangkitTestsuite(Testsuite):
         )
 
         #
-        # Convenience options for developpers
+        # Convenience options for developers
         #
 
         parser.add_argument(
@@ -315,8 +323,13 @@ class LangkitTestsuite(Testsuite):
                     "LD_LIBRARY_PATH", os.path.join(sigsegv_handler_dir, "lib")
                 )
 
-        # If Java is enabled and there is a Maven local repo, export it
+        # If Java is enabled and there is a Maven local repo, export values
+        # that are going to be required by test drivers.
         if not args.disable_java:
+            self.env.lkt_java_bindings = (
+                args.with_lkt_java_bindings
+                or os.path.join(self.root_dir, "..", "lkt", "build", "java")
+            )
             if args.maven_executable:
                 os.environ["MAVEN_EXECUTABLE"] = args.maven_executable
             if args.maven_local_repo:
@@ -342,6 +355,18 @@ class LangkitTestsuite(Testsuite):
         drivers.lkt_unparse_driver.LktUnparseDriver.adjust_dag_dependencies(
             self.env, dag
         )
+
+        # If Java is enabled and a Java test is enabled, build the Lkt Java
+        # bindings and the required native-image main.
+        if any(
+            isinstance(test_data.driver, drivers.java_driver.JavaDriver)
+            for test_data in dag.vertex_data.values()
+        ):
+            drivers.java_driver.JavaDriver.build_lkt_java_bindings(
+                self.main.args.maven_executable,
+                self.main.args.maven_local_repo,
+                self.env.lkt_java_bindings,
+            )
 
     def dump_testsuite_result(self) -> None:
         args = self.main.args

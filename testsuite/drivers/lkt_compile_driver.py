@@ -12,9 +12,5 @@ class LktCompileDriver(PythonDriver):
     """
 
     @property
-    def mandatory_files(self):
-        return []
-
-    @property
     def script_and_args(self):
         return [os.path.join(self.support_dir, "lkt_compile.py")]

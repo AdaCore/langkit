@@ -117,315 +117,549 @@ private package Liblktlang.Unparsers is
       
          Text_For_Token_Unparser_0 : aliased constant Text_Type := "!";
       Token_Unparser_0 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Excl_Mark, Text_For_Token_Unparser_0'Access);
+        (Kind      => Token_Index_For_Lkt_Excl_Mark,
+         Text      => Text_For_Token_Unparser_0'Access,
+         Index     => 1,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_1 : aliased constant Text_Type := "!=";
       Token_Unparser_1 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_N_E, Text_For_Token_Unparser_1'Access);
+        (Kind      => Token_Index_For_Lkt_N_E,
+         Text      => Text_For_Token_Unparser_1'Access,
+         Index     => 2,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_2 : aliased constant Text_Type := "%";
       Token_Unparser_2 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Percent, Text_For_Token_Unparser_2'Access);
+        (Kind      => Token_Index_For_Lkt_Percent,
+         Text      => Text_For_Token_Unparser_2'Access,
+         Index     => 3,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_3 : aliased constant Text_Type := "&";
       Token_Unparser_3 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Amp, Text_For_Token_Unparser_3'Access);
+        (Kind      => Token_Index_For_Lkt_Amp,
+         Text      => Text_For_Token_Unparser_3'Access,
+         Index     => 4,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_4 : aliased constant Text_Type := "(";
       Token_Unparser_4 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_L_Par, Text_For_Token_Unparser_4'Access);
+        (Kind      => Token_Index_For_Lkt_L_Par,
+         Text      => Text_For_Token_Unparser_4'Access,
+         Index     => 5,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_5 : aliased constant Text_Type := ")";
       Token_Unparser_5 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_R_Par, Text_For_Token_Unparser_5'Access);
+        (Kind      => Token_Index_For_Lkt_R_Par,
+         Text      => Text_For_Token_Unparser_5'Access,
+         Index     => 6,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_6 : aliased constant Text_Type := "*";
       Token_Unparser_6 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Times, Text_For_Token_Unparser_6'Access);
+        (Kind      => Token_Index_For_Lkt_Times,
+         Text      => Text_For_Token_Unparser_6'Access,
+         Index     => 7,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_7 : aliased constant Text_Type := "+";
       Token_Unparser_7 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Plus, Text_For_Token_Unparser_7'Access);
+        (Kind      => Token_Index_For_Lkt_Plus,
+         Text      => Text_For_Token_Unparser_7'Access,
+         Index     => 8,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_8 : aliased constant Text_Type := ",";
       Token_Unparser_8 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Comma, Text_For_Token_Unparser_8'Access);
+        (Kind      => Token_Index_For_Lkt_Comma,
+         Text      => Text_For_Token_Unparser_8'Access,
+         Index     => 9,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_9 : aliased constant Text_Type := "-";
       Token_Unparser_9 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Minus, Text_For_Token_Unparser_9'Access);
+        (Kind      => Token_Index_For_Lkt_Minus,
+         Text      => Text_For_Token_Unparser_9'Access,
+         Index     => 10,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_10 : aliased constant Text_Type := "->";
       Token_Unparser_10 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Right_Arrow, Text_For_Token_Unparser_10'Access);
+        (Kind      => Token_Index_For_Lkt_Right_Arrow,
+         Text      => Text_For_Token_Unparser_10'Access,
+         Index     => 11,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_11 : aliased constant Text_Type := ".";
       Token_Unparser_11 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Dot, Text_For_Token_Unparser_11'Access);
+        (Kind      => Token_Index_For_Lkt_Dot,
+         Text      => Text_For_Token_Unparser_11'Access,
+         Index     => 12,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_12 : aliased constant Text_Type := "...";
       Token_Unparser_12 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Ellipsis, Text_For_Token_Unparser_12'Access);
+        (Kind      => Token_Index_For_Lkt_Ellipsis,
+         Text      => Text_For_Token_Unparser_12'Access,
+         Index     => 13,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_13 : aliased constant Text_Type := "/";
       Token_Unparser_13 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Div, Text_For_Token_Unparser_13'Access);
+        (Kind      => Token_Index_For_Lkt_Div,
+         Text      => Text_For_Token_Unparser_13'Access,
+         Index     => 14,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_14 : aliased constant Text_Type := ":";
       Token_Unparser_14 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Colon, Text_For_Token_Unparser_14'Access);
+        (Kind      => Token_Index_For_Lkt_Colon,
+         Text      => Text_For_Token_Unparser_14'Access,
+         Index     => 15,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_15 : aliased constant Text_Type := "::";
       Token_Unparser_15 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Double_Colon, Text_For_Token_Unparser_15'Access);
+        (Kind      => Token_Index_For_Lkt_Double_Colon,
+         Text      => Text_For_Token_Unparser_15'Access,
+         Index     => 16,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_16 : aliased constant Text_Type := ":::";
       Token_Unparser_16 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Triple_Colon, Text_For_Token_Unparser_16'Access);
+        (Kind      => Token_Index_For_Lkt_Triple_Colon,
+         Text      => Text_For_Token_Unparser_16'Access,
+         Index     => 17,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_17 : aliased constant Text_Type := ";";
       Token_Unparser_17 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Semicolon, Text_For_Token_Unparser_17'Access);
+        (Kind      => Token_Index_For_Lkt_Semicolon,
+         Text      => Text_For_Token_Unparser_17'Access,
+         Index     => 18,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_18 : aliased constant Text_Type := "<";
       Token_Unparser_18 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_L_T, Text_For_Token_Unparser_18'Access);
+        (Kind      => Token_Index_For_Lkt_L_T,
+         Text      => Text_For_Token_Unparser_18'Access,
+         Index     => 19,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_19 : aliased constant Text_Type := "<-";
       Token_Unparser_19 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Left_Arrow, Text_For_Token_Unparser_19'Access);
+        (Kind      => Token_Index_For_Lkt_Left_Arrow,
+         Text      => Text_For_Token_Unparser_19'Access,
+         Index     => 20,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_20 : aliased constant Text_Type := "<->";
       Token_Unparser_20 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Two_Sided_Arrow, Text_For_Token_Unparser_20'Access);
+        (Kind      => Token_Index_For_Lkt_Two_Sided_Arrow,
+         Text      => Text_For_Token_Unparser_20'Access,
+         Index     => 21,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_21 : aliased constant Text_Type := "<=";
       Token_Unparser_21 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_L_T_E, Text_For_Token_Unparser_21'Access);
+        (Kind      => Token_Index_For_Lkt_L_T_E,
+         Text      => Text_For_Token_Unparser_21'Access,
+         Index     => 22,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_22 : aliased constant Text_Type := "=";
       Token_Unparser_22 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Equal, Text_For_Token_Unparser_22'Access);
+        (Kind      => Token_Index_For_Lkt_Equal,
+         Text      => Text_For_Token_Unparser_22'Access,
+         Index     => 23,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_23 : aliased constant Text_Type := "==";
       Token_Unparser_23 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_E_Q, Text_For_Token_Unparser_23'Access);
+        (Kind      => Token_Index_For_Lkt_E_Q,
+         Text      => Text_For_Token_Unparser_23'Access,
+         Index     => 24,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_24 : aliased constant Text_Type := "=>";
       Token_Unparser_24 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Fat_Right_Arrow, Text_For_Token_Unparser_24'Access);
+        (Kind      => Token_Index_For_Lkt_Fat_Right_Arrow,
+         Text      => Text_For_Token_Unparser_24'Access,
+         Index     => 25,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_25 : aliased constant Text_Type := ">";
       Token_Unparser_25 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_G_T, Text_For_Token_Unparser_25'Access);
+        (Kind      => Token_Index_For_Lkt_G_T,
+         Text      => Text_For_Token_Unparser_25'Access,
+         Index     => 26,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_26 : aliased constant Text_Type := ">=";
       Token_Unparser_26 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_G_T_E, Text_For_Token_Unparser_26'Access);
+        (Kind      => Token_Index_For_Lkt_G_T_E,
+         Text      => Text_For_Token_Unparser_26'Access,
+         Index     => 27,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_27 : aliased constant Text_Type := "?";
       Token_Unparser_27 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Int_Mark, Text_For_Token_Unparser_27'Access);
+        (Kind      => Token_Index_For_Lkt_Int_Mark,
+         Text      => Text_For_Token_Unparser_27'Access,
+         Index     => 28,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_28 : aliased constant Text_Type := "@";
       Token_Unparser_28 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_At, Text_For_Token_Unparser_28'Access);
+        (Kind      => Token_Index_For_Lkt_At,
+         Text      => Text_For_Token_Unparser_28'Access,
+         Index     => 29,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_29 : aliased constant Text_Type := "[";
       Token_Unparser_29 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_L_Brack, Text_For_Token_Unparser_29'Access);
+        (Kind      => Token_Index_For_Lkt_L_Brack,
+         Text      => Text_For_Token_Unparser_29'Access,
+         Index     => 30,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_30 : aliased constant Text_Type := "]";
       Token_Unparser_30 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_R_Brack, Text_For_Token_Unparser_30'Access);
+        (Kind      => Token_Index_For_Lkt_R_Brack,
+         Text      => Text_For_Token_Unparser_30'Access,
+         Index     => 31,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_31 : aliased constant Text_Type := "and";
       Token_Unparser_31 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_And_Kw, Text_For_Token_Unparser_31'Access);
+        (Kind      => Token_Index_For_Lkt_And_Kw,
+         Text      => Text_For_Token_Unparser_31'Access,
+         Index     => 32,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_32 : aliased constant Text_Type := "as";
       Token_Unparser_32 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_32'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_32'Access,
+         Index     => 33,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_33 : aliased constant Text_Type := "bind";
       Token_Unparser_33 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Bind_Kw, Text_For_Token_Unparser_33'Access);
+        (Kind      => Token_Index_For_Lkt_Bind_Kw,
+         Text      => Text_For_Token_Unparser_33'Access,
+         Index     => 34,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_34 : aliased constant Text_Type := "case";
       Token_Unparser_34 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Case_Kw, Text_For_Token_Unparser_34'Access);
+        (Kind      => Token_Index_For_Lkt_Case_Kw,
+         Text      => Text_For_Token_Unparser_34'Access,
+         Index     => 35,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_35 : aliased constant Text_Type := "class";
       Token_Unparser_35 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Class_Kw, Text_For_Token_Unparser_35'Access);
+        (Kind      => Token_Index_For_Lkt_Class_Kw,
+         Text      => Text_For_Token_Unparser_35'Access,
+         Index     => 36,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_36 : aliased constant Text_Type := "discard";
       Token_Unparser_36 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Discard_Kw, Text_For_Token_Unparser_36'Access);
+        (Kind      => Token_Index_For_Lkt_Discard_Kw,
+         Text      => Text_For_Token_Unparser_36'Access,
+         Index     => 37,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_37 : aliased constant Text_Type := "dont_skip";
       Token_Unparser_37 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_37'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_37'Access,
+         Index     => 38,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_38 : aliased constant Text_Type := "dynvar";
       Token_Unparser_38 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Dyn_Var_Kw, Text_For_Token_Unparser_38'Access);
+        (Kind      => Token_Index_For_Lkt_Dyn_Var_Kw,
+         Text      => Text_For_Token_Unparser_38'Access,
+         Index     => 39,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_39 : aliased constant Text_Type := "elif";
       Token_Unparser_39 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Elif_Kw, Text_For_Token_Unparser_39'Access);
+        (Kind      => Token_Index_For_Lkt_Elif_Kw,
+         Text      => Text_For_Token_Unparser_39'Access,
+         Index     => 40,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_40 : aliased constant Text_Type := "else";
       Token_Unparser_40 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Else_Kw, Text_For_Token_Unparser_40'Access);
+        (Kind      => Token_Index_For_Lkt_Else_Kw,
+         Text      => Text_For_Token_Unparser_40'Access,
+         Index     => 41,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_41 : aliased constant Text_Type := "enum";
       Token_Unparser_41 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Enum_Kw, Text_For_Token_Unparser_41'Access);
+        (Kind      => Token_Index_For_Lkt_Enum_Kw,
+         Text      => Text_For_Token_Unparser_41'Access,
+         Index     => 42,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_42 : aliased constant Text_Type := "false";
       Token_Unparser_42 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_42'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_42'Access,
+         Index     => 43,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_43 : aliased constant Text_Type := "family";
       Token_Unparser_43 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_43'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_43'Access,
+         Index     => 44,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_44 : aliased constant Text_Type := "from";
       Token_Unparser_44 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_From_Kw, Text_For_Token_Unparser_44'Access);
+        (Kind      => Token_Index_For_Lkt_From_Kw,
+         Text      => Text_For_Token_Unparser_44'Access,
+         Index     => 45,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_45 : aliased constant Text_Type := "fun";
       Token_Unparser_45 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Fun_Kw, Text_For_Token_Unparser_45'Access);
+        (Kind      => Token_Index_For_Lkt_Fun_Kw,
+         Text      => Text_For_Token_Unparser_45'Access,
+         Index     => 46,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_46 : aliased constant Text_Type := "generic";
       Token_Unparser_46 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Generic_Kw, Text_For_Token_Unparser_46'Access);
+        (Kind      => Token_Index_For_Lkt_Generic_Kw,
+         Text      => Text_For_Token_Unparser_46'Access,
+         Index     => 47,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_47 : aliased constant Text_Type := "grammar";
       Token_Unparser_47 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Grammar_Kw, Text_For_Token_Unparser_47'Access);
+        (Kind      => Token_Index_For_Lkt_Grammar_Kw,
+         Text      => Text_For_Token_Unparser_47'Access,
+         Index     => 48,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_48 : aliased constant Text_Type := "if";
       Token_Unparser_48 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_If_Kw, Text_For_Token_Unparser_48'Access);
+        (Kind      => Token_Index_For_Lkt_If_Kw,
+         Text      => Text_For_Token_Unparser_48'Access,
+         Index     => 49,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_49 : aliased constant Text_Type := "implements";
       Token_Unparser_49 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Implements_Kw, Text_For_Token_Unparser_49'Access);
+        (Kind      => Token_Index_For_Lkt_Implements_Kw,
+         Text      => Text_For_Token_Unparser_49'Access,
+         Index     => 50,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_50 : aliased constant Text_Type := "import";
       Token_Unparser_50 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Import_Kw, Text_For_Token_Unparser_50'Access);
+        (Kind      => Token_Index_For_Lkt_Import_Kw,
+         Text      => Text_For_Token_Unparser_50'Access,
+         Index     => 51,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_51 : aliased constant Text_Type := "in";
       Token_Unparser_51 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_In_Kw, Text_For_Token_Unparser_51'Access);
+        (Kind      => Token_Index_For_Lkt_In_Kw,
+         Text      => Text_For_Token_Unparser_51'Access,
+         Index     => 52,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_52 : aliased constant Text_Type := "is";
       Token_Unparser_52 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Is_Kw, Text_For_Token_Unparser_52'Access);
+        (Kind      => Token_Index_For_Lkt_Is_Kw,
+         Text      => Text_For_Token_Unparser_52'Access,
+         Index     => 53,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_53 : aliased constant Text_Type := "keep";
       Token_Unparser_53 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_53'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_53'Access,
+         Index     => 54,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_54 : aliased constant Text_Type := "lexer";
       Token_Unparser_54 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Lexer_Kw, Text_For_Token_Unparser_54'Access);
+        (Kind      => Token_Index_For_Lkt_Lexer_Kw,
+         Text      => Text_For_Token_Unparser_54'Access,
+         Index     => 55,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_55 : aliased constant Text_Type := "match";
       Token_Unparser_55 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Match_Kw, Text_For_Token_Unparser_55'Access);
+        (Kind      => Token_Index_For_Lkt_Match_Kw,
+         Text      => Text_For_Token_Unparser_55'Access,
+         Index     => 56,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_56 : aliased constant Text_Type := "no_case";
       Token_Unparser_56 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_56'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_56'Access,
+         Index     => 57,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_57 : aliased constant Text_Type := "not";
       Token_Unparser_57 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Not_Kw, Text_For_Token_Unparser_57'Access);
+        (Kind      => Token_Index_For_Lkt_Not_Kw,
+         Text      => Text_For_Token_Unparser_57'Access,
+         Index     => 58,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_58 : aliased constant Text_Type := "null";
       Token_Unparser_58 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Null_Kw, Text_For_Token_Unparser_58'Access);
+        (Kind      => Token_Index_For_Lkt_Null_Kw,
+         Text      => Text_For_Token_Unparser_58'Access,
+         Index     => 59,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_59 : aliased constant Text_Type := "or";
       Token_Unparser_59 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Or_Kw, Text_For_Token_Unparser_59'Access);
+        (Kind      => Token_Index_For_Lkt_Or_Kw,
+         Text      => Text_For_Token_Unparser_59'Access,
+         Index     => 60,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_60 : aliased constant Text_Type := "pick";
       Token_Unparser_60 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_60'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_60'Access,
+         Index     => 61,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_61 : aliased constant Text_Type := "previous_token";
       Token_Unparser_61 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_61'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_61'Access,
+         Index     => 62,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_62 : aliased constant Text_Type := "raise";
       Token_Unparser_62 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Raise_Kw, Text_For_Token_Unparser_62'Access);
+        (Kind      => Token_Index_For_Lkt_Raise_Kw,
+         Text      => Text_For_Token_Unparser_62'Access,
+         Index     => 63,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_63 : aliased constant Text_Type := "select";
       Token_Unparser_63 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Select_Kw, Text_For_Token_Unparser_63'Access);
+        (Kind      => Token_Index_For_Lkt_Select_Kw,
+         Text      => Text_For_Token_Unparser_63'Access,
+         Index     => 64,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_64 : aliased constant Text_Type := "send";
       Token_Unparser_64 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_64'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_64'Access,
+         Index     => 65,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_65 : aliased constant Text_Type := "skip";
       Token_Unparser_65 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_65'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_65'Access,
+         Index     => 66,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_66 : aliased constant Text_Type := "stop_cut";
       Token_Unparser_66 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_66'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_66'Access,
+         Index     => 67,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_67 : aliased constant Text_Type := "struct";
       Token_Unparser_67 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Struct_Kw, Text_For_Token_Unparser_67'Access);
+        (Kind      => Token_Index_For_Lkt_Struct_Kw,
+         Text      => Text_For_Token_Unparser_67'Access,
+         Index     => 68,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_68 : aliased constant Text_Type := "then";
       Token_Unparser_68 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Then_Kw, Text_For_Token_Unparser_68'Access);
+        (Kind      => Token_Index_For_Lkt_Then_Kw,
+         Text      => Text_For_Token_Unparser_68'Access,
+         Index     => 69,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_69 : aliased constant Text_Type := "trait";
       Token_Unparser_69 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Trait_Kw, Text_For_Token_Unparser_69'Access);
+        (Kind      => Token_Index_For_Lkt_Trait_Kw,
+         Text      => Text_For_Token_Unparser_69'Access,
+         Index     => 70,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_70 : aliased constant Text_Type := "true";
       Token_Unparser_70 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Identifier, Text_For_Token_Unparser_70'Access);
+        (Kind      => Token_Index_For_Lkt_Identifier,
+         Text      => Text_For_Token_Unparser_70'Access,
+         Index     => 71,
+         Is_Symbol => True);
       
          Text_For_Token_Unparser_71 : aliased constant Text_Type := "try";
       Token_Unparser_71 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Try_Kw, Text_For_Token_Unparser_71'Access);
+        (Kind      => Token_Index_For_Lkt_Try_Kw,
+         Text      => Text_For_Token_Unparser_71'Access,
+         Index     => 72,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_72 : aliased constant Text_Type := "val";
       Token_Unparser_72 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Val_Kw, Text_For_Token_Unparser_72'Access);
+        (Kind      => Token_Index_For_Lkt_Val_Kw,
+         Text      => Text_For_Token_Unparser_72'Access,
+         Index     => 73,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_73 : aliased constant Text_Type := "when";
       Token_Unparser_73 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_When_Kw, Text_For_Token_Unparser_73'Access);
+        (Kind      => Token_Index_For_Lkt_When_Kw,
+         Text      => Text_For_Token_Unparser_73'Access,
+         Index     => 74,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_74 : aliased constant Text_Type := "{";
       Token_Unparser_74 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_L_Brace, Text_For_Token_Unparser_74'Access);
+        (Kind      => Token_Index_For_Lkt_L_Brace,
+         Text      => Text_For_Token_Unparser_74'Access,
+         Index     => 75,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_75 : aliased constant Text_Type := "|";
       Token_Unparser_75 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Pipe, Text_For_Token_Unparser_75'Access);
+        (Kind      => Token_Index_For_Lkt_Pipe,
+         Text      => Text_For_Token_Unparser_75'Access,
+         Index     => 76,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_76 : aliased constant Text_Type := "|>";
       Token_Unparser_76 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_Comb, Text_For_Token_Unparser_76'Access);
+        (Kind      => Token_Index_For_Lkt_Comb,
+         Text      => Text_For_Token_Unparser_76'Access,
+         Index     => 77,
+         Is_Symbol => False);
       
          Text_For_Token_Unparser_77 : aliased constant Text_Type := "}";
       Token_Unparser_77 : aliased constant Token_Unparser_Impl :=
-        (Token_Index_For_Lkt_R_Brace, Text_For_Token_Unparser_77'Access);
+        (Kind      => Token_Index_For_Lkt_R_Brace,
+         Text      => Text_For_Token_Unparser_77'Access,
+         Index     => 78,
+         Is_Symbol => False);
 
          Token_Sequence_1 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_0'Access);
@@ -607,6 +841,87 @@ private package Liblktlang.Unparsers is
            (1 => Token_Unparser_76'Access, 2 => Token_Unparser_73'Access, 3 => Token_Unparser_4'Access);
          Token_Sequence_90 : aliased constant Token_Sequence_Impl :=
            (1 => Token_Unparser_77'Access);
+
+   
+   Token_Unparsers : aliased constant Token_Unparser_Array_Impl :=
+     (1 => Token_Unparser_0'Access,
+      2 => Token_Unparser_1'Access,
+      3 => Token_Unparser_2'Access,
+      4 => Token_Unparser_3'Access,
+      5 => Token_Unparser_4'Access,
+      6 => Token_Unparser_5'Access,
+      7 => Token_Unparser_6'Access,
+      8 => Token_Unparser_7'Access,
+      9 => Token_Unparser_8'Access,
+      10 => Token_Unparser_9'Access,
+      11 => Token_Unparser_10'Access,
+      12 => Token_Unparser_11'Access,
+      13 => Token_Unparser_12'Access,
+      14 => Token_Unparser_13'Access,
+      15 => Token_Unparser_14'Access,
+      16 => Token_Unparser_15'Access,
+      17 => Token_Unparser_16'Access,
+      18 => Token_Unparser_17'Access,
+      19 => Token_Unparser_18'Access,
+      20 => Token_Unparser_19'Access,
+      21 => Token_Unparser_20'Access,
+      22 => Token_Unparser_21'Access,
+      23 => Token_Unparser_22'Access,
+      24 => Token_Unparser_23'Access,
+      25 => Token_Unparser_24'Access,
+      26 => Token_Unparser_25'Access,
+      27 => Token_Unparser_26'Access,
+      28 => Token_Unparser_27'Access,
+      29 => Token_Unparser_28'Access,
+      30 => Token_Unparser_29'Access,
+      31 => Token_Unparser_30'Access,
+      32 => Token_Unparser_31'Access,
+      33 => Token_Unparser_32'Access,
+      34 => Token_Unparser_33'Access,
+      35 => Token_Unparser_34'Access,
+      36 => Token_Unparser_35'Access,
+      37 => Token_Unparser_36'Access,
+      38 => Token_Unparser_37'Access,
+      39 => Token_Unparser_38'Access,
+      40 => Token_Unparser_39'Access,
+      41 => Token_Unparser_40'Access,
+      42 => Token_Unparser_41'Access,
+      43 => Token_Unparser_42'Access,
+      44 => Token_Unparser_43'Access,
+      45 => Token_Unparser_44'Access,
+      46 => Token_Unparser_45'Access,
+      47 => Token_Unparser_46'Access,
+      48 => Token_Unparser_47'Access,
+      49 => Token_Unparser_48'Access,
+      50 => Token_Unparser_49'Access,
+      51 => Token_Unparser_50'Access,
+      52 => Token_Unparser_51'Access,
+      53 => Token_Unparser_52'Access,
+      54 => Token_Unparser_53'Access,
+      55 => Token_Unparser_54'Access,
+      56 => Token_Unparser_55'Access,
+      57 => Token_Unparser_56'Access,
+      58 => Token_Unparser_57'Access,
+      59 => Token_Unparser_58'Access,
+      60 => Token_Unparser_59'Access,
+      61 => Token_Unparser_60'Access,
+      62 => Token_Unparser_61'Access,
+      63 => Token_Unparser_62'Access,
+      64 => Token_Unparser_63'Access,
+      65 => Token_Unparser_64'Access,
+      66 => Token_Unparser_65'Access,
+      67 => Token_Unparser_66'Access,
+      68 => Token_Unparser_67'Access,
+      69 => Token_Unparser_68'Access,
+      70 => Token_Unparser_69'Access,
+      71 => Token_Unparser_70'Access,
+      72 => Token_Unparser_71'Access,
+      73 => Token_Unparser_72'Access,
+      74 => Token_Unparser_73'Access,
+      75 => Token_Unparser_74'Access,
+      76 => Token_Unparser_75'Access,
+      77 => Token_Unparser_76'Access,
+      78 => Token_Unparser_77'Access);
 
 
 
@@ -1796,6 +2111,16 @@ private package Liblktlang.Unparsers is
 
          
 
+         Bare_Destructuring_Pattern_Detail_Fields_Unparser_List
+            : aliased constant Field_Unparser_List_Impl
+            := (N               => 1,
+                Field_Unparsers =>
+                  (1 => (Member_Index_For_Destructuring_Pattern_Detail_F_Decl, Empty_Token_Sequence, Empty_Token_Sequence, False)),
+                Inter_Tokens    =>
+                  (1 => Empty_Token_Sequence));
+
+         
+
          Bare_Field_Pattern_Detail_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
             := (N               => 2,
@@ -2717,7 +3042,7 @@ private package Liblktlang.Unparsers is
          Unparser_For_Enum_Class_Alt_Decl_List : aliased constant Node_Unparser_Impl :=
            (Kind => List,
             Separator => Token_Unparser_8'Access,
-            Sep_Extra => Allow_None);
+            Sep_Extra => Allow_Trailing);
       
 
          Unparser_For_Enum_Class_Case_List : aliased constant Node_Unparser_Impl :=
@@ -2729,7 +3054,7 @@ private package Liblktlang.Unparsers is
          Unparser_For_Enum_Lit_Decl_List : aliased constant Node_Unparser_Impl :=
            (Kind => List,
             Separator => Token_Unparser_8'Access,
-            Sep_Extra => Allow_None);
+            Sep_Extra => Allow_Trailing);
       
 
          Unparser_For_Expr_List : aliased constant Node_Unparser_Impl :=
@@ -3074,6 +3399,13 @@ private package Liblktlang.Unparsers is
             Post_Tokens => Empty_Token_Sequence);
       
 
+      
+
+         Unparser_For_Destructuring_Pattern_Detail : aliased constant Node_Unparser_Impl :=
+           (Kind => Regular,
+            Pre_Tokens => Empty_Token_Sequence,
+            Field_Unparsers => Bare_Destructuring_Pattern_Detail_Fields_Unparser_List'Access,
+            Post_Tokens => Empty_Token_Sequence);
       
 
          Unparser_For_Field_Pattern_Detail : aliased constant Node_Unparser_Impl :=
@@ -3550,6 +3882,8 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Pattern_Detail => null
          ,
+         Type_Index_For_Destructuring_Pattern_Detail => Unparser_For_Destructuring_Pattern_Detail'Access
+         ,
          Type_Index_For_Field_Pattern_Detail => Unparser_For_Field_Pattern_Detail'Access
          ,
          Type_Index_For_Property_Pattern_Detail => Unparser_For_Property_Pattern_Detail'Access
@@ -3567,1410 +3901,8 @@ private package Liblktlang.Unparsers is
          Type_Index_For_Var_Bind => Unparser_For_Var_Bind'Access
    );
 
-
-   Default_Config : aliased constant String :=
-          "{" & Character'Val (10)
-      & "  ""node_configs"": {" & Character'Val (10)
-      & "    ""AnyOf"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_expr""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""in""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""indent""," & Character'Val (10)
-      & "            ""contents"": {" & Character'Val (10)
-      & "              ""kind"": ""group""," & Character'Val (10)
-      & "              ""document"": {""kind"": ""recurse_field"", ""field"": ""f_values""}" & Character'Val (10)
-      & "            }" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""AnyOfList"": {" & Character'Val (10)
-      & "      ""sep"": [""line"", ""recurse"", ""whitespace""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ArrayLiteral"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_exprs"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent"", ""contents"": [" & Character'Val (10)
-      & "                ""softline""," & Character'Val (10)
-      & "                {""kind"": ""group"", ""document"": ""recurse""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        ""f_element_type"": [" & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          ""recurse""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""BaseImportList"": {}," & Character'Val (10)
-      & "    ""Pattern"": {}," & Character'Val (10)
-      & "    ""ComplexPattern"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_pattern"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": {" & Character'Val (10)
-      & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
-      & "            ""if"": [""OrPattern""]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        ""f_details"": {" & Character'Val (10)
-      & "          ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "          ""then"": ""recurse""," & Character'Val (10)
-      & "          ""else"": {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": [" & Character'Val (10)
-      & "              {" & Character'Val (10)
-      & "                ""kind"": ""indent""," & Character'Val (10)
-      & "                ""contents"": [""softline"", ""recurse""]" & Character'Val (10)
-      & "              }," & Character'Val (10)
-      & "              ""softline""" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""TypePattern"": {}," & Character'Val (10)
-      & "    ""NotPattern"": {}," & Character'Val (10)
-      & "    ""NullPattern"": {}," & Character'Val (10)
-      & "    ""OrPattern"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group"", ""document"": ""recurse""" & Character'Val (10)
-      & "      }," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_left_sub_pattern"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
-      & "            ""if"": [""OrPattern""]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & "          ""line""" & Character'Val (10)
-      & "        ]," & Character'Val (10)
-      & "        ""f_right_sub_pattern"": [" & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
-      & "            ""if"": [""OrPattern""]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ParenPattern"": {}," & Character'Val (10)
-      & "    ""RegexPattern"": {}," & Character'Val (10)
-      & "    ""EllipsisPattern"": {}," & Character'Val (10)
-      & "    ""AnyTypePattern"": {}," & Character'Val (10)
-      & "    ""PatternList"": {}," & Character'Val (10)
-      & "    ""BindingValDecl"": {}," & Character'Val (10)
-      & "    ""PatternDetailList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & Character'Val (10)
-      & "    ""FieldPatternDetail"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_id""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_expected_value""}" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""PropertyPatternDetail"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_call""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_expected_value""}" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""BaseCallExpr"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group"", ""document"": ""recurse""" & Character'Val (10)
-      & "      }," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_name"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": {" & Character'Val (10)
-      & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
-      & "            ""if"": [""DotExpr"", ""KeepExpr"", ""CastExpr"", ""CallExpr""]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        ""f_args"": {" & Character'Val (10)
-      & "          ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "          ""then"": ""recurse""," & Character'Val (10)
-      & "          ""else"": {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": [" & Character'Val (10)
-      & "              {" & Character'Val (10)
-      & "                ""kind"": ""indent""," & Character'Val (10)
-      & "                ""contents"": [""softline"", ""recurse""]" & Character'Val (10)
-      & "              }," & Character'Val (10)
-      & "              ""softline""" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""BaseLexerCaseRuleAlt"": {}," & Character'Val (10)
-      & "    ""BaseLexerCaseRuleAltList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""BigNumLit"": {}," & Character'Val (10)
-      & "    ""BinOp"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "           {""kind"": ""recurse_field"", ""field"": ""f_left""}," & Character'Val (10)
-      & "           ""line""," & Character'Val (10)
-      & "           {""kind"": ""recurse_field"", ""field"": ""f_op""}," & Character'Val (10)
-      & "           ""whitespace""," & Character'Val (10)
-      & "           {""kind"": ""recurse_field"", ""field"": ""f_right""}" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""BlockExpr"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "         {" & Character'Val (10)
-      & "           ""kind"": ""indent""," & Character'Val (10)
-      & "           ""contents"": [" & Character'Val (10)
-      & "             ""hardline""," & Character'Val (10)
-      & "             {""kind"": ""recurse_field"", ""field"": ""f_clauses""}" & Character'Val (10)
-      & "           ]" & Character'Val (10)
-      & "         }," & Character'Val (10)
-      & "         ""hardline""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""BlockExprClause"": {}," & Character'Val (10)
-      & "    ""BlockStringLine"": {}," & Character'Val (10)
-      & "    ""BlockStringLineList"": {}," & Character'Val (10)
-      & "    ""BlockStringLit"": {}," & Character'Val (10)
-      & "    ""CallExprList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""CastExpr"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group"", ""document"": ""recurse""" & Character'Val (10)
-      & "      }," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_expr"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
-      & "            ""if"": [""DotExpr"", ""KeepExpr"", ""CastExpr"", ""CallExpr""]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & "          ""softline""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""CharLit"": {}," & Character'Val (10)
-      & "    ""ClassDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""class""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_syn_base_type""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_traits""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_decls""}," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_syn_base_type"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         ""recurse""" & Character'Val (10)
-      & "        ]," & Character'Val (10)
-      & "        ""f_traits"": [" & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""implements""}," & Character'Val (10)
-      & "          ""recurse""" & Character'Val (10)
-      & "        ]," & Character'Val (10)
-      & "        ""f_decls"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "            ""then"": [""hardline"", ""recurse""]," & Character'Val (10)
-      & "            ""else"": [" & Character'Val (10)
-      & "              {""kind"": ""indent"", ""contents"": [""hardline"", ""recurse""]}," & Character'Val (10)
-      & "              ""hardline""" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ClassQualifier"": {}," & Character'Val (10)
-      & "    ""DeclAnnotation"": {" & Character'Val (10)
-      & "      ""node"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""DeclAnnotationList"": {}," & Character'Val (10)
-      & "    ""DeclAnnotationArgs"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_args"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [" & Character'Val (10)
-      & "                ""softline""," & Character'Val (10)
-      & "                {""kind"": ""group"", ""document"": ""recurse""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""DefId"": {}," & Character'Val (10)
-      & "    ""DefaultListTypeRef"": {}," & Character'Val (10)
-      & "    ""DotExpr"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group"", ""document"": ""recurse""" & Character'Val (10)
-      & "      }," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_prefix"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
-      & "            ""if"": [""DotExpr"", ""KeepExpr"", ""CastExpr"", ""CallExpr""]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & "          ""softline""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""DynVarDecl"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_decl_type"": [""whitespace"", ""recurse""]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ElsifBranch"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        ""hardline""," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""elif""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_cond_expr""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            ""line""," & Character'Val (10)
-      & "            {""kind"": ""text"", ""text"": ""then""}," & Character'Val (10)
-      & "            ""whitespace""," & Character'Val (10)
-      & "            {""kind"": ""recurse_field"", ""field"": ""f_then_expr""}" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_cond_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""ifKind""," & Character'Val (10)
-      & "          ""matchers"": [" & Character'Val (10)
-      & "            {""kind"": [""BlockExpr"", ""ParenExpr""], ""document"": ""recurse""}" & Character'Val (10)
-      & "          ]," & Character'Val (10)
-      & "          ""default"": {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": {""kind"": ""indent"", ""contents"": [""softline"", ""recurse""]}" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        ""f_then_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""ifKind""," & Character'Val (10)
-      & "          ""matchers"": [" & Character'Val (10)
-      & "            {""kind"": [""BlockExpr"", ""ParenExpr""], ""document"": ""recurse""}" & Character'Val (10)
-      & "          ]," & Character'Val (10)
-      & "          ""default"": {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": {""kind"": ""indent"", ""contents"": [""softline"", ""recurse""]}" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ElsifBranchList"": {" & Character'Val (10)
-      & "      ""flush_before_children"": false" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""EnumClassAltDecl"": {}," & Character'Val (10)
-      & "    ""EnumClassAltDeclList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""EnumClassCase"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""case""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [" & Character'Val (10)
-      & "                ""line""," & Character'Val (10)
-      & "                {""kind"": ""recurse_field"", ""field"": ""f_decls""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""EnumClassCaseList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""EnumClassDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""enum""}," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""class""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_syn_base_type""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_traits""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "         {" & Character'Val (10)
-      & "           ""kind"": ""indent""," & Character'Val (10)
-      & "           ""contents"": [" & Character'Val (10)
-      & "             {""kind"": ""recurse_field"", ""field"": ""f_branches""}," & Character'Val (10)
-      & "             {""kind"": ""recurse_field"", ""field"": ""f_decls""}" & Character'Val (10)
-      & "           ]" & Character'Val (10)
-      & "         }," & Character'Val (10)
-      & "         ""hardline""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_syn_base_type"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         ""recurse""" & Character'Val (10)
-      & "        ]," & Character'Val (10)
-      & "        ""f_branches"": {" & Character'Val (10)
-      & "          ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "          ""then"": [""recurse""]," & Character'Val (10)
-      & "          ""else"": [""hardline"", ""recurse""]" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        ""f_decls"": {" & Character'Val (10)
-      & "          ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "          ""then"": [""recurse""]," & Character'Val (10)
-      & "          ""else"": [""hardline"", ""recurse""]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""EnumLitDecl"": {}," & Character'Val (10)
-      & "    ""EnumLitDeclList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""EnumTypeDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""enum""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_traits""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "         {" & Character'Val (10)
-      & "           ""kind"": ""indent""," & Character'Val (10)
-      & "           ""contents"": [" & Character'Val (10)
-      & "             ""hardline""," & Character'Val (10)
-      & "             {""kind"": ""text"", ""text"": ""case""}," & Character'Val (10)
-      & "             {" & Character'Val (10)
-      & "               ""kind"": ""group""," & Character'Val (10)
-      & "               ""document"": {" & Character'Val (10)
-      & "                 ""kind"": ""indent""," & Character'Val (10)
-      & "                 ""contents"": [" & Character'Val (10)
-      & "                   ""line""," & Character'Val (10)
-      & "                   {""kind"": ""recurse_field"", ""field"": ""f_literals""}" & Character'Val (10)
-      & "                 ]" & Character'Val (10)
-      & "               }" & Character'Val (10)
-      & "             }," & Character'Val (10)
-      & "             {""kind"": ""recurse_field"", ""field"": ""f_decls""}" & Character'Val (10)
-      & "           ]" & Character'Val (10)
-      & "         }," & Character'Val (10)
-      & "         ""hardline""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_decls"": {" & Character'Val (10)
-      & "          ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "          ""then"": [""recurse""]," & Character'Val (10)
-      & "          ""else"": [""hardline"", ""recurse""]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""EnvSpecDecl"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_syn_name"": [""recurse"", ""whitespace""]," & Character'Val (10)
-      & "        ""f_actions"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""indent""," & Character'Val (10)
-      & "            ""contents"": [" & Character'Val (10)
-      & "              {""kind"": ""ifEmpty"", ""then"": [], ""else"": ""hardline""}," & Character'Val (10)
-      & "              ""recurse""" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & "          ""hardline""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ErrorOnNull"": {}," & Character'Val (10)
-      & "    ""ExcludesNull"": {}," & Character'Val (10)
-      & "    ""ExprList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""FieldDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_decl_type""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_trait_ref""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_default_val""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_trait_ref"": [""whitespace"", ""recurse""]," & Character'Val (10)
-      & "        ""f_default_val"": [" & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""=""}," & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""ifKind""," & Character'Val (10)
-      & "            ""matchers"": [" & Character'Val (10)
-      & "              {""kind"": ""BlockExpr"", ""document"": [""whitespace"", ""recurse""]}," & Character'Val (10)
-      & "              {""kind"": ""ParenExpr"", ""document"": [""whitespace"", ""recurse""]}" & Character'Val (10)
-      & "            ]," & Character'Val (10)
-      & "            ""default"": {" & Character'Val (10)
-      & "              ""kind"": ""group""," & Character'Val (10)
-      & "              ""document"": {""kind"": ""indent"", ""contents"": [""line"", ""recurse""]}" & Character'Val (10)
-      & "            }" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""FullDecl"": {}," & Character'Val (10)
-      & "    ""FullDeclList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""FunParamDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_decl_annotations""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_decl_type""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_default_val""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_default_val"": [" & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""=""}," & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": {""kind"": ""indent"", ""contents"": [""line"", ""recurse""]}" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""FunParamDeclList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""FunDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""fun""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""(""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [" & Character'Val (10)
-      & "                ""softline""," & Character'Val (10)
-      & "                {""kind"": ""recurse_field"", ""field"": ""f_params""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": "")""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_return_type""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_trait_ref""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_body""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_trait_ref"": [" & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""implements""}," & Character'Val (10)
-      & "          ""recurse""" & Character'Val (10)
-      & "        ]," & Character'Val (10)
-      & "        ""f_body"": [" & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {" & Character'Val (10)
-      & "           ""kind"": ""ifKind""," & Character'Val (10)
-      & "           ""matchers"": [" & Character'Val (10)
-      & "             {" & Character'Val (10)
-      & "               ""kind"": [""BlockExpr"", ""MatchExpr""]," & Character'Val (10)
-      & "               ""document"": [" & Character'Val (10)
-      & "                 {""kind"": ""text"", ""text"": ""=""}," & Character'Val (10)
-      & "                 ""whitespace""," & Character'Val (10)
-      & "                 ""recurse""" & Character'Val (10)
-      & "               ]" & Character'Val (10)
-      & "             }" & Character'Val (10)
-      & "           ]," & Character'Val (10)
-      & "           ""default"": {" & Character'Val (10)
-      & "             ""kind"": ""group""," & Character'Val (10)
-      & "             ""document"": [" & Character'Val (10)
-      & "               {" & Character'Val (10)
-      & "                 ""kind"": ""indent""," & Character'Val (10)
-      & "                 ""contents"": [" & Character'Val (10)
-      & "                   {""kind"": ""text"", ""text"": ""=""}," & Character'Val (10)
-      & "                   ""line""," & Character'Val (10)
-      & "                   ""recurse""" & Character'Val (10)
-      & "                 ]" & Character'Val (10)
-      & "               }" & Character'Val (10)
-      & "             ]" & Character'Val (10)
-      & "           }" & Character'Val (10)
-      & "         }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""FunctionTypeRef"": {}," & Character'Val (10)
-      & "    ""GenericDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""generic""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""[""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [" & Character'Val (10)
-      & "                ""softline""," & Character'Val (10)
-      & "                {""kind"": ""recurse_field"", ""field"": ""f_generic_param_decls""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""]""}," & Character'Val (10)
-      & "        ""hardline""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_decl""}" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GenericParamDeclList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GenericParamTypeDecl"": {}," & Character'Val (10)
-      & "    ""GenericInstantiation"": {}," & Character'Val (10)
-      & "    ""GenericTypeRef"": {}," & Character'Val (10)
-      & "    ""GrammarCut"": {}," & Character'Val (10)
-      & "    ""GrammarDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""grammar""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_rules""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_rules"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "            ""then"": [""hardline"", ""recurse""]," & Character'Val (10)
-      & "            ""else"": [" & Character'Val (10)
-      & "              {""kind"": ""indent"", ""contents"": [""hardline"", ""recurse""]}," & Character'Val (10)
-      & "              ""hardline""" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarDiscard"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [""softline"", ""recurse""]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarDontSkip"": {}," & Character'Val (10)
-      & "    ""GrammarExprList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarExprListList"": {" & Character'Val (10)
-      & "      ""sep"": [""line"", ""recurse"", ""whitespace""]," & Character'Val (10)
-      & "      ""leading_sep"": [""recurse"", ""whitespace""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarImplicitPick"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_exprs"": ""recurse""" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarList"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_list_type""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_kind""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""(""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [" & Character'Val (10)
-      & "                ""softline""," & Character'Val (10)
-      & "                {""kind"": ""recurse_field"", ""field"": ""f_expr""}," & Character'Val (10)
-      & "                {""kind"": ""recurse_field"", ""field"": ""f_sep""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": "")""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_sep"": [" & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": "",""}," & Character'Val (10)
-      & "          ""line""," & Character'Val (10)
-      & "          ""recurse""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarListSep"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_extra"": [" & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": "",""}," & Character'Val (10)
-      & "          ""line""," & Character'Val (10)
-      & "          ""recurse""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarNull"": {}," & Character'Val (10)
-      & "    ""GrammarOpt"": {}," & Character'Val (10)
-      & "    ""GrammarOptError"": {}," & Character'Val (10)
-      & "    ""GrammarOptErrorGroup"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [""softline"", ""recurse""]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarOptGroup"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [""softline"", ""recurse""]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarOrExpr"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_sub_exprs"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [""softline"", ""recurse""]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarPick"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_exprs"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [""softline"", ""recurse""]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarPredicate"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_expr""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""|>""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""when""}," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""(""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_prop_ref""}," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": "")""}" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarRuleDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""<-""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""ifKind""," & Character'Val (10)
-      & "          ""field"": ""f_expr""," & Character'Val (10)
-      & "          ""matchers"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": [""TokenLit"", ""TokenPatternLit""]," & Character'Val (10)
-      & "              ""document"": {" & Character'Val (10)
-      & "                ""kind"": ""indent""," & Character'Val (10)
-      & "                ""contents"": {" & Character'Val (10)
-      & "                  ""kind"": ""group""," & Character'Val (10)
-      & "                  ""document"": [" & Character'Val (10)
-      & "                    ""line"", {""kind"": ""recurse_field"", ""field"": ""f_expr""}" & Character'Val (10)
-      & "                  ]" & Character'Val (10)
-      & "                }" & Character'Val (10)
-      & "              }" & Character'Val (10)
-      & "            }" & Character'Val (10)
-      & "          ]," & Character'Val (10)
-      & "          ""default"": [" & Character'Val (10)
-      & "            ""whitespace"", {""kind"": ""recurse_field"", ""field"": ""f_expr""}" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""GrammarRuleRef"": {}," & Character'Val (10)
-      & "    ""GrammarSkip"": {}," & Character'Val (10)
-      & "    ""GrammarStopCut"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [""softline"", ""recurse""]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""Id"": {}," & Character'Val (10)
-      & "    ""IfExpr"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": [" & Character'Val (10)
-      & "              {""kind"": ""text"", ""text"": ""if""}," & Character'Val (10)
-      & "              ""whitespace""," & Character'Val (10)
-      & "              {""kind"": ""recurse_field"", ""field"": ""f_cond_expr""}," & Character'Val (10)
-      & "              ""line""," & Character'Val (10)
-      & "              {""kind"": ""text"", ""text"": ""then""}," & Character'Val (10)
-      & "              ""whitespace""," & Character'Val (10)
-      & "              {""kind"": ""recurse_field"", ""field"": ""f_then_expr""}" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": [" & Character'Val (10)
-      & "              {""kind"": ""recurse_field"", ""field"": ""f_alternatives""}" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & Character'Val (10)
-      & "          ""line""," & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": [" & Character'Val (10)
-      & "              {""kind"": ""text"", ""text"": ""else""}," & Character'Val (10)
-      & "              ""whitespace""," & Character'Val (10)
-      & "              {""kind"": ""recurse_field"", ""field"": ""f_else_expr""}" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_cond_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""ifKind""," & Character'Val (10)
-      & "          ""matchers"": [" & Character'Val (10)
-      & "            {""kind"": [""BlockExpr"", ""ParenExpr""], ""document"": ""recurse""}" & Character'Val (10)
-      & "          ]," & Character'Val (10)
-      & "          ""default"": {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": {""kind"": ""indent"", ""contents"": [""softline"", ""recurse""]}" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        ""f_else_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""ifKind""," & Character'Val (10)
-      & "          ""matchers"": [" & Character'Val (10)
-      & "            {""kind"": [""BlockExpr"", ""ParenExpr""], ""document"": ""recurse""}" & Character'Val (10)
-      & "          ]," & Character'Val (10)
-      & "          ""default"": {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": {""kind"": ""indent"", ""contents"": [""softline"", ""recurse""]}" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        ""f_then_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""ifKind""," & Character'Val (10)
-      & "          ""matchers"": [" & Character'Val (10)
-      & "            {""kind"": [""BlockExpr"", ""ParenExpr""], ""document"": ""recurse""}" & Character'Val (10)
-      & "          ]," & Character'Val (10)
-      & "          ""default"": {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": {""kind"": ""indent"", ""contents"": [""softline"", ""recurse""]}" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""Import"": {" & Character'Val (10)
-      & "      ""node"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ImportFrom"": {" & Character'Val (10)
-      & "      ""node"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ImportAllFrom"": {" & Character'Val (10)
-      & "      ""node"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ImportedName"": {}," & Character'Val (10)
-      & "    ""ImportedNameList"": {}," & Character'Val (10)
-      & "    ""ImportedId"": {}," & Character'Val (10)
-      & "    ""Isa"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_expr""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""is""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_pattern""}" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""KeepExpr"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_expr"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""recurse_flatten""," & Character'Val (10)
-      & "            ""if"": [""DotExpr"", ""KeepExpr"", ""CastExpr"", ""CallExpr""]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & "          ""softline""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LambdaParamDecl"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_decl_type"": [" & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          ""recurse""" & Character'Val (10)
-      & "        ]," & Character'Val (10)
-      & "        ""f_default_val"": [" & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""=""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          ""recurse""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LambdaParamDeclList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LambdaExpr"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""(""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_params""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": "")""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_return_type""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""id"": ""comments""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {""kind"": ""text"", ""text"": ""=>""}," & Character'Val (10)
-      & "            ""flushLineBreaks""" & Character'Val (10)
-      & "          ]," & Character'Val (10)
-      & "          ""bubbleUpTrailingTrivias"": false" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""ifKind""," & Character'Val (10)
-      & "          ""field"": ""f_body""," & Character'Val (10)
-      & "          ""matchers"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""BlockExpr""," & Character'Val (10)
-      & "              ""document"": [" & Character'Val (10)
-      & "                {" & Character'Val (10)
-      & "                  ""kind"": ""ifBreak""," & Character'Val (10)
-      & "                  ""groupId"": ""comments""," & Character'Val (10)
-      & "                  ""breakContents"": []," & Character'Val (10)
-      & "                  ""flatContents"": ""whitespace""" & Character'Val (10)
-      & "                }," & Character'Val (10)
-      & "                {""kind"": ""recurse_field"", ""field"": ""f_body""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }" & Character'Val (10)
-      & "          ]," & Character'Val (10)
-      & "          ""default"": {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": [" & Character'Val (10)
-      & "              {" & Character'Val (10)
-      & "                ""kind"": ""ifBreak""," & Character'Val (10)
-      & "                ""groupId"": ""comments""," & Character'Val (10)
-      & "                ""breakContents"": []," & Character'Val (10)
-      & "                ""flatContents"": ""line""" & Character'Val (10)
-      & "              }," & Character'Val (10)
-      & "              {""kind"": ""recurse_field"", ""field"": ""f_body""}" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_params"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [""softline"", ""recurse""]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        ""f_return_type"": [" & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          ""recurse""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LangkitRoot"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_imports"": [" & Character'Val (10)
-      & "          ""recurse""," & Character'Val (10)
-      & "          {""kind"": ""ifEmpty"", ""then"": [], ""else"": ""hardline""}" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LexerCaseRule"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""match""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_expr""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_alts""}," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_alts"": [" & Character'Val (10)
-      & "          {""kind"": ""indent"", ""contents"": [""hardline"", ""recurse""]}," & Character'Val (10)
-      & "          ""hardline""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LexerCaseRuleSend"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_match_size"": [""whitespace"", ""recurse""]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LexerDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""lexer""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_rules""}," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_rules"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "            ""then"": [""hardline"", ""recurse""]," & Character'Val (10)
-      & "            ""else"": [" & Character'Val (10)
-      & "              {""kind"": ""indent"", ""contents"": [""hardline"", ""recurse""]}," & Character'Val (10)
-      & "              ""hardline""" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LexerFamilyDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""family""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_rules""}," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_rules"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "            ""then"": [""hardline"", ""recurse""]," & Character'Val (10)
-      & "            ""else"": [" & Character'Val (10)
-      & "              {""kind"": ""indent"", ""contents"": [""hardline"", ""recurse""]}," & Character'Val (10)
-      & "              ""hardline""" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ListKind"": {}," & Character'Val (10)
-      & "    ""LktNodeList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LogicAssign"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_dest_var""}," & Character'Val (10)
-      & "          ""line""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""<-""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_value""}" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LogicExpr"": {}," & Character'Val (10)
-      & "    ""LogicPredicate"": {}," & Character'Val (10)
-      & "    ""LogicPropagate"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_dest_var""}," & Character'Val (10)
-      & "          ""line""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""<-""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_call""}" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""LogicUnify"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_lhs""}," & Character'Val (10)
-      & "          ""line""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""<->""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_rhs""}" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""MatchBranch"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""case""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_decl""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""=>""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": {" & Character'Val (10)
-      & "            ""kind"": ""indent""," & Character'Val (10)
-      & "            ""contents"": [" & Character'Val (10)
-      & "              ""line""," & Character'Val (10)
-      & "              {""kind"": ""recurse_field"", ""field"": ""f_expr""}" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""PatternMatchBranch"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""case""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_pattern""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""=>""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": {" & Character'Val (10)
-      & "            ""kind"": ""indent""," & Character'Val (10)
-      & "            ""contents"": [" & Character'Val (10)
-      & "              ""line""," & Character'Val (10)
-      & "              {""kind"": ""recurse_field"", ""field"": ""f_expr""}" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""BaseMatchBranchList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""hardline""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""MatchExpr"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""match""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [" & Character'Val (10)
-      & "                ""line""," & Character'Val (10)
-      & "                {""kind"": ""recurse_field"", ""field"": ""f_match_expr""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""line""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "        {" & Character'Val (10)
-      & "          ""kind"": ""indent""," & Character'Val (10)
-      & "          ""contents"": [" & Character'Val (10)
-      & "            ""hardline""," & Character'Val (10)
-      & "            {""kind"": ""recurse_field"", ""field"": ""f_branches""}" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }," & Character'Val (10)
-      & "        ""hardline""," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""MatchValDecl"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_decl_type"": [""whitespace"", ""recurse""]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ModuleDocStringLine"": {}," & Character'Val (10)
-      & "    ""ModuleDocStringLineList"": {}," & Character'Val (10)
-      & "    ""ModuleDocStringLit"": {}," & Character'Val (10)
-      & "    ""ModuleId"": {}," & Character'Val (10)
-      & "    ""NotExpr"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_expr"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [""whitespace"", ""recurse""]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""NullCondQualifier"": {}," & Character'Val (10)
-      & "    ""NullLit"": {}," & Character'Val (10)
-      & "    ""NumLit"": {}," & Character'Val (10)
-      & "    ""Op"": {}," & Character'Val (10)
-      & "    ""Argument"": {}," & Character'Val (10)
-      & "    ""ArgumentList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""line""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ParenExpr"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [" & Character'Val (10)
-      & "                  {""kind"": ""text"", ""text"": ""(""}," & Character'Val (10)
-      & "                  ""softline""," & Character'Val (10)
-      & "                  {" & Character'Val (10)
-      & "                  ""kind"": ""group""," & Character'Val (10)
-      & "                  ""document"": {""kind"": ""recurse_field"", ""field"": ""f_expr""}" & Character'Val (10)
-      & "                  }" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & "          ""softline""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": "")""}" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""ParseNodeExpr"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_sub_exprs"": {" & Character'Val (10)
-      & "          ""kind"": ""group""," & Character'Val (10)
-      & "          ""document"": [" & Character'Val (10)
-      & "            {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [" & Character'Val (10)
-      & "                ""softline""," & Character'Val (10)
-      & "                {""kind"": ""group"", ""document"": ""recurse""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }," & Character'Val (10)
-      & "            ""softline""" & Character'Val (10)
-      & "          ]" & Character'Val (10)
-      & "        }" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""Query"": {}," & Character'Val (10)
-      & "    ""RaiseExpr"": {" & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_except_expr"": [""whitespace"", ""recurse""]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""RefId"": {}," & Character'Val (10)
-      & "    ""RefIdList"": {}," & Character'Val (10)
-      & "    ""SimpleTypeRef"": {}," & Character'Val (10)
-      & "    ""SingleLineStringLit"": {}," & Character'Val (10)
-      & "    ""StructDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""struct""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_traits""}," & Character'Val (10)
-      & "         ""whitespace""," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "         {""kind"": ""recurse_field"", ""field"": ""f_decls""}," & Character'Val (10)
-      & "         {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_decls"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "            ""then"": [""hardline"", ""recurse""]," & Character'Val (10)
-      & "            ""else"": [" & Character'Val (10)
-      & "              {""kind"": ""indent"", ""contents"": [""hardline"", ""recurse""]}," & Character'Val (10)
-      & "              ""hardline""" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""SubscriptExpr"": {" & Character'Val (10)
-      & "      ""node"": {""kind"": ""group"", ""document"": ""recurse""}," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_index"": [" & Character'Val (10)
-      & "          {""kind"": ""indent"", ""contents"": [""softline"", ""recurse""]}," & Character'Val (10)
-      & "          ""softline""" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""TokenLit"": {}," & Character'Val (10)
-      & "    ""TokenNoCaseLit"": {}," & Character'Val (10)
-      & "    ""TokenPatternConcat"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "           {""kind"": ""recurse_field"", ""field"": ""f_left""}," & Character'Val (10)
-      & "           ""line""," & Character'Val (10)
-      & "           {""kind"": ""text"", ""text"": ""&""}," & Character'Val (10)
-      & "           ""whitespace""," & Character'Val (10)
-      & "           {""kind"": ""recurse_field"", ""field"": ""f_right""}" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""TokenPatternLit"": {}," & Character'Val (10)
-      & "    ""TokenRef"": {}," & Character'Val (10)
-      & "    ""TraitDecl"": {" & Character'Val (10)
-      & "      ""node"": [" & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""trait""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "        ""whitespace""," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_traits""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""{""}," & Character'Val (10)
-      & "        {""kind"": ""recurse_field"", ""field"": ""f_decls""}," & Character'Val (10)
-      & "        {""kind"": ""text"", ""text"": ""}""}" & Character'Val (10)
-      & "      ]," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "        ""f_decls"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""ifEmpty""," & Character'Val (10)
-      & "            ""then"": [""hardline"", ""recurse""]," & Character'Val (10)
-      & "            ""else"": [" & Character'Val (10)
-      & "              {""kind"": ""indent"", ""contents"": [""hardline"", ""recurse""]}," & Character'Val (10)
-      & "              ""hardline""" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""TryExpr"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""group""," & Character'Val (10)
-      & "            ""document"": [" & Character'Val (10)
-      & "               {""kind"": ""text"", ""text"": ""try""}," & Character'Val (10)
-      & "               ""whitespace""," & Character'Val (10)
-      & "               {""kind"": ""recurse_field"", ""field"": ""f_try_expr""}" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }," & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""ifKind""," & Character'Val (10)
-      & "            ""field"": ""f_or_expr""," & Character'Val (10)
-      & "            ""matchers"": []," & Character'Val (10)
-      & "            ""default"": [" & Character'Val (10)
-      & "              ""line""," & Character'Val (10)
-      & "              {" & Character'Val (10)
-      & "                ""kind"": ""group""," & Character'Val (10)
-      & "                ""document"": {""kind"": ""recurse_field"", ""field"": ""f_or_expr""}" & Character'Val (10)
-      & "              }" & Character'Val (10)
-      & "            ]," & Character'Val (10)
-      & "            ""absent"": {""kind"": ""recurse_field"", ""field"": ""f_or_expr""}" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""TypeRefList"": {" & Character'Val (10)
-      & "      ""sep"": [""recurse"", ""whitespace""]" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""UnOp"": {}," & Character'Val (10)
-      & "    ""ValDecl"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""val""}," & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_syn_name""}," & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_decl_type""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""=""}," & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""ifKind""," & Character'Val (10)
-      & "            ""field"": ""f_expr""," & Character'Val (10)
-      & "            ""__TODO__"": [" & Character'Val (10)
-      & "              ""All matchers below are wrapped in a group in order to""," & Character'Val (10)
-      & "              ""workaround #838""" & Character'Val (10)
-      & "            ]," & Character'Val (10)
-      & "            ""matchers"": [" & Character'Val (10)
-      & "              {" & Character'Val (10)
-      & "                ""kind"": [""BlockExpr"", ""ParenExpr"", ""MatchExpr""]," & Character'Val (10)
-      & "                ""document"": [" & Character'Val (10)
-      & "                  ""whitespace""," & Character'Val (10)
-      & "                  {""kind"": ""recurse_field"", ""field"": ""f_expr""}" & Character'Val (10)
-      & "                 ]" & Character'Val (10)
-      & "              }" & Character'Val (10)
-      & "            ]," & Character'Val (10)
-      & "            ""default"": {" & Character'Val (10)
-      & "              ""kind"": ""indent""," & Character'Val (10)
-      & "              ""contents"": [" & Character'Val (10)
-      & "                ""line""," & Character'Val (10)
-      & "                {""kind"": ""recurse_field"", ""field"": ""f_expr""}" & Character'Val (10)
-      & "              ]" & Character'Val (10)
-      & "            }" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }," & Character'Val (10)
-      & "      ""fields"": {" & Character'Val (10)
-      & "         ""f_decl_type"": [" & Character'Val (10)
-      & "           {""kind"": ""text"", ""text"": "":""}," & Character'Val (10)
-      & "           ""whitespace""," & Character'Val (10)
-      & "           ""recurse""" & Character'Val (10)
-      & "         ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }," & Character'Val (10)
-      & "    ""VarBind"": {" & Character'Val (10)
-      & "      ""node"": {" & Character'Val (10)
-      & "        ""kind"": ""group""," & Character'Val (10)
-      & "        ""document"": [" & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""bind""}," & Character'Val (10)
-      & "          {""kind"": ""recurse_field"", ""field"": ""f_name""}," & Character'Val (10)
-      & "          ""whitespace""," & Character'Val (10)
-      & "          {""kind"": ""text"", ""text"": ""=""}," & Character'Val (10)
-      & "          {" & Character'Val (10)
-      & "            ""kind"": ""indent""," & Character'Val (10)
-      & "            ""contents"": [" & Character'Val (10)
-      & "              ""line""," & Character'Val (10)
-      & "              {""kind"": ""recurse_field"", ""field"": ""f_expr""}" & Character'Val (10)
-      & "            ]" & Character'Val (10)
-      & "          }" & Character'Val (10)
-      & "        ]" & Character'Val (10)
-      & "      }" & Character'Val (10)
-      & "    }" & Character'Val (10)
-      & "  }" & Character'Val (10)
-      & "}" & Character'Val (10)
-;
+   Default_Config_Filename : aliased constant String :=
+     "builtin://unparsing/default_config.json";
 
    
    Format_Options : aliased constant Format_Options_Type :=
@@ -4983,10 +3915,12 @@ private package Liblktlang.Unparsers is
       End_Of_Line => Prettier_Ada.Documents.LF);
 
    Unparsers : aliased constant Unparsers_Impl :=
-     (Token_Spacings'Access,
+     (False,
+      Token_Spacings'Access,
       Token_Newlines'Access,
+      Token_Unparsers'Access,
       Node_Unparsers'Access,
-      Default_Config'Access,
+      Default_Config_Filename'Access,
       Format_Options'Access);
 
 end Liblktlang.Unparsers;

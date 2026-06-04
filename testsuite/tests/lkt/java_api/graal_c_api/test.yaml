@@ -1,0 +1,8 @@
+driver: java
+canonicalize_directory_separators: true
+mode: graal_c_api
+control:
+  - [SKIP, "not has_java", "Java tests disabled"]
+
+sync_trees:
+  - ../common

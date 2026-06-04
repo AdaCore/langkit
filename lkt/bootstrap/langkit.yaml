@@ -6,8 +6,8 @@ library:
   short_name: lkt
   standalone: true
   defaults:
-    unit_provider: Liblktlang.Default_Provider.Create
-    unparsing_config: default_unparsing_config.json
+    unit_provider: Liblktlang.Default_Provider.Create_Lkt
+    unparsing_config: default_unparsing_config.lkt
 mains:
   source_dirs: [extensions/mains]
   main_programs: [lkt_toolbox]
@@ -15,3 +15,13 @@ plugin_passes:
   - prelude.generate_prelude_pass
 language_server:
   file_extensions: [".lkt"]
+
+extra_docs:
+  liblktlang.create_default_provider: |
+    Create a default unit provider that is going to use the environment
+    variable associated to the provided language mode to fetch sources. Note
+    that the current working directory is implicitly looked at first.
+
+  liblktlang.create_default_provider_from_directories: |
+    Return a unit provider that will look for units in the given list of
+    directories. Note that the current directory is implicitly looked at first.

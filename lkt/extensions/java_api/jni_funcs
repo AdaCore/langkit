@@ -1,0 +1,15 @@
+## vim: ft=makojava
+
+<% nat = c_api.get_name %>
+
+    // --- Default provider functions
+
+    public static native UnitProvider ${nat("create_default_provider")}(
+        int languageMode
+    );
+
+    public static native UnitProvider
+    ${nat("create_default_provider_from_directories")}(
+        int languageMode,
+        String[] directories
+    );

@@ -119,7 +119,7 @@ package Liblktlang.Analysis is
       --  it contains, this operation makes all reference to these nodes stale
       --  as well.
       --
-      --  Root node class for lkt AST nodes.
+      --  Root node class for Lkt AST nodes.
       --
       --  Derived nodes: :ada:ref:`Argument`, :ada:ref:`Base_Import`,
       --  :ada:ref:`Base_Lexer_Case_Rule_Alt`, :ada:ref:`Base_Match_Branch`,
@@ -718,6 +718,21 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
+      type Pattern_Detail is new Lkt_Node with private
+         with First_Controlling_Parameter
+      ;
+      --  Base class for a detail in a ComplexPattern.
+      --
+      --  Derived nodes: :ada:ref:`Destructuring_Pattern_Detail`,
+      --  :ada:ref:`Field_Pattern_Detail`, :ada:ref:`Property_Pattern_Detail`
+
+      type Destructuring_Pattern_Detail is new Pattern_Detail with private
+         with First_Controlling_Parameter
+      ;
+      --  Pattern detail denoting the destructuring of a field as a shorthand.
+      --
+      --  This node type has no derivation.
+
       type Dot_Expr is new Expr with private
          with First_Controlling_Parameter
       ;
@@ -914,14 +929,6 @@ package Liblktlang.Analysis is
       --  Field declaration.
       --
       --  This node type has no derivation.
-
-      type Pattern_Detail is new Lkt_Node with private
-         with First_Controlling_Parameter
-      ;
-      --  Base class for a detail in a ComplexPattern.
-      --
-      --  Derived nodes: :ada:ref:`Field_Pattern_Detail`,
-      --  :ada:ref:`Property_Pattern_Detail`
 
       type Field_Pattern_Detail is new Pattern_Detail with private
          with First_Controlling_Parameter
@@ -2080,6 +2087,10 @@ package Liblktlang.Analysis is
       --% no-document: True
       No_Default_List_Type_Ref : constant Default_List_Type_Ref;
       --% no-document: True
+      No_Pattern_Detail : constant Pattern_Detail;
+      --% no-document: True
+      No_Destructuring_Pattern_Detail : constant Destructuring_Pattern_Detail;
+      --% no-document: True
       No_Dot_Expr : constant Dot_Expr;
       --% no-document: True
       No_Dyn_Env_Wrapper : constant Dyn_Env_Wrapper;
@@ -2127,8 +2138,6 @@ package Liblktlang.Analysis is
       No_Excludes_Null_Present : constant Excludes_Null_Present;
       --% no-document: True
       No_Field_Decl : constant Field_Decl;
-      --% no-document: True
-      No_Pattern_Detail : constant Pattern_Detail;
       --% no-document: True
       No_Field_Pattern_Detail : constant Field_Pattern_Detail;
       --% no-document: True
@@ -2462,6 +2471,18 @@ package Liblktlang.Analysis is
    --
    --  ``Reparsed`` indicates whether the unit was reparsed, or whether it was
    --  the first parse.
+
+   procedure Unit_Diagnostic_Callback
+     (Self    : in out Event_Handler_Interface;
+      Context : Analysis_Context'Class;
+      Unit    : Analysis_Unit'Class;
+      Message : Text_Type) is null;
+   --  Callback that will be called when a diagnostic is emitted for an
+   --  analysis unit.
+   --
+   --  ``Unit`` is the unit for which the diagnostic is emitted.
+   --
+   --  ``Message`` is the diagnostic message.
 
    procedure Release (Self : in out Event_Handler_Interface) is abstract;
    --  Actions to perform when releasing resources associated to Self
@@ -2909,7 +2930,7 @@ package Liblktlang.Analysis is
 
             
    type Complete_Item is private;
-   --  Completion item for language servers
+   --  Completion item for language servers.
 
       
    function Declaration
@@ -3061,7 +3082,7 @@ package Liblktlang.Analysis is
 
             
    type Ref_Result is private;
-   --  Reference result struct
+   --  Reference result struct.
 
       
    function Ref
@@ -3375,73 +3396,73 @@ package Liblktlang.Analysis is
          
    function P_Char_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the character builtin type.
+   --  Unit method. Return the ``Char`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Int_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the integer builtin type.
+   --  Unit method. Return the ``Int`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Bool_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the boolean builtin type.
+   --  Unit method. Return the ``Bool`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Bigint_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the big integer builtin type.
+   --  Unit method. Return the ``BigInt`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_String_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the string builtin type.
+   --  Unit method. Return the ``String`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Symbol_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the string builtin type.
+   --  Unit method. Return the ``Symbol`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Property_Error_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the property error builtin type.
+   --  Unit method. Return the ``PropertyError`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Regexp_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the regexp builtin type.
+   --  Unit method. Return the ``Regexp`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Entity_Gen_Type
      (Node : Lkt_Node'Class) return Generic_Decl;
-   --  Unit method. Return the logicvar builtin type.
+   --  Unit method. Return the ``Entity`` generic builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Entity_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the logicvar builtin type.
+   --  Unit method. Return the ``Entity`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Logicvar_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the logicvar builtin type.
+   --  Unit method. Return the ``LogicVar`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Equation_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the logicvar builtin type.
+   --  Unit method. Return the ``Equation`` builtin type.
    --% belongs-to: Lkt_Node
 
          
@@ -3457,39 +3478,51 @@ package Liblktlang.Analysis is
    --% belongs-to: Lkt_Node
 
          
+   function P_Stream_Gen_Type
+     (Node : Lkt_Node'Class) return Generic_Decl;
+   --  Unit method. Return the stream builtin generic type.
+   --% belongs-to: Lkt_Node
+
+         
+   function P_Stream_Type
+     (Node : Lkt_Node'Class) return Named_Type_Decl;
+   --  Unit method. Return the stream builtin type.
+   --% belongs-to: Lkt_Node
+
+         
    function P_Astlist_Gen_Type
      (Node : Lkt_Node'Class) return Generic_Decl;
-   --  Unit method. Return the ASTList builtin generic type.
+   --  Unit method. Return the ``ASTList`` builtin generic type.
    --% belongs-to: Lkt_Node
 
          
    function P_Astlist_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the ASTList builtin type.
+   --  Unit method. Return the ``ASTList`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Node_Builder_Gen_Type
      (Node : Lkt_Node'Class) return Generic_Decl;
-   --  Unit method. Return the NodeBuilder builtin generic type.
+   --  Unit method. Return the ``NodeBuilder`` builtin generic type.
    --% belongs-to: Lkt_Node
 
          
    function P_Node_Builder_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
-   --  Unit method. Return the NodeBuilder builtin type.
+   --  Unit method. Return the ``NodeBuilder`` builtin type.
    --% belongs-to: Lkt_Node
 
          
    function P_Iterator_Gen_Trait
      (Node : Lkt_Node'Class) return Generic_Decl;
-   --  Unit method. Return the Iterator builtin generic trait.
+   --  Unit method. Return the ``Iterator`` builtin generic trait.
    --% belongs-to: Lkt_Node
 
          
    function P_Iterator_Trait
      (Node : Lkt_Node'Class) return Trait_Decl;
-   --  Unit method. Return the Iterator builtin trait.
+   --  Unit method. Return the ``Iterator`` builtin trait.
    --% belongs-to: Lkt_Node
 
          
@@ -3507,36 +3540,36 @@ package Liblktlang.Analysis is
          
    function P_Topmost_Invalid_Decl
      (Node : Lkt_Node'Class) return Lkt_Node;
-   --  Return the topmost (from ``Self`` to the root node) FullDecl annotated
-   --  with ``@invalid``, null otherwise.
+   --  Return the topmost (from ``Self`` to the root node) ``FullDecl``
+   --  annotated with ``@invalid``, null otherwise.
    --% belongs-to: Lkt_Node
 
          
    function P_Nameres_Diagnostics
      (Node : Lkt_Node'Class) return Solver_Diagnostic_Array;
-   --  If name resolution on this lkt compilation unit fails, this returns all
+   --  If name resolution on this Lkt compilation unit fails, this returns all
    --  the diagnostics that were produced while resolving it.
    --% belongs-to: Lkt_Node
 
          
    function P_Solve_Enclosing_Context
      (Node : Lkt_Node'Class) return Solver_Result;
-   --  Finds the nearest parent that is an xref_entry_point and solve its
+   --  Find the nearest parent that is an xref entry point and solve its
    --  equation.
    --% belongs-to: Lkt_Node
 
          
    function P_Xref_Entry_Point
      (Node : Lkt_Node'Class) return Boolean;
-   --  Designates entities that are entry point for the xref solving
-   --  infrastructure. If this returns true, then nameres_diagnostics can be
-   --  called on it.
+   --  Return whether this node is an entry point for the xref solving
+   --  infrastructure. If this returns true, then ``nameres_diagnostics`` can
+   --  be called on it.
    --% belongs-to: Lkt_Node
 
          
    function P_Complete
      (Node : Lkt_Node'Class) return Complete_Item_Array;
-   --  Return an array of completion item for language server clients
+   --  Return an array of completion item for language server clients.
    --% belongs-to: Lkt_Node
 
 
@@ -3575,38 +3608,44 @@ package Liblktlang.Analysis is
          
    function P_As_Bare_Decl
      (Node : Decl'Class) return Decl;
-   --  Get this declaration without rebindings information.
+   --  Return this declaration without rebindings information.
    --% belongs-to: Decl
 
          
    function P_Get_Type
      (Node : Decl'Class) return Type_Decl;
-   --  Return the type of the Decl.
+   --  Return the relevant type when this declaration is used to create a value
+   --  (the return type for a function, the type itself for structs/classes,
+   --  ...).
+   --
+   --  This returns null when the type cannot be inferred.
    --% belongs-to: Decl
 
          
    function P_Get_Cast_Type
      (Node : Decl'Class;
       Cast_To : Type_Decl'Class) return Type_Decl;
-   --  If we are casting an entity (Self) to something that is not an entity,
-   --  make it an entity.
+   --  Return the type of ``E.as[T]`` when ``cast_to`` materializes the cast
+   --  destination type (``T``), and ``self`` is the type of ``E``.
+   --
+   --  The result is ``T`` except when ``T`` is a bare node type whereas
+   --  ``self`` is an entity type: in this case, the result is ``Entity[T]``.
    --% belongs-to: Decl
 
          
    function P_Get_Keep_Type
      (Node : Decl'Class;
       Keep_Type : Type_Decl'Class) return Type_Decl;
-   --  Return the type of Entity when we only keep elements of type keep_type.
-   --  If we are casting an entity (Self) to something that is not an entity,
-   --  make it an entity.
+   --  Return the type of ``E.keep[T]`` when ``keep_type`` materializes the
+   --  input type (``T``), and ``self`` is the type of ``E``.
    --% belongs-to: Decl
 
          
    function P_Get_Suffix_Type
      (Node : Decl'Class;
       Prefix_Type : Type_Decl'Class) return Type_Decl;
-   --  If we are accessing a ParseField of an entity, then that field's type
-   --  also needs to be an entity.
+   --  Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+   --  member and ``prefix_type`` is the type of ``E``.
    --% belongs-to: Decl
 
          
@@ -3789,14 +3828,12 @@ package Liblktlang.Analysis is
 
          
    function P_Base_Type
-     (Node : Type_Decl'Class) return Type_Ref;
-   --  Return the base type for this node, if any.
-   --% belongs-to: Type_Decl
-
-         
-   function P_Base_Type_If_Entity
      (Node : Type_Decl'Class) return Type_Decl;
    --  Return the base type for this node, if any.
+   --
+   --  Note that this includes "logic" base types for covariant types, like
+   --  ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
+   --  ``Entity[Child]``.
    --% belongs-to: Type_Decl
 
 
@@ -4744,6 +4781,25 @@ package Liblktlang.Analysis is
 
 
 
+
+
+
+
+
+         
+   
+
+   function F_Decl
+     (Node : Destructuring_Pattern_Detail'Class) return Binding_Val_Decl;
+   --  When there are no parsing errors, this field is never null.
+   --% belongs-to: Destructuring_Pattern_Detail
+
+
+
+
+
+
+
          
    
 
@@ -5105,11 +5161,6 @@ package Liblktlang.Analysis is
      (Node : Field_Decl'Class) return Dot_Expr;
    --  This field may be null even when there are no parsing errors.
    --% belongs-to: Field_Decl
-
-
-
-
-
 
 
 
@@ -7046,17 +7097,7 @@ package Liblktlang.Analysis is
    
 
    function F_Call
-     (Node : Property_Pattern_Detail'Class) return Expr;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Array_Literal`, :ada:ref:`Big_Num_Lit`, :ada:ref:`Block_Expr`,
-   --  :ada:ref:`Block_String_Lit`, :ada:ref:`Call_Expr`, :ada:ref:`Cast_Expr`,
-   --  :ada:ref:`Char_Lit`, :ada:ref:`Dot_Expr`, :ada:ref:`Error_On_Null`,
-   --  :ada:ref:`Generic_Instantiation`, :ada:ref:`Keep_Expr`,
-   --  :ada:ref:`Logic_Expr`, :ada:ref:`Logic_Predicate`,
-   --  :ada:ref:`Match_Expr`, :ada:ref:`Null_Lit`, :ada:ref:`Num_Lit`,
-   --  :ada:ref:`Paren_Expr`, :ada:ref:`Query`, :ada:ref:`Ref_Id`,
-   --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
-   --
+     (Node : Property_Pattern_Detail'Class) return Call_Expr;
    --  When there are no parsing errors, this field is never null.
    --% belongs-to: Property_Pattern_Detail
 
@@ -7247,6 +7288,12 @@ package Liblktlang.Analysis is
 
 
 
+
+         
+   function P_Denoted_Value
+     (Node : Regex_Pattern'Class) return Decoded_String_Value;
+   --  Return the equivalent string for this regular expression.
+   --% belongs-to: Regex_Pattern
 
 
 
@@ -7988,6 +8035,12 @@ package Liblktlang.Analysis is
       function As_Default_List_Type_Ref
         (Node : Lkt_Node'Class) return Default_List_Type_Ref;
       --% no-document: True
+      function As_Pattern_Detail
+        (Node : Lkt_Node'Class) return Pattern_Detail;
+      --% no-document: True
+      function As_Destructuring_Pattern_Detail
+        (Node : Lkt_Node'Class) return Destructuring_Pattern_Detail;
+      --% no-document: True
       function As_Dot_Expr
         (Node : Lkt_Node'Class) return Dot_Expr;
       --% no-document: True
@@ -8059,9 +8112,6 @@ package Liblktlang.Analysis is
       --% no-document: True
       function As_Field_Decl
         (Node : Lkt_Node'Class) return Field_Decl;
-      --% no-document: True
-      function As_Pattern_Detail
-        (Node : Lkt_Node'Class) return Pattern_Detail;
       --% no-document: True
       function As_Field_Pattern_Detail
         (Node : Lkt_Node'Class) return Field_Pattern_Detail;
@@ -8749,6 +8799,14 @@ private
       No_Default_List_Type_Ref : constant Default_List_Type_Ref :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
+         type Pattern_Detail is new Lkt_Node with null record;
+      No_Pattern_Detail : constant Pattern_Detail :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Destructuring_Pattern_Detail is new Pattern_Detail with null record;
+      No_Destructuring_Pattern_Detail : constant Destructuring_Pattern_Detail :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
          type Dot_Expr is new Expr with null record;
       No_Dot_Expr : constant Dot_Expr :=
         (Internal   => Implementation.No_Entity,
@@ -8843,10 +8901,6 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Field_Decl is new Component_Decl with null record;
       No_Field_Decl : constant Field_Decl :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Pattern_Detail is new Lkt_Node with null record;
-      No_Pattern_Detail : constant Pattern_Detail :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Field_Pattern_Detail is new Pattern_Detail with null record;

@@ -1,0 +1,41 @@
+===== Test with environment variables =====
+
+== Fetch "foo" in Lkt mode with LKT_PATH
+"foo" unit resolved to src/foo.lkt
+  'fun lkt(): String = "lkt"\n'
+
+== Fetch "foo" in LKQL mode with LKQL_PATH
+"foo" unit resolved to src/foo.lkql
+  'fun lkql(): String = "lkql"\n'
+
+== Fetch "foo" in Lkt mode with LKQL_PATH
+"foo" unit not found...
+
+== Fetch "foo" in LKQL mode with LKT_PATH
+"foo" unit not found...
+
+== Fetch "foo" in Lkt mode with no environment variables
+"foo" unit not found...
+
+===== Test with explicit directories =====
+
+== Fetch "foo" in Lkt mode in "src" dir
+"foo" unit resolved to src/foo.lkt
+  'fun lkt(): String = "lkt"\n'
+
+== Fetch "foo" in Lkt mode in "other_src" dirs
+"foo" unit resolved to other_src/foo.lkt
+  'fun lkt(): String = "other_lkt"\n'
+
+== Fetch "foo" in LKQL mode in "src" dir
+"foo" unit resolved to src/foo.lkql
+  'fun lkql(): String = "lkql"\n'
+
+== Fetch "foo" in LKQL mode in "other_src" dir
+"foo" unit resolved to other_src/foo.lkql
+  'fun lkql(): String = "other_lkql"\n'
+
+== Fetch "foo" in Lkt mode in no dirs
+"foo" unit not found...
+
+main.py: Done

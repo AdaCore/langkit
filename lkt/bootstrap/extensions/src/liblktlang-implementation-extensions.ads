@@ -14,11 +14,11 @@ package Liblktlang.Implementation.Extensions is
        Enable : Boolean) return Boolean;
 
    function Id_P_Custom_Image
-     (Node : Bare_Id; E_Info : Entity_Info) return String_Type;
+     (Node : Bare_Id; E_Info : Internal_Entity_Info) return String_Type;
    --  Custom version of Image for Ids to keep Entity information
 
    function Decl_P_Custom_Image
-     (Node : Bare_Decl; E_Info : Entity_Info) return String_Type;
+     (Node : Bare_Decl; E_Info : Internal_Entity_Info) return String_Type;
    --  Custom version of Image for Decls to keep Entity information
 
    function Decl_Short_Image (Node : Bare_Decl) return Text_Type;
@@ -55,6 +55,10 @@ package Liblktlang.Implementation.Extensions is
    function Module_Doc_String_Lit_P_Denoted_Value
      (Node : Bare_Module_Doc_String_Lit) return Internal_Decoded_String_Value;
    --  Return the content of the given module doc string literal node
+
+   function Regex_Pattern_P_Denoted_Value
+     (Node : Bare_Regex_Pattern) return Internal_Decoded_String_Value;
+   --  Return the equivalent string for this regular expression
 
    function Single_Line_String_Lit_P_Denoted_Value
      (Node : Bare_Single_Line_String_Lit) return Internal_Decoded_String_Value;

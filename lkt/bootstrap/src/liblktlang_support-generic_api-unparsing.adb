@@ -21,16 +21,15 @@ with Ada.Strings.Unbounded.Aux;
 pragma Warnings (On, "internal");
 
 with GNAT.Regpat;
-with GNAT.Strings;
 
 with GNATCOLL.Iconv;
 with GNATCOLL.Opt_Parse;
-with GNATCOLL.VFS; use GNATCOLL.VFS;
 with Prettier_Ada.Documents.Json;
 
 with Liblktlang_Support.Errors;         use Liblktlang_Support.Errors;
 with Liblktlang_Support.Generic_API.Introspection;
 use Liblktlang_Support.Generic_API.Introspection;
+with Liblktlang_Support.Internal;       use Liblktlang_Support.Internal;
 with Liblktlang_Support.Internal.Descriptor;
 use Liblktlang_Support.Internal.Descriptor;
 with Liblktlang_Support.Internal.Unparsing;
@@ -57,13 +56,18 @@ package body Liblktlang_Support.Generic_API.Unparsing is
 
    function Load_Unparsing_Config_From_Buffer
      (Language        : Language_Id;
-      Buffer          : String;
+      Buffer          : Memory_Buffer_And_Access;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean)
+      Check_All_Nodes : Boolean;
+      Overridings     : Memory_Buffer_And_Access_Array)
       return Unparsing_Configuration
    is (Ada.Finalization.Controlled with
        Value => Load_Unparsing_Config_From_Buffer
-                  (Language, Buffer, Diagnostics, Check_All_Nodes));
+                  (Language,
+                   Buffer,
+                   Diagnostics,
+                   Check_All_Nodes,
+                   Overridings));
    --  Like ``Load_Unparsing_Config``, but loading the unparsing configuration
    --  from an in-memory buffer rather than from a file.
 
@@ -370,10 +374,6 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       --  Document to substitute to "recurse*" nodes when instantiating a
       --  template.
 
-      Node : Lk_Node;
-      --  Node from which ``Document`` was generated. Keeping track of this is
-      --  necessary in order to implement instantiation for "recurse_flatten".
-
       Next_Token : Lk_Token;
       --  Token that follows ``Node``, i.e. the token to assign to
       --  ``Current_Token`` after this template argument has been processed.
@@ -410,7 +410,9 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    function Instantiate_Template
      (Pool          : in out Document_Pool;
       Symbols       : in out Symbol_Instantiation_Context;
+      Config        : Unparsing_Configuration_Record;
       Node          : Lk_Node;
+      Field         : Lk_Node;
       Current_Token : in out Lk_Token;
       Trivias       : Trivias_Info;
       Template      : Template_Type;
@@ -420,7 +422,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    --
    --  ``Node`` must be the node for which we instantiate this template: it is
    --  used to correctly initialize the ``Node`` component of instantiated
-   --  documents.
+   --  documents. When instantiating a field template, ``Field`` must be the
+   --  corresponding field node.
    --
    --  ``Current_Token`` must be the first token for ``Node``, and is updated
    --  to account for all the tokens that are processed by this template.
@@ -428,9 +431,16 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    --  Information in ``Trivias`` is used to process trivias as expected.
 
    type Instantiation_State is record
+      Language : Language_Id;
+      --  Language for processed sources
+
       Node : Lk_Node;
       --  Node for which we instantiate a template (see the ``Node`` argument
       --  of ``Instantiate_Template``).
+
+      Field : Lk_Node;
+      --  When instantiating a field template, this is set to the corresponding
+      --  field. Uninitialized for other templates.
 
       Current_Token : Lk_Token;
       --  Token that is about to be unparsed by this template instantiation.
@@ -444,6 +454,9 @@ package body Liblktlang_Support.Generic_API.Unparsing is
 
       Trivias : not null access constant Trivias_Info;
       --  Information used to process trivias as expected
+
+      Token_Formattings : Token_Unparser_Formattings;
+      --  Formatting for tokens from the unparsing configuration
    end record;
    --  Group of common parameters for ``Instantiate_Template_Helper``, to have
    --  a single argument to pass down to recursion.
@@ -452,9 +465,15 @@ package body Liblktlang_Support.Generic_API.Unparsing is
      (Pool     : in out Document_Pool;
       State    : in out Instantiation_State;
       Template : Document_Type) return Document_Type;
-   --  Helper for ``Instantiate_Template_Helper``. Implement the recursive part
-   --  of template instantiation: ``Instantiate_Template_Helper`` takes care of
-   --  the template unwrapping.
+   --  Helper for ``Instantiate_Template``. Implement the recursive part of
+   --  template instantiation: ``Instantiate_Template`` takes care of the
+   --  template unwrapping.
+
+   function Evaluate_Expression
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Value_Ref;
+   --  Helper for ``Instantiate_Template_Helper``. Evaluate an expression tree
+   --  and return the resulting value.
 
    -----------------------
    -- Check_Same_Tokens --
@@ -1183,7 +1202,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
             Items.Append
               (Pool.Create_Token
                  (Fragment.Comment_Token.Kind,
-                  Comment_Stripped_Text (Fragment.Comment_Token)));
+                  Comment_Stripped_Text (Fragment.Comment_Token),
+                  No_Token_Unparser));
 
          when Whitespaces =>
             Items.Append
@@ -1256,10 +1276,11 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                Count        : constant Natural := Node.Children_Count;
                Sep_Fragment : Unparsing_Fragment :=
                  (if Node_Unparser.Separator = null
-                  then (Kind          => List_Separator_Fragment,
-                        Token_Kind    => No_Token_Kind_Ref,
-                        Token_Text    => To_Unbounded_Text (""),
-                        List_Sep_Kind => Sep_Template)
+                  then (Kind           => List_Separator_Fragment,
+                        Token_Kind     => No_Token_Kind_Ref,
+                        Token_Text     => To_Unbounded_Text (""),
+                        Token_Unparser => No_Token_Unparser,
+                        List_Sep_Kind  => Sep_Template)
                   else Fragment_For
                          (Id, Node_Unparser.Separator, Sep_Template));
             begin
@@ -1305,9 +1326,10 @@ package body Liblktlang_Support.Generic_API.Unparsing is
          when Token =>
             Process.all
               (Fragment      =>
-                 (Kind       => Token_Fragment,
-                  Token_Kind => Token_Node_Kind (Node_Type),
-                  Token_Text => To_Unbounded_Text (Node.Text)),
+                 (Kind           => Token_Fragment,
+                  Token_Kind     => Token_Node_Kind (Node_Type),
+                  Token_Text     => To_Unbounded_Text (Node.Text),
+                  Token_Unparser => No_Token_Unparser),
                Current_Token => Current_Token);
       end case;
    end Iterate_On_Fragments;
@@ -1422,11 +1444,12 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    is
       Diagnostics : Diagnostics_Vectors.Vector;
       Result      : constant Unparsing_Configuration :=
-        Load_Unparsing_Config_From_Buffer
+        Load_Unparsing_Config
           (Language,
-           Language.Unparsers.Default_Config.all,
+           Language.Unparsers.Default_Config_Filename.all,
            Diagnostics,
-           Check_All_Nodes => False);
+           Check_All_Nodes => False,
+           Overridings     => Empty_File_Array);
    begin
       if not Diagnostics.Is_Empty then
          raise Program_Error;
@@ -1442,26 +1465,28 @@ package body Liblktlang_Support.Generic_API.Unparsing is
      (Language        : Language_Id;
       Filename        : String;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
-      Check_All_Nodes : Boolean := False)
+      Check_All_Nodes : Boolean := False;
+      Overridings     : File_Array := Empty_File_Array)
       return Unparsing_Configuration
    is
-      use type GNAT.Strings.String_Access;
-
-      JSON_Text : GNAT.Strings.String_Access := Create (+Filename).Read_File;
+      Filenames : File_Array (1 .. Overridings'Length + 1);
+      Buffers   : Memory_Buffer_And_Access_Array (1 .. Overridings'Length + 1);
    begin
-      if JSON_Text = null then
-         Append
-           (Diagnostics,
-            No_Source_Location_Range,
-            To_Text ("cannot read " & Filename));
+      Filenames (1) := Create (+Filename);
+      Filenames (2 .. Filenames'Last) := Overridings;
+      if not Load_Buffers (Language, Filenames, Buffers, Diagnostics) then
          return No_Unparsing_Configuration;
       end if;
 
       return Result : constant Unparsing_Configuration :=
         Load_Unparsing_Config_From_Buffer
-          (Language, JSON_Text.all, Diagnostics, Check_All_Nodes)
+          (Language        => Language,
+           Buffer          => Buffers (1),
+           Diagnostics     => Diagnostics,
+           Check_All_Nodes => Check_All_Nodes,
+           Overridings     => Buffers (2 .. Buffers'Last))
       do
-         GNAT.Strings.Free (JSON_Text);
+         Free (Buffers);
       end return;
    end Load_Unparsing_Config;
 
@@ -1506,18 +1531,23 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    function Instantiate_Template
      (Pool          : in out Document_Pool;
       Symbols       : in out Symbol_Instantiation_Context;
+      Config        : Unparsing_Configuration_Record;
       Node          : Lk_Node;
+      Field         : Lk_Node;
       Current_Token : in out Lk_Token;
       Trivias       : Trivias_Info;
       Template      : Template_Type;
       Arguments     : Template_Instantiation_Args) return Document_Type
    is
       State : Instantiation_State :=
-        (Node,
+        (Node.Language,
+         Node,
+         Field,
          Current_Token,
          Symbols'Unrestricted_Access,
          Arguments'Unrestricted_Access,
-         Trivias'Unrestricted_Access);
+         Trivias'Unrestricted_Access,
+         Config.Token_Formattings);
    begin
       return Result : constant Document_Type :=
         Instantiate_Template_Helper (Pool, State, Template.Root)
@@ -1594,63 +1624,6 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                     (State.Symbols.all, Template.If_Break_Group_Id));
             end;
 
-         when If_Empty =>
-            declare
-               --  Consider that a list node with no child but with attached
-               --  comments is *not* empty. This makes more sense for
-               --  formatting concerns, as we unparse these comments as list
-               --  children.
-
-               Child       : constant Lk_Node :=
-                 State.Arguments.With_Recurse_Doc.Node;
-               Subtemplate : constant Document_Type :=
-                 (if Is_Empty_List (Child)
-                  then Template.If_Empty_Then
-                  else Template.If_Empty_Else);
-            begin
-               return Instantiate_Template_Helper
-                        (Pool, State, Subtemplate);
-            end;
-
-         when If_Kind =>
-            declare
-               Field_Node       : constant Lk_Node :=
-                 Eval_Syntax_Field (State.Node, Template.If_Kind_Field);
-               Matched_Template : Document_Type := Template.If_Kind_Default;
-
-            begin
-               --  If the field is present, pick the document for the first
-               --  matcher that accepts it.
-
-               if Is_Field_Present
-                    (Field_Node,
-                     Syntax_Field_Index
-                       (Template.If_Kind_Field, Type_Of (State.Node)))
-               then
-                  for I in
-                    Template.If_Kind_Matchers.First_Index
-                    .. Template.If_Kind_Matchers.Last_Index
-                  loop
-                     if Matches
-                          (Field_Node, Template.If_Kind_Matchers.Reference (I))
-                     then
-                        Matched_Template :=
-                          Template.If_Kind_Matchers (I).Document;
-                        exit;
-                     end if;
-                  end loop;
-
-               --  Otherwise, use the null template, if present. For all
-               --  other cases, use the default template.
-
-               elsif Template.If_Kind_Absent /= null then
-                  Matched_Template := Template.If_Kind_Absent;
-               end if;
-
-               return Instantiate_Template_Helper
-                        (Pool, State, Matched_Template);
-            end;
-
          when Indent =>
             return Pool.Create_Indent
               (Instantiate_Template_Helper
@@ -1696,47 +1669,37 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                Next_Token => State.Current_Token);
 
          when Recurse_Flatten =>
-            declare
-               Arg : constant Single_Template_Instantiation_Argument :=
-                 State.Arguments.With_Recurse_Doc;
-            begin
-               return Result : Document_Type :=
-                  Use_Template_Argument
-                    (Pool       => Pool,
-                     Argument   => State.Arguments.With_Recurse_Doc,
-                     Next_Token => State.Current_Token)
-               do
-                  --  As long as Result is a document we can flatten and that
-                  --  was created by a node that passes the flattening guard,
-                  --  unwrap it.
+            return Result : Document_Type :=
+               Use_Template_Argument
+                 (Pool       => Pool,
+                  Argument   => State.Arguments.With_Recurse_Doc,
+                  Next_Token => State.Current_Token)
+            do
+               --  As long as Result is a document we can flatten, unwrap it
 
-                  while not Arg.Node.Is_Null
-                        and then Node_Matches
-                                   (Arg.Node, Template.Recurse_Flatten_Types)
-                  loop
-                     case Result.Kind is
-                        when Align =>
-                           Result := Result.Align_Contents;
+               loop
+                  case Result.Kind is
+                     when Align =>
+                        Result := Result.Align_Contents;
 
-                        when Fill =>
-                           Result := Result.Fill_Document;
+                     when Fill =>
+                        Result := Result.Fill_Document;
 
-                        when Group =>
-                           Result := Result.Group_Document;
+                     when Group =>
+                        Result := Result.Group_Document;
 
-                        when Indent =>
-                           Result := Result.Indent_Document;
+                     when Indent =>
+                        Result := Result.Indent_Document;
 
-                        when List =>
-                           exit when Result.List_Documents.Length /= 1;
-                           Result := Result.List_Documents.First_Element;
+                     when List =>
+                        exit when Result.List_Documents.Length /= 1;
+                        Result := Result.List_Documents.First_Element;
 
-                        when others =>
-                           exit;
-                     end case;
-                  end loop;
-               end return;
-            end;
+                     when others =>
+                        exit;
+                  end case;
+               end loop;
+            end return;
 
          when Recurse_Left =>
             return Use_Shared_Document (Pool, State.Arguments.Join_Left);
@@ -1749,9 +1712,31 @@ package body Liblktlang_Support.Generic_API.Unparsing is
 
          when Table_Separator | Token =>
             declare
-               Items : Document_Vectors.Vector;
+               Items    : Document_Vectors.Vector;
+               Unparser : constant Token_Unparser_Index :=
+                 Template.Token_Unparser;
+
+               --  If this token comes from an unparser, apply the formatting
+               --  rules from the config to it. Otherwise, just use the
+               --  formatting from the sources (Current_Token).
+
+               Format_Cfg : Token_Unparser_Formattings_Impl renames
+                 State.Token_Formattings.all;
+               Formatting : constant Document_Type :=
+                 (if Unparser = No_Token_Unparser
+                  then null
+                  elsif Template.Kind = Table_Separator
+                  then Format_Cfg (Unparser).Table_Separator
+                  else Format_Cfg (Unparser).Token);
             begin
-               Items.Append (Template);
+               Items.Append
+                 (if Formatting = null
+                  then Pool.Create_Token_Kind
+                         (Template.Kind,
+                          State.Current_Token.Kind,
+                          To_Unbounded_Text (State.Current_Token.Text),
+                          No_Token_Unparser)
+                  else Formatting);
                Process_Trivias
                  (State.Current_Token,
                   Items,
@@ -1763,8 +1748,92 @@ package body Liblktlang_Support.Generic_API.Unparsing is
 
          when Trim | Whitespace =>
             return Template;
+
+         when If_Then_Else =>
+            declare
+               Condition   : constant Value_Ref :=
+                 Evaluate_Expression (State, Template.If_Condition);
+               Subtemplate : constant Document_Type :=
+                 (if Condition.As_Bool
+                  then Template.If_Then
+                  else Template.If_Else);
+            begin
+               return Instantiate_Template_Helper (Pool, State, Subtemplate);
+            end;
+
+         when Match =>
+            declare
+               Field_Node       : constant Lk_Node :=
+                 Eval_Syntax_Field (State.Node, Template.Match_Field);
+               Matched_Template : Document_Type := Template.Match_Default;
+
+            begin
+               --  If the field is present, pick the document for the first
+               --  matcher that accepts it.
+
+               if Is_Field_Present
+                    (Field_Node,
+                     Syntax_Field_Index
+                       (Template.Match_Field, Type_Of (State.Node)))
+               then
+                  for I in
+                    Template.Match_Matchers.First_Index
+                    .. Template.Match_Matchers.Last_Index
+                  loop
+                     if Matches
+                          (Field_Node, Template.Match_Matchers.Reference (I))
+                     then
+                        Matched_Template :=
+                          Template.Match_Matchers (I).Document;
+                        exit;
+                     end if;
+                  end loop;
+
+               --  Otherwise, use the null template, if present. For all
+               --  other cases, use the default template.
+
+               elsif Template.Match_Absent /= null then
+                  Matched_Template := Template.Match_Absent;
+               end if;
+
+               return Instantiate_Template_Helper
+                        (Pool, State, Matched_Template);
+            end;
       end case;
    end Instantiate_Template_Helper;
+
+   -------------------------
+   -- Evaluate_Expression --
+   -------------------------
+
+   function Evaluate_Expression
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Value_Ref is
+   begin
+      case Template_Expression_Kind (Expression.Kind) is
+         when Is_A =>
+            declare
+               Node : constant Lk_Node :=
+                 Evaluate_Expression (State, Expression.Is_A_Node).As_Node;
+               Result : constant Boolean :=
+                 not Node.Is_Null
+                 and then Node_Matches (Node, Expression.Is_A_Kinds);
+            begin
+               return From_Bool (State.Language, Result);
+            end;
+
+         when Is_Empty =>
+            declare
+               Node : constant Lk_Node :=
+                 Evaluate_Expression (State, Expression.Is_Empty_Node).As_Node;
+            begin
+               return From_Bool (State.Language, Is_Empty_List (Node));
+            end;
+
+         when This_Field =>
+            return From_Node (State.Language, State.Field);
+      end case;
+   end Evaluate_Expression;
 
    -------------------------
    -- Unparse_To_Prettier --
@@ -1783,6 +1852,15 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       Trivias     : Trivias_Info;
       Pool        : Document_Pool;
       Next_Symbol : Some_Template_Symbol := 1;
+
+      function Document_For_Token_Fragment
+        (Current_Token : Lk_Token;
+         Fragment      : Unparsing_Fragment)
+         return Document_Type
+      with Pre => Fragment.Kind in Token_Fragment | List_Separator_Fragment;
+      --  Return the document to use to format the given (token) unparsing
+      --  fragment. This takes token formatting rules from ``Config`` into
+      --  account.
 
       procedure Skip_Tokens
         (Current_Token : in out Lk_Token;
@@ -1858,6 +1936,47 @@ package body Liblktlang_Support.Generic_API.Unparsing is
          end if;
       end Emit_Error;
 
+      ---------------------------------
+      -- Document_For_Token_Fragment --
+      ---------------------------------
+
+      function Document_For_Token_Fragment
+        (Current_Token : Lk_Token;
+         Fragment      : Unparsing_Fragment)
+         return Document_Type
+      is
+         Result   : Document_Type;
+         Unparser : Token_Unparser_Index renames Fragment.Token_Unparser;
+      begin
+         if Fragment.Token_Kind = No_Token_Kind_Ref then
+
+            --  This is a dummy fragment: yield an empty document list for it
+
+            return Pool.Create_Empty_List;
+
+         elsif Unparser = No_Token_Unparser then
+
+            --  This fragment does not come from an unparser: create a document
+            --  that reflects exactly the token that comes from sources.
+
+            return Pool.Create_Token
+                     (Fragment.Token_Kind, Fragment.Token_Text, Unparser);
+         end if;
+
+         --  This token comes from an unparser: apply the formatting rules from
+         --  the config to it.
+
+         Result := Config.Value.Token_Formattings.all (Unparser).Token;
+         if Result = null then
+            return Pool.Create_Token
+                     (Current_Token.Kind,
+                      To_Unbounded_Text (Current_Token.Text),
+                      Unparser);
+         else
+            return Result;
+         end if;
+      end Document_For_Token_Fragment;
+
       -----------------
       -- Skip_Tokens --
       -----------------
@@ -1896,8 +2015,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                pragma Assert (Fragment.Kind = Token_Fragment);
             begin
                Items.Append
-                 (Pool.Create_Token
-                    (Fragment.Token_Kind, Fragment.Token_Text));
+                 (Document_For_Token_Fragment (Current_Token, Fragment));
                Process_Trivias
                  (Current_Token, Items, Pool, Trivias, Skip_Token => True);
             end;
@@ -2053,9 +2171,7 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                         or else Is_Fake_Token);
 
                      Token : Document_Type :=
-                       (if F.Token_Kind = No_Token_Kind_Ref
-                        then Pool.Create_Empty_List
-                        else Pool.Create_Token (F.Token_Kind, F.Token_Text));
+                       Document_For_Token_Fragment (Current_Token, F);
                   begin
                      --  If we have a list separator, instantiate the
                      --  corresponding template to wrap ``Token``.
@@ -2090,12 +2206,13 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                            Args.With_Recurse_Doc :=
                              (Document   => Create_Shared_Document
                                               (Pool.Create_List (Sep_Items)),
-                              Node       => N,
                               Next_Token => Next_Token);
                            Token := Instantiate_Template
                              (Pool          => Pool,
                               Symbols       => Symbols,
+                              Config        => Config.Value.all,
                               Node          => N,
+                              Field         => No_Lk_Node,
                               Current_Token => Current_Token,
                               Trivias       => Trivias,
                               Template      => Sep_Template,
@@ -2279,6 +2396,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                                   (Pool          => Pool,
                                    Symbols       => Symbols,
                                    Node          => N,
+                                   Field         => No_Lk_Node,
+                                   Config        => Config.Value.all,
                                    Current_Token => Current_Token,
                                    Trivias       => Trivias,
                                    Template      => Table_Join_Template,
@@ -2336,7 +2455,9 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                Result := Instantiate_Template
                  (Pool          => Pool,
                   Symbols       => Symbols,
+                  Config        => Config.Value.all,
                   Node          => N,
+                  Field         => No_Lk_Node,
                   Trivias       => Trivias,
                   Current_Token => Current_Token,
                   Template      => Template,
@@ -2345,7 +2466,6 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                      With_Recurse_Doc =>
                        (Document   => Create_Shared_Document
                                         (Pool.Create_List (Items)),
-                        Node       => N,
                         Next_Token => Current_Token)));
 
             when With_Recurse_Field =>
@@ -2415,7 +2535,6 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                         Arguments.Field_Docs.Append
                           (Single_Template_Instantiation_Argument'
                              (Document   => Create_Shared_Document (Child_Doc),
-                              Node       => Child,
                               Next_Token => Field_Token));
 
                         if Current_Token_Trace.Is_Active then
@@ -2443,7 +2562,9 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                   Result := Instantiate_Template
                     (Pool          => Pool,
                      Symbols       => Symbols,
+                     Config        => Config.Value.all,
                      Node          => N,
+                     Field         => No_Lk_Node,
                      Current_Token => Current_Token,
                      Trivias       => Trivias,
                      Template      => Template,
@@ -2558,7 +2679,6 @@ package body Liblktlang_Support.Generic_API.Unparsing is
          begin
             Field_Template_Args.With_Recurse_Doc :=
               (Document   => Create_Shared_Document (Field_Doc),
-               Node       => Child,
                Next_Token => Next_Token);
          end;
 
@@ -2569,7 +2689,9 @@ package body Liblktlang_Support.Generic_API.Unparsing is
            (Instantiate_Template
               (Pool          => Pool,
                Symbols       => Symbols,
+               Config        => Config.Value.all,
                Node          => Node,
+               Field         => Child,
                Current_Token => Current_Token,
                Trivias       => Trivias,
                Template      => Field_Template,
@@ -2907,6 +3029,13 @@ package body Liblktlang_Support.Generic_API.Unparsing is
          Help        => "Name of the JSON pretty-printer configuration file",
          Default_Val => Null_Unbounded_String);
 
+      package Overriding_Filenames is new Parse_Option_List
+        (Parser      => Parser,
+         Long        => "--overriding",
+         Arg_Type    => Unbounded_String,
+         Accumulate  => True,
+         Help        => "JSON files to override the unparsing configuration.");
+
       package Check_All_Nodes is new Parse_Flag
         (Parser      => Parser,
          Short       => "-C",
@@ -3116,18 +3245,30 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       declare
          Diagnostics : Diagnostics_Vectors.Vector;
          Filename    : constant String := To_String (Config_Filename.Get);
+
+         Overridings      : constant Overriding_Filenames.Result_Array :=
+           Overriding_Filenames.Get;
+         Overriding_Files : File_Array (Overridings'Range);
       begin
-         if Filename = "" then
-            Config := Default_Unparsing_Configuration (Language);
-         else
-            Config := Load_Unparsing_Config
-              (Language, Filename, Diagnostics, Check_All_Nodes.Get);
-            if Config = No_Unparsing_Configuration then
-               Put_Line ("Error when loading the unparsing configuration:");
-               Print (Diagnostics);
-               Set_Exit_Status (Failure);
-               return;
-            end if;
+         for I in Overridings'Range loop
+            Overriding_Files (I) := Create (+To_String (Overridings (I)));
+         end loop;
+
+         Config := Load_Unparsing_Config
+           (Language        => Language,
+            Filename        =>
+              (if Filename = ""
+               then Language.Unparsers.Default_Config_Filename.all
+               else Filename),
+            Diagnostics     => Diagnostics,
+            Check_All_Nodes => Check_All_Nodes.Get,
+            Overridings     => Overriding_Files);
+
+         if Config = No_Unparsing_Configuration then
+            Put_Line ("Error when loading the unparsing configuration:");
+            Print (Diagnostics);
+            Set_Exit_Status (Failure);
+            return;
          end if;
       end;
 

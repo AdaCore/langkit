@@ -1990,7 +1990,7 @@ package body Liblktlang_Support.Generic_API.Introspection is
                R := Id.Eval_Node_Member (V, Member.Index, Args);
             exception
                when Exc : others =>
-                  if Id.Is_Managed_Error (Exc) then
+                  if Id.Is_Managed_Exception (Exception_Identity (Exc)) then
                      return Result : Value_Or_Error (Is_Error => True) do
                         Save_Occurrence (Result.Error, Exc);
                      end return;

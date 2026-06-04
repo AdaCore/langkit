@@ -80,7 +80,7 @@ typedef enum {
 
         /* lkt_node (abstract)  */
         /*
-         * Root node class for lkt AST nodes.
+         * Root node class for Lkt AST nodes.
          *
          * Derived nodes: ``lkt_argument``, ``lkt_base_import``,
          * ``lkt_base_lexer_case_rule_alt``, ``lkt_base_match_branch``,
@@ -1952,9 +1952,17 @@ typedef enum {
         /*
          * Base class for a detail in a ComplexPattern.
          *
-         * Derived nodes: ``lkt_field_pattern_detail``,
-         * ``lkt_property_pattern_detail``
+         * Derived nodes: ``lkt_destructuring_pattern_detail``,
+         * ``lkt_field_pattern_detail``, ``lkt_property_pattern_detail``
          */
+    
+
+        /*
+         * Pattern detail denoting the destructuring of a field as a shorthand.
+         *
+         * This node type has no derivation.
+         */
+        lkt_destructuring_pattern_detail = 185,
     
 
         /*
@@ -1962,7 +1970,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_field_pattern_detail = 185,
+        lkt_field_pattern_detail = 186,
     
 
         /*
@@ -1970,7 +1978,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_property_pattern_detail = 186,
+        lkt_property_pattern_detail = 187,
     
 
         /* type_ref (abstract)  */
@@ -1988,7 +1996,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_default_list_type_ref = 187,
+        lkt_default_list_type_ref = 188,
     
 
         /*
@@ -1996,7 +2004,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_function_type_ref = 188,
+        lkt_function_type_ref = 189,
     
 
         /*
@@ -2004,7 +2012,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_generic_type_ref = 189,
+        lkt_generic_type_ref = 190,
     
 
         /*
@@ -2012,7 +2020,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_simple_type_ref = 190,
+        lkt_simple_type_ref = 191,
     
 
         /*
@@ -2020,7 +2028,7 @@ typedef enum {
          *
          * This node type has no derivation.
          */
-        lkt_var_bind = 191,
+        lkt_var_bind = 192,
 } lkt_node_kind_enum;
 
 /*
@@ -2311,6 +2319,13 @@ typedef struct {
     * Gramar rule to use for parsing.
     */
    typedef enum {
+      LKT_LANGUAGE_MODE_LKT, LKT_LANGUAGE_MODE_LKQL
+   } lkt_language_mode;
+   /*
+    * All languages that can be analyzed by Liblktlang. This enumeration is
+    * used to provide information when creating a new unit provider.
+    */
+   typedef enum {
       LKT_LOOKUP_KIND_RECURSIVE, LKT_LOOKUP_KIND_FLAT, LKT_LOOKUP_KIND_MINIMAL
    } lkt_lookup_kind;
    /*
@@ -2332,6 +2347,7 @@ typedef enum {
       EXCEPTION_INVALID_UNIT_NAME_ERROR,
       EXCEPTION_NATIVE_EXCEPTION,
       EXCEPTION_PRECONDITION_FAILURE,
+      EXCEPTION_PROGRAM_ERROR,
       EXCEPTION_PROPERTY_ERROR,
       EXCEPTION_TEMPLATE_ARGS_ERROR,
       EXCEPTION_TEMPLATE_FORMAT_ERROR,
@@ -2622,6 +2638,21 @@ typedef void (*lkt_event_handler_unit_parsed_callback)(
    lkt_analysis_context context,
    lkt_analysis_unit unit,
    lkt_bool reparsed
+);
+
+/*
+ * Callback that will be called when a diagnostic is emitted for an analysis
+ * unit.
+ *
+ * ``Unit`` is the unit for which the diagnostic is emitted.
+ *
+ * ``Message`` is the diagnostic message.
+ */
+typedef void (*lkt_event_handler_unit_diagnostic_callback)(
+   void *data,
+   lkt_analysis_context context,
+   lkt_analysis_unit unit,
+   lkt_text *message
 );
 
 /*
@@ -3040,214 +3071,220 @@ typedef enum {
         = 170,
       lkt_member_ref_type_pattern_f_type_name
         = 171,
-      lkt_member_ref_field_pattern_detail_f_id
+      lkt_member_ref_destructuring_pattern_detail_f_decl
         = 172,
-      lkt_member_ref_field_pattern_detail_f_expected_value
+      lkt_member_ref_field_pattern_detail_f_id
         = 173,
-      lkt_member_ref_property_pattern_detail_f_call
+      lkt_member_ref_field_pattern_detail_f_expected_value
         = 174,
-      lkt_member_ref_property_pattern_detail_f_expected_value
+      lkt_member_ref_property_pattern_detail_f_call
         = 175,
-      lkt_member_ref_function_type_ref_f_param_types
+      lkt_member_ref_property_pattern_detail_f_expected_value
         = 176,
-      lkt_member_ref_function_type_ref_f_return_type
+      lkt_member_ref_function_type_ref_f_param_types
         = 177,
-      lkt_member_ref_generic_type_ref_f_type_name
+      lkt_member_ref_function_type_ref_f_return_type
         = 178,
-      lkt_member_ref_generic_type_ref_f_args
+      lkt_member_ref_generic_type_ref_f_type_name
         = 179,
-      lkt_member_ref_simple_type_ref_f_type_name
+      lkt_member_ref_generic_type_ref_f_args
         = 180,
-      lkt_member_ref_var_bind_f_name
+      lkt_member_ref_simple_type_ref_f_type_name
         = 181,
-      lkt_member_ref_var_bind_f_expr
+      lkt_member_ref_var_bind_f_name
         = 182,
-      lkt_member_ref_parent
+      lkt_member_ref_var_bind_f_expr
         = 183,
-      lkt_member_ref_parents
+      lkt_member_ref_parent
         = 184,
-      lkt_member_ref_children
+      lkt_member_ref_parents
         = 185,
-      lkt_member_ref_token_start
+      lkt_member_ref_children
         = 186,
-      lkt_member_ref_token_end
+      lkt_member_ref_token_start
         = 187,
-      lkt_member_ref_child_index
+      lkt_member_ref_token_end
         = 188,
-      lkt_member_ref_previous_sibling
+      lkt_member_ref_child_index
         = 189,
-      lkt_member_ref_next_sibling
+      lkt_member_ref_previous_sibling
         = 190,
-      lkt_member_ref_unit
+      lkt_member_ref_next_sibling
         = 191,
-      lkt_member_ref_is_ghost
+      lkt_member_ref_unit
         = 192,
-      lkt_member_ref_full_sloc_image
+      lkt_member_ref_is_ghost
         = 193,
-      lkt_member_ref_completion_item_kind_to_int
+      lkt_member_ref_full_sloc_image
         = 194,
-      lkt_member_ref_lkt_node_p_set_solver_debug_mode
+      lkt_member_ref_completion_item_kind_to_int
         = 195,
-      lkt_member_ref_lkt_node_p_prelude_unit
+      lkt_member_ref_lkt_node_p_set_solver_debug_mode
         = 196,
-      lkt_member_ref_lkt_node_p_basic_trait_gen
+      lkt_member_ref_lkt_node_p_prelude_unit
         = 197,
-      lkt_member_ref_lkt_node_p_basic_trait
+      lkt_member_ref_lkt_node_p_basic_trait_gen
         = 198,
-      lkt_member_ref_lkt_node_p_node_gen_trait
+      lkt_member_ref_lkt_node_p_basic_trait
         = 199,
-      lkt_member_ref_lkt_node_p_node_trait
+      lkt_member_ref_lkt_node_p_node_gen_trait
         = 200,
-      lkt_member_ref_lkt_node_p_indexable_gen_trait
+      lkt_member_ref_lkt_node_p_node_trait
         = 201,
-      lkt_member_ref_lkt_node_p_indexable_trait
+      lkt_member_ref_lkt_node_p_indexable_gen_trait
         = 202,
-      lkt_member_ref_lkt_node_p_token_node_trait
+      lkt_member_ref_lkt_node_p_indexable_trait
         = 203,
-      lkt_member_ref_lkt_node_p_error_node_trait
+      lkt_member_ref_lkt_node_p_token_node_trait
         = 204,
-      lkt_member_ref_lkt_node_p_char_type
+      lkt_member_ref_lkt_node_p_error_node_trait
         = 205,
-      lkt_member_ref_lkt_node_p_int_type
+      lkt_member_ref_lkt_node_p_char_type
         = 206,
-      lkt_member_ref_lkt_node_p_bool_type
+      lkt_member_ref_lkt_node_p_int_type
         = 207,
-      lkt_member_ref_lkt_node_p_bigint_type
+      lkt_member_ref_lkt_node_p_bool_type
         = 208,
-      lkt_member_ref_lkt_node_p_string_type
+      lkt_member_ref_lkt_node_p_bigint_type
         = 209,
-      lkt_member_ref_lkt_node_p_symbol_type
+      lkt_member_ref_lkt_node_p_string_type
         = 210,
-      lkt_member_ref_lkt_node_p_property_error_type
+      lkt_member_ref_lkt_node_p_symbol_type
         = 211,
-      lkt_member_ref_lkt_node_p_regexp_type
+      lkt_member_ref_lkt_node_p_property_error_type
         = 212,
-      lkt_member_ref_lkt_node_p_entity_gen_type
+      lkt_member_ref_lkt_node_p_regexp_type
         = 213,
-      lkt_member_ref_lkt_node_p_entity_type
+      lkt_member_ref_lkt_node_p_entity_gen_type
         = 214,
-      lkt_member_ref_lkt_node_p_logicvar_type
+      lkt_member_ref_lkt_node_p_entity_type
         = 215,
-      lkt_member_ref_lkt_node_p_equation_type
+      lkt_member_ref_lkt_node_p_logicvar_type
         = 216,
-      lkt_member_ref_lkt_node_p_array_gen_type
+      lkt_member_ref_lkt_node_p_equation_type
         = 217,
-      lkt_member_ref_lkt_node_p_array_type
+      lkt_member_ref_lkt_node_p_array_gen_type
         = 218,
-      lkt_member_ref_lkt_node_p_astlist_gen_type
+      lkt_member_ref_lkt_node_p_array_type
         = 219,
-      lkt_member_ref_lkt_node_p_astlist_type
+      lkt_member_ref_lkt_node_p_stream_gen_type
         = 220,
-      lkt_member_ref_lkt_node_p_node_builder_gen_type
+      lkt_member_ref_lkt_node_p_stream_type
         = 221,
-      lkt_member_ref_lkt_node_p_node_builder_type
+      lkt_member_ref_lkt_node_p_astlist_gen_type
         = 222,
-      lkt_member_ref_lkt_node_p_iterator_gen_trait
+      lkt_member_ref_lkt_node_p_astlist_type
         = 223,
-      lkt_member_ref_lkt_node_p_iterator_trait
+      lkt_member_ref_lkt_node_p_node_builder_gen_type
         = 224,
-      lkt_member_ref_lkt_node_p_analysis_unit_gen_trait
+      lkt_member_ref_lkt_node_p_node_builder_type
         = 225,
-      lkt_member_ref_lkt_node_p_analysis_unit_trait
+      lkt_member_ref_lkt_node_p_iterator_gen_trait
         = 226,
-      lkt_member_ref_lkt_node_p_topmost_invalid_decl
+      lkt_member_ref_lkt_node_p_iterator_trait
         = 227,
-      lkt_member_ref_lkt_node_p_nameres_diagnostics
+      lkt_member_ref_lkt_node_p_analysis_unit_gen_trait
         = 228,
-      lkt_member_ref_lkt_node_p_solve_enclosing_context
+      lkt_member_ref_lkt_node_p_analysis_unit_trait
         = 229,
-      lkt_member_ref_lkt_node_p_xref_entry_point
+      lkt_member_ref_lkt_node_p_topmost_invalid_decl
         = 230,
-      lkt_member_ref_lkt_node_p_complete
+      lkt_member_ref_lkt_node_p_nameres_diagnostics
         = 231,
-      lkt_member_ref_base_import_p_referenced_units
+      lkt_member_ref_lkt_node_p_solve_enclosing_context
         = 232,
-      lkt_member_ref_base_match_branch_p_match_part
+      lkt_member_ref_lkt_node_p_xref_entry_point
         = 233,
-      lkt_member_ref_class_qualifier_p_as_bool
+      lkt_member_ref_lkt_node_p_complete
         = 234,
-      lkt_member_ref_decl_p_custom_image
+      lkt_member_ref_base_import_p_referenced_units
         = 235,
-      lkt_member_ref_decl_p_decl_type_name
+      lkt_member_ref_base_match_branch_p_match_part
         = 236,
-      lkt_member_ref_decl_p_def_ids
+      lkt_member_ref_class_qualifier_p_as_bool
         = 237,
-      lkt_member_ref_decl_p_as_bare_decl
+      lkt_member_ref_decl_p_custom_image
         = 238,
-      lkt_member_ref_decl_p_get_type
+      lkt_member_ref_decl_p_decl_type_name
         = 239,
-      lkt_member_ref_decl_p_get_cast_type
+      lkt_member_ref_decl_p_def_ids
         = 240,
-      lkt_member_ref_decl_p_get_keep_type
+      lkt_member_ref_decl_p_as_bare_decl
         = 241,
-      lkt_member_ref_decl_p_get_suffix_type
+      lkt_member_ref_decl_p_get_type
         = 242,
-      lkt_member_ref_decl_p_is_generic
+      lkt_member_ref_decl_p_get_cast_type
         = 243,
-      lkt_member_ref_decl_p_return_type_is_instantiated
+      lkt_member_ref_decl_p_get_keep_type
         = 244,
-      lkt_member_ref_decl_p_is_instantiated
+      lkt_member_ref_decl_p_get_suffix_type
         = 245,
-      lkt_member_ref_decl_p_name
+      lkt_member_ref_decl_p_is_generic
         = 246,
-      lkt_member_ref_decl_p_full_name
+      lkt_member_ref_decl_p_return_type_is_instantiated
         = 247,
-      lkt_member_ref_fun_decl_p_is_dynamic_combiner
+      lkt_member_ref_decl_p_is_instantiated
         = 248,
-      lkt_member_ref_fun_decl_p_find_all_overrides
+      lkt_member_ref_decl_p_name
         = 249,
-      lkt_member_ref_type_decl_p_def_id
+      lkt_member_ref_decl_p_full_name
         = 250,
-      lkt_member_ref_type_decl_p_base_type
+      lkt_member_ref_fun_decl_p_is_dynamic_combiner
         = 251,
-      lkt_member_ref_type_decl_p_base_type_if_entity
+      lkt_member_ref_fun_decl_p_find_all_overrides
         = 252,
-      lkt_member_ref_excludes_null_p_as_bool
+      lkt_member_ref_type_decl_p_def_id
         = 253,
-      lkt_member_ref_expr_p_get_type
+      lkt_member_ref_type_decl_p_base_type
         = 254,
-      lkt_member_ref_expr_p_get_generic_type
+      lkt_member_ref_excludes_null_p_as_bool
         = 255,
-      lkt_member_ref_expr_p_get_expected_type
+      lkt_member_ref_expr_p_get_type
         = 256,
-      lkt_member_ref_expr_p_referenced_decl
+      lkt_member_ref_expr_p_get_generic_type
         = 257,
-      lkt_member_ref_token_lit_p_denoted_value
+      lkt_member_ref_expr_p_get_expected_type
         = 258,
-      lkt_member_ref_token_pattern_lit_p_denoted_value
+      lkt_member_ref_expr_p_referenced_decl
         = 259,
-      lkt_member_ref_id_p_custom_image
+      lkt_member_ref_token_lit_p_denoted_value
         = 260,
-      lkt_member_ref_def_id_p_name
+      lkt_member_ref_token_pattern_lit_p_denoted_value
         = 261,
-      lkt_member_ref_def_id_p_get_implementatinons
+      lkt_member_ref_id_p_custom_image
         = 262,
-      lkt_member_ref_def_id_p_decl_detail
+      lkt_member_ref_def_id_p_name
         = 263,
-      lkt_member_ref_def_id_p_completion_item_kind
+      lkt_member_ref_def_id_p_get_implementatinons
         = 264,
-      lkt_member_ref_def_id_p_doc
+      lkt_member_ref_def_id_p_decl_detail
         = 265,
-      lkt_member_ref_def_id_p_find_all_references
+      lkt_member_ref_def_id_p_completion_item_kind
         = 266,
-      lkt_member_ref_ref_id_p_referenced_defining_name
+      lkt_member_ref_def_id_p_doc
         = 267,
-      lkt_member_ref_char_lit_p_denoted_value
+      lkt_member_ref_def_id_p_find_all_references
         = 268,
-      lkt_member_ref_string_lit_p_denoted_value
+      lkt_member_ref_ref_id_p_referenced_defining_name
         = 269,
-      lkt_member_ref_string_lit_p_is_prefixed_string
+      lkt_member_ref_char_lit_p_denoted_value
         = 270,
-      lkt_member_ref_string_lit_p_prefix
+      lkt_member_ref_string_lit_p_denoted_value
         = 271,
-      lkt_member_ref_string_lit_p_is_regexp_literal
+      lkt_member_ref_string_lit_p_is_prefixed_string
         = 272,
-      lkt_member_ref_full_decl_p_has_annotation
+      lkt_member_ref_string_lit_p_prefix
         = 273,
-      lkt_member_ref_null_cond_qualifier_p_as_bool
+      lkt_member_ref_string_lit_p_is_regexp_literal
         = 274,
-      lkt_member_ref_type_ref_p_referenced_decl
+      lkt_member_ref_full_decl_p_has_annotation
         = 275,
+      lkt_member_ref_null_cond_qualifier_p_as_bool
+        = 276,
+      lkt_member_ref_regex_pattern_p_denoted_value
+        = 277,
+      lkt_member_ref_type_ref_p_referenced_decl
+        = 278,
 } lkt_introspection_member_ref;
 
 /*
@@ -4354,7 +4391,7 @@ extern int lkt_lkt_node_p_error_node_trait(
 
 
 /*
- * Unit method. Return the character builtin type.
+ * Unit method. Return the ``Char`` builtin type.
  */
 extern int lkt_lkt_node_p_char_type(
     lkt_node *node,
@@ -4369,7 +4406,7 @@ extern int lkt_lkt_node_p_char_type(
 
 
 /*
- * Unit method. Return the integer builtin type.
+ * Unit method. Return the ``Int`` builtin type.
  */
 extern int lkt_lkt_node_p_int_type(
     lkt_node *node,
@@ -4384,7 +4421,7 @@ extern int lkt_lkt_node_p_int_type(
 
 
 /*
- * Unit method. Return the boolean builtin type.
+ * Unit method. Return the ``Bool`` builtin type.
  */
 extern int lkt_lkt_node_p_bool_type(
     lkt_node *node,
@@ -4399,7 +4436,7 @@ extern int lkt_lkt_node_p_bool_type(
 
 
 /*
- * Unit method. Return the big integer builtin type.
+ * Unit method. Return the ``BigInt`` builtin type.
  */
 extern int lkt_lkt_node_p_bigint_type(
     lkt_node *node,
@@ -4414,7 +4451,7 @@ extern int lkt_lkt_node_p_bigint_type(
 
 
 /*
- * Unit method. Return the string builtin type.
+ * Unit method. Return the ``String`` builtin type.
  */
 extern int lkt_lkt_node_p_string_type(
     lkt_node *node,
@@ -4429,7 +4466,7 @@ extern int lkt_lkt_node_p_string_type(
 
 
 /*
- * Unit method. Return the string builtin type.
+ * Unit method. Return the ``Symbol`` builtin type.
  */
 extern int lkt_lkt_node_p_symbol_type(
     lkt_node *node,
@@ -4444,7 +4481,7 @@ extern int lkt_lkt_node_p_symbol_type(
 
 
 /*
- * Unit method. Return the property error builtin type.
+ * Unit method. Return the ``PropertyError`` builtin type.
  */
 extern int lkt_lkt_node_p_property_error_type(
     lkt_node *node,
@@ -4459,7 +4496,7 @@ extern int lkt_lkt_node_p_property_error_type(
 
 
 /*
- * Unit method. Return the regexp builtin type.
+ * Unit method. Return the ``Regexp`` builtin type.
  */
 extern int lkt_lkt_node_p_regexp_type(
     lkt_node *node,
@@ -4474,7 +4511,7 @@ extern int lkt_lkt_node_p_regexp_type(
 
 
 /*
- * Unit method. Return the logicvar builtin type.
+ * Unit method. Return the ``Entity`` generic builtin type.
  */
 extern int lkt_lkt_node_p_entity_gen_type(
     lkt_node *node,
@@ -4489,7 +4526,7 @@ extern int lkt_lkt_node_p_entity_gen_type(
 
 
 /*
- * Unit method. Return the logicvar builtin type.
+ * Unit method. Return the ``Entity`` builtin type.
  */
 extern int lkt_lkt_node_p_entity_type(
     lkt_node *node,
@@ -4504,7 +4541,7 @@ extern int lkt_lkt_node_p_entity_type(
 
 
 /*
- * Unit method. Return the logicvar builtin type.
+ * Unit method. Return the ``LogicVar`` builtin type.
  */
 extern int lkt_lkt_node_p_logicvar_type(
     lkt_node *node,
@@ -4519,7 +4556,7 @@ extern int lkt_lkt_node_p_logicvar_type(
 
 
 /*
- * Unit method. Return the logicvar builtin type.
+ * Unit method. Return the ``Equation`` builtin type.
  */
 extern int lkt_lkt_node_p_equation_type(
     lkt_node *node,
@@ -4564,7 +4601,37 @@ extern int lkt_lkt_node_p_array_type(
 
 
 /*
- * Unit method. Return the ASTList builtin generic type.
+ * Unit method. Return the stream builtin generic type.
+ */
+extern int lkt_lkt_node_p_stream_gen_type(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * Unit method. Return the stream builtin type.
+ */
+extern int lkt_lkt_node_p_stream_type(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * Unit method. Return the ``ASTList`` builtin generic type.
  */
 extern int lkt_lkt_node_p_astlist_gen_type(
     lkt_node *node,
@@ -4579,7 +4646,7 @@ extern int lkt_lkt_node_p_astlist_gen_type(
 
 
 /*
- * Unit method. Return the ASTList builtin type.
+ * Unit method. Return the ``ASTList`` builtin type.
  */
 extern int lkt_lkt_node_p_astlist_type(
     lkt_node *node,
@@ -4594,7 +4661,7 @@ extern int lkt_lkt_node_p_astlist_type(
 
 
 /*
- * Unit method. Return the NodeBuilder builtin generic type.
+ * Unit method. Return the ``NodeBuilder`` builtin generic type.
  */
 extern int lkt_lkt_node_p_node_builder_gen_type(
     lkt_node *node,
@@ -4609,7 +4676,7 @@ extern int lkt_lkt_node_p_node_builder_gen_type(
 
 
 /*
- * Unit method. Return the NodeBuilder builtin type.
+ * Unit method. Return the ``NodeBuilder`` builtin type.
  */
 extern int lkt_lkt_node_p_node_builder_type(
     lkt_node *node,
@@ -4624,7 +4691,7 @@ extern int lkt_lkt_node_p_node_builder_type(
 
 
 /*
- * Unit method. Return the Iterator builtin generic trait.
+ * Unit method. Return the ``Iterator`` builtin generic trait.
  */
 extern int lkt_lkt_node_p_iterator_gen_trait(
     lkt_node *node,
@@ -4639,7 +4706,7 @@ extern int lkt_lkt_node_p_iterator_gen_trait(
 
 
 /*
- * Unit method. Return the Iterator builtin trait.
+ * Unit method. Return the ``Iterator`` builtin trait.
  */
 extern int lkt_lkt_node_p_iterator_trait(
     lkt_node *node,
@@ -4684,8 +4751,8 @@ extern int lkt_lkt_node_p_analysis_unit_trait(
 
 
 /*
- * Return the topmost (from ``Self`` to the root node) FullDecl annotated with
- * ``@invalid``, null otherwise.
+ * Return the topmost (from ``Self`` to the root node) ``FullDecl`` annotated
+ * with ``@invalid``, null otherwise.
  */
 extern int lkt_lkt_node_p_topmost_invalid_decl(
     lkt_node *node,
@@ -4700,7 +4767,7 @@ extern int lkt_lkt_node_p_topmost_invalid_decl(
 
 
 /*
- * If name resolution on this lkt compilation unit fails, this returns all the
+ * If name resolution on this Lkt compilation unit fails, this returns all the
  * diagnostics that were produced while resolving it.
  */
 extern int lkt_lkt_node_p_nameres_diagnostics(
@@ -4716,7 +4783,7 @@ extern int lkt_lkt_node_p_nameres_diagnostics(
 
 
 /*
- * Finds the nearest parent that is an xref_entry_point and solve its equation.
+ * Find the nearest parent that is an xref entry point and solve its equation.
  */
 extern int lkt_lkt_node_p_solve_enclosing_context(
     lkt_node *node,
@@ -4731,9 +4798,9 @@ extern int lkt_lkt_node_p_solve_enclosing_context(
 
 
 /*
- * Designates entities that are entry point for the xref solving
- * infrastructure. If this returns true, then nameres_diagnostics can be called
- * on it.
+ * Return whether this node is an entry point for the xref solving
+ * infrastructure. If this returns true, then ``nameres_diagnostics`` can be
+ * called on it.
  */
 extern int lkt_lkt_node_p_xref_entry_point(
     lkt_node *node,
@@ -4748,7 +4815,7 @@ extern int lkt_lkt_node_p_xref_entry_point(
 
 
 /*
- * Return an array of completion item for language server clients
+ * Return an array of completion item for language server clients.
  */
 extern int lkt_lkt_node_p_complete(
     lkt_node *node,
@@ -5096,7 +5163,7 @@ extern int lkt_decl_p_def_ids(
 
 
 /*
- * Get this declaration without rebindings information.
+ * Return this declaration without rebindings information.
  */
 extern int lkt_decl_p_as_bare_decl(
     lkt_node *node,
@@ -5111,7 +5178,10 @@ extern int lkt_decl_p_as_bare_decl(
 
 
 /*
- * Return the type of the Decl.
+ * Return the relevant type when this declaration is used to create a value
+ * (the return type for a function, the type itself for structs/classes, ...).
+ *
+ * This returns null when the type cannot be inferred.
  */
 extern int lkt_decl_p_get_type(
     lkt_node *node,
@@ -5126,8 +5196,11 @@ extern int lkt_decl_p_get_type(
 
 
 /*
- * If we are casting an entity (Self) to something that is not an entity, make
- * it an entity.
+ * Return the type of ``E.as[T]`` when ``cast_to`` materializes the cast
+ * destination type (``T``), and ``self`` is the type of ``E``.
+ *
+ * The result is ``T`` except when ``T`` is a bare node type whereas ``self``
+ * is an entity type: in this case, the result is ``Entity[T]``.
  */
 extern int lkt_decl_p_get_cast_type(
     lkt_node *node,
@@ -5145,9 +5218,8 @@ extern int lkt_decl_p_get_cast_type(
 
 
 /*
- * Return the type of Entity when we only keep elements of type keep_type. If
- * we are casting an entity (Self) to something that is not an entity, make it
- * an entity.
+ * Return the type of ``E.keep[T]`` when ``keep_type`` materializes the input
+ * type (``T``), and ``self`` is the type of ``E``.
  */
 extern int lkt_decl_p_get_keep_type(
     lkt_node *node,
@@ -5165,8 +5237,8 @@ extern int lkt_decl_p_get_keep_type(
 
 
 /*
- * If we are accessing a ParseField of an entity, then that field's type also
- * needs to be an entity.
+ * Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+ * member and ``prefix_type`` is the type of ``E``.
  */
 extern int lkt_decl_p_get_suffix_type(
     lkt_node *node,
@@ -5678,23 +5750,12 @@ extern int lkt_type_decl_p_def_id(
 
 /*
  * Return the base type for this node, if any.
+ *
+ * Note that this includes "logic" base types for covariant types, like
+ * ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
+ * ``Entity[Child]``.
  */
 extern int lkt_type_decl_p_base_type(
-    lkt_node *node,
-
-
-    lkt_node *value_p
-);
-
-
-        
-
-
-
-/*
- * Return the base type for this node, if any.
- */
-extern int lkt_type_decl_p_base_type_if_entity(
     lkt_node *node,
 
 
@@ -8284,12 +8345,42 @@ extern int lkt_paren_pattern_f_sub_pattern(
 
 
 /*
+ * Return the equivalent string for this regular expression.
+ */
+extern int lkt_regex_pattern_p_denoted_value(
+    lkt_node *node,
+
+
+    lkt_internal_decoded_string_value *value_p
+);
+
+
+        
+
+
+
+/*
  * This field can contain one of the following nodes:
  * ``lkt_function_type_ref``, ``lkt_generic_type_ref``, ``lkt_simple_type_ref``
  *
  * When there are no parsing errors, this field is never null.
  */
 extern int lkt_type_pattern_f_type_name(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * When there are no parsing errors, this field is never null.
+ */
+extern int lkt_destructuring_pattern_detail_f_decl(
     lkt_node *node,
 
 
@@ -8335,14 +8426,6 @@ extern int lkt_field_pattern_detail_f_expected_value(
 
 
 /*
- * This field can contain one of the following nodes: ``lkt_array_literal``,
- * ``lkt_big_num_lit``, ``lkt_block_expr``, ``lkt_block_string_lit``,
- * ``lkt_call_expr``, ``lkt_cast_expr``, ``lkt_char_lit``, ``lkt_dot_expr``,
- * ``lkt_error_on_null``, ``lkt_generic_instantiation``, ``lkt_keep_expr``,
- * ``lkt_logic_expr``, ``lkt_logic_predicate``, ``lkt_match_expr``,
- * ``lkt_null_lit``, ``lkt_num_lit``, ``lkt_paren_expr``, ``lkt_query``,
- * ``lkt_ref_id``, ``lkt_single_line_string_lit``, ``lkt_subscript_expr``
- *
  * When there are no parsing errors, this field is never null.
  */
 extern int lkt_property_pattern_detail_f_call(
@@ -8542,13 +8625,17 @@ extern int lkt_var_bind_f_expr(
  *    be filtered if they're used to forward diagnostics to the user.
  *
  * ``unit_parsed`` is a callback that will be called when a unit is parsed.
+ *
+ * ``unit_diagnostic`` is a callback that will be called when a diagnostic is
+ * emitted for a unit.
  */
 extern lkt_event_handler
 lkt_create_event_handler(
    void *data,
    lkt_event_handler_destroy_callback destroy_func,
    lkt_event_handler_unit_requested_callback unit_requested_func,
-   lkt_event_handler_unit_parsed_callback unit_parsed_func
+   lkt_event_handler_unit_parsed_callback unit_parsed_func,
+   lkt_event_handler_unit_diagnostic_callback unit_diagnostic_func
 );
 
 /*
@@ -9181,6 +9268,22 @@ lkt_rewriting_create_from_template(
     lkt_grammar_rule rule
 );
 
+
+      
+
+
+extern
+lkt_unit_provider lkt_create_default_provider(
+    lkt_language_mode mode
+);
+
+extern
+lkt_unit_provider
+lkt_create_default_provider_from_directories(
+    lkt_language_mode mode,
+    char **directories,
+    int directories_count
+);
 
 
 

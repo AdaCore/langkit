@@ -5,9 +5,10 @@ with Ada.Text_IO;    use Ada.Text_IO;
 
 with Interfaces; use Interfaces;
 
-with GNAT.Regexp;
+with GNAT.Regpat;
 with GNATCOLL.Traces;
 
+with Liblktlang.All_Properties;    use Liblktlang.All_Properties;
 with Liblktlang.Analysis;          use Liblktlang.Analysis;
 with Liblktlang.Prelude;
 with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
@@ -16,8 +17,8 @@ with Liblktlang_Support.Text;      use Liblktlang_Support.Text;
 
 package body Liblktlang.Implementation.Extensions is
 
-   Lkt_Filename_Regexp : constant GNAT.Regexp.Regexp :=
-     GNAT.Regexp.Compile ("([a-z](_?[a-z0-9]+)*)\.lkt");
+   Lkt_Filename_Regexp : constant GNAT.Regpat.Pattern_Matcher :=
+     GNAT.Regpat.Compile ("([a-z](_?[a-z0-9]+)*)\.(lkt|lkql)");
 
    package WWS renames Ada.Strings.Wide_Wide_Unbounded;
 
@@ -350,27 +351,32 @@ package body Liblktlang.Implementation.Extensions is
    function Langkit_Root_P_Module_Name
      (Node : Bare_Langkit_Root) return Symbol_Type
    is
+      use GNAT.Regpat;
+
       Filename : constant String :=
         Ada.Directories.Simple_Name (Node.Unit.Get_Filename);
+      Matches  : Match_Array (0 .. 3);
    begin
+      Match (Lkt_Filename_Regexp, Filename, Matches);
+
       --  If ``Node`` belongs to the prelude, which is not a regular module,
       --  return the empty symbol, as documented.
 
       if Lkt_Node_P_Is_From_Prelude (Node) then
          return No_Symbol;
 
-      --  Otherwise, make sure the unit has a valid Lkt filename
+      --  Otherwise, make sure the unit has a valid filename
 
-      elsif not GNAT.Regexp.Match (Filename, Lkt_Filename_Regexp) then
+      elsif Matches (0) = No_Match then
          Raise_Property_Exception
-           (Node, Property_Error'Identity, "invalid Lkt filename");
+           (Node, Property_Error'Identity, "invalid filename");
       end if;
 
       --  From there, just strip the extension and we have the module name
 
       declare
          Module_Name : String renames
-           Filename (Filename'First .. Filename'Last - 4);
+           Filename (Matches (1).First .. Matches (1).Last);
       begin
          return Find (Node.Unit.Context.Symbols, To_Text (Module_Name));
       end;
@@ -394,14 +400,15 @@ package body Liblktlang.Implementation.Extensions is
          --  an assertion error.
 
          if Prelude.Diagnostics'Length > 0 then
+            pragma Annotate (Xcov, Exempt_On, "defensive code");
             for Diagnostic of Prelude.Diagnostics loop
                Put_Line (To_Pretty_String (Diagnostic));
             end loop;
             raise Assertion_Error with "Errors in prelude";
+            pragma Annotate (Xcov, Exempt_Off);
          end if;
-
-         Populate_Lexical_Env (Prelude);
       end if;
+      Populate_Lexical_Env (Prelude);
       return Unwrap_Unit (Prelude);
    end Lkt_Node_P_Prelude_Unit;
 
@@ -430,7 +437,7 @@ package body Liblktlang.Implementation.Extensions is
    -----------------------
 
    function Id_P_Custom_Image
-     (Node : Bare_Id; E_Info : Entity_Info) return String_Type
+     (Node : Bare_Id; E_Info : Internal_Entity_Info) return String_Type
    is
       pragma Unreferenced (E_Info);
    begin
@@ -446,7 +453,7 @@ package body Liblktlang.Implementation.Extensions is
    -------------------------
 
    function Decl_P_Custom_Image
-      (Node : Bare_Decl; E_Info : Entity_Info) return String_Type
+      (Node : Bare_Decl; E_Info : Internal_Entity_Info) return String_Type
    is
       Full_Name_Acc : String_Type :=
          Dispatcher_Decl_P_Full_Name_Internal (Node, E_Info);
@@ -610,6 +617,16 @@ package body Liblktlang.Implementation.Extensions is
    begin
       return Block_Denoted_String (Node.Module_Doc_String_Lit_F_Lines);
    end Module_Doc_String_Lit_P_Denoted_Value;
+
+   -----------------------------------
+   -- Regex_Pattern_P_Denoted_Value --
+   -----------------------------------
+
+   function Regex_Pattern_P_Denoted_Value
+     (Node : Bare_Regex_Pattern) return Internal_Decoded_String_Value is
+   begin
+      return Common_Denoted_String (Node);
+   end Regex_Pattern_P_Denoted_Value;
 
    --------------------------------------------
    -- Single_Line_String_Lit_P_Denoted_Value --

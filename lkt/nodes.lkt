@@ -54,6 +54,12 @@ struct RefResult implements RefResultInterface {
     ref: Entity[RefId] implements RefResultInterface.ref
 }
 
+|" All languages that can be analyzed by Liblktlang. This enumeration is used
+|" to provide information when creating a new unit provider.
+enum LanguageMode {
+    case lkt, lkql
+}
+
 |" Root node class for Lkt AST nodes.
 @abstract
 class LktNode implements Node[LktNode], LspNodeInterface {

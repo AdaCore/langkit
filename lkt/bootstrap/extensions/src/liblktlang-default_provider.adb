@@ -3,15 +3,18 @@ with Ada.Environment_Variables;
 
 with GNAT.OS_Lib;
 
-with Liblktlang.Common; use Liblktlang.Common;
-
 package body Liblktlang.Default_Provider is
 
    package Dirs renames Ada.Directories;
    package Env renames Ada.Environment_Variables;
 
+   --------------------------------
+   -- Default unit provider type --
+   --------------------------------
+
    type Default_Unit_Provider is new Internal_Unit_Provider with record
       Ref_Count   : Natural;
+      Mode        : Language_Mode;
       Directories : String_Vectors.Vector;
    end record;
    type Default_Unit_Provider_Access is access all Default_Unit_Provider;
@@ -34,6 +37,25 @@ package body Liblktlang.Default_Provider is
       Reparse        : Boolean := False;
       Unit           : out Internal_Unit;
       PLE_Root_Index : out Positive);
+
+   function Unit_Base_Filename
+     (Mode : Language_Mode; Name : Text_Type) return String;
+   --  Return the base filename corresponding to this unit name, or an empty
+   --  string if ``Name`` is not a valid unit name.
+
+   function Path_Var_Name (Mode : Language_Mode) return String
+   is (case Mode is
+         when Lkt  => "LKT_PATH",
+         when Lkql => "LKQL_PATH");
+   --  Name of the environment variable that contains the list of directories
+   --  to fetch sources from.
+
+   function File_Extension (Mode : Language_Mode) return String
+   is (case Mode is
+         when Lkt  => ".lkt",
+         when Lkql => ".lkql");
+   --  File extension (including the dot) to append in order to construct unit
+   --  filenames.
 
    -------------
    -- Inc_Ref --
@@ -66,7 +88,7 @@ package body Liblktlang.Default_Provider is
       Filename       : out US.Unbounded_String;
       PLE_Root_Index : out Positive)
    is
-      Base_Filename : constant String := Unit_Base_Filename (Name);
+      Base_Filename : constant String := Unit_Base_Filename (Self.Mode, Name);
    begin
       PLE_Root_Index := 1;
 
@@ -113,7 +135,7 @@ package body Liblktlang.Default_Provider is
       if US.Length (Filename) = 0 then
          Unit := Get_With_Error
            (Context,
-            Unit_Base_Filename (Name),
+            Unit_Base_Filename (Self.Mode, Name),
             "Cannot open source file",
             Charset,
             Default_Grammar_Rule);
@@ -131,7 +153,9 @@ package body Liblktlang.Default_Provider is
    -- Unit_Base_Filename --
    ------------------------
 
-   function Unit_Base_Filename (Name : Text_Type) return String is
+   function Unit_Base_Filename
+     (Mode : Language_Mode; Name : Text_Type) return String
+   is
       Radix : String (Name'Range);
    begin
       --  Accept only names made of alphanumerics and underscores
@@ -141,19 +165,21 @@ package body Liblktlang.Default_Provider is
          end if;
          Radix (I) := Character'Val (Character_Type'Pos (Name (I)));
       end loop;
-      return Radix & ".lkt";
+      return Radix & File_Extension (Mode);
    end Unit_Base_Filename;
 
    ------------
    -- Create --
    ------------
 
-   function Create return Internal_Unit_Provider_Access is
+   function Create (Mode : Language_Mode) return Internal_Unit_Provider_Access
+   is
       Result : constant Default_Unit_Provider_Access :=
          new Default_Unit_Provider'(Internal_Unit_Provider with
                                     Ref_Count   => 1,
+                                    Mode        => Mode,
                                     Directories => <>);
-      Path   : constant String := Env.Value (Path_Var_Name, "");
+      Path   : constant String := Env.Value (Path_Var_Name (Mode), "");
 
       procedure Append (S : String);
       --  If S is a non-empty string, append it as a lookup directory
@@ -199,12 +225,13 @@ package body Liblktlang.Default_Provider is
    ----------------------
 
    function Create_From_Dirs
-     (Directories : String_Vectors.Vector)
+     (Mode : Language_Mode; Directories : String_Vectors.Vector)
       return Internal_Unit_Provider_Access
    is
       Result : constant Default_Unit_Provider_Access :=
         new Default_Unit_Provider'(Internal_Unit_Provider with
                                    Ref_Count   => 1,
+                                   Mode        => Mode,
                                    Directories => <>);
    begin
       --  Sources in the current directory always come first

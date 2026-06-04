@@ -148,7 +148,9 @@ def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
     os.environ["LKT_PATH"] = os.path.pathsep.join(config.source_dirs)
 
     # Load ``lkt_file`` and all the units it references, transitively
-    ctx = L.AnalysisContext(unit_provider=L.UnitProvider.from_lkt_path())
+    ctx = L.AnalysisContext(
+        unit_provider=L.UnitProvider.create_default(L.LanguageMode.lkt)
+    )
     process_unit(ctx.get_from_file(config.entry_point))
 
     os.environ["LKT_PATH"] = old_path

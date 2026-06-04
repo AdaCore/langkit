@@ -2650,6 +2650,8 @@ public final class ${ctx.lib_name.camel}
 
         }
 
+        ${exts.include_extension(ctx.ext("java_api", "unit_provider_class"))}
+
     }
 
     ${java_doc('langkit.event_handler_type', 4)}

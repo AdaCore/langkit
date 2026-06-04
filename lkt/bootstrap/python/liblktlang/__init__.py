@@ -669,6 +669,19 @@ class GrammarRule(_Enum):
     _c_to_py = [
         main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, module_id_rule, def_id_rule, doc_rule, module_doc_rule, imported_names_rule, import_clause_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, lexer_family_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, neg_pattern_rule, pattern_binding_rule, complex_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, pattern_arg_rule, expr_rule, stream_concat_rule, logic_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule, query_comprehension_rule]
     _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+class LanguageMode(_Enum):
+    """
+    All languages that can be analyzed by Liblktlang. This enumeration is used
+    to provide information when creating a new unit provider.
+    """
+
+    lkt = 'lkt'
+    lkql = 'lkql'
+
+    _name = 'LanguageMode'
+    _c_to_py = [
+        lkt, lkql]
+    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 class LookupKind(_Enum):
     """
 
@@ -790,6 +803,7 @@ class _EventHandlerWrapper:
             _event_handler_cb_destroy,
             _event_handler_cb_unit_requested,
             _event_handler_cb_unit_parsed,
+            _event_handler_cb_unit_diagnostic,
         )
 
     def __del__(self) -> None:
@@ -852,6 +866,23 @@ class _EventHandlerWrapper:
             )
         except BaseException as exc:
             _log_uncaught_error("EventHandler.unit_parsed_callback")
+
+    @staticmethod
+    def unit_diagnostic_func(self: _EventHandlerWrapper,
+                             context: object,
+                             unit: object,
+                             message: _text) -> None:
+        py_context = AnalysisContext._wrap(context)
+        py_unit = AnalysisUnit._wrap(unit)
+        py_message = message.contents._wrap()
+        try:
+            self.event_handler.unit_diagnostic_callback(
+                py_context,
+                py_unit,
+                py_message,
+            )
+        except BaseException as exc:
+            _log_uncaught_error("EventHandler.unit_diagnostic_callback")
 
 
 def _canonicalize_buffer(buffer: AnyStr,
@@ -927,6 +958,11 @@ class PreconditionFailure(Exception):
     satisfied.
     """
     pass
+class ProgramError(Exception):
+    """
+    Internal exception, raised in case of a bug in the library.
+    """
+    pass
 class PropertyError(Exception):
     """
     Exception that is raised when an error occurs while evaluating any AST node
@@ -987,6 +1023,7 @@ _exception_kind_to_type = [
     InvalidUnitNameError,
     NativeException,
     PreconditionFailure,
+    ProgramError,
     PropertyError,
     TemplateArgsError,
     TemplateFormatError,
@@ -1042,6 +1079,20 @@ class EventHandler(Protocol):
 
         ``Reparsed`` indicates whether the unit was reparsed, or whether it was
         the first parse.
+        """
+        pass
+
+    def unit_diagnostic_callback(self,
+                                 context: AnalysisContext,
+                                 unit: AnalysisUnit,
+                                 message: str) -> None:
+        """
+        Callback that will be called when a diagnostic is emitted for an
+        analysis unit.
+
+        ``Unit`` is the unit for which the diagnostic is emitted.
+
+        ``Message`` is the diagnostic message.
         """
         pass
 
@@ -2030,8 +2081,26 @@ class UnitProvider:
 
 
       
+
+
     @classmethod
-    def from_directories(cls, directories: list[str]) -> UnitProvider:
+    def create_default(cls, mode: str) -> UnitProvider:
+        """
+        Create a default unit provider that is going to use the environment
+        variable associated to the provided language mode to fetch sources.
+        Note that the current working directory is implicitly looked at first.
+        """
+        c_value = _create_default_provider(
+            LanguageMode._unwrap(mode),
+        )
+        return _CUnitProvider(c_value)
+
+    @classmethod
+    def from_directories(
+        cls,
+        mode: str,
+        directories: list[str],
+    ) -> UnitProvider:
         """
         Return a unit provider that will look for units in the given list of
         directories. Note that the current directory is implicitly looked at
@@ -2055,18 +2124,12 @@ class UnitProvider:
             c_array_ptr, ctypes.POINTER(ctypes.c_char_p)
         )
 
-        c_value = _create_default_provider(directories_arg)
-        return _CUnitProvider(c_value)
-
-    @classmethod
-    def from_lkt_path(cls) -> UnitProvider:
-        """
-        Return a unit provider created from the ``LKT_PATH`` environment
-        variable.
-        """
-        return cls.from_directories(
-            os.environ.get("LKT_PATH", "").split(os.path.pathsep)
+        c_value = _create_default_provider_from_directories(
+            LanguageMode._unwrap(mode),
+            directories_arg,
+            len(directories),
         )
+        return _CUnitProvider(c_value)
 
 
 
@@ -2091,7 +2154,7 @@ class _CUnitProvider(UnitProvider):
 
 class LktNode:
     """
-    Root node class for lkt AST nodes.
+    Root node class for Lkt AST nodes.
 
     Derived nodes: :py:class:`Argument`, :py:class:`BaseImport`,
     :py:class:`BaseLexerCaseRuleAlt`, :py:class:`BaseMatchBranch`,
@@ -2556,7 +2619,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the character builtin type.
+        Unit method. Return the ``Char`` builtin type.
         """
         
 
@@ -2575,7 +2638,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the integer builtin type.
+        Unit method. Return the ``Int`` builtin type.
         """
         
 
@@ -2594,7 +2657,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the boolean builtin type.
+        Unit method. Return the ``Bool`` builtin type.
         """
         
 
@@ -2613,7 +2676,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the big integer builtin type.
+        Unit method. Return the ``BigInt`` builtin type.
         """
         
 
@@ -2632,7 +2695,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the string builtin type.
+        Unit method. Return the ``String`` builtin type.
         """
         
 
@@ -2651,7 +2714,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the string builtin type.
+        Unit method. Return the ``Symbol`` builtin type.
         """
         
 
@@ -2670,7 +2733,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the property error builtin type.
+        Unit method. Return the ``PropertyError`` builtin type.
         """
         
 
@@ -2689,7 +2752,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the regexp builtin type.
+        Unit method. Return the ``Regexp`` builtin type.
         """
         
 
@@ -2708,7 +2771,7 @@ class LktNode:
         self
     ) -> GenericDecl:
         """
-        Unit method. Return the logicvar builtin type.
+        Unit method. Return the ``Entity`` generic builtin type.
         """
         
 
@@ -2727,7 +2790,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the logicvar builtin type.
+        Unit method. Return the ``Entity`` builtin type.
         """
         
 
@@ -2746,7 +2809,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the logicvar builtin type.
+        Unit method. Return the ``LogicVar`` builtin type.
         """
         
 
@@ -2765,7 +2828,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the logicvar builtin type.
+        Unit method. Return the ``Equation`` builtin type.
         """
         
 
@@ -2818,11 +2881,49 @@ class LktNode:
         return result
     
     @property
+    def p_stream_gen_type(
+        self
+    ) -> GenericDecl:
+        """
+        Unit method. Return the stream builtin generic type.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_stream_gen_type)
+        result = LktNode._wrap(c_result)
+
+
+        return result
+    
+    @property
+    def p_stream_type(
+        self
+    ) -> NamedTypeDecl:
+        """
+        Unit method. Return the stream builtin type.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_stream_type)
+        result = LktNode._wrap(c_result)
+
+
+        return result
+    
+    @property
     def p_astlist_gen_type(
         self
     ) -> GenericDecl:
         """
-        Unit method. Return the ASTList builtin generic type.
+        Unit method. Return the ``ASTList`` builtin generic type.
         """
         
 
@@ -2841,7 +2942,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the ASTList builtin type.
+        Unit method. Return the ``ASTList`` builtin type.
         """
         
 
@@ -2860,7 +2961,7 @@ class LktNode:
         self
     ) -> GenericDecl:
         """
-        Unit method. Return the NodeBuilder builtin generic type.
+        Unit method. Return the ``NodeBuilder`` builtin generic type.
         """
         
 
@@ -2879,7 +2980,7 @@ class LktNode:
         self
     ) -> NamedTypeDecl:
         """
-        Unit method. Return the NodeBuilder builtin type.
+        Unit method. Return the ``NodeBuilder`` builtin type.
         """
         
 
@@ -2898,7 +2999,7 @@ class LktNode:
         self
     ) -> GenericDecl:
         """
-        Unit method. Return the Iterator builtin generic trait.
+        Unit method. Return the ``Iterator`` builtin generic trait.
         """
         
 
@@ -2917,7 +3018,7 @@ class LktNode:
         self
     ) -> TraitDecl:
         """
-        Unit method. Return the Iterator builtin trait.
+        Unit method. Return the ``Iterator`` builtin trait.
         """
         
 
@@ -2974,8 +3075,8 @@ class LktNode:
         self
     ) -> LktNode:
         """
-        Return the topmost (from ``Self`` to the root node) FullDecl annotated
-        with ``@invalid``, null otherwise.
+        Return the topmost (from ``Self`` to the root node) ``FullDecl``
+        annotated with ``@invalid``, null otherwise.
         """
         
 
@@ -2992,7 +3093,7 @@ class LktNode:
         self
     ) -> List[SolverDiagnostic]:
         """
-        If name resolution on this lkt compilation unit fails, this returns all
+        If name resolution on this Lkt compilation unit fails, this returns all
         the diagnostics that were produced while resolving it.
         """
         
@@ -3012,7 +3113,7 @@ class LktNode:
         self
     ) -> SolverResult:
         """
-        Finds the nearest parent that is an xref_entry_point and solve its
+        Find the nearest parent that is an xref entry point and solve its
         equation.
         """
         
@@ -3032,9 +3133,9 @@ class LktNode:
         self
     ) -> bool:
         """
-        Designates entities that are entry point for the xref solving
-        infrastructure. If this returns true, then nameres_diagnostics can be
-        called on it.
+        Return whether this node is an entry point for the xref solving
+        infrastructure. If this returns true, then ``nameres_diagnostics`` can
+        be called on it.
         """
         
 
@@ -3053,7 +3154,7 @@ class LktNode:
         self
     ) -> List[CompleteItem]:
         """
-        Return an array of completion item for language server clients
+        Return an array of completion item for language server clients.
         """
         
 
@@ -3298,9 +3399,9 @@ class LktNode:
         """
         Dump the sub-tree in a human-readable format on the given file.
 
-        :param str indent: Prefix printed on each line during the dump.
+        :param indent: Prefix printed on each line during the dump.
 
-        :param file file: File in which the dump must occur.
+        :param file: File in which the dump must occur.
         """
 
         def print_node(name, value):
@@ -3465,7 +3566,7 @@ class LktNode:
 
     def is_a(self, *types: Type[LktNode]) -> bool:
         """
-        Shortcut for isinstance(self, types). :rtype: bool
+        Shortcut for isinstance(self, types).
         """
         return isinstance(self, tuple(types))
 
@@ -4396,7 +4497,7 @@ class Decl(LktNode):
         self
     ) -> Decl:
         """
-        Get this declaration without rebindings information.
+        Return this declaration without rebindings information.
         """
         
 
@@ -4415,7 +4516,11 @@ class Decl(LktNode):
         self
     ) -> TypeDecl:
         """
-        Return the type of the Decl.
+        Return the relevant type when this declaration is used to create a
+        value (the return type for a function, the type itself for
+        structs/classes, ...).
+
+        This returns null when the type cannot be inferred.
         """
         
 
@@ -4433,8 +4538,11 @@ class Decl(LktNode):
         self, cast_to: TypeDecl
     ) -> TypeDecl:
         """
-        If we are casting an entity (Self) to something that is not an entity,
-        make it an entity.
+        Return the type of ``E.as[T]`` when ``cast_to`` materializes the cast
+        destination type (``T``), and ``self`` is the type of ``E``.
+
+        The result is ``T`` except when ``T`` is a bare node type whereas
+        ``self`` is an entity type: in this case, the result is ``Entity[T]``.
         """
         
 
@@ -4453,9 +4561,8 @@ class Decl(LktNode):
         self, keep_type: TypeDecl
     ) -> TypeDecl:
         """
-        Return the type of Entity when we only keep elements of type keep_type.
-        If we are casting an entity (Self) to something that is not an entity,
-        make it an entity.
+        Return the type of ``E.keep[T]`` when ``keep_type`` materializes the
+        input type (``T``), and ``self`` is the type of ``E``.
         """
         
 
@@ -4474,8 +4581,8 @@ class Decl(LktNode):
         self, prefix_type: TypeDecl
     ) -> TypeDecl:
         """
-        If we are accessing a ParseField of an entity, then that field's type
-        also needs to be an entity.
+        Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+        member and ``prefix_type`` is the type of ``E``.
         """
         
 
@@ -5763,9 +5870,13 @@ class TypeDecl(Decl):
     @property
     def p_base_type(
         self
-    ) -> TypeRef:
+    ) -> TypeDecl:
         """
         Return the base type for this node, if any.
+
+        Note that this includes "logic" base types for covariant types, like
+        ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
+        ``Entity[Child]``.
         """
         
 
@@ -5774,25 +5885,6 @@ class TypeDecl(Decl):
 
         
         c_result = self._eval_field(_Entity_c_type(), _type_decl_p_base_type)
-        result = LktNode._wrap(c_result)
-
-
-        return result
-    
-    @property
-    def p_base_type_if_entity(
-        self
-    ) -> TypeDecl:
-        """
-        Return the base type for this node, if any.
-        """
-        
-
-        
-
-
-        
-        c_result = self._eval_field(_Entity_c_type(), _type_decl_p_base_type_if_entity)
         result = LktNode._wrap(c_result)
 
 
@@ -13141,6 +13233,25 @@ class RegexPattern(Pattern):
 
     
 
+    
+    @property
+    def p_denoted_value(
+        self
+    ) -> DecodedStringValue:
+        """
+        Return the equivalent string for this regular expression.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(DecodedStringValue._c_type(), _regex_pattern_p_denoted_value)
+        result = DecodedStringValue._wrap(c_result)
+
+
+        return result
 
     _field_names = Pattern._field_names + (
     )
@@ -13203,8 +13314,8 @@ class PatternDetail(LktNode):
 
     Base class for a detail in a ComplexPattern.
 
-    Derived nodes: :py:class:`FieldPatternDetail`,
-    :py:class:`PropertyPatternDetail`
+    Derived nodes: :py:class:`DestructuringPatternDetail`,
+    :py:class:`FieldPatternDetail`, :py:class:`PropertyPatternDetail`
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -13214,6 +13325,47 @@ class PatternDetail(LktNode):
     _field_names = LktNode._field_names + (
     )
 
+
+
+
+
+
+
+class DestructuringPatternDetail(PatternDetail):
+    """
+    Subclass of :py:class:`PatternDetail`.
+
+    Pattern detail denoting the destructuring of a field as a shorthand.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+    
+    @property
+    def f_decl(
+        self
+    ) -> BindingValDecl:
+        """
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_destructuring_pattern_detail_f_decl)
+
+
+
+        return result
+
+    _field_names = PatternDetail._field_names + (
+        "f_decl",
+    )
+
+    _kind_name = 'DestructuringPatternDetail'
 
 
 
@@ -13299,18 +13451,8 @@ class PropertyPatternDetail(PatternDetail):
     @property
     def f_call(
         self
-    ) -> Expr:
+    ) -> CallExpr:
         """
-        This field can contain one of the following nodes:
-        :py:class:`ArrayLiteral`, :py:class:`BigNumLit`, :py:class:`BlockExpr`,
-        :py:class:`BlockStringLit`, :py:class:`CallExpr`, :py:class:`CastExpr`,
-        :py:class:`CharLit`, :py:class:`DotExpr`, :py:class:`ErrorOnNull`,
-        :py:class:`GenericInstantiation`, :py:class:`KeepExpr`,
-        :py:class:`LogicExpr`, :py:class:`LogicPredicate`,
-        :py:class:`MatchExpr`, :py:class:`NullLit`, :py:class:`NumLit`,
-        :py:class:`ParenExpr`, :py:class:`Query`, :py:class:`RefId`,
-        :py:class:`SingleLineStringLit`, :py:class:`SubscriptExpr`
-
         When there are no parsing errors, this field is never null.
         """
         
@@ -13795,7 +13937,7 @@ class _Entity_c_type(ctypes.Structure):
 
 class CompleteItem(_BaseStruct):
     """
-    Completion item for language servers
+    Completion item for language servers.
     """
 
     
@@ -14215,7 +14357,7 @@ class LogicContext(_BaseStruct):
 
 class RefResult(_BaseStruct):
     """
-    Reference result struct
+    Reference result struct.
     """
 
     
@@ -15426,6 +15568,18 @@ _lkt_node_p_array_type = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
+_lkt_node_p_stream_gen_type = _import_func(
+    'lkt_lkt_node_p_stream_gen_type',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_lkt_node_p_stream_type = _import_func(
+    'lkt_lkt_node_p_stream_type',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
 _lkt_node_p_astlist_gen_type = _import_func(
     'lkt_lkt_node_p_astlist_gen_type',
     [ctypes.POINTER(_Entity_c_type),
@@ -15838,12 +15992,6 @@ _type_decl_p_def_id = _import_func(
 )
 _type_decl_p_base_type = _import_func(
     'lkt_type_decl_p_base_type',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
-)
-_type_decl_p_base_type_if_entity = _import_func(
-    'lkt_type_decl_p_base_type_if_entity',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -16682,8 +16830,20 @@ _paren_pattern_f_sub_pattern = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
+_regex_pattern_p_denoted_value = _import_func(
+    'lkt_regex_pattern_p_denoted_value',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(DecodedStringValue._c_type)],
+    ctypes.c_int
+)
 _type_pattern_f_type_name = _import_func(
     'lkt_type_pattern_f_type_name',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_destructuring_pattern_detail_f_decl = _import_func(
+    'lkt_destructuring_pattern_detail_f_decl',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -16787,6 +16947,13 @@ _event_handler_unit_parsed_func = ctypes.CFUNCTYPE(
     AnalysisUnit._c_type,    # unit
     ctypes.c_uint8,          # reparsed
 )
+_event_handler_unit_diagnostic_func = ctypes.CFUNCTYPE(
+    None,
+    ctypes.py_object,        # data
+    AnalysisContext._c_type, # context
+    AnalysisUnit._c_type,    # unit
+    ctypes.POINTER(_text),   # message
+)
 _create_event_handler = _import_func(
     'lkt_create_event_handler',
     [
@@ -16794,6 +16961,7 @@ _create_event_handler = _import_func(
         _event_handler_destroy_func,
         _event_handler_unit_requested_func,
         _event_handler_unit_parsed_func,
+        _event_handler_unit_diagnostic_func,
     ],
     _event_handler,
 )
@@ -16811,6 +16979,9 @@ _event_handler_cb_unit_requested = _event_handler_unit_requested_func(
 )
 _event_handler_cb_unit_parsed = _event_handler_unit_parsed_func(
     _EventHandlerWrapper.unit_parsed_func
+)
+_event_handler_cb_unit_diagnostic = _event_handler_unit_diagnostic_func(
+    _EventHandlerWrapper.unit_diagnostic_func
 )
 
 # Unit providers
@@ -16840,7 +17011,13 @@ _dec_ref_unit_provider = _import_func(
       
 _create_default_provider = _import_func(
     'lkt_create_default_provider',
-    [ctypes.POINTER(ctypes.c_char_p)],
+    [ctypes.c_int],
+    _unit_provider,
+)
+
+_create_default_provider_from_directories = _import_func(
+    'lkt_create_default_provider_from_directories',
+    [ctypes.c_int, ctypes.POINTER(ctypes.c_char_p), ctypes.c_int],
     _unit_provider,
 )
 
@@ -17086,13 +17263,14 @@ _kind_to_astnode_cls = {
     182: ParenPattern,
     183: RegexPattern,
     184: TypePattern,
-    185: FieldPatternDetail,
-    186: PropertyPatternDetail,
-    187: DefaultListTypeRef,
-    188: FunctionTypeRef,
-    189: GenericTypeRef,
-    190: SimpleTypeRef,
-    191: VarBind,
+    185: DestructuringPatternDetail,
+    186: FieldPatternDetail,
+    187: PropertyPatternDetail,
+    188: DefaultListTypeRef,
+    189: FunctionTypeRef,
+    190: GenericTypeRef,
+    191: SimpleTypeRef,
+    192: VarBind,
 }
 
 

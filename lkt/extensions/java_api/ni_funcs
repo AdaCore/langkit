@@ -1,0 +1,20 @@
+## vim: ft=makojava
+
+<% nat = c_api.get_name %>
+
+    // --- Default provider functions
+
+    @CompilerDirectives.TruffleBoundary
+    @CFunction
+    public static native UnitProviderNative ${nat("create_default_provider")}(
+        int language_mode
+    );
+
+    @CompilerDirectives.TruffleBoundary
+    @CFunction
+    public static native UnitProviderNative
+    ${nat("create_default_provider_from_directories")}(
+        int language_mode,
+        CCharPointerPointer directories,
+        int directories_count
+    );

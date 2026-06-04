@@ -11,7 +11,30 @@ package body Liblktlang.Implementation.C.Extensions is
    ---------------------------------
 
    function lkt_create_default_provider
-     (Directories : System.Address) return lkt_unit_provider
+     (Mode : Language_Mode) return lkt_unit_provider
+   is
+      Result : Internal_Unit_Provider_Access;
+   begin
+      Clear_Last_Exception;
+      Result := Create (Mode);
+      return Wrap_Private_Provider (Result);
+   exception
+      when Exc : others =>
+         pragma Annotate (Xcov, Exempt_On, "defensive code");
+         Set_Last_Exception (Exc);
+         return lkt_unit_provider (System.Null_Address);
+         pragma Annotate (Xcov, Exempt_Off);
+   end lkt_create_default_provider;
+
+   --------------------------------------------------
+   -- lkt_create_default_provider_from_directories --
+   --------------------------------------------------
+
+   function lkt_create_default_provider_from_directories
+     (Mode              : Language_Mode;
+      Directories       : System.Address;
+      Directories_Count : int)
+      return lkt_unit_provider
    is
       Result : Internal_Unit_Provider_Access;
    begin
@@ -19,7 +42,7 @@ package body Liblktlang.Implementation.C.Extensions is
 
       declare
          Ada_Dirs : String_Vectors.Vector;
-         C_Dirs   : constant array (Positive) of chars_ptr
+         C_Dirs   : constant array (1 .. Directories_Count) of chars_ptr
            with Import, Address => Directories;
       begin
          for C_Dirname of C_Dirs loop
@@ -27,7 +50,7 @@ package body Liblktlang.Implementation.C.Extensions is
             Ada_Dirs.Append (US.To_Unbounded_String (Value (C_Dirname)));
          end loop;
 
-         Result := Create_From_Dirs (Ada_Dirs);
+         Result := Create_From_Dirs (Mode, Ada_Dirs);
       end;
 
       return Wrap_Private_Provider (Result);
@@ -38,6 +61,6 @@ package body Liblktlang.Implementation.C.Extensions is
          Set_Last_Exception (Exc);
          return lkt_unit_provider (System.Null_Address);
          pragma Annotate (Xcov, Exempt_Off);
-   end lkt_create_default_provider;
+   end lkt_create_default_provider_from_directories;
 
 end Liblktlang.Implementation.C.Extensions;
