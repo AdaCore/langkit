@@ -210,6 +210,7 @@ class Emitter:
         )
         self.java_jni = os.path.join(self.java_dir, "jni")
 
+        self.vscode_ext_dir = os.path.join(self.lib_root, "vscode_ext")
         self.lklsp_dir = os.path.join(self.lib_root, "lklsp")
         self.lklsp_package = os.path.join(
             self.lklsp_dir, "src", "main", "java", "com", "adacore", "lklsp"
@@ -572,6 +573,8 @@ class Emitter:
             self.lklsp_dir,
             self.lklsp_package,
             self.lklsp_niconfig,
+            self.vscode_ext_dir,
+            os.path.join(self.vscode_ext_dir, "src"),
         ]:
             if not os.path.exists(d):
                 os.makedirs(d)
@@ -1217,6 +1220,38 @@ class Emitter:
             )
             os.chmod(
                 os.path.join(self.lklsp_dir, "make_native_image.py"), 0o775
+            )
+
+    def emit_vscode_extension(self, ctx: CompileCtx) -> None:
+        """
+        Generate the sources for the VS Code extension.
+        """
+        if ctx.config.vscode_ext is None:
+            printcol(
+                "No VS code extension configuration was provided",
+                Colors.FAIL,
+            )
+            return
+        for template, export_file, export_dir in [
+            (
+                "vscode_ext/src__extension_ts",
+                "src/extension.ts",
+                self.vscode_ext_dir,
+            ),
+            (
+                "vscode_ext/package_json",
+                "package.json",
+                self.vscode_ext_dir,
+            ),
+            (
+                "vscode_ext/tsconfig_json",
+                "tsconfig.json",
+                self.vscode_ext_dir,
+            ),
+        ]:
+            code = ctx.render_template(template, ctx=ctx)
+            self.write_source_file(
+                os.path.join(export_dir, export_file), code, None
             )
 
     def write_ada_module(

@@ -187,6 +187,11 @@ class CompilationMode(enum.Enum):
     Generate sources for the language server.
     """
 
+    generate_ext = enum.auto()
+    """
+    Generate sources for the VS Code Extension.
+    """
+
 
 class GeneratedException:
     """
@@ -2203,6 +2208,8 @@ class CompileCtx:
         self.all_passes = []
         if mode == CompilationMode.generate_lsp:
             self.all_passes += self.generate_lsp_passes
+        elif mode == CompilationMode.generate_ext:
+            self.all_passes += self.generate_ext_passes
         else:
             self.all_passes += self.compilation_passes
             if mode == CompilationMode.generate_lib:
@@ -2651,6 +2658,21 @@ class CompileCtx:
         return [
             *self.start_code_emission_passes,
             EmitterPass("emit Language Server", Emitter.emit_language_server),
+            self.end_code_emission_pass,
+        ]
+
+    @property
+    def generate_ext_passes(self) -> list[AbstractPass]:
+        """
+        Return the list of passes to generate the VS Code extension.
+        """
+        from langkit.passes import Emitter, EmitterPass
+
+        return [
+            *self.start_code_emission_passes,
+            EmitterPass(
+                "emit VS Code extension", Emitter.emit_vscode_extension
+            ),
             self.end_code_emission_pass,
         ]
 
