@@ -1636,6 +1636,12 @@ class ManageScript(abc.ABC):
         by NodeJS's ``process.arch`` and ``process.platform``.
         """
 
+        if self.context.config.vscode_ext is None:
+            printcol(
+                "No VS Code extension configuration provided", Colors.FAIL
+            )
+            sys.exit(1)
+
         # Start by generating the sources of the extension
         self.context.create_all_passes(CompilationMode.generate_ext)
         self.context.emit()
