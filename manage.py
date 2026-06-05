@@ -298,6 +298,17 @@ def install_langkit_support(args: Namespace) -> None:
                 ]
             )
 
+    # Also deploy the unparsing configuration format doc so that downstream
+    # projects can embed it in their own documentation.
+    dest = os.path.join(args.prefix, "share", "doc", "langkit_support")
+    filename = "unparsing_config_format.rst"
+    if not os.path.exists(dest):
+        os.makedirs(dest)
+    shutil.copy(
+        os.path.join(SUPPORT_ROOT, filename),
+        os.path.join(dest, filename),
+    )
+
 
 def package_deps(args: Namespace) -> None:
     """

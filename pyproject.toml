@@ -49,6 +49,7 @@ langkit = [
     "support/*.adc",
     "support/*.ads",
     "support/*.gpr",
+    "support/*.rst",
     "templates/*.mako",
     "templates/*/*.mako",
 ]
