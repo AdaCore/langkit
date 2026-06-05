@@ -6,10 +6,14 @@
         "document": [
           {
             "kind": "match",
-            "field": "f_lhs",
+            "node": {
+              "kind": "eval_member",
+              "prefix": "this_node",
+              "member": "f_rhs"
+            },
             "matchers": [
               {
-                "kind": "Expr",
+                "pattern": {"kind": "node", "type": "Expr"},
                 "document": [
                   {
                     "kind": "recurse_field",
@@ -23,7 +27,7 @@
                 ]
               },
               {
-                "kind": "Number",
+                "pattern": {"kind": "node", "type": "Number"},
                 "document": [
                   {
                     "kind": "recurse_field",
@@ -35,22 +39,25 @@
                     "text": "+"
                   }
                 ]
-              }
-            ],
-            "default": {
-              "kind": "group",
-              "document": [
-                {
-                  "kind": "recurse_field",
-                  "field": "f_lhs"
-                },
-                "hardline",
-                {
-                  "kind": "text",
-                  "text": "+"
+              },
+              {
+                "pattern": "*",
+                "document": {
+                  "kind": "group",
+                  "document": [
+                    {
+                      "kind": "recurse_field",
+                      "field": "f_lhs"
+                    },
+                    "hardline",
+                    {
+                      "kind": "text",
+                      "text": "+"
+                    }
+                  ]
                 }
-              ]
-            }
+              }
+            ]
           },
           {
             "kind": "recurse_field",

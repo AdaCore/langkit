@@ -4757,6 +4757,16 @@ package body ${ada_lib_name}.Implementation is
       return Result;
    end Children;
 
+   -------------------
+   -- Is_Empty_List --
+   -------------------
+
+   function Is_Empty_List (Node : ${ctx.generic_list_type.name}) return Boolean
+   is
+   begin
+      return Length (Node) = 0;
+   end Is_Empty_List;
+
    ---------------------
    -- New_Unit_String --
    ---------------------

@@ -225,11 +225,11 @@ class ElsifBranch {
             recurse(f_cond_expr),
             group(line, "then", whitespace, recurse(f_then_expr))
         ]
-    val f_cond_expr = match node {
+    val f_cond_expr = match this_field {
         case BlockExpr | ParenExpr => recurse
         case _ => group(indent(softline, recurse))
     }
-    val f_then_expr = match node {
+    val f_then_expr = match this_field {
         case BlockExpr | ParenExpr => recurse
         case _ => group(indent(softline, recurse))
     }
@@ -347,7 +347,7 @@ class FieldDecl {
         [
             whitespace,
             "=",
-            match node {
+            match this_field {
                 case BlockExpr => [whitespace, recurse]
                 case ParenExpr => [whitespace, recurse]
                 case _ => group(indent(line, recurse))
@@ -397,7 +397,7 @@ class FunDecl {
     val f_body =
         [
             whitespace,
-            match node {
+            match this_field {
                 case BlockExpr | MatchExpr => ["=", whitespace, recurse]
                 case _ => group(indent("=", line, recurse))
             }
@@ -532,7 +532,7 @@ class GrammarRuleDecl {
             recurse(f_syn_name),
             whitespace,
             "<-",
-            match f_expr {
+            match this_node.f_expr {
                 case TokenLit | TokenPatternLit =>
                     indent(group(line, recurse(f_expr)))
                 case _ => [whitespace, recurse(f_expr)]
@@ -569,15 +569,15 @@ class IfExpr {
             line,
             group("else", whitespace, recurse(f_else_expr))
         )
-    val f_cond_expr = match node {
+    val f_cond_expr = match this_field {
         case BlockExpr | ParenExpr => recurse
         case _ => group(indent(softline, recurse))
     }
-    val f_else_expr = match node {
+    val f_else_expr = match this_field {
         case BlockExpr | ParenExpr => recurse
         case _ => group(indent(softline, recurse))
     }
-    val f_then_expr = match node {
+    val f_then_expr = match this_field {
         case BlockExpr | ParenExpr => recurse
         case _ => group(indent(softline, recurse))
     }
@@ -647,7 +647,7 @@ class LambdaExpr {
                 id="comments",
                 bubbleUpTrailingTrivias=false
             ),
-            match f_body {
+            match this_node.f_body {
                 case BlockExpr =>
                     [
                         ifBreak([], whitespace, groupId="comments"),
@@ -894,7 +894,7 @@ class TryExpr {
     val node =
         group(
             group("try", whitespace, recurse(f_try_expr)),
-            match f_or_expr {
+            match this_node.f_or_expr {
                 case null => recurse(f_or_expr)
                 case _ => [line, group(recurse(f_or_expr))]
             }
@@ -916,7 +916,7 @@ class ValDecl {
             recurse(f_decl_type),
             whitespace,
             "=",
-            match f_expr {
+            match this_node.f_expr {
                 case BlockExpr | ParenExpr | MatchExpr =>
                     [whitespace, recurse(f_expr)]
                 case _ => indent(line, recurse(f_expr))

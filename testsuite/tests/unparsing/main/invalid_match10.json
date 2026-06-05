@@ -1,7 +1,13 @@
 {
   "node_configs": {
-    "FooNodeList": {
-      "sep": {"kind": "match", "matchers": [], "default": "recurse"}
+    "Addition": {
+      "node": {
+        "kind": "match",
+        "node": "this_node",
+        "matchers": [
+          {"pattern": "*", "document": "invalid"}
+        ]
+      }
     }
   }
 }

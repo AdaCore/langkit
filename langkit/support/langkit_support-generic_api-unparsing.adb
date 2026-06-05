@@ -469,6 +469,10 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  template instantiation: ``Instantiate_Template`` takes care of the
    --  template unwrapping.
 
+   procedure Process_Evaluation_Exception
+     (State : Instantiation_State; Exc : Exception_Occurrence);
+   --  If ``Exc`` is a managed exception, log it. Otherwise, repropagate it
+
    function Evaluate_Condition
      (State      : in out Instantiation_State;
       Expression : Document_Type) return Boolean;
@@ -480,6 +484,12 @@ package body Langkit_Support.Generic_API.Unparsing is
       Expression : Document_Type) return Value_Ref;
    --  Helper for ``Evaluate_Condition``. Evaluate an expression tree
    --  and return the resulting value. This may propagate a managed exception.
+
+   function Pattern_Matches
+     (State   : in out Instantiation_State;
+      Pattern : Document_Type;
+      Value   : Value_Ref) return Boolean;
+   --  Return whether the given pattern matches the given value
 
    -----------------------
    -- Check_Same_Tokens --
@@ -1769,44 +1779,79 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when Match =>
             declare
-               Field_Node       : constant Lk_Node :=
-                 Eval_Syntax_Field (State.Node, Template.Match_Field);
-               Matched_Template : Document_Type := Template.Match_Default;
-
+               Doc  : Document_Type;
+               Node : Value_Ref := No_Value_Ref;
             begin
-               --  If the field is present, pick the document for the first
-               --  matcher that accepts it.
+               --  First evaluate the controlling node. If an exception occurs
+               --  at this point, we will use the default matcher below.
 
-               if Is_Field_Present
-                    (Field_Node,
-                     Syntax_Field_Index
-                       (Template.Match_Field, Type_Of (State.Node)))
-               then
-                  for I in
-                    Template.Match_Matchers.First_Index
-                    .. Template.Match_Matchers.Last_Index
-                  loop
-                     if Matches
-                          (Field_Node, Template.Match_Matchers.Reference (I))
+               begin
+                  Node := Evaluate_Expression (State, Template.Match_Node);
+               exception
+                  when Exc : others =>
+                     Process_Evaluation_Exception (State, Exc);
+               end;
+
+               --  Now find the first matcher that applies for this node, and
+               --  then instantiate the associated template.
+
+               for I in 1 .. Template.Match_Matchers.Last_Index loop
+                  declare
+                     M : Matcher_Record renames
+                       Template.Match_Matchers.Constant_Reference (I);
+                  begin
+                     if (Node = No_Value_Ref
+                         and then Is_Default_Pattern (M.Pattern))
+                         or else (Node /= No_Value_Ref
+                                  and then Pattern_Matches
+                                             (State, M.Pattern, Node))
                      then
-                        Matched_Template :=
-                          Template.Match_Matchers (I).Document;
+                        Doc := M.Document;
                         exit;
                      end if;
-                  end loop;
+                  end;
+               end loop;
 
-               --  Otherwise, use the null template, if present. For all
-               --  other cases, use the default template.
+               --  Configuration parsing is supposed to ensure that each
+               --  match template has a matcher with a default pattern, so
+               --  we must match one alternative in all cases.
 
-               elsif Template.Match_Absent /= null then
-                  Matched_Template := Template.Match_Absent;
-               end if;
+               pragma Assert (Doc /= null);
 
-               return Instantiate_Template_Helper
-                        (Pool, State, Matched_Template);
+               return Instantiate_Template_Helper (Pool, State, Doc);
             end;
       end case;
    end Instantiate_Template_Helper;
+
+   ----------------------------------
+   -- Process_Evaluation_Exception --
+   ----------------------------------
+
+   procedure Process_Evaluation_Exception
+     (State : Instantiation_State; Exc : Exception_Occurrence) is
+   begin
+      --  Let unmanaged exceptions propagate: they are true bugs
+
+      if not Is_Managed_Exception (State.Language, Exception_Identity (Exc))
+      then
+         Reraise_Occurrence (Exc);
+
+      --  If requested, log managed exceptions
+
+      elsif Expansion_Errors_Trace.Is_Active then
+         declare
+            Context : constant String :=
+              (if State.Field.Is_Null
+               then ""
+               else "field " & State.Field.Image & " of ")
+              & State.Node.Image;
+         begin
+            Expansion_Errors_Trace.Trace
+              ("Exception caught during the expansion of " & Context);
+            Expansion_Errors_Trace.Trace (Exception_Information (Exc));
+         end;
+      end if;
+   end Process_Evaluation_Exception;
 
    ------------------------
    -- Evaluate_Condition --
@@ -1818,39 +1863,14 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Result : Value_Ref;
    begin
-      --  Evaluate the condition itself
+      --  Evaluate the condition itself. Consider that the condition evaluates
+      --  to false in case of error.
 
       begin
          Result := Evaluate_Expression (State, Expression);
       exception
          when Exc : others =>
-
-            --  Let unmanaged exceptions propagate: they are true bugs
-
-            if not Is_Managed_Exception
-                     (State.Language, Exception_Identity (Exc))
-            then
-               raise;
-
-            --  If requested, log managed exceptions
-
-            elsif Expansion_Errors_Trace.Is_Active then
-               declare
-                  Context : constant String :=
-                    (if State.Field.Is_Null
-                     then ""
-                     else "field " & State.Field.Image & " of ")
-                    & State.Node.Image;
-               begin
-                  Expansion_Errors_Trace.Trace
-                    ("Exception caught during the expansion of " & Context);
-                  Expansion_Errors_Trace.Trace
-                    (Exception_Information (Exc));
-               end;
-            end if;
-
-            --  Consider that the condition evaluates to false in case of error
-
+            Process_Evaluation_Exception (State, Exc);
             return False;
       end;
       return As_Bool (Result);
@@ -1925,11 +1945,10 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when Is_A =>
             declare
-               Node : constant Lk_Node :=
-                 Evaluate_Expression (State, Expression.Is_A_Node).As_Node;
+               Node : constant Value_Ref :=
+                 Evaluate_Expression (State, Expression.Is_A_Node);
                Result : constant Boolean :=
-                 not Node.Is_Null
-                 and then Node_Matches (Node, Expression.Is_A_Kinds);
+                 Pattern_Matches (State, Expression.Is_A_Pattern, Node);
             begin
                return From_Bool (Lang, Result);
             end;
@@ -1984,6 +2003,78 @@ package body Langkit_Support.Generic_API.Unparsing is
             return From_Node (Lang, State.Node);
       end case;
    end Evaluate_Expression;
+
+   ---------------------
+   -- Pattern_Matches --
+   ---------------------
+
+   function Pattern_Matches
+     (State   : in out Instantiation_State;
+      Pattern : Document_Type;
+      Value   : Value_Ref) return Boolean
+   is
+   begin
+      case Template_Pattern_Kind (Pattern.Kind) is
+         when Default_Pattern =>
+            return True;
+
+         when Literal_Pattern =>
+            return Pattern.Literal_Pattern_Value = Value;
+
+         when Member_Pattern =>
+            declare
+               Member : Value_Ref;
+               Args   : Value_Ref_Array
+                          (1 ..  Pattern.Member_Pattern_Args.Last_Index);
+            begin
+               begin
+                  for I in Args'Range loop
+                     Args (I) := Evaluate_Expression
+                                   (State, Pattern.Member_Pattern_Args (I));
+                  end loop;
+                  Member := Eval_Member
+                    (Value, Pattern.Member_Pattern_Ref, Args);
+               exception
+                  when Exc : others =>
+                     Process_Evaluation_Exception (State, Exc);
+                     return False;
+               end;
+
+               return Pattern_Matches
+                        (State, Pattern.Member_Pattern_Sub, Member);
+            end;
+
+         when Node_Pattern =>
+            if As_Node (Value).Is_Null
+               or else not Is_Derived_From
+                             (Type_Of (Value), Pattern.Node_Pattern_Type)
+            then
+               return False;
+            end if;
+
+            for I in 1 .. Pattern.Node_Pattern_Members.Last_Index loop
+               if not Pattern_Matches
+                        (State, Pattern.Node_Pattern_Members (I), Value)
+               then
+                  return False;
+               end if;
+            end loop;
+
+            return True;
+
+         when Not_Pattern =>
+            return not Pattern_Matches (State, Pattern.Not_Pattern_Sub, Value);
+
+         when Or_Pattern =>
+            for I in 1 .. Pattern.Or_Pattern_List.Last_Index loop
+               if Pattern_Matches (State, Pattern.Or_Pattern_List (I), Value)
+               then
+                  return True;
+               end if;
+            end loop;
+            return False;
+      end case;
+   end Pattern_Matches;
 
    -------------------------
    -- Unparse_To_Prettier --

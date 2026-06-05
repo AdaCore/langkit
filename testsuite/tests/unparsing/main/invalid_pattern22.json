@@ -1,0 +1,18 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "f_name": {
+          "kind": "if",
+          "condition": {
+            "kind": "is_a",
+            "node": "this_node",
+            "pattern": {"kind": "not", "pattern": "foo"}
+          },
+          "then": "recurse_flatten",
+          "else": "recurse"
+        }
+      }
+    }
+  }
+}

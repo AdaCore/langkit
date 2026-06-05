@@ -3408,13 +3408,20 @@ class ASTNodeType(BaseStructType):
             assert element_type
             doc = doc or "List of {}.".format(element_type.lkt_name)
 
+        if is_root:
+            fields = self.root_node_builtin_properties
+        elif is_generic_list_type:
+            fields = self.generic_list_builtin_properties
+        else:
+            fields = None
+
         super().__init__(
             context,
             name,
             location,
             doc=doc,
             base=base,
-            fields=self.builtin_properties if is_root else None,
+            fields=fields,
             implements=implements,
             is_ptr=True,
             null_allowed=True,
@@ -4162,7 +4169,7 @@ class ASTNodeType(BaseStructType):
             location=self.location,
         )
 
-    def builtin_properties(
+    def root_node_builtin_properties(
         self,
         owner: CompiledType,
     ) -> builtin_list[E.PropertyDef]:
@@ -4492,6 +4499,38 @@ class ASTNodeType(BaseStructType):
                 Convert a CompletionItemKind enum to its corresponding
                 integer value.
                 """,
+            ),
+        ]
+
+    def generic_list_builtin_properties(
+        self,
+        owner: CompiledType,
+    ) -> builtin_list[E.PropertyDef]:
+        """
+        Return properties available for all list nodes.
+        """
+        import langkit.expressions as E
+
+        assert owner == self
+
+        return [
+            E.PropertyDef(
+                owner=self,
+                names=MemberNames.for_property(
+                    self, "is_empty_list", builtin=True
+                ),
+                location=Location.builtin,
+                expr=None,
+                type=T.Bool,
+                public=True,
+                external=True,
+                uses_entity_info=False,
+                uses_envs=False,
+                optional_entity_info=False,
+                warn_on_unused=False,
+                artificial=True,
+                has_property_syntax=True,
+                doc="Return whether this list node has no children.",
             ),
         ]
 

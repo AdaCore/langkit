@@ -174,28 +174,24 @@
 --        "else": <sub-template>
 --      }
 --
---  * The "match" template is valid only inside a node configuration.  The
---    "absent" entry is optional. If "field" is not present, "absent" is
---    yielded if defined, otherwise fallback to "default".
+--  * The "match" template yields one of several alternative templates
+--    depending on a controlling node (what the "node" expression returns).
 --
---    If "field" is present, the entry in "matchers" that corresponds to the
---    field's kind is looked up ("kind" is either the name of a node, or a list
---    of node names): the "document" template for the first entry that matches
---    is used. The "default" template is used if there is no match::
+--    Each alternative template is guarded by a pattern: the expression yields
+--    the alternative template associated to the first pattern that matches the
+--    controlling node.
+--
+--    Note that at least one pattern (in practice: the last one) must match all
+--    values (i.e. be the default pattern)::
 --
 --      {
 --        "kind": "match",
---        "field": "<field-name>",
+--        "node": <expression>,
 --        "matchers": [
---          {"kind": <node-name>, "document": <sub-template>},
+--          {"pattern": <pattern>, "document": <sub-template>},
 --          ...
---        ],
---        "default": <sub-template>
---        "absent": <sub-template>
+--        ]
 --      }
---
---    A variant is available in field templates. It has no "field" entry: the
---    alternative is picked depending on the field that owns this template.
 --
 --  * The "indent" template yields an "indent" Prettier document::
 --
@@ -331,13 +327,14 @@
 --        "kwargs": {
 --          "arg1": <sub-expression>,
 --          "arg2": <sub-expression>,
+--          ...
 --        }
 --      }
 --
---  * The "is_a" expression returns whether its operand matches the given node
---    kinds::
+--  * The "is_a" expression returns whether its operand matches the given
+--    pattern (see the paragraph below that describes what patterns are)::
 --
---      {"kind": "is_a", "node": <sub-expression>, "kinds": ["Node1", "Node2"]}
+--      {"kind": "is_a", "node": <sub-expression>, "pattern": <pattern>}
 --
 --  * The "is_empty" expression returns whether its operand is considered as
 --    empty for unparsing purposes::
@@ -378,6 +375,58 @@
 --  In case of an error happening during expression evaluation, the evaluation
 --  is reported in the EXPANSION_ERRORS trace), and the encompassing condition
 --  evaluates to false.
+--
+--  Patterns are used to test values against given "shapes". A pattern can be
+--  one of the following:
+--
+--  * The "*" pattern (JSON string), that matches all values.
+--
+--  * The "null" pattern (JSON null), to check if a node is null, or is a list
+--    node that is considered as absent for unparsing purposes.
+--
+--  * The "false"/"true" pattern (JSON booleans), to check the value of a
+--    boolean.
+--
+--  * The "symbol_literal" pattern, to check if a symbol value is equal to a
+--    given constant::
+--
+--      {"kind": "symbol_literal", "value": "some string value"}
+--
+--  * The "node" pattern, to check if a node has a given type::
+--
+--      {"kind": "node", "type": "SomeNodeType"}
+--
+--    It also allows performing additional tests on its fields/properties:::
+--
+--      {
+--        "kind": "node",
+--        "type": "SomeNodeType",
+--        "members": [
+--          {
+--            "member": "f_some_field",
+--            "pattern": <sub-pattern>
+--          },
+--          {
+--            "member": "p_some_property",
+--            "args: [<sub-expression>, ...],
+--            "kwargs": {
+--              "arg1": <sub-expression>,
+--              "arg2": <sub-expression>,
+--              ...
+--            },
+--            "pattern": <sub-pattern>
+--          },
+--          ...
+--        ]
+--      }
+--
+--  * The "not" pattern, to match anything that a subpattern does *not* match::
+--
+--      {"kind": "not", "pattern": <sub-pattern>}
+--
+--  * The "or" pattern, to delegate the match to any of the sub-patterns::
+--
+--      {"kind": "or", "patterns": [<sub-pattern>, ...]}
 --
 --  The configuration file has the following format::
 --

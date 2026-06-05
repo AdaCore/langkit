@@ -7,7 +7,7 @@
           "condition": {
             "kind": "is_a",
             "node": "this_field",
-            "kinds": "blah"
+            "pattern": 1
           },
           "then": "recurse_flatten",
           "else": "recurse"

@@ -529,6 +529,11 @@ Visit <NullNode foo.txt:1:46-1:50>
   Is list node: false
   Parsing fields: []
   All fields:
+  - Name: is_empty_list
+  - Is nullable: true
+    Member reference: FOO_IS_EMPTY_LIST
+    Java method name: isEmptyList
+    Params: []
 - Node: FooNodeList
   Kind: null
   Is token node: false

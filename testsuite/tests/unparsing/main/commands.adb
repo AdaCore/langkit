@@ -234,6 +234,19 @@ begin
    Check ("cmd_node_symbol.json",
           "var v1: T = foo; var v2: T = Foo; var v3: T = casing_Foo;");
    Check ("cmd_cast.json", "def f(x: Int): Int {x;} def g(x: Int): Int {x;}");
+   Check ("cmd_pattern.json", "def f(x: Int, y: Int=1): Int {x;}");
+   Check ("cmd_pattern2.json", "def f(x: Int, y: Int=1): Int {x;}");
+   Check ("cmd_pattern3.json", "var x: Int = 1; var y: Int = 2;");
+   Check ("cmd_pattern4.json", "var x: Int = 1; var y: Int = x;");
+   Check ("cmd_pattern5.json",
+          "var x: Int = 1; var x: Int = x; var y: Int = 1;");
+   Check ("cmd_pattern6.json", "var x: Int = 1; var y: Int = x;");
+   Check ("cmd_pattern7.json",
+          "var x: Int = 1; var y: Int = 2; var z: Int = 3;");
+   Check ("cmd_pattern8.json", "var x: Int = 1;");
+   Check ("cmd_pattern9.json", "var x: Int = 1; var y: Int = x;");
+   Check ("cmd_pattern10.json", "{} {var x: Int = 1;}");
+   Check ("cmd_pattern11.json", "{} {var x: Int = 1;}");
 
    Put_Line ("Done.");
 end Commands;

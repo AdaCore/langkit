@@ -10,10 +10,14 @@
           },
           {
             "kind": "match",
-            "field": "f_rhs",
+            "node": {
+              "kind": "eval_member",
+              "prefix": "this_node",
+              "member": "f_rhs"
+            },
             "matchers": [
               {
-                "kind": "Number",
+                "pattern": {"kind": "node", "type": "Number"},
                 "document": [
                   "hardline",
                   {
@@ -25,22 +29,25 @@
                     "field": "f_rhs"
                   }
                 ]
-              }
-            ],
-            "default": {
-              "kind": "group",
-              "document": [
-                {
-                  "kind": "text",
-                  "text": "+"
-                },
-                "hardline",
-                {
-                  "kind": "recurse_field",
-                  "field": "f_rhs"
+              },
+              {
+                "pattern": "*",
+                "document": {
+                  "kind": "group",
+                  "document": [
+                    {
+                      "kind": "text",
+                      "text": "+"
+                    },
+                    "hardline",
+                    {
+                      "kind": "recurse_field",
+                      "field": "f_rhs"
+                    }
+                  ]
                 }
-              ]
-            }
+              }
+            ]
           }
         ]
       }

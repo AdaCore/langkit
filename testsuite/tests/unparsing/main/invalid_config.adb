@@ -153,8 +153,6 @@ begin
    Check ("invalid_is_a2.json");
    Check ("invalid_is_a3.json");
    Check ("invalid_is_a4.json");
-   Check ("invalid_is_a5.json");
-   Check ("invalid_is_a6.json");
    Check ("invalid_table_join.json");
    Check ("invalid_table_join2.json");
    Check ("invalid_table_join3.json");
@@ -204,6 +202,29 @@ begin
    Check ("invalid_cast5.json");
    Check ("invalid_cast6.json");
    Check ("invalid_cast7.json");
+   Check ("invalid_pattern.json");
+   Check ("invalid_pattern2.json");
+   Check ("invalid_pattern3.json");
+   Check ("invalid_pattern4.json");
+   Check ("invalid_pattern5.json");
+   Check ("invalid_pattern6.json");
+   Check ("invalid_pattern7.json");
+   Check ("invalid_pattern8.json");
+   Check ("invalid_pattern9.json");
+   Check ("invalid_pattern10.json");
+   Check ("invalid_pattern11.json");
+   Check ("invalid_pattern12.json");
+   Check ("invalid_pattern13.json");
+   Check ("invalid_pattern14.json");
+   Check ("invalid_pattern15.json");
+   Check ("invalid_pattern16.json");
+   Check ("invalid_pattern17.json");
+   Check ("invalid_pattern18.json");
+   Check ("invalid_pattern19.json");
+   Check ("invalid_pattern20.json");
+   Check ("invalid_pattern21.json");
+   Check ("invalid_pattern22.json");
+   Check ("invalid_pattern23.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");

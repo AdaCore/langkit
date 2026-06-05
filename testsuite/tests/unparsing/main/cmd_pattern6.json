@@ -1,0 +1,42 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": {
+        "kind": "if",
+        "condition": {
+          "kind": "is_a",
+          "node": "this_node",
+          "pattern": {
+            "kind": "node",
+            "type": "VarDecl",
+            "members": [
+              {
+                "member": "p_eval_member_test",
+                "args": [
+                  {
+                    "kind": "eval_member",
+                    "prefix": "this_node",
+                    "member": "f_value"
+                  },
+                  "this_node"
+                ],
+                "pattern": {
+                  "kind": "node",
+                  "type": "VarDecl",
+                  "members": [
+                    {
+                      "member": "f_value",
+                      "pattern": {"kind": "node", "type": "Number"}
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "then": ["recurse", "whitespace"],
+        "else": "recurse"
+      }
+    }
+  }
+}

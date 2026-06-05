@@ -10,17 +10,30 @@
         {"kind": "text", "text": "="},
         {
           "kind": "match",
-          "field": "f_value",
+          "node": {
+            "kind": "eval_member",
+            "prefix": "this_node",
+            "member": "f_value"
+          },
           "matchers": [
             {
-              "kind": ["Number", "Addition"],
+              "pattern": {
+                "kind": "or",
+                "patterns": [
+                  {"kind": "node", "type": "Number"},
+                  {"kind": "node", "type": "Addition"}
+                ]
+              },
               "document": [
                 "whitespace",
                 {"kind": "recurse_field", "field": "f_value"}
               ]
+            },
+            {
+              "pattern": "*",
+              "document": {"kind": "recurse_field", "field": "f_value"}
             }
-          ],
-          "default": {"kind": "recurse_field", "field": "f_value"}
+          ]
         },
         {"kind": "text", "text": ";"}
       ]

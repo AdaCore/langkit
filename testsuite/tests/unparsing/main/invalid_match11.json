@@ -1,13 +1,26 @@
 {
   "node_configs": {
-    "VarDecl": {
-      "fields": {
-        "f_name": {
-         "kind": "match",
-         "field": "f_name",
-         "matchers": [],
-         "default": "recurse"
-        }
+    "Addition": {
+      "node": {
+        "kind": "match",
+        "node": "this_node",
+        "matchers": [
+          {
+            "pattern": null,
+            "document": [
+               {"kind": "recurse_field", "field": "f_lhs"},
+               {"kind": "text", "text": "+"},
+               {"kind": "recurse_field", "field": "f_rhs"}
+            ]
+          },
+          {
+            "pattern": "*",
+            "document": [
+               {"kind": "text", "text": "+"},
+               {"kind": "recurse_field", "field": "f_rhs"}
+            ]
+          }
+        ]
       }
     }
   }

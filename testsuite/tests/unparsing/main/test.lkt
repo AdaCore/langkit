@@ -137,6 +137,9 @@ class CallArg: FooNode {
 @abstract
 class Decl: FooNode {
     @abstract @parse_field name: Name
+
+    @exported
+    fun name_symbol(): Symbol = node.name.symbol
 }
 
 class FunDecl: Decl {

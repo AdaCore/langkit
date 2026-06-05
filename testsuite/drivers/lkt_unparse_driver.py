@@ -58,6 +58,8 @@ class LktUnparseDriver(BaseDriver):
                 self.env.lkt_unparsing_config_json,
                 "-A",
                 "-C",
+                "-t",
+                "expansion_errors",
                 "input.lkt",
             ],
             memcheck=self.memcheck_for_lkt,

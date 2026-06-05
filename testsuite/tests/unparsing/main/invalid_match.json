@@ -2,39 +2,9 @@
   "node_configs": {
     "Addition": {
       "node": {
-        "kind": "group",
-        "document": [
-          {
-            "kind": "recurse_field",
-            "field": "f_lhs"
-          },
-          {
-            "kind": "match",
-            "field": "f_rhs",
-            "matchers": [
-              {
-                "kind": "Number",
-                "document": [
-                  "hardline",
-                  {
-                    "kind": "text",
-                    "text": "+"
-                  }
-                ]
-              }
-            ],
-            "default": [
-              {
-                "kind": "text",
-                "text": "+"
-              },
-              "hardline",
-              {
-                "kind": "recurse_field",
-                "field": "f_rhs"
-              }
-            ]
-          }
+        "kind": "match",
+        "matchers": [
+          {"pattern": "*", "document": "recurse"}
         ]
       }
     }

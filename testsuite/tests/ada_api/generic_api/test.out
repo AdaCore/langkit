@@ -1149,6 +1149,7 @@ For Foo_Node_Base_List
   Is_Ghost (FooNode.is_ghost: 29)
   Full_Sloc_Image (FooNode.full_sloc_image: 30)
   Completion_Item_Kind_To_Int (FooNode.completion_item_kind_to_int: 31)
+  Is_Empty_List (FooNodeBaseList.is_empty_list: 58)
 
 For Expr_List
   Parent (FooNode.parent: 20)
@@ -1163,6 +1164,7 @@ For Expr_List
   Is_Ghost (FooNode.is_ghost: 29)
   Full_Sloc_Image (FooNode.full_sloc_image: 30)
   Completion_Item_Kind_To_Int (FooNode.completion_item_kind_to_int: 31)
+  Is_Empty_List (FooNodeBaseList.is_empty_list: 58)
 
 For Foo_Node_List
   Parent (FooNode.parent: 20)
@@ -1177,6 +1179,7 @@ For Foo_Node_List
   Is_Ghost (FooNode.is_ghost: 29)
   Full_Sloc_Image (FooNode.full_sloc_image: 30)
   Completion_Item_Kind_To_Int (FooNode.completion_item_kind_to_int: 31)
+  Is_Empty_List (FooNodeBaseList.is_empty_list: 58)
 
 For Name_List
   Parent (FooNode.parent: 20)
@@ -1191,6 +1194,7 @@ For Name_List
   Is_Ghost (FooNode.is_ghost: 29)
   Full_Sloc_Image (FooNode.full_sloc_image: 30)
   Completion_Item_Kind_To_Int (FooNode.completion_item_kind_to_int: 31)
+  Is_Empty_List (FooNodeBaseList.is_empty_list: 58)
 
 For Name
   Parent (FooNode.parent: 20)
@@ -1219,7 +1223,7 @@ For Null_Qual
   Is_Ghost (FooNode.is_ghost: 29)
   Full_Sloc_Image (FooNode.full_sloc_image: 30)
   Completion_Item_Kind_To_Int (FooNode.completion_item_kind_to_int: 31)
-  P_As_Bool (NullQual.p_as_bool: 58)
+  P_As_Bool (NullQual.p_as_bool: 59)
 
 For Null_Qual_Absent
   Parent (FooNode.parent: 20)
@@ -1234,7 +1238,7 @@ For Null_Qual_Absent
   Is_Ghost (FooNode.is_ghost: 29)
   Full_Sloc_Image (FooNode.full_sloc_image: 30)
   Completion_Item_Kind_To_Int (FooNode.completion_item_kind_to_int: 31)
-  P_As_Bool (NullQual.p_as_bool: 58)
+  P_As_Bool (NullQual.p_as_bool: 59)
 
 For Null_Qual_Present
   Parent (FooNode.parent: 20)
@@ -1249,7 +1253,7 @@ For Null_Qual_Present
   Is_Ghost (FooNode.is_ghost: 29)
   Full_Sloc_Image (FooNode.full_sloc_image: 30)
   Completion_Item_Kind_To_Int (FooNode.completion_item_kind_to_int: 31)
-  P_As_Bool (NullQual.p_as_bool: 58)
+  P_As_Bool (NullQual.p_as_bool: 59)
 
 For Synth_Node
   Parent (FooNode.parent: 20)
@@ -1655,7 +1659,13 @@ F_Create_Synth_Node (Example.f_create_synth_node: 57)
   type: SynthNode
   no argument
 
-P_As_Bool (NullQual.p_as_bool: 58)
+Is_Empty_List (FooNodeBaseList.is_empty_list: 58)
+  owner: FooNodeBaseList
+  is a property
+  type: Bool
+  no argument
+
+P_As_Bool (NullQual.p_as_bool: 59)
   owner: NullQual
   is a property
   type: Bool
