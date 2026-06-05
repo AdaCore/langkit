@@ -358,7 +358,7 @@ class LangkitTestsuite(Testsuite):
 
         # If Java is enabled and a Java test is enabled, build the Lkt Java
         # bindings and the required native-image main.
-        if any(
+        if not self.main.args.disable_java and any(
             isinstance(test_data.driver, drivers.java_driver.JavaDriver)
             for test_data in dag.vertex_data.values()
         ):
