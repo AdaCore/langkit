@@ -459,10 +459,10 @@ class CompileCtx:
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
-        from langkit.python_api import PythonAPISettings
-        from langkit.ocaml_api import OCamlAPISettings
         from langkit.java_api import JavaAPISettings
+        from langkit.ocaml_api import OCamlAPISettings
         from langkit.passes import AbstractPass
+        from langkit.python_api import PythonAPISettings
         from langkit.textmate_grammar import TextMateGrammarSettings
         from langkit.unparsers import Unparsers
 
