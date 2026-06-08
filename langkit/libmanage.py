@@ -123,7 +123,7 @@ class DisableWarningAction(argparse.Action):
         namespace.enabled_warnings.disable(values)
 
 
-class ManageScript(abc.ABC):
+class ManageScript:
     build_modes: list[BuildMode]
     """
     Build modes to build.

@@ -58,7 +58,7 @@ class Language(str, enum.Enum):
         return self.value
 
 
-class SourcePostProcessor(abc.ABC):
+class SourcePostProcessor:
     """
     Base class for objects used to refine (post-process) generated source code.
     """

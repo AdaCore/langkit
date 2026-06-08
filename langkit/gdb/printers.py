@@ -70,7 +70,7 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
         return self.cls(value, self.context)
 
 
-class BasePrinter(abc.ABC):
+class BasePrinter:
     """
     Base class for pretty-printers.
 

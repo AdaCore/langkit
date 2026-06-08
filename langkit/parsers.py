@@ -412,7 +412,7 @@ class Grammar:
                 )
 
 
-class Parser(abc.ABC):
+class Parser:
     """
     Base class for parsers building blocks.
     """

@@ -499,7 +499,7 @@ def check_generic(
         check_comment()
 
 
-class LanguageChecker(abc.ABC):
+class LanguageChecker:
     """Base class for language-specific checkers."""
 
     # String for single-line comments starters

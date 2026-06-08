@@ -102,7 +102,7 @@ class SequenceReader:
 
 class RegexpCollection:
 
-    class Parser(abc.ABC):
+    class Parser:
         """Base class for regexp components."""
 
         @abc.abstractmethod
