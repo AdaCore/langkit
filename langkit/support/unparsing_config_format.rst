@@ -668,8 +668,7 @@ one of the following:
 
 ``null``
 
-    Matches null nodes and list nodes that are considered as absent for
-    unparsing purposes (see the ``is_empty`` expression).
+    Matches null nodes.
 
     .. code-block:: json
 
