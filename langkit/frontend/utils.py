@@ -143,17 +143,14 @@ def load_lkt(config: LktSpecConfig) -> list[L.AnalysisUnit]:
                 for u in imp.p_referenced_units:
                     process_unit(u)
 
-    # Give Liblktlang access to the Lkt files to analyze
-    old_path = os.environ.get("LKT_PATH", "")
-    os.environ["LKT_PATH"] = os.path.pathsep.join(config.source_dirs)
-
     # Load ``lkt_file`` and all the units it references, transitively
     ctx = L.AnalysisContext(
-        unit_provider=L.UnitProvider.create_default(L.LanguageMode.lkt)
+        unit_provider=L.UnitProvider.from_directories(
+            L.LanguageMode.lkt,
+            config.source_dirs,
+        )
     )
     process_unit(ctx.get_from_file(config.entry_point))
-
-    os.environ["LKT_PATH"] = old_path
 
     # Forward potential lexing/parsing errors to our diagnostics system
     for u, d in diagnostics:
