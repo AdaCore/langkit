@@ -652,7 +652,7 @@ and the encompassing condition evaluates to false.
 .. _unparsing_cfg_patterns:
 
 Patterns
-========
+--------
 
 Patterns are used to test values against given "shapes". A pattern can be
 one of the following:
