@@ -341,6 +341,24 @@ composition of the following building blocks.
 
    See also :ref:`unparsing_cfg_bubble_up`.
 
+``if``
+
+   Yield one of two alternative templates depending on a controlling expression
+   (see :ref:`unparsing_cfg_expressions`).
+
+   .. code-block:: json
+
+      {
+         "kind": "if",
+         "condition": {"kind": "is_empty", "node": "this_node"},
+         "then": "recurse",
+         "else": ["recurse", "whitespace"]
+      }
+
+   The ``condition`` expression must return a boolean. If it evaluates to
+   ``true``, the ``then`` template is used. If it evaluates to ``false`` or
+   raises an exception, the ``else`` template is used instead.
+
 ``ifBreak``
 
    Yield a ``ifBreak`` Prettier document:
