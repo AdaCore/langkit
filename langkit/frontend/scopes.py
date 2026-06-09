@@ -20,7 +20,7 @@ class Scope:
     """
 
     @dataclasses.dataclass
-    class Entity(metaclass=abc.ABCMeta):
+    class Entity:
         """
         Object that is registered in a scope.
         """

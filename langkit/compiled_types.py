@@ -432,7 +432,7 @@ def fields_callback_wrapper(
     return wrapper
 
 
-class AbstractNodeData(abc.ABC):
+class AbstractNodeData:
     """
     This class defines an abstract base class for fields and properties on
     AST nodes.

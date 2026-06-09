@@ -153,7 +153,7 @@ class PassManager:
         )
 
 
-class AbstractPass(abc.ABC):
+class AbstractPass:
     """
     Base class for all specialized compilation passes.
 

@@ -22,7 +22,7 @@ from langkit.names import Name
 # the state machine sources, which can be costly.
 
 
-class Matcher(abc.ABC):
+class Matcher:
     """
     Base class for a matcher. A matcher specificies in which case a given
     input will trigger a match.
@@ -118,7 +118,7 @@ class Pattern(Matcher):
         return ("Pattern", self.pattern)
 
 
-class Action(abc.ABC):
+class Action:
     """
     Base class for an action. An action specificies what to do with a given
     match.
