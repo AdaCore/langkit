@@ -1,0 +1,6 @@
+{
+    "invalid_combination_kind": {
+        "combination": "what!",
+        "matchers": ["a", "b"]
+    }
+}

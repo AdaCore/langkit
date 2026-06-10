@@ -103,6 +103,7 @@ if TYPE_CHECKING:
     from langkit.passes import AbstractPass
     from langkit.python_api import PythonAPISettings
     import langkit.template_utils
+    from langkit.textmate_grammar import TextMateGrammarSettings
 
     import liblktlang as L
 
@@ -394,6 +395,7 @@ class CompileCtx:
     python_api_settings: PythonAPISettings
     ocaml_api_settings: OCamlAPISettings
     java_api_settings: JavaAPISettings
+    textmate_grammar_settings: TextMateGrammarSettings
 
     all_passes: list[AbstractPass]
     """
@@ -457,10 +459,11 @@ class CompileCtx:
         :param verbosity: Amount of messages to display on standard output.
             None by default.
         """
-        from langkit.python_api import PythonAPISettings
-        from langkit.ocaml_api import OCamlAPISettings
         from langkit.java_api import JavaAPISettings
+        from langkit.ocaml_api import OCamlAPISettings
         from langkit.passes import AbstractPass
+        from langkit.python_api import PythonAPISettings
+        from langkit.textmate_grammar import TextMateGrammarSettings
         from langkit.unparsers import Unparsers
 
         self.plugin_loader = plugin_loader
@@ -508,6 +511,8 @@ class CompileCtx:
         self.ocaml_api_settings = OCamlAPISettings(self, self.c_api_settings)
 
         self.java_api_settings = JavaAPISettings(self, self.c_api_settings)
+
+        self.textmate_grammar_settings = TextMateGrammarSettings(self)
 
         self.fns: set[Parser] = set()
         """
@@ -2512,6 +2517,11 @@ class CompileCtx:
             GlobalPass(
                 "finalize unparsers code generation", self.unparsers.finalize
             ),
+            GlobalPass(
+                "load TextMate configuration",
+                self.textmate_grammar_settings.load_textmate_config,
+                disabled=self.config.textmate_config_file is None,
+            ),
         ]
 
     @property
@@ -2614,6 +2624,13 @@ class CompileCtx:
             EmitterPass("emit GDB helpers", Emitter.emit_gdb_helpers),
             EmitterPass("emit OCaml API", Emitter.emit_ocaml_api),
             EmitterPass("emit Java API", Emitter.emit_java_api),
+            # Add the TextMate emission pass if a configuration has been
+            # provided.
+            EmitterPass(
+                "emit TextMate grammar",
+                Emitter.emit_textmate_grammar,
+                disabled=self.config.textmate_config_file is None,
+            ),
             EmitterPass(
                 "emit units for builtin files", Emitter.emit_builtin_files
             ),

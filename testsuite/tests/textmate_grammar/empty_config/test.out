@@ -1,0 +1,7 @@
+== foo.lkt ==
+empty_config.json:1:1: error: Expecting value
+
+== test.py ==
+No TextMate grammar produced...
+
+lkt_compile: Done

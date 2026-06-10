@@ -41,7 +41,7 @@ command.
 
 By default, Maven uses your default local repository (generally ``~/.m2``) to
 download dependencies. You can use the ``--maven-local-repo`` option to
-change this behaviour and set a custom local Maven repository.
+change this behavior and set a custom local Maven repository.
 
 .. code-block::
 

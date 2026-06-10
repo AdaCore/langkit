@@ -664,6 +664,13 @@ class CompilationConfig:
     Configuration for the VS Code extension.
     """
 
+    textmate_config_file: str | None = None
+    """
+    Filename relative to the extensions directory, containing the JSON
+    configuration for the TextMate grammar generation pass. If ``None``, the
+    pass is skipped.
+    """
+
     mains: MainsConfig = dataclasses.field(default_factory=MainsConfig)
 
     plugin_passes: list[str] = dataclasses.field(default_factory=list)

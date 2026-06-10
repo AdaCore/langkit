@@ -1,0 +1,7 @@
+== foo.lkt ==
+invalid_matchers_type.json: error: "matchers" is a str, expecting list
+
+== test.py ==
+No TextMate grammar produced...
+
+lkt_compile: Done

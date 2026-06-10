@@ -1,0 +1,7 @@
+driver: lkt_compile
+
+sync_trees:
+  - ../common
+
+config:
+  textmate_config_file: empty_config.json

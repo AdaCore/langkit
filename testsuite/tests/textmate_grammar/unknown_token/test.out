@@ -1,0 +1,7 @@
+== foo.lkt ==
+unknown_token.json: error: Unknown token name "UnknownToken"
+
+== test.py ==
+No TextMate grammar produced...
+
+lkt_compile: Done
