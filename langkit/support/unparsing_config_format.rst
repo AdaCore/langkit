@@ -788,7 +788,7 @@ tree is post-processed: trivias that appear before the first token of a node
 the document tree ("bubbled up").
 
 By default, all leading trivias are bubbled up, and trailing trivias are
-bubbled up only for ``fill` and ``group`` documents. In order to satisfy some
+bubbled up only for ``fill`` and ``group`` documents. In order to satisfy some
 coding styles, these defaults can be overriden on a case by case basis in
 templates. To achieve this, the following templates accept the optional
 ``bubbleUpLeadingTrivias`` and ``bubbleUpTrailingTrivias`` boolean entries to
