@@ -269,9 +269,9 @@ class TextMateGrammarSettings(AbstractAPISettings):
         """
         return self.named_pattern_matcher.sub(
             lambda s: [
-                self.process_named_patterns(p[1])
+                self.process_named_patterns(p.regexp)
                 for p in self.context.lexer.patterns
-                if p[0] == s.group()[1:-1]
+                if p.name == s.group()[1:-1]
             ][0],
             source_regex,
         )
