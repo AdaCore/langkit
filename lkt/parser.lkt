@@ -358,7 +358,7 @@ grammar lkt_grammar {
     ellipsis_pattern <- EllipsisPattern(?pick(id "@") "...")
     integer_pattern <- IntegerPattern(@Number)
     list_pattern <- ListPattern(
-        "[" list+(or(ellipsis_pattern | neg_pattern), ",") "]"
+        "[" list*(or(ellipsis_pattern | neg_pattern), ",") "]"
     )
     pattern_arg <- or(
         | FieldPatternDetail(id ":" / pattern)

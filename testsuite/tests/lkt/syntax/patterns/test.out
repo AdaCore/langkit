@@ -1,9 +1,9 @@
-LangkitRoot[1:1-11:57]
+LangkitRoot[1:1-12:16]
 |f_doc: <null>
 |f_imports:
 |  BaseImportList[1:1-1:1]: <empty list>
 |f_decls:
-|  FullDeclList[1:1-11:57]
+|  FullDeclList[1:1-12:16]
 |  |  FullDecl[1:1-1:17]
 |  |  |f_doc: <null>
 |  |  |f_decl_annotations:
@@ -472,4 +472,27 @@ LangkitRoot[1:1-11:57]
 |  |  |  |  |  |  |  |  |f_predicate: <null>
 |  |  |  |  |  |f_details:
 |  |  |  |  |  |  PatternDetailList[11:57-11:57]: <empty list>
+|  |  |  |  |  |f_predicate: <null>
+|  |  FullDecl[12:1-12:16]
+|  |  |f_doc: <null>
+|  |  |f_decl_annotations:
+|  |  |  DeclAnnotationList[11:57-11:57]: <empty list>
+|  |  |f_decl:
+|  |  |  ValDecl[12:1-12:16]
+|  |  |  |f_syn_name:
+|  |  |  |  DefId[12:5-12:6]: _
+|  |  |  |f_decl_type: <null>
+|  |  |  |f_expr:
+|  |  |  |  Isa[12:9-12:16]
+|  |  |  |  |f_expr:
+|  |  |  |  |  RefId[12:9-12:10]: a
+|  |  |  |  |f_pattern:
+|  |  |  |  |  ComplexPattern[12:14-12:16]
+|  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  ListPattern[12:14-12:16]
+|  |  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  |  PatternList[12:15-12:15]: <empty list>
+|  |  |  |  |  |f_details:
+|  |  |  |  |  |  PatternDetailList[12:16-12:16]: <empty list>
 |  |  |  |  |  |f_predicate: <null>
