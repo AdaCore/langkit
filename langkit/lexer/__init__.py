@@ -493,6 +493,12 @@ class Lexer:
     generate parse trees.
     """
 
+    pattern_map: dict[str, PatternEntry]
+    """
+    Mapping from pattern name to the corresponding entry. Set during lexer
+    compilation.
+    """
+
     def __init__(
         self,
         tokens_class: Type[LexerToken],
@@ -782,8 +788,10 @@ class Lexer:
         regexps = RegexpCollection(case_insensitive=self.case_insensitive)
 
         # Import patterns into regexps
+        self.pattern_map = {}
         for p in self.patterns:
             regexps.add_pattern(p.location, p.name, p.regexp)
+            self.pattern_map[p.name] = p
 
         # Now turn each rule into a NFA
         nfas = []

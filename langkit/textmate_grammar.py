@@ -116,7 +116,7 @@ class TextMateGrammarSettings(AbstractAPISettings):
     Container for the TextMate grammar generation settings.
     """
 
-    named_pattern_matcher = re.compile(r"\{[a-zA-Z][a-zA-Z0-9_]*\}")
+    named_pattern_matcher = re.compile(r"\{(?P<name>[a-zA-Z][a-zA-Z0-9_]*)\}")
     """
     Regular expression required to match on named pattern inside token regular
     expressions.
@@ -268,11 +268,11 @@ class TextMateGrammarSettings(AbstractAPISettings):
         value.
         """
         return self.named_pattern_matcher.sub(
-            lambda s: [
-                self.process_named_patterns(p.regexp)
-                for p in self.context.lexer.patterns
-                if p.name == s.group()[1:-1]
-            ][0],
+            lambda m: self.process_named_patterns(
+                # The lexer was already compiled, so we know that all
+                # referenced patterns exist.
+                self.context.lexer.pattern_map[m.group("name")].regexp
+            ),
             source_regex,
         )
 
