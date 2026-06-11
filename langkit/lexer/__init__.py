@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 from collections import defaultdict
+import dataclasses
 import re
 from typing import Iterator, Sequence, Type, cast
 
@@ -20,6 +21,28 @@ from langkit.names import Name
 # lexer specification, and thus implement a cache. If the signature does not
 # change from one run to another, we can avoid computing the DFA and generating
 # the state machine sources, which can be costly.
+
+
+@dataclasses.dataclass(frozen=True)
+class PatternEntry:
+    """
+    Pattern registered in the lexer.
+    """
+
+    name: str
+    """
+    Lower-case name for this pattern.
+    """
+
+    regexp: str
+    """
+    Regular expression for this pattern.
+    """
+
+    location: Location
+    """
+    Language spec location where this pattern is declared.
+    """
 
 
 class Matcher:
@@ -470,6 +493,12 @@ class Lexer:
     generate parse trees.
     """
 
+    pattern_map: dict[str, PatternEntry]
+    """
+    Mapping from pattern name to the corresponding entry. Set during lexer
+    compilation.
+    """
+
     def __init__(
         self,
         tokens_class: Type[LexerToken],
@@ -498,7 +527,7 @@ class Lexer:
         for i, t in enumerate(sorted(self.tokens, key=lambda t: t.base_name)):
             t._index = i
 
-        self.patterns: list[tuple[str, str, Location]] = []
+        self.patterns: list[PatternEntry] = []
         self.rules: list[RuleAssoc] = []
         self.tokens_set = {el.name for el in self.tokens}
         self.track_indent = track_indent
@@ -544,7 +573,7 @@ class Lexer:
         return (
             "Lexer",
             self.tokens.signature,
-            sorted((k, v) for (k, v, _) in self.patterns),
+            sorted((p.name, p.regexp) for p in self.patterns),
             # Do not sort signatures for rules as their order matters
             [r.signature for r in self.rules],
             self.track_indent,
@@ -571,7 +600,7 @@ class Lexer:
         """
         Like ``add_patterns``, but add a single pattern.
         """
-        self.patterns.append((name, regexp, location))
+        self.patterns.append(PatternEntry(name, regexp, location))
 
     def add_rules(self, *rules: tuple[Matcher, Action] | RuleAssoc) -> None:
         """
@@ -759,8 +788,10 @@ class Lexer:
         regexps = RegexpCollection(case_insensitive=self.case_insensitive)
 
         # Import patterns into regexps
-        for name, pattern, loc in self.patterns:
-            regexps.add_pattern(loc, name, pattern)
+        self.pattern_map = {}
+        for p in self.patterns:
+            regexps.add_pattern(p.location, p.name, p.regexp)
+            self.pattern_map[p.name] = p
 
         # Now turn each rule into a NFA
         nfas = []
