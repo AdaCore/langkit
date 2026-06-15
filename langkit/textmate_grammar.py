@@ -141,8 +141,13 @@ class TextMateGrammarSettings(AbstractAPISettings):
             with open(self.config_file, "r") as f:
                 config = json.load(f)
         except OSError as e:
+            # Here we format the error message in a custom way to avoid the
+            # call to `repr` on `e.filename` that is done by `str(e)`. This
+            # call is returning a string with some double backslashes on
+            # Windows, which isn't convenient for our testing processes.
             error(
-                f"Cannot open the TextMate config file: {e}",
+                f"Cannot open the TextMate config file: "
+                f"[Errno {e.errno}] {e.strerror}: '{e.filename}'",
                 Location.nowhere,
             )
         except json.JSONDecodeError as e:
