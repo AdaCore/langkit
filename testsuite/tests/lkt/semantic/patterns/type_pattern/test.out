@@ -1,0 +1,28 @@
+test.lkt:46:14-46:21: error: pattern accepts values of type MyClass, but the matched expression is of type Int
+ 46 | val _ = i is MyClass
+    |              ^^^^^^^ 
+test.lkt:47:18-47:28: error: pattern accepts values of type OtherChild, but the matched expression is of type ChildClass
+ 47 | val _ = child is OtherChild
+    |                  ^^^^^^^^^^ 
+test.lkt:48:14-48:22: error: pattern accepts values of type MyStruct, but the matched expression is of type Int
+ 48 | val _ = i is MyStruct
+    |              ^^^^^^^^ 
+test.lkt:49:14-49:20: error: pattern accepts values of type MyEnum, but the matched expression is of type Int
+ 49 | val _ = i is MyEnum
+    |              ^^^^^^ 
+test.lkt:50:38-50:42: error: expected Entity[MyNode], got MyNode
+ 50 | val _ = entity is x@MyNode when x == node
+    |                                      ^^^^ 
+test.lkt:51:41-51:43: error: pattern accepts values of type String, but the matched expression is of type Int
+ 51 | val _ = GenStruct(1, 2) is GenStruct(a: "", b: true)
+    |                                         ^^ 
+test.lkt:51:48-51:52: error: pattern accepts values of type Bool, but the matched expression is of type Int
+ 51 | val _ = GenStruct(1, 2) is GenStruct(a: "", b: true)
+    |                                                ^^^^ 
+test.lkt:53:10-53:20: error: pattern accepts values of type OtherChild, but the matched expression is of type ChildClass
+ 53 |     case OtherChild => true
+    |          ^^^^^^^^^^ 
+test.lkt:55:28-55:38: error: pattern accepts values of type OtherChild, but the matched expression is of type ChildClass
+ 55 | val _ = from [child] match OtherChild
+    |                            ^^^^^^^^^^ 
+

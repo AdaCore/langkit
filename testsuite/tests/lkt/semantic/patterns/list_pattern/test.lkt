@@ -1,0 +1,54 @@
+class A {}
+class B: A {}
+class C: A {}
+class D {}
+
+generic[T] struct S { t: T }
+
+val i = 42
+val i_l = [1, 2, 3]
+val s_l = ["a", "b", "c"]
+val a_l = [A()]
+val b_l = [B()]
+val c_l = [C()]
+val d_l = [D()]
+
+# Test valid usages
+val _ = i_l is [1, 2, 3]
+val _ = i_l is []
+val _ = s_l is ["a", "b", "c"]
+val _ = s_l is []
+val _ = a_l is [A]
+val _ = a_l is [A, B, C]
+val _ = a_l is [C, B, A]
+val _ = a_l is [B]
+val _ = a_l is [C]
+val _ = b_l is [A]
+val _ = b_l is [B]
+val _ = b_l is [A, B, C]
+val _ = match i_l {
+    case [1, 2, 3] => true
+    case [] => true
+}
+val _ = from [i_l] match [1, 2, 3]
+
+# Test erroneous usages
+val _ = i is [1]
+val _ = i is []
+val _ = i is [[]]
+val _ = i_l is ["a", "b", "c"]
+val _ = i_l is [1, 2, "c"]
+val _ = i_l is [1, 2, S]
+val _ = i_l is [_, true]
+val _ = i_l is ["", true]
+val _ = i_l is [true, _]
+val _ = i_l is [_, ((true))]
+val _ = i_l is [_, (true | false)]
+val _ = i_l is [_, (_ | false)]
+val _ = b_l is [C]
+val _ = a_l is [D]
+val _ = match i_l {
+    case ["a", "b", "c"] => true
+    case [[]] => true
+}
+val _ = from [i_l] match [true]

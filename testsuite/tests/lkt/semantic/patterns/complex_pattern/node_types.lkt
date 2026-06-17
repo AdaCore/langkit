@@ -16,6 +16,7 @@ val entity: Entity[BinOp] = null
 # Test destructuring details
 val _ = node is BinOp(x, y)
 val _ = entity is BinOp(x, y)
+val _ = entity is ((BinOp))(x, y)
 val _ = entity is Entity[BinOp](x, y)
 
 # Test field details
@@ -27,3 +28,9 @@ val _ = entity is BinOp(left: x, right: BinOp(y, z))
 # Test property details
 val _ = node is BinOp(my_prop(): x)
 val _ = entity is BinOp(my_prop(): x)
+
+# Test pattern acceptance
+val _ = node is BinOp
+val _ = entity is BinOp
+val _ = node is Entity[BinOp]
+val _ = entity is Entity[BinOp]

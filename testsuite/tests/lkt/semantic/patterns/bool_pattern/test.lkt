@@ -1,0 +1,18 @@
+val b = true
+val i = 42
+
+val _ = b is true
+val _ = b is false
+val _ = match b {
+    case true => true
+    case false => false
+}
+val _ = from [b] match true
+
+val _ = i is true
+val _ = i is false
+val _ = match i {
+    case true => true
+    case false => false
+}
+val _ = from [i] match true

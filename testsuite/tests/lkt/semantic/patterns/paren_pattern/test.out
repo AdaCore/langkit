@@ -1,0 +1,13 @@
+test.lkt:7:14-7:17: error: pattern accepts values of type Int, but the matched expression is of type Bool
+ 7 | val _ = b is (1)
+   |              ^^^ 
+test.lkt:8:14-8:34: error: pattern accepts values of type Bool, but the matched expression is of type Int
+ 8 | val _ = i is ((((((((true))))))))
+   |              ^^^^^^^^^^^^^^^^^^^^ 
+test.lkt:12:10-12:24: error: pattern accepts values of type Bool, but the matched expression is of type Int
+ 12 |     case (((((true))))) => false
+    |          ^^^^^^^^^^^^^^ 
+test.lkt:14:24-14:37: error: pattern accepts values of type Int, but the matched expression is of type Bool
+ 14 | val _ = from [b] match ((((((1))))))
+    |                        ^^^^^^^^^^^^^ 
+

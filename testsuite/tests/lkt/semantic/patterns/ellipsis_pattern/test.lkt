@@ -1,0 +1,19 @@
+val b_l = [true]
+val i_l = [1, 2, 3]
+
+val _ = i_l is [1, ...]
+val _ = i_l is [...]
+val _ = i_l is [l@...] when l.length() == 1
+val _ = b_l is [l@...] when l[0]
+val _ = match b_l {
+    case [true, ...] => true
+    case [x@...] => x[0]
+}
+val _ = from [i_l] match [l@...] if l[0] == 1
+
+val _ = i_l is [x@...] when x[0]
+val _ = b_l is [x@...] when x[0] == 1
+val _ = match i_l {
+    case [x@...] => x[0] == ""
+}
+val _ = from [i_l] match [l@...] if l[0]

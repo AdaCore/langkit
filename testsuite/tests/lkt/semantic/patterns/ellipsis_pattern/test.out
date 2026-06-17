@@ -1,0 +1,13 @@
+test.lkt:14:29-14:33: error: expected Bool, got Int
+ 14 | val _ = i_l is [x@...] when x[0]
+    |                             ^^^^ 
+test.lkt:15:37-15:38: error: expected Bool, got Int
+ 15 | val _ = b_l is [x@...] when x[0] == 1
+    |                                     ^ 
+test.lkt:17:29-17:31: error: expected Int, got String
+ 17 |     case [x@...] => x[0] == ""
+    |                             ^^ 
+test.lkt:19:37-19:41: error: expected Bool, got Int
+ 19 | val _ = from [i_l] match [l@...] if l[0]
+    |                                     ^^^^ 
+

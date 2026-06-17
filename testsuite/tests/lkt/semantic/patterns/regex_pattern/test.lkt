@@ -1,0 +1,15 @@
+val s = "Hello"
+val i = 42
+
+val _ = s is "Hello"
+val _ = s is ""
+val _ = match s {
+    case "" => true
+}
+val _ = from [s] match "Hello"
+
+val _ = i is "Hello"
+val _ = match i {
+    case "" => true
+}
+val _ = from [i] match "Hello"

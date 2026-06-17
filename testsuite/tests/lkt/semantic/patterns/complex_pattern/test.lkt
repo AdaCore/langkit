@@ -14,9 +14,6 @@ val s = "a"
 val i_l = [1, 2, 3]
 val a = A()
 
-# TODO (eng/libadalang/langkit/#929): Add test for pattern details when they
-# will be supported.
-
 # Test adding a binding to the pattern env
 val _ = b is x@true when x
 val _ = b is b when b
@@ -37,7 +34,17 @@ val _ = match i {
 }
 val _ = from i_l match x select x if x == 1
 val _ = from i_l match i_l select i_l if i_l == 1
+
+# Test invalid usages of introduced bindings
 val _ = a is x when x.other_field
+val _ = match s {
+    case x@"" when x == 1 => true
+}
+val _ = from i_l match x when x.length() == 1
 
 # Test complex pattern with non-boolean predicate
 val _ = i is 1 when "Not a bool"
+
+# Test that complex patterns aren't reporting duplicate diagnostics
+val _ = i is x when x is y when y is z when "Not a bool"
+val _ = i is x when x is y when y is z when z == ""

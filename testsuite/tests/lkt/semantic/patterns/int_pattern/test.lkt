@@ -1,0 +1,18 @@
+val i = 42
+val b = true
+
+val _ = i is 1
+val _ = i is 100000000000000000000000000000
+val _ = match i {
+    case 1 => true
+    case 100000000000000000000000000000 => true
+}
+val _ = from [i] match 1
+
+val _ = b is 1
+val _ = b is 100000000000000000000000000000
+val _ = match b {
+    case 1 => true
+    case 100000000000000000000000000000 => true
+}
+val _ = from [b] match 1
