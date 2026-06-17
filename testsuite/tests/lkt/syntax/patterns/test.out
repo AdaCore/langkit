@@ -303,7 +303,7 @@ LangkitRoot[1:1-12:16]
 |  |  |  |  |  |  |  |  |  PatternDetailList[8:16-8:16]: <empty list>
 |  |  |  |  |  |  |  |  |f_predicate: <null>
 |  |  |  |  |  |  |  |  EllipsisPattern[8:18-8:21]
-|  |  |  |  |  |  |  |  |f_binding: <null>
+|  |  |  |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |  |  |  RenamingComplexPattern[8:23-8:24]
 |  |  |  |  |  |  |  |  |f_decl:
 |  |  |  |  |  |  |  |  |  BindingValDecl[8:23-8:24]
@@ -348,7 +348,7 @@ LangkitRoot[1:1-12:16]
 |  |  |  |  |  |  |  |  |  |  PatternDetailList[9:20-9:20]: <empty list>
 |  |  |  |  |  |  |  |  |  |f_predicate: <null>
 |  |  |  |  |  |  |  |  |  EllipsisPattern[9:22-9:25]
-|  |  |  |  |  |  |  |  |  |f_binding: <null>
+|  |  |  |  |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |  |f_details:
 |  |  |  |  |  |  |  PatternDetailList[9:26-9:26]: <empty list>
 |  |  |  |  |  |  |f_predicate: <null>
@@ -375,7 +375,7 @@ LangkitRoot[1:1-12:16]
 |  |  |  |  |  |  |  |f_sub_patterns:
 |  |  |  |  |  |  |  |  PatternList[10:15-10:18]
 |  |  |  |  |  |  |  |  |  EllipsisPattern[10:15-10:18]
-|  |  |  |  |  |  |  |  |  |f_binding: <null>
+|  |  |  |  |  |  |  |  |  |f_decl: <null>
 |  |  |  |  |  |  |f_details:
 |  |  |  |  |  |  |  PatternDetailList[10:19-10:19]: <empty list>
 |  |  |  |  |  |  |f_predicate: <null>

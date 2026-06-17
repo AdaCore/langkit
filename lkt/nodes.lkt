@@ -3010,6 +3010,15 @@ enum class ExcludesNull: LktNode {
 class Pattern: LktNode {
 }
 
+|" Base of all patterns that may introduce a new binding in the lexical
+|" environment.
+@abstract
+class BindingPattern: Pattern {
+    @nullable
+    @parse_field
+    decl: BindingValDecl
+}
+
 |" Pattern to match on booleans.
 enum class BoolPattern: Pattern {
     case True, False
@@ -3036,11 +3045,7 @@ class ListPattern: Pattern {
 |"
 |"    o@ObjectDecl(field: Pattern, prop(): Pattern)
 |"    when foo(o) == 42
-class ComplexPattern: Pattern {
-    @nullable
-    @parse_field
-    decl: BindingValDecl
-
+class ComplexPattern: BindingPattern {
     @nullable
     @parse_field
     pattern: Pattern
@@ -3107,10 +3112,7 @@ class RegexPattern: Pattern implements TokenNode {
 }
 
 |" Pattern to match any remaining number of elements in a list pattern.
-class EllipsisPattern: Pattern {
-    @parse_field
-    @nullable
-    binding: Id
+class EllipsisPattern: BindingPattern {
 }
 
 |" Pattern that allows to match any type. Only usable as a ComplexPattern's

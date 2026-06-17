@@ -355,7 +355,7 @@ grammar lkt_grammar {
         | BoolPattern.False(@Identifier("false"))
     )
 
-    ellipsis_pattern <- EllipsisPattern(?pick(id "@") "...")
+    ellipsis_pattern <- EllipsisPattern(?pick(pattern_binding "@") "...")
     integer_pattern <- IntegerPattern(@Number)
     list_pattern <- ListPattern(
         "[" list*(or(ellipsis_pattern | neg_pattern), ",") "]"
