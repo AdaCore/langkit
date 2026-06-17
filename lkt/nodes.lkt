@@ -650,18 +650,12 @@ class Decl: LktNode implements DeclarationInterface {
                             mvd.decl_type.referenced_decl()
                         )
                 case bvd: BindingValDecl =>
-                    # TODO: For the moment we just handle the case where there
-                    # is no local information in the pattern to determine the
-                    # type of BindingValDecl, and it is used as a top-level
-                    # binding. This is a straight copy of the ``MatchValDecl``
-                    # case above. See eng/libadalang/langkit#929.
-                    bvd.parent.parent.as[PatternMatchBranch].do(
-                        (pmb) =>
-                        pmb.parent.parent.as![MatchExpr].match_expr.get_type(),
-                        default_val= raise[Entity[TypeDecl]] PropertyError(
-                            "Patterns typing not implemented yet"
+                    match bvd.parent {
+                        case cp: BindingPattern => cp.get_output_type()
+                        case _ => raise[Entity[TypeDecl]] PropertyError(
+                            "Invalid parsing tree"
                         )
-                    )
+                    }
                 case lad: LambdaParamDecl =>
                     if lad.decl_type.is_null
                     then
@@ -1117,20 +1111,27 @@ class Decl: LktNode implements DeclarationInterface {
             )
         }
 
+    |" Create the ``EnvAssoc`` object that will represent the addition of this
+    |" declaration in the provided ``dest_env``.
+    fun make_env_assoc(dest_env: DesignatedEnv): EnvAssoc =
+        EnvAssoc(
+            key=self.name(),
+            value=node,
+            dest_env=dest_env,
+            metadata=null[Metadata]
+        )
+
     env_spec {
         add_all_to_env(
             {
                 # Regular env entry, so that this declaration is available
                 # using its name in this module.
-                val regular_entry = EnvAssoc(
-                    key=self.name(),
-                    value=node,
-                    dest_env=DesignatedEnv(
+                val regular_entry = self.make_env_assoc(
+                    DesignatedEnv(
                         kind=DesignatedEnvKind.current_env,
                         env_name=null[Symbol],
                         direct_env=null[LexicalEnv]
-                    ),
-                    metadata=null[Metadata]
+                    )
                 );
 
                 # If the type explicitly implements the ``Node`` trait, or it
@@ -1450,7 +1451,6 @@ class BindingValDecl: UserValDecl {
     fun decl_type_name(): String = "pattern bound value declaration"
 
     fun xref_entry_point(): Bool = false
-
 }
 
 |" Value declaration in a match branch.
@@ -3008,6 +3008,32 @@ enum class ExcludesNull: LktNode {
 |" ``OrPattern`` and ``TypePattern``.
 @abstract
 class Pattern: LktNode {
+    |" Return the type of the value passed to this pattern.
+    @memoized
+    fun get_input_type(): Entity[TypeDecl] = {
+        val interesting_parent = self
+            .parents(with_self=false)
+            .find((p) => p is Expr | Pattern);
+        match interesting_parent {
+            case i: Isa => i.expr.get_type()
+            case m: MatchExpr => m.match_expr.get_type()
+            case q: Query => q.source.get_type().get_indexable_content_type()
+            case l: ListPattern =>
+                if self is EllipsisPattern then
+                    l.get_output_type()
+                else
+                    l.get_output_type()?.get_indexable_content_type()
+            case p: Pattern => p.get_input_type()
+            # TODO: Support PatternDetail here (see eng/libadalang/langkit#929)
+            case _ => raise[Entity[TypeDecl]] PropertyError(
+                "Cannot determine input type of the pattern"
+            )
+        }
+    }
+
+    |" Return the type of values that match this pattern.
+    @memoized
+    fun get_output_type(): Entity[TypeDecl] = self.get_input_type()
 }
 
 |" Base of all patterns that may introduce a new binding in the lexical
@@ -3025,6 +3051,9 @@ class ScopedPattern: Pattern {
     @parse_field
     sub_pattern: Pattern
 
+    fun get_output_type(): Entity[TypeDecl] =
+        self.sub_pattern.get_output_type()
+
     env_spec {
         add_env()
     }
@@ -3033,6 +3062,8 @@ class ScopedPattern: Pattern {
 |" Pattern to match on booleans.
 enum class BoolPattern: Pattern {
     case True, False
+
+    fun get_output_type(): Entity[TypeDecl] = self.bool_type()
 }
 
 |" Pattern to match on integers.
@@ -3067,6 +3098,12 @@ class ComplexPattern: BindingPattern {
     @nullable
     @parse_field
     predicate: Expr
+
+    fun get_output_type(): Entity[TypeDecl] =
+        if self.pattern.is_null then
+            self.get_input_type()
+        else
+            self.pattern.get_output_type()
 }
 
 |" Special case of a complex pattern with no pattern part. This subclass exists
@@ -3078,6 +3115,8 @@ class RenamingComplexPattern: ComplexPattern {
 class TypePattern: Pattern {
     @parse_field
     type_name: TypeRef
+
+    fun get_output_type(): Entity[TypeDecl] = self.type_name.referenced_decl()
 }
 
 |" Pattern that matches if its inner pattern doesn't match.
@@ -3102,6 +3141,12 @@ class OrPattern: Pattern {
     left_sub_pattern: ScopedPattern
     @parse_field
     right_sub_pattern: ScopedPattern
+
+    fun get_output_type(): Entity[TypeDecl] =
+        self.left_sub_pattern.get_output_type().common_ancestor(
+            self.right_sub_pattern.get_output_type(),
+            imprecise=true
+        )
 }
 
 |" A syntactically parenthesized pattern. Has no effect, only used to
@@ -3109,6 +3154,9 @@ class OrPattern: Pattern {
 class ParenPattern: Pattern {
     @parse_field
     sub_pattern: Pattern
+
+    fun get_output_type(): Entity[TypeDecl] =
+        self.sub_pattern.get_output_type()
 }
 
 |" Pattern that considers the value as text and matches it against the
@@ -3118,6 +3166,8 @@ class RegexPattern: Pattern implements TokenNode {
     @exported
     @external()
     fun denoted_value(): DecodedStringValue
+
+    fun get_output_type(): Entity[TypeDecl] = self.string_type()
 }
 
 |" Pattern to match any remaining number of elements in a list pattern.
@@ -3183,6 +3233,7 @@ class Expr: LktNode {
         case p: CallExpr =>
             (p.name == node and self.has_context_free_type())
             and not self is RefId | DotExpr
+        case q: Query => q.source == node
         case _ => false
     }
 
@@ -4429,7 +4480,14 @@ class RefId: Id implements TokenNode, ReferenceInterface{
     fun from_node(): LktNode =
         node.parents().find(
             (p) =>
-            p.parent is BlockExpr | BaseMatchBranch | LambdaExpr | FunDecl
+            p.parent is
+                BlockExpr
+                | BaseMatchBranch
+                | LambdaExpr
+                | FunDecl
+                | ComplexPattern
+                | Isa
+                | Query
             or p.parent.do((v1) => v1.parent is BlockExpr)
         )
 
@@ -4683,6 +4741,10 @@ class Isa: Expr {
     fun xref_equation(): Equation = self.actual_type_var <- self.bool_type()
 
     fun has_context_free_type(): Bool = true
+
+    env_spec {
+        add_env()
+    }
 }
 
 |" Keep expression.
@@ -5665,18 +5727,21 @@ class Query: Expr {
     guard: Expr
 
     res_elems_type_var: LogicVar
+    source_type_var: LogicVar
 
     fun xref_equation(): Equation =
-        self.source.xref_equation()
-        %and self.actual_type_var <- TypeDecl.make_stream_type%(
+        self.actual_type_var <- TypeDecl.make_stream_type%(
             self.res_elems_type_var
         )
 
-        # Ensure the source is an iterable value
+        # Ensure the source is an iterable value. TODO: We introduce
+        # `source_type_var` only to simplify the emission of error messages.
+        # Refactor this bit once langkit#768 is available.
+        %and self.source_type_var <- self.source.get_type()
         %and {
             bind error_location = self.source.node;
             TypeDecl.has_trait%(
-                self.source.actual_type_var,
+                self.source_type_var,
                 self.iterable_trait()
             )
         }
@@ -5705,7 +5770,7 @@ class Query: Expr {
             else
                 self.res_elems_type_var
                 <- TypeDecl.get_indexable_content_type%(
-                    self.source.actual_type_var
+                    self.source_type_var
                 )
         )
 
@@ -5730,6 +5795,10 @@ class Query: Expr {
             self.source.has_context_free_type()
         else
             self.mapping.has_context_free_type()
+
+    env_spec {
+        add_env()
+    }
 }
 
 |" Operator in a binary operator expression.
