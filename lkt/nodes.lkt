@@ -1866,34 +1866,29 @@ class TypeDecl: Decl implements TypeInterface {
     |" ``Entity[Child]``).
     @exported
     fun base_type(): Entity[TypeDecl] = {
-        # Unwrap the entity type (if present) to the corresponding bare node
-        # type.
-        val entity_type = self.entity_type();
-        val node_builder_type = self.node_builder_type();
-        val stream_type = self.stream_type();
-
-        # If this is an Entity instantiation, return the Entity instantiation
-        # correspoding to the node base type.
-        if node == entity_type.node
-        then self.get_entity_node_type().base_type().do(
-            (t) => entity_type.instantiate_generic_decl([t]).as[TypeDecl]
-        )
-
-        # Likewise for NodeBuilder instantiations
-        elif node == node_builder_type.node
-        then self.get_node_builder_node_type().base_type().do(
-            (t) => node_builder_type.instantiate_generic_decl([t]).as[TypeDecl]
-        )
-
-        # Likewise for Stream instantiations
-        elif node == stream_type.node
-        then self.get_stream_element_type().base_type().do(
-            (t) => stream_type.instantiate_generic_decl([t]).as[TypeDecl]
+        # If this type is the instantiation of a covariant generic type,
+        # consider that its base type is the instantiation of the same generic
+        # type, but with the base type of the type parameter.
+        self.parent.as[GenericDecl].do(
+            (gd) =>
+                if
+                    gd.generic_param_decls.length() == 1
+                    and gd.full_decl().has_annotation(s"covariant")
+                then {
+                    val type_param = self.get_instantiation_type(self);
+                    type_param.base_type().do(
+                        (base_type) =>
+                            node
+                                .as_bare_entity
+                                .instantiate_generic_type_decl([base_type])
+                    )
+                }
+                else null[Entity[TypeDecl]]
         )
 
         # Otherwise, just retreive the base type defined at the syntax level
         # (if there is one).
-        else self.syn_base_type?.referenced_decl()
+        or? self.syn_base_type?.referenced_decl()
     }
 
     |" Return an array containing all base types of ``self`` (ancestors last).
@@ -1959,16 +1954,6 @@ class TypeDecl: Decl implements TypeInterface {
     |" which it was instantiated. Return ``self`` otherwise.
     fun get_entity_node_type(): Entity[TypeDecl] =
         self.get_instantiation_type(self.entity_type())
-
-    |" If ``self`` is an instantiation of ``NodeBuilder``, return the type with
-    |" which it was instantiated. Return ``self`` otherwise.
-    fun get_node_builder_node_type(): Entity[TypeDecl] =
-        self.get_instantiation_type(self.node_builder_type())
-
-    |" If ``self`` is an instantiation of ``Stream``, return the type with
-    |" which it was instantiated. Return ``self`` otherwise.
-    fun get_stream_element_type(): Entity[TypeDecl] =
-        self.get_instantiation_type(self.stream_type())
 
     |" Return whether ``rhs`` is equal to or is a subtype of ``self``.
     @predicate_error("$rhs is not a subtype of $Self")
