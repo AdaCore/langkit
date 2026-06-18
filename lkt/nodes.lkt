@@ -1480,17 +1480,18 @@ class ValDecl: ExplicitlyTypedDecl {
     fun decl_type_name(): String = "value declaration"
 
     fun xref_equation(): Equation =
-        (
+        self.expr.xref_equation()
+        %and (
             if self.decl_type.is_null
             then
-                self.expr.xref_equation()
-                %and self.expr.expected_type_var <- null[Entity[TypeDecl]]
+                self.expr.expected_type_var <- null[Entity[TypeDecl]]
+                %and {
+                    bind error_location = node.syn_name;
+                    TypeDecl.could_determine_type%(self.expr.actual_type_var)
+                }
             else
-                (
-                    self.expr.xref_equation()
-                    %and self.expr.expected_type_var
-                    <- self.decl_type.referenced_decl()
-                )
+                self.expr.expected_type_var
+                <- self.decl_type.referenced_decl()
                 %and (
                     if self.decl_type.referenced_decl().is_null then %false
                     else {
@@ -1502,10 +1503,6 @@ class ValDecl: ExplicitlyTypedDecl {
                     }
                 )
         )
-        %and {
-            bind error_location = node.syn_name;
-            TypeDecl.could_determine_type%(self.expr.actual_type_var)
-        }
 }
 
 |" Function declaration.

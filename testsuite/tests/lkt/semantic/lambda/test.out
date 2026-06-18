@@ -31,10 +31,6 @@ test.lkt:4:42-4:62: error: could not determine type
  4 | val half_decl_type : (Int, Int) -> Int = (i: Int, j) => i + j
    |                                          ^^^^^^^^^^^^^^^^^^^^ 
 
-test.lkt:4:5-4:19: error: could not determine type
- 4 | val half_decl_type : (Int, Int) -> Int = (i: Int, j) => i + j
-   |     ^^^^^^^^^^^^^^ 
-
 Decl <ValDecl "half_decl_type" test.lkt:4:1-4:62>
      has_type <FunctionType prelude: "(Int, Int) -> Int">
 
@@ -78,10 +74,6 @@ Decl <ValDecl "half_decl_type" test.lkt:4:1-4:62>
 test.lkt:5:40-5:55: error: could not determine type
  5 | val no_decl_type : (Int, Int) -> Int = (i, j) => i + j
    |                                        ^^^^^^^^^^^^^^^ 
-
-test.lkt:5:5-5:17: error: could not determine type
- 5 | val no_decl_type : (Int, Int) -> Int = (i, j) => i + j
-   |     ^^^^^^^^^^^^ 
 
 Decl <ValDecl "no_decl_type" test.lkt:5:1-5:55>
      has_type <FunctionType prelude: "(Int, Int) -> Int">

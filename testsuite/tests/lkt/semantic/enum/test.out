@@ -119,10 +119,6 @@ test.lkt:18:38-18:40: error: undefined entity
  18 | val enum_no_field : Basic = Basic.a1.b1
     |                                      ^^ 
 
-test.lkt:18:5-18:18: error: could not determine type
- 18 | val enum_no_field : Basic = Basic.a1.b1
-    |     ^^^^^^^^^^^^^ 
-
 Decl <ValDecl "enum_no_field" test.lkt:18:1-18:40>
      has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
 
