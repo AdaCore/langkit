@@ -4734,6 +4734,10 @@ class LambdaExpr: Expr {
                 <- self.body.get_type()?.create_function_type(
                     self.params.map((a) => a.get_type())
                 )
+                %and {
+                    bind error_location = node;
+                    TypeDecl.could_determine_type%(self.actual_type_var)
+                }
             else
                 self.body.xref_equation()
                 %and self.actual_type_var
