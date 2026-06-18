@@ -159,6 +159,25 @@ Decl <ValDecl "propagation3" test.lkt:16:1-16:31>
               has_type <FunctionType "() -> A" test.lkt>
               references <ClassDecl "A" test.lkt:1:1-1:11>
 
+Decl <ValDecl "propagation4" test.lkt:17:1-17:44>
+     has_type <StructDecl prelude: "Array[Int]">
+
+   Expr <IfExpr test.lkt:17:20-17:44>
+        has_type <StructDecl prelude: "Array[Int]">
+
+      Id   <RefId "true" test.lkt:17:23-17:27>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Expr <ArrayLiteral test.lkt:17:33-17:36>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <NumLit test.lkt:17:34-17:35>
+              has_type <StructDecl prelude: "Int">
+
+      Expr <ArrayLiteral test.lkt:17:42-17:44>
+           has_type <StructDecl prelude: "Array[Int]">
+
 <ValDecl "invalid1" test.lkt:19:1-19:41> failed nameres:
 test.lkt:19:29-19:41: error: expected Array[Int], got Array[String]
  19 | val invalid1 : Array[Int] = ["", "", ""]

@@ -3329,7 +3329,7 @@ class ArrayLiteral: Expr {
             then
                 if self.exprs.length() == 0
                 then
-                    self.actual_element_type <- null[Entity[TypeDecl]]
+                    self.actual_element_type <-> self.expected_exprs_type_var
                     %and {
                         bind error_location = node;
                         TypeDecl.could_determine_type%(
