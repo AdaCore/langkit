@@ -3323,57 +3323,47 @@ class ArrayLiteral: Expr {
     }
 
     fun xref_equation(): Equation =
-        (
-            (
-                self.expected_exprs_type_equation()
-                %and (
-                    if self.element_type.is_null
-                    then
-                        if self.exprs.length() == 0
-                        then
-                            self.actual_element_type <- null[Entity[TypeDecl]]
-                            %and {
-                                bind error_location = node;
-                                TypeDecl.could_determine_type%(
-                                    self.actual_element_type
-                                )
-                            }
-                        else
+        self.expected_exprs_type_equation()
+        %and (
+            if self.element_type.is_null
+            then
+                if self.exprs.length() == 0
+                then
+                    self.actual_element_type <- null[Entity[TypeDecl]]
+                    %and {
+                        bind error_location = node;
+                        TypeDecl.could_determine_type%(
                             self.actual_element_type
-                            <- TypeDecl.imprecise_common_ancestor_list%(
-                                self.exprs.map((expr) => expr.actual_type_var)
-                            )
-                    else
-                        self.actual_element_type
-                        <- self.element_type.referenced_decl()
-                )
-            )
-            %and (
-                # Set the type of the array
-                self.actual_type_var
-                <- TypeDecl.make_array_type%(self.actual_element_type)
-            )
-        )
-        %and self.exprs.logic_all(
-            (expr) =>
-            (
-                # Type the elements
-                expr.xref_equation()
-                %and (
-                    # Set the expected types of elements
-                    expr.expected_type_var <-> self.expected_exprs_type_var
-                )
-            )
-            %and (
-                # Verify that the types of elements all match
-                {
-                    bind error_location = expr.node;
-                    TypeDecl.matching_type%(
-                        expr.expected_type_var,
-                        expr.actual_type_var
+                        )
+                    }
+                else
+                    self.actual_element_type
+                    <- TypeDecl.imprecise_common_ancestor_list%(
+                        self.exprs.map((expr) => expr.actual_type_var)
                     )
-                }
-            )
+            else
+                self.actual_element_type <- self.element_type.referenced_decl()
+        )
+
+        # Set the type of the array
+        %and self.actual_type_var
+        <- TypeDecl.make_array_type%(self.actual_element_type)
+
+        # Type the elements
+        %and self.exprs.logic_all((expr) =>
+            expr.xref_equation()
+
+            # Set the expected types of elements
+            %and expr.expected_type_var <-> self.expected_exprs_type_var
+
+            # Verify that the types of elements all match
+            %and {
+                bind error_location = expr.node;
+                TypeDecl.matching_type%(
+                    expr.expected_type_var,
+                    expr.actual_type_var
+                )
+            }
         )
 }
 
