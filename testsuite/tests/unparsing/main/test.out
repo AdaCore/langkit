@@ -3769,6 +3769,13 @@ var v1:T=f(
     ccc=C
 );
 
+== main.adb -c table_align/suffix_comment_after_sep.json table_align/suffix_comment_after_sep.txt ==
+var v1:T=f(
+    sublist=1, # Comment 1
+    sublist,sublist=2, # Comment 2
+    sublist,sublist,sublist=3 # Comment 3
+);
+
 == main.adb -c table_align/token_original.json table_align/calls.txt ==
 var v1:T=f(
     a  =A,

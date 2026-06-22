@@ -36,6 +36,9 @@ grammar foo_grammar {
     expr <- or(
         | Addition(expr "+" expr_1)
         | MinusExpr("-" expr_1 ?("(" list+(name, ",", allow_leading) ")"))
+        | SublistEqual(
+            list+(Name(@Identifier("sublist")), ",", allow_leading) "=" expr
+        )
         | expr_1
     )
     expr_1 <- or(
@@ -189,6 +192,11 @@ class Number: Expr implements TokenNode {
 
 class Ref: Expr {
     @parse_field name: Name
+}
+
+class SublistEqual: Expr {
+    @parse_field lhs: ASTList[Name]
+    @parse_field rhs: Expr
 }
 
 class PlusDecls: ASTList[Decl] {
