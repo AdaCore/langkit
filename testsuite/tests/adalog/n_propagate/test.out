@@ -13,6 +13,6 @@ All:
     %Z <- 1
     %X <- 0
 
-Solution: [%Z = 1, %Y = 1, %X = 0]
+Solution: [%Z = 1, %X = 0, %Y = 1]
 
 Done.

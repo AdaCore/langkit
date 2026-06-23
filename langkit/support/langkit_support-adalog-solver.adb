@@ -685,6 +685,13 @@ package body Langkit_Support.Adalog.Solver is
             when Propagate =>
                Add (Self.Target);
                Add (Self.From);
+            when N_Propagate =>
+               Add (Self.Target);
+               for V of Self.Comb_Vars loop
+                  Add (V);
+               end loop;
+            when Predicate =>
+               Add (Self.Target);
             when N_Predicate =>
                Add (Self.Target);
                for V of Self.Vars loop
@@ -693,8 +700,10 @@ package body Langkit_Support.Adalog.Solver is
             when Unify =>
                Add (Self.Unify_From);
                Add (Self.Target);
-            when others =>
+            when Assign =>
                Add (Self.Target);
+            when True | False =>
+               null;
          end case;
       end Process_Atom;
 
