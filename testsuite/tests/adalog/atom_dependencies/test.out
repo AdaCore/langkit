@@ -1,0 +1,17 @@
+Solving relation:
+%X <-> %Y
+Solution: [%X = <undefined>, %Y = <undefined>]
+
+Solving relation:
+%Y <- Prop(%X)
+
+Solving relation:
+%X <- N_Prop(%Y, %Z)
+
+Solving relation:
+Pred?(%X)
+
+Solving relation:
+N_Pred?(%X, %Y)
+
+Done.
