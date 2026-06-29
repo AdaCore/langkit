@@ -22,10 +22,8 @@ package Langkit_Support.Generic_API is
    ------------------
 
    type Any_Language_Id is private;
-   No_Language_Id : constant Any_Language_Id;
-   subtype Language_Id is Any_Language_Id
-     with Dynamic_Predicate => Language_Id /= No_Language_Id;
-   --  Unique identifier for a Langkit-generated library.
+   --  Unique identifier for a Langkit-generated library, or no library if
+   --  ``No_Language_Id``.
    --
    --  All operations done using the generic API are done in the context of a
    --  Langkit-generated library. Because of this, all subprograms in the
@@ -46,6 +44,13 @@ package Langkit_Support.Generic_API is
    --  :ada:ref:`Langkit_Support.Generic_API.Analysis.Lk_Node` argument, they
    --  also need to take a :ada:ref:`Language_Id` argument to receive the
    --  language ID information in all cases.
+
+   No_Language_Id : constant Any_Language_Id;
+   --  Special value to denote the absence of a Langkit-generated library
+
+   subtype Language_Id is Any_Language_Id
+     with Dynamic_Predicate => Language_Id /= No_Language_Id;
+   --  See :ada:ref:`Any_Language_Id`
 
    function Language_Name (Id : Language_Id) return Name_Type;
    --  Return the name of the language that the library corresponding to ``Id``
@@ -94,14 +99,19 @@ package Langkit_Support.Generic_API is
    --  ``Rule`` is :ada:ref:`No_Grammar_Rule_Ref`.
 
    type Any_Grammar_Rule_Index is new Natural;
-   subtype Grammar_Rule_Index is
-     Any_Grammar_Rule_Index range 1 ..  Any_Grammar_Rule_Index'Last;
-   No_Grammar_Rule_Index : constant Any_Grammar_Rule_Index := 0;
-   --  Language-specific index to designate a grammar rule.
+   --  Language-specific index to designate a grammar rule, or no grammar rule
+   --  if ``No_Grammar_Rule_Index``.
    --
    --  A given languages accepts ``N`` grammar rules, so the only valid indexes
-   --  for it are ``1 .. N``. The :ada:ref:`Last_Grammar_Rule` function below
-   --  gives the actual ``N`` for a given language.
+   --  for it are ``1 .. N``. The :ada:ref:`Last_Grammar_Rule` function gives
+   --  the actual ``N`` for a given language.
+
+   subtype Grammar_Rule_Index is
+     Any_Grammar_Rule_Index range 1 ..  Any_Grammar_Rule_Index'Last;
+   --  See :ada:ref:`Any_Grammar_Rule_Index`
+
+   No_Grammar_Rule_Index : constant Any_Grammar_Rule_Index := 0;
+   --  Special value to denote the absence of a grammar rule
 
    function To_Index (Rule : Grammar_Rule_Ref) return Grammar_Rule_Index;
    --  Return the index of the given grammar rule. Raise a
@@ -147,14 +157,19 @@ package Langkit_Support.Generic_API is
    --  ``Kind`` is :ada:ref:`No_Token_Kind_Ref`.
 
    type Any_Token_Kind_Index is new Natural;
-   subtype Token_Kind_Index is
-     Any_Token_Kind_Index range 1 ..  Any_Token_Kind_Index'Last;
-   No_Token_Kind_Index : constant Any_Token_Kind_Index := 0;
-   --  Language-specific index to designate a token kind.
+   --  Language-specific index to designate a token kind, or no token kind if
+   --  ``No_Token_Kind_Index``.
    --
    --  A given languages accepts ``N`` token kinds, so the only valid indexes
-   --  for it are ``1 .. N``. The :ada:ref:`Last_Token_Kind` function below
-   --  gives the actual ``N`` for a given language.
+   --  for it are ``1 .. N``. The :ada:ref:`Last_Token_Kind` function gives the
+   --  actual ``N`` for a given language.
+
+   subtype Token_Kind_Index is
+     Any_Token_Kind_Index range 1 ..  Any_Token_Kind_Index'Last;
+   --  See :ada:ref:`Any_Token_Kind_Index`
+
+   No_Token_Kind_Index : constant Any_Token_Kind_Index := 0;
+   --  Special value to denote the absence of a token kind
 
    function To_Index (Kind : Token_Kind_Ref) return Token_Kind_Index;
    --  Return the index of the given token kind. Raise a
@@ -201,14 +216,19 @@ package Langkit_Support.Generic_API is
    --  ``Kind`` is :ada:ref:`No_Token_Kind`.
 
    type Any_Token_Family_Index is new Natural;
-   subtype Token_Family_Index is
-     Any_Token_Family_Index range 1 ..  Any_Token_Family_Index'Last;
-   No_Token_Family_Index : constant Any_Token_Family_Index := 0;
-   --  Language-specific index to designate a token family.
+   --  Language-specific index to designate a token family, or no token family
+   --  if ``No_Token_Family_Index``.
    --
    --  A given languages accepts ``N`` token families, so the only valid
    --  indexes for it are ``1 .. N``. The :ada:ref:`Last_Token_Family` function
-   --  below gives the actual ``N`` for a given language.
+   --  gives the actual ``N`` for a given language.
+
+   subtype Token_Family_Index is
+     Any_Token_Family_Index range 1 ..  Any_Token_Family_Index'Last;
+   --  See :ada:ref:`Any_Token_Family_Index`
+
+   No_Token_Family_Index : constant Any_Token_Family_Index := 0;
+   --  Special value to denote the absence of a token family
 
    function To_Index (Family : Token_Family_Ref) return Token_Family_Index;
    --  Return the index of the given token family. Raise a

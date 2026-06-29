@@ -27,15 +27,30 @@ use Langkit_Support.Token_Data_Handlers;
 package Langkit_Support.Generic_API.Analysis is
 
    type Lk_Context is tagged private;
+   --  Reference to a context object.
+   --
+   --  This is a strong reference: the referenced context lives as long as the
+   --  reference exists.
+
    type Lk_Unit is new Langkit_Support.Text.Text_Buffer_Ifc with private;
+   --  Reference to a unit object.
+   --
+   --  This contains a strong reference to the owning context: this context and
+   --  all its units live as long as the reference exists.
+
    type Lk_Node is tagged private;
+   --  Reference to a node object.
+   --
+   --  This is a weak reference: the designated node may be destroyed even if
+   --  there are still references to it, but usage of such a stale reference is
+   --  properly rejected.
+
    type Lk_Token is tagged private;
-   --  Reference types to actual context/unit/node/token objects. Only
-   --  ``Lk_Context`` and ``Lk_Unit`` are strong references (designated object
-   --  lives as long as the reference exists): ``Lk_Node`` and ``Lk_Token_Ref``
-   --  are weak references (designated object may be destroyed even if there
-   --  are still references to it, but usage of such a stale reference is
-   --  properly rejected).
+   --  Reference to a token object.
+   --
+   --  This is a weak reference: the designated token may be destroyed even if
+   --  there are still references to it, but usage of such a stale reference is
+   --  properly rejected.
 
    No_Lk_Context : constant Lk_Context;
    --  Special value to mean the absence of analysis context
