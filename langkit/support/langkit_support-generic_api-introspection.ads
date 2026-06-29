@@ -229,12 +229,20 @@ package Langkit_Support.Generic_API.Introspection is
    --  Return the list of all enum values for the given enum type
 
    type Any_Enum_Value_Index is new Natural;
+   --  Index of an enum value for a given enum type, or no enum value if
+   --  ``No_Enum_Value_Index``.
+   --
+   --  A given enum type accepts ``N`` values, so the only valid indexes for it
+   --  are ``1 .. N``. The :ada:ref:`Enum_Last_Value` function gives the actual
+   --  ``N`` for a given enum type.
+
    subtype Enum_Value_Index is Any_Enum_Value_Index
       range 1 .. Any_Enum_Value_Index'Last;
-   --  Index of an enum value for a given enum type
+   --  See :ada:ref:`Any_Enum_Value_Index`
 
    No_Enum_Value_Index : constant Any_Enum_Value_Index := 0;
-   --  Special ``Any_Enum_Value_Index`` to mean: no reference to a type
+   --  Special ``Any_Enum_Value_Index`` value to denote the absence of an enum
+   --  value.
 
    function To_Index (Value : Enum_Value_Ref) return Enum_Value_Index;
    --  Return the index of the given type. Raise a ``Precondition_Failure``
@@ -503,15 +511,19 @@ package Langkit_Support.Generic_API.Introspection is
    --  Return the type of ``Member``
 
    type Any_Struct_Member_Index is new Natural;
-   subtype Struct_Member_Index is
-     Any_Struct_Member_Index range 1 .. Any_Struct_Member_Index'Last;
-   --  Language-specific index to designate a struct member.
+   --  Language-specific index to designate a struct member, or no struct
+   --  member if ``No_Struct_Member``.
    --
    --  A given language defines members for the ``1 .. Last_Struct_Member
-   --  (Language)`` range: see the ``Last_Struct_Member`` function below.
+   --  (Language)`` range: see the :ada:ref:`Last_Struct_Member` function.
+
+   subtype Struct_Member_Index is
+     Any_Struct_Member_Index range 1 .. Any_Struct_Member_Index'Last;
+   --  Language-specific index to designate a struct member
 
    No_Struct_Member : constant Any_Struct_Member_Index := 0;
-   --  Special ``Any_Struct_Member_Index`` to mean: no reference to an argument
+   --  Special ``Any_Struct_Member_Index`` value to denote the absence of an
+   --  argument.
 
    function To_Index (Member : Struct_Member_Ref) return Struct_Member_Index;
    --  Return the index of the given struct member. Raise a
@@ -528,11 +540,14 @@ package Langkit_Support.Generic_API.Introspection is
    --  Return the last struct member index that is valid for the given language
 
    subtype Any_Argument_Index is Natural;
+   --  Index of a property argument, or no argument for ``No_Argument_Index``
+
    subtype Argument_Index is
      Any_Argument_Index range 1 ..  Any_Argument_Index'Last;
    --  Index of a property argument
 
    No_Argument_Index : constant Any_Argument_Index := 0;
+   --  Special index value to denote the absence of a property argument
 
    function Member_Argument_Type
      (Member : Struct_Member_Ref; Argument : Argument_Index) return Type_Ref;

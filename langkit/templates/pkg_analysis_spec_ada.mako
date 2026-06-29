@@ -560,8 +560,10 @@ package ${ada_lib_name}.Analysis is
 
    function Kind
      (Node : ${root_entity.api_name}'Class) return ${T.node_kind};
+   --  Return the concrete kind for ``Node``
+
    function Kind_Name (Node : ${root_entity.api_name}'Class) return String;
-   --  Return the concrete kind for Node
+   --  Return the name of the concrete kind for ``Node``
 
    pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
