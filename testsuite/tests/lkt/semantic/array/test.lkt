@@ -14,6 +14,7 @@ val common_type = [B(), C()]
 val propagation1 : Array[A] = [null]
 val propagation2 : A = [null][0]
 val propagation3 = [null, A()]
+val propagation4 = if true then [1] else []
 
 val invalid1 : Array[Int] = ["", "", ""]
 val invalid2 = [null]
