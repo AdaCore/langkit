@@ -884,6 +884,14 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Trace : constant Boolean := Trivias_Trace.Is_Active;
 
+      function Preceeded_By_List_Separator (Node : Lk_Node) return Boolean;
+      --  Return whether the first token that preceeds ``Node`` is a list
+      --  separator.
+      --
+      --  Note that this can be the case if ``Node.Parent`` itself is the list
+      --  node that owns the separator, but also if any of its own parents is
+      --  the list node that owns the separator.
+
       procedure Process (Node : Lk_Node; Index : Positive);
       --  Reattach relevant trivias to ``Node``. This processes ``Node``'s
       --  children recursively.
@@ -894,6 +902,47 @@ package body Langkit_Support.Generic_API.Unparsing is
       procedure Reattach (T : Lk_Token; To : Lk_Node; What : String);
       --  Reattach ``T`` to the ``To`` node. ``What`` is used to qualify this
       --  trivia in debug logs.
+
+      ---------------------------------
+      -- Preceeded_By_List_Separator --
+      ---------------------------------
+
+      function Preceeded_By_List_Separator (Node : Lk_Node) return Boolean is
+         T_First     : constant Lk_Token := Node.Token_Start;
+         Cur, Parent : Lk_Node;
+      begin
+         --  Exit early if T_First is the first token in this unit
+
+         if T_First.Previous (Exclude_Trivia => True).Is_Null then
+            return False;
+         end if;
+
+         --  Find the Node ancestor that:
+         --
+         --  1. is a list node;
+         --  2. has separators (the unparsing tables tell us this);
+         --  3. has a child which has the same first token as Node.
+
+         Cur := Node;
+         loop
+            Parent := Cur.Parent;
+            if Parent.Is_Null then
+               return False;
+            end if;
+
+            if Parent.Token_Start = T_First then
+               Cur := Parent;
+            else
+               declare
+                  Unparser : Node_Unparser_Impl renames
+                    Node_Unparser_For (Type_Of (Parent)).all;
+               begin
+                  return
+                    Unparser.Kind = List and then Unparser.Separator /= null;
+               end;
+            end if;
+         end loop;
+      end Preceeded_By_List_Separator;
 
       -------------
       -- Process --
@@ -910,13 +959,16 @@ package body Langkit_Support.Generic_API.Unparsing is
            and then (Node.Parent.Is_Null
                      or else Is_Field_Present (Node, Index));
       begin
-         --  Register reattached trivias that come before list nodes
+         --  Register reattached trivias that come before list nodes, except if
+         --  they follow a list separator.
 
          if Is_Present_List then
             declare
                First_Trivia : constant Lk_Token := First_Trivia_Before (Node);
             begin
-               if not First_Trivia.Is_Null then
+               if not First_Trivia.Is_Null
+                  and then not Preceeded_By_List_Separator (Node)
+               then
                   Reattach
                     (First_Trivia, Node, "leading trivias before list node");
                end if;

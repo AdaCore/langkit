@@ -170,6 +170,13 @@ gpr_mains:
 
     - main.adb -c table_align/table_sep_in_field.json table_align/calls.txt
 
+    # Check that suffix comments that appear after the list separator are
+    # preserved as suffix comments in a table configuration (these comments
+    # used to be unparsed in the next row, and thus became line comments).
+    - main.adb
+        -c table_align/suffix_comment_after_sep.json
+        table_align/suffix_comment_after_sep.txt
+
     # Ensure that, when original token formatting is requested, preserved
     # tokens are turned into token separators when the config mandates it.
     - main.adb -c table_align/token_original.json table_align/calls.txt

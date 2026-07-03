@@ -1,0 +1,5 @@
+var v1: T = f(
+    sublist = 1, # Comment 1
+    sublist, sublist = 2, # Comment 2
+    sublist, sublist, sublist = 3 # Comment 3
+);

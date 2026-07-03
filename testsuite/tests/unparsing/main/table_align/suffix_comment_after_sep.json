@@ -1,0 +1,13 @@
+{
+  "node_configs": {
+    "CallArgList": {"table": {}},
+    "Call": {
+      "fields": {
+        "f_args": [
+          {"kind": "indent", "contents": ["hardline", "recurse"]},
+          "hardline"
+        ]
+      }
+    }
+  }
+}
