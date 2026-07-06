@@ -1,4 +1,3 @@
-== foo.lkt ==
 Code generation was successful
 
 == test.py ==
@@ -6,7 +5,7 @@ Produced TextMate grammar:
 -----
 
 {
-    "scopeName": "source.foo",
+    "scopeName": "source.Foo",
     "patterns": [
         { "include": "#keyword.first" },
         { "include": "#keyword.other" },
@@ -33,4 +32,9 @@ Produced TextMate grammar:
 
 -----
 
-lkt_compile: Done
+Produced package.json "grammars" field
+-----
+[{'language': 'Foo', 'scopeName': 'source.Foo', 'path': './syntaxes/Foo.tmGrammar.json'}]
+-----
+
+vscode_ext_generate: Done
