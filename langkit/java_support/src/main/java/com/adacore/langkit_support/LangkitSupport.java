@@ -2,6 +2,7 @@ package com.adacore.langkit_support;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.UnsupportedOperationException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -486,6 +487,9 @@ public class LangkitSupport {
          */
         public abstract void close();
 
+        /** Get all rewriting units in this context. */
+        public abstract RewritingUnitInterface[] rewritingUnits();
+
         /**
          * Create a new regular node of the given Kind and assign it the given
          * Children.
@@ -524,6 +528,15 @@ public class LangkitSupport {
         ) {
             throw new NotImplementedException();
         }
+    }
+
+    /**
+     * Counterpart of an analysis unit with rewriting actions applied to it.
+     */
+    public interface RewritingUnitInterface extends TruffleObject {
+        AnalysisUnit getAnalysisUnit();
+        String unparse();
+        String unparseWithPartialFormatting();
     }
 
     /** Interface to override how source files are fetched and decoded. */
@@ -759,6 +772,16 @@ public class LangkitSupport {
 
         /** The list of associated parsing diagnostics. */
         public abstract Diagnostic[] getDiagnostics();
+
+        /**
+         * Get the rewriting unit associated to this analysis unit if there is
+         * one.
+         */
+        public RewritingUnitInterface getRewritingUnit() {
+            throw new UnsupportedOperationException(
+                "The library implementation doesn't support rewriting"
+            );
+        }
     }
 
     /** This type represents a member reference. */
