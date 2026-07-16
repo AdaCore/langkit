@@ -95,7 +95,7 @@ package Langkit_Support.Rewriting.Unparsing is
       --  Append-only text buffer for the unparsed tree
 
       Last_Token : Token_Kind_Index;
-      --  If Content is not emply, kind of the last token/trivia that was
+      --  If Content is not empty, kind of the last token/trivia that was
       --  unparsed. Undefined otherwise.
    end record;
 
