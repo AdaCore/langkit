@@ -782,6 +782,16 @@ package body Langkit_Support.Rewriting.Unparsing is
       Buffer.Last_Token := Kind;
    end Append;
 
+   -----------
+   -- Clear --
+   -----------
+
+   procedure Clear (Buffer : out Unparsing_Buffer) is
+   begin
+      Set_Unbounded_Wide_Wide_String (Buffer.Content, "");
+      Buffer.Last_Token := Token_Kind_Index'First;
+   end Clear;
+
    ----------------------
    -- To_String_Access --
    ----------------------
