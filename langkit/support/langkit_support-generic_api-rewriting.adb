@@ -968,6 +968,23 @@ package body Langkit_Support.Generic_API.Rewriting is
    end Unparse;
 
    -------------------------------------
+   -- Unparse_With_Partial_Formatting --
+   -------------------------------------
+
+   function Unparse_With_Partial_Formatting
+     (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type
+   is
+      Output_Unit   : Reparsed_Unit;
+      Output_Buffer : Unparsing_Buffer;
+   begin
+      Check_Safety_Net ("Handle", Handle);
+      Pre_Check_URW_Handle ("Handle", Handle.Ref);
+      Reparse_With_Partial_Formatting (Handle.Ref, Output_Buffer, Output_Unit);
+      Destroy (Output_Unit);
+      return Output_Buffer.Content;
+   end Unparse_With_Partial_Formatting;
+
+   -------------------------------------
    -- Reparse_With_Partial_Formatting --
    -------------------------------------
 
