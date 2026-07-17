@@ -109,6 +109,11 @@ package Langkit_Support.Rewriting.Unparsing is
       with Pre => Text'Length > 0;
    --  Append Text, to unparse the given token Kind, to Buffer
 
+   function To_String_Access
+     (Buffer : Unparsing_Buffer; Charset : String) return String_Access;
+   --  Get the content of the provided ``Buffer`` as a newly allocated string
+   --  encoded following ``Charset``.
+
    procedure Unparse
      (Node             : Abstract_Node;
       Unit             : Lk_Unit;

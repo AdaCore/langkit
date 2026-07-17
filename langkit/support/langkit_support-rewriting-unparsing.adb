@@ -782,6 +782,78 @@ package body Langkit_Support.Rewriting.Unparsing is
       Buffer.Last_Token := Kind;
    end Append;
 
+   ----------------------
+   -- To_String_Access --
+   ----------------------
+
+   function To_String_Access
+     (Buffer : Unparsing_Buffer; Charset : String) return String_Access
+   is
+      use Ada.Strings.Wide_Wide_Unbounded.Aux;
+
+      Buffer_Access : Big_Wide_Wide_String_Access;
+      Length        : Natural;
+      --  Buffer internals, to avoid costly buffer copies
+   begin
+      Get_Wide_Wide_String (Buffer.Content, Buffer_Access, Length);
+
+      --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
+      --  them here.
+
+      if Length = 0 then
+         return new String'("");
+      end if;
+
+      declare
+         use GNATCOLL.Iconv;
+
+         State  : constant Iconv_T :=
+           Iconv_Open (To_Code => Charset, From_Code => Text_Charset);
+         Status : Iconv_Result;
+
+         To_Convert_String : constant String (1 .. 4 * Length)
+         with
+           Import     => True,
+           Convention => Ada,
+           Address    => Buffer_Access.all'Address;
+
+         Output_Buffer : String_Access :=
+           new String (1 .. 4 * To_Convert_String'Length);
+         --  Encodings should not take more than 4 bytes per code point, so
+         --  this should be enough to hold the conversion.
+
+         Input_Index  : Positive := To_Convert_String'First;
+         Output_Index : Positive := Output_Buffer'First;
+      begin
+         Iconv
+           (State,
+            To_Convert_String,
+            Input_Index,
+            Output_Buffer.all,
+            Output_Index,
+            Status);
+         Iconv_Close (State);
+         case Status is
+            when Success =>
+               null;
+
+            when others  =>
+               raise Program_Error with "cannot encode result";
+         end case;
+
+         declare
+            Result_Slice : String renames
+              Output_Buffer (Output_Buffer'First .. Output_Index - 1);
+            Result       : constant String_Access :=
+              new String (Result_Slice'Range);
+         begin
+            Result.all := Result_Slice;
+            Free (Output_Buffer);
+            return Result;
+         end;
+      end;
+   end To_String_Access;
+
    -------------------------
    -- Apply_Spacing_Rules --
    -------------------------
@@ -891,70 +963,11 @@ package body Langkit_Support.Rewriting.Unparsing is
       Unparsing_Config : Unparsing_Configuration_Access;
       As_Unit          : Boolean) return String_Access
    is
-      use Ada.Strings.Wide_Wide_Unbounded.Aux;
-
       Buffer        : Unparsing_Buffer;
       --  Buffer to store the result of unparsing as text
-
-      Buffer_Access : Big_Wide_Wide_String_Access;
-      Length        : Natural;
-      --  Buffer internals, to avoid costly buffer copies
    begin
       Unparse (Node, Unit, Formatted_Node, Unparsing_Config, As_Unit, Buffer);
-      Get_Wide_Wide_String (Buffer.Content, Buffer_Access, Length);
-
-      --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
-      --  them here.
-
-      if Length = 0 then
-         return new String'("");
-      end if;
-
-      declare
-         use GNATCOLL.Iconv;
-
-         State  : constant Iconv_T := Iconv_Open
-           (To_Code   => Unit.Charset,
-            From_Code => Text_Charset);
-         Status : Iconv_Result;
-
-         To_Convert_String : constant String (1 .. 4 * Length)
-            with Import     => True,
-                 Convention => Ada,
-                 Address    => Buffer_Access.all'Address;
-
-         Output_Buffer : String_Access :=
-            new String (1 .. 4 * To_Convert_String'Length);
-         --  Encodings should not take more than 4 bytes per code point, so
-         --  this should be enough to hold the conversion.
-
-         Input_Index  : Positive := To_Convert_String'First;
-         Output_Index : Positive := Output_Buffer'First;
-      begin
-         Iconv
-           (State,
-            To_Convert_String,
-            Input_Index,
-            Output_Buffer.all,
-            Output_Index,
-            Status);
-         Iconv_Close (State);
-         case Status is
-            when Success => null;
-            when others => raise Program_Error with "cannot encode result";
-         end case;
-
-         declare
-            Result_Slice : String renames
-               Output_Buffer (Output_Buffer'First ..  Output_Index - 1);
-            Result       : constant String_Access :=
-               new String (Result_Slice'Range);
-         begin
-            Result.all := Result_Slice;
-            Free (Output_Buffer);
-            return Result;
-         end;
-      end;
+      return To_String_Access (Buffer, Unit.Charset);
    end Unparse;
 
    -------------
