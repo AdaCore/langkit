@@ -564,7 +564,6 @@ class NativeLibPackager(BasePackager):
 
         # VSS
         vss_libs = [
-            self.vss_path("vss-gnat", "vss_gnat"),
             self.vss_path("vss-text", "vss_text"),
         ]
 
