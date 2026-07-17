@@ -139,11 +139,15 @@ print_units (foo_unit_rewriting_handle *units)
 /* Print the unparsing of the given UNIT.  */
 
 static void
-print_unit_unparsing (foo_unit_rewriting_handle unit)
+print_unit_unparsing (foo_unit_rewriting_handle unit, int format)
 {
   foo_text text;
 
-  foo_rewriting_unit_unparse (unit, &text);
+  if (format) {
+    foo_rewriting_unit_unparse_with_partial_formatting (unit, &text);
+  } else {
+    foo_rewriting_unit_unparse (unit, &text);
+  }
   abort_on_exception ();
   print_indented_buffer ("  |", &text);
   foo_destroy_text (&text);
@@ -267,7 +271,7 @@ main (void)
   u = fetch_unit (ctx, "s2.txt", 1);
   urh = foo_rewriting_unit_to_handle (u);
   abort_on_exception ();
-  print_unit_unparsing (urh);
+  print_unit_unparsing (urh, 0);
   puts ("");
 
   puts ("Unparse node:");
@@ -560,6 +564,12 @@ main (void)
   free_text (&text);
   foo_rewriting_insert_last (nrh, nrh_tmp);
   abort_on_exception ();
+
+  puts ("Unparse s2.txt unit:");
+  print_unit_unparsing (urh_tmp, 0);
+
+  puts ("Unparse s2.txt unit with partial formatting:");
+  print_unit_unparsing (urh_tmp, 1);
 
   puts ("Applying...");
   foo_rewriting_apply (rh, &apply_result);

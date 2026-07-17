@@ -193,7 +193,7 @@ public class RewritingTests {
             System.out.println(
                 "Root rewriting node children: " + Arrays.toString(children)
             );
-            assertTrue("Children count is 3", children.length == 3);
+            assertTrue("Children count is 4", children.length == 4);
             assertTrue("Child parent is the root",
                        children[0].parent().equals(rnode1));
 
@@ -203,8 +203,8 @@ public class RewritingTests {
             RewritingNode rlastChild = rnode1.lastChild();
             System.out.println("Root first child: " + rfirstChild);
             System.out.println("Root last child: " + rlastChild);
-            assertTrue("Last child previous is the first child next",
-                       rlastChild.previousChild()
+            assertTrue("Last child second previous is the first child next",
+                       rlastChild.previousChild().previousChild()
                                  .equals(rfirstChild.nextChild()));
             assertTrue("Last child next is None",
                        rlastChild.nextChild().isNone());
@@ -507,11 +507,17 @@ public class RewritingTests {
             System.out.println("#####");
             System.out.println(rroot.unparse());
             System.out.println("#####");
+            System.out.println(
+                "Declaration list unparse with partial formatting:"
+            );
+            System.out.println("#####");
+            System.out.println(runit.unparseWithPartialFormatting());
+            System.out.println("#####");
             assertTrue("Inserted node is now tied", rdeclCreated1.isTied());
             assertTrue("First declaration is the inserted one",
                        rroot.firstChild().equals(rdeclCreated1));
-            assertTrue("Children count is now 4",
-                       rroot.children().length == 4);
+            assertTrue("Children count is now 5",
+                       rroot.children().length == 5);
             assertLangkitException(
                 "Inserting a first child in a non list node",
                 () -> rdeclCreated1.insertFirst(rname2)
@@ -531,8 +537,8 @@ public class RewritingTests {
             assertTrue("Inserted node is now tied", rdeclCreated2.isTied());
             assertTrue("Last declaration is the inserted one",
                        rroot.lastChild().equals(rdeclCreated2));
-            assertTrue("Children count is now 5",
-                       rroot.children().length == 5);
+            assertTrue("Children count is now 6",
+                       rroot.children().length == 6);
             assertLangkitException(
                 "Inserting a last child in a non list node",
                 () -> rdeclCreated2.insertLast(rname2)
@@ -555,8 +561,8 @@ public class RewritingTests {
             assertTrue("Inserted node is now tied", rdeclCreated3.isTied());
             assertTrue("3rd declaration is the inserted one",
                        rroot.children()[2].equals(rdeclCreated3));
-            assertTrue("Children count is now 6",
-                       rroot.children().length == 6);
+            assertTrue("Children count is now 7",
+                       rroot.children().length == 7);
             assertLangkitException(
                 "Inserting a node before a non-list-parent node",
                 () -> rthridName.insertBefore(rname2)
@@ -576,8 +582,8 @@ public class RewritingTests {
             assertTrue("Inserted node is now tied", rdeclCreated4.isTied());
             assertTrue("5th declaration is the inserted one",
                        rroot.children()[4].equals(rdeclCreated4));
-            assertTrue("Children count is now 7",
-                       rroot.children().length == 7);
+            assertTrue("Children count is now 8",
+                       rroot.children().length == 8);
             assertLangkitException(
                 "Inserting a node before a non-list-parent node",
                 () -> rthridName.insertAfter(rname2)
@@ -594,8 +600,8 @@ public class RewritingTests {
             System.out.println("#####");
             System.out.println(rroot.unparse());
             System.out.println("#####");
-            assertTrue("Children count is now 6",
-                       rroot.children().length == 6);
+            assertTrue("Children count is now 7",
+                       rroot.children().length == 7);
             assertLangkitException(
                 "Removing a node which is not in a list node",
                 () -> rname1.removeFromParent()

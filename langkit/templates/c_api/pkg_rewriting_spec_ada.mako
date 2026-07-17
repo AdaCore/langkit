@@ -106,6 +106,14 @@ private package ${ada_lib_name}.Rewriting_C is
            Convention    => C,
            External_Name => "${capi.get_name('rewriting_unit_unparse')}";
 
+   procedure C_Unparse_With_Partial_Formatting
+     (Handle : C_Unit_Rewriting_Handle; Result : access ${text_type})
+      with Export        => True,
+           Convention    => C,
+           External_Name => "${capi.get_name(
+               'rewriting_unit_unparse_with_partial_formatting'
+           )}";
+
 
    function C_Node_To_Handle
      (Node : Internal_Node) return C_Node_Rewriting_Handle

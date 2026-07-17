@@ -38,4 +38,3 @@ class Literal: FooNode implements TokenNode {
 @custom_short_image
 class Name: FooNode implements TokenNode {
 }
-

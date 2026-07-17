@@ -393,6 +393,16 @@
             RewritingUnit rewritingUnit
         );
 
+        /**
+         * Unparse the given rewriting unit and return its textual value with
+         * modified parts formatted.
+         */
+        @CompilerDirectives.TruffleBoundary
+        public static native Text
+        ${nat("rewriting_unit_unparse_with_partial_formatting")}(
+            RewritingUnit rewritingUnit
+        );
+
         // ----- Rewriting node functions -----
 
         /** Get the rewriting node from the given parsed node */

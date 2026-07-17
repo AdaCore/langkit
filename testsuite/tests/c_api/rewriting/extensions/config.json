@@ -1,0 +1,14 @@
+{
+  "node_configs": {
+    "DeclList": {
+      "sep": ["recurse", "hardline"],
+      "independent_lines": true
+    },
+    "Var": {
+      "fields": {
+        "f_name": ["whitespace", "recurse", "whitespace"],
+        "f_expr": ["whitespace", "recurse"]
+      }
+    }
+  }
+}

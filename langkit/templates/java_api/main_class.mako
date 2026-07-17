@@ -4829,6 +4829,31 @@ public final class ${ctx.lib_name.camel}
             return res;
         }
 
+        ${java_doc('langkit.rewriting.unit_unparse_with_partial_formatting', 8)}
+        public String unparseWithPartialFormatting() {
+            final Text unparseText;
+
+            if(ImageInfo.inImageCode()) {
+                final TextNative textNative = StackValue.get(
+                    TextNative.class
+                );
+                NI_LIB.${nat("rewriting_unit_unparse_with_partial_formatting")}(
+                    this.unwrap(),
+                    textNative
+                );
+                unparseText = Text.wrap(textNative);
+            } else {
+                unparseText =
+                    JNI_LIB.${nat(
+                        "rewriting_unit_unparse_with_partial_formatting"
+                    )}(this);
+            }
+
+            String res = unparseText.getContent();
+            unparseText.close();
+            return res;
+        }
+
         // ----- Override methods -----
 
         @Override
