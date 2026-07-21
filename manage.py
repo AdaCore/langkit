@@ -471,7 +471,7 @@ def bootstrap(args: Namespace) -> None:
 
     # Now that we have the codegen for the bootstrap project, its Lkt sources
     # (just copies of the Lkt project itself) are no longer useful: just remove
-    # them, to avoid unecessary bootstrap directory bloat.
+    # them, to avoid unnecessary bootstrap directory bloat.
     for lkt_src in Path(LKT_BOOTSTRAP_ROOT).glob("**/*.lkt"):
         lkt_src.unlink()
 
