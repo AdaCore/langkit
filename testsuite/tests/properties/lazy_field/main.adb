@@ -28,16 +28,19 @@ begin
    Put_Line ("On " & E.Image);
    for I in 1 .. 2 loop
       Put ("Attempt" & I'Image & "... ");
+      Flush;
       Put_Line (E.F_Lazy_Int'Image);
    end loop;
    New_Line;
    Put_Line ("On " & N.Image);
+   Flush;
    Put_Line (N.F_Lazy_Int'Image);
    New_Line;
 
    Put_Line ("== Lazy_Refcounted ==");
    for I in 1 .. 2 loop
       Put ("Attempt" & I'Image & "... ");
+      Flush;
       declare
          A : constant Integer_Array := E.F_Lazy_Refcounted;
       begin
@@ -51,6 +54,7 @@ begin
    New_Line;
 
    Put_Line ("== Lazy_In_Abstract ==");
+   Flush;
    Put_Line (E.F_Lazy_In_Abstract'Image);
    New_Line;
 
@@ -58,12 +62,16 @@ begin
    declare
       EF : constant Example := E.P_With_Flag (True);
    begin
+      Flush;
       Put_Line ("E.P_Is_Flag_Enabled = " & E.P_Is_Flag_Enabled'Image);
+      Flush;
       Put_Line
         ("E.F_Lazy_Node.P_Is_Flag_Enabled = "
          & E.F_Lazy_Node.P_Is_Flag_Enabled'Image);
       New_Line;
+      Flush;
       Put_Line ("EF.P_Is_Flag_Enabled = " & EF.P_Is_Flag_Enabled'Image);
+      Flush;
       Put_Line
         ("EF.F_Lazy_Node.P_Is_Flag_Enabled = "
          & EF.F_Lazy_Node.P_Is_Flag_Enabled'Image);
@@ -73,6 +81,7 @@ begin
    Put_Line ("== Lazy_Error ==");
    for I in 1 .. 2 loop
       Put ("Attempt" & I'Image & "... ");
+      Flush;
       begin
          Put_Line (E.F_Lazy_Error'Image);
       exception
