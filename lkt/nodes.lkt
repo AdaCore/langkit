@@ -112,15 +112,25 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     fun node_trait(): Entity[TraitDecl] =
         node.node_gen_trait().decl.as[TraitDecl]
 
-    |" Unit method. Return the ``Node`` builtin generic trait.
+    |" Unit method. Return the ``Indexable`` builtin generic trait.
     @exported
     fun indexable_gen_trait(): Entity[GenericDecl] =
         node.get_builtin_gen_decl(s"Indexable")
 
-    |" Unit method. Return the ``Node`` builtin trait.
+    |" Unit method. Return the ``Indexable`` builtin trait.
     @exported
     fun indexable_trait(): Entity[TraitDecl] =
         node.indexable_gen_trait().decl.as[TraitDecl]
+
+    |" Unit method. Return the ``Iterable`` builtin generic trait.
+    @exported
+    fun iterable_gen_trait(): Entity[GenericDecl] =
+        node.get_builtin_gen_decl(s"Iterable")
+
+    |" Unit method. Return the ``Iterable`` builtin trait.
+    @exported
+    fun iterable_trait(): Entity[TraitDecl] =
+        node.iterable_gen_trait().decl.as[TraitDecl]
 
     |" Unit method. Return the ``TokenNode`` builtin trait.
     @exported
@@ -589,7 +599,7 @@ class Decl: LktNode implements DeclarationInterface {
                     )
                     .as_entity
                 else
-                    # Add a new argument at the begining of the function type
+                    # Add a new argument at the beginning of the function type
                     # when it is a static combiner. It must accept an entity of
                     # the function's owning type.
                     FunctionType(
@@ -713,7 +723,7 @@ class Decl: LktNode implements DeclarationInterface {
         elt_type?.make_array_type()
     }
 
-    |" Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+    |" Return the type of ``E.F`` when ``self`` is the declaration of the ``F``
     |" member and ``prefix_type`` is the type of ``E``.
     @exported
     fun get_suffix_type(prefix_type: Entity[TypeDecl]): Entity[TypeDecl] = {
@@ -977,12 +987,12 @@ class Decl: LktNode implements DeclarationInterface {
             )
             .do(
                 (dew) =>
-                self.get_rebinded_decl(dew.dynenvwrapper_instantiation_env)
+                self.get_rebound_decl(dew.dynenvwrapper_instantiation_env)
             )
 
     |" Create a new Entity from Self using rebindings_env as the new
     |" environment to handle generics.
-    fun get_rebinded_decl(rebindings_env: LexicalEnv): Entity[Decl] = {
+    fun get_rebound_decl(rebindings_env: LexicalEnv): Entity[Decl] = {
         val shed_current = node.parent.node_env.shed_rebindings(self.info);
 
         if self.is_null or not self.parent is GenericDecl
@@ -1706,7 +1716,7 @@ class GenericDecl: Decl {
     |" Return the suffix of the node's image that contains the type parameters.
     fun image_suffix(): String =
         "[" & (
-            # When no rebinindings are present, use the generic_param_decls of
+            # When no rebindings are present, use the generic_param_decls of
             # the GenericDecl to avoid using the environment as for
             # instantiated type parameters: The result would be the same either
             # way.
@@ -2013,7 +2023,7 @@ class TypeDecl: Decl implements TypeInterface {
         else
             self.common_ancestor_helper(other_types, 0, true)
 
-    |" Return true if Self and other are matching type that can be permutated.
+    |" Return true if Self and other are matching type that can be permuted.
     @predicate_error("expected $Self, got $other")
     fun commutative_matching_type(
         other: Entity[TypeDecl],
@@ -2054,18 +2064,24 @@ class TypeDecl: Decl implements TypeInterface {
         )
         or self.matching_type(other)
 
+    |" Return whether this type declaration implements the provided trait.
+    @predicate_error("$Self does not implement the $tr trait")
+    fun has_trait(tr: Entity[TraitDecl]): Bool =
+        self.is_null
+        or self.traits.any(
+            (tref) => tref.referenced_decl().node == tr.node
+        )
+        or self.base_type()?.has_trait(tr)
+
+        # In the case of an entity type, we look in the inner node type for
+        # the searched trait.
+        or self.get_entity_node_type().do(
+            (nt) => nt != self and nt.has_trait(tr)
+        )
+
     |" Predicate used to verify that a type implements the Indexable trait.
     @predicate_error("$Self is not Indexable")
-    fun is_indexable_type(): Bool =
-        self.is_null
-        or {
-            bind origin = self;
-
-            self.defined_scope().get_first(s"__call__")
-            .as[FunDecl]
-            ?.owning_type()
-        }
-        == node.indexable_trait().node
+    fun is_indexable_type(): Bool = self.has_trait(node.indexable_trait())
 
     |" Predicate used to emit an error when the type of an expression is not
     |" callable.
@@ -2228,7 +2244,7 @@ class TypeDecl: Decl implements TypeInterface {
         .as[Decl]
         ?.subdecl_if_generic()
 
-    |" Return a rebinded version of BasicTrait, in order to allow for all
+    |" Return a rebound version of BasicTrait, in order to allow for all
     |" types to have builtins (do, singleton...) in their environment.
     fun basic_trait_from_self(): Entity[TypeDecl] =
         self.basic_trait().instantiate_generic_type_decl([self])
@@ -2339,7 +2355,7 @@ class TypeDecl: Decl implements TypeInterface {
                     (t) => t.node == self.astlist_type().node
                 )
                 .do(
-                    # When the class is an ASTList, its ``buider`` method needs
+                    # When the class is an ASTList, its ``builder`` method needs
                     # to accept an array of the list's element as a NodeBuilder
                     # type for the first argument.
                     (list_type) => {
@@ -5160,42 +5176,38 @@ class SubscriptExpr: Expr {
     fun has_context_free_type(): Bool = self.prefix.has_context_free_type()
 
     fun xref_equation(): Equation =
-        (
-            (
-                (
-                    (
-                        (
-                            self.prefix.xref_equation()
-                            %and self.index.xref_equation()
-                        )
-                        %and self.actual_type_var
-                        <- TypeDecl.get_indexable_content_type%(
-                            self.prefix.actual_type_var
-                        )
-                    )
-                    %and (
-                        # The index should be an integer
-                        self.index.expected_type_var <- self.int_type()
-                    )
-                )
-                %and (
-                    if not self.xref_entry_point()
-                    then
-                        self.prefix.expected_type_var
-                        <- TypeDecl.make_array_type%(self.expected_type_var)
-                    elif self.prefix.has_context_free_type()
-                    then
-                        self.prefix.expected_type_var <- null[Entity[TypeDecl]]
-                    else
-                        self.prefix.expected_type_var
-                        <- self.get_expected_type()?.make_array_type()
-                )
-            )
+        self.prefix.xref_equation()
+        %and self.index.xref_equation()
+
+        # The type of this expression is the content of the indexed array
+        %and self.actual_type_var
+        <- TypeDecl.get_indexable_content_type%(
+            self.prefix.actual_type_var
+        )
+
+        # The index should be an integer
+        %and (
+            self.index.expected_type_var <- self.int_type()
             %and {
                 bind error_location = node.index;
                 TypeDecl.is_int_type%(self.index.actual_type_var)
             }
         )
+
+        # Propagate the expected type of this expression to the prefix
+        # expresion if this is required.
+        %and (
+            if not self.xref_entry_point() then
+                self.prefix.expected_type_var
+                <- TypeDecl.make_array_type%(self.expected_type_var)
+            elif self.prefix.has_context_free_type() then
+                self.prefix.expected_type_var <- null[Entity[TypeDecl]]
+            else
+                self.prefix.expected_type_var
+                <- self.get_expected_type()?.make_array_type()
+        )
+
+        # Ensure the prefix is an indexable value
         %and {
             bind error_location = node.prefix;
             TypeDecl.is_indexable_type%(self.prefix.actual_type_var)
@@ -5582,7 +5594,7 @@ class PatternMatchBranch: BaseMatchBranch {
 }
 
 |" Query comprehension.
-|" ``from <expr> match <pattern> [if <expr>]``
+|" ``from <source> match <pattern> [select <mapping>] [if <guard>]``
 class Query: Expr {
     @parse_field
     source: Expr
@@ -5597,6 +5609,73 @@ class Query: Expr {
     @nullable
     @parse_field
     guard: Expr
+
+    res_elems_type_var: LogicVar
+
+    fun xref_equation(): Equation =
+        self.source.xref_equation()
+        %and self.actual_type_var <- TypeDecl.make_stream_type%(
+            self.res_elems_type_var
+        )
+
+        # Ensure the source is an iterable value
+        %and {
+            bind error_location = self.source.node;
+            TypeDecl.has_trait%(
+                self.source.actual_type_var,
+                self.iterable_trait()
+            )
+        }
+
+        # Propagate the expected type of this expression to the mapping
+        # expresion if this is required.
+        %and (
+            if not self.mapping.is_null then
+                self.mapping.xref_equation()
+                %and (
+                    if not self.xref_entry_point() then
+                        self.mapping.expected_type_var
+                        <- TypeDecl.get_indexable_content_type%(
+                            self.expected_type_var
+                        )
+                    elif self.mapping.has_context_free_type() then
+                        self.mapping.expected_type_var
+                        <- null[Entity[TypeDecl]]
+                    else
+                        self.mapping.expected_type_var
+                        <- self
+                            .get_expected_type()
+                            ?.get_indexable_content_type()
+                )
+                %and self.res_elems_type_var <-> self.mapping.actual_type_var
+            else
+                self.res_elems_type_var
+                <- TypeDecl.get_indexable_content_type%(
+                    self.source.actual_type_var
+                )
+        )
+
+        # Ensure the guard is a boolean
+        %and (
+            if not self.guard.is_null then
+                self.guard.xref_equation()
+                %and {
+                    bind error_location = node.guard;
+                    self.guard.expected_type_var <- self.bool_type()
+                    %and TypeDecl.matching_type%(
+                        self.guard.expected_type_var,
+                        self.guard.actual_type_var
+                    )
+                }
+            else
+                %true
+        )
+
+    fun has_context_free_type(): Bool =
+        if self.mapping.is_null then
+            self.source.has_context_free_type()
+        else
+            self.mapping.has_context_free_type()
 }
 
 |" Operator in a binary operator expression.
