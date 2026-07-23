@@ -24,11 +24,12 @@ procedure Partial_Formatting is
    ----------
 
    procedure Test (Title : String; Options : Rewriting_Options) is
-      Ctx     : constant Analysis_Context := Create_Context;
-      U       : constant Analysis_Unit :=
+      Ctx           : constant Analysis_Context := Create_Context;
+      U             : constant Analysis_Unit :=
         Get_From_File (Ctx, "partial_formatting.txt");
-      RH      : Rewriting_Handle;
-      Dummy_R : Apply_Result;
+      RH            : Rewriting_Handle;
+      Unparsing_Res : Unbounded_Text_Type;
+      Dummy_R       : Apply_Result;
    begin
       Put_Line (Title);
       Put_Line ("===========================");
@@ -63,6 +64,11 @@ procedure Partial_Formatting is
       end;
 
       New_Line;
+      Put_Line ("Unparsing the rewriting unit with partial formatting...");
+      Unparsing_Res :=
+        Unparse_With_Partial_Formatting (Handle (To_Generic_Unit (U)));
+
+      New_Line;
       Put_Line ("Applying the diff...");
       Dummy_R := Apply (RH);
       if not Dummy_R.Success then
@@ -72,6 +78,16 @@ procedure Partial_Formatting is
       New_Line;
       Put_Line ("Quoting source buffer for rewritten unit...");
       Put_Line (Encode (Text (U), "ASCII"));
+
+      New_Line;
+      Put_Line
+        ("Ensuring that unparsed rewriting unit is the same as resulting"
+         & " unit text...");
+      if Text (U) /= To_Text (Unparsing_Res) then
+         Put_Line
+           ("Error: result of the unparsing isn't the same as the text of the"
+            & " rewritten unit");
+      end if;
       New_Line;
    end Test;
 

@@ -3336,6 +3336,23 @@ ${api.jni_func_sig("rewriting_unit_unparse", "jobject")}(
     return Text_wrap(env, res_native);
 }
 
+// Unparse the given rewriting unit with partial formatting
+${api.jni_func_sig(
+    "rewriting_unit_unparse_with_partial_formatting",
+    "jobject"
+)}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_unit
+) {
+    ${text_type} res_native = Text_new_value();
+    ${nat("rewriting_unit_unparse_with_partial_formatting")}(
+        RewritingUnit_unwrap(env, rewriting_unit),
+        &res_native
+    );
+    return Text_wrap(env, res_native);
+}
+
 // ==========
 // Rewriting node functions
 // ==========

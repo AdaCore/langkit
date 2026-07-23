@@ -3,6 +3,8 @@ No rewriting options
 
 Adding new definition ...
 
+Unparsing the rewriting unit with partial formatting...
+
 Applying the diff...
 
 Quoting source buffer for rewritten unit...
@@ -22,10 +24,14 @@ def f1(a: Int, b: Int = 0): Int {
 
 
 
+Ensuring that unparsed rewriting unit is the same as resulting unit text...
+
 Default rewriting options
 ===========================
 
 Adding new definition ...
+
+Unparsing the rewriting unit with partial formatting...
 
 Applying the diff...
 
@@ -64,10 +70,14 @@ def f1(a:Int,b:Int=0): Int
 }
 # f1
 
+Ensuring that unparsed rewriting unit is the same as resulting unit text...
+
 Custom rewriting options
 ===========================
 
 Adding new definition ...
+
+Unparsing the rewriting unit with partial formatting...
 
 Applying the diff...
 
@@ -91,6 +101,8 @@ def f1(a: Int, b: Int = 0): Int {
 # f1
 
 
+
+Ensuring that unparsed rewriting unit is the same as resulting unit text...
 
 partial_formatting.adb: Done.
 Done

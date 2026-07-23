@@ -281,6 +281,16 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Image (Handle : Node_Rewriting_Handle_Access) return String;
    --  Implementation for the node Image
 
+   procedure Reparse_With_Partial_Formatting
+     (Unit_Handle      : Unit_Rewriting_Handle_Access;
+      Unparsing_Result : out Unparsing_Buffer;
+      Reparsing_Result : out Reparsed_Unit);
+   --  Unparse the provided ``Unit_Handle``, placing the result in
+   --  ``Unparsing_Result``. Then, reparse it in ``Reparsing_Result``.
+   --
+   --  If an unparsing configuration is available, use it to format rewrote
+   --  parts of ``Unit_Handle`` if possible.
+
    -----------------------
    -- Create_Safety_Net --
    -----------------------
@@ -750,7 +760,7 @@ package body Langkit_Support.Generic_API.Rewriting is
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
       H                : Rewriting_Handle_Access renames Handle.Ref;
       Desc             : Language_Descriptor_Access;
-      Unparsing_Config : Unparsing_Configuration_Access;
+      Unparsing_Result : Unparsing_Buffer;
 
       --  We first run the unparser on all rewritten units without modifying
       --  these units, and apply modifications only once we are sure the
@@ -777,143 +787,40 @@ package body Langkit_Support.Generic_API.Rewriting is
       Check_Safety_Net ("Handle", Handle);
       Pre_Check_RW_Handle ("Handle", H);
       Desc := +H.Context.Language;
-      Unparsing_Config := Unwrap_Unparsing_Configuration (H.Config);
 
       --  Try to reparse all units that were potentially modified
 
       for Unit_Handle of H.Units loop
          declare
-            PU    : constant Processed_Unit := new Processed_Unit_Record'
-              (Unit     => Unit_Handle.Unit,
-               New_Data => <>);
-            Input : Lexer_Input :=
-              (Kind        => Bytes_Buffer,
-               Charset     => <>,
-               Read_BOM    => False,
-               Bytes       => System.Null_Address,
-               Bytes_Count => 0);
-            Bytes : String_Access;
-
-            New_Root : constant Abstract_Node :=
-              Abstract_Node_From_Rewriting (Unit_Handle.Root);
+            PU : constant Processed_Unit :=
+              new Processed_Unit_Record'
+                (Unit => Unit_Handle.Unit, New_Data => <>);
 
             function Error_Result return Apply_Result
             is ((Success => False, Unit => PU.Unit, Diagnostics => <>));
          begin
             Units.Append (PU);
 
-            --  Reparse (i.e. unparse and then parse) this rewritten unit
-
-            begin
-               Bytes := Unparse
-                 (New_Root,
-                  PU.Unit,
-                  Formatted_Node   => No_Lk_Node,
-                  Unparsing_Config => null,
-                  As_Unit          => True);
-            exception
-               when Exc : Malformed_Tree_Error =>
-                  Result := Error_Result;
-                  Append
-                    (Result.Diagnostics,
-                     No_Source_Location_Range,
-                     To_Text (Exception_Message (Exc)));
-                  exit;
-            end;
-
-            Input.Charset := To_Unbounded_String (Unit_Handle.Unit.Charset);
-            Input.Bytes := Bytes.all'Address;
-            Input.Bytes_Count := Bytes.all'Length;
-            Desc.Unit_Do_Parsing.all
-              (Unwrap_Unit (Unit_Handle.Unit), Input, PU.New_Data);
-
-            --  If there is a parsing error or if the reparsed tree does not
-            --  have the same shape as the rewriting handle tree, abort the
-            --  rewriting process.
+            Clear (Unparsing_Result);
+            Reparse_With_Partial_Formatting
+              (Unit_Handle, Unparsing_Result, PU.New_Data);
 
             if PU.New_Data.Present
-               and then not
-                 (PU.New_Data.Diagnostics.Is_Empty
-                  and then Has_Same_Shape
-                             (H.Context.Language, New_Root, PU.New_Data))
+              and then not PU.New_Data.Diagnostics.Is_Empty
             then
                Result := Error_Result;
                Result.Diagnostics.Move (PU.New_Data.Diagnostics);
                Destroy (PU.New_Data);
-               Free (Bytes);
                exit;
             end if;
-
-            --  Reparse (i.e. unparse and then parse) this rewritten unit.
-            --  When unparsing, make sure to use the given configuration to
-            --  format rewritten parts of the tree.
-            --
-            --  To do that, we first do a complete reformatting of the
-            --  rewritten unit, which will serve as reference when doing the
-            --  second and final unparsing of the rewritten unit to extract
-            --  the formatting of only the rewritten parts.
-            --
-            --  Note that this is only valid if the rewritten unit and the
-            --  reparsed unit have the same tree structure, but this has been
-            --  checked above.
-            --
-            --  Note this sequence of parsing/unparsing is not optimal, because
-            --  the rewritten unit is parsed several times. At some point we
-            --  could try to investigate whether it's possible to reuse the
-            --  internal tree inside ``PU.New_Data`` for the operations below.
-
-            if Unparsing_Config /= null then
-               declare
-                  Reparse_Ctx : constant Lk_Context := Create_Context
-                    (H.Context.Language, Unit_Handle.Unit.Charset);
-                  --  Reparse_Ctx will be used to hold the unparsed rewritten
-                  --  unit (the unformatted and then the reformatted units).
-
-                  Rewritten_Unit : constant Lk_Unit :=
-                    Reparse_Ctx.Get_From_Buffer ("rewritten", Bytes.all);
-                  --  Parse the rewritten source in a new unit to use as basis
-                  --  for the reformatting.
-
-                  Formatted_Text : constant Unbounded_String := Format
-                    (Unparse_To_Prettier (Rewritten_Unit.Root, H.Config),
-                     H.Options);
-                  --  Format the rewritten source according to the the
-                  --  specified unparsing configuration and format options.
-
-                  Formatted_Unit : constant Lk_Unit :=
-                    Reparse_Ctx.Get_From_Buffer
-                      ("rewritten_formatted", To_String (Formatted_Text));
-                  --  Parse the formatted text into a an actual analysis unit
-               begin
-                  --  We are going to do another round of unparsing (new dat
-                  --  for PU and Bytes), so free resources created by the
-                  --  previous round.
-
-                  Destroy (PU.New_Data);
-                  Free (Bytes);
-
-                  --  Use the formatted analysis unit as reference when
-                  --  unparsing the rewriting diff a second time, to apply
-                  --  formatting in modified sections of the tree.
-
-                  Bytes := Unparse
-                    (New_Root,
-                     PU.Unit,
-                     Formatted_Node   => Formatted_Unit.Root,
-                     Unparsing_Config => Unparsing_Config,
-                     As_Unit          => True);
-
-                  Input.Bytes := Bytes.all'Address;
-                  Input.Bytes_Count := Bytes.all'Length;
-                  Desc.Unit_Do_Parsing.all
-                    (Unwrap_Unit (Unit_Handle.Unit), Input, PU.New_Data);
-
-                  --  We don't check diagnostics the second time as we're
-                  --  parsing the tree structure as the first time.
-               end;
-            end if;
-
-            Free (Bytes);
+         exception
+            when Exc : Malformed_Tree_Error =>
+               Result := Error_Result;
+               Append
+                 (Result.Diagnostics,
+                  No_Source_Location_Range,
+                  To_Text (Exception_Message (Exc)));
+               exit;
          end;
       end loop;
 
@@ -1059,6 +966,161 @@ package body Langkit_Support.Generic_API.Rewriting is
          Unparsing_Config => null,
          As_Unit          => True);
    end Unparse;
+
+   -------------------------------------
+   -- Unparse_With_Partial_Formatting --
+   -------------------------------------
+
+   function Unparse_With_Partial_Formatting
+     (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type
+   is
+      Output_Unit   : Reparsed_Unit;
+      Output_Buffer : Unparsing_Buffer;
+   begin
+      Check_Safety_Net ("Handle", Handle);
+      Pre_Check_URW_Handle ("Handle", Handle.Ref);
+      Reparse_With_Partial_Formatting (Handle.Ref, Output_Buffer, Output_Unit);
+      Destroy (Output_Unit);
+      return Output_Buffer.Content;
+   end Unparse_With_Partial_Formatting;
+
+   -------------------------------------
+   -- Reparse_With_Partial_Formatting --
+   -------------------------------------
+
+   procedure Reparse_With_Partial_Formatting
+     (Unit_Handle      : Unit_Rewriting_Handle_Access;
+      Unparsing_Result : out Unparsing_Buffer;
+      Reparsing_Result : out Reparsed_Unit)
+   is
+      H                : Rewriting_Handle_Access renames
+        Handle (Unit_Handle.Unit.Context).Ref;
+      Unparsing_Config : Unparsing_Configuration_Access;
+      Desc             : Language_Descriptor_Access;
+      Input            : Lexer_Input :=
+        (Kind        => Bytes_Buffer,
+         Charset     => <>,
+         Read_BOM    => False,
+         Bytes       => System.Null_Address,
+         Bytes_Count => 0);
+      Bytes            : String_Access;
+      Rewriting_Root   : constant Abstract_Node :=
+        Abstract_Node_From_Rewriting (Unit_Handle.Root);
+      Rewrote_Unit     : constant Lk_Unit := Unit_Handle.Unit;
+   begin
+      --  Perform checks and fetch working values
+
+      Pre_Check_RW_Handle ("Handle", H);
+      Desc := +H.Context.Language;
+      Unparsing_Config := Unwrap_Unparsing_Configuration (H.Config);
+
+      --  Reparse (i.e. unparse and then parse) this rewritten unit
+
+      Unparse
+        (Rewriting_Root,
+         Rewrote_Unit,
+         Formatted_Node   => No_Lk_Node,
+         Unparsing_Config => null,
+         As_Unit          => True,
+         Result           => Unparsing_Result);
+      Bytes := To_String_Access (Unparsing_Result, Rewrote_Unit.Charset);
+
+      Input.Charset := To_Unbounded_String (Rewrote_Unit.Charset);
+      Input.Bytes := Bytes.all'Address;
+      Input.Bytes_Count := Bytes.all'Length;
+      Desc.Unit_Do_Parsing.all
+        (Unwrap_Unit (Rewrote_Unit), Input, Reparsing_Result);
+
+      --  If there is a parsing error or if the reparsed tree does not
+      --  have the same shape as the rewriting handle tree, do not process
+      --  further to try to format the reparsed unit.
+
+      if Reparsing_Result.Present
+        and then
+          not (Reparsing_Result.Diagnostics.Is_Empty
+               and then
+                 Has_Same_Shape
+                   (H.Context.Language, Rewriting_Root, Reparsing_Result))
+      then
+         Free (Bytes);
+         return;
+      end if;
+
+      --  Reparse (i.e. unparse and then parse) this rewritten unit.
+      --  When unparsing, make sure to use the given configuration to
+      --  format rewritten parts of the tree.
+      --
+      --  To do that, we first do a complete reformatting of the
+      --  rewritten unit, which will serve as reference when doing the
+      --  second and final unparsing of the rewritten unit to extract
+      --  the formatting of only the rewritten parts.
+      --
+      --  Note that this is only valid if the rewritten unit and the
+      --  reparsed unit have the same tree structure, but this has been
+      --  checked above.
+      --
+      --  Note this sequence of parsing/unparsing is not optimal, because
+      --  the rewritten unit is parsed several times. At some point we
+      --  could try to investigate whether it's possible to reuse the
+      --  internal tree inside ``PU.New_Data`` for the operations below.
+
+      if Unparsing_Config /= null then
+         declare
+            Reparse_Ctx : constant Lk_Context :=
+              Create_Context (H.Context.Language, Rewrote_Unit.Charset);
+            --  Reparse_Ctx will be used to hold the unparsed rewritten
+            --  unit (the unformatted and then the reformatted units).
+
+            Unformatted_Unit : constant Lk_Unit :=
+              Reparse_Ctx.Get_From_Buffer ("rewritten", Bytes.all);
+            --  Parse the rewritten source in a new unit to use as basis
+            --  for the reformatting.
+
+            Formatted_Text : constant Unbounded_String :=
+              Format
+                (Unparse_To_Prettier (Unformatted_Unit.Root, H.Config),
+                 H.Options);
+            --  Format the rewritten source according to the the
+            --  specified unparsing configuration and format options.
+
+            Formatted_Unit : constant Lk_Unit :=
+              Reparse_Ctx.Get_From_Buffer
+                ("rewritten_formatted", To_String (Formatted_Text));
+            --  Parse the formatted text into a an actual analysis unit
+         begin
+            --  We are going to do another round of unparsing (new dat
+            --  for PU and Bytes), so free resources created by the
+            --  previous round.
+
+            Free (Bytes);
+            Clear (Unparsing_Result);
+            Destroy (Reparsing_Result);
+
+            --  Use the formatted analysis unit as reference when
+            --  unparsing the rewriting diff a second time, to apply
+            --  formatting in modified sections of the tree.
+
+            Unparse
+              (Rewriting_Root,
+               Rewrote_Unit,
+               Formatted_Node   => Formatted_Unit.Root,
+               Unparsing_Config => Unparsing_Config,
+               As_Unit          => True,
+               Result           => Unparsing_Result);
+            Bytes := To_String_Access (Unparsing_Result, Rewrote_Unit.Charset);
+
+            Input.Bytes := Bytes.all'Address;
+            Input.Bytes_Count := Bytes.all'Length;
+            Desc.Unit_Do_Parsing.all
+              (Unwrap_Unit (Unit_Handle.Unit), Input, Reparsing_Result);
+
+            --  We don't check diagnostics the second time as we're
+            --  parsing the tree structure as the first time.
+         end;
+      end if;
+
+      Free (Bytes);
+   end Reparse_With_Partial_Formatting;
 
    ------------
    -- Handle --

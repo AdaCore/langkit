@@ -145,6 +145,16 @@ package body ${ada_lib_name}.Rewriting is
       return G.Unparse (+Handle);
    end Unparse;
 
+   -------------------------------------
+   -- Unparse_With_Partial_Formatting --
+   -------------------------------------
+
+   function Unparse_With_Partial_Formatting
+     (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type is
+   begin
+      return G.Unparse_With_Partial_Formatting (+Handle);
+   end Unparse_With_Partial_Formatting;
+
    ------------
    -- Handle --
    ------------

@@ -862,6 +862,13 @@ ${capi.get_name('rewriting_unit_unparse')}(
     ${text_type} *result
 );
 
+${c_doc('langkit.rewriting.unit_unparse_with_partial_formatting')}
+extern void
+${capi.get_name('rewriting_unit_unparse_with_partial_formatting')}(
+    ${unit_rewriting_handle_type} handle,
+    ${text_type} *result
+);
+
 /* ... node rewriting... */
 
 ${c_doc('langkit.rewriting.node_handle')}

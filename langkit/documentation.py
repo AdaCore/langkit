@@ -1155,6 +1155,10 @@ base_langkit_docs = {
     "langkit.rewriting.unit_unparse": """
         Return the text associated to the given unit.
     """,
+    "langkit.rewriting.unit_unparse_with_partial_formatting": """
+        Return the text associated to the given unit with modified parts
+        formatted if possible.
+    """,
     "langkit.rewriting.node_handle": """
         Return the rewriting handle corresponding to Node.
 

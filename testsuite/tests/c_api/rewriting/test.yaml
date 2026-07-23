@@ -1,2 +1,6 @@
 driver: lkt_build_and_run
+config:
+  library:
+    defaults:
+      unparsing_config: config.json
 gpr_mains: [main.c]

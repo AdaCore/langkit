@@ -864,6 +864,18 @@
             TextNative result
         );
 
+        /**
+         * Unparse the given rewriting unit and return its textual value with
+         * modified parts formatted.
+         */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void
+        ${nat("rewriting_unit_unparse_with_partial_formatting")}(
+            RewritingUnitNative rewriting_unit,
+            TextNative result
+        );
+
         // ----- Rewriting node functions -----
 
         /** Get the rewriting node from the given parsed node */
