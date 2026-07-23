@@ -125,10 +125,6 @@ test.lkt:11:25-11:33: error: could not determine callee type
  11 | val invalid2 : String = identity(null)
     |                         ^^^^^^^^ 
 
-test.lkt:11:5-11:13: error: could not determine type
- 11 | val invalid2 : String = identity(null)
-    |     ^^^^^^^^ 
-
 Decl <ValDecl "invalid2" test.lkt:11:1-11:39>
      has_type <StructDecl prelude: "String">
 
