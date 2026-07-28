@@ -4457,6 +4457,7 @@ public final class ${ctx.lib_name.camel}
                 // Get the native array
                 final WordPointer unitArrayNative =
                     NI_LIB.${nat("rewriting_unit_handles")}(this.unwrap());
+                checkException();
 
                 // Fill the Java result list
                 final List<RewritingUnit> resList = new ArrayList<>();
