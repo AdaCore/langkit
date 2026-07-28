@@ -1,0 +1,11 @@
+class FooNode implements Node[FooNode] {}
+
+# Test the or int
+val or_int_string: String = null or? ""
+val or_int_node: FooNode = null or? FooNode()
+val or_int_inferred = null or? ""
+val or_int_propagated_l_to_r = "" or? null
+val or_int_propagated_r_to_l = null or? ""
+val or_int_propagated_down: String = null or? null
+val not_same_type_operands = "" or? 1
+val null_operands = null or? null

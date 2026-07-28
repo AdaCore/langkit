@@ -1,0 +1,16 @@
+class FooNode implements Node[FooNode] {}
+class SubNode: FooNode {}
+
+# Test ordering operations
+val ord_lt: Bool = 1 < 1
+val ord_leq: Bool = 1 <= 1
+val ord_gt: Bool = 1 > 1
+val ord_geq: Bool = 1 >= 1
+val ord_nodes: Bool = FooNode() < FooNode()
+val ord_node_and_sub: Bool = FooNode() < SubNode()
+val ord_inferred = 1 < 1
+val ord_propagated_l_to_r = 1 < null
+val ord_propagated_r_to_l = null < 1
+val not_bool_res: Int = 1 < 1
+val not_same_type_operands = 1 < FooNode()
+val not_valid_operands = "Hello" < "World"

@@ -2211,6 +2211,17 @@ class TypeDecl: Decl implements TypeInterface {
     fun make_stream_type(): Entity[TypeDecl] =
         self?.stream_type().instantiate_generic_type_decl([self])
 
+    |" For a stream type declaration and another one, create a new stream type
+    |" instantiated with the common ancestor of ``self`` elements type and
+    |" ``other_type``.
+    @memoized
+    fun make_stream_of_common_ancestor(
+        other_type: Entity[TypeDecl]
+    ): Entity[TypeDecl] =
+        self?.get_indexable_content_type()
+            ?.imprecise_common_ancestor_list([other_type])
+            ?.make_stream_type()
+
     |" Get the type parameter used to rebind the Array type declaration.
     fun get_indexable_content_type(): Entity[TypeDecl] =
         if self.is_null then null[Entity[TypeDecl]]
@@ -3774,125 +3785,151 @@ class BinOp: Expr {
     right: Expr
 
     fun xref_equation(): Equation = {
-        val sub_constraints =
-            self.left.xref_equation() %and self.right.xref_equation();
+        # Create an equation check that the right operand is having the
+        # expected type.
+        val check_right_type = {
+            bind error_location = node.right;
+            TypeDecl.commutative_matching_type%(
+                self.right.expected_type_var,
+                self.right.actual_type_var,
+                # When dealing with order operators or the "or?"
+                # operator, we must allow common ancestors. This is
+                # unnecessary for "==" and "!=", because if one of the
+                # type is not a subtype of the other, the operands will
+                # always be different.
+                (
+                    self.op.is_order_op()
+                    or self.op is Op.OrInt | Op.StreamCons | Op.StreamConcat
+                )
+            )
+        };
 
-        val commutative_constraints =
-            if self.op.is_commutative() then
-                {
-                    bind error_location = node.right;
-                    TypeDecl.commutative_matching_type%(
-                        self.right.expected_type_var,
-                        self.right.actual_type_var,
-                        # When dealing with order operators or the "or?"
-                        # operator, we must allow common ancestors. This is
-                        # unnecessary for "==" and "!=", because if one of the
-                        # type is not a subtype of the other, the operands will
-                        # always be different.
-                        self.op.is_order_op() or self.op is Op.OrInt
-                    )
-                }
-                %and self.right.actual_type_var <-> self.left.expected_type_var
-                %and self.right.expected_type_var <-> self.left.actual_type_var
+        # Create an equation to propagate types from the left operand to the
+        # right one, and vice versa.
+        val l_and_r_propagation =
+            self.right.actual_type_var <-> self.left.expected_type_var
+            %and self.right.expected_type_var <-> self.left.actual_type_var;
+
+        # Create an equation wrapping the previous one to propagate the
+        # expected type of this expression to the right and left operands if
+        # this is required.
+        val full_propagation = (
+            if self.has_context_free_type() then
+                l_and_r_propagation
+            elif self.xref_entry_point() then
+                self.left.expected_type_var <- self.get_expected_type()
+                %and self.right.expected_type_var <- self.get_expected_type()
             else
-                %true;
+                self.left.expected_type_var <-> self.expected_type_var
+                %and self.right.expected_type_var <-> self.expected_type_var
+        );
 
-        sub_constraints
-        %and commutative_constraints
+        self.left.xref_equation() %and self.right.xref_equation()
         %and (
             # "and" "or"
             if self.op.is_bool_op()
             then
                 self.actual_type_var <- self.bool_type()
+                %and self.left.expected_type_var <- self.bool_type()
+                %and self.right.expected_type_var <- self.bool_type()
                 %and {
                     bind error_location = node.left;
                     TypeDecl.is_bool%(self.left.actual_type_var)
+                }
+                %and {
+                    bind error_location = node.right;
+                    TypeDecl.is_bool%(self.right.actual_type_var)
                 }
             # "%and" "%or"
             elif self.op.is_equation_op()
             then
                 self.actual_type_var <- self.equation_type()
+                %and self.left.expected_type_var <- self.equation_type()
+                %and self.right.expected_type_var <- self.equation_type()
                 %and {
                     bind error_location = node.left;
                     TypeDecl.is_equation%(self.left.actual_type_var)
+                }
+                %and {
+                    bind error_location = node.right;
+                    TypeDecl.is_equation%(self.right.actual_type_var)
                 }
             # ">" ">=" "<" "<="
             elif self.op.is_order_op()
             then
                 self.actual_type_var <- self.bool_type()
+                %and l_and_r_propagation
+                %and check_right_type
                 %and {
                     bind error_location = node.left;
                     TypeDecl.is_int_or_node%(self.left.actual_type_var)
                 }
-                %and {
-                    bind error_location = node.right;
-                    TypeDecl.is_int_or_node%(self.right.actual_type_var)
-                }
-            # " +" "-" "*" "/"
+            # "+" "-" "*" "/"
             elif self.op.is_arith_op()
             then
                 self.actual_type_var <-> self.left.actual_type_var
+                %and full_propagation
+                %and check_right_type
                 %and {
                     bind error_location = node.left;
                     TypeDecl.is_int_type%(self.left.actual_type_var)
-                }
-                %and {
-                    bind error_location = node.right;
-                    TypeDecl.is_int_type%(self.right.actual_type_var)
                 }
             # "&"
             elif self.op is Op.Amp
             then
                 self.actual_type_var <-> self.left.actual_type_var
+                %and full_propagation
+                %and check_right_type
                 %and {
                     bind error_location = node.left;
-                    TypeDecl.is_string_or_array_type%(
-                        self.left.actual_type_var
-                    )
-                }
-                %and {
-                    bind error_location = node.right;
-                    TypeDecl.is_string_or_array_type%(
-                        self.right.actual_type_var
-                    )
+                    TypeDecl.is_string_or_array_type%(self.left.actual_type_var)
                 }
             # "::"
             elif self.op is Op.StreamCons
             then
-                self.actual_type_var <-> self.right.actual_type_var
-                %and
-                    self.right.expected_type_var
-                    <- TypeDecl.make_stream_type%(self.left.actual_type_var)
-                %and
-                    self.left.expected_type_var
-                    <- TypeDecl.get_indexable_content_type%(
-                        self.right.actual_type_var
-                    )
-                %and {
-                    bind error_location = node.right;
-                    TypeDecl.is_stream%(self.right.actual_type_var)
-                }
-                %and {
-                    bind error_location = node.left;
-                    TypeDecl.is_subtype_pred%(
-                        self.left.expected_type_var,
+                self.actual_type_var
+                    <- TypeDecl.make_stream_of_common_ancestor%(
+                        self.right.actual_type_var,
                         self.left.actual_type_var
                     )
-                }
+                %and (
+                    if self.has_context_free_type() then
+                        self.left.expected_type_var
+                            <- TypeDecl.get_indexable_content_type%(
+                                self.right.actual_type_var
+                            )
+                        %and self.right.expected_type_var
+                            <- TypeDecl.make_stream_type%(
+                                self.left.actual_type_var
+                            )
+                    elif self.xref_entry_point() then
+                        self.left.expected_type_var
+                            <- self.get_expected_type()
+                                .get_indexable_content_type()
+                        %and self.right.expected_type_var
+                            <- self.get_expected_type()
+                    else
+                        self.left.expected_type_var <-
+                            TypeDecl.get_indexable_content_type%(
+                                self.expected_type_var
+                            )
+                        %and self.right.expected_type_var
+                            <-> self.expected_type_var
+                )
+                %and check_right_type
             # ":::"
             elif self.op is Op.StreamConcat
             then
-                self.actual_type_var <-> self.right.actual_type_var
+                self.actual_type_var <- TypeDecl.common_ancestor%(
+                    self.left.actual_type_var,
+                    self.right.actual_type_var
+                )
+                %and full_propagation
+                %and check_right_type
                 %and {
                     bind error_location = node.left;
                     TypeDecl.is_stream%(
                         self.left.actual_type_var
-                    )
-                }
-                %and {
-                    bind error_location = node.right;
-                    TypeDecl.is_stream%(
-                        self.right.actual_type_var
                     )
                 }
             # "or?"
@@ -3902,8 +3939,13 @@ class BinOp: Expr {
                 <- TypeDecl.imprecise_common_ancestor_list%(
                     [self.left.actual_type_var, self.right.actual_type_var]
                 )
-            # " ==" "!="
-            else self.actual_type_var <- self.bool_type()
+                %and full_propagation
+                %and check_right_type
+            # "==" "!="
+            else
+                self.actual_type_var <- self.bool_type()
+                %and l_and_r_propagation
+                %and check_right_type
         )
     }
 
@@ -5708,8 +5750,6 @@ enum class Op: LktNode {
     fun is_arith_op(): Bool = node is Op.Plus | Op.Minus | Op.Mult | Op.Div
 
     fun is_order_op(): Bool = node is Op.Lt | Op.Lte | Op.Gt | Op.Gte
-
-    fun is_commutative(): Bool = not node is Op.StreamCons
 }
 
 |" Argument for function calls or for annotations.

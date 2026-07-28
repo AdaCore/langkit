@@ -1,0 +1,7 @@
+# Test logic operations
+val logic_and: Bool = true and false
+val logic_or: Bool = true or false
+val logic_inferred = true and false
+val logic_propagated = null and null
+val not_bool_operand = null and 1
+val not_bool_res: Int = true and false

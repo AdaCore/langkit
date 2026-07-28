@@ -1,0 +1,17 @@
+class A {}
+class B: A {}
+class C: A {}
+
+# Test concatenation operations
+val concat_str: String = "" & ""
+val concat_arr: Array[Int] = [1] & [1]
+val concat_cls_arr: Array[B] = [B()] & [B()]
+val concat_inferred = "" & ""
+val concat_propagated_l_to_r = "" & null
+val concat_propagated_r_to_l = null & [1]
+val concat_propagated_down: String = null & null
+val not_same_type_operands = [1] & ""
+val not_valid_operands = 1 & 2
+val no_covariance = [B()] & [A()]
+val not_valid_propagated_down: Int = null & null
+val null_operands = null & null
