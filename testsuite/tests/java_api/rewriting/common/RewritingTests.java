@@ -151,8 +151,9 @@ public class RewritingTests {
         try (
             AnalysisContext context1 = AnalysisContext.create();
             AnalysisContext context2 = AnalysisContext.create();
-            RewritingContext rcontext = context1.startRewriting();
         ) {
+            RewritingContext rcontext = context1.startRewriting();
+
             // Create rewriting units
             System.out.println("Creating analysis and rewriting units");
             AnalysisUnit unit1 = context1.getUnitFromFile("s1.txt");
@@ -236,6 +237,17 @@ public class RewritingTests {
                        rname1.firstChild().isNone());
             assertTrue("Last child of the expr is None",
                        rexpr1.lastChild().isNone());
+
+            // Closing the rewriting context and opening a new one
+            rcontext.close();
+            rcontext = context1.startRewriting();
+            assertTrue(
+                "Rewriting node of root has changed",
+                rcontext.equals(
+                    node1.getRewritingNode().getRewritingContext()
+                )
+            );
+            rcontext.close();
         }
         footer("Rewriting node");
     }

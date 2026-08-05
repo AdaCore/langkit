@@ -3396,13 +3396,13 @@ ${api.jni_func_sig("rewriting_node_to_handle", "jobject")}(
     JNIEnv *env,
     jclass jni_lib,
     jobject entity
- ) {
-    return RewritingNode_wrap(
-        env,
+) {
+    ${node_rewriting_handle_type} native_rewriting_node =
         ${nat("rewriting_node_to_handle")}(
             Entity_unwrap(env, entity).node
-        )
-    );
+        );
+    check_exception(env);
+    return RewritingNode_wrap(env, native_rewriting_node);
 }
 
 // Get the parsed node from the given rewriting node
@@ -3431,12 +3431,12 @@ ${api.jni_func_sig("rewriting_node_to_context", "jobject")}(
     jclass jni_lib,
     jobject rewriting_node
 ) {
-    return RewritingContext_wrap(
-        env,
+    ${rewriting_handle_type} native_rewriting_context =
         ${nat("rewriting_node_to_context")}(
             RewritingNode_unwrap(env, rewriting_node)
-        )
-    );
+        );
+    check_exception(env);
+    return RewritingContext_wrap(env, native_rewriting_context);
 }
 
 // Clone the given rewriting node and return the result
