@@ -3099,6 +3099,22 @@ class ComplexPattern: BindingPattern {
     @parse_field
     predicate: Expr
 
+    fun xref_entry_point(): Bool = true
+
+    fun xref_equation(): Equation =
+        if not self.predicate.is_null then
+            self.predicate.xref_equation()
+            %and self.predicate.expected_type_var <- self.bool_type()
+            %and {
+                bind error_location = node.predicate;
+                TypeDecl.commutative_matching_type%(
+                    self.predicate.expected_type_var,
+                    self.predicate.actual_type_var
+                )
+            }
+        else
+            %true
+
     fun get_output_type(): Entity[TypeDecl] =
         if self.pattern.is_null then
             self.get_input_type()
