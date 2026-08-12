@@ -1103,13 +1103,14 @@ void encode_utf_32(
     );
 }
 
-void check_exception(JNIEnv *env) {
+uint8_t check_exception(JNIEnv *env) {
     // Call the Java checking exception function
     (*env)->CallStaticVoidMethod(
         env,
         main_class_ref,
         check_exception_method_id
     );
+    return (*env)->ExceptionCheck(env);
 }
 
 % for node_type in ctx.node_types:
@@ -3051,7 +3052,7 @@ ${api.jni_func_sig("rewriting_start_rewriting", "jobject")}(
             analysis_context
         )
     );
-    check_exception(env);
+    if (check_exception(env)) return NULL;
     return RewritingContext_wrap(env, rctx);
 }
 
@@ -3401,7 +3402,7 @@ ${api.jni_func_sig("rewriting_node_to_handle", "jobject")}(
         ${nat("rewriting_node_to_handle")}(
             Entity_unwrap(env, entity).node
         );
-    check_exception(env);
+    if (check_exception(env)) return NULL;
     return RewritingNode_wrap(env, native_rewriting_node);
 }
 
@@ -3435,7 +3436,7 @@ ${api.jni_func_sig("rewriting_node_to_context", "jobject")}(
         ${nat("rewriting_node_to_context")}(
             RewritingNode_unwrap(env, rewriting_node)
         );
-    check_exception(env);
+    if (check_exception(env)) return NULL;
     return RewritingContext_wrap(env, native_rewriting_context);
 }
 
