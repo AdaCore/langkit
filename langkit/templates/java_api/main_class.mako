@@ -4346,6 +4346,13 @@ public final class ${ctx.lib_name.camel}
             null
         );
 
+        /**
+         * A cache containing all created rewriting context, mapped from their
+         * native addresses.
+         */
+        private static final Map<PointerWrapper, RewritingContext>
+        INSTANCE_CACHE = new HashMap<>();
+
         // ----- Instance attributes -----
 
         /** The reference to the native rewriting context handle. */
@@ -4401,10 +4408,16 @@ public final class ${ctx.lib_name.camel}
         static RewritingContext fromReference(
             final PointerWrapper reference
         ) {
-            return new RewritingContext(
-                reference,
-                getAnalysisContextFromRef(reference)
-            );
+            if (!INSTANCE_CACHE.containsKey(reference)) {
+                INSTANCE_CACHE.put(
+                    reference,
+                    new RewritingContext(
+                        reference,
+                        getAnalysisContextFromRef(reference)
+                    )
+                );
+            }
+            return INSTANCE_CACHE.get(reference);
         }
 
         // ----- Graal C API methods -----
@@ -4440,7 +4453,6 @@ public final class ${ctx.lib_name.camel}
         public boolean isClosed() {
             return this.closed;
         }
-
 
         ${java_doc('langkit.rewriting.handle_context', 8)}
         public AnalysisContext getAnalysisContext() {
@@ -4663,6 +4675,9 @@ public final class ${ctx.lib_name.camel}
 
             // Flag the rewriting context as closed
             this.closed = true;
+
+            // Remove the context from the instance cache
+            INSTANCE_CACHE.remove(this.reference);
         }
 
         ${java_doc('langkit.rewriting.abort_rewriting', 8)}
