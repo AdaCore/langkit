@@ -1,17 +1,32 @@
+import json
 import os
 
 
 def main(ctx):
     if ctx is not None:
-        generated_filename = os.path.join(
+        package_json_filename = os.path.join(
             ctx.config.emission.library_directory,
-            "foo.tmLanguage.json",
+            "vscode_ext",
+            "package.json",
         )
-        if os.path.isfile(generated_filename):
-            with open(os.path.join("build", "foo.tmLanguage.json"), "r") as f:
+        textmate_grammar_filename = os.path.join(
+            ctx.config.emission.library_directory,
+            "vscode_ext",
+            "syntaxes",
+            "Foo.tmLanguage.json",
+        )
+        if os.path.isfile(textmate_grammar_filename):
+            with open(textmate_grammar_filename, "r") as f:
                 print("Produced TextMate grammar:")
                 print("-----")
                 print(f.read())
                 print("-----")
-                return
+                print("")
+            with open(package_json_filename, "r") as f:
+                package_json = json.load(f)
+                print('Produced package.json "grammars" field')
+                print("-----")
+                print(package_json["contributes"]["grammars"])
+                print("-----")
+            return
     print("No TextMate grammar produced...")

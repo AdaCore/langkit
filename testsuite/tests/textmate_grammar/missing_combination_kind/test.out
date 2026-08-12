@@ -1,7 +1,6 @@
-== foo.lkt ==
 invalid_matcher_type.json: error: Cannot find the "combination" field in {'matchers': ['@Token']}
 
 == test.py ==
 No TextMate grammar produced...
 
-lkt_compile: Done
+vscode_ext_generate: Done

@@ -26,6 +26,7 @@ import drivers.lkt_parse_driver
 import drivers.lkt_toolbox_driver
 import drivers.lkt_unparse_driver
 import drivers.python_driver
+from drivers.vscode_ext_generate_driver import VSCodeExtGenerateDriver
 
 
 def add_to_path(env_var, directory):
@@ -53,6 +54,7 @@ class LangkitTestsuite(Testsuite):
         "lkt_parse": drivers.lkt_parse_driver.LktParseDriver,
         "lkt_unparse": drivers.lkt_unparse_driver.LktUnparseDriver,
         "python": drivers.python_driver.PythonDriver,
+        "vscode_ext_generate": VSCodeExtGenerateDriver,
     }
 
     def add_options(self, parser):

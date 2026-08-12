@@ -180,10 +180,11 @@ class TextMateGrammarSettings(AbstractAPISettings):
         """
         Full path to the TextMate grammar configuration file.
         """
-        assert self.context.config.textmate_config_file is not None
+        assert self.context.config.vscode_ext is not None
+        assert self.context.config.vscode_ext.textmate_config_file is not None
         return os.path.join(
             self.context.extensions_dir,
-            self.context.config.textmate_config_file,
+            self.context.config.vscode_ext.textmate_config_file,
         )
 
     def error_in_config(self, msg: str) -> NoReturn:

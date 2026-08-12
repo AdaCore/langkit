@@ -1,7 +1,6 @@
-== foo.lkt ==
 invalid_string_matcher.json: error: Cannot create a matcher from the string "not_valid" (it should starts either with "@" or "/")
 
 == test.py ==
 No TextMate grammar produced...
 
-lkt_compile: Done
+vscode_ext_generate: Done

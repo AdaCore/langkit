@@ -1,6 +1,6 @@
 <% rules = tm_settings.all_rules %>
 {
-    "scopeName": "source.${ctx.config.library.language_name.lower}",
+    "scopeName": "source.${ctx.config.library.language_name.camel}",
     "patterns": [
         %for i, r in enumerate(rules):
         { "include": "#${r.identifier}" }${',' if i < len(rules) - 1 else ''}

@@ -36,6 +36,15 @@ ext_config = ctx.config.vscode_ext
         ]
       }
     ],
+% if ext_config.textmate_config_file is not None:
+    "grammars": [
+      {
+        "language": "${lang_name}",
+        "scopeName": "source.${lang_name}",
+        "path": "./syntaxes/${lang_name}.tmGrammar.json"
+      }
+    ],
+% endif
     "configuration": {
       "type": "object",
       "title": "${lang_name} Language Server configuration"

@@ -637,6 +637,14 @@ class VSCodeExtConfig:
     Version of the extension (must be SemVer compatible).
     """
 
+    textmate_config_file: str | None = None
+    """
+    Filename relative to the extensions directory, containing the JSON
+    configuration for the TextMate grammar generation pass. If ``None``, the
+    pass is skipped and no TextMate grammar is included in the generated
+    extension.
+    """
+
 
 @dataclasses.dataclass
 class CompilationConfig:
@@ -662,13 +670,6 @@ class CompilationConfig:
     vscode_ext: VSCodeExtConfig | None = None
     """
     Configuration for the VS Code extension.
-    """
-
-    textmate_config_file: str | None = None
-    """
-    Filename relative to the extensions directory, containing the JSON
-    configuration for the TextMate grammar generation pass. If ``None``, the
-    pass is skipped.
     """
 
     mains: MainsConfig = dataclasses.field(default_factory=MainsConfig)

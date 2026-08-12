@@ -1,7 +1,8 @@
-driver: lkt_compile
+driver: vscode_ext_generate
 
 sync_trees:
   - ../common
 
 config:
-  textmate_config_file: invalid_string_matcher.json
+  vscode_ext:
+    textmate_config_file: invalid_string_matcher.json

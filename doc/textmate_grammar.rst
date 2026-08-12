@@ -2,11 +2,11 @@
 TextMate Grammar Generation
 ***************************
 
-Langkit can generate TextMate grammars from language specifications, providing
-a (quite free) syntactic coloration in editors that support this format.
+When generating a VScode extension for a language, Langkit can also generate a
+TextMate grammar to enable syntactic coloration for it.
 
-To enable the TextMate grammar generation, you have to provide a configuration
-file for it in the ``langkit.yaml`` file, following this example:
+To enable the TextMate grammar generation, you just have to provide a
+configuration file for it in the ``langkit.yaml`` file, following this example:
 
 .. code-block:: yaml
 
@@ -14,9 +14,14 @@ file for it in the ``langkit.yaml`` file, following this example:
       entry_point: foo.lkt
     library:
       language_name: Foo
-    textmate_config_file: my_textmate_config.json
+    vscode_ext:
+      textmate_config_file: my_textmate_config.json
 
 The provided file is resolved relatively to the ``extensions`` directory.
+
+The generated TextMate grammar file will be placed in the
+``build/vscode_ext/syntaxes`` directory, automatically included in the
+extension when packaging it.
 
 
 Configuration files

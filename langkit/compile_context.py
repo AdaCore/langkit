@@ -2341,11 +2341,9 @@ class CompileCtx:
         """
         Return the list of passes to compile the DSL.
         """
-        from langkit.compiled_types import create_builtin_types
         from langkit.envs import EnvSpec
         from langkit.expressions import PropertyDef
         from langkit.generic_interface import check_interface_implementations
-        from langkit.lexer import Lexer
         from langkit.parsers import Grammar, Parser
         from langkit.passes import (
             ASTNodePass,
@@ -2353,20 +2351,14 @@ class CompileCtx:
             GlobalPass,
             GrammarPass,
             GrammarRulePass,
-            LexerPass,
             MajorStepPass,
             PropertyPass,
             errors_checkpoint_pass,
         )
 
         return [
-            MajorStepPass("Lkt processing"),
-            errors_checkpoint_pass,
-            GlobalPass("create builtin types", create_builtin_types),
-            GlobalPass("lower Lkt", CompileCtx.lower_lkt),
-            MajorStepPass("Compiling the lexer"),
-            LexerPass("check token families", Lexer.check_token_families),
-            LexerPass("compile lexer rules", Lexer.compile_rules),
+            *self.lower_lkt_passes,
+            *self.compile_lexer_passes,
             MajorStepPass("Compiling the grammar"),
             GrammarPass(
                 "check grammar entry points", Grammar.check_entry_points
@@ -2517,11 +2509,39 @@ class CompileCtx:
             GlobalPass(
                 "finalize unparsers code generation", self.unparsers.finalize
             ),
-            GlobalPass(
-                "load TextMate configuration",
-                self.textmate_grammar_settings.load_textmate_config,
-                disabled=self.config.textmate_config_file is None,
-            ),
+        ]
+
+    @property
+    def lower_lkt_passes(self) -> list[AbstractPass]:
+        """
+        Return a list of pass to lower language Lkt sources.
+        """
+        from langkit.compiled_types import create_builtin_types
+        from langkit.passes import (
+            GlobalPass,
+            MajorStepPass,
+            errors_checkpoint_pass,
+        )
+
+        return [
+            MajorStepPass("Lkt processing"),
+            errors_checkpoint_pass,
+            GlobalPass("create builtin types", create_builtin_types),
+            GlobalPass("lower Lkt", CompileCtx.lower_lkt),
+        ]
+
+    @property
+    def compile_lexer_passes(self) -> list[AbstractPass]:
+        """
+        Return as list of pass to compile the language lexer.
+        """
+        from langkit.lexer import Lexer
+        from langkit.passes import LexerPass, MajorStepPass
+
+        return [
+            MajorStepPass("Compiling the lexer"),
+            LexerPass("check token families", Lexer.check_token_families),
+            LexerPass("compile lexer rules", Lexer.compile_rules),
         ]
 
     @property
@@ -2624,13 +2644,6 @@ class CompileCtx:
             EmitterPass("emit GDB helpers", Emitter.emit_gdb_helpers),
             EmitterPass("emit OCaml API", Emitter.emit_ocaml_api),
             EmitterPass("emit Java API", Emitter.emit_java_api),
-            # Add the TextMate emission pass if a configuration has been
-            # provided.
-            EmitterPass(
-                "emit TextMate grammar",
-                Emitter.emit_textmate_grammar,
-                disabled=self.config.textmate_config_file is None,
-            ),
             EmitterPass(
                 "emit units for builtin files", Emitter.emit_builtin_files
             ),
@@ -2683,15 +2696,47 @@ class CompileCtx:
         """
         Return the list of passes to generate the VS Code extension.
         """
-        from langkit.passes import Emitter, EmitterPass
+        from langkit.passes import (
+            Emitter,
+            EmitterPass,
+            GlobalPass,
+            errors_checkpoint_pass,
+        )
 
-        return [
+        has_textmate_config = (
+            self.config.vscode_ext is not None
+            and self.config.vscode_ext.textmate_config_file is not None
+        )
+
+        # Create the list of passes to generate the VScode extension
+        res = [
             *self.start_code_emission_passes,
             EmitterPass(
                 "emit VS Code extension", Emitter.emit_vscode_extension
             ),
+            EmitterPass(
+                "emit TextMate grammar",
+                Emitter.emit_textmate_grammar,
+                disabled=not has_textmate_config,
+            ),
             self.end_code_emission_pass,
         ]
+
+        # If a TextMate grammar configuration file has been provided, we need
+        # to add some passes to compile the language lexer and load the
+        # configuration file.
+        if has_textmate_config:
+            res = [
+                *self.lower_lkt_passes,
+                *self.compile_lexer_passes,
+                GlobalPass(
+                    "load TextMate configuration",
+                    self.textmate_grammar_settings.load_textmate_config,
+                ),
+                errors_checkpoint_pass,
+            ] + res
+
+        return res
 
     def run_passes(self, passes: list[AbstractPass]) -> None:
         """

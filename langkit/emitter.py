@@ -211,6 +211,9 @@ class Emitter:
         self.java_jni = os.path.join(self.java_dir, "jni")
 
         self.vscode_ext_dir = os.path.join(self.lib_root, "vscode_ext")
+        self.vscode_syntaxes_dir = os.path.join(
+            self.vscode_ext_dir, "syntaxes"
+        )
         self.lklsp_dir = os.path.join(self.lib_root, "lklsp")
         self.lklsp_package = os.path.join(
             self.lklsp_dir, "src", "main", "java", "com", "adacore", "lklsp"
@@ -575,6 +578,7 @@ class Emitter:
             self.lklsp_niconfig,
             self.vscode_ext_dir,
             os.path.join(self.vscode_ext_dir, "src"),
+            self.vscode_syntaxes_dir,
         ]:
             if not os.path.exists(d):
                 os.makedirs(d)
@@ -1259,12 +1263,13 @@ class Emitter:
         Generate the TextMate grammar file.
         """
         code = ctx.render_template(
-            "textmate/grammar", tm_settings=ctx.textmate_grammar_settings
+            "vscode_ext/textmate/grammar",
+            tm_settings=ctx.textmate_grammar_settings,
         )
         self.write_source_file(
             os.path.join(
-                self.lib_root,
-                f"{ctx.config.library.language_name.lower}.tmLanguage.json",
+                self.vscode_syntaxes_dir,
+                f"{ctx.config.library.language_name.camel}.tmLanguage.json",
             ),
             code,
             None,

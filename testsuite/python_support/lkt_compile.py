@@ -7,13 +7,16 @@ in the test directory, also execute it at the end of the driver execution.
 import argparse
 import glob
 import os.path
-import sys
-
 import yaml
 
 import langkit
 
-from utils import derive_config, emit_and_print_errors, python_support_dir
+from utils import (
+    derive_config,
+    emit_and_print_errors,
+    python_support_dir,
+    run_test_py,
+)
 
 
 # Extract test configuration from "test.yaml"
@@ -66,28 +69,7 @@ for lkt_file in sorted(tests):
 
     ctx = emit_and_print_errors(lkt_file=lkt_file, config=test_config)
     print("")
-
-    # If there is a "test.py" script in the test directory, run it
-    if os.path.exists("test.py"):
-        print("== test.py ==")
-        sys.stderr.flush()
-        sys.stdout.flush()
-
-        with open("test.py", "rb") as f:
-            code = f.read()
-        globs = {
-            "__file__": "test.py",
-            "__name__": "__main__",
-        }
-        exec(code, globs)
-
-        # If this script defines a "main" function, call it with the
-        # compilation context (or None if the compilation failed).
-        if "main" in globs:
-            globs["main"](ctx)
-
-        print("")
-
+    run_test_py(ctx)
     langkit.reset()
 
 

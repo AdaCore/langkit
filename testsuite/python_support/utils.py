@@ -47,6 +47,12 @@ base_config = {
         # as possible.
         "implementation_packages_capacity": 1,
     },
+    "vscode_ext": {
+        "name": "foolanguage",
+        "display_name": "Foo language support",
+        "description": "A dummy VSCode extension to test its generation",
+        "publisher": "@langkit_testsuite",
+    },
     "warnings": default_warnings,
 }
 
@@ -186,15 +192,19 @@ def prepare_context(config: C.CompilationConfig):
 def emit_and_print_errors(
     config: dict | None = None,
     lkt_file: str | None = None,
+    compilation_mode: CompilationMode = CompilationMode.generate_lib,
 ):
     """
-    Compile and emit code the given set of arguments. Return the compile
-    context if this was successful, None otherwise.
+    Run all passes implied by the provided ``compilation_mode``. Return the
+    compile context if this was successful, None otherwise.
 
     See ``prepare_context`` arguments.
     """
     actual_base_config = dict(base_config)
-    actual_base_config["lkt_spec"]["entry_point"] = lkt_file
+
+    # Replace the default "test.lkt" entry point if one has been provided
+    if lkt_file is not None:
+        actual_base_config["lkt_spec"]["entry_point"] = lkt_file
 
     actual_config = C.CompilationConfig.deserialize(
         "test.yaml:config", derive_config(actual_base_config, config)
@@ -202,7 +212,7 @@ def emit_and_print_errors(
 
     try:
         ctx = prepare_context(actual_config)
-        ctx.create_all_passes(CompilationMode.generate_lib)
+        ctx.create_all_passes(compilation_mode)
         ctx.emit()
         # ... and tell about how it went
     except DiagnosticError:
@@ -477,6 +487,30 @@ def build_and_run(
 
         # Run the newly created main
         run(P.realpath("main"), *ni_main.args)
+
+
+def run_test_py(ctx: CompileCtx | None):
+    """
+    If there is a "test.py" script in the test directory, execute it and if it
+    defines a "main" function, call it with the provided ``ctx``.
+    """
+    if os.path.exists("test.py"):
+        print("== test.py ==")
+        sys.stderr.flush()
+        sys.stdout.flush()
+
+        with open("test.py", "rb") as f:
+            code = f.read()
+        globs = {
+            "__file__": "test.py",
+            "__name__": "__main__",
+        }
+        exec(code, globs)
+
+        if "main" in globs:
+            globs["main"](ctx)
+
+        print("")
 
 
 def indent(text: str, prefix: str = "  ") -> str:

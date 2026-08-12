@@ -1,7 +1,6 @@
-== foo.lkt ==
 invalid_json.json:2:19: error: Expecting ':' delimiter
 
 == test.py ==
 No TextMate grammar produced...
 
-lkt_compile: Done
+vscode_ext_generate: Done
