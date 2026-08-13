@@ -3080,6 +3080,7 @@ ${api.jni_func_sig("rewriting_unit_handles", "jobjectArray")}(
         ${nat("rewriting_unit_handles")}(
             RewritingContext_unwrap(env, rewriting_context)
         );
+    check_exception(env);
 
     // Count the number of units in the result
     unsigned int unit_count = 0;

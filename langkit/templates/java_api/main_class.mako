@@ -4291,6 +4291,7 @@ public final class ${ctx.lib_name.camel}
 
         % if ctx.generate_unparsers:
         ${java_doc('langkit.rewriting.unit_handle', 8)}
+        @Override
         public RewritingUnit getRewritingUnit() {
             final RewritingUnit res;
 
@@ -4449,12 +4450,14 @@ public final class ${ctx.lib_name.camel}
         // ----- Instance methods -----
 
         ${java_doc('langkit.rewriting.unit_handles', 8)}
+        @Override
         public RewritingUnit[] rewritingUnits() {
 
             if(ImageInfo.inImageCode()) {
                 // Get the native array
                 final WordPointer unitArrayNative =
                     NI_LIB.${nat("rewriting_unit_handles")}(this.unwrap());
+                checkException();
 
                 // Fill the Java result list
                 final List<RewritingUnit> resList = new ArrayList<>();
@@ -4693,7 +4696,8 @@ public final class ${ctx.lib_name.camel}
     }
 
     ${java_doc('langkit.rewriting.unit_rewriting_handle_type', 4)}
-    public static final class RewritingUnit {
+    public static final class RewritingUnit
+        implements LangkitSupport.RewritingUnitInterface {
 
         // ----- Class methods -----
 
@@ -4753,6 +4757,7 @@ public final class ${ctx.lib_name.camel}
         // ----- Getters -----
 
         ${java_doc('langkit.rewriting.handle_unit', 8)}
+        @Override
         public AnalysisUnit getAnalysisUnit() {
             if(this.analysisUnit == null) {
 
@@ -4808,6 +4813,7 @@ public final class ${ctx.lib_name.camel}
         // ----- Instance methods -----
 
         ${java_doc('langkit.rewriting.unit_unparse', 8)}
+        @Override
         public String unparse() {
             final Text unparseText;
 
@@ -4830,6 +4836,7 @@ public final class ${ctx.lib_name.camel}
         }
 
         ${java_doc('langkit.rewriting.unit_unparse_with_partial_formatting', 8)}
+        @Override
         public String unparseWithPartialFormatting() {
             final Text unparseText;
 
