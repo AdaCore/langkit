@@ -14,7 +14,7 @@ from langkit.compile_context import CompilationMode, CompileCtx
 import langkit.config as C
 from langkit.diagnostics import DiagnosticError
 from langkit.libmanage import ManageScript
-from langkit.utils import PluginLoader
+from langkit.utils import LibraryType, PluginLoader
 
 from drivers.valgrind import valgrind_cmd
 
@@ -233,6 +233,7 @@ def build_and_run(
     ocaml_main: Main | None = None,
     java_main: Main | None = None,
     ni_main: Main | None = None,
+    library_types: set[LibraryType] | None = None,
 ) -> None:
     """
     Compile and emit code for a Lkt language spec and build the generated
@@ -259,6 +260,9 @@ def build_and_run(
         and run with the Langkit Java lib through JNI.
     :param ni_main: If not None, name of the Java main sourec file to build
         and run with the Langkit Java lib through Native Image.
+    :param library_types: The set of library types to build for the generated
+        library. If left to None, infer it from the mains/Python scripts
+        passed.
     """
     # All tests are expected to write their output encoded with UTF-8. This is
     # the default on Unix systems, but not on Windows: reconfigure stdout
@@ -288,12 +292,26 @@ def build_and_run(
     config = C.CompilationConfig.deserialize("test.yaml:config", config_yaml)
     m = Manage(config)
 
+    if library_types is None:
+        library_types = set()
+        if py_script or ocaml_main or java_main or ni_main:
+            library_types.add(LibraryType.relocatable)
+        if gpr_mains:
+            library_types.add(LibraryType.static)
+    if not library_types:
+        library_types.add(LibraryType.static)
+
     # First build the library. Forward all test.py's arguments to the libmanage
     # call so that manual testcase runs can pass "-g", for instance.
     argv = (
         ["make"]
         + sys.argv[1:]
         + ["-vnone", f"-j{jobs}", "--full-error-traces"]
+        + [
+            "--library-types={}".format(
+                ",".join(t.value for t in library_types)
+            )
+        ]
     )
 
     # If there is a Java main, enable the Java bindings building
