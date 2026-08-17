@@ -405,7 +405,16 @@ def build_and_run(
                     main_sources=fmt_str_list(main_source_files),
                 )
             )
-        run("gprbuild", "-Pgen", "-q", "-p", *(main_gprbuild_extra_args or []))
+        run(
+            "gprbuild",
+            "-Pgen",
+            "-q",
+            "-p",
+            "-cargs:Ada",
+            "-gnat2022",
+            "-gargs",
+            *(main_gprbuild_extra_args or []),
+        )
 
         # Now run all mains. If there are more than one main to run, print a
         # heading before each one.
