@@ -35,6 +35,8 @@ package Langkit_Support.Token_Data_Handlers is
       --  For instance: null for keywords but actual text for identifiers.
    end record with Pack;
    --  Holder for per-token data to be stored in the token data handler
+   --
+   --  @exclude
 
    --  Trivias are tokens that are not to be taken into account during parsing,
    --  and are marked as so in the lexer definition. Conceptually, we want
@@ -46,6 +48,8 @@ package Langkit_Support.Token_Data_Handlers is
       Has_Next : Boolean;
    end record with Pack;
    --  This defines a node in a trivia linked list
+   --
+   --  @exclude
 
    package Token_Vectors is new Langkit_Support.Vectors
      (Element_Type => Stored_Token_Data);
@@ -86,6 +90,7 @@ package Langkit_Support.Token_Data_Handlers is
       --  * If this references no token, both Token and Trivia are
       --    No_Token_Index.
    end record;
+   --  @exclude
 
    No_Token_Or_Trivia_Index : constant Token_Or_Trivia_Index :=
      (No_Token_Index, No_Token_Index);
@@ -174,8 +179,10 @@ package Langkit_Support.Token_Data_Handlers is
       --  Untyped reference to the object that owns this token data handler.
       --  Generated libraries use this to have a backlink to the analysis unit.
    end record;
+   --  @exclude
 
    type Token_Data_Handler_Access is access all Token_Data_Handler;
+   --  @exclude
 
    function Initialized (TDH : Token_Data_Handler) return Boolean;
    --  Return whether TDH has been initialized (see the Initialize procedure)
