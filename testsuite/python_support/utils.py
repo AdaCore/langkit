@@ -410,6 +410,11 @@ def build_and_run(
             "-Pgen",
             "-q",
             "-p",
+            # By this point, the generated library is supposed to be built, so
+            # ask GPRbuild not to rebuild any of its unit. It may happen
+            # otherwise because of different optimization level/language
+            # version requested for the mains themselves.
+            f"-X{m.lib_name.upper()}_EXTERNALLY_BUILT=true",
             "-cargs:Ada",
             "-gnat2022",
             "-gargs",

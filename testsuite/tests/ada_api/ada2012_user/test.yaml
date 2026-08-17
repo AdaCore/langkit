@@ -4,6 +4,7 @@
 driver: lkt_build_and_run
 gpr_mains: [main.adb]
 main_gprbuild_extra_args:
+  - -XLIBRARY_TYPE=relocatable
   - -cargs:Ada
   - -gnat2012
   - -O2
