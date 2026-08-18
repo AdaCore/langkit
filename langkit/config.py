@@ -592,6 +592,13 @@ class LanguageServerConfig:
     server if there is no custom project manager.
     """
 
+    main: str | None = None
+    """
+    Filename relative to the extensions directory, designating the entry point
+    function main class for the language server executable. if ``None``, a
+    default main class is generated.
+    """
+
 
 @dataclasses.dataclass
 class VSCodeExtConfig:

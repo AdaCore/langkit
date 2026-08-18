@@ -15,6 +15,7 @@ plugin_passes:
   - prelude.generate_prelude_pass
 language_server:
   file_extensions: [".lkt"]
+  main: lsp/LktLs.java
 vscode_ext:
   name: lkt
   display_name: Lkt

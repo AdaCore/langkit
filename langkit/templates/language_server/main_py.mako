@@ -7,6 +7,7 @@ Python wrapper to instantiate ${ctx.config.library.language_name.camel}Ls.
 
 import os
 import subprocess
+import sys
 
 
 if __name__ == '__main__':
@@ -51,5 +52,6 @@ if __name__ == '__main__':
         "--enable-native-access=ALL-UNNAMED",
         "--sun-misc-unsafe-memory-access=allow",
         f'-Djava.library.path={java_library_path}',
-        f'com.adacore.lklsp.${ctx.config.library.language_name.camel}Ls'
+        f'com.adacore.lklsp.${ctx.config.library.language_name.camel}Ls',
+        *sys.argv[1:]
     ])
