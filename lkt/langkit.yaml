@@ -23,6 +23,7 @@ vscode_ext:
   publisher: adacore
   language_config_file: vscode_language_config.json
   textmate_config_file: textmate_config.json
+  launch_args: ["--mode=lkt"]
 extra_docs:
   liblktlang.create_default_provider: |
     Create a default unit provider that is going to use the environment

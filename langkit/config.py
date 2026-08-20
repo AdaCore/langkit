@@ -659,6 +659,11 @@ class VSCodeExtConfig:
     extension.
     """
 
+    launch_args: list[str] = dataclasses.field(default_factory=list)
+    """
+    Arguments passed to the language server executable on launch.
+    """
+
 
 @dataclasses.dataclass
 class CompilationConfig:
