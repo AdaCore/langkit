@@ -180,6 +180,7 @@ package body Liblktlang.Implementation is
                when Precomputed_Sym_Builder => "builder",
                when Precomputed_Sym_Call => "__call__",
                when Precomputed_Sym_Char => "Char",
+               when Precomputed_Sym_Covariant => "covariant",
                when Precomputed_Sym_Dedent => "dedent",
                when Precomputed_Sym_Default_Metadata => "__default_metadata",
                when Precomputed_Sym_Domain => "domain",
@@ -196,6 +197,7 @@ package body Liblktlang.Implementation is
                when Precomputed_Sym_Indexable => "Indexable",
                when Precomputed_Sym_Int => "Int",
                when Precomputed_Sym_Invalid => "invalid",
+               when Precomputed_Sym_Iterable => "Iterable",
                when Precomputed_Sym_Iterator => "Iterator",
                when Precomputed_Sym_Keep => "keep",
                when Precomputed_Sym_Lazy => "lazy",
@@ -203,11 +205,11 @@ package body Liblktlang.Implementation is
                when Precomputed_Sym_List_Elements => "list_elements",
                when Precomputed_Sym_Logicvar => "LogicVar",
                when Precomputed_Sym_Metadata => "Metadata",
-               when Precomputed_Sym_Metadata_49 => "metadata",
+               when Precomputed_Sym_Metadata_51 => "metadata",
                when Precomputed_Sym_Newline => "newline",
                when Precomputed_Sym_No_Case => "no_case",
                when Precomputed_Sym_Node => "Node",
-               when Precomputed_Sym_Node_52 => "node",
+               when Precomputed_Sym_Node_54 => "node",
                when Precomputed_Sym_Nodebuilder => "NodeBuilder",
                when Precomputed_Sym_Null_Field => "null_field",
                when Precomputed_Sym_Nullable => "nullable",
@@ -11647,6 +11649,16 @@ end case;
       return Result;
    end Children;
 
+   -------------------
+   -- Is_Empty_List --
+   -------------------
+
+   function Is_Empty_List (Node : Bare_Lkt_Node_Base_List) return Boolean
+   is
+   begin
+      return Length (Node) = 0;
+   end Is_Empty_List;
+
    ---------------------
    -- New_Unit_String --
    ---------------------
@@ -11748,6 +11760,12 @@ declare
 N_Bare_Match_Expr : constant Bare_Match_Expr := N_Bare_Expr;
 begin
 Assign (N_Bare_Match_Expr,        N_Bare_Match_Expr.Match_Expr_F_Expected_Branch_Type_Var,        "expected_branch_type_var");
+end;
+when Lkt_Query_Range =>
+declare
+N_Bare_Query : constant Bare_Query := N_Bare_Expr;
+begin
+Assign (N_Bare_Query,        N_Bare_Query.Query_F_Res_Elems_Type_Var,        "res_elems_type_var");
 end;
 when Lkt_Try_Expr_Range =>
 declare
@@ -27241,6 +27259,7 @@ end case;
             Self.Query_F_Mapping := Query_F_Mapping;
             Self.Query_F_Guard := Query_F_Guard;
          
+      Self.Query_F_Res_Elems_Type_Var := Null_Var_Record;
 
       end Initialize_Fields_For_Query;
 
@@ -29781,6 +29800,12 @@ declare
 N_Bare_Match_Expr : constant Bare_Match_Expr := N_Bare_Expr;
 begin
 Reset_Logic_Var (N_Bare_Match_Expr.Match_Expr_F_Expected_Branch_Type_Var);
+end;
+when Lkt_Query_Range =>
+declare
+N_Bare_Query : constant Bare_Query := N_Bare_Expr;
+begin
+Reset_Logic_Var (N_Bare_Query.Query_F_Res_Elems_Type_Var);
 end;
 when Lkt_Try_Expr_Range =>
 declare

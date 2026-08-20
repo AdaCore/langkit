@@ -1302,6 +1302,22 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  current thread. Will be automatically allocated on error and free'd on
    --  the next error.
 
+   function lkt_copy_last_exception
+     (Exc : lkt_exception_Ptr) return int
+     with Export        => True,
+          Convention    => C,
+          External_Name => "lkt_copy_last_exception";
+   --  Return 0 if the last API call returned without error. Otherwise, return
+   --  1 and copy exception details into EXC (which must be free'd once done
+   --  with it: see ``lkt_free_exception``.
+
+   procedure lkt_free_exception (Exc : lkt_exception_Ptr)
+     with Export        => True,
+          Convention    => C,
+          External_Name => "lkt_free_exception";
+   --  Free resources allocated with EXC (to be used only for exception data
+   --  created by ``lkt_copy_last_exception``.
+
    function lkt_exception_name
      (Kind : lkt_exception_kind) return chars_ptr
       with Export, Convention => C;
@@ -1741,7 +1757,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_indexable_gen_trait";
-   --  Unit method. Return the ``Node`` builtin generic trait.
+   --  Unit method. Return the ``Indexable`` builtin generic trait.
 
            
    
@@ -1758,7 +1774,41 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_lkt_node_p_indexable_trait";
-   --  Unit method. Return the ``Node`` builtin trait.
+   --  Unit method. Return the ``Indexable`` builtin trait.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_p_iterable_gen_trait
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_p_iterable_gen_trait";
+   --  Unit method. Return the ``Iterable`` builtin generic trait.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_p_iterable_trait
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_p_iterable_trait";
+   --  Unit method. Return the ``Iterable`` builtin trait.
 
            
    
@@ -2773,7 +2823,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_decl_p_get_suffix_type";
-   --  Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+   --  Return the type of ``E.F`` when ``self`` is the declaration of the ``F``
    --  member and ``prefix_type`` is the type of ``E``.
 
            
@@ -3359,7 +3409,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --
    --  Note that this includes "logic" base types for covariant types, like
    --  ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
-   --  ``Entity[Child]``.
+   --  ``Entity[Child]``).
 
            
    
@@ -6103,6 +6153,23 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_lexer_case_rule_send_f_match_size";
    --  When there are no parsing errors, this field is never null.
+
+           
+   
+
+   
+   
+
+   function lkt_lkt_node_base_list_is_empty_list
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_bool) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_lkt_node_base_list_is_empty_list";
+   --  Return whether this list node has no children.
 
            
    

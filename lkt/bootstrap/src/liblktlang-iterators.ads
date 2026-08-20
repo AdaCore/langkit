@@ -96,31 +96,31 @@ package Liblktlang.Iterators is
    --  Return a predicate that accepts only nodes that are *not* accepted by
    --  ``Predicate``.
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function "and" (Left, Right : Lkt_Node_Predicate) return Lkt_Node_Predicate;
    --  Return a predicate that accepts only nodes that are accepted by both
    --  ``Left`` and ``Right``.
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function "or" (Left, Right : Lkt_Node_Predicate) return Lkt_Node_Predicate;
    --  Return a predicate that accepts only nodes that are accepted by ``Left``
    --  or ``Right``.
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function For_All (Predicates : Lkt_Node_Predicate_Array) return Lkt_Node_Predicate;
    --  Return a predicate that accepts only nodes that are accepted by all
    --  given ``Predicates``.
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function For_Some (Predicates : Lkt_Node_Predicate_Array) return Lkt_Node_Predicate;
    --  Return a predicate that accepts only nodes that are accepted by at least
    --  one of the given ``Predicates``.
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function For_All_Children
      (Predicate : Lkt_Node_Predicate; Skip_Null : Boolean := True) return Lkt_Node_Predicate;
@@ -128,7 +128,7 @@ package Liblktlang.Iterators is
    --  accepts all children. Unless ``Skip_Null`` is false, this does not
    --  evaluate the predicate on null children.
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function For_Some_Children
      (Predicate : Lkt_Node_Predicate; Skip_Null : Boolean := True) return Lkt_Node_Predicate;
@@ -136,7 +136,7 @@ package Liblktlang.Iterators is
    --  accepts at least one child. Unless ``Skip_Null`` is false, this does not
    --  evaluate the predicate on null children.
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function Child_With
      (Field     : Struct_Member_Ref;
@@ -148,7 +148,7 @@ package Liblktlang.Iterators is
    --  Raise a ``Precondition_Failure`` if ``Field`` is not a valid node field
    --  reference.
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    ---------------------------
    -- Node search functions --
@@ -186,23 +186,23 @@ package Liblktlang.Iterators is
    function Kind_Is (Kind : Lkt_Node_Kind_Type) return Lkt_Node_Predicate;
    --  Return a predicate that accepts only nodes of the given ``Kind``
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function Kind_In (First, Last : Lkt_Node_Kind_Type) return Lkt_Node_Predicate;
    --  Return a predicate that accepts only nodes whose kind is in First ..
    --  Last.
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function Text_Is (Text : Text_Type) return Lkt_Node_Predicate;
    --  Return a predicate that accepts only nodes that match the given ``Text``
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    function Node_Is_Null return Lkt_Node_Predicate;
    --  Return a predicate that accepts only null nodes
    --
-   --% belongs-to: Lkt_Node_Predicate
+   --  @belongs-to Lkt_Node_Predicate
 
    
 

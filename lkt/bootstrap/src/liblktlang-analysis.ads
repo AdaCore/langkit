@@ -1764,7 +1764,8 @@ package Liblktlang.Analysis is
       type Query is new Expr with private
          with First_Controlling_Parameter
       ;
-      --  Query comprehension. ``from <expr> match <pattern> [if <expr>]``
+      --  Query comprehension. ``from <source> match <pattern> [select
+      --  <mapping>] [if <guard>]``
       --
       --  This node type has no derivation.
 
@@ -1972,445 +1973,445 @@ package Liblktlang.Analysis is
       --  node type derived from the root type has a similar ``No_Node``
       --  constant.
       No_Decl : constant Decl;
-      --% no-document: True
+      --  @exclude
       No_Expr : constant Expr;
-      --% no-document: True
+      --  @exclude
       No_Any_Of : constant Any_Of;
-      --% no-document: True
+      --  @exclude
       No_Lkt_Node_Base_List : constant Lkt_Node_Base_List;
-      --% no-document: True
+      --  @exclude
       No_Expr_List : constant Expr_List;
-      --% no-document: True
+      --  @exclude
       No_Any_Of_List : constant Any_Of_List;
-      --% no-document: True
+      --  @exclude
       No_Type_Decl : constant Type_Decl;
-      --% no-document: True
+      --  @exclude
       No_Any_Type_Decl : constant Any_Type_Decl;
-      --% no-document: True
+      --  @exclude
       No_Pattern : constant Pattern;
-      --% no-document: True
+      --  @exclude
       No_Any_Type_Pattern : constant Any_Type_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Argument : constant Argument;
-      --% no-document: True
+      --  @exclude
       No_Argument_List : constant Argument_List;
-      --% no-document: True
+      --  @exclude
       No_Array_Literal : constant Array_Literal;
-      --% no-document: True
+      --  @exclude
       No_Base_Call_Expr : constant Base_Call_Expr;
-      --% no-document: True
+      --  @exclude
       No_Base_Grammar_Rule_Decl : constant Base_Grammar_Rule_Decl;
-      --% no-document: True
+      --  @exclude
       No_Base_Import : constant Base_Import;
-      --% no-document: True
+      --  @exclude
       No_Base_Import_List : constant Base_Import_List;
-      --% no-document: True
+      --  @exclude
       No_Base_Lexer_Case_Rule_Alt : constant Base_Lexer_Case_Rule_Alt;
-      --% no-document: True
+      --  @exclude
       No_Base_Lexer_Case_Rule_Alt_List : constant Base_Lexer_Case_Rule_Alt_List;
-      --% no-document: True
+      --  @exclude
       No_Base_Match_Branch : constant Base_Match_Branch;
-      --% no-document: True
+      --  @exclude
       No_Base_Match_Branch_List : constant Base_Match_Branch_List;
-      --% no-document: True
+      --  @exclude
       No_Base_Val_Decl : constant Base_Val_Decl;
-      --% no-document: True
+      --  @exclude
       No_Named_Type_Decl : constant Named_Type_Decl;
-      --% no-document: True
+      --  @exclude
       No_Basic_Class_Decl : constant Basic_Class_Decl;
-      --% no-document: True
+      --  @exclude
       No_Lit : constant Lit;
-      --% no-document: True
+      --  @exclude
       No_Big_Num_Lit : constant Big_Num_Lit;
-      --% no-document: True
+      --  @exclude
       No_Bin_Op : constant Bin_Op;
-      --% no-document: True
+      --  @exclude
       No_User_Val_Decl : constant User_Val_Decl;
-      --% no-document: True
+      --  @exclude
       No_Binding_Val_Decl : constant Binding_Val_Decl;
-      --% no-document: True
+      --  @exclude
       No_Block_Expr : constant Block_Expr;
-      --% no-document: True
+      --  @exclude
       No_Block_Expr_Clause : constant Block_Expr_Clause;
-      --% no-document: True
+      --  @exclude
       No_Block_String_Line : constant Block_String_Line;
-      --% no-document: True
+      --  @exclude
       No_Block_String_Line_List : constant Block_String_Line_List;
-      --% no-document: True
+      --  @exclude
       No_String_Lit : constant String_Lit;
-      --% no-document: True
+      --  @exclude
       No_Block_String_Lit : constant Block_String_Lit;
-      --% no-document: True
+      --  @exclude
       No_Bool_Pattern : constant Bool_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Bool_Pattern_False : constant Bool_Pattern_False;
-      --% no-document: True
+      --  @exclude
       No_Bool_Pattern_True : constant Bool_Pattern_True;
-      --% no-document: True
+      --  @exclude
       No_Call_Expr : constant Call_Expr;
-      --% no-document: True
+      --  @exclude
       No_Call_Expr_List : constant Call_Expr_List;
-      --% no-document: True
+      --  @exclude
       No_Cast_Expr : constant Cast_Expr;
-      --% no-document: True
+      --  @exclude
       No_Char_Lit : constant Char_Lit;
-      --% no-document: True
+      --  @exclude
       No_Class_Decl : constant Class_Decl;
-      --% no-document: True
+      --  @exclude
       No_Class_Qualifier : constant Class_Qualifier;
-      --% no-document: True
+      --  @exclude
       No_Class_Qualifier_Absent : constant Class_Qualifier_Absent;
-      --% no-document: True
+      --  @exclude
       No_Class_Qualifier_Present : constant Class_Qualifier_Present;
-      --% no-document: True
+      --  @exclude
       No_Complex_Pattern : constant Complex_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Explicitly_Typed_Decl : constant Explicitly_Typed_Decl;
-      --% no-document: True
+      --  @exclude
       No_Component_Decl : constant Component_Decl;
-      --% no-document: True
+      --  @exclude
       No_Decl_Annotation : constant Decl_Annotation;
-      --% no-document: True
+      --  @exclude
       No_Decl_Annotation_Args : constant Decl_Annotation_Args;
-      --% no-document: True
+      --  @exclude
       No_Decl_Annotation_List : constant Decl_Annotation_List;
-      --% no-document: True
+      --  @exclude
       No_Full_Decl_List : constant Full_Decl_List;
-      --% no-document: True
+      --  @exclude
       No_Decl_Block : constant Decl_Block;
-      --% no-document: True
+      --  @exclude
       No_Id : constant Id;
-      --% no-document: True
+      --  @exclude
       No_Def_Id : constant Def_Id;
-      --% no-document: True
+      --  @exclude
       No_Type_Ref : constant Type_Ref;
-      --% no-document: True
+      --  @exclude
       No_Default_List_Type_Ref : constant Default_List_Type_Ref;
-      --% no-document: True
+      --  @exclude
       No_Pattern_Detail : constant Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       No_Destructuring_Pattern_Detail : constant Destructuring_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       No_Dot_Expr : constant Dot_Expr;
-      --% no-document: True
+      --  @exclude
       No_Dyn_Env_Wrapper : constant Dyn_Env_Wrapper;
-      --% no-document: True
+      --  @exclude
       No_Dyn_Var_Decl : constant Dyn_Var_Decl;
-      --% no-document: True
+      --  @exclude
       No_Ellipsis_Pattern : constant Ellipsis_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Elsif_Branch : constant Elsif_Branch;
-      --% no-document: True
+      --  @exclude
       No_Elsif_Branch_List : constant Elsif_Branch_List;
-      --% no-document: True
+      --  @exclude
       No_Enum_Class_Alt_Decl : constant Enum_Class_Alt_Decl;
-      --% no-document: True
+      --  @exclude
       No_Enum_Class_Alt_Decl_List : constant Enum_Class_Alt_Decl_List;
-      --% no-document: True
+      --  @exclude
       No_Enum_Class_Case : constant Enum_Class_Case;
-      --% no-document: True
+      --  @exclude
       No_Enum_Class_Case_List : constant Enum_Class_Case_List;
-      --% no-document: True
+      --  @exclude
       No_Enum_Class_Decl : constant Enum_Class_Decl;
-      --% no-document: True
+      --  @exclude
       No_Enum_Lit_Decl : constant Enum_Lit_Decl;
-      --% no-document: True
+      --  @exclude
       No_Enum_Lit_Decl_List : constant Enum_Lit_Decl_List;
-      --% no-document: True
+      --  @exclude
       No_Enum_Type_Decl : constant Enum_Type_Decl;
-      --% no-document: True
+      --  @exclude
       No_Env_Spec_Decl : constant Env_Spec_Decl;
-      --% no-document: True
+      --  @exclude
       No_Error_Decl : constant Error_Decl;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Expr : constant Grammar_Expr;
-      --% no-document: True
+      --  @exclude
       No_Error_Grammar_Expr : constant Error_Grammar_Expr;
-      --% no-document: True
+      --  @exclude
       No_Error_Lexer_Case_Rule_Alt : constant Error_Lexer_Case_Rule_Alt;
-      --% no-document: True
+      --  @exclude
       No_Error_On_Null : constant Error_On_Null;
-      --% no-document: True
+      --  @exclude
       No_Excludes_Null : constant Excludes_Null;
-      --% no-document: True
+      --  @exclude
       No_Excludes_Null_Absent : constant Excludes_Null_Absent;
-      --% no-document: True
+      --  @exclude
       No_Excludes_Null_Present : constant Excludes_Null_Present;
-      --% no-document: True
+      --  @exclude
       No_Field_Decl : constant Field_Decl;
-      --% no-document: True
+      --  @exclude
       No_Field_Pattern_Detail : constant Field_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       No_Full_Decl : constant Full_Decl;
-      --% no-document: True
+      --  @exclude
       No_Fun_Decl : constant Fun_Decl;
-      --% no-document: True
+      --  @exclude
       No_Fun_Param_Decl : constant Fun_Param_Decl;
-      --% no-document: True
+      --  @exclude
       No_Fun_Param_Decl_List : constant Fun_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       No_Function_Type : constant Function_Type;
-      --% no-document: True
+      --  @exclude
       No_Function_Type_Ref : constant Function_Type_Ref;
-      --% no-document: True
+      --  @exclude
       No_Generic_Decl : constant Generic_Decl;
-      --% no-document: True
+      --  @exclude
       No_Generic_Instantiation : constant Generic_Instantiation;
-      --% no-document: True
+      --  @exclude
       No_Generic_Param_Decl_List : constant Generic_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       No_Generic_Param_Type_Decl : constant Generic_Param_Type_Decl;
-      --% no-document: True
+      --  @exclude
       No_Generic_Type_Ref : constant Generic_Type_Ref;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Cut : constant Grammar_Cut;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Decl : constant Grammar_Decl;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Discard : constant Grammar_Discard;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Dont_Skip : constant Grammar_Dont_Skip;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Expr_List : constant Grammar_Expr_List;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Expr_List_List : constant Grammar_Expr_List_List;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Pick : constant Grammar_Pick;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Implicit_Pick : constant Grammar_Implicit_Pick;
-      --% no-document: True
+      --  @exclude
       No_Grammar_List : constant Grammar_List;
-      --% no-document: True
+      --  @exclude
       No_Grammar_List_Sep : constant Grammar_List_Sep;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Null : constant Grammar_Null;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Opt : constant Grammar_Opt;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Opt_Error : constant Grammar_Opt_Error;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Opt_Error_Group : constant Grammar_Opt_Error_Group;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Opt_Group : constant Grammar_Opt_Group;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Or_Expr : constant Grammar_Or_Expr;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Predicate : constant Grammar_Predicate;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Rule_Decl : constant Grammar_Rule_Decl;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Rule_Ref : constant Grammar_Rule_Ref;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Skip : constant Grammar_Skip;
-      --% no-document: True
+      --  @exclude
       No_Grammar_Stop_Cut : constant Grammar_Stop_Cut;
-      --% no-document: True
+      --  @exclude
       No_If_Expr : constant If_Expr;
-      --% no-document: True
+      --  @exclude
       No_Import : constant Import;
-      --% no-document: True
+      --  @exclude
       No_Import_All_From : constant Import_All_From;
-      --% no-document: True
+      --  @exclude
       No_Import_From : constant Import_From;
-      --% no-document: True
+      --  @exclude
       No_Imported_Id : constant Imported_Id;
-      --% no-document: True
+      --  @exclude
       No_Imported_Name : constant Imported_Name;
-      --% no-document: True
+      --  @exclude
       No_Imported_Name_List : constant Imported_Name_List;
-      --% no-document: True
+      --  @exclude
       No_Integer_Pattern : constant Integer_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Isa : constant Isa;
-      --% no-document: True
+      --  @exclude
       No_Keep_Expr : constant Keep_Expr;
-      --% no-document: True
+      --  @exclude
       No_Lambda_Expr : constant Lambda_Expr;
-      --% no-document: True
+      --  @exclude
       No_Lambda_Param_Decl : constant Lambda_Param_Decl;
-      --% no-document: True
+      --  @exclude
       No_Lambda_Param_Decl_List : constant Lambda_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       No_Langkit_Root : constant Langkit_Root;
-      --% no-document: True
+      --  @exclude
       No_Lexer_Case_Rule : constant Lexer_Case_Rule;
-      --% no-document: True
+      --  @exclude
       No_Lexer_Case_Rule_Cond_Alt : constant Lexer_Case_Rule_Cond_Alt;
-      --% no-document: True
+      --  @exclude
       No_Lexer_Case_Rule_Default_Alt : constant Lexer_Case_Rule_Default_Alt;
-      --% no-document: True
+      --  @exclude
       No_Lexer_Case_Rule_Send : constant Lexer_Case_Rule_Send;
-      --% no-document: True
+      --  @exclude
       No_Lexer_Decl : constant Lexer_Decl;
-      --% no-document: True
+      --  @exclude
       No_Lexer_Family_Decl : constant Lexer_Family_Decl;
-      --% no-document: True
+      --  @exclude
       No_List_Kind : constant List_Kind;
-      --% no-document: True
+      --  @exclude
       No_List_Kind_One : constant List_Kind_One;
-      --% no-document: True
+      --  @exclude
       No_List_Kind_Zero : constant List_Kind_Zero;
-      --% no-document: True
+      --  @exclude
       No_List_Pattern : constant List_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Lkt_Node_List : constant Lkt_Node_List;
-      --% no-document: True
+      --  @exclude
       No_Logic_Assign : constant Logic_Assign;
-      --% no-document: True
+      --  @exclude
       No_Logic_Call_Expr : constant Logic_Call_Expr;
-      --% no-document: True
+      --  @exclude
       No_Logic_Expr : constant Logic_Expr;
-      --% no-document: True
+      --  @exclude
       No_Logic_Predicate : constant Logic_Predicate;
-      --% no-document: True
+      --  @exclude
       No_Logic_Propagate : constant Logic_Propagate;
-      --% no-document: True
+      --  @exclude
       No_Logic_Propagate_Call : constant Logic_Propagate_Call;
-      --% no-document: True
+      --  @exclude
       No_Logic_Unify : constant Logic_Unify;
-      --% no-document: True
+      --  @exclude
       No_Match_Branch : constant Match_Branch;
-      --% no-document: True
+      --  @exclude
       No_Match_Expr : constant Match_Expr;
-      --% no-document: True
+      --  @exclude
       No_Match_Val_Decl : constant Match_Val_Decl;
-      --% no-document: True
+      --  @exclude
       No_Module_Doc_String_Line : constant Module_Doc_String_Line;
-      --% no-document: True
+      --  @exclude
       No_Module_Doc_String_Line_List : constant Module_Doc_String_Line_List;
-      --% no-document: True
+      --  @exclude
       No_Module_Doc_String_Lit : constant Module_Doc_String_Lit;
-      --% no-document: True
+      --  @exclude
       No_Module_Id : constant Module_Id;
-      --% no-document: True
+      --  @exclude
       No_Node_Decl : constant Node_Decl;
-      --% no-document: True
+      --  @exclude
       No_Not_Expr : constant Not_Expr;
-      --% no-document: True
+      --  @exclude
       No_Not_Pattern : constant Not_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Null_Cond_Qualifier : constant Null_Cond_Qualifier;
-      --% no-document: True
+      --  @exclude
       No_Null_Cond_Qualifier_Absent : constant Null_Cond_Qualifier_Absent;
-      --% no-document: True
+      --  @exclude
       No_Null_Cond_Qualifier_Present : constant Null_Cond_Qualifier_Present;
-      --% no-document: True
+      --  @exclude
       No_Null_Lit : constant Null_Lit;
-      --% no-document: True
+      --  @exclude
       No_Null_Pattern : constant Null_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Num_Lit : constant Num_Lit;
-      --% no-document: True
+      --  @exclude
       No_Op : constant Op;
-      --% no-document: True
+      --  @exclude
       No_Op_Amp : constant Op_Amp;
-      --% no-document: True
+      --  @exclude
       No_Op_And : constant Op_And;
-      --% no-document: True
+      --  @exclude
       No_Op_Div : constant Op_Div;
-      --% no-document: True
+      --  @exclude
       No_Op_Eq : constant Op_Eq;
-      --% no-document: True
+      --  @exclude
       No_Op_Gt : constant Op_Gt;
-      --% no-document: True
+      --  @exclude
       No_Op_Gte : constant Op_Gte;
-      --% no-document: True
+      --  @exclude
       No_Op_Logic_And : constant Op_Logic_And;
-      --% no-document: True
+      --  @exclude
       No_Op_Logic_Or : constant Op_Logic_Or;
-      --% no-document: True
+      --  @exclude
       No_Op_Lt : constant Op_Lt;
-      --% no-document: True
+      --  @exclude
       No_Op_Lte : constant Op_Lte;
-      --% no-document: True
+      --  @exclude
       No_Op_Minus : constant Op_Minus;
-      --% no-document: True
+      --  @exclude
       No_Op_Mult : constant Op_Mult;
-      --% no-document: True
+      --  @exclude
       No_Op_Ne : constant Op_Ne;
-      --% no-document: True
+      --  @exclude
       No_Op_Or : constant Op_Or;
-      --% no-document: True
+      --  @exclude
       No_Op_Or_Int : constant Op_Or_Int;
-      --% no-document: True
+      --  @exclude
       No_Op_Plus : constant Op_Plus;
-      --% no-document: True
+      --  @exclude
       No_Op_Stream_Concat : constant Op_Stream_Concat;
-      --% no-document: True
+      --  @exclude
       No_Op_Stream_Cons : constant Op_Stream_Cons;
-      --% no-document: True
+      --  @exclude
       No_Or_Pattern : constant Or_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Paren_Expr : constant Paren_Expr;
-      --% no-document: True
+      --  @exclude
       No_Paren_Pattern : constant Paren_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Parse_Node_Expr : constant Parse_Node_Expr;
-      --% no-document: True
+      --  @exclude
       No_Pattern_Detail_List : constant Pattern_Detail_List;
-      --% no-document: True
+      --  @exclude
       No_Pattern_List : constant Pattern_List;
-      --% no-document: True
+      --  @exclude
       No_Pattern_Match_Branch : constant Pattern_Match_Branch;
-      --% no-document: True
+      --  @exclude
       No_Single_Line_String_Lit : constant Single_Line_String_Lit;
-      --% no-document: True
+      --  @exclude
       No_Pattern_Single_Line_String_Lit : constant Pattern_Single_Line_String_Lit;
-      --% no-document: True
+      --  @exclude
       No_Property_Pattern_Detail : constant Property_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       No_Query : constant Query;
-      --% no-document: True
+      --  @exclude
       No_Raise_Expr : constant Raise_Expr;
-      --% no-document: True
+      --  @exclude
       No_Ref_Id : constant Ref_Id;
-      --% no-document: True
+      --  @exclude
       No_Ref_Id_List : constant Ref_Id_List;
-      --% no-document: True
+      --  @exclude
       No_Regex_Pattern : constant Regex_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Renaming_Complex_Pattern : constant Renaming_Complex_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Self_Decl : constant Self_Decl;
-      --% no-document: True
+      --  @exclude
       No_Simple_Type_Ref : constant Simple_Type_Ref;
-      --% no-document: True
+      --  @exclude
       No_Struct_Decl : constant Struct_Decl;
-      --% no-document: True
+      --  @exclude
       No_Subscript_Expr : constant Subscript_Expr;
-      --% no-document: True
+      --  @exclude
       No_Synth_Fun_Decl : constant Synth_Fun_Decl;
-      --% no-document: True
+      --  @exclude
       No_Synth_Param_Decl : constant Synth_Param_Decl;
-      --% no-document: True
+      --  @exclude
       No_Synthetic_Lexer_Decl : constant Synthetic_Lexer_Decl;
-      --% no-document: True
+      --  @exclude
       No_Type_Ref_List : constant Type_Ref_List;
-      --% no-document: True
+      --  @exclude
       No_Synthetic_Type_Ref_List : constant Synthetic_Type_Ref_List;
-      --% no-document: True
+      --  @exclude
       No_Token_Lit : constant Token_Lit;
-      --% no-document: True
+      --  @exclude
       No_Token_No_Case_Lit : constant Token_No_Case_Lit;
-      --% no-document: True
+      --  @exclude
       No_Token_Pattern_Concat : constant Token_Pattern_Concat;
-      --% no-document: True
+      --  @exclude
       No_Token_Pattern_Lit : constant Token_Pattern_Lit;
-      --% no-document: True
+      --  @exclude
       No_Token_Ref : constant Token_Ref;
-      --% no-document: True
+      --  @exclude
       No_Trait_Decl : constant Trait_Decl;
-      --% no-document: True
+      --  @exclude
       No_Try_Expr : constant Try_Expr;
-      --% no-document: True
+      --  @exclude
       No_Type_Pattern : constant Type_Pattern;
-      --% no-document: True
+      --  @exclude
       No_Un_Op : constant Un_Op;
-      --% no-document: True
+      --  @exclude
       No_Val_Decl : constant Val_Decl;
-      --% no-document: True
+      --  @exclude
       No_Var_Bind : constant Var_Bind;
-      --% no-document: True
+      --  @exclude
 
    function Is_Null (Node : Lkt_Node'Class) return Boolean;
    --  Return whether this node is a null node reference.
@@ -2624,7 +2625,7 @@ package Liblktlang.Analysis is
    --
    --  ``Tab_Stop`` is a positive number to describe the effect of tabulation
    --  characters on the column number in source files.
-   --% belongs-to: Analysis_Context
+   --  @belongs-to Analysis_Context
 
    function Has_Unit
      (Context       : Analysis_Context'Class;
@@ -2726,7 +2727,7 @@ package Liblktlang.Analysis is
      (Context : Analysis_Context'Class) return Unit_Provider_Reference;
    --  Return the unit provider for ``Context``
    --
-   --% belongs-to: Analysis_Context
+   --  @belongs-to Analysis_Context
 
    function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type;
    --  Return a hash for this context, to be used in hash tables.
@@ -3238,8 +3239,10 @@ package Liblktlang.Analysis is
 
    function Kind
      (Node : Lkt_Node'Class) return Lkt_Node_Kind_Type;
+   --  Return the concrete kind for ``Node``
+
    function Kind_Name (Node : Lkt_Node'Class) return String;
-   --  Return the concrete kind for Node
+   --  Return the name of the concrete kind for ``Node``
 
    pragma Warnings (Off, "defined after private extension");
 
@@ -3251,7 +3254,7 @@ package Liblktlang.Analysis is
      (Node : Lkt_Node'Class) return Lkt_Node;
    --  Return the syntactic parent for this node. Return null for the root
    --  node.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Parents
@@ -3259,7 +3262,7 @@ package Liblktlang.Analysis is
       With_Self : Boolean := True) return Lkt_Node_Array;
    --  Return an array that contains the lexical parents, this node included
    --  iff ``with_self`` is True. Nearer parents are first in the list.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Children
@@ -3268,43 +3271,43 @@ package Liblktlang.Analysis is
    --
    --  .. warning:: This constructs a whole array every-time you call it, and
    --     as such is less efficient than calling the ``Child`` built-in.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Token_Start
      (Node : Lkt_Node'Class) return Token_Reference;
    --  Return the first token used to parse this node.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Token_End
      (Node : Lkt_Node'Class) return Token_Reference;
    --  Return the last token used to parse this node.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Child_Index
      (Node : Lkt_Node'Class) return Integer;
    --  Return the 0-based index for Node in its parent's children.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Previous_Sibling
      (Node : Lkt_Node'Class) return Lkt_Node;
    --  Return the node's previous sibling, or null if there is no such sibling.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Next_Sibling
      (Node : Lkt_Node'Class) return Lkt_Node;
    --  Return the node's next sibling, or null if there is no such sibling.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Unit
      (Node : Lkt_Node'Class) return Analysis_Unit;
    --  Return the analysis unit owning this node.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Is_Ghost
@@ -3315,248 +3318,260 @@ package Liblktlang.Analysis is
    --  they are logically located instead between two tokens. Both the
    --  ``token_start`` and the ``token_end`` of all ghost nodes is the token
    --  right after this logical position.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Full_Sloc_Image
      (Node : Lkt_Node'Class) return Text_Type;
    --  Return a string containing the filename + the sloc in GNU conformant
    --  format. Useful to create diagnostics from a node.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function Completion_Item_Kind_To_Int
      (Node : Lkt_Node'Class;
       Kind : Completion_Item_Kind) return Integer;
    --  Convert a CompletionItemKind enum to its corresponding integer value.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Set_Solver_Debug_Mode
      (Node : Lkt_Node'Class;
       Enable : Boolean) return Boolean;
    --  Enable or disable the solver traces for debugging purposes.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Prelude_Unit
      (Node : Lkt_Node'Class) return Analysis_Unit;
    --  Return the unit that contains the Lkt prelude (predefined types and
    --  values).
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Basic_Trait_Gen
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the ``BasicTrait`` builtin generic trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Basic_Trait
      (Node : Lkt_Node'Class) return Trait_Decl;
    --  Unit method. Return the ``BasicTrait`` builtin trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Node_Gen_Trait
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the ``Node`` builtin generic trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Node_Trait
      (Node : Lkt_Node'Class) return Trait_Decl;
    --  Unit method. Return the ``Node`` builtin trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Indexable_Gen_Trait
      (Node : Lkt_Node'Class) return Generic_Decl;
-   --  Unit method. Return the ``Node`` builtin generic trait.
-   --% belongs-to: Lkt_Node
+   --  Unit method. Return the ``Indexable`` builtin generic trait.
+   --  @belongs-to Lkt_Node
 
          
    function P_Indexable_Trait
      (Node : Lkt_Node'Class) return Trait_Decl;
-   --  Unit method. Return the ``Node`` builtin trait.
-   --% belongs-to: Lkt_Node
+   --  Unit method. Return the ``Indexable`` builtin trait.
+   --  @belongs-to Lkt_Node
+
+         
+   function P_Iterable_Gen_Trait
+     (Node : Lkt_Node'Class) return Generic_Decl;
+   --  Unit method. Return the ``Iterable`` builtin generic trait.
+   --  @belongs-to Lkt_Node
+
+         
+   function P_Iterable_Trait
+     (Node : Lkt_Node'Class) return Trait_Decl;
+   --  Unit method. Return the ``Iterable`` builtin trait.
+   --  @belongs-to Lkt_Node
 
          
    function P_Token_Node_Trait
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``TokenNode`` builtin trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Error_Node_Trait
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``ErrorNode`` builtin trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Char_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``Char`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Int_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``Int`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Bool_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``Bool`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Bigint_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``BigInt`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_String_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``String`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Symbol_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``Symbol`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Property_Error_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``PropertyError`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Regexp_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``Regexp`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Entity_Gen_Type
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the ``Entity`` generic builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Entity_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``Entity`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Logicvar_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``LogicVar`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Equation_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``Equation`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Array_Gen_Type
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the array builtin generic type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Array_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the array builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Stream_Gen_Type
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the stream builtin generic type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Stream_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the stream builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Astlist_Gen_Type
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the ``ASTList`` builtin generic type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Astlist_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``ASTList`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Node_Builder_Gen_Type
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the ``NodeBuilder`` builtin generic type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Node_Builder_Type
      (Node : Lkt_Node'Class) return Named_Type_Decl;
    --  Unit method. Return the ``NodeBuilder`` builtin type.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Iterator_Gen_Trait
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the ``Iterator`` builtin generic trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Iterator_Trait
      (Node : Lkt_Node'Class) return Trait_Decl;
    --  Unit method. Return the ``Iterator`` builtin trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Analysis_Unit_Gen_Trait
      (Node : Lkt_Node'Class) return Generic_Decl;
    --  Unit method. Return the ``AnalysisUnit`` builtin generic trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Analysis_Unit_Trait
      (Node : Lkt_Node'Class) return Trait_Decl;
    --  Unit method. Return the ``AnalysisUnit`` builtin trait.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Topmost_Invalid_Decl
      (Node : Lkt_Node'Class) return Lkt_Node;
    --  Return the topmost (from ``Self`` to the root node) ``FullDecl``
    --  annotated with ``@invalid``, null otherwise.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Nameres_Diagnostics
      (Node : Lkt_Node'Class) return Solver_Diagnostic_Array;
    --  If name resolution on this Lkt compilation unit fails, this returns all
    --  the diagnostics that were produced while resolving it.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Solve_Enclosing_Context
      (Node : Lkt_Node'Class) return Solver_Result;
    --  Find the nearest parent that is an xref entry point and solve its
    --  equation.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Xref_Entry_Point
@@ -3564,13 +3579,13 @@ package Liblktlang.Analysis is
    --  Return whether this node is an entry point for the xref solving
    --  infrastructure. If this returns true, then ``nameres_diagnostics`` can
    --  be called on it.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
          
    function P_Complete
      (Node : Lkt_Node'Class) return Complete_Item_Array;
    --  Return an array of completion item for language server clients.
-   --% belongs-to: Lkt_Node
+   --  @belongs-to Lkt_Node
 
 
 
@@ -3582,7 +3597,7 @@ package Liblktlang.Analysis is
    function F_Syn_Name
      (Node : Decl'Class) return Def_Id;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
 
 
@@ -3590,26 +3605,26 @@ package Liblktlang.Analysis is
    function P_Custom_Image
      (Node : Decl'Class) return Text_Type;
    --  Return the image string using entity information.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Decl_Type_Name
      (Node : Decl'Class) return Text_Type;
    --  Return the name of the declaration type, as it should be seen by
    --  users/shown in diagnostics.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Def_Ids
      (Node : Decl'Class) return Def_Id_Array;
    --  Return all the defining names that this declaration defines.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_As_Bare_Decl
      (Node : Decl'Class) return Decl;
    --  Return this declaration without rebindings information.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Get_Type
@@ -3619,7 +3634,7 @@ package Liblktlang.Analysis is
    --  ...).
    --
    --  This returns null when the type cannot be inferred.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Get_Cast_Type
@@ -3630,7 +3645,7 @@ package Liblktlang.Analysis is
    --
    --  The result is ``T`` except when ``T`` is a bare node type whereas
    --  ``self`` is an entity type: in this case, the result is ``Entity[T]``.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Get_Keep_Type
@@ -3638,47 +3653,47 @@ package Liblktlang.Analysis is
       Keep_Type : Type_Decl'Class) return Type_Decl;
    --  Return the type of ``E.keep[T]`` when ``keep_type`` materializes the
    --  input type (``T``), and ``self`` is the type of ``E``.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Get_Suffix_Type
      (Node : Decl'Class;
       Prefix_Type : Type_Decl'Class) return Type_Decl;
-   --  Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+   --  Return the type of ``E.F`` when ``self`` is the declaration of the ``F``
    --  member and ``prefix_type`` is the type of ``E``.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Is_Generic
      (Node : Decl'Class) return Boolean;
    --  Returns whether the Decl is generic.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Return_Type_Is_Instantiated
      (Node : Decl'Class) return Boolean;
    --  Return True if the return type of this function is instantiated.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Is_Instantiated
      (Node : Decl'Class) return Boolean;
    --  Return True if Self is an instantiated declaration, meaning that it does
    --  not use any of its declared generic types.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Name
      (Node : Decl'Class) return Unbounded_Text_Type;
    --  Return the symbol corresponding to the name of this declaration.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
          
    function P_Full_Name
      (Node : Decl'Class) return Text_Type;
    --  Return the full name of this decl, as it should be seen by users/shown
    --  in diagnostics.
-   --% belongs-to: Decl
+   --  @belongs-to Decl
 
 
 
@@ -3689,19 +3704,19 @@ package Liblktlang.Analysis is
    function P_Get_Type
      (Node : Expr'Class) return Type_Decl;
    --  Return the type of this expression.
-   --% belongs-to: Expr
+   --  @belongs-to Expr
 
          
    function P_Get_Generic_Type
      (Node : Expr'Class) return Type_Decl;
    --  Return the expected type of this expression.
-   --% belongs-to: Expr
+   --  @belongs-to Expr
 
          
    function P_Get_Expected_Type
      (Node : Expr'Class) return Type_Decl;
    --  Return the expected type of this expression.
-   --% belongs-to: Expr
+   --  @belongs-to Expr
 
          
    function P_Referenced_Decl
@@ -3712,7 +3727,7 @@ package Liblktlang.Analysis is
    --  The property is memoized in order to avoid use the value inside logic
    --  variables on every redundent call, causing faulty behavior when used
    --  with rebindings. TODO: Do like LAL to avoid memoization for more safety.
-   --% belongs-to: Expr
+   --  @belongs-to Expr
 
 
 
@@ -3736,7 +3751,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Any_Of
+   --  @belongs-to Any_Of
 
 
          
@@ -3758,7 +3773,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Any_Of
+   --  @belongs-to Any_Of
 
 
 
@@ -3766,6 +3781,12 @@ package Liblktlang.Analysis is
 
 
 
+
+         
+   function Is_Empty_List
+     (Node : Lkt_Node_Base_List'Class) return Boolean;
+   --  Return whether this list node has no children.
+   --  @belongs-to Lkt_Node_Base_List
 
 
 
@@ -3807,7 +3828,7 @@ package Liblktlang.Analysis is
    function F_Traits
      (Node : Type_Decl'Class) return Type_Ref_List;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Type_Decl
+   --  @belongs-to Type_Decl
 
 
          
@@ -3816,7 +3837,7 @@ package Liblktlang.Analysis is
    function F_Syn_Base_Type
      (Node : Type_Decl'Class) return Type_Ref;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Type_Decl
+   --  @belongs-to Type_Decl
 
 
 
@@ -3824,7 +3845,7 @@ package Liblktlang.Analysis is
    function P_Def_Id
      (Node : Type_Decl'Class) return Def_Id;
    --  Return the defining name of this type declaration
-   --% belongs-to: Type_Decl
+   --  @belongs-to Type_Decl
 
          
    function P_Base_Type
@@ -3833,8 +3854,8 @@ package Liblktlang.Analysis is
    --
    --  Note that this includes "logic" base types for covariant types, like
    --  ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
-   --  ``Entity[Child]``.
-   --% belongs-to: Type_Decl
+   --  ``Entity[Child]``).
+   --  @belongs-to Type_Decl
 
 
 
@@ -3861,7 +3882,7 @@ package Liblktlang.Analysis is
    function F_Name
      (Node : Argument'Class) return Ref_Id;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Argument
+   --  @belongs-to Argument
 
 
          
@@ -3885,7 +3906,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Argument
+   --  @belongs-to Argument
 
 
 
@@ -3939,7 +3960,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Array_Literal
+   --  @belongs-to Array_Literal
 
 
          
@@ -3952,7 +3973,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Array_Literal
+   --  @belongs-to Array_Literal
 
 
 
@@ -3976,7 +3997,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Base_Call_Expr
+   --  @belongs-to Base_Call_Expr
 
 
          
@@ -3985,7 +4006,7 @@ package Liblktlang.Analysis is
    function F_Args
      (Node : Base_Call_Expr'Class) return Argument_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Base_Call_Expr
+   --  @belongs-to Base_Call_Expr
 
 
 
@@ -3999,7 +4020,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Base_Grammar_Rule_Decl'Class) return Grammar_Expr;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Base_Grammar_Rule_Decl
+   --  @belongs-to Base_Grammar_Rule_Decl
 
 
 
@@ -4013,7 +4034,7 @@ package Liblktlang.Analysis is
      (Node : Base_Import'Class) return Analysis_Unit_Array;
    --  Return the list of units that contain the modules that this clause
    --  imports. Load them if needed.
-   --% belongs-to: Base_Import
+   --  @belongs-to Base_Import
 
 
 
@@ -4095,7 +4116,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Base_Match_Branch
+   --  @belongs-to Base_Match_Branch
 
 
 
@@ -4104,7 +4125,7 @@ package Liblktlang.Analysis is
      (Node : Base_Match_Branch'Class) return Lkt_Node;
    --  Return the "match" part of the branch, either a pattern branch or a
    --  legacy match branch with variable declaration.
-   --% belongs-to: Base_Match_Branch
+   --  @belongs-to Base_Match_Branch
 
 
 
@@ -4146,7 +4167,7 @@ package Liblktlang.Analysis is
    function F_Decls
      (Node : Named_Type_Decl'Class) return Decl_Block;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Named_Type_Decl
+   --  @belongs-to Named_Type_Decl
 
 
 
@@ -4190,7 +4211,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Bin_Op
+   --  @belongs-to Bin_Op
 
 
          
@@ -4199,11 +4220,11 @@ package Liblktlang.Analysis is
    function F_Op
      (Node : Bin_Op'Class) return Op;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Bin_Op
+   --  @belongs-to Bin_Op
 
       function F_Op
         (Node : Bin_Op'Class) return Lkt_Op;
-      --% belongs-to: Bin_Op
+      --  @belongs-to Bin_Op
 
          
    
@@ -4226,7 +4247,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Bin_Op
+   --  @belongs-to Bin_Op
 
 
 
@@ -4266,7 +4287,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Block_Expr
+   --  @belongs-to Block_Expr
 
 
 
@@ -4283,7 +4304,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Var_Bind`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Block_Expr_Clause
+   --  @belongs-to Block_Expr_Clause
 
 
 
@@ -4326,27 +4347,27 @@ package Liblktlang.Analysis is
    function P_Denoted_Value
      (Node : String_Lit'Class) return Decoded_String_Value;
    --  Return the content of the given string literal node.
-   --% belongs-to: String_Lit
+   --  @belongs-to String_Lit
 
          
    function P_Is_Prefixed_String
      (Node : String_Lit'Class) return Boolean;
    --  Return whether this string is prefixed or not.
-   --% belongs-to: String_Lit
+   --  @belongs-to String_Lit
 
          
    function P_Prefix
      (Node : String_Lit'Class) return Character_Type;
    --  Return the prefix of this string, or the null character if there is no
    --  prefix.
-   --% belongs-to: String_Lit
+   --  @belongs-to String_Lit
 
          
    function P_Is_Regexp_Literal
      (Node : String_Lit'Class) return Boolean;
    --  Return whether this string literal is actually a regexp literal, by
    --  checking that this string is prefixed by 'p'.
-   --% belongs-to: String_Lit
+   --  @belongs-to String_Lit
 
 
 
@@ -4358,7 +4379,7 @@ package Liblktlang.Analysis is
    function F_Lines
      (Node : Block_String_Lit'Class) return Block_String_Line_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Block_String_Lit
+   --  @belongs-to Block_String_Lit
 
 
 
@@ -4427,7 +4448,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Cast_Expr
+   --  @belongs-to Cast_Expr
 
 
          
@@ -4436,10 +4457,10 @@ package Liblktlang.Analysis is
    function F_Null_Cond
      (Node : Cast_Expr'Class) return Null_Cond_Qualifier;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Cast_Expr
+   --  @belongs-to Cast_Expr
 
       function F_Null_Cond (Node : Cast_Expr'Class) return Boolean;
-      --% belongs-to: Cast_Expr
+      --  @belongs-to Cast_Expr
 
 
          
@@ -4448,10 +4469,10 @@ package Liblktlang.Analysis is
    function F_Excludes_Null
      (Node : Cast_Expr'Class) return Excludes_Null;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Cast_Expr
+   --  @belongs-to Cast_Expr
 
       function F_Excludes_Null (Node : Cast_Expr'Class) return Boolean;
-      --% belongs-to: Cast_Expr
+      --  @belongs-to Cast_Expr
 
 
          
@@ -4464,7 +4485,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Cast_Expr
+   --  @belongs-to Cast_Expr
 
 
 
@@ -4477,7 +4498,7 @@ package Liblktlang.Analysis is
    function P_Denoted_Value
      (Node : Char_Lit'Class) return Decoded_Char_Value;
    --  Return the content of the given character literal node.
-   --% belongs-to: Char_Lit
+   --  @belongs-to Char_Lit
 
 
 
@@ -4493,7 +4514,7 @@ package Liblktlang.Analysis is
    function P_As_Bool
      (Node : Class_Qualifier'Class) return Boolean;
    --  Return whether this node is present
-   --% belongs-to: Class_Qualifier
+   --  @belongs-to Class_Qualifier
 
 
 
@@ -4515,7 +4536,7 @@ package Liblktlang.Analysis is
    function F_Decl
      (Node : Complex_Pattern'Class) return Binding_Val_Decl;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Complex_Pattern
+   --  @belongs-to Complex_Pattern
 
 
          
@@ -4530,7 +4551,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Regex_Pattern`, :ada:ref:`Type_Pattern`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Complex_Pattern
+   --  @belongs-to Complex_Pattern
 
 
          
@@ -4539,7 +4560,7 @@ package Liblktlang.Analysis is
    function F_Details
      (Node : Complex_Pattern'Class) return Pattern_Detail_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Complex_Pattern
+   --  @belongs-to Complex_Pattern
 
 
          
@@ -4563,7 +4584,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Complex_Pattern
+   --  @belongs-to Complex_Pattern
 
 
 
@@ -4581,7 +4602,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Explicitly_Typed_Decl
+   --  @belongs-to Explicitly_Typed_Decl
 
 
 
@@ -4610,7 +4631,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Component_Decl
+   --  @belongs-to Component_Decl
 
 
 
@@ -4624,7 +4645,7 @@ package Liblktlang.Analysis is
    function F_Name
      (Node : Decl_Annotation'Class) return Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Decl_Annotation
+   --  @belongs-to Decl_Annotation
 
 
          
@@ -4633,7 +4654,7 @@ package Liblktlang.Analysis is
    function F_Args
      (Node : Decl_Annotation'Class) return Decl_Annotation_Args;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Decl_Annotation
+   --  @belongs-to Decl_Annotation
 
 
 
@@ -4647,7 +4668,7 @@ package Liblktlang.Analysis is
    function F_Args
      (Node : Decl_Annotation_Args'Class) return Argument_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Decl_Annotation_Args
+   --  @belongs-to Decl_Annotation_Args
 
 
 
@@ -4715,7 +4736,7 @@ package Liblktlang.Analysis is
    function P_Custom_Image
      (Node : Id'Class) return Text_Type;
    --  Returns the image of this RefId using entity information.
-   --% belongs-to: Id
+   --  @belongs-to Id
 
 
 
@@ -4726,40 +4747,40 @@ package Liblktlang.Analysis is
    function P_Name
      (Node : Def_Id'Class) return Text_Type;
    --  Return the name defined by this DefId.
-   --% belongs-to: Def_Id
+   --  @belongs-to Def_Id
 
          
    function P_Get_Implementatinons
      (Node : Def_Id'Class;
       Units : Analysis_Unit_Array) return Def_Id_Array;
    --  Return the implementations of this name.
-   --% belongs-to: Def_Id
+   --  @belongs-to Def_Id
 
          
    function P_Decl_Detail
      (Node : Def_Id'Class) return Text_Type;
    --  Return the details to display in the language server client when it
    --  requests for completion or hovering information.
-   --% belongs-to: Def_Id
+   --  @belongs-to Def_Id
 
          
    function P_Completion_Item_Kind
      (Node : Def_Id'Class) return Integer;
    --  Return the kind of completion item for this DefId.
-   --% belongs-to: Def_Id
+   --  @belongs-to Def_Id
 
          
    function P_Doc
      (Node : Def_Id'Class) return Text_Type;
    --  Return the documentation associated to this DefId.
-   --% belongs-to: Def_Id
+   --  @belongs-to Def_Id
 
          
    function P_Find_All_References
      (Node : Def_Id'Class;
       Units : Analysis_Unit_Array) return Ref_Result_Array;
    --  Return the list of all RefId that refer to this DefId.
-   --% belongs-to: Def_Id
+   --  @belongs-to Def_Id
 
 
 
@@ -4770,7 +4791,7 @@ package Liblktlang.Analysis is
    function P_Referenced_Decl
      (Node : Type_Ref'Class) return Type_Decl;
    --  Returns the referenced type declaration.
-   --% belongs-to: Type_Ref
+   --  @belongs-to Type_Ref
 
 
 
@@ -4792,7 +4813,7 @@ package Liblktlang.Analysis is
    function F_Decl
      (Node : Destructuring_Pattern_Detail'Class) return Binding_Val_Decl;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Destructuring_Pattern_Detail
+   --  @belongs-to Destructuring_Pattern_Detail
 
 
 
@@ -4817,7 +4838,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Dot_Expr
+   --  @belongs-to Dot_Expr
 
 
          
@@ -4826,10 +4847,10 @@ package Liblktlang.Analysis is
    function F_Null_Cond
      (Node : Dot_Expr'Class) return Null_Cond_Qualifier;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Dot_Expr
+   --  @belongs-to Dot_Expr
 
       function F_Null_Cond (Node : Dot_Expr'Class) return Boolean;
-      --% belongs-to: Dot_Expr
+      --  @belongs-to Dot_Expr
 
 
          
@@ -4838,7 +4859,7 @@ package Liblktlang.Analysis is
    function F_Suffix
      (Node : Dot_Expr'Class) return Ref_Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Dot_Expr
+   --  @belongs-to Dot_Expr
 
 
 
@@ -4862,7 +4883,7 @@ package Liblktlang.Analysis is
    function F_Binding
      (Node : Ellipsis_Pattern'Class) return Id;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Ellipsis_Pattern
+   --  @belongs-to Ellipsis_Pattern
 
 
 
@@ -4891,7 +4912,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Elsif_Branch
+   --  @belongs-to Elsif_Branch
 
 
          
@@ -4915,7 +4936,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Elsif_Branch
+   --  @belongs-to Elsif_Branch
 
 
 
@@ -4984,7 +5005,7 @@ package Liblktlang.Analysis is
    function F_Decls
      (Node : Enum_Class_Case'Class) return Enum_Class_Alt_Decl_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Enum_Class_Case
+   --  @belongs-to Enum_Class_Case
 
 
 
@@ -5023,7 +5044,7 @@ package Liblktlang.Analysis is
    function F_Branches
      (Node : Enum_Class_Decl'Class) return Enum_Class_Case_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Enum_Class_Decl
+   --  @belongs-to Enum_Class_Decl
 
 
 
@@ -5067,7 +5088,7 @@ package Liblktlang.Analysis is
    function F_Literals
      (Node : Enum_Type_Decl'Class) return Enum_Lit_Decl_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Enum_Type_Decl
+   --  @belongs-to Enum_Type_Decl
 
 
 
@@ -5081,7 +5102,7 @@ package Liblktlang.Analysis is
    function F_Actions
      (Node : Env_Spec_Decl'Class) return Call_Expr_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Env_Spec_Decl
+   --  @belongs-to Env_Spec_Decl
 
 
 
@@ -5125,7 +5146,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Error_On_Null
+   --  @belongs-to Error_On_Null
 
 
 
@@ -5138,7 +5159,7 @@ package Liblktlang.Analysis is
    function P_As_Bool
      (Node : Excludes_Null'Class) return Boolean;
    --  Return whether this node is present
-   --% belongs-to: Excludes_Null
+   --  @belongs-to Excludes_Null
 
 
 
@@ -5160,7 +5181,7 @@ package Liblktlang.Analysis is
    function F_Trait_Ref
      (Node : Field_Decl'Class) return Dot_Expr;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Field_Decl
+   --  @belongs-to Field_Decl
 
 
 
@@ -5174,7 +5195,7 @@ package Liblktlang.Analysis is
    function F_Id
      (Node : Field_Pattern_Detail'Class) return Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Field_Pattern_Detail
+   --  @belongs-to Field_Pattern_Detail
 
 
          
@@ -5187,7 +5208,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Field_Pattern_Detail
+   --  @belongs-to Field_Pattern_Detail
 
 
 
@@ -5204,7 +5225,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Block_String_Lit`, :ada:ref:`Single_Line_String_Lit`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Full_Decl
+   --  @belongs-to Full_Decl
 
 
          
@@ -5213,7 +5234,7 @@ package Liblktlang.Analysis is
    function F_Decl_Annotations
      (Node : Full_Decl'Class) return Decl_Annotation_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Full_Decl
+   --  @belongs-to Full_Decl
 
 
          
@@ -5230,7 +5251,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Named_Type_Decl`, :ada:ref:`Val_Decl`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Full_Decl
+   --  @belongs-to Full_Decl
 
 
 
@@ -5239,7 +5260,7 @@ package Liblktlang.Analysis is
      (Node : Full_Decl'Class;
       Name : Unbounded_Text_Type) return Boolean;
    --  Return whether this node has an annotation with name ``name``.
-   --% belongs-to: Full_Decl
+   --  @belongs-to Full_Decl
 
 
 
@@ -5251,7 +5272,7 @@ package Liblktlang.Analysis is
    function F_Params
      (Node : Fun_Decl'Class) return Fun_Param_Decl_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Fun_Decl
+   --  @belongs-to Fun_Decl
 
 
          
@@ -5264,7 +5285,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Fun_Decl
+   --  @belongs-to Fun_Decl
 
 
          
@@ -5273,7 +5294,7 @@ package Liblktlang.Analysis is
    function F_Trait_Ref
      (Node : Fun_Decl'Class) return Dot_Expr;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Fun_Decl
+   --  @belongs-to Fun_Decl
 
 
          
@@ -5297,7 +5318,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Fun_Decl
+   --  @belongs-to Fun_Decl
 
 
 
@@ -5307,14 +5328,14 @@ package Liblktlang.Analysis is
    --  When this property is called by a LogicCallExpr, return whether it
    --  expects a dynamic number of arguments. In other words, it expects an
    --  array of entities as its first argument.
-   --% belongs-to: Fun_Decl
+   --  @belongs-to Fun_Decl
 
          
    function P_Find_All_Overrides
      (Node : Fun_Decl'Class;
       Units : Analysis_Unit_Array) return Fun_Decl_Array;
    --  Return the list of all RefId that refer to this DefId.
-   --% belongs-to: Fun_Decl
+   --  @belongs-to Fun_Decl
 
 
 
@@ -5326,7 +5347,7 @@ package Liblktlang.Analysis is
    function F_Decl_Annotations
      (Node : Fun_Param_Decl'Class) return Decl_Annotation_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Fun_Param_Decl
+   --  @belongs-to Fun_Param_Decl
 
 
 
@@ -5374,7 +5395,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Function_Type_Ref
+   --  @belongs-to Function_Type_Ref
 
 
          
@@ -5387,7 +5408,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Function_Type_Ref
+   --  @belongs-to Function_Type_Ref
 
 
 
@@ -5401,7 +5422,7 @@ package Liblktlang.Analysis is
    function F_Generic_Param_Decls
      (Node : Generic_Decl'Class) return Generic_Param_Decl_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Generic_Decl
+   --  @belongs-to Generic_Decl
 
 
          
@@ -5418,7 +5439,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Val_Decl`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Generic_Decl
+   --  @belongs-to Generic_Decl
 
 
 
@@ -5442,7 +5463,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Generic_Instantiation
+   --  @belongs-to Generic_Instantiation
 
 
          
@@ -5455,7 +5476,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Generic_Instantiation
+   --  @belongs-to Generic_Instantiation
 
 
 
@@ -5474,10 +5495,10 @@ package Liblktlang.Analysis is
    function F_Has_Class
      (Node : Generic_Param_Type_Decl'Class) return Class_Qualifier;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Generic_Param_Type_Decl
+   --  @belongs-to Generic_Param_Type_Decl
 
       function F_Has_Class (Node : Generic_Param_Type_Decl'Class) return Boolean;
-      --% belongs-to: Generic_Param_Type_Decl
+      --  @belongs-to Generic_Param_Type_Decl
 
 
 
@@ -5494,7 +5515,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Ref_Id`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Generic_Type_Ref
+   --  @belongs-to Generic_Type_Ref
 
 
          
@@ -5507,7 +5528,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Generic_Type_Ref
+   --  @belongs-to Generic_Type_Ref
 
 
 
@@ -5526,7 +5547,7 @@ package Liblktlang.Analysis is
    function F_Rules
      (Node : Grammar_Decl'Class) return Full_Decl_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Decl
+   --  @belongs-to Grammar_Decl
 
 
 
@@ -5540,7 +5561,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Grammar_Discard'Class) return Grammar_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Discard
+   --  @belongs-to Grammar_Discard
 
 
 
@@ -5554,7 +5575,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Grammar_Dont_Skip'Class) return Grammar_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Dont_Skip
+   --  @belongs-to Grammar_Dont_Skip
 
 
          
@@ -5563,7 +5584,7 @@ package Liblktlang.Analysis is
    function F_Dont_Skip
      (Node : Grammar_Dont_Skip'Class) return Grammar_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Dont_Skip
+   --  @belongs-to Grammar_Dont_Skip
 
 
 
@@ -5627,7 +5648,7 @@ package Liblktlang.Analysis is
    function F_Exprs
      (Node : Grammar_Pick'Class) return Grammar_Expr_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Pick
+   --  @belongs-to Grammar_Pick
 
 
 
@@ -5646,7 +5667,7 @@ package Liblktlang.Analysis is
    function F_List_Type
      (Node : Grammar_List'Class) return Type_Ref;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_List
+   --  @belongs-to Grammar_List
 
 
          
@@ -5655,11 +5676,11 @@ package Liblktlang.Analysis is
    function F_Kind
      (Node : Grammar_List'Class) return List_Kind;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_List
+   --  @belongs-to Grammar_List
 
       function F_Kind
         (Node : Grammar_List'Class) return Lkt_List_Kind;
-      --% belongs-to: Grammar_List
+      --  @belongs-to Grammar_List
 
          
    
@@ -5667,7 +5688,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Grammar_List'Class) return Grammar_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_List
+   --  @belongs-to Grammar_List
 
 
          
@@ -5676,7 +5697,7 @@ package Liblktlang.Analysis is
    function F_Sep
      (Node : Grammar_List'Class) return Grammar_List_Sep;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Grammar_List
+   --  @belongs-to Grammar_List
 
 
 
@@ -5690,7 +5711,7 @@ package Liblktlang.Analysis is
    function F_Token
      (Node : Grammar_List_Sep'Class) return Grammar_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_List_Sep
+   --  @belongs-to Grammar_List_Sep
 
 
          
@@ -5699,7 +5720,7 @@ package Liblktlang.Analysis is
    function F_Extra
      (Node : Grammar_List_Sep'Class) return Id;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Grammar_List_Sep
+   --  @belongs-to Grammar_List_Sep
 
 
 
@@ -5717,7 +5738,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Grammar_Null
+   --  @belongs-to Grammar_Null
 
 
 
@@ -5731,7 +5752,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Grammar_Opt'Class) return Grammar_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Opt
+   --  @belongs-to Grammar_Opt
 
 
 
@@ -5745,7 +5766,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Grammar_Opt_Error'Class) return Grammar_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Opt_Error
+   --  @belongs-to Grammar_Opt_Error
 
 
 
@@ -5759,7 +5780,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Grammar_Opt_Error_Group'Class) return Grammar_Expr_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Opt_Error_Group
+   --  @belongs-to Grammar_Opt_Error_Group
 
 
 
@@ -5773,7 +5794,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Grammar_Opt_Group'Class) return Grammar_Expr_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Opt_Group
+   --  @belongs-to Grammar_Opt_Group
 
 
 
@@ -5787,7 +5808,7 @@ package Liblktlang.Analysis is
    function F_Sub_Exprs
      (Node : Grammar_Or_Expr'Class) return Grammar_Expr_List_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Or_Expr
+   --  @belongs-to Grammar_Or_Expr
 
 
 
@@ -5801,7 +5822,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Grammar_Predicate'Class) return Grammar_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Predicate
+   --  @belongs-to Grammar_Predicate
 
 
          
@@ -5813,7 +5834,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Ref_Id`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Predicate
+   --  @belongs-to Grammar_Predicate
 
 
 
@@ -5832,7 +5853,7 @@ package Liblktlang.Analysis is
    function F_Node_Name
      (Node : Grammar_Rule_Ref'Class) return Ref_Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Rule_Ref
+   --  @belongs-to Grammar_Rule_Ref
 
 
 
@@ -5850,7 +5871,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Skip
+   --  @belongs-to Grammar_Skip
 
 
 
@@ -5864,7 +5885,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Grammar_Stop_Cut'Class) return Grammar_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Grammar_Stop_Cut
+   --  @belongs-to Grammar_Stop_Cut
 
 
 
@@ -5893,7 +5914,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: If_Expr
+   --  @belongs-to If_Expr
 
 
          
@@ -5917,7 +5938,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: If_Expr
+   --  @belongs-to If_Expr
 
 
          
@@ -5926,7 +5947,7 @@ package Liblktlang.Analysis is
    function F_Alternatives
      (Node : If_Expr'Class) return Elsif_Branch_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: If_Expr
+   --  @belongs-to If_Expr
 
 
          
@@ -5950,7 +5971,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: If_Expr
+   --  @belongs-to If_Expr
 
 
 
@@ -5964,7 +5985,7 @@ package Liblktlang.Analysis is
    function F_Imported_Names
      (Node : Import'Class) return Imported_Name_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Import
+   --  @belongs-to Import
 
 
 
@@ -5978,7 +5999,7 @@ package Liblktlang.Analysis is
    function F_Module_Name
      (Node : Import_All_From'Class) return Module_Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Import_All_From
+   --  @belongs-to Import_All_From
 
 
 
@@ -5992,7 +6013,7 @@ package Liblktlang.Analysis is
    function F_Module_Name
      (Node : Import_From'Class) return Module_Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Import_From
+   --  @belongs-to Import_From
 
 
          
@@ -6001,7 +6022,7 @@ package Liblktlang.Analysis is
    function F_Imported_Names
      (Node : Import_From'Class) return Imported_Name_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Import_From
+   --  @belongs-to Import_From
 
 
 
@@ -6020,7 +6041,7 @@ package Liblktlang.Analysis is
    function F_Original_Name
      (Node : Imported_Name'Class) return Imported_Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Imported_Name
+   --  @belongs-to Imported_Name
 
 
          
@@ -6029,7 +6050,7 @@ package Liblktlang.Analysis is
    function F_Renaming
      (Node : Imported_Name'Class) return Def_Id;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Imported_Name
+   --  @belongs-to Imported_Name
 
 
 
@@ -6085,7 +6106,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Isa
+   --  @belongs-to Isa
 
 
          
@@ -6098,7 +6119,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Isa
+   --  @belongs-to Isa
 
 
 
@@ -6122,7 +6143,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Keep_Expr
+   --  @belongs-to Keep_Expr
 
 
          
@@ -6131,10 +6152,10 @@ package Liblktlang.Analysis is
    function F_Null_Cond
      (Node : Keep_Expr'Class) return Null_Cond_Qualifier;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Keep_Expr
+   --  @belongs-to Keep_Expr
 
       function F_Null_Cond (Node : Keep_Expr'Class) return Boolean;
-      --% belongs-to: Keep_Expr
+      --  @belongs-to Keep_Expr
 
 
          
@@ -6147,7 +6168,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Keep_Expr
+   --  @belongs-to Keep_Expr
 
 
 
@@ -6161,7 +6182,7 @@ package Liblktlang.Analysis is
    function F_Params
      (Node : Lambda_Expr'Class) return Lambda_Param_Decl_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lambda_Expr
+   --  @belongs-to Lambda_Expr
 
 
          
@@ -6174,7 +6195,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Lambda_Expr
+   --  @belongs-to Lambda_Expr
 
 
          
@@ -6198,7 +6219,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lambda_Expr
+   --  @belongs-to Lambda_Expr
 
 
 
@@ -6242,7 +6263,7 @@ package Liblktlang.Analysis is
    function F_Doc
      (Node : Langkit_Root'Class) return Module_Doc_String_Lit;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Langkit_Root
+   --  @belongs-to Langkit_Root
 
 
          
@@ -6251,7 +6272,7 @@ package Liblktlang.Analysis is
    function F_Imports
      (Node : Langkit_Root'Class) return Base_Import_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Langkit_Root
+   --  @belongs-to Langkit_Root
 
 
          
@@ -6260,7 +6281,7 @@ package Liblktlang.Analysis is
    function F_Decls
      (Node : Langkit_Root'Class) return Full_Decl_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Langkit_Root
+   --  @belongs-to Langkit_Root
 
 
 
@@ -6286,7 +6307,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Token_Pattern_Lit`, :ada:ref:`Token_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lexer_Case_Rule
+   --  @belongs-to Lexer_Case_Rule
 
 
          
@@ -6295,7 +6316,7 @@ package Liblktlang.Analysis is
    function F_Alts
      (Node : Lexer_Case_Rule'Class) return Base_Lexer_Case_Rule_Alt_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lexer_Case_Rule
+   --  @belongs-to Lexer_Case_Rule
 
 
 
@@ -6309,7 +6330,7 @@ package Liblktlang.Analysis is
    function F_Cond_Exprs
      (Node : Lexer_Case_Rule_Cond_Alt'Class) return Ref_Id_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lexer_Case_Rule_Cond_Alt
+   --  @belongs-to Lexer_Case_Rule_Cond_Alt
 
 
          
@@ -6318,7 +6339,7 @@ package Liblktlang.Analysis is
    function F_Send
      (Node : Lexer_Case_Rule_Cond_Alt'Class) return Lexer_Case_Rule_Send;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lexer_Case_Rule_Cond_Alt
+   --  @belongs-to Lexer_Case_Rule_Cond_Alt
 
 
 
@@ -6332,7 +6353,7 @@ package Liblktlang.Analysis is
    function F_Send
      (Node : Lexer_Case_Rule_Default_Alt'Class) return Lexer_Case_Rule_Send;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lexer_Case_Rule_Default_Alt
+   --  @belongs-to Lexer_Case_Rule_Default_Alt
 
 
 
@@ -6346,7 +6367,7 @@ package Liblktlang.Analysis is
    function F_Sent
      (Node : Lexer_Case_Rule_Send'Class) return Ref_Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lexer_Case_Rule_Send
+   --  @belongs-to Lexer_Case_Rule_Send
 
 
          
@@ -6355,7 +6376,7 @@ package Liblktlang.Analysis is
    function F_Match_Size
      (Node : Lexer_Case_Rule_Send'Class) return Num_Lit;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lexer_Case_Rule_Send
+   --  @belongs-to Lexer_Case_Rule_Send
 
 
 
@@ -6372,7 +6393,7 @@ package Liblktlang.Analysis is
    --  nodes: :ada:ref:`Full_Decl`, :ada:ref:`Lexer_Case_Rule`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lexer_Decl
+   --  @belongs-to Lexer_Decl
 
 
 
@@ -6386,7 +6407,7 @@ package Liblktlang.Analysis is
    function F_Rules
      (Node : Lexer_Family_Decl'Class) return Full_Decl_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Lexer_Family_Decl
+   --  @belongs-to Lexer_Family_Decl
 
 
 
@@ -6419,7 +6440,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: List_Pattern
+   --  @belongs-to List_Pattern
 
 
 
@@ -6466,7 +6487,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Logic_Assign
+   --  @belongs-to Logic_Assign
 
 
          
@@ -6487,7 +6508,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Logic_Assign
+   --  @belongs-to Logic_Assign
 
 
 
@@ -6509,7 +6530,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Ref_Id`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Logic_Expr
+   --  @belongs-to Logic_Expr
 
 
 
@@ -6541,7 +6562,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Logic_Propagate
+   --  @belongs-to Logic_Propagate
 
 
          
@@ -6550,7 +6571,7 @@ package Liblktlang.Analysis is
    function F_Call
      (Node : Logic_Propagate'Class) return Logic_Propagate_Call;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Logic_Propagate
+   --  @belongs-to Logic_Propagate
 
 
 
@@ -6582,7 +6603,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Logic_Unify
+   --  @belongs-to Logic_Unify
 
 
          
@@ -6603,7 +6624,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Logic_Unify
+   --  @belongs-to Logic_Unify
 
 
 
@@ -6617,7 +6638,7 @@ package Liblktlang.Analysis is
    function F_Decl
      (Node : Match_Branch'Class) return Match_Val_Decl;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Match_Branch
+   --  @belongs-to Match_Branch
 
 
 
@@ -6646,7 +6667,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Match_Expr
+   --  @belongs-to Match_Expr
 
 
          
@@ -6655,7 +6676,7 @@ package Liblktlang.Analysis is
    function F_Branches
      (Node : Match_Expr'Class) return Base_Match_Branch_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Match_Expr
+   --  @belongs-to Match_Expr
 
 
 
@@ -6704,7 +6725,7 @@ package Liblktlang.Analysis is
    function F_Lines
      (Node : Module_Doc_String_Lit'Class) return Module_Doc_String_Line_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Module_Doc_String_Lit
+   --  @belongs-to Module_Doc_String_Lit
 
 
 
@@ -6742,7 +6763,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Not_Expr
+   --  @belongs-to Not_Expr
 
 
 
@@ -6759,7 +6780,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Not_Pattern
+   --  @belongs-to Not_Pattern
 
 
 
@@ -6772,7 +6793,7 @@ package Liblktlang.Analysis is
    function P_As_Bool
      (Node : Null_Cond_Qualifier'Class) return Boolean;
    --  Return whether this node is present
-   --% belongs-to: Null_Cond_Qualifier
+   --  @belongs-to Null_Cond_Qualifier
 
 
 
@@ -6798,7 +6819,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Null_Lit
+   --  @belongs-to Null_Lit
 
 
 
@@ -6920,7 +6941,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Or_Pattern
+   --  @belongs-to Or_Pattern
 
 
          
@@ -6933,7 +6954,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Or_Pattern
+   --  @belongs-to Or_Pattern
 
 
 
@@ -6962,7 +6983,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Paren_Expr
+   --  @belongs-to Paren_Expr
 
 
 
@@ -6980,7 +7001,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Paren_Pattern
+   --  @belongs-to Paren_Pattern
 
 
 
@@ -6998,7 +7019,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Parse_Node_Expr
+   --  @belongs-to Parse_Node_Expr
 
 
          
@@ -7007,7 +7028,7 @@ package Liblktlang.Analysis is
    function F_Sub_Exprs
      (Node : Parse_Node_Expr'Class) return Grammar_Expr_List;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Parse_Node_Expr
+   --  @belongs-to Parse_Node_Expr
 
 
 
@@ -7075,7 +7096,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Pattern_Match_Branch
+   --  @belongs-to Pattern_Match_Branch
 
 
 
@@ -7099,7 +7120,7 @@ package Liblktlang.Analysis is
    function F_Call
      (Node : Property_Pattern_Detail'Class) return Call_Expr;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Property_Pattern_Detail
+   --  @belongs-to Property_Pattern_Detail
 
 
          
@@ -7112,7 +7133,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Property_Pattern_Detail
+   --  @belongs-to Property_Pattern_Detail
 
 
 
@@ -7141,7 +7162,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Query
+   --  @belongs-to Query
 
 
          
@@ -7154,7 +7175,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Query
+   --  @belongs-to Query
 
 
          
@@ -7178,7 +7199,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Query
+   --  @belongs-to Query
 
 
          
@@ -7202,7 +7223,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Query
+   --  @belongs-to Query
 
 
 
@@ -7220,7 +7241,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Raise_Expr
+   --  @belongs-to Raise_Expr
 
 
          
@@ -7244,7 +7265,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Raise_Expr
+   --  @belongs-to Raise_Expr
 
 
 
@@ -7257,7 +7278,7 @@ package Liblktlang.Analysis is
    function P_Referenced_Defining_Name
      (Node : Ref_Id'Class) return Def_Id;
    --  Return the referenced defining name.
-   --% belongs-to: Ref_Id
+   --  @belongs-to Ref_Id
 
 
 
@@ -7293,7 +7314,7 @@ package Liblktlang.Analysis is
    function P_Denoted_Value
      (Node : Regex_Pattern'Class) return Decoded_String_Value;
    --  Return the equivalent string for this regular expression.
-   --% belongs-to: Regex_Pattern
+   --  @belongs-to Regex_Pattern
 
 
 
@@ -7318,7 +7339,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Ref_Id`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Simple_Type_Ref
+   --  @belongs-to Simple_Type_Ref
 
 
 
@@ -7347,7 +7368,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Single_Line_String_Lit`, :ada:ref:`Subscript_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Subscript_Expr
+   --  @belongs-to Subscript_Expr
 
 
          
@@ -7356,10 +7377,10 @@ package Liblktlang.Analysis is
    function F_Null_Cond
      (Node : Subscript_Expr'Class) return Null_Cond_Qualifier;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Subscript_Expr
+   --  @belongs-to Subscript_Expr
 
       function F_Null_Cond (Node : Subscript_Expr'Class) return Boolean;
-      --% belongs-to: Subscript_Expr
+      --  @belongs-to Subscript_Expr
 
 
          
@@ -7383,7 +7404,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Subscript_Expr
+   --  @belongs-to Subscript_Expr
 
 
 
@@ -7441,7 +7462,7 @@ package Liblktlang.Analysis is
    function P_Denoted_Value
      (Node : Token_Lit'Class) return Decoded_String_Value;
    --  Return the content of the given token literal node.
-   --% belongs-to: Token_Lit
+   --  @belongs-to Token_Lit
 
 
 
@@ -7453,7 +7474,7 @@ package Liblktlang.Analysis is
    function F_Lit
      (Node : Token_No_Case_Lit'Class) return Token_Lit;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Token_No_Case_Lit
+   --  @belongs-to Token_No_Case_Lit
 
 
 
@@ -7470,7 +7491,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Token_Pattern_Concat`, :ada:ref:`Token_Pattern_Lit`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Token_Pattern_Concat
+   --  @belongs-to Token_Pattern_Concat
 
 
          
@@ -7479,7 +7500,7 @@ package Liblktlang.Analysis is
    function F_Right
      (Node : Token_Pattern_Concat'Class) return Token_Pattern_Lit;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Token_Pattern_Concat
+   --  @belongs-to Token_Pattern_Concat
 
 
 
@@ -7492,7 +7513,7 @@ package Liblktlang.Analysis is
    function P_Denoted_Value
      (Node : Token_Pattern_Lit'Class) return Decoded_String_Value;
    --  Return the content of the given token pattern literal node.
-   --% belongs-to: Token_Pattern_Lit
+   --  @belongs-to Token_Pattern_Lit
 
 
 
@@ -7504,7 +7525,7 @@ package Liblktlang.Analysis is
    function F_Token_Name
      (Node : Token_Ref'Class) return Ref_Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Token_Ref
+   --  @belongs-to Token_Ref
 
 
          
@@ -7513,7 +7534,7 @@ package Liblktlang.Analysis is
    function F_Expr
      (Node : Token_Ref'Class) return Token_Lit;
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Token_Ref
+   --  @belongs-to Token_Ref
 
 
 
@@ -7547,7 +7568,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Try_Expr
+   --  @belongs-to Try_Expr
 
 
          
@@ -7571,7 +7592,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  This field may be null even when there are no parsing errors.
-   --% belongs-to: Try_Expr
+   --  @belongs-to Try_Expr
 
 
 
@@ -7589,7 +7610,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Simple_Type_Ref`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Type_Pattern
+   --  @belongs-to Type_Pattern
 
 
 
@@ -7606,11 +7627,11 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Op_Plus`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Un_Op
+   --  @belongs-to Un_Op
 
       function F_Op
         (Node : Un_Op'Class) return Lkt_Op;
-      --% belongs-to: Un_Op
+      --  @belongs-to Un_Op
 
          
    
@@ -7631,7 +7652,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Subscript_Expr`, :ada:ref:`Try_Expr`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Un_Op
+   --  @belongs-to Un_Op
 
 
 
@@ -7660,7 +7681,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Val_Decl
+   --  @belongs-to Val_Decl
 
 
 
@@ -7674,7 +7695,7 @@ package Liblktlang.Analysis is
    function F_Name
      (Node : Var_Bind'Class) return Ref_Id;
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Var_Bind
+   --  @belongs-to Var_Bind
 
 
          
@@ -7698,7 +7719,7 @@ package Liblktlang.Analysis is
    --  :ada:ref:`Try_Expr`, :ada:ref:`Un_Op`
    --
    --  When there are no parsing errors, this field is never null.
-   --% belongs-to: Var_Bind
+   --  @belongs-to Var_Bind
 
 
 
@@ -7860,667 +7881,667 @@ package Liblktlang.Analysis is
    pragma Warnings (Off, "defined after private extension");
       function As_Lkt_Node
         (Node : Lkt_Node'Class) return Lkt_Node;
-      --% no-document: True
+      --  @exclude
       function As_Decl
         (Node : Lkt_Node'Class) return Decl;
-      --% no-document: True
+      --  @exclude
       function As_Expr
         (Node : Lkt_Node'Class) return Expr;
-      --% no-document: True
+      --  @exclude
       function As_Any_Of
         (Node : Lkt_Node'Class) return Any_Of;
-      --% no-document: True
+      --  @exclude
       function As_Lkt_Node_Base_List
         (Node : Lkt_Node'Class) return Lkt_Node_Base_List;
-      --% no-document: True
+      --  @exclude
       function As_Expr_List
         (Node : Lkt_Node'Class) return Expr_List;
-      --% no-document: True
+      --  @exclude
       function As_Any_Of_List
         (Node : Lkt_Node'Class) return Any_Of_List;
-      --% no-document: True
+      --  @exclude
       function As_Type_Decl
         (Node : Lkt_Node'Class) return Type_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Any_Type_Decl
         (Node : Lkt_Node'Class) return Any_Type_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Pattern
         (Node : Lkt_Node'Class) return Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Any_Type_Pattern
         (Node : Lkt_Node'Class) return Any_Type_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Argument
         (Node : Lkt_Node'Class) return Argument;
-      --% no-document: True
+      --  @exclude
       function As_Argument_List
         (Node : Lkt_Node'Class) return Argument_List;
-      --% no-document: True
+      --  @exclude
       function As_Array_Literal
         (Node : Lkt_Node'Class) return Array_Literal;
-      --% no-document: True
+      --  @exclude
       function As_Base_Call_Expr
         (Node : Lkt_Node'Class) return Base_Call_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Base_Grammar_Rule_Decl
         (Node : Lkt_Node'Class) return Base_Grammar_Rule_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Base_Import
         (Node : Lkt_Node'Class) return Base_Import;
-      --% no-document: True
+      --  @exclude
       function As_Base_Import_List
         (Node : Lkt_Node'Class) return Base_Import_List;
-      --% no-document: True
+      --  @exclude
       function As_Base_Lexer_Case_Rule_Alt
         (Node : Lkt_Node'Class) return Base_Lexer_Case_Rule_Alt;
-      --% no-document: True
+      --  @exclude
       function As_Base_Lexer_Case_Rule_Alt_List
         (Node : Lkt_Node'Class) return Base_Lexer_Case_Rule_Alt_List;
-      --% no-document: True
+      --  @exclude
       function As_Base_Match_Branch
         (Node : Lkt_Node'Class) return Base_Match_Branch;
-      --% no-document: True
+      --  @exclude
       function As_Base_Match_Branch_List
         (Node : Lkt_Node'Class) return Base_Match_Branch_List;
-      --% no-document: True
+      --  @exclude
       function As_Base_Val_Decl
         (Node : Lkt_Node'Class) return Base_Val_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Named_Type_Decl
         (Node : Lkt_Node'Class) return Named_Type_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Basic_Class_Decl
         (Node : Lkt_Node'Class) return Basic_Class_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Lit
         (Node : Lkt_Node'Class) return Lit;
-      --% no-document: True
+      --  @exclude
       function As_Big_Num_Lit
         (Node : Lkt_Node'Class) return Big_Num_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Bin_Op
         (Node : Lkt_Node'Class) return Bin_Op;
-      --% no-document: True
+      --  @exclude
       function As_User_Val_Decl
         (Node : Lkt_Node'Class) return User_Val_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Binding_Val_Decl
         (Node : Lkt_Node'Class) return Binding_Val_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Block_Expr
         (Node : Lkt_Node'Class) return Block_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Block_Expr_Clause
         (Node : Lkt_Node'Class) return Block_Expr_Clause;
-      --% no-document: True
+      --  @exclude
       function As_Block_String_Line
         (Node : Lkt_Node'Class) return Block_String_Line;
-      --% no-document: True
+      --  @exclude
       function As_Block_String_Line_List
         (Node : Lkt_Node'Class) return Block_String_Line_List;
-      --% no-document: True
+      --  @exclude
       function As_String_Lit
         (Node : Lkt_Node'Class) return String_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Block_String_Lit
         (Node : Lkt_Node'Class) return Block_String_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Bool_Pattern
         (Node : Lkt_Node'Class) return Bool_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Bool_Pattern_False
         (Node : Lkt_Node'Class) return Bool_Pattern_False;
-      --% no-document: True
+      --  @exclude
       function As_Bool_Pattern_True
         (Node : Lkt_Node'Class) return Bool_Pattern_True;
-      --% no-document: True
+      --  @exclude
       function As_Call_Expr
         (Node : Lkt_Node'Class) return Call_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Call_Expr_List
         (Node : Lkt_Node'Class) return Call_Expr_List;
-      --% no-document: True
+      --  @exclude
       function As_Cast_Expr
         (Node : Lkt_Node'Class) return Cast_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Char_Lit
         (Node : Lkt_Node'Class) return Char_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Class_Decl
         (Node : Lkt_Node'Class) return Class_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Class_Qualifier
         (Node : Lkt_Node'Class) return Class_Qualifier;
-      --% no-document: True
+      --  @exclude
       function As_Class_Qualifier_Absent
         (Node : Lkt_Node'Class) return Class_Qualifier_Absent;
-      --% no-document: True
+      --  @exclude
       function As_Class_Qualifier_Present
         (Node : Lkt_Node'Class) return Class_Qualifier_Present;
-      --% no-document: True
+      --  @exclude
       function As_Complex_Pattern
         (Node : Lkt_Node'Class) return Complex_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Explicitly_Typed_Decl
         (Node : Lkt_Node'Class) return Explicitly_Typed_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Component_Decl
         (Node : Lkt_Node'Class) return Component_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Decl_Annotation
         (Node : Lkt_Node'Class) return Decl_Annotation;
-      --% no-document: True
+      --  @exclude
       function As_Decl_Annotation_Args
         (Node : Lkt_Node'Class) return Decl_Annotation_Args;
-      --% no-document: True
+      --  @exclude
       function As_Decl_Annotation_List
         (Node : Lkt_Node'Class) return Decl_Annotation_List;
-      --% no-document: True
+      --  @exclude
       function As_Full_Decl_List
         (Node : Lkt_Node'Class) return Full_Decl_List;
-      --% no-document: True
+      --  @exclude
       function As_Decl_Block
         (Node : Lkt_Node'Class) return Decl_Block;
-      --% no-document: True
+      --  @exclude
       function As_Id
         (Node : Lkt_Node'Class) return Id;
-      --% no-document: True
+      --  @exclude
       function As_Def_Id
         (Node : Lkt_Node'Class) return Def_Id;
-      --% no-document: True
+      --  @exclude
       function As_Type_Ref
         (Node : Lkt_Node'Class) return Type_Ref;
-      --% no-document: True
+      --  @exclude
       function As_Default_List_Type_Ref
         (Node : Lkt_Node'Class) return Default_List_Type_Ref;
-      --% no-document: True
+      --  @exclude
       function As_Pattern_Detail
         (Node : Lkt_Node'Class) return Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       function As_Destructuring_Pattern_Detail
         (Node : Lkt_Node'Class) return Destructuring_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       function As_Dot_Expr
         (Node : Lkt_Node'Class) return Dot_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Dyn_Env_Wrapper
         (Node : Lkt_Node'Class) return Dyn_Env_Wrapper;
-      --% no-document: True
+      --  @exclude
       function As_Dyn_Var_Decl
         (Node : Lkt_Node'Class) return Dyn_Var_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Ellipsis_Pattern
         (Node : Lkt_Node'Class) return Ellipsis_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Elsif_Branch
         (Node : Lkt_Node'Class) return Elsif_Branch;
-      --% no-document: True
+      --  @exclude
       function As_Elsif_Branch_List
         (Node : Lkt_Node'Class) return Elsif_Branch_List;
-      --% no-document: True
+      --  @exclude
       function As_Enum_Class_Alt_Decl
         (Node : Lkt_Node'Class) return Enum_Class_Alt_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Enum_Class_Alt_Decl_List
         (Node : Lkt_Node'Class) return Enum_Class_Alt_Decl_List;
-      --% no-document: True
+      --  @exclude
       function As_Enum_Class_Case
         (Node : Lkt_Node'Class) return Enum_Class_Case;
-      --% no-document: True
+      --  @exclude
       function As_Enum_Class_Case_List
         (Node : Lkt_Node'Class) return Enum_Class_Case_List;
-      --% no-document: True
+      --  @exclude
       function As_Enum_Class_Decl
         (Node : Lkt_Node'Class) return Enum_Class_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Enum_Lit_Decl
         (Node : Lkt_Node'Class) return Enum_Lit_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Enum_Lit_Decl_List
         (Node : Lkt_Node'Class) return Enum_Lit_Decl_List;
-      --% no-document: True
+      --  @exclude
       function As_Enum_Type_Decl
         (Node : Lkt_Node'Class) return Enum_Type_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Env_Spec_Decl
         (Node : Lkt_Node'Class) return Env_Spec_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Error_Decl
         (Node : Lkt_Node'Class) return Error_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Expr
         (Node : Lkt_Node'Class) return Grammar_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Error_Grammar_Expr
         (Node : Lkt_Node'Class) return Error_Grammar_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Error_Lexer_Case_Rule_Alt
         (Node : Lkt_Node'Class) return Error_Lexer_Case_Rule_Alt;
-      --% no-document: True
+      --  @exclude
       function As_Error_On_Null
         (Node : Lkt_Node'Class) return Error_On_Null;
-      --% no-document: True
+      --  @exclude
       function As_Excludes_Null
         (Node : Lkt_Node'Class) return Excludes_Null;
-      --% no-document: True
+      --  @exclude
       function As_Excludes_Null_Absent
         (Node : Lkt_Node'Class) return Excludes_Null_Absent;
-      --% no-document: True
+      --  @exclude
       function As_Excludes_Null_Present
         (Node : Lkt_Node'Class) return Excludes_Null_Present;
-      --% no-document: True
+      --  @exclude
       function As_Field_Decl
         (Node : Lkt_Node'Class) return Field_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Field_Pattern_Detail
         (Node : Lkt_Node'Class) return Field_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       function As_Full_Decl
         (Node : Lkt_Node'Class) return Full_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Fun_Decl
         (Node : Lkt_Node'Class) return Fun_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Fun_Param_Decl
         (Node : Lkt_Node'Class) return Fun_Param_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Fun_Param_Decl_List
         (Node : Lkt_Node'Class) return Fun_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       function As_Function_Type
         (Node : Lkt_Node'Class) return Function_Type;
-      --% no-document: True
+      --  @exclude
       function As_Function_Type_Ref
         (Node : Lkt_Node'Class) return Function_Type_Ref;
-      --% no-document: True
+      --  @exclude
       function As_Generic_Decl
         (Node : Lkt_Node'Class) return Generic_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Generic_Instantiation
         (Node : Lkt_Node'Class) return Generic_Instantiation;
-      --% no-document: True
+      --  @exclude
       function As_Generic_Param_Decl_List
         (Node : Lkt_Node'Class) return Generic_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       function As_Generic_Param_Type_Decl
         (Node : Lkt_Node'Class) return Generic_Param_Type_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Generic_Type_Ref
         (Node : Lkt_Node'Class) return Generic_Type_Ref;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Cut
         (Node : Lkt_Node'Class) return Grammar_Cut;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Decl
         (Node : Lkt_Node'Class) return Grammar_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Discard
         (Node : Lkt_Node'Class) return Grammar_Discard;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Dont_Skip
         (Node : Lkt_Node'Class) return Grammar_Dont_Skip;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Expr_List
         (Node : Lkt_Node'Class) return Grammar_Expr_List;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Expr_List_List
         (Node : Lkt_Node'Class) return Grammar_Expr_List_List;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Pick
         (Node : Lkt_Node'Class) return Grammar_Pick;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Implicit_Pick
         (Node : Lkt_Node'Class) return Grammar_Implicit_Pick;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_List
         (Node : Lkt_Node'Class) return Grammar_List;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_List_Sep
         (Node : Lkt_Node'Class) return Grammar_List_Sep;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Null
         (Node : Lkt_Node'Class) return Grammar_Null;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Opt
         (Node : Lkt_Node'Class) return Grammar_Opt;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Opt_Error
         (Node : Lkt_Node'Class) return Grammar_Opt_Error;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Opt_Error_Group
         (Node : Lkt_Node'Class) return Grammar_Opt_Error_Group;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Opt_Group
         (Node : Lkt_Node'Class) return Grammar_Opt_Group;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Or_Expr
         (Node : Lkt_Node'Class) return Grammar_Or_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Predicate
         (Node : Lkt_Node'Class) return Grammar_Predicate;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Rule_Decl
         (Node : Lkt_Node'Class) return Grammar_Rule_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Rule_Ref
         (Node : Lkt_Node'Class) return Grammar_Rule_Ref;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Skip
         (Node : Lkt_Node'Class) return Grammar_Skip;
-      --% no-document: True
+      --  @exclude
       function As_Grammar_Stop_Cut
         (Node : Lkt_Node'Class) return Grammar_Stop_Cut;
-      --% no-document: True
+      --  @exclude
       function As_If_Expr
         (Node : Lkt_Node'Class) return If_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Import
         (Node : Lkt_Node'Class) return Import;
-      --% no-document: True
+      --  @exclude
       function As_Import_All_From
         (Node : Lkt_Node'Class) return Import_All_From;
-      --% no-document: True
+      --  @exclude
       function As_Import_From
         (Node : Lkt_Node'Class) return Import_From;
-      --% no-document: True
+      --  @exclude
       function As_Imported_Id
         (Node : Lkt_Node'Class) return Imported_Id;
-      --% no-document: True
+      --  @exclude
       function As_Imported_Name
         (Node : Lkt_Node'Class) return Imported_Name;
-      --% no-document: True
+      --  @exclude
       function As_Imported_Name_List
         (Node : Lkt_Node'Class) return Imported_Name_List;
-      --% no-document: True
+      --  @exclude
       function As_Integer_Pattern
         (Node : Lkt_Node'Class) return Integer_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Isa
         (Node : Lkt_Node'Class) return Isa;
-      --% no-document: True
+      --  @exclude
       function As_Keep_Expr
         (Node : Lkt_Node'Class) return Keep_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Lambda_Expr
         (Node : Lkt_Node'Class) return Lambda_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Lambda_Param_Decl
         (Node : Lkt_Node'Class) return Lambda_Param_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Lambda_Param_Decl_List
         (Node : Lkt_Node'Class) return Lambda_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       function As_Langkit_Root
         (Node : Lkt_Node'Class) return Langkit_Root;
-      --% no-document: True
+      --  @exclude
       function As_Lexer_Case_Rule
         (Node : Lkt_Node'Class) return Lexer_Case_Rule;
-      --% no-document: True
+      --  @exclude
       function As_Lexer_Case_Rule_Cond_Alt
         (Node : Lkt_Node'Class) return Lexer_Case_Rule_Cond_Alt;
-      --% no-document: True
+      --  @exclude
       function As_Lexer_Case_Rule_Default_Alt
         (Node : Lkt_Node'Class) return Lexer_Case_Rule_Default_Alt;
-      --% no-document: True
+      --  @exclude
       function As_Lexer_Case_Rule_Send
         (Node : Lkt_Node'Class) return Lexer_Case_Rule_Send;
-      --% no-document: True
+      --  @exclude
       function As_Lexer_Decl
         (Node : Lkt_Node'Class) return Lexer_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Lexer_Family_Decl
         (Node : Lkt_Node'Class) return Lexer_Family_Decl;
-      --% no-document: True
+      --  @exclude
       function As_List_Kind
         (Node : Lkt_Node'Class) return List_Kind;
-      --% no-document: True
+      --  @exclude
       function As_List_Kind_One
         (Node : Lkt_Node'Class) return List_Kind_One;
-      --% no-document: True
+      --  @exclude
       function As_List_Kind_Zero
         (Node : Lkt_Node'Class) return List_Kind_Zero;
-      --% no-document: True
+      --  @exclude
       function As_List_Pattern
         (Node : Lkt_Node'Class) return List_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Lkt_Node_List
         (Node : Lkt_Node'Class) return Lkt_Node_List;
-      --% no-document: True
+      --  @exclude
       function As_Logic_Assign
         (Node : Lkt_Node'Class) return Logic_Assign;
-      --% no-document: True
+      --  @exclude
       function As_Logic_Call_Expr
         (Node : Lkt_Node'Class) return Logic_Call_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Logic_Expr
         (Node : Lkt_Node'Class) return Logic_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Logic_Predicate
         (Node : Lkt_Node'Class) return Logic_Predicate;
-      --% no-document: True
+      --  @exclude
       function As_Logic_Propagate
         (Node : Lkt_Node'Class) return Logic_Propagate;
-      --% no-document: True
+      --  @exclude
       function As_Logic_Propagate_Call
         (Node : Lkt_Node'Class) return Logic_Propagate_Call;
-      --% no-document: True
+      --  @exclude
       function As_Logic_Unify
         (Node : Lkt_Node'Class) return Logic_Unify;
-      --% no-document: True
+      --  @exclude
       function As_Match_Branch
         (Node : Lkt_Node'Class) return Match_Branch;
-      --% no-document: True
+      --  @exclude
       function As_Match_Expr
         (Node : Lkt_Node'Class) return Match_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Match_Val_Decl
         (Node : Lkt_Node'Class) return Match_Val_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Module_Doc_String_Line
         (Node : Lkt_Node'Class) return Module_Doc_String_Line;
-      --% no-document: True
+      --  @exclude
       function As_Module_Doc_String_Line_List
         (Node : Lkt_Node'Class) return Module_Doc_String_Line_List;
-      --% no-document: True
+      --  @exclude
       function As_Module_Doc_String_Lit
         (Node : Lkt_Node'Class) return Module_Doc_String_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Module_Id
         (Node : Lkt_Node'Class) return Module_Id;
-      --% no-document: True
+      --  @exclude
       function As_Node_Decl
         (Node : Lkt_Node'Class) return Node_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Not_Expr
         (Node : Lkt_Node'Class) return Not_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Not_Pattern
         (Node : Lkt_Node'Class) return Not_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Null_Cond_Qualifier
         (Node : Lkt_Node'Class) return Null_Cond_Qualifier;
-      --% no-document: True
+      --  @exclude
       function As_Null_Cond_Qualifier_Absent
         (Node : Lkt_Node'Class) return Null_Cond_Qualifier_Absent;
-      --% no-document: True
+      --  @exclude
       function As_Null_Cond_Qualifier_Present
         (Node : Lkt_Node'Class) return Null_Cond_Qualifier_Present;
-      --% no-document: True
+      --  @exclude
       function As_Null_Lit
         (Node : Lkt_Node'Class) return Null_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Null_Pattern
         (Node : Lkt_Node'Class) return Null_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Num_Lit
         (Node : Lkt_Node'Class) return Num_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Op
         (Node : Lkt_Node'Class) return Op;
-      --% no-document: True
+      --  @exclude
       function As_Op_Amp
         (Node : Lkt_Node'Class) return Op_Amp;
-      --% no-document: True
+      --  @exclude
       function As_Op_And
         (Node : Lkt_Node'Class) return Op_And;
-      --% no-document: True
+      --  @exclude
       function As_Op_Div
         (Node : Lkt_Node'Class) return Op_Div;
-      --% no-document: True
+      --  @exclude
       function As_Op_Eq
         (Node : Lkt_Node'Class) return Op_Eq;
-      --% no-document: True
+      --  @exclude
       function As_Op_Gt
         (Node : Lkt_Node'Class) return Op_Gt;
-      --% no-document: True
+      --  @exclude
       function As_Op_Gte
         (Node : Lkt_Node'Class) return Op_Gte;
-      --% no-document: True
+      --  @exclude
       function As_Op_Logic_And
         (Node : Lkt_Node'Class) return Op_Logic_And;
-      --% no-document: True
+      --  @exclude
       function As_Op_Logic_Or
         (Node : Lkt_Node'Class) return Op_Logic_Or;
-      --% no-document: True
+      --  @exclude
       function As_Op_Lt
         (Node : Lkt_Node'Class) return Op_Lt;
-      --% no-document: True
+      --  @exclude
       function As_Op_Lte
         (Node : Lkt_Node'Class) return Op_Lte;
-      --% no-document: True
+      --  @exclude
       function As_Op_Minus
         (Node : Lkt_Node'Class) return Op_Minus;
-      --% no-document: True
+      --  @exclude
       function As_Op_Mult
         (Node : Lkt_Node'Class) return Op_Mult;
-      --% no-document: True
+      --  @exclude
       function As_Op_Ne
         (Node : Lkt_Node'Class) return Op_Ne;
-      --% no-document: True
+      --  @exclude
       function As_Op_Or
         (Node : Lkt_Node'Class) return Op_Or;
-      --% no-document: True
+      --  @exclude
       function As_Op_Or_Int
         (Node : Lkt_Node'Class) return Op_Or_Int;
-      --% no-document: True
+      --  @exclude
       function As_Op_Plus
         (Node : Lkt_Node'Class) return Op_Plus;
-      --% no-document: True
+      --  @exclude
       function As_Op_Stream_Concat
         (Node : Lkt_Node'Class) return Op_Stream_Concat;
-      --% no-document: True
+      --  @exclude
       function As_Op_Stream_Cons
         (Node : Lkt_Node'Class) return Op_Stream_Cons;
-      --% no-document: True
+      --  @exclude
       function As_Or_Pattern
         (Node : Lkt_Node'Class) return Or_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Paren_Expr
         (Node : Lkt_Node'Class) return Paren_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Paren_Pattern
         (Node : Lkt_Node'Class) return Paren_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Parse_Node_Expr
         (Node : Lkt_Node'Class) return Parse_Node_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Pattern_Detail_List
         (Node : Lkt_Node'Class) return Pattern_Detail_List;
-      --% no-document: True
+      --  @exclude
       function As_Pattern_List
         (Node : Lkt_Node'Class) return Pattern_List;
-      --% no-document: True
+      --  @exclude
       function As_Pattern_Match_Branch
         (Node : Lkt_Node'Class) return Pattern_Match_Branch;
-      --% no-document: True
+      --  @exclude
       function As_Single_Line_String_Lit
         (Node : Lkt_Node'Class) return Single_Line_String_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Pattern_Single_Line_String_Lit
         (Node : Lkt_Node'Class) return Pattern_Single_Line_String_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Property_Pattern_Detail
         (Node : Lkt_Node'Class) return Property_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       function As_Query
         (Node : Lkt_Node'Class) return Query;
-      --% no-document: True
+      --  @exclude
       function As_Raise_Expr
         (Node : Lkt_Node'Class) return Raise_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Ref_Id
         (Node : Lkt_Node'Class) return Ref_Id;
-      --% no-document: True
+      --  @exclude
       function As_Ref_Id_List
         (Node : Lkt_Node'Class) return Ref_Id_List;
-      --% no-document: True
+      --  @exclude
       function As_Regex_Pattern
         (Node : Lkt_Node'Class) return Regex_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Renaming_Complex_Pattern
         (Node : Lkt_Node'Class) return Renaming_Complex_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Self_Decl
         (Node : Lkt_Node'Class) return Self_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Simple_Type_Ref
         (Node : Lkt_Node'Class) return Simple_Type_Ref;
-      --% no-document: True
+      --  @exclude
       function As_Struct_Decl
         (Node : Lkt_Node'Class) return Struct_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Subscript_Expr
         (Node : Lkt_Node'Class) return Subscript_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Synth_Fun_Decl
         (Node : Lkt_Node'Class) return Synth_Fun_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Synth_Param_Decl
         (Node : Lkt_Node'Class) return Synth_Param_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Synthetic_Lexer_Decl
         (Node : Lkt_Node'Class) return Synthetic_Lexer_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Type_Ref_List
         (Node : Lkt_Node'Class) return Type_Ref_List;
-      --% no-document: True
+      --  @exclude
       function As_Synthetic_Type_Ref_List
         (Node : Lkt_Node'Class) return Synthetic_Type_Ref_List;
-      --% no-document: True
+      --  @exclude
       function As_Token_Lit
         (Node : Lkt_Node'Class) return Token_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Token_No_Case_Lit
         (Node : Lkt_Node'Class) return Token_No_Case_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Token_Pattern_Concat
         (Node : Lkt_Node'Class) return Token_Pattern_Concat;
-      --% no-document: True
+      --  @exclude
       function As_Token_Pattern_Lit
         (Node : Lkt_Node'Class) return Token_Pattern_Lit;
-      --% no-document: True
+      --  @exclude
       function As_Token_Ref
         (Node : Lkt_Node'Class) return Token_Ref;
-      --% no-document: True
+      --  @exclude
       function As_Trait_Decl
         (Node : Lkt_Node'Class) return Trait_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Try_Expr
         (Node : Lkt_Node'Class) return Try_Expr;
-      --% no-document: True
+      --  @exclude
       function As_Type_Pattern
         (Node : Lkt_Node'Class) return Type_Pattern;
-      --% no-document: True
+      --  @exclude
       function As_Un_Op
         (Node : Lkt_Node'Class) return Un_Op;
-      --% no-document: True
+      --  @exclude
       function As_Val_Decl
         (Node : Lkt_Node'Class) return Val_Decl;
-      --% no-document: True
+      --  @exclude
       function As_Var_Bind
         (Node : Lkt_Node'Class) return Var_Bind;
-      --% no-document: True
+      --  @exclude
 
    function Hash
      (Node : Lkt_Node) return Ada.Containers.Hash_Type;

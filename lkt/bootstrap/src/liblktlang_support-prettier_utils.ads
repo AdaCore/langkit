@@ -18,8 +18,6 @@ with GNATCOLL.Traces;
 with Prettier_Ada.Documents;
 
 with Liblktlang_Support.Generic_API; use Liblktlang_Support.Generic_API;
-with Liblktlang_Support.Generic_API.Analysis;
-use Liblktlang_Support.Generic_API.Analysis;
 with Liblktlang_Support.Generic_API.Introspection;
 use Liblktlang_Support.Generic_API.Introspection;
 with Liblktlang_Support.Internal.Unparsing;
@@ -32,12 +30,7 @@ private package Liblktlang_Support.Prettier_Utils is
    package Prettier renames Prettier_Ada.Documents;
    use type Prettier.Symbol_Type;
 
-   package Type_Vectors is new Ada.Containers.Vectors (Positive, Type_Ref);
-
-   function Node_Matches
-     (Node : Lk_Node; Types : Type_Vectors.Vector) return Boolean
-   with Pre => not Node.Is_Null;
-   --  Return whether ``Node`` matches at least one type in ``Types``
+   package Value_Vectors is new Ada.Containers.Vectors (Positive, Value_Ref);
 
    --  The Document_Type data structure serves two joint purposes:
    --
@@ -126,16 +119,10 @@ private package Liblktlang_Support.Prettier_Utils is
    package Document_Vectors is new Ada.Containers.Vectors
      (Positive, Document_Type);
 
-   package Type_Ref_Vectors is new Ada.Containers.Vectors (Positive, Type_Ref);
-
    type Matcher_Record is record
-      Matched_Types : Type_Ref_Vectors.Vector;
-      Document      : Document_Type;
+      Pattern  : Document_Type;
+      Document : Document_Type;
    end record;
-
-   function Matches (Node : Lk_Node; Matcher : Matcher_Record) return Boolean;
-   --  Return if ``Node`` matches at least one type in
-   --  ``Matcher.Matched_Types``.
 
    package Matcher_Vectors is new Ada.Containers.Vectors
      (Index_Type   => Positive,
@@ -161,6 +148,8 @@ private package Liblktlang_Support.Prettier_Utils is
       Indent_Default_Config : constant Config := (True, False);
 
    end Trivias_Bubble_Up;
+
+   type Binary_Operator is (Equal, And_Then, Or_Else);
 
    type Document_Kind is (
 
@@ -200,9 +189,27 @@ private package Liblktlang_Support.Prettier_Utils is
 
       --  Expressions
 
+      Bin_Op,
+      Cast,
+      Eval_Member,
       Is_A,
       Is_Empty,
-      This_Field
+      Node_Symbol,
+      Node_Text,
+      Not_Expr,
+      String_Lit,
+      Symbol_Lit,
+      This_Field,
+      This_Node,
+
+      --  Patterns
+
+      Default_Pattern,
+      Literal_Pattern,
+      Member_Pattern,
+      Node_Pattern,
+      Not_Pattern,
+      Or_Pattern
    );
 
    subtype Template_Conditional_Kind is
@@ -211,13 +218,20 @@ private package Liblktlang_Support.Prettier_Utils is
    --  instantiation.
 
    subtype Template_Expression_Kind is
-     Document_Kind range Is_A .. This_Field;
+     Document_Kind range Bin_Op .. This_Node;
    --  Kind for a document that materializes an expression for conditions in
    --  template instantiation.
 
+   subtype Template_Pattern_Kind is
+     Document_Kind range Default_Pattern .. Or_Pattern;
+   --  Kind for a document that materializes a pattern for "match" templates
+   --  and "is_a" expressions.
+
    subtype Template_Non_Expression_Kind is Document_Kind
    with Static_Predicate =>
-     Template_Non_Expression_Kind not in Template_Expression_Kind;
+     Template_Non_Expression_Kind not in
+       Template_Expression_Kind
+     | Template_Pattern_Kind;
    --  Any node that is not an expression, i.e. a document that will in the end
    --  be expanded and turned into a Prettier document. This is anything but an
    --  expression.
@@ -228,7 +242,8 @@ private package Liblktlang_Support.Prettier_Utils is
        Expected_Line_Breaks
      | Expected_Whitespaces
      | Table
-     | Template_Expression_Kind;
+     | Template_Expression_Kind
+     | Template_Pattern_Kind;
    --  Kind for a document template (i.e. before instantiation)
 
    subtype Instantiated_Template_Document_Kind is Document_Kind
@@ -236,6 +251,7 @@ private package Liblktlang_Support.Prettier_Utils is
      Instantiated_Template_Document_Kind not in
        Template_Conditional_Kind
      | Template_Expression_Kind
+     | Template_Pattern_Kind
      | Recurse
      | Recurse_Field
      | Recurse_Flatten
@@ -368,20 +384,68 @@ private package Liblktlang_Support.Prettier_Utils is
             If_Else      : Document_Type;
 
          when Match =>
-            Match_Field    : Struct_Member_Ref;
+            Match_Node     : Document_Type;
             Match_Matchers : Matcher_Vectors.Vector;
-            Match_Default  : Document_Type;
-            Match_Absent   : Document_Type;
+
+         when Bin_Op =>
+            Bin_Op_Op  : Binary_Operator;
+            Bin_Op_LHS : Document_Type;
+            Bin_Op_RHS : Document_Type;
+
+         when Cast =>
+            Cast_Prefix : Document_Type;
+            Cast_Type   : Type_Ref;
+
+         when Eval_Member =>
+            Eval_Member_Prefix : Document_Type;
+            Eval_Member_Ref    : Struct_Member_Ref;
+            Eval_Member_Args   : Document_Vectors.Vector;
 
          when Is_A =>
-            Is_A_Node  : Document_Type;
-            Is_A_Kinds : Type_Vectors.Vector;
+            Is_A_Node    : Document_Type;
+            Is_A_Pattern : Document_Type;
 
          when Is_Empty =>
             Is_Empty_Node : Document_Type;
 
-         when This_Field =>
+         when Node_Symbol =>
+            Node_Symbol_Node : Document_Type;
+
+         when Node_Text =>
+            Node_Text_Node : Document_Type;
+
+         when Not_Expr =>
+            Not_Expr_Operand : Document_Type;
+
+         when String_Lit =>
+            String_Lit_Value : Value_Ref;
+
+         when Symbol_Lit =>
+            Symbol_Lit_Value : Value_Ref;
+
+         when This_Field | This_Node =>
             null;
+
+         when Default_Pattern =>
+            null;
+
+         when Literal_Pattern =>
+            Literal_Pattern_Value : Value_Ref;
+
+         when Member_Pattern =>
+            Member_Pattern_Ref  : Struct_Member_Ref;
+            Member_Pattern_Args : Document_Vectors.Vector;
+            Member_Pattern_Sub  : Document_Type;
+
+         when Node_Pattern =>
+            Node_Pattern_Type    : Type_Ref;
+            Node_Pattern_Members : Document_Vectors.Vector;
+
+         when Not_Pattern =>
+            Not_Pattern_Sub : Document_Type;
+
+         when Or_Pattern =>
+            Or_Pattern_List : Document_Vectors.Vector;
       end case;
    end record;
 
@@ -434,6 +498,9 @@ private package Liblktlang_Support.Prettier_Utils is
 
    type Document_Pool is limited private;
    --  Allocation pool for ``Document_Type`` nodes
+
+   procedure Initialize (Self : in out Document_Pool; Language : Language_Id);
+   --  Associate a pool to a given language
 
    procedure Refresh_Prettier_Documents (Pool : in out Document_Pool);
    --  Recompute the Prettier ``Document_Type`` values for all nodes in
@@ -610,17 +677,35 @@ private package Liblktlang_Support.Prettier_Utils is
    --  Return an ``If_Then_Else`` node
 
    function Create_Match
-     (Self           : in out Document_Pool;
-      Match_Field    : Struct_Member_Ref;
-      Match_Matchers : in out Matcher_Vectors.Vector;
-      Match_Default  : Document_Type;
-      Match_Absent   : Document_Type) return Document_Type;
+     (Self     : in out Document_Pool;
+      Node     : Document_Type;
+      Matchers : in out Matcher_Vectors.Vector) return Document_Type;
    --  Return an ``Match`` node
 
-   function Create_Is_A
+   function Create_Bin_Op
      (Self  : in out Document_Pool;
-      Node  : Document_Type;
-      Kinds : in out Type_Vectors.Vector) return Document_Type;
+      Op    : Binary_Operator;
+      LHS   : Document_Type;
+      RHS   : Document_Type) return Document_Type;
+   --  Return a ``Bin_Op`` node
+
+   function Create_Cast
+     (Self    : in out Document_Pool;
+      Prefix  : Document_Type;
+      To_Type : Type_Ref) return Document_Type;
+   --  Return a ``Cast`` node
+
+   function Create_Eval_Member
+     (Self   : in out Document_Pool;
+      Prefix : Document_Type;
+      Member : Struct_Member_Ref;
+      Args   : in out Document_Vectors.Vector) return Document_Type;
+   --  Return an ``Eval_Node`` node
+
+   function Create_Is_A
+     (Self    : in out Document_Pool;
+      Node    : Document_Type;
+      Pattern : Document_Type) return Document_Type;
    --  Return an ``Is_A`` node
 
    function Create_Is_Empty
@@ -628,9 +713,67 @@ private package Liblktlang_Support.Prettier_Utils is
       Node : Document_Type) return Document_Type;
    --  Return an ``Is_Empty`` node
 
+   function Create_Node_Symbol
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type;
+   --  Return a ``Node_Symbol`` node
+
+   function Create_Node_Text
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type;
+   --  Return a ``Node_Text`` node
+
+   function Create_Not_Expr
+     (Self    : in out Document_Pool;
+      Operand : Document_Type) return Document_Type;
+   --  Return a ``Not_Expr`` node
+
+   function Create_String_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type;
+   --  Return a ``String_Lit`` node
+
+   function Create_Symbol_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type;
+   --  Return a ``Symbol_Lit`` node
+
    function Create_This_Field
      (Self : in out Document_Pool) return Document_Type;
    --  Return a ``This_Field`` node
+
+   function Create_This_Node
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``This_Node`` node
+
+   function Create_Default_Pattern
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Default_Pattern`` node
+
+   function Create_Literal_Pattern
+     (Self : in out Document_Pool; Value : Value_Ref) return Document_Type;
+   --  Return a ``Literal_Pattern`` node
+
+   function Create_Member_Pattern
+     (Self   : in out Document_Pool;
+      Member : Struct_Member_Ref;
+      Args   : in out Document_Vectors.Vector;
+      Sub    : Document_Type) return Document_Type;
+   --  Return a ``Member_Pattern`` node
+
+   function Create_Node_Pattern
+     (Self      : in out Document_Pool;
+      Node_Type : Type_Ref;
+      Members   : in out Document_Vectors.Vector) return Document_Type;
+   --  Return a ``Node_Pattern`` node
+
+   function Create_Not_Pattern
+     (Self    : in out Document_Pool;
+      Pattern : Document_Type) return Document_Type;
+   --  Return a ``Not_Pattern`` node
+
+   function Create_Or_Pattern
+     (Self     : in out Document_Pool;
+      Patterns : in out Document_Vectors.Vector) return Document_Type;
+   --  Return a ``Or_Pattern`` node
 
    procedure Bubble_Up_Trivias
      (Pool : in out Document_Pool; Document : in out Document_Type);
@@ -654,6 +797,11 @@ private package Liblktlang_Support.Prettier_Utils is
    --
    --  See ``Unparsing_Configuration_Record.Max_Empty_Lines`` for the semantics
    --  of ``Max_Empty_Lines``.
+
+   function Is_Default_Pattern (Document : Document_Type) return Boolean
+   with Pre => Document.Kind in Template_Pattern_Kind;
+   --  Return whether ``Document`` is a pattern that matches all possible
+   --  values.
 
    procedure Dump
      (Document : Document_Type; Trace : GNATCOLL.Traces.Trace_Handle := null);
@@ -767,6 +915,7 @@ private
 
    type Document_Pool is limited record
       Documents : Document_Vectors.Vector;
+      Language  : Language_Id;
 
       --  Some leaf nodes are used so often that allocating singletons rather
       --  than allocating once instance per use saves a lot of memory. We store

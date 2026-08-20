@@ -1,6 +1,7 @@
 
 with Liblktlang_Support.Diagnostics; use Liblktlang_Support.Diagnostics;
 with Liblktlang_Support.Symbols;     use Liblktlang_Support.Symbols;
+with Liblktlang_Support.Text;        use Liblktlang_Support.Text;
 
 with Liblktlang_Support.Internal.Analysis;
 with Liblktlang_Support.Token_Data_Handlers;
@@ -22,6 +23,10 @@ private package Liblktlang.Lexer_Implementation is
    --
    --  In addition, set ``Same_Contents`` to whether if ``Old_TDH`` is not null
    --  and its contents is identical to the content of ``Input``.
+
+   function Canonicalize_Symbol
+     (Symbol : Text_Type) return Symbolization_Result;
+   --  Convenience wrapper around the symbol canonicalizer for this language
 
    function Get_Symbol
      (Token : Token_Or_Trivia_Index;

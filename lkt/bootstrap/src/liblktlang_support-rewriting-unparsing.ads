@@ -95,7 +95,7 @@ package Liblktlang_Support.Rewriting.Unparsing is
       --  Append-only text buffer for the unparsed tree
 
       Last_Token : Token_Kind_Index;
-      --  If Content is not emply, kind of the last token/trivia that was
+      --  If Content is not empty, kind of the last token/trivia that was
       --  unparsed. Undefined otherwise.
    end record;
 
@@ -108,6 +108,14 @@ package Liblktlang_Support.Rewriting.Unparsing is
       Text   : Text_Type)
       with Pre => Text'Length > 0;
    --  Append Text, to unparse the given token Kind, to Buffer
+
+   procedure Clear (Buffer : out Unparsing_Buffer);
+   --  Clear the provided ``Buffer``, removing all its content
+
+   function To_String_Access
+     (Buffer : Unparsing_Buffer; Charset : String) return String_Access;
+   --  Get the content of the provided ``Buffer`` as a newly allocated string
+   --  encoded following ``Charset``.
 
    procedure Unparse
      (Node             : Abstract_Node;

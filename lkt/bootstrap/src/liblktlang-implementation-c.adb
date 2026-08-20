@@ -1488,6 +1488,37 @@ package body Liblktlang.Implementation.C is
       end if;
    end;
 
+   function lkt_copy_last_exception
+     (Exc : lkt_exception_Ptr) return int
+   is
+      Exc_Src : constant lkt_exception_Ptr :=
+        lkt_get_last_exception;
+   begin
+      if Exc_Src = null then
+         return 0;
+      else
+         declare
+            ST_Size : constant Natural := Exc_Src.Stack_Trace.Size;
+         begin
+            Exc.Kind := Exc_Src.Kind;
+            Exc.Information := New_String (Value (Exc_Src.Information));
+            Exc.Stack_Trace :=
+              new Stack_Trace_Record'
+                (Capacity => ST_Size,
+                 Size     => ST_Size,
+                 Items    => Exc_Src.Stack_Trace.Items (1 .. ST_Size));
+            return 1;
+         end;
+      end if;
+   end;
+
+   procedure lkt_free_exception (Exc : lkt_exception_Ptr)
+   is
+   begin
+      Free (Exc.Information);
+      Free (Exc.Stack_Trace);
+   end;
+
    function lkt_exception_name
      (Kind : lkt_exception_kind) return chars_ptr is
    begin
@@ -3199,6 +3230,100 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_lkt_node_p_indexable_trait;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_p_iterable_gen_trait
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Entity_Generic_Decl;
+         begin
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Iterable_Gen_Trait
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                  (Result.Node, Result.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_p_iterable_gen_trait;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_p_iterable_trait
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+
+         declare
+            
+
+            Result : Internal_Entity_Trait_Decl;
+         begin
+            Result := Liblktlang.Impl_0.Lkt_Node_P_Iterable_Trait
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                  (Result.Node, Result.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_p_iterable_trait;
 
 
            
@@ -14033,6 +14158,57 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_lexer_case_rule_send_f_match_size;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_lkt_node_base_list_is_empty_list
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_bool) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Lkt_Node_Base_List then
+
+         declare
+            
+
+            Result : Boolean;
+         begin
+            Result := Liblktlang.Implementation.Is_Empty_List
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   lkt_bool (Boolean'Pos (Result))
+            ;
+
+            return 1;
+         exception
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_lkt_node_base_list_is_empty_list;
 
 
            

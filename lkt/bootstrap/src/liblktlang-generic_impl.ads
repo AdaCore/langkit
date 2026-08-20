@@ -10,7 +10,9 @@ with Liblktlang_Support.Internal;          use Liblktlang_Support.Internal;
 with Liblktlang_Support.Internal.Analysis; use Liblktlang_Support.Internal.Analysis;
 with Liblktlang_Support.Internal.Descriptor;
 use Liblktlang_Support.Internal.Descriptor;
+with Liblktlang.Lexer_Implementation;
 with Liblktlang_Support.Slocs;             use Liblktlang_Support.Slocs;
+with Liblktlang_Support.Symbols;           use Liblktlang_Support.Symbols;
 with Liblktlang_Support.Text;              use Liblktlang_Support.Text;
 with Liblktlang_Support.Token_Data_Handlers;
 use Liblktlang_Support.Token_Data_Handlers;
@@ -731,6 +733,7 @@ private package Liblktlang.Generic_Impl is
    function Node_Token_Start (Node : Internal_Node) return Internal_Token;
    function Node_Token_End (Node : Internal_Node) return Internal_Token;
    function Node_Text (Node : Internal_Node) return Text_Type;
+   function Node_Symbol (Node : Internal_Node) return Symbol_Type;
    function Node_Sloc_Range
      (Node : Internal_Node) return Source_Location_Range;
    function Node_Lookup
@@ -835,6 +838,7 @@ private package Liblktlang.Generic_Impl is
       Node_Token_Start          => Node_Token_Start'Access,
       Node_Token_End            => Node_Token_End'Access,
       Node_Text                 => Node_Text'Access,
+      Node_Symbol               => Node_Symbol'Access,
       Node_Sloc_Range           => Node_Sloc_Range'Access,
       Node_Lookup               => Node_Lookup'Access,
       Node_Last_Attempted_Child => Node_Last_Attempted_Child'Access,
@@ -850,6 +854,7 @@ private package Liblktlang.Generic_Impl is
       Create_Array         => Create_Array'Access,
       Create_Struct        => Create_Struct'Access,
       Eval_Node_Member     => Eval_Node_Member'Access,
-      Is_Managed_Exception => Implementation.Properties_May_Raise'Access);
+      Is_Managed_Exception => Implementation.Properties_May_Raise'Access,
+      Canonicalize_Symbol  => Lexer_Implementation.Canonicalize_Symbol'Access);
 
 end Liblktlang.Generic_Impl;

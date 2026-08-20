@@ -15,7 +15,11 @@ plugin_passes:
   - prelude.generate_prelude_pass
 language_server:
   file_extensions: [".lkt"]
-
+vscode_ext:
+  name: lkt
+  display_name: Lkt
+  description: Extension for the Lkt language
+  publisher: adacore
 extra_docs:
   liblktlang.create_default_provider: |
     Create a default unit provider that is going to use the environment

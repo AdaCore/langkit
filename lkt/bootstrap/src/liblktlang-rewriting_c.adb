@@ -331,6 +331,24 @@ package body Liblktlang.Rewriting_C is
          Set_Last_Exception (Exc);
    end C_Unparse;
 
+   ---------------------------------------
+   -- C_Unparse_With_Partial_Formatting --
+   ---------------------------------------
+
+   procedure C_Unparse_With_Partial_Formatting
+     (Handle : C_Unit_Rewriting_Handle; Result : access lkt_text)
+   is
+      Text : Unbounded_Text_Type;
+   begin
+      Clear_Last_Exception;
+      Text := From_C_Unit_Rewriting_Handle
+        (Handle).Unparse_With_Partial_Formatting;
+      Result.all := Wrap_Alloc (Text);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Unparse_With_Partial_Formatting;
+
    ----------------------
    -- C_Node_To_Handle --
    ----------------------

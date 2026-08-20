@@ -1229,7 +1229,8 @@ typedef enum {
     
 
         /*
-         * Query comprehension. ``from <expr> match <pattern> [if <expr>]``
+         * Query comprehension. ``from <source> match <pattern> [select
+         * <mapping>] [if <guard>]``
          *
          * This node type has no derivation.
          */
@@ -3135,156 +3136,162 @@ typedef enum {
         = 202,
       lkt_member_ref_lkt_node_p_indexable_trait
         = 203,
-      lkt_member_ref_lkt_node_p_token_node_trait
+      lkt_member_ref_lkt_node_p_iterable_gen_trait
         = 204,
-      lkt_member_ref_lkt_node_p_error_node_trait
+      lkt_member_ref_lkt_node_p_iterable_trait
         = 205,
-      lkt_member_ref_lkt_node_p_char_type
+      lkt_member_ref_lkt_node_p_token_node_trait
         = 206,
-      lkt_member_ref_lkt_node_p_int_type
+      lkt_member_ref_lkt_node_p_error_node_trait
         = 207,
-      lkt_member_ref_lkt_node_p_bool_type
+      lkt_member_ref_lkt_node_p_char_type
         = 208,
-      lkt_member_ref_lkt_node_p_bigint_type
+      lkt_member_ref_lkt_node_p_int_type
         = 209,
-      lkt_member_ref_lkt_node_p_string_type
+      lkt_member_ref_lkt_node_p_bool_type
         = 210,
-      lkt_member_ref_lkt_node_p_symbol_type
+      lkt_member_ref_lkt_node_p_bigint_type
         = 211,
-      lkt_member_ref_lkt_node_p_property_error_type
+      lkt_member_ref_lkt_node_p_string_type
         = 212,
-      lkt_member_ref_lkt_node_p_regexp_type
+      lkt_member_ref_lkt_node_p_symbol_type
         = 213,
-      lkt_member_ref_lkt_node_p_entity_gen_type
+      lkt_member_ref_lkt_node_p_property_error_type
         = 214,
-      lkt_member_ref_lkt_node_p_entity_type
+      lkt_member_ref_lkt_node_p_regexp_type
         = 215,
-      lkt_member_ref_lkt_node_p_logicvar_type
+      lkt_member_ref_lkt_node_p_entity_gen_type
         = 216,
-      lkt_member_ref_lkt_node_p_equation_type
+      lkt_member_ref_lkt_node_p_entity_type
         = 217,
-      lkt_member_ref_lkt_node_p_array_gen_type
+      lkt_member_ref_lkt_node_p_logicvar_type
         = 218,
-      lkt_member_ref_lkt_node_p_array_type
+      lkt_member_ref_lkt_node_p_equation_type
         = 219,
-      lkt_member_ref_lkt_node_p_stream_gen_type
+      lkt_member_ref_lkt_node_p_array_gen_type
         = 220,
-      lkt_member_ref_lkt_node_p_stream_type
+      lkt_member_ref_lkt_node_p_array_type
         = 221,
-      lkt_member_ref_lkt_node_p_astlist_gen_type
+      lkt_member_ref_lkt_node_p_stream_gen_type
         = 222,
-      lkt_member_ref_lkt_node_p_astlist_type
+      lkt_member_ref_lkt_node_p_stream_type
         = 223,
-      lkt_member_ref_lkt_node_p_node_builder_gen_type
+      lkt_member_ref_lkt_node_p_astlist_gen_type
         = 224,
-      lkt_member_ref_lkt_node_p_node_builder_type
+      lkt_member_ref_lkt_node_p_astlist_type
         = 225,
-      lkt_member_ref_lkt_node_p_iterator_gen_trait
+      lkt_member_ref_lkt_node_p_node_builder_gen_type
         = 226,
-      lkt_member_ref_lkt_node_p_iterator_trait
+      lkt_member_ref_lkt_node_p_node_builder_type
         = 227,
-      lkt_member_ref_lkt_node_p_analysis_unit_gen_trait
+      lkt_member_ref_lkt_node_p_iterator_gen_trait
         = 228,
-      lkt_member_ref_lkt_node_p_analysis_unit_trait
+      lkt_member_ref_lkt_node_p_iterator_trait
         = 229,
-      lkt_member_ref_lkt_node_p_topmost_invalid_decl
+      lkt_member_ref_lkt_node_p_analysis_unit_gen_trait
         = 230,
-      lkt_member_ref_lkt_node_p_nameres_diagnostics
+      lkt_member_ref_lkt_node_p_analysis_unit_trait
         = 231,
-      lkt_member_ref_lkt_node_p_solve_enclosing_context
+      lkt_member_ref_lkt_node_p_topmost_invalid_decl
         = 232,
-      lkt_member_ref_lkt_node_p_xref_entry_point
+      lkt_member_ref_lkt_node_p_nameres_diagnostics
         = 233,
-      lkt_member_ref_lkt_node_p_complete
+      lkt_member_ref_lkt_node_p_solve_enclosing_context
         = 234,
-      lkt_member_ref_base_import_p_referenced_units
+      lkt_member_ref_lkt_node_p_xref_entry_point
         = 235,
-      lkt_member_ref_base_match_branch_p_match_part
+      lkt_member_ref_lkt_node_p_complete
         = 236,
-      lkt_member_ref_class_qualifier_p_as_bool
+      lkt_member_ref_base_import_p_referenced_units
         = 237,
-      lkt_member_ref_decl_p_custom_image
+      lkt_member_ref_base_match_branch_p_match_part
         = 238,
-      lkt_member_ref_decl_p_decl_type_name
+      lkt_member_ref_class_qualifier_p_as_bool
         = 239,
-      lkt_member_ref_decl_p_def_ids
+      lkt_member_ref_decl_p_custom_image
         = 240,
-      lkt_member_ref_decl_p_as_bare_decl
+      lkt_member_ref_decl_p_decl_type_name
         = 241,
-      lkt_member_ref_decl_p_get_type
+      lkt_member_ref_decl_p_def_ids
         = 242,
-      lkt_member_ref_decl_p_get_cast_type
+      lkt_member_ref_decl_p_as_bare_decl
         = 243,
-      lkt_member_ref_decl_p_get_keep_type
+      lkt_member_ref_decl_p_get_type
         = 244,
-      lkt_member_ref_decl_p_get_suffix_type
+      lkt_member_ref_decl_p_get_cast_type
         = 245,
-      lkt_member_ref_decl_p_is_generic
+      lkt_member_ref_decl_p_get_keep_type
         = 246,
-      lkt_member_ref_decl_p_return_type_is_instantiated
+      lkt_member_ref_decl_p_get_suffix_type
         = 247,
-      lkt_member_ref_decl_p_is_instantiated
+      lkt_member_ref_decl_p_is_generic
         = 248,
-      lkt_member_ref_decl_p_name
+      lkt_member_ref_decl_p_return_type_is_instantiated
         = 249,
-      lkt_member_ref_decl_p_full_name
+      lkt_member_ref_decl_p_is_instantiated
         = 250,
-      lkt_member_ref_fun_decl_p_is_dynamic_combiner
+      lkt_member_ref_decl_p_name
         = 251,
-      lkt_member_ref_fun_decl_p_find_all_overrides
+      lkt_member_ref_decl_p_full_name
         = 252,
-      lkt_member_ref_type_decl_p_def_id
+      lkt_member_ref_fun_decl_p_is_dynamic_combiner
         = 253,
-      lkt_member_ref_type_decl_p_base_type
+      lkt_member_ref_fun_decl_p_find_all_overrides
         = 254,
-      lkt_member_ref_excludes_null_p_as_bool
+      lkt_member_ref_type_decl_p_def_id
         = 255,
-      lkt_member_ref_expr_p_get_type
+      lkt_member_ref_type_decl_p_base_type
         = 256,
-      lkt_member_ref_expr_p_get_generic_type
+      lkt_member_ref_excludes_null_p_as_bool
         = 257,
-      lkt_member_ref_expr_p_get_expected_type
+      lkt_member_ref_expr_p_get_type
         = 258,
-      lkt_member_ref_expr_p_referenced_decl
+      lkt_member_ref_expr_p_get_generic_type
         = 259,
-      lkt_member_ref_token_lit_p_denoted_value
+      lkt_member_ref_expr_p_get_expected_type
         = 260,
-      lkt_member_ref_token_pattern_lit_p_denoted_value
+      lkt_member_ref_expr_p_referenced_decl
         = 261,
-      lkt_member_ref_id_p_custom_image
+      lkt_member_ref_token_lit_p_denoted_value
         = 262,
-      lkt_member_ref_def_id_p_name
+      lkt_member_ref_token_pattern_lit_p_denoted_value
         = 263,
-      lkt_member_ref_def_id_p_get_implementatinons
+      lkt_member_ref_id_p_custom_image
         = 264,
-      lkt_member_ref_def_id_p_decl_detail
+      lkt_member_ref_def_id_p_name
         = 265,
-      lkt_member_ref_def_id_p_completion_item_kind
+      lkt_member_ref_def_id_p_get_implementatinons
         = 266,
-      lkt_member_ref_def_id_p_doc
+      lkt_member_ref_def_id_p_decl_detail
         = 267,
-      lkt_member_ref_def_id_p_find_all_references
+      lkt_member_ref_def_id_p_completion_item_kind
         = 268,
-      lkt_member_ref_ref_id_p_referenced_defining_name
+      lkt_member_ref_def_id_p_doc
         = 269,
-      lkt_member_ref_char_lit_p_denoted_value
+      lkt_member_ref_def_id_p_find_all_references
         = 270,
-      lkt_member_ref_string_lit_p_denoted_value
+      lkt_member_ref_ref_id_p_referenced_defining_name
         = 271,
-      lkt_member_ref_string_lit_p_is_prefixed_string
+      lkt_member_ref_char_lit_p_denoted_value
         = 272,
-      lkt_member_ref_string_lit_p_prefix
+      lkt_member_ref_string_lit_p_denoted_value
         = 273,
-      lkt_member_ref_string_lit_p_is_regexp_literal
+      lkt_member_ref_string_lit_p_is_prefixed_string
         = 274,
-      lkt_member_ref_full_decl_p_has_annotation
+      lkt_member_ref_string_lit_p_prefix
         = 275,
-      lkt_member_ref_null_cond_qualifier_p_as_bool
+      lkt_member_ref_string_lit_p_is_regexp_literal
         = 276,
-      lkt_member_ref_regex_pattern_p_denoted_value
+      lkt_member_ref_full_decl_p_has_annotation
         = 277,
-      lkt_member_ref_type_ref_p_referenced_decl
+      lkt_member_ref_is_empty_list
         = 278,
+      lkt_member_ref_null_cond_qualifier_p_as_bool
+        = 279,
+      lkt_member_ref_regex_pattern_p_denoted_value
+        = 280,
+      lkt_member_ref_type_ref_p_referenced_decl
+        = 281,
 } lkt_introspection_member_ref;
 
 /*
@@ -4331,7 +4338,7 @@ extern int lkt_lkt_node_p_node_trait(
 
 
 /*
- * Unit method. Return the ``Node`` builtin generic trait.
+ * Unit method. Return the ``Indexable`` builtin generic trait.
  */
 extern int lkt_lkt_node_p_indexable_gen_trait(
     lkt_node *node,
@@ -4346,9 +4353,39 @@ extern int lkt_lkt_node_p_indexable_gen_trait(
 
 
 /*
- * Unit method. Return the ``Node`` builtin trait.
+ * Unit method. Return the ``Indexable`` builtin trait.
  */
 extern int lkt_lkt_node_p_indexable_trait(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * Unit method. Return the ``Iterable`` builtin generic trait.
+ */
+extern int lkt_lkt_node_p_iterable_gen_trait(
+    lkt_node *node,
+
+
+    lkt_node *value_p
+);
+
+
+        
+
+
+
+/*
+ * Unit method. Return the ``Iterable`` builtin trait.
+ */
+extern int lkt_lkt_node_p_iterable_trait(
     lkt_node *node,
 
 
@@ -5237,7 +5274,7 @@ extern int lkt_decl_p_get_keep_type(
 
 
 /*
- * Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+ * Return the type of ``E.F`` when ``self`` is the declaration of the ``F``
  * member and ``prefix_type`` is the type of ``E``.
  */
 extern int lkt_decl_p_get_suffix_type(
@@ -5753,7 +5790,7 @@ extern int lkt_type_decl_p_def_id(
  *
  * Note that this includes "logic" base types for covariant types, like
  * ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
- * ``Entity[Child]``.
+ * ``Entity[Child]``).
  */
 extern int lkt_type_decl_p_base_type(
     lkt_node *node,
@@ -8148,6 +8185,21 @@ extern int lkt_lexer_case_rule_send_f_match_size(
 
 
 /*
+ * Return whether this list node has no children.
+ */
+extern int lkt_lkt_node_base_list_is_empty_list(
+    lkt_node *node,
+
+
+    lkt_bool *value_p
+);
+
+
+        
+
+
+
+/*
  * Return whether this node is present
  */
 extern int lkt_null_cond_qualifier_p_as_bool(
@@ -8769,6 +8821,21 @@ extern const lkt_exception *
 lkt_get_last_exception(void);
 
 /*
+ * Return 0 if the last API call returned without error. Otherwise, return 1
+ * and copy exception details into EXC (which must be free'd once done with it:
+ * see ``lkt_free_exception``.
+ */
+extern const int
+lkt_copy_last_exception(lkt_exception *exc);
+
+/*
+ * Free resources allocated with EXC (to be used only for exception data
+ * created by ``lkt_copy_last_exception``.
+ */
+extern void
+lkt_free_last_exception(lkt_exception *exc);
+
+/*
  * Return the name of the given exception kind. Callers are responsible for
  * free'ing the result.
  */
@@ -8963,6 +9030,16 @@ lkt_rewriting_unit_set_root(
  */
 extern void
 lkt_rewriting_unit_unparse(
+    lkt_unit_rewriting_handle handle,
+    lkt_text *result
+);
+
+/*
+ * Return the text associated to the given unit with modified parts formatted
+ * if possible.
+ */
+extern void
+lkt_rewriting_unit_unparse_with_partial_formatting(
     lkt_unit_rewriting_handle handle,
     lkt_text *result
 );

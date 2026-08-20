@@ -249,7 +249,7 @@ function Lkt_Node_P_Indexable_Gen_Trait
 
    
    ;
---  Unit method. Return the ``Node`` builtin generic trait.
+--  Unit method. Return the ``Indexable`` builtin generic trait.
 
 
 
@@ -268,7 +268,45 @@ function Lkt_Node_P_Indexable_Trait
 
    
    ;
---  Unit method. Return the ``Node`` builtin trait.
+--  Unit method. Return the ``Indexable`` builtin trait.
+
+
+
+
+      
+
+
+
+
+function Lkt_Node_P_Iterable_Gen_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Generic_Decl
+
+   
+   ;
+--  Unit method. Return the ``Iterable`` builtin generic trait.
+
+
+
+
+      
+
+
+
+
+function Lkt_Node_P_Iterable_Trait
+   
+  (Node : Bare_Lkt_Node
+  )
+
+   return Internal_Entity_Trait_Decl
+
+   
+   ;
+--  Unit method. Return the ``Iterable`` builtin trait.
 
 
 
@@ -2149,7 +2187,7 @@ function Decl_P_Get_Suffix_Type
 
    
    ;
---  Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
+--  Return the type of ``E.F`` when ``self`` is the declaration of the ``F``
 --  member and ``prefix_type`` is the type of ``E``.
 
 
@@ -2536,7 +2574,7 @@ function Decl_P_Instantiate_Generic_Decl
 
 
 
-function Decl_P_Get_Rebinded_Decl
+function Decl_P_Get_Rebound_Decl
    
   (Node : Bare_Decl
       ; Rebindings_Env : Lexical_Env
@@ -2919,6 +2957,33 @@ function Decl_P_Unmatched_Argument
 ;
 
    overriding function Image (Self : Decl_P_Unmatched_Argument_0_Predicate) return String;
+
+
+      
+
+
+
+
+function Decl_P_Is_Equivalent_Decl
+   
+  (Node : Bare_Decl
+      ; Other : Internal_Entity_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+
+   
+   ;
+--  Return whether ``self`` and ``other`` are equivalent generic
+--  instantiations.
+--
+--  The same generic declaration can be instantiated several times with
+--  structurally equivalent (but different) rebindings: this performs a
+--  structural comparison.
+
+
 
 
       
@@ -4205,7 +4270,7 @@ function Generic_Decl_P_Instantiated_Generic_Params
 
    
    ;
-
+--  Return the list of types used to instantiate this generic declaration
 
 
 
@@ -4766,7 +4831,7 @@ function Dispatcher_Type_Decl_P_Base_Type
 --
 --  Note that this includes "logic" base types for covariant types, like
 --  ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
---  ``Entity[Child]``.
+--  ``Entity[Child]``).
 
 
 
@@ -5133,6 +5198,30 @@ function Type_Decl_P_Is_Stream
 
 
 
+function Type_Decl_P_Get_Instantiation_Type
+   
+  (Node : Bare_Type_Decl
+      ; Gen_Type : Internal_Entity_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Type_Decl
+
+   
+   ;
+--  Helper for the ``get_*_type`` methods below: if ``self`` is an
+--  instantiation of ``gen_type``, return the type with which it was
+--  instantiated. Return ``self`` otherwise.
+
+
+
+
+      
+
+
+
+
 function Type_Decl_P_Get_Entity_Node_Type
    
   (Node : Bare_Type_Decl
@@ -5144,8 +5233,8 @@ function Type_Decl_P_Get_Entity_Node_Type
 
    
    ;
---  Get the type parameter used to rebind the Entity type declaration if Self
---  is the entity type.
+--  If ``self`` is an instantiation of ``Entity``, return the type with which
+--  it was instantiated. Return ``self`` otherwise.
 
 
 
@@ -5155,7 +5244,7 @@ function Type_Decl_P_Get_Entity_Node_Type
 
 
 
-function Type_Decl_P_Is_Subtype_Or_Eq
+function Type_Decl_P_Is_Subtype_Pred
    
   (Node : Bare_Type_Decl
       ; Rhs : Internal_Entity_Type_Decl
@@ -5172,7 +5261,7 @@ function Type_Decl_P_Is_Subtype_Or_Eq
 
 
          
-   type Type_Decl_P_Is_Subtype_Or_Eq_0_Predicate is new Solver_Ifc.N_Predicate_Type with record
+   type Type_Decl_P_Is_Subtype_Pred_0_Predicate is new Solver_Ifc.N_Predicate_Type with record
          Error_Location : Bare_Lkt_Node;
    end record
    with First_Controlling_Parameter;
@@ -5180,31 +5269,31 @@ function Type_Decl_P_Is_Subtype_Or_Eq
    
    
 
-   function Create_Type_Decl_P_Is_Subtype_Or_Eq_0_Predicate
+   function Create_Type_Decl_P_Is_Subtype_Pred_0_Predicate
    (
          N : Positive;
          Error_Location : Bare_Lkt_Node
    )
-      return Type_Decl_P_Is_Subtype_Or_Eq_0_Predicate
+      return Type_Decl_P_Is_Subtype_Pred_0_Predicate
 ;
 
    
    overriding function Call
-     (Self : Type_Decl_P_Is_Subtype_Or_Eq_0_Predicate;
+     (Self : Type_Decl_P_Is_Subtype_Pred_0_Predicate;
          Entities : Entity_Vars.Value_Array
      ) return Boolean
 ;
 
    
    overriding procedure Failed
-     (Self : Type_Decl_P_Is_Subtype_Or_Eq_0_Predicate;
+     (Self : Type_Decl_P_Is_Subtype_Pred_0_Predicate;
          Entities : Entity_Vars.Value_Array;
       Ctxs    : Solver_Ifc.Logic_Context_Array;
       Round   : Natural;
       Emitter : Solver_Ifc.Diagnostic_Emitter)
 ;
 
-   overriding function Image (Self : Type_Decl_P_Is_Subtype_Or_Eq_0_Predicate) return String;
+   overriding function Image (Self : Type_Decl_P_Is_Subtype_Pred_0_Predicate) return String;
 
 
       
@@ -5358,7 +5447,7 @@ function Type_Decl_P_Commutative_Matching_Type
 
    
    ;
---  Return true if Self and other are matching type that can be permutated.
+--  Return true if Self and other are matching type that can be permuted.
 
 
 
@@ -5493,28 +5582,6 @@ function Type_Decl_P_Could_Determine_Type
 
 
 
-function Type_Decl_P_Matching_Generic_Types
-   
-  (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-
-   
-   ;
---  Return true if Self and other are matcing generic types.
-
-
-
-
-      
-
-
-
-
 function Type_Decl_P_Matching_Type
    
   (Node : Bare_Type_Decl
@@ -5527,7 +5594,7 @@ function Type_Decl_P_Matching_Type
 
    
    ;
---  Return true if Self and other are matching types.
+--  Return true if ``other`` matches ``self``
 
 
 
@@ -5695,6 +5762,64 @@ function Type_Decl_P_Matching_Logic_Type
 ;
 
    overriding function Image (Self : Type_Decl_P_Matching_Logic_Type_1_Predicate) return String;
+
+
+      
+
+
+
+
+function Type_Decl_P_Has_Trait
+   
+  (Node : Bare_Type_Decl
+      ; Tr : Internal_Entity_Trait_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+
+   
+   ;
+--  Return whether this type declaration implements the provided trait.
+
+
+
+         
+   type Type_Decl_P_Has_Trait_0_Predicate is new Solver_Ifc.Predicate_Type with record
+         Field_0 : Internal_Entity_Trait_Decl;
+         Error_Location : Bare_Lkt_Node;
+   end record
+   with First_Controlling_Parameter;
+
+   
+   
+
+   function Create_Type_Decl_P_Has_Trait_0_Predicate
+   (
+         Tr : Internal_Entity_Trait_Decl;
+         Error_Location : Bare_Lkt_Node
+   )
+      return Type_Decl_P_Has_Trait_0_Predicate
+;
+
+   
+   overriding function Call
+     (Self : Type_Decl_P_Has_Trait_0_Predicate;
+         Entity : Internal_Entity
+     ) return Boolean
+;
+
+   
+   overriding procedure Failed
+     (Self : Type_Decl_P_Has_Trait_0_Predicate;
+         Entity : Internal_Entity;
+      Ctxs    : Solver_Ifc.Logic_Context_Array;
+      Round   : Natural;
+      Emitter : Solver_Ifc.Diagnostic_Emitter)
+;
+
+   overriding function Image (Self : Type_Decl_P_Has_Trait_0_Predicate) return String;
 
 
       
@@ -6186,6 +6311,53 @@ function Type_Decl_P_Make_Stream_Type
 
 
 
+function Type_Decl_P_Make_Stream_Of_Common_Ancestor
+   
+  (Node : Bare_Type_Decl
+      ; Other_Type : Internal_Entity_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Internal_Entity_Type_Decl
+
+   
+   ;
+--  For a stream type declaration and another one, create a new stream type
+--  instantiated with the common ancestor of ``self`` elements type and
+--  ``other_type``.
+
+
+
+
+         
+   type Type_Decl_P_Make_Stream_Of_Common_Ancestor_0_Functor is new Solver_Ifc.Combiner_Type with
+      null record
+   with First_Controlling_Parameter;
+
+   
+   overriding function Combine (
+      Self : Type_Decl_P_Make_Stream_Of_Common_Ancestor_0_Functor;
+         Vals : Entity_Vars.Value_Array
+   ) return Internal_Entity
+ with Inline;
+   overriding function Image (Self : Type_Decl_P_Make_Stream_Of_Common_Ancestor_0_Functor) return String;
+
+
+   
+   
+   function Create_Type_Decl_P_Make_Stream_Of_Common_Ancestor_0_Functor
+   (
+         N : Positive
+   )
+     return Type_Decl_P_Make_Stream_Of_Common_Ancestor_0_Functor
+;
+
+      
+
+
+
+
 function Type_Decl_P_Get_Indexable_Content_Type
    
   (Node : Bare_Type_Decl
@@ -6263,7 +6435,7 @@ function Type_Decl_P_Basic_Trait_From_Self
 
    
    ;
---  Return a rebinded version of BasicTrait, in order to allow for all types to
+--  Return a rebound version of BasicTrait, in order to allow for all types to
 --  have builtins (do, singleton...) in their environment.
 
 
@@ -6341,7 +6513,7 @@ function Dispatcher_Type_Decl_P_Is_Subtype
       with
         Inline_Always
    ;
---  Return true if Self is a subtype of other.
+--  Return true if ``self`` is a subtype of ``other``.
 
 
 
@@ -6372,6 +6544,29 @@ function Type_Decl_P_Common_Ancestor
 
 
 
+
+         
+   type Type_Decl_P_Common_Ancestor_0_Functor is new Solver_Ifc.Combiner_Type with
+      null record
+   with First_Controlling_Parameter;
+
+   
+   overriding function Combine (
+      Self : Type_Decl_P_Common_Ancestor_0_Functor;
+         Vals : Entity_Vars.Value_Array
+   ) return Internal_Entity
+ with Inline;
+   overriding function Image (Self : Type_Decl_P_Common_Ancestor_0_Functor) return String;
+
+
+   
+   
+   function Create_Type_Decl_P_Common_Ancestor_0_Functor
+   (
+         N : Positive
+   )
+     return Type_Decl_P_Common_Ancestor_0_Functor
+;
 
       
 
@@ -6438,7 +6633,7 @@ function Type_Decl_P_Base_Type
 --
 --  Note that this includes "logic" base types for covariant types, like
 --  ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
---  ``Entity[Child]``.
+--  ``Entity[Child]``).
 
 
 
@@ -6460,7 +6655,7 @@ function Type_Decl_P_Is_Subtype
 
    
    ;
---  Return true if Self is a subtype of other.
+--  Return true if ``self`` is a subtype of ``other``.
 
 
 
@@ -6520,28 +6715,6 @@ function Enum_Class_Alt_Decl_P_Decl_Type_Name
   )
 
    return String_Type
-
-   
-   ;
-
-
-
-
-
-      
-
-
-
-
-function Enum_Class_Alt_Decl_P_Is_Subtype
-   
-  (Node : Bare_Enum_Class_Alt_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
 
    
    ;
@@ -6653,6 +6826,28 @@ function Function_Type_P_Defined_Scope
    
    ;
 --  ``Origin``: Origin node of the request.
+
+
+
+
+      
+
+
+
+
+function Function_Type_P_Is_Subtype
+   
+  (Node : Bare_Function_Type
+      ; Other : Internal_Entity_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+
+   
+   ;
+
 
 
 
@@ -6827,28 +7022,6 @@ function Named_Type_Decl_P_Defined_Scope
    
    ;
 --  ``Origin``: Origin node of the request.
-
-
-
-
-      
-
-
-
-
-function Basic_Class_Decl_P_Is_Subtype
-   
-  (Node : Bare_Basic_Class_Decl
-      ; Other : Internal_Entity_Type_Decl
-   ; E_Info : Internal_Entity_Info :=
-      No_Entity_Info
-  )
-
-   return Boolean
-
-   
-   ;
-
 
 
 
@@ -10018,6 +10191,48 @@ function Paren_Expr_P_Has_Context_Free_Type
 
 
 
+function Query_P_Xref_Equation
+   
+  (Node : Bare_Query
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Logic_Equation
+
+   
+   ;
+
+
+
+
+
+      
+
+
+
+
+function Query_P_Has_Context_Free_Type
+   
+  (Node : Bare_Query
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+   return Boolean
+
+   
+   ;
+
+
+
+
+
+      
+
+
+
+
 function Raise_Expr_P_Xref_Equation
    
   (Node : Bare_Raise_Expr
@@ -10433,25 +10648,6 @@ function Op_P_Is_Arith_Op
 
 
 function Op_P_Is_Order_Op
-   
-  (Node : Bare_Op
-  )
-
-   return Boolean
-
-   
-   ;
-
-
-
-
-
-      
-
-
-
-
-function Op_P_Is_Commutative
    
   (Node : Bare_Op
   )
