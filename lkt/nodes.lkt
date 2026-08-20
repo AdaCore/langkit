@@ -4662,7 +4662,7 @@ class RefId: Id implements TokenNode, ReferenceInterface{
     @exported
     fun referenced_defining_name(): Entity[DefId]
             implements ReferenceInterface.referenced_defining_name =
-        self.referenced_decl().syn_name
+        self.referenced_decl()?.syn_name
 
     fun generic_type_equation(): Equation =
         # Assign the generic type
