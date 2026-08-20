@@ -134,11 +134,32 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
 
     if exc_wrap:
         def wrapper(*args, **kwargs):
+            exc = _Exception()
+            exc_ref = ctypes.byref(exc)
             check_argcount(args, kwargs)
             result = func(*args, **kwargs)
-            exc = _get_last_exception()
-            if exc:
-                raise exc.contents._wrap()
+            # Do not use the "get_last_exception" API so that getting exception
+            # details + checking if there is an exception is done atomically.
+            #
+            # We used to have::
+            #
+            #    result = func(*args, **kwargs)
+            #    exc = _get_last_exception()
+            #    if exc:
+            #        ...
+            #
+            # But starting with Python 3.13.14, the GC could trigger during the
+            # evaluation of "if exc:". As a result, exc could contain an
+            # exception, but the GC would trigger the destruction of an object,
+            # which would itself call a C API destructor, which would clear
+            # exception information, leading to a crash in _Exception._wrap().
+            # "_copy_last_exception" is more atomic: it copies exception
+            # information and return whether there is an exception at the same
+            # time, so the GC does not run in between.
+            if _copy_last_exception(exc_ref):
+                py_exc = exc._wrap()
+                _free_exception(exc_ref)
+                raise py_exc
             return result
     else:
         def wrapper(*args, **kwargs):
@@ -191,10 +212,17 @@ def _log_uncaught_error(context):
     traceback.print_exc()
 
 
-_get_last_exception = _import_func(
-   '${capi.get_name("get_last_exception")}',
-   [], ctypes.POINTER(_Exception),
-   exc_wrap=False
+_copy_last_exception = _import_func(
+   '${capi.get_name("copy_last_exception")}',
+   [ctypes.POINTER(_Exception)],
+   ctypes.c_int,
+   exc_wrap=False,
+)
+_free_exception = _import_func(
+   '${capi.get_name("free_exception")}',
+   [ctypes.POINTER(_Exception)],
+   None,
+   exc_wrap=False,
 )
 
 

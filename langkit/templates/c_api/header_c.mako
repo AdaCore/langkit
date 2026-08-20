@@ -742,6 +742,14 @@ ${c_doc('langkit.get_last_exception')}
 extern const ${exception_type} *
 ${capi.get_name('get_last_exception')}(void);
 
+${c_doc('langkit.copy_last_exception')}
+extern const int
+${capi.get_name('copy_last_exception')}(${exception_type} *exc);
+
+${c_doc('langkit.free_exception')}
+extern void
+${capi.get_name('free_last_exception')}(${exception_type} *exc);
+
 ${c_doc('langkit.exception_name')}
 extern char *
 ${capi.get_name('exception_name')}(${exception_kind_type} kind);
