@@ -1,0 +1,6 @@
+val b = true
+
+# Test that binding patterns in "not patterns" aren't accessible outside
+val _ = b is x@(not true) when x
+val _ = b is not (x@true when x)
+val _ = b is (not x@true) when x

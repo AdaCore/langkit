@@ -1,0 +1,17 @@
+class A {
+    field: Int = 1
+}
+class B: A {
+    other_field: Bool = true
+}
+class C: A {
+    other_field: String = "hello"
+}
+
+val a = A()
+
+# Test that binding in "or patterns" aren't accessible outside
+val _ = a is x@(B | C) when x.field == 1
+val _ = a is (x@B when x.other_field | C)
+val _ = a is (x@B | C) when x.field == 1
+val _ = a is (x@B | (C when x.field == 1))

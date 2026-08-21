@@ -1,0 +1,65 @@
+Resolving test.lkt
+==================
+Decl <ValDecl "b" test.lkt:1:1-1:13>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "true" test.lkt:1:9-1:13>
+        has_type <EnumTypeDecl prelude: "Bool">
+        references <EnumLitDecl prelude: "true">
+
+Decl <ValDecl "_" test.lkt:4:1-4:33>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:4:9-4:33>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "b" test.lkt:4:9-4:10>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <ValDecl "b" test.lkt:1:1-1:13>
+
+      Decl <BindingValDecl "x" test.lkt:4:14-4:15>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "x" test.lkt:4:32-4:33>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <BindingValDecl "x" test.lkt:4:14-4:15>
+
+Decl <ValDecl "_" test.lkt:5:1-5:33>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:5:9-5:33>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "b" test.lkt:5:9-5:10>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <ValDecl "b" test.lkt:1:1-1:13>
+
+      Decl <BindingValDecl "x" test.lkt:5:19-5:20>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "x" test.lkt:5:31-5:32>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <BindingValDecl "x" test.lkt:5:19-5:20>
+
+Decl <ValDecl "_" test.lkt:6:1-6:33>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:6:9-6:33>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "b" test.lkt:6:9-6:10>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <ValDecl "b" test.lkt:1:1-1:13>
+
+<ComplexPattern test.lkt:6:14-6:33> failed nameres:
+test.lkt:6:32-6:33: error: undefined entity
+ 6 | val _ = b is (not x@true) when x
+   |                                ^ 
+
+      Decl <BindingValDecl "x" test.lkt:6:19-6:20>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "x" test.lkt:6:32-6:33>
+           has_type None
+           references None
+
