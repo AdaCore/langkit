@@ -72,6 +72,6 @@ ext_config = ctx.config.vscode_ext
     "@typescript-eslint/parser": "^7.11.0",
     "eslint": "^8.57.0",
     "typescript": "^5.4.5",
-    "@vscode/vsce": "^2.15.0"
+    "@vscode/vsce": "^3.9.2"
   }
 }
