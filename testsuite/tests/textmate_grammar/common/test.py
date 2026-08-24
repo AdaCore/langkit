@@ -13,7 +13,7 @@ def main(ctx):
             ctx.config.emission.library_directory,
             "vscode_ext",
             "syntaxes",
-            "Foo.tmLanguage.json",
+            "Foo.tmGrammar.json",
         )
         if os.path.isfile(textmate_grammar_filename):
             with open(textmate_grammar_filename, "r") as f:

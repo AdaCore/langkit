@@ -1269,7 +1269,7 @@ class Emitter:
         self.write_source_file(
             os.path.join(
                 self.vscode_syntaxes_dir,
-                f"{ctx.config.library.language_name.camel}.tmLanguage.json",
+                f"{ctx.config.library.language_name.camel}.tmGrammar.json",
             ),
             code,
             None,
