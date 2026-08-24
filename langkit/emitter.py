@@ -1258,6 +1258,32 @@ class Emitter:
                 os.path.join(export_dir, export_file), code, None
             )
 
+    def copy_language_config(self, ctx: CompileCtx) -> None:
+        """
+        Copy the language configuration provided through the language config to
+        the generated VSCode extension directory.
+        """
+        # Assert that the language configuraiton exists
+        assert ctx.config.vscode_ext is not None
+        assert ctx.config.vscode_ext.language_config_file is not None
+
+        source = os.path.join(
+            ctx.extensions_dir, ctx.config.vscode_ext.language_config_file
+        )
+        target = os.path.join(
+            self.vscode_ext_dir,
+            ctx.config.library.language_name.camel
+            + "-language-configuration.json",
+        )
+
+        # Read the source configuration
+        language_config_content = None
+        with open(source, "r") as f:
+            language_config_content = f.read()
+
+        # Write the target file with the language configuration
+        self.write_source_file(target, language_config_content, None)
+
     def emit_textmate_grammar(self, ctx: CompileCtx) -> None:
         """
         Generate the TextMate grammar file.
