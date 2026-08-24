@@ -2708,7 +2708,7 @@ class CompileCtx:
             and self.config.vscode_ext.textmate_config_file is not None
         )
 
-        # Create the list of passes to generate the VScode extension
+        # Create the list of passes to generate the VSCode extension
         res = [
             *self.start_code_emission_passes,
             EmitterPass(

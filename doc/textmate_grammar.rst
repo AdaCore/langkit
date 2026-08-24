@@ -2,7 +2,7 @@
 TextMate Grammar Generation
 ***************************
 
-When generating a VScode extension for a language, Langkit can also generate a
+When generating a VSCode extension for a language, Langkit can also generate a
 TextMate grammar to enable syntactic coloration for it.
 
 To enable the TextMate grammar generation, you just have to provide a
