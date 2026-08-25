@@ -4,9 +4,24 @@ include:
   - component: $CI_SERVER_FQDN/eng/gitlab-templates/pre-commit@~latest
     inputs:
       stage: single
+  - component: $CI_SERVER_FQDN/it/gitlab-templates/thirdparties-bundles@~latest
+    inputs:
+      prepare_deploy_stage: "deploy"
+      deploy_stage: "deploy"
+      job_with_bundle_generation_artifacts: "create_extension_lock_file"
+      allow_audit_failure: "true"
+      job_with_bundle_generation_artifacts_rules:
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+          when: manual
+        # - if: '$CI_COMMIT_BRANCH != "master"'
+        #   when: never
+        # - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "web"'
+        #   when: manual
 
 stages:
   - single
+  - vscode_ext
+  - deploy
 
 
 ###############
@@ -110,3 +125,44 @@ libadalang_build_and_test:
 continuous_builder:
   extends: .cb
   stage: single
+
+##############################
+# CREATE_EXTENSION_LOCK_FILE #
+##############################
+
+create_extension_lock_file:
+  extends: .basic
+  stage: vscode_ext
+  needs: []
+  services:
+    - image:pe-base
+    - cpu:16
+    - mem:16
+    - security_group:GitLabRunnerTasksExecPrivilegedSG
+  script:
+    - generic_anod_ci
+    - . /tmp/ci_env.sh
+    - anod build lkt-vscode-extension
+    - BUILD_DIR=$(anod info build lkt-vscode-extension --show working_dir)/build
+    - cp $BUILD_DIR/lkt_build/vscode_ext/package.json package.json
+    - cp $BUILD_DIR/lkt_build/vscode_ext/package-lock.json package-lock.json
+    - echo "BUNDLE_NAME=lkt-vscode-extension_npm-cache-$(date '+%Y%m%d')" >> variables.env
+    - echo "PACKAGE_TYPE=node" >> variables.env
+    - echo "PACKAGES_FILE=package.json" >> variables.env
+  rules:
+    # Run this on demand for merge requests only
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+    # For security reasons, the Privileged security group is only granted to the
+    # master branch. Considering we only want to create a new bundle when
+    # updating the vscode extension dependencies, we make the job run manually.
+    # - if: '$CI_COMMIT_BRANCH != "master"'
+    #   when: never
+    # - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "web"'
+    #   when: manual
+  artifacts:
+    reports:
+      dotenv: variables.env
+    paths:
+      - package.json
+      - package-lock.json
