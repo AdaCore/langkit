@@ -1069,19 +1069,13 @@ package Liblktlang.Rewriting is
 
          function Create_Ellipsis_Pattern
            (Handle : Rewriting_Handle
-               ; F_Binding : Node_Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
          function Create_List_Pattern
            (Handle : Rewriting_Handle
                ; F_Sub_Patterns : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Not_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Sub_Pattern : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;
 
 
@@ -1093,6 +1087,18 @@ package Liblktlang.Rewriting is
 
 
          function Create_Paren_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Scoped_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Not_Pattern
            (Handle : Rewriting_Handle
                ; F_Sub_Pattern : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle;

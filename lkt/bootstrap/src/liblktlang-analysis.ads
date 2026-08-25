@@ -272,12 +272,12 @@ package Liblktlang.Analysis is
       --  The only patterns that are currently used and implemented in Lkt's
       --  IsA are ``OrPattern`` and ``TypePattern``.
       --
-      --  Derived nodes: :ada:ref:`Any_Type_Pattern`, :ada:ref:`Bool_Pattern`,
-      --  :ada:ref:`Complex_Pattern`, :ada:ref:`Ellipsis_Pattern`,
+      --  Derived nodes: :ada:ref:`Any_Type_Pattern`,
+      --  :ada:ref:`Binding_Pattern`, :ada:ref:`Bool_Pattern`,
       --  :ada:ref:`Integer_Pattern`, :ada:ref:`List_Pattern`,
-      --  :ada:ref:`Not_Pattern`, :ada:ref:`Null_Pattern`,
-      --  :ada:ref:`Or_Pattern`, :ada:ref:`Paren_Pattern`,
-      --  :ada:ref:`Regex_Pattern`, :ada:ref:`Type_Pattern`
+      --  :ada:ref:`Null_Pattern`, :ada:ref:`Or_Pattern`,
+      --  :ada:ref:`Paren_Pattern`, :ada:ref:`Regex_Pattern`,
+      --  :ada:ref:`Scoped_Pattern`, :ada:ref:`Type_Pattern`
 
       type Any_Type_Pattern is new Pattern with private
          with First_Controlling_Parameter
@@ -445,6 +445,15 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
+      type Binding_Pattern is new Pattern with private
+         with First_Controlling_Parameter
+      ;
+      --  Base of all patterns that may introduce a new binding in the lexical
+      --  environment.
+      --
+      --  Derived nodes: :ada:ref:`Complex_Pattern`,
+      --  :ada:ref:`Ellipsis_Pattern`
+
       type User_Val_Decl is new Base_Val_Decl with private
          with First_Controlling_Parameter
       ;
@@ -597,7 +606,7 @@ package Liblktlang.Analysis is
       ;
       --  This node type has no derivation.
 
-      type Complex_Pattern is new Pattern with private
+      type Complex_Pattern is new Binding_Pattern with private
          with First_Controlling_Parameter
       ;
       --  Composition of any of the following components:
@@ -754,7 +763,7 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Ellipsis_Pattern is new Pattern with private
+      type Ellipsis_Pattern is new Binding_Pattern with private
          with First_Controlling_Parameter
       ;
       --  Pattern to match any remaining number of elements in a list pattern.
@@ -1511,7 +1520,15 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Not_Pattern is new Pattern with private
+      type Scoped_Pattern is new Pattern with private
+         with First_Controlling_Parameter
+      ;
+      --  A pattern that introduce a new lexical environment and delegate the
+      --  matching logic to its subpattern.
+      --
+      --  Derived nodes: :ada:ref:`Not_Pattern`
+
+      type Not_Pattern is new Scoped_Pattern with private
          with First_Controlling_Parameter
       ;
       --  Pattern that matches if its inner pattern doesn't match.
@@ -1723,8 +1740,7 @@ package Liblktlang.Analysis is
       --  List of Pattern.
       --
       --  This list node can contain one of the following nodes:
-      --  :ada:ref:`Complex_Pattern`, :ada:ref:`Ellipsis_Pattern`,
-      --  :ada:ref:`Not_Pattern`
+      --  :ada:ref:`Binding_Pattern`, :ada:ref:`Not_Pattern`
       --
       --  This node type has no derivation.
 
@@ -2026,6 +2042,8 @@ package Liblktlang.Analysis is
       --  @exclude
       No_Bin_Op : constant Bin_Op;
       --  @exclude
+      No_Binding_Pattern : constant Binding_Pattern;
+      --  @exclude
       No_User_Val_Decl : constant User_Val_Decl;
       --  @exclude
       No_Binding_Val_Decl : constant Binding_Val_Decl;
@@ -2287,6 +2305,8 @@ package Liblktlang.Analysis is
       No_Node_Decl : constant Node_Decl;
       --  @exclude
       No_Not_Expr : constant Not_Expr;
+      --  @exclude
+      No_Scoped_Pattern : constant Scoped_Pattern;
       --  @exclude
       No_Not_Pattern : constant Not_Pattern;
       --  @exclude
@@ -4255,6 +4275,20 @@ package Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Decl
+     (Node : Binding_Pattern'Class) return Binding_Val_Decl;
+   --  This field may be null even when there are no parsing errors.
+   --  @belongs-to Binding_Pattern
+
+
+
+
+
+
+
 
 
 
@@ -4528,15 +4562,6 @@ package Liblktlang.Analysis is
 
 
 
-
-
-         
-   
-
-   function F_Decl
-     (Node : Complex_Pattern'Class) return Binding_Val_Decl;
-   --  This field may be null even when there are no parsing errors.
-   --  @belongs-to Complex_Pattern
 
 
          
@@ -4875,15 +4900,6 @@ package Liblktlang.Analysis is
 
 
 
-
-
-         
-   
-
-   function F_Binding
-     (Node : Ellipsis_Pattern'Class) return Id;
-   --  This field may be null even when there are no parsing errors.
-   --  @belongs-to Ellipsis_Pattern
 
 
 
@@ -6436,8 +6452,7 @@ package Liblktlang.Analysis is
    function F_Sub_Patterns
      (Node : List_Pattern'Class) return Pattern_List;
    --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Complex_Pattern`, :ada:ref:`Ellipsis_Pattern`,
-   --  :ada:ref:`Not_Pattern`
+   --  nodes: :ada:ref:`Binding_Pattern`, :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
    --  @belongs-to List_Pattern
@@ -6775,12 +6790,18 @@ package Liblktlang.Analysis is
    
 
    function F_Sub_Pattern
-     (Node : Not_Pattern'Class) return Pattern;
+     (Node : Scoped_Pattern'Class) return Pattern;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
-   --  @belongs-to Not_Pattern
+   --  @belongs-to Scoped_Pattern
+
+
+
+
+
 
 
 
@@ -6936,10 +6957,7 @@ package Liblktlang.Analysis is
    
 
    function F_Left_Sub_Pattern
-     (Node : Or_Pattern'Class) return Pattern;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
-   --
+     (Node : Or_Pattern'Class) return Scoped_Pattern;
    --  When there are no parsing errors, this field is never null.
    --  @belongs-to Or_Pattern
 
@@ -6948,11 +6966,7 @@ package Liblktlang.Analysis is
    
 
    function F_Right_Sub_Pattern
-     (Node : Or_Pattern'Class) return Pattern;
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Or_Pattern`
-   --
+     (Node : Or_Pattern'Class) return Scoped_Pattern;
    --  When there are no parsing errors, this field is never null.
    --  @belongs-to Or_Pattern
 
@@ -7963,6 +7977,9 @@ package Liblktlang.Analysis is
       function As_Bin_Op
         (Node : Lkt_Node'Class) return Bin_Op;
       --  @exclude
+      function As_Binding_Pattern
+        (Node : Lkt_Node'Class) return Binding_Pattern;
+      --  @exclude
       function As_User_Val_Decl
         (Node : Lkt_Node'Class) return User_Val_Decl;
       --  @exclude
@@ -8356,6 +8373,9 @@ package Liblktlang.Analysis is
       function As_Not_Expr
         (Node : Lkt_Node'Class) return Not_Expr;
       --  @exclude
+      function As_Scoped_Pattern
+        (Node : Lkt_Node'Class) return Scoped_Pattern;
+      --  @exclude
       function As_Not_Pattern
         (Node : Lkt_Node'Class) return Not_Pattern;
       --  @exclude
@@ -8696,6 +8716,10 @@ private
       No_Bin_Op : constant Bin_Op :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
+         type Binding_Pattern is new Pattern with null record;
+      No_Binding_Pattern : constant Binding_Pattern :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
          type User_Val_Decl is new Base_Val_Decl with null record;
       No_User_Val_Decl : constant User_Val_Decl :=
         (Internal   => Implementation.No_Entity,
@@ -8772,7 +8796,7 @@ private
       No_Class_Qualifier_Present : constant Class_Qualifier_Present :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Complex_Pattern is new Pattern with null record;
+         type Complex_Pattern is new Binding_Pattern with null record;
       No_Complex_Pattern : constant Complex_Pattern :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
@@ -8840,7 +8864,7 @@ private
       No_Dyn_Var_Decl : constant Dyn_Var_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Ellipsis_Pattern is new Pattern with null record;
+         type Ellipsis_Pattern is new Binding_Pattern with null record;
       No_Ellipsis_Pattern : constant Ellipsis_Pattern :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
@@ -9220,7 +9244,11 @@ private
       No_Not_Expr : constant Not_Expr :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Not_Pattern is new Pattern with null record;
+         type Scoped_Pattern is new Pattern with null record;
+      No_Scoped_Pattern : constant Scoped_Pattern :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
+         type Not_Pattern is new Scoped_Pattern with null record;
       No_Not_Pattern : constant Not_Pattern :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);

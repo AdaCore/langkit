@@ -12073,8 +12073,7 @@ class PatternList(LktNodeBaseList):
     List of Pattern.
 
     This list node can contain one of the following nodes:
-    :py:class:`ComplexPattern`, :py:class:`EllipsisPattern`,
-    :py:class:`NotPattern`
+    :py:class:`BindingPattern`, :py:class:`NotPattern`
 
     This node type has no derivation.
     """
@@ -12737,11 +12736,11 @@ class Pattern(LktNode):
     The only patterns that are currently used and implemented in Lkt's IsA are
     ``OrPattern`` and ``TypePattern``.
 
-    Derived nodes: :py:class:`AnyTypePattern`, :py:class:`BoolPattern`,
-    :py:class:`ComplexPattern`, :py:class:`EllipsisPattern`,
-    :py:class:`IntegerPattern`, :py:class:`ListPattern`,
-    :py:class:`NotPattern`, :py:class:`NullPattern`, :py:class:`OrPattern`,
-    :py:class:`ParenPattern`, :py:class:`RegexPattern`, :py:class:`TypePattern`
+    Derived nodes: :py:class:`AnyTypePattern`, :py:class:`BindingPattern`,
+    :py:class:`BoolPattern`, :py:class:`IntegerPattern`,
+    :py:class:`ListPattern`, :py:class:`NullPattern`, :py:class:`OrPattern`,
+    :py:class:`ParenPattern`, :py:class:`RegexPattern`,
+    :py:class:`ScopedPattern`, :py:class:`TypePattern`
     """
     __slots__ : Tuple[str, ...] = ()
 
@@ -12792,20 +12791,39 @@ class AnyTypePattern(Pattern):
 
 
 
-class BoolPattern(Pattern):
+class BindingPattern(Pattern):
     """
     Subclass of :py:class:`Pattern`.
 
-    Pattern to match on booleans.
+    Base of all patterns that may introduce a new binding in the lexical
+    environment.
 
-    Derived nodes: :py:class:`BoolPatternFalse`, :py:class:`BoolPatternTrue`
+    Derived nodes: :py:class:`ComplexPattern`, :py:class:`EllipsisPattern`
     """
     __slots__ : Tuple[str, ...] = ()
 
     
 
+    
+    @property
+    def f_decl(
+        self
+    ) -> BindingValDecl:
+        """
+        This field may be null even when there are no parsing errors.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_binding_pattern_f_decl)
+
+
+
+        return result
 
     _field_names = Pattern._field_names + (
+        "f_decl",
     )
 
 
@@ -12814,51 +12832,9 @@ class BoolPattern(Pattern):
 
 
 
-class BoolPatternFalse(BoolPattern):
+class ComplexPattern(BindingPattern):
     """
-    Subclass of :py:class:`BoolPattern`.
-
-    This node type has no derivation.
-    """
-    __slots__ : Tuple[str, ...] = ()
-
-    
-
-
-    _field_names = BoolPattern._field_names + (
-    )
-
-    _kind_name = 'BoolPatternFalse'
-
-
-
-
-
-
-class BoolPatternTrue(BoolPattern):
-    """
-    Subclass of :py:class:`BoolPattern`.
-
-    This node type has no derivation.
-    """
-    __slots__ : Tuple[str, ...] = ()
-
-    
-
-
-    _field_names = BoolPattern._field_names + (
-    )
-
-    _kind_name = 'BoolPatternTrue'
-
-
-
-
-
-
-class ComplexPattern(Pattern):
-    """
-    Subclass of :py:class:`Pattern`.
+    Subclass of :py:class:`BindingPattern`.
 
     Composition of any of the following components:
 
@@ -12883,23 +12859,6 @@ class ComplexPattern(Pattern):
 
     
 
-    
-    @property
-    def f_decl(
-        self
-    ) -> BindingValDecl:
-        """
-        This field may be null even when there are no parsing errors.
-        """
-        
-
-        
-
-        result = self._eval_astnode_field(_complex_pattern_f_decl)
-
-
-
-        return result
     
     @property
     def f_pattern(
@@ -12973,8 +12932,7 @@ class ComplexPattern(Pattern):
 
         return result
 
-    _field_names = Pattern._field_names + (
-        "f_decl",
+    _field_names = BindingPattern._field_names + (
         "f_pattern",
         "f_details",
         "f_predicate",
@@ -13011,9 +12969,9 @@ class RenamingComplexPattern(ComplexPattern):
 
 
 
-class EllipsisPattern(Pattern):
+class EllipsisPattern(BindingPattern):
     """
-    Subclass of :py:class:`Pattern`.
+    Subclass of :py:class:`BindingPattern`.
 
     Pattern to match any remaining number of elements in a list pattern.
 
@@ -13023,29 +12981,75 @@ class EllipsisPattern(Pattern):
 
     
 
-    
-    @property
-    def f_binding(
-        self
-    ) -> Id:
-        """
-        This field may be null even when there are no parsing errors.
-        """
-        
 
-        
-
-        result = self._eval_astnode_field(_ellipsis_pattern_f_binding)
-
-
-
-        return result
-
-    _field_names = Pattern._field_names + (
-        "f_binding",
+    _field_names = BindingPattern._field_names + (
     )
 
     _kind_name = 'EllipsisPattern'
+
+
+
+
+
+
+class BoolPattern(Pattern):
+    """
+    Subclass of :py:class:`Pattern`.
+
+    Pattern to match on booleans.
+
+    Derived nodes: :py:class:`BoolPatternFalse`, :py:class:`BoolPatternTrue`
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = Pattern._field_names + (
+    )
+
+
+
+
+
+
+
+class BoolPatternFalse(BoolPattern):
+    """
+    Subclass of :py:class:`BoolPattern`.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = BoolPattern._field_names + (
+    )
+
+    _kind_name = 'BoolPatternFalse'
+
+
+
+
+
+
+class BoolPatternTrue(BoolPattern):
+    """
+    Subclass of :py:class:`BoolPattern`.
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = BoolPattern._field_names + (
+    )
+
+    _kind_name = 'BoolPatternTrue'
 
 
 
@@ -13094,8 +13098,7 @@ class ListPattern(Pattern):
     ) -> PatternList:
         """
         This field contains a list that itself contains one of the following
-        nodes: :py:class:`ComplexPattern`, :py:class:`EllipsisPattern`,
-        :py:class:`NotPattern`
+        nodes: :py:class:`BindingPattern`, :py:class:`NotPattern`
 
         When there are no parsing errors, this field is never null.
         """
@@ -13114,56 +13117,6 @@ class ListPattern(Pattern):
     )
 
     _kind_name = 'ListPattern'
-
-
-
-
-
-
-class NotPattern(Pattern):
-    """
-    Subclass of :py:class:`Pattern`.
-
-    Pattern that matches if its inner pattern doesn't match.
-
-    For instance:
-
-    .. code::
-
-       val non_objects = select not ObjectDecl
-
-    This node type has no derivation.
-    """
-    __slots__ : Tuple[str, ...] = ()
-
-    
-
-    
-    @property
-    def f_sub_pattern(
-        self
-    ) -> Pattern:
-        """
-        This field can contain one of the following nodes:
-        :py:class:`ComplexPattern`, :py:class:`NotPattern`
-
-        When there are no parsing errors, this field is never null.
-        """
-        
-
-        
-
-        result = self._eval_astnode_field(_not_pattern_f_sub_pattern)
-
-
-
-        return result
-
-    _field_names = Pattern._field_names + (
-        "f_sub_pattern",
-    )
-
-    _kind_name = 'NotPattern'
 
 
 
@@ -13215,11 +13168,8 @@ class OrPattern(Pattern):
     @property
     def f_left_sub_pattern(
         self
-    ) -> Pattern:
+    ) -> ScopedPattern:
         """
-        This field can contain one of the following nodes:
-        :py:class:`ComplexPattern`, :py:class:`NotPattern`
-
         When there are no parsing errors, this field is never null.
         """
         
@@ -13235,12 +13185,8 @@ class OrPattern(Pattern):
     @property
     def f_right_sub_pattern(
         self
-    ) -> Pattern:
+    ) -> ScopedPattern:
         """
-        This field can contain one of the following nodes:
-        :py:class:`ComplexPattern`, :py:class:`NotPattern`,
-        :py:class:`OrPattern`
-
         When there are no parsing errors, this field is never null.
         """
         
@@ -13348,6 +13294,81 @@ class RegexPattern(Pattern):
     )
 
     _kind_name = 'RegexPattern'
+
+
+
+
+
+
+class ScopedPattern(Pattern):
+    """
+    Subclass of :py:class:`Pattern`.
+
+    A pattern that introduce a new lexical environment and delegate the
+    matching logic to its subpattern.
+
+    Derived nodes: :py:class:`NotPattern`
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+    
+    @property
+    def f_sub_pattern(
+        self
+    ) -> Pattern:
+        """
+        This field can contain one of the following nodes:
+        :py:class:`ComplexPattern`, :py:class:`NotPattern`,
+        :py:class:`OrPattern`
+
+        When there are no parsing errors, this field is never null.
+        """
+        
+
+        
+
+        result = self._eval_astnode_field(_scoped_pattern_f_sub_pattern)
+
+
+
+        return result
+
+    _field_names = Pattern._field_names + (
+        "f_sub_pattern",
+    )
+
+    _kind_name = 'ScopedPattern'
+
+
+
+
+
+
+class NotPattern(ScopedPattern):
+    """
+    Subclass of :py:class:`ScopedPattern`.
+
+    Pattern that matches if its inner pattern doesn't match.
+
+    For instance:
+
+    .. code::
+
+       val non_objects = select not ObjectDecl
+
+    This node type has no derivation.
+    """
+    __slots__ : Tuple[str, ...] = ()
+
+    
+
+
+    _field_names = ScopedPattern._field_names + (
+    )
+
+    _kind_name = 'NotPattern'
 
 
 
@@ -16879,8 +16900,8 @@ _null_cond_qualifier_p_as_bool = _import_func(
      ctypes.POINTER(ctypes.c_uint8)],
     ctypes.c_int
 )
-_complex_pattern_f_decl = _import_func(
-    'lkt_complex_pattern_f_decl',
+_binding_pattern_f_decl = _import_func(
+    'lkt_binding_pattern_f_decl',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -16903,20 +16924,8 @@ _complex_pattern_f_predicate = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
-_ellipsis_pattern_f_binding = _import_func(
-    'lkt_ellipsis_pattern_f_binding',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
-)
 _list_pattern_f_sub_patterns = _import_func(
     'lkt_list_pattern_f_sub_patterns',
-    [ctypes.POINTER(_Entity_c_type),
-     ctypes.POINTER(_Entity_c_type)],
-    ctypes.c_int
-)
-_not_pattern_f_sub_pattern = _import_func(
-    'lkt_not_pattern_f_sub_pattern',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
@@ -16943,6 +16952,12 @@ _regex_pattern_p_denoted_value = _import_func(
     'lkt_regex_pattern_p_denoted_value',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(DecodedStringValue._c_type)],
+    ctypes.c_int
+)
+_scoped_pattern_f_sub_pattern = _import_func(
+    'lkt_scoped_pattern_f_sub_pattern',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
 _type_pattern_f_type_name = _import_func(
@@ -17359,27 +17374,28 @@ _kind_to_astnode_cls = {
     169: OpStreamConcat,
     170: OpStreamCons,
     171: AnyTypePattern,
-    172: BoolPatternFalse,
-    173: BoolPatternTrue,
-    174: ComplexPattern,
-    175: RenamingComplexPattern,
-    176: EllipsisPattern,
+    172: ComplexPattern,
+    173: RenamingComplexPattern,
+    174: EllipsisPattern,
+    175: BoolPatternFalse,
+    176: BoolPatternTrue,
     177: IntegerPattern,
     178: ListPattern,
-    179: NotPattern,
-    180: NullPattern,
-    181: OrPattern,
-    182: ParenPattern,
-    183: RegexPattern,
-    184: TypePattern,
-    185: DestructuringPatternDetail,
-    186: FieldPatternDetail,
-    187: PropertyPatternDetail,
-    188: DefaultListTypeRef,
-    189: FunctionTypeRef,
-    190: GenericTypeRef,
-    191: SimpleTypeRef,
-    192: VarBind,
+    179: NullPattern,
+    180: OrPattern,
+    181: ParenPattern,
+    182: RegexPattern,
+    183: ScopedPattern,
+    184: NotPattern,
+    185: TypePattern,
+    186: DestructuringPatternDetail,
+    187: FieldPatternDetail,
+    188: PropertyPatternDetail,
+    189: DefaultListTypeRef,
+    190: FunctionTypeRef,
+    191: GenericTypeRef,
+    192: SimpleTypeRef,
+    193: VarBind,
 }
 
 

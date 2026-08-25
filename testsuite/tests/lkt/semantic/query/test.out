@@ -238,39 +238,66 @@ Decl <ValDecl "propagate2" test.lkt:20:1-20:61>
       Expr <NullLit test.lkt:20:57-20:61>
            has_type <ClassDecl "A" test.lkt:1:1-1:11>
 
-<ValDecl "not_iterable_source" test.lkt:22:1-22:42> failed nameres:
-test.lkt:22:32-22:34: error: Int does not implement the Iterable[T] trait
- 22 | val not_iterable_source = from 42 match 1
+Decl <ValDecl "guard_depends_on_pattern_and_source" test.lkt:22:1-23:44>
+     has_type <StructDecl prelude: "Stream[Int]">
+
+   Expr <Query test.lkt:23:5-23:44>
+        has_type <StructDecl prelude: "Stream[Int]">
+
+      Id   <RefId "int_arr" test.lkt:23:10-23:17>
+           has_type <StructDecl prelude: "Array[Int]">
+           references <ValDecl "int_arr" test.lkt:5:1-5:24>
+
+      Decl <BindingValDecl "a" test.lkt:23:24-23:25>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "a" test.lkt:23:33-23:34>
+           has_type <StructDecl prelude: "Int">
+           references <BindingValDecl "a" test.lkt:23:24-23:25>
+
+      Expr <BinOp test.lkt:23:38-23:44>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+         Id   <RefId "a" test.lkt:23:38-23:39>
+              has_type <StructDecl prelude: "Int">
+              references <BindingValDecl "a" test.lkt:23:24-23:25>
+
+         Expr <NumLit test.lkt:23:43-23:44>
+              has_type <StructDecl prelude: "Int">
+
+<ValDecl "not_iterable_source" test.lkt:25:1-25:42> failed nameres:
+test.lkt:25:32-25:34: error: Int does not implement the Iterable[T] trait
+ 25 | val not_iterable_source = from 42 match 1
     |                                ^^ 
 
-test.lkt:22:5-22:24: error: could not determine type
- 22 | val not_iterable_source = from 42 match 1
+test.lkt:25:5-25:24: error: could not determine type
+ 25 | val not_iterable_source = from 42 match 1
     |     ^^^^^^^^^^^^^^^^^^^ 
 
-Decl <ValDecl "not_iterable_source" test.lkt:22:1-22:42>
+Decl <ValDecl "not_iterable_source" test.lkt:25:1-25:42>
      has_type None
 
-   Expr <Query test.lkt:22:27-22:42>
+   Expr <Query test.lkt:25:27-25:42>
         has_type None
 
-      Expr <NumLit test.lkt:22:32-22:34>
-           has_type None
+      Expr <NumLit test.lkt:25:32-25:34>
+           has_type <StructDecl prelude: "Int">
 
-<ValDecl "not_bool_guard" test.lkt:23:1-23:58> failed nameres:
-test.lkt:23:46-23:58: error: expected Bool, got String
- 23 | val not_bool_guard = from int_arr match 1 if "not a bool"
+<ValDecl "not_bool_guard" test.lkt:26:1-26:58> failed nameres:
+test.lkt:26:46-26:58: error: expected Bool, got String
+ 26 | val not_bool_guard = from int_arr match 1 if "not a bool"
     |                                              ^^^^^^^^^^^^ 
 
-Decl <ValDecl "not_bool_guard" test.lkt:23:1-23:58>
+Decl <ValDecl "not_bool_guard" test.lkt:26:1-26:58>
      has_type None
 
-   Expr <Query test.lkt:23:22-23:58>
+   Expr <Query test.lkt:26:22-26:58>
         has_type None
 
-      Id   <RefId "int_arr" test.lkt:23:27-23:34>
-           has_type None
-           references None
+      Id   <RefId "int_arr" test.lkt:26:27-26:34>
+           has_type <StructDecl prelude: "Array[Int]">
+           references <ValDecl "int_arr" test.lkt:5:1-5:24>
 
-      Expr <SingleLineStringLit test.lkt:23:46-23:58>
+      Expr <SingleLineStringLit test.lkt:26:46-26:58>
            has_type None
 

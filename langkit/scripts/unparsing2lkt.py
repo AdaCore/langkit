@@ -485,6 +485,9 @@ def to_json(input_file: str) -> str:
                 visit(p)
                 return {"kind": "or", "patterns": patterns}
 
+            case L.ScopedPattern():
+                return parse_pattern(p.f_sub_pattern)
+
             case _:
                 error(p, "invalid pattern")
 

@@ -1,2 +1,0 @@
-val bar = 15
-val foo = bar is _

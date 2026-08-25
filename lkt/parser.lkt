@@ -305,7 +305,10 @@ grammar lkt_grammar {
         ).dont_skip("}")
         "}"
     )
-    pattern <- or(OrPattern(neg_pattern "|" pattern) | neg_pattern)
+    pattern <- or(
+        | OrPattern(ScopedPattern(neg_pattern) "|" ScopedPattern(pattern))
+        | neg_pattern
+    )
     neg_pattern <- or(
         | NotPattern("not" neg_pattern)
         | complex_pattern
@@ -355,10 +358,10 @@ grammar lkt_grammar {
         | BoolPattern.False(@Identifier("false"))
     )
 
-    ellipsis_pattern <- EllipsisPattern(?pick(id "@") "...")
+    ellipsis_pattern <- EllipsisPattern(?pick(pattern_binding "@") "...")
     integer_pattern <- IntegerPattern(@Number)
     list_pattern <- ListPattern(
-        "[" list+(or(ellipsis_pattern | neg_pattern), ",") "]"
+        "[" list*(or(ellipsis_pattern | neg_pattern), ",") "]"
     )
     pattern_arg <- or(
         | FieldPatternDetail(id ":" / pattern)

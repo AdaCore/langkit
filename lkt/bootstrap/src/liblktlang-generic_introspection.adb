@@ -6171,16 +6171,16 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Complex_Pattern_Range =>
+when Lkt_Binding_Pattern =>
 declare
-N_Bare_Complex_Pattern : constant Analysis.Complex_Pattern := N.As_Complex_Pattern;
+N_Bare_Binding_Pattern : constant Analysis.Binding_Pattern := N.As_Binding_Pattern;
 begin
 case Member is
-when Member_Index_For_Complex_Pattern_F_Decl =>
+when Member_Index_For_Binding_Pattern_F_Decl =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
-Set_Node (R, N_Bare_Complex_Pattern.F_Decl);
+Set_Node (R, N_Bare_Binding_Pattern.F_Decl);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -6191,6 +6191,14 @@ Free (Result);
 end if;
 raise;
 end;
+when others => null;
+end case;
+case Lkt_Binding_Pattern (Kind) is
+when Lkt_Complex_Pattern_Range =>
+declare
+N_Bare_Complex_Pattern : constant Analysis.Complex_Pattern := N_Bare_Binding_Pattern.As_Complex_Pattern;
+begin
+case Member is
 when Member_Index_For_Complex_Pattern_F_Pattern =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
@@ -6239,26 +6247,6 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Ellipsis_Pattern_Range =>
-declare
-N_Bare_Ellipsis_Pattern : constant Analysis.Ellipsis_Pattern := N.As_Ellipsis_Pattern;
-begin
-case Member is
-when Member_Index_For_Ellipsis_Pattern_F_Binding =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Ellipsis_Pattern.F_Binding);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
 when others => null;
 end case;
 end;
@@ -6272,29 +6260,6 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_List_Pattern.F_Sub_Patterns);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when others => null;
-end case;
-end;
-when Lkt_Not_Pattern_Range =>
-declare
-N_Bare_Not_Pattern : constant Analysis.Not_Pattern := N.As_Not_Pattern;
-begin
-case Member is
-when Member_Index_For_Not_Pattern_F_Sub_Pattern =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Not_Pattern.F_Sub_Pattern);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -6379,6 +6344,29 @@ declare
 R : Internal_Acc_Decoded_String_Value :=  new Internal_Rec_Decoded_String_Value;
 begin
 R.Value := N_Bare_Regex_Pattern.P_Denoted_Value;
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Scoped_Pattern_Range =>
+declare
+N_Bare_Scoped_Pattern : constant Analysis.Scoped_Pattern := N.As_Scoped_Pattern;
+begin
+case Member is
+when Member_Index_For_Scoped_Pattern_F_Sub_Pattern =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N_Bare_Scoped_Pattern.F_Sub_Pattern);
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

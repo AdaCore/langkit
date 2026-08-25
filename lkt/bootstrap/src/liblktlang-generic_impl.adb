@@ -10,9 +10,9 @@ package body Liblktlang.Generic_Impl is
 
    package Builtin_Files is
          Buffer_0   : constant Character
-         with Import, External_Name => "lkt_builtin_file_b6194bc62e6e1435340b1066a472445c";
+         with Import, External_Name => "lkt_builtin_file_1d81fc631931b996ccb5fc6d1afd3db8";
          Contents_0 : constant Memory_Buffer :=
-           (Buffer_0'Address, 54848);
+           (Buffer_0'Address, 56845);
    end Builtin_Files;
 
    ---------

@@ -541,22 +541,20 @@ package body Liblktlang.Generic_API is
                      return Lkt_Op_Stream_Cons;
                   when Type_Index_For_Any_Type_Pattern =>
                      return Lkt_Any_Type_Pattern;
-                  when Type_Index_For_Bool_Pattern_False =>
-                     return Lkt_Bool_Pattern_False;
-                  when Type_Index_For_Bool_Pattern_True =>
-                     return Lkt_Bool_Pattern_True;
                   when Type_Index_For_Complex_Pattern =>
                      return Lkt_Complex_Pattern;
                   when Type_Index_For_Renaming_Complex_Pattern =>
                      return Lkt_Renaming_Complex_Pattern;
                   when Type_Index_For_Ellipsis_Pattern =>
                      return Lkt_Ellipsis_Pattern;
+                  when Type_Index_For_Bool_Pattern_False =>
+                     return Lkt_Bool_Pattern_False;
+                  when Type_Index_For_Bool_Pattern_True =>
+                     return Lkt_Bool_Pattern_True;
                   when Type_Index_For_Integer_Pattern =>
                      return Lkt_Integer_Pattern;
                   when Type_Index_For_List_Pattern =>
                      return Lkt_List_Pattern;
-                  when Type_Index_For_Not_Pattern =>
-                     return Lkt_Not_Pattern;
                   when Type_Index_For_Null_Pattern =>
                      return Lkt_Null_Pattern;
                   when Type_Index_For_Or_Pattern =>
@@ -565,6 +563,10 @@ package body Liblktlang.Generic_API is
                      return Lkt_Paren_Pattern;
                   when Type_Index_For_Regex_Pattern =>
                      return Lkt_Regex_Pattern;
+                  when Type_Index_For_Scoped_Pattern =>
+                     return Lkt_Scoped_Pattern;
+                  when Type_Index_For_Not_Pattern =>
+                     return Lkt_Not_Pattern;
                   when Type_Index_For_Type_Pattern =>
                      return Lkt_Type_Pattern;
                   when Type_Index_For_Destructuring_Pattern_Detail =>

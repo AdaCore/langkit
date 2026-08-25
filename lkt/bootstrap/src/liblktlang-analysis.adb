@@ -1584,6 +1584,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Binding_Pattern
+        (Node : Lkt_Node'Class) return Binding_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Binding_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Binding_Pattern then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BindingPattern";
+         
+            end if;
+      end;
       function As_User_Val_Decl
         (Node : Lkt_Node'Class) return User_Val_Decl
       is
@@ -5249,6 +5277,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to NotExpr";
+         
+            end if;
+      end;
+      function As_Scoped_Pattern
+        (Node : Lkt_Node'Class) return Scoped_Pattern
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Scoped_Pattern;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Scoped_Pattern_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to ScopedPattern";
          
             end if;
       end;
@@ -11184,6 +11240,34 @@ package body Liblktlang.Analysis is
 
 
 
+         
+   
+
+   function F_Decl
+     (Node : Binding_Pattern'Class) return Binding_Val_Decl
+   is
+      Result : Bare_Binding_Val_Decl;
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+      Result := Implementation.Binding_Pattern_F_Decl (Node.Internal.Node);
+         if Result = null then
+            return No_Binding_Val_Decl;
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
+   end F_Decl;
+
+
+
+
+
+
+
 
 
 
@@ -11778,29 +11862,6 @@ package body Liblktlang.Analysis is
 
 
 
-
-
-         
-   
-
-   function F_Decl
-     (Node : Complex_Pattern'Class) return Binding_Val_Decl
-   is
-      Result : Bare_Binding_Val_Decl;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Complex_Pattern_F_Decl (Node.Internal.Node);
-         if Result = null then
-            return No_Binding_Val_Decl;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Decl;
 
 
          
@@ -12632,29 +12693,6 @@ package body Liblktlang.Analysis is
 
 
 
-
-
-         
-   
-
-   function F_Binding
-     (Node : Ellipsis_Pattern'Class) return Id
-   is
-      Result : Bare_Id;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Ellipsis_Pattern_F_Binding (Node.Internal.Node);
-         if Result = null then
-            return No_Id;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Binding;
 
 
 
@@ -16051,7 +16089,7 @@ package body Liblktlang.Analysis is
    
 
    function F_Sub_Pattern
-     (Node : Not_Pattern'Class) return Pattern
+     (Node : Scoped_Pattern'Class) return Pattern
    is
       Result : Bare_Pattern;
    begin
@@ -16060,7 +16098,7 @@ package body Liblktlang.Analysis is
       end if;
 
       Check_Safety_Net (Node);
-      Result := Implementation.Not_Pattern_F_Sub_Pattern (Node.Internal.Node);
+      Result := Implementation.Scoped_Pattern_F_Sub_Pattern (Node.Internal.Node);
          if Result = null then
             return No_Pattern;
          else
@@ -16068,6 +16106,11 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Sub_Pattern;
+
+
+
+
+
 
 
 
@@ -16257,9 +16300,9 @@ package body Liblktlang.Analysis is
    
 
    function F_Left_Sub_Pattern
-     (Node : Or_Pattern'Class) return Pattern
+     (Node : Or_Pattern'Class) return Scoped_Pattern
    is
-      Result : Bare_Pattern;
+      Result : Bare_Scoped_Pattern;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
@@ -16268,7 +16311,7 @@ package body Liblktlang.Analysis is
       Check_Safety_Net (Node);
       Result := Implementation.Or_Pattern_F_Left_Sub_Pattern (Node.Internal.Node);
          if Result = null then
-            return No_Pattern;
+            return No_Scoped_Pattern;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -16280,9 +16323,9 @@ package body Liblktlang.Analysis is
    
 
    function F_Right_Sub_Pattern
-     (Node : Or_Pattern'Class) return Pattern
+     (Node : Or_Pattern'Class) return Scoped_Pattern
    is
-      Result : Bare_Pattern;
+      Result : Bare_Scoped_Pattern;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
@@ -16291,7 +16334,7 @@ package body Liblktlang.Analysis is
       Check_Safety_Net (Node);
       Result := Implementation.Or_Pattern_F_Right_Sub_Pattern (Node.Internal.Node);
          if Result = null then
-            return No_Pattern;
+            return No_Scoped_Pattern;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);

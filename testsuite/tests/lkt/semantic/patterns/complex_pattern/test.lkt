@@ -1,0 +1,43 @@
+class A {
+    field: Int = 1
+}
+class B: A {
+    other_field: Bool = true
+}
+class C: A {
+    other_field: String = "hello"
+}
+
+val b = true
+val i = 42
+val s = "a"
+val i_l = [1, 2, 3]
+val a = A()
+
+# TODO (eng/libadalang/langkit/#929): Add test for pattern details when they
+# will be supported.
+
+# Test adding a binding to the pattern env
+val _ = b is x@true when x
+val _ = b is b when b
+val _ = b is ((x@true)) when x
+val _ = b is x@(not true) when x
+val _ = i is x when x == 1
+val _ = i is x@1 when x == 1
+val _ = s is x@"x" when x.length() == 1
+val _ = i_l is [x] when x == 1
+val _ = i_l is [x@...] when x[0] == 1
+val _ = a is x@A when x.field == 1
+val _ = a is x@B when x.other_field
+val _ = a is x@C when x.other_field.length() == 1
+val _ = a is x@(B | C) when x.field == 1
+val _ = a is x@(C | C) when x.other_field.length() == 1
+val _ = match i {
+    case x => x == 1
+}
+val _ = from i_l match x select x if x == 1
+val _ = from i_l match i_l select i_l if i_l == 1
+val _ = a is x when x.other_field
+
+# Test complex pattern with non-boolean predicate
+val _ = i is 1 when "Not a bool"

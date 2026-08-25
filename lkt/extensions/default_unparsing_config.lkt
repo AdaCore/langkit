@@ -24,6 +24,13 @@ class BaseImportList {
 class Pattern {
 }
 
+class ScopedPattern {
+    val f_sub_pattern =
+        if this_field is OrPattern
+        then recurse_flatten
+        else recurse
+}
+
 class ComplexPattern {
     val f_pattern = group(
         if this_field is OrPattern

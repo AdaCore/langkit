@@ -492,18 +492,19 @@ package Liblktlang.Common is
       Lkt_Op_Stream_Concat,
       Lkt_Op_Stream_Cons,
       Lkt_Any_Type_Pattern,
-      Lkt_Bool_Pattern_False,
-      Lkt_Bool_Pattern_True,
       Lkt_Complex_Pattern,
       Lkt_Renaming_Complex_Pattern,
       Lkt_Ellipsis_Pattern,
+      Lkt_Bool_Pattern_False,
+      Lkt_Bool_Pattern_True,
       Lkt_Integer_Pattern,
       Lkt_List_Pattern,
-      Lkt_Not_Pattern,
       Lkt_Null_Pattern,
       Lkt_Or_Pattern,
       Lkt_Paren_Pattern,
       Lkt_Regex_Pattern,
+      Lkt_Scoped_Pattern,
+      Lkt_Not_Pattern,
       Lkt_Type_Pattern,
       Lkt_Destructuring_Pattern_Detail,
       Lkt_Field_Pattern_Detail,
@@ -687,27 +688,28 @@ package Liblktlang.Common is
       Lkt_Op_Stream_Concat => 169,
       Lkt_Op_Stream_Cons => 170,
       Lkt_Any_Type_Pattern => 171,
-      Lkt_Bool_Pattern_False => 172,
-      Lkt_Bool_Pattern_True => 173,
-      Lkt_Complex_Pattern => 174,
-      Lkt_Renaming_Complex_Pattern => 175,
-      Lkt_Ellipsis_Pattern => 176,
+      Lkt_Complex_Pattern => 172,
+      Lkt_Renaming_Complex_Pattern => 173,
+      Lkt_Ellipsis_Pattern => 174,
+      Lkt_Bool_Pattern_False => 175,
+      Lkt_Bool_Pattern_True => 176,
       Lkt_Integer_Pattern => 177,
       Lkt_List_Pattern => 178,
-      Lkt_Not_Pattern => 179,
-      Lkt_Null_Pattern => 180,
-      Lkt_Or_Pattern => 181,
-      Lkt_Paren_Pattern => 182,
-      Lkt_Regex_Pattern => 183,
-      Lkt_Type_Pattern => 184,
-      Lkt_Destructuring_Pattern_Detail => 185,
-      Lkt_Field_Pattern_Detail => 186,
-      Lkt_Property_Pattern_Detail => 187,
-      Lkt_Default_List_Type_Ref => 188,
-      Lkt_Function_Type_Ref => 189,
-      Lkt_Generic_Type_Ref => 190,
-      Lkt_Simple_Type_Ref => 191,
-      Lkt_Var_Bind => 192);
+      Lkt_Null_Pattern => 179,
+      Lkt_Or_Pattern => 180,
+      Lkt_Paren_Pattern => 181,
+      Lkt_Regex_Pattern => 182,
+      Lkt_Scoped_Pattern => 183,
+      Lkt_Not_Pattern => 184,
+      Lkt_Type_Pattern => 185,
+      Lkt_Destructuring_Pattern_Detail => 186,
+      Lkt_Field_Pattern_Detail => 187,
+      Lkt_Property_Pattern_Detail => 188,
+      Lkt_Default_List_Type_Ref => 189,
+      Lkt_Function_Type_Ref => 190,
+      Lkt_Generic_Type_Ref => 191,
+      Lkt_Simple_Type_Ref => 192,
+      Lkt_Var_Bind => 193);
 
       subtype Lkt_Lkt_Node is Lkt_Node_Kind_Type
             range Lkt_Argument .. Lkt_Var_Bind;
@@ -1300,14 +1302,8 @@ package Liblktlang.Common is
       subtype Lkt_Any_Type_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Any_Type_Pattern .. Lkt_Any_Type_Pattern;
       --  @exclude
-      subtype Lkt_Bool_Pattern is Lkt_Node_Kind_Type
-            range Lkt_Bool_Pattern_False .. Lkt_Bool_Pattern_True;
-      --  @exclude
-      subtype Lkt_Bool_Pattern_False_Range is Lkt_Node_Kind_Type
-            range Lkt_Bool_Pattern_False .. Lkt_Bool_Pattern_False;
-      --  @exclude
-      subtype Lkt_Bool_Pattern_True_Range is Lkt_Node_Kind_Type
-            range Lkt_Bool_Pattern_True .. Lkt_Bool_Pattern_True;
+      subtype Lkt_Binding_Pattern is Lkt_Node_Kind_Type
+            range Lkt_Complex_Pattern .. Lkt_Ellipsis_Pattern;
       --  @exclude
       subtype Lkt_Complex_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Complex_Pattern .. Lkt_Renaming_Complex_Pattern;
@@ -1318,14 +1314,20 @@ package Liblktlang.Common is
       subtype Lkt_Ellipsis_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Ellipsis_Pattern .. Lkt_Ellipsis_Pattern;
       --  @exclude
+      subtype Lkt_Bool_Pattern is Lkt_Node_Kind_Type
+            range Lkt_Bool_Pattern_False .. Lkt_Bool_Pattern_True;
+      --  @exclude
+      subtype Lkt_Bool_Pattern_False_Range is Lkt_Node_Kind_Type
+            range Lkt_Bool_Pattern_False .. Lkt_Bool_Pattern_False;
+      --  @exclude
+      subtype Lkt_Bool_Pattern_True_Range is Lkt_Node_Kind_Type
+            range Lkt_Bool_Pattern_True .. Lkt_Bool_Pattern_True;
+      --  @exclude
       subtype Lkt_Integer_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Integer_Pattern .. Lkt_Integer_Pattern;
       --  @exclude
       subtype Lkt_List_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_List_Pattern .. Lkt_List_Pattern;
-      --  @exclude
-      subtype Lkt_Not_Pattern_Range is Lkt_Node_Kind_Type
-            range Lkt_Not_Pattern .. Lkt_Not_Pattern;
       --  @exclude
       subtype Lkt_Null_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Null_Pattern .. Lkt_Null_Pattern;
@@ -1338,6 +1340,12 @@ package Liblktlang.Common is
       --  @exclude
       subtype Lkt_Regex_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Regex_Pattern .. Lkt_Regex_Pattern;
+      --  @exclude
+      subtype Lkt_Scoped_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Scoped_Pattern .. Lkt_Not_Pattern;
+      --  @exclude
+      subtype Lkt_Not_Pattern_Range is Lkt_Node_Kind_Type
+            range Lkt_Not_Pattern .. Lkt_Not_Pattern;
       --  @exclude
       subtype Lkt_Type_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Type_Pattern .. Lkt_Type_Pattern;
