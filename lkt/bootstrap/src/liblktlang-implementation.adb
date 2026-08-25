@@ -7210,6 +7210,10 @@ end Reraise_Memoized_Error;
    
 
    case Self.Kind is
+            when Lkt_Scoped_Pattern .. Lkt_Not_Pattern =>
+            
+            Scoped_Pattern_Pre_Env_Actions (Self, State, Add_To_Env_Only);
+      
             when Lkt_Decl_Block =>
             
             Decl_Block_Pre_Env_Actions (Self, State, Add_To_Env_Only);
@@ -7303,6 +7307,10 @@ end Reraise_Memoized_Error;
    
 
    case Self.Kind is
+            when Lkt_Scoped_Pattern .. Lkt_Not_Pattern =>
+            
+            null;
+      
             when Lkt_Decl_Block =>
             
             null;
@@ -10488,16 +10496,26 @@ begin
                     return;
                 
 end;
-when Lkt_Complex_Pattern_Range =>
+when Lkt_Binding_Pattern =>
 declare
-N_Bare_Complex_Pattern : constant Bare_Complex_Pattern := Node;
+N_Bare_Binding_Pattern : constant Bare_Binding_Pattern := Node;
 begin
 case Index is
 
                         when 1 =>
-                            Result := N_Bare_Complex_Pattern.Complex_Pattern_F_Decl;
+                            Result := N_Bare_Binding_Pattern.Binding_Pattern_F_Decl;
                             return;
                     
+
+                        when others => null;
+                    end case;
+                
+case Lkt_Binding_Pattern (K) is
+when Lkt_Complex_Pattern_Range =>
+declare
+N_Bare_Complex_Pattern : constant Bare_Complex_Pattern := N_Bare_Binding_Pattern;
+begin
+case Index is
 
                         when 2 =>
                             Result := N_Bare_Complex_Pattern.Complex_Pattern_F_Pattern;
@@ -10518,20 +10536,8 @@ case Index is
                     end case;
                 
 end;
-when Lkt_Ellipsis_Pattern_Range =>
-declare
-N_Bare_Ellipsis_Pattern : constant Bare_Ellipsis_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Ellipsis_Pattern.Ellipsis_Pattern_F_Binding;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
+when others => null;
+end case;
 end;
 when Lkt_List_Pattern_Range =>
 declare
@@ -10541,21 +10547,6 @@ case Index is
 
                         when 1 =>
                             Result := N_Bare_List_Pattern.List_Pattern_F_Sub_Patterns;
-                            return;
-                    
-
-                        when others => null;
-                    end case;
-                
-end;
-when Lkt_Not_Pattern_Range =>
-declare
-N_Bare_Not_Pattern : constant Bare_Not_Pattern := Node;
-begin
-case Index is
-
-                        when 1 =>
-                            Result := N_Bare_Not_Pattern.Not_Pattern_F_Sub_Pattern;
                             return;
                     
 
@@ -10591,6 +10582,21 @@ case Index is
 
                         when 1 =>
                             Result := N_Bare_Paren_Pattern.Paren_Pattern_F_Sub_Pattern;
+                            return;
+                    
+
+                        when others => null;
+                    end case;
+                
+end;
+when Lkt_Scoped_Pattern_Range =>
+declare
+N_Bare_Scoped_Pattern : constant Bare_Scoped_Pattern := Node;
+begin
+case Index is
+
+                        when 1 =>
+                            Result := N_Bare_Scoped_Pattern.Scoped_Pattern_F_Sub_Pattern;
                             return;
                     
 
@@ -11580,7 +11586,7 @@ end case;
       begin
          
          return
-           (if Node.Kind in Lkt_Match_Branch | Lkt_Pattern_Match_Branch | Lkt_Field_Decl | Lkt_Fun_Decl | Lkt_Env_Spec_Decl | Lkt_Generic_Decl | Lkt_Grammar_Decl | Lkt_Langkit_Root | Lkt_Lexer_Decl | Lkt_Block_Expr | Lkt_Lambda_Expr | Lkt_Decl_Block
+           (if Node.Kind in Lkt_Match_Branch | Lkt_Pattern_Match_Branch | Lkt_Field_Decl | Lkt_Fun_Decl | Lkt_Env_Spec_Decl | Lkt_Generic_Decl | Lkt_Grammar_Decl | Lkt_Langkit_Root | Lkt_Lexer_Decl | Lkt_Block_Expr | Lkt_Lambda_Expr | Lkt_Decl_Block | Lkt_Scoped_Pattern | Lkt_Not_Pattern
             then Get_Parent_Env
             else Node.Self_Env);
       end Get_Base_Env;
@@ -13647,6 +13653,49 @@ end case;
 
       pragma Warnings (Off, "referenced");
       function Trace_Image (R : Internal_Entity_Bin_Op) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Internal_Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
+      function Create_Internal_Entity_Binding_Pattern
+        (Node : Bare_Binding_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Binding_Pattern is
+      begin
+         if Node = null then
+            return No_Entity_Binding_Pattern;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+      ----------------
+      -- Equivalent --
+      ----------------
+
+      function Equivalent (L, R : Internal_Entity_Binding_Pattern) return Boolean is
+      begin
+         return L.Node = R.Node and then Equivalent (L.Info, R.Info);
+      end Equivalent;
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Binding_Pattern) return String is
          pragma Warnings (On, "referenced");
       begin
             return Image (Internal_Entity'(Node => R.Node, Info => R.Info));
@@ -19280,6 +19329,49 @@ end case;
 
       pragma Warnings (Off, "referenced");
       function Trace_Image (R : Internal_Entity_Not_Expr) return String is
+         pragma Warnings (On, "referenced");
+      begin
+            return Image (Internal_Entity'(Node => R.Node, Info => R.Info));
+      end Trace_Image;
+
+
+   
+
+   
+
+
+
+      function Create_Internal_Entity_Scoped_Pattern
+        (Node : Bare_Scoped_Pattern; Info : Internal_Entity_Info)
+         return Internal_Entity_Scoped_Pattern is
+      begin
+         if Node = null then
+            return No_Entity_Scoped_Pattern;
+         end if;
+         return (Node => Node, Info => Info);
+      end;
+
+
+
+      ----------------
+      -- Equivalent --
+      ----------------
+
+      function Equivalent (L, R : Internal_Entity_Scoped_Pattern) return Boolean is
+      begin
+         return L.Node = R.Node and then Equivalent (L.Info, R.Info);
+      end Equivalent;
+
+
+   
+
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      pragma Warnings (Off, "referenced");
+      function Trace_Image (R : Internal_Entity_Scoped_Pattern) return String is
          pragma Warnings (On, "referenced");
       begin
             return Image (Internal_Entity'(Node => R.Node, Info => R.Info));
@@ -28613,39 +28705,34 @@ end case;
       
 
    --
-   --  Primitives for Bare_Bool_Pattern
+   --  Primitives for Bare_Binding_Pattern
    --
 
    
-
-
-
-
-   
-
 
       
+      procedure Initialize_Fields_For_Binding_Pattern
+        (Self : Bare_Binding_Pattern
+         ; Binding_Pattern_F_Decl : Bare_Binding_Val_Decl
+        ) is
+      begin
 
-   --
-   --  Primitives for Bare_Bool_Pattern_False
-   --
+            Self.Binding_Pattern_F_Decl := Binding_Pattern_F_Decl;
+         
 
-   
-
-
-
-
-   
-
+      end Initialize_Fields_For_Binding_Pattern;
 
       
+   function Binding_Pattern_F_Decl
+     (Node : Bare_Binding_Pattern) return Bare_Binding_Val_Decl
+   is
+      
 
-   --
-   --  Primitives for Bare_Bool_Pattern_True
-   --
-
-   
-
+   begin
+         
+         return Node.Binding_Pattern_F_Decl;
+      
+   end;
 
 
 
@@ -28663,32 +28750,21 @@ end case;
       
       procedure Initialize_Fields_For_Complex_Pattern
         (Self : Bare_Complex_Pattern
-         ; Complex_Pattern_F_Decl : Bare_Binding_Val_Decl
+         ; Binding_Pattern_F_Decl : Bare_Binding_Val_Decl
          ; Complex_Pattern_F_Pattern : Bare_Pattern
          ; Complex_Pattern_F_Details : Bare_Pattern_Detail_List
          ; Complex_Pattern_F_Predicate : Bare_Expr
         ) is
       begin
+            Initialize_Fields_For_Binding_Pattern
+              (Self, Binding_Pattern_F_Decl);
 
-            Self.Complex_Pattern_F_Decl := Complex_Pattern_F_Decl;
             Self.Complex_Pattern_F_Pattern := Complex_Pattern_F_Pattern;
             Self.Complex_Pattern_F_Details := Complex_Pattern_F_Details;
             Self.Complex_Pattern_F_Predicate := Complex_Pattern_F_Predicate;
          
 
       end Initialize_Fields_For_Complex_Pattern;
-
-      
-   function Complex_Pattern_F_Decl
-     (Node : Bare_Complex_Pattern) return Bare_Binding_Val_Decl
-   is
-      
-
-   begin
-         
-         return Node.Complex_Pattern_F_Decl;
-      
-   end;
 
       
    function Complex_Pattern_F_Pattern
@@ -28742,14 +28818,14 @@ end case;
       
       procedure Initialize_Fields_For_Renaming_Complex_Pattern
         (Self : Bare_Renaming_Complex_Pattern
-         ; Complex_Pattern_F_Decl : Bare_Binding_Val_Decl
+         ; Binding_Pattern_F_Decl : Bare_Binding_Val_Decl
          ; Complex_Pattern_F_Pattern : Bare_Pattern
          ; Complex_Pattern_F_Details : Bare_Pattern_Detail_List
          ; Complex_Pattern_F_Predicate : Bare_Expr
         ) is
       begin
             Initialize_Fields_For_Complex_Pattern
-              (Self, Complex_Pattern_F_Decl, Complex_Pattern_F_Pattern, Complex_Pattern_F_Details, Complex_Pattern_F_Predicate);
+              (Self, Binding_Pattern_F_Decl, Complex_Pattern_F_Pattern, Complex_Pattern_F_Details, Complex_Pattern_F_Predicate);
 
          
 
@@ -28771,26 +28847,57 @@ end case;
       
       procedure Initialize_Fields_For_Ellipsis_Pattern
         (Self : Bare_Ellipsis_Pattern
-         ; Ellipsis_Pattern_F_Binding : Bare_Id
+         ; Binding_Pattern_F_Decl : Bare_Binding_Val_Decl
         ) is
       begin
+            Initialize_Fields_For_Binding_Pattern
+              (Self, Binding_Pattern_F_Decl);
 
-            Self.Ellipsis_Pattern_F_Binding := Ellipsis_Pattern_F_Binding;
          
 
       end Initialize_Fields_For_Ellipsis_Pattern;
 
-      
-   function Ellipsis_Pattern_F_Binding
-     (Node : Bare_Ellipsis_Pattern) return Bare_Id
-   is
+
+
+   
+
+
       
 
-   begin
-         
-         return Node.Ellipsis_Pattern_F_Binding;
+   --
+   --  Primitives for Bare_Bool_Pattern
+   --
+
+   
+
+
+
+
+   
+
+
       
-   end;
+
+   --
+   --  Primitives for Bare_Bool_Pattern_False
+   --
+
+   
+
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Bool_Pattern_True
+   --
+
+   
+
 
 
 
@@ -28851,43 +28958,6 @@ end case;
       
 
    --
-   --  Primitives for Bare_Not_Pattern
-   --
-
-   
-
-      
-      procedure Initialize_Fields_For_Not_Pattern
-        (Self : Bare_Not_Pattern
-         ; Not_Pattern_F_Sub_Pattern : Bare_Pattern
-        ) is
-      begin
-
-            Self.Not_Pattern_F_Sub_Pattern := Not_Pattern_F_Sub_Pattern;
-         
-
-      end Initialize_Fields_For_Not_Pattern;
-
-      
-   function Not_Pattern_F_Sub_Pattern
-     (Node : Bare_Not_Pattern) return Bare_Pattern
-   is
-      
-
-   begin
-         
-         return Node.Not_Pattern_F_Sub_Pattern;
-      
-   end;
-
-
-
-   
-
-
-      
-
-   --
    --  Primitives for Bare_Null_Pattern
    --
 
@@ -28910,8 +28980,8 @@ end case;
       
       procedure Initialize_Fields_For_Or_Pattern
         (Self : Bare_Or_Pattern
-         ; Or_Pattern_F_Left_Sub_Pattern : Bare_Pattern
-         ; Or_Pattern_F_Right_Sub_Pattern : Bare_Pattern
+         ; Or_Pattern_F_Left_Sub_Pattern : Bare_Scoped_Pattern
+         ; Or_Pattern_F_Right_Sub_Pattern : Bare_Scoped_Pattern
         ) is
       begin
 
@@ -28923,7 +28993,7 @@ end case;
 
       
    function Or_Pattern_F_Left_Sub_Pattern
-     (Node : Bare_Or_Pattern) return Bare_Pattern
+     (Node : Bare_Or_Pattern) return Bare_Scoped_Pattern
    is
       
 
@@ -28935,7 +29005,7 @@ end case;
 
       
    function Or_Pattern_F_Right_Sub_Pattern
-     (Node : Bare_Or_Pattern) return Bare_Pattern
+     (Node : Bare_Or_Pattern) return Bare_Scoped_Pattern
    is
       
 
@@ -28995,6 +29065,69 @@ end case;
 
    
 
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Scoped_Pattern
+   --
+
+   
+
+      
+      procedure Initialize_Fields_For_Scoped_Pattern
+        (Self : Bare_Scoped_Pattern
+         ; Scoped_Pattern_F_Sub_Pattern : Bare_Pattern
+        ) is
+      begin
+
+            Self.Scoped_Pattern_F_Sub_Pattern := Scoped_Pattern_F_Sub_Pattern;
+         
+
+      end Initialize_Fields_For_Scoped_Pattern;
+
+      
+   function Scoped_Pattern_F_Sub_Pattern
+     (Node : Bare_Scoped_Pattern) return Bare_Pattern
+   is
+      
+
+   begin
+         
+         return Node.Scoped_Pattern_F_Sub_Pattern;
+      
+   end;
+
+
+
+   
+
+
+      
+
+   --
+   --  Primitives for Bare_Not_Pattern
+   --
+
+   
+
+      
+      procedure Initialize_Fields_For_Not_Pattern
+        (Self : Bare_Not_Pattern
+         ; Scoped_Pattern_F_Sub_Pattern : Bare_Pattern
+        ) is
+      begin
+            Initialize_Fields_For_Scoped_Pattern
+              (Self, Scoped_Pattern_F_Sub_Pattern);
+
+         
+
+      end Initialize_Fields_For_Not_Pattern;
 
 
 
@@ -29660,18 +29793,19 @@ Lkt_Op_Plus => To_Unbounded_String ("OpPlus"),
 Lkt_Op_Stream_Concat => To_Unbounded_String ("OpStreamConcat"), 
 Lkt_Op_Stream_Cons => To_Unbounded_String ("OpStreamCons"), 
 Lkt_Any_Type_Pattern => To_Unbounded_String ("AnyTypePattern"), 
-Lkt_Bool_Pattern_False => To_Unbounded_String ("BoolPatternFalse"), 
-Lkt_Bool_Pattern_True => To_Unbounded_String ("BoolPatternTrue"), 
 Lkt_Complex_Pattern => To_Unbounded_String ("ComplexPattern"), 
 Lkt_Renaming_Complex_Pattern => To_Unbounded_String ("RenamingComplexPattern"), 
 Lkt_Ellipsis_Pattern => To_Unbounded_String ("EllipsisPattern"), 
+Lkt_Bool_Pattern_False => To_Unbounded_String ("BoolPatternFalse"), 
+Lkt_Bool_Pattern_True => To_Unbounded_String ("BoolPatternTrue"), 
 Lkt_Integer_Pattern => To_Unbounded_String ("IntegerPattern"), 
 Lkt_List_Pattern => To_Unbounded_String ("ListPattern"), 
-Lkt_Not_Pattern => To_Unbounded_String ("NotPattern"), 
 Lkt_Null_Pattern => To_Unbounded_String ("NullPattern"), 
 Lkt_Or_Pattern => To_Unbounded_String ("OrPattern"), 
 Lkt_Paren_Pattern => To_Unbounded_String ("ParenPattern"), 
 Lkt_Regex_Pattern => To_Unbounded_String ("RegexPattern"), 
+Lkt_Scoped_Pattern => To_Unbounded_String ("ScopedPattern"), 
+Lkt_Not_Pattern => To_Unbounded_String ("NotPattern"), 
 Lkt_Type_Pattern => To_Unbounded_String ("TypePattern"), 
 Lkt_Destructuring_Pattern_Detail => To_Unbounded_String ("DestructuringPatternDetail"), 
 Lkt_Field_Pattern_Detail => To_Unbounded_String ("FieldPatternDetail"), 

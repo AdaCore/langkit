@@ -6194,7 +6194,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
-   function lkt_complex_pattern_f_decl
+   function lkt_binding_pattern_f_decl
      (Node : lkt_node_Ptr;
 
 
@@ -6202,7 +6202,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
 
       with Export        => True,
            Convention    => C,
-           External_name => "lkt_complex_pattern_f_decl";
+           External_name => "lkt_binding_pattern_f_decl";
    --  This field may be null even when there are no parsing errors.
 
            
@@ -6283,23 +6283,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
-   function lkt_ellipsis_pattern_f_binding
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_ellipsis_pattern_f_binding";
-   --  This field may be null even when there are no parsing errors.
-
-           
-   
-
-   
-   
-
    function lkt_list_pattern_f_sub_patterns
      (Node : lkt_node_Ptr;
 
@@ -6310,28 +6293,7 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_list_pattern_f_sub_patterns";
    --  This field contains a list that itself contains one of the following
-   --  nodes: :ada:ref:`Complex_Pattern`, :ada:ref:`Ellipsis_Pattern`,
-   --  :ada:ref:`Not_Pattern`
-   --
-   --  When there are no parsing errors, this field is never null.
-
-           
-   
-
-   
-   
-
-   function lkt_not_pattern_f_sub_pattern
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_not_pattern_f_sub_pattern";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
+   --  nodes: :ada:ref:`Binding_Pattern`, :ada:ref:`Not_Pattern`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6350,9 +6312,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_or_pattern_f_left_sub_pattern";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`
-   --
    --  When there are no parsing errors, this field is never null.
 
            
@@ -6370,10 +6329,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
       with Export        => True,
            Convention    => C,
            External_name => "lkt_or_pattern_f_right_sub_pattern";
-   --  This field can contain one of the following nodes:
-   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
-   --  :ada:ref:`Or_Pattern`
-   --
    --  When there are no parsing errors, this field is never null.
 
            
@@ -6413,6 +6368,27 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_regex_pattern_p_denoted_value";
    --  Return the equivalent string for this regular expression.
+
+           
+   
+
+   
+   
+
+   function lkt_scoped_pattern_f_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+      with Export        => True,
+           Convention    => C,
+           External_name => "lkt_scoped_pattern_f_sub_pattern";
+   --  This field can contain one of the following nodes:
+   --  :ada:ref:`Complex_Pattern`, :ada:ref:`Not_Pattern`,
+   --  :ada:ref:`Or_Pattern`
+   --
+   --  When there are no parsing errors, this field is never null.
 
            
    

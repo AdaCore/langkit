@@ -772,18 +772,19 @@ package body Liblktlang.Implementation.C is
       Lkt_Op_Stream_Concat => new Text_Type'(To_Text ("OpStreamConcat")),
       Lkt_Op_Stream_Cons => new Text_Type'(To_Text ("OpStreamCons")),
       Lkt_Any_Type_Pattern => new Text_Type'(To_Text ("AnyTypePattern")),
-      Lkt_Bool_Pattern_False => new Text_Type'(To_Text ("BoolPatternFalse")),
-      Lkt_Bool_Pattern_True => new Text_Type'(To_Text ("BoolPatternTrue")),
       Lkt_Complex_Pattern => new Text_Type'(To_Text ("ComplexPattern")),
       Lkt_Renaming_Complex_Pattern => new Text_Type'(To_Text ("RenamingComplexPattern")),
       Lkt_Ellipsis_Pattern => new Text_Type'(To_Text ("EllipsisPattern")),
+      Lkt_Bool_Pattern_False => new Text_Type'(To_Text ("BoolPatternFalse")),
+      Lkt_Bool_Pattern_True => new Text_Type'(To_Text ("BoolPatternTrue")),
       Lkt_Integer_Pattern => new Text_Type'(To_Text ("IntegerPattern")),
       Lkt_List_Pattern => new Text_Type'(To_Text ("ListPattern")),
-      Lkt_Not_Pattern => new Text_Type'(To_Text ("NotPattern")),
       Lkt_Null_Pattern => new Text_Type'(To_Text ("NullPattern")),
       Lkt_Or_Pattern => new Text_Type'(To_Text ("OrPattern")),
       Lkt_Paren_Pattern => new Text_Type'(To_Text ("ParenPattern")),
       Lkt_Regex_Pattern => new Text_Type'(To_Text ("RegexPattern")),
+      Lkt_Scoped_Pattern => new Text_Type'(To_Text ("ScopedPattern")),
+      Lkt_Not_Pattern => new Text_Type'(To_Text ("NotPattern")),
       Lkt_Type_Pattern => new Text_Type'(To_Text ("TypePattern")),
       Lkt_Destructuring_Pattern_Detail => new Text_Type'(To_Text ("DestructuringPatternDetail")),
       Lkt_Field_Pattern_Detail => new Text_Type'(To_Text ("FieldPatternDetail")),
@@ -14269,7 +14270,7 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_complex_pattern_f_decl
+   function lkt_binding_pattern_f_decl
      (Node : lkt_node_Ptr;
 
 
@@ -14281,14 +14282,14 @@ package body Liblktlang.Implementation.C is
       Clear_Last_Exception;
 
 
-      if Unwrapped_Node.Kind in Lkt_Complex_Pattern_Range then
+      if Unwrapped_Node.Kind in Lkt_Binding_Pattern then
 
          declare
             
 
             Result : Bare_Binding_Val_Decl;
          begin
-            Result := Complex_Pattern_F_Decl
+            Result := Binding_Pattern_F_Decl
               (Unwrapped_Node);
 
             Value_P.all :=
@@ -14310,7 +14311,7 @@ package body Liblktlang.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end lkt_complex_pattern_f_decl;
+   end lkt_binding_pattern_f_decl;
 
 
            
@@ -14473,57 +14474,6 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_ellipsis_pattern_f_binding
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Ellipsis_Pattern_Range then
-
-         declare
-            
-
-            Result : Bare_Id;
-         begin
-            Result := Ellipsis_Pattern_F_Binding
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Liblktlang_Support.Errors.Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_ellipsis_pattern_f_binding;
-
-
-           
-
-   
-
-   
-   
-
    function lkt_list_pattern_f_sub_patterns
      (Node : lkt_node_Ptr;
 
@@ -14575,57 +14525,6 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_not_pattern_f_sub_pattern
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Not_Pattern_Range then
-
-         declare
-            
-
-            Result : Bare_Pattern;
-         begin
-            Result := Not_Pattern_F_Sub_Pattern
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Liblktlang_Support.Errors.Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_not_pattern_f_sub_pattern;
-
-
-           
-
-   
-
-   
-   
-
    function lkt_or_pattern_f_left_sub_pattern
      (Node : lkt_node_Ptr;
 
@@ -14643,7 +14542,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Pattern;
+            Result : Bare_Scoped_Pattern;
          begin
             Result := Or_Pattern_F_Left_Sub_Pattern
               (Unwrapped_Node);
@@ -14694,7 +14593,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Pattern;
+            Result : Bare_Scoped_Pattern;
          begin
             Result := Or_Pattern_F_Right_Sub_Pattern
               (Unwrapped_Node);
@@ -14821,6 +14720,57 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_regex_pattern_p_denoted_value;
+
+
+           
+
+   
+
+   
+   
+
+   function lkt_scoped_pattern_f_sub_pattern
+     (Node : lkt_node_Ptr;
+
+
+      Value_P : access lkt_node) return int
+
+   is
+      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
+   begin
+      Clear_Last_Exception;
+
+
+      if Unwrapped_Node.Kind in Lkt_Scoped_Pattern_Range then
+
+         declare
+            
+
+            Result : Bare_Pattern;
+         begin
+            Result := Scoped_Pattern_F_Sub_Pattern
+              (Unwrapped_Node);
+
+            Value_P.all :=
+                   (Result, Node.Info)
+            ;
+
+            return 1;
+         exception
+            when Exc : Liblktlang_Support.Errors.Property_Error =>
+               Set_Last_Exception (Exc);
+               return 0;
+         end;
+
+      else
+         return 0;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end lkt_scoped_pattern_f_sub_pattern;
 
 
            

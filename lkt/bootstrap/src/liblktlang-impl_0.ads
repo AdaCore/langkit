@@ -10934,5 +10934,12 @@ function Var_Bind_P_Xref_Equation
          Add_To_Env_Only : Boolean := False);
 
 
+      
+      procedure Scoped_Pattern_Pre_Env_Actions
+        (Self            : Bare_Scoped_Pattern;
+         State           : in out PLE_Node_State;
+         Add_To_Env_Only : Boolean := False);
+
+
 
 end Liblktlang.Impl_0;

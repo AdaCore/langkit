@@ -255,30 +255,32 @@ private package Liblktlang.Generic_Introspection is
       Type_Index_For_Op_Stream_Cons : constant Type_Index := 226;
       Type_Index_For_Pattern : constant Type_Index := 227;
       Type_Index_For_Any_Type_Pattern : constant Type_Index := 228;
-      Type_Index_For_Bool_Pattern : constant Type_Index := 229;
-      Type_Index_For_Bool_Pattern_False : constant Type_Index := 230;
-      Type_Index_For_Bool_Pattern_True : constant Type_Index := 231;
-      Type_Index_For_Complex_Pattern : constant Type_Index := 232;
-      Type_Index_For_Renaming_Complex_Pattern : constant Type_Index := 233;
-      Type_Index_For_Ellipsis_Pattern : constant Type_Index := 234;
-      Type_Index_For_Integer_Pattern : constant Type_Index := 235;
-      Type_Index_For_List_Pattern : constant Type_Index := 236;
-      Type_Index_For_Not_Pattern : constant Type_Index := 237;
+      Type_Index_For_Binding_Pattern : constant Type_Index := 229;
+      Type_Index_For_Complex_Pattern : constant Type_Index := 230;
+      Type_Index_For_Renaming_Complex_Pattern : constant Type_Index := 231;
+      Type_Index_For_Ellipsis_Pattern : constant Type_Index := 232;
+      Type_Index_For_Bool_Pattern : constant Type_Index := 233;
+      Type_Index_For_Bool_Pattern_False : constant Type_Index := 234;
+      Type_Index_For_Bool_Pattern_True : constant Type_Index := 235;
+      Type_Index_For_Integer_Pattern : constant Type_Index := 236;
+      Type_Index_For_List_Pattern : constant Type_Index := 237;
       Type_Index_For_Null_Pattern : constant Type_Index := 238;
       Type_Index_For_Or_Pattern : constant Type_Index := 239;
       Type_Index_For_Paren_Pattern : constant Type_Index := 240;
       Type_Index_For_Regex_Pattern : constant Type_Index := 241;
-      Type_Index_For_Type_Pattern : constant Type_Index := 242;
-      Type_Index_For_Pattern_Detail : constant Type_Index := 243;
-      Type_Index_For_Destructuring_Pattern_Detail : constant Type_Index := 244;
-      Type_Index_For_Field_Pattern_Detail : constant Type_Index := 245;
-      Type_Index_For_Property_Pattern_Detail : constant Type_Index := 246;
-      Type_Index_For_Type_Ref : constant Type_Index := 247;
-      Type_Index_For_Default_List_Type_Ref : constant Type_Index := 248;
-      Type_Index_For_Function_Type_Ref : constant Type_Index := 249;
-      Type_Index_For_Generic_Type_Ref : constant Type_Index := 250;
-      Type_Index_For_Simple_Type_Ref : constant Type_Index := 251;
-      Type_Index_For_Var_Bind : constant Type_Index := 252;
+      Type_Index_For_Scoped_Pattern : constant Type_Index := 242;
+      Type_Index_For_Not_Pattern : constant Type_Index := 243;
+      Type_Index_For_Type_Pattern : constant Type_Index := 244;
+      Type_Index_For_Pattern_Detail : constant Type_Index := 245;
+      Type_Index_For_Destructuring_Pattern_Detail : constant Type_Index := 246;
+      Type_Index_For_Field_Pattern_Detail : constant Type_Index := 247;
+      Type_Index_For_Property_Pattern_Detail : constant Type_Index := 248;
+      Type_Index_For_Type_Ref : constant Type_Index := 249;
+      Type_Index_For_Default_List_Type_Ref : constant Type_Index := 250;
+      Type_Index_For_Function_Type_Ref : constant Type_Index := 251;
+      Type_Index_For_Generic_Type_Ref : constant Type_Index := 252;
+      Type_Index_For_Simple_Type_Ref : constant Type_Index := 253;
+      Type_Index_For_Var_Bind : constant Type_Index := 254;
 
    ----------------------------
    -- Member index constants --
@@ -444,127 +446,126 @@ private package Liblktlang.Generic_Introspection is
       Member_Index_For_Lexer_Case_Rule_F_Alts : constant Struct_Member_Index := 158;
       Member_Index_For_Lexer_Case_Rule_Send_F_Sent : constant Struct_Member_Index := 159;
       Member_Index_For_Lexer_Case_Rule_Send_F_Match_Size : constant Struct_Member_Index := 160;
-      Member_Index_For_Complex_Pattern_F_Decl : constant Struct_Member_Index := 161;
+      Member_Index_For_Binding_Pattern_F_Decl : constant Struct_Member_Index := 161;
       Member_Index_For_Complex_Pattern_F_Pattern : constant Struct_Member_Index := 162;
       Member_Index_For_Complex_Pattern_F_Details : constant Struct_Member_Index := 163;
       Member_Index_For_Complex_Pattern_F_Predicate : constant Struct_Member_Index := 164;
-      Member_Index_For_Ellipsis_Pattern_F_Binding : constant Struct_Member_Index := 165;
-      Member_Index_For_List_Pattern_F_Sub_Patterns : constant Struct_Member_Index := 166;
-      Member_Index_For_Not_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 167;
-      Member_Index_For_Or_Pattern_F_Left_Sub_Pattern : constant Struct_Member_Index := 168;
-      Member_Index_For_Or_Pattern_F_Right_Sub_Pattern : constant Struct_Member_Index := 169;
-      Member_Index_For_Paren_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 170;
-      Member_Index_For_Type_Pattern_F_Type_Name : constant Struct_Member_Index := 171;
-      Member_Index_For_Destructuring_Pattern_Detail_F_Decl : constant Struct_Member_Index := 172;
-      Member_Index_For_Field_Pattern_Detail_F_Id : constant Struct_Member_Index := 173;
-      Member_Index_For_Field_Pattern_Detail_F_Expected_Value : constant Struct_Member_Index := 174;
-      Member_Index_For_Property_Pattern_Detail_F_Call : constant Struct_Member_Index := 175;
-      Member_Index_For_Property_Pattern_Detail_F_Expected_Value : constant Struct_Member_Index := 176;
-      Member_Index_For_Function_Type_Ref_F_Param_Types : constant Struct_Member_Index := 177;
-      Member_Index_For_Function_Type_Ref_F_Return_Type : constant Struct_Member_Index := 178;
-      Member_Index_For_Generic_Type_Ref_F_Type_Name : constant Struct_Member_Index := 179;
-      Member_Index_For_Generic_Type_Ref_F_Args : constant Struct_Member_Index := 180;
-      Member_Index_For_Simple_Type_Ref_F_Type_Name : constant Struct_Member_Index := 181;
-      Member_Index_For_Var_Bind_F_Name : constant Struct_Member_Index := 182;
-      Member_Index_For_Var_Bind_F_Expr : constant Struct_Member_Index := 183;
-      Member_Index_For_Parent : constant Struct_Member_Index := 184;
-      Member_Index_For_Parents : constant Struct_Member_Index := 185;
-      Member_Index_For_Children : constant Struct_Member_Index := 186;
-      Member_Index_For_Token_Start : constant Struct_Member_Index := 187;
-      Member_Index_For_Token_End : constant Struct_Member_Index := 188;
-      Member_Index_For_Child_Index : constant Struct_Member_Index := 189;
-      Member_Index_For_Previous_Sibling : constant Struct_Member_Index := 190;
-      Member_Index_For_Next_Sibling : constant Struct_Member_Index := 191;
-      Member_Index_For_Unit : constant Struct_Member_Index := 192;
-      Member_Index_For_Is_Ghost : constant Struct_Member_Index := 193;
-      Member_Index_For_Full_Sloc_Image : constant Struct_Member_Index := 194;
-      Member_Index_For_Completion_Item_Kind_To_Int : constant Struct_Member_Index := 195;
-      Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode : constant Struct_Member_Index := 196;
-      Member_Index_For_Lkt_Node_P_Prelude_Unit : constant Struct_Member_Index := 197;
-      Member_Index_For_Lkt_Node_P_Basic_Trait_Gen : constant Struct_Member_Index := 198;
-      Member_Index_For_Lkt_Node_P_Basic_Trait : constant Struct_Member_Index := 199;
-      Member_Index_For_Lkt_Node_P_Node_Gen_Trait : constant Struct_Member_Index := 200;
-      Member_Index_For_Lkt_Node_P_Node_Trait : constant Struct_Member_Index := 201;
-      Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait : constant Struct_Member_Index := 202;
-      Member_Index_For_Lkt_Node_P_Indexable_Trait : constant Struct_Member_Index := 203;
-      Member_Index_For_Lkt_Node_P_Iterable_Gen_Trait : constant Struct_Member_Index := 204;
-      Member_Index_For_Lkt_Node_P_Iterable_Trait : constant Struct_Member_Index := 205;
-      Member_Index_For_Lkt_Node_P_Token_Node_Trait : constant Struct_Member_Index := 206;
-      Member_Index_For_Lkt_Node_P_Error_Node_Trait : constant Struct_Member_Index := 207;
-      Member_Index_For_Lkt_Node_P_Char_Type : constant Struct_Member_Index := 208;
-      Member_Index_For_Lkt_Node_P_Int_Type : constant Struct_Member_Index := 209;
-      Member_Index_For_Lkt_Node_P_Bool_Type : constant Struct_Member_Index := 210;
-      Member_Index_For_Lkt_Node_P_Bigint_Type : constant Struct_Member_Index := 211;
-      Member_Index_For_Lkt_Node_P_String_Type : constant Struct_Member_Index := 212;
-      Member_Index_For_Lkt_Node_P_Symbol_Type : constant Struct_Member_Index := 213;
-      Member_Index_For_Lkt_Node_P_Property_Error_Type : constant Struct_Member_Index := 214;
-      Member_Index_For_Lkt_Node_P_Regexp_Type : constant Struct_Member_Index := 215;
-      Member_Index_For_Lkt_Node_P_Entity_Gen_Type : constant Struct_Member_Index := 216;
-      Member_Index_For_Lkt_Node_P_Entity_Type : constant Struct_Member_Index := 217;
-      Member_Index_For_Lkt_Node_P_Logicvar_Type : constant Struct_Member_Index := 218;
-      Member_Index_For_Lkt_Node_P_Equation_Type : constant Struct_Member_Index := 219;
-      Member_Index_For_Lkt_Node_P_Array_Gen_Type : constant Struct_Member_Index := 220;
-      Member_Index_For_Lkt_Node_P_Array_Type : constant Struct_Member_Index := 221;
-      Member_Index_For_Lkt_Node_P_Stream_Gen_Type : constant Struct_Member_Index := 222;
-      Member_Index_For_Lkt_Node_P_Stream_Type : constant Struct_Member_Index := 223;
-      Member_Index_For_Lkt_Node_P_Astlist_Gen_Type : constant Struct_Member_Index := 224;
-      Member_Index_For_Lkt_Node_P_Astlist_Type : constant Struct_Member_Index := 225;
-      Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type : constant Struct_Member_Index := 226;
-      Member_Index_For_Lkt_Node_P_Node_Builder_Type : constant Struct_Member_Index := 227;
-      Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait : constant Struct_Member_Index := 228;
-      Member_Index_For_Lkt_Node_P_Iterator_Trait : constant Struct_Member_Index := 229;
-      Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : constant Struct_Member_Index := 230;
-      Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait : constant Struct_Member_Index := 231;
-      Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl : constant Struct_Member_Index := 232;
-      Member_Index_For_Lkt_Node_P_Nameres_Diagnostics : constant Struct_Member_Index := 233;
-      Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context : constant Struct_Member_Index := 234;
-      Member_Index_For_Lkt_Node_P_Xref_Entry_Point : constant Struct_Member_Index := 235;
-      Member_Index_For_Lkt_Node_P_Complete : constant Struct_Member_Index := 236;
-      Member_Index_For_Base_Import_P_Referenced_Units : constant Struct_Member_Index := 237;
-      Member_Index_For_Base_Match_Branch_P_Match_Part : constant Struct_Member_Index := 238;
-      Member_Index_For_Class_Qualifier_P_As_Bool : constant Struct_Member_Index := 239;
-      Member_Index_For_Decl_P_Custom_Image : constant Struct_Member_Index := 240;
-      Member_Index_For_Decl_P_Decl_Type_Name : constant Struct_Member_Index := 241;
-      Member_Index_For_Decl_P_Def_Ids : constant Struct_Member_Index := 242;
-      Member_Index_For_Decl_P_As_Bare_Decl : constant Struct_Member_Index := 243;
-      Member_Index_For_Decl_P_Get_Type : constant Struct_Member_Index := 244;
-      Member_Index_For_Decl_P_Get_Cast_Type : constant Struct_Member_Index := 245;
-      Member_Index_For_Decl_P_Get_Keep_Type : constant Struct_Member_Index := 246;
-      Member_Index_For_Decl_P_Get_Suffix_Type : constant Struct_Member_Index := 247;
-      Member_Index_For_Decl_P_Is_Generic : constant Struct_Member_Index := 248;
-      Member_Index_For_Decl_P_Return_Type_Is_Instantiated : constant Struct_Member_Index := 249;
-      Member_Index_For_Decl_P_Is_Instantiated : constant Struct_Member_Index := 250;
-      Member_Index_For_Decl_P_Name : constant Struct_Member_Index := 251;
-      Member_Index_For_Decl_P_Full_Name : constant Struct_Member_Index := 252;
-      Member_Index_For_Fun_Decl_P_Is_Dynamic_Combiner : constant Struct_Member_Index := 253;
-      Member_Index_For_Fun_Decl_P_Find_All_Overrides : constant Struct_Member_Index := 254;
-      Member_Index_For_Type_Decl_P_Def_Id : constant Struct_Member_Index := 255;
-      Member_Index_For_Type_Decl_P_Base_Type : constant Struct_Member_Index := 256;
-      Member_Index_For_Excludes_Null_P_As_Bool : constant Struct_Member_Index := 257;
-      Member_Index_For_Expr_P_Get_Type : constant Struct_Member_Index := 258;
-      Member_Index_For_Expr_P_Get_Generic_Type : constant Struct_Member_Index := 259;
-      Member_Index_For_Expr_P_Get_Expected_Type : constant Struct_Member_Index := 260;
-      Member_Index_For_Expr_P_Referenced_Decl : constant Struct_Member_Index := 261;
-      Member_Index_For_Token_Lit_P_Denoted_Value : constant Struct_Member_Index := 262;
-      Member_Index_For_Token_Pattern_Lit_P_Denoted_Value : constant Struct_Member_Index := 263;
-      Member_Index_For_Id_P_Custom_Image : constant Struct_Member_Index := 264;
-      Member_Index_For_Def_Id_P_Name : constant Struct_Member_Index := 265;
-      Member_Index_For_Def_Id_P_Get_Implementatinons : constant Struct_Member_Index := 266;
-      Member_Index_For_Def_Id_P_Decl_Detail : constant Struct_Member_Index := 267;
-      Member_Index_For_Def_Id_P_Completion_Item_Kind : constant Struct_Member_Index := 268;
-      Member_Index_For_Def_Id_P_Doc : constant Struct_Member_Index := 269;
-      Member_Index_For_Def_Id_P_Find_All_References : constant Struct_Member_Index := 270;
-      Member_Index_For_Ref_Id_P_Referenced_Defining_Name : constant Struct_Member_Index := 271;
-      Member_Index_For_Char_Lit_P_Denoted_Value : constant Struct_Member_Index := 272;
-      Member_Index_For_String_Lit_P_Denoted_Value : constant Struct_Member_Index := 273;
-      Member_Index_For_String_Lit_P_Is_Prefixed_String : constant Struct_Member_Index := 274;
-      Member_Index_For_String_Lit_P_Prefix : constant Struct_Member_Index := 275;
-      Member_Index_For_String_Lit_P_Is_Regexp_Literal : constant Struct_Member_Index := 276;
-      Member_Index_For_Full_Decl_P_Has_Annotation : constant Struct_Member_Index := 277;
-      Member_Index_For_Is_Empty_List : constant Struct_Member_Index := 278;
-      Member_Index_For_Null_Cond_Qualifier_P_As_Bool : constant Struct_Member_Index := 279;
-      Member_Index_For_Regex_Pattern_P_Denoted_Value : constant Struct_Member_Index := 280;
-      Member_Index_For_Type_Ref_P_Referenced_Decl : constant Struct_Member_Index := 281;
+      Member_Index_For_List_Pattern_F_Sub_Patterns : constant Struct_Member_Index := 165;
+      Member_Index_For_Or_Pattern_F_Left_Sub_Pattern : constant Struct_Member_Index := 166;
+      Member_Index_For_Or_Pattern_F_Right_Sub_Pattern : constant Struct_Member_Index := 167;
+      Member_Index_For_Paren_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 168;
+      Member_Index_For_Scoped_Pattern_F_Sub_Pattern : constant Struct_Member_Index := 169;
+      Member_Index_For_Type_Pattern_F_Type_Name : constant Struct_Member_Index := 170;
+      Member_Index_For_Destructuring_Pattern_Detail_F_Decl : constant Struct_Member_Index := 171;
+      Member_Index_For_Field_Pattern_Detail_F_Id : constant Struct_Member_Index := 172;
+      Member_Index_For_Field_Pattern_Detail_F_Expected_Value : constant Struct_Member_Index := 173;
+      Member_Index_For_Property_Pattern_Detail_F_Call : constant Struct_Member_Index := 174;
+      Member_Index_For_Property_Pattern_Detail_F_Expected_Value : constant Struct_Member_Index := 175;
+      Member_Index_For_Function_Type_Ref_F_Param_Types : constant Struct_Member_Index := 176;
+      Member_Index_For_Function_Type_Ref_F_Return_Type : constant Struct_Member_Index := 177;
+      Member_Index_For_Generic_Type_Ref_F_Type_Name : constant Struct_Member_Index := 178;
+      Member_Index_For_Generic_Type_Ref_F_Args : constant Struct_Member_Index := 179;
+      Member_Index_For_Simple_Type_Ref_F_Type_Name : constant Struct_Member_Index := 180;
+      Member_Index_For_Var_Bind_F_Name : constant Struct_Member_Index := 181;
+      Member_Index_For_Var_Bind_F_Expr : constant Struct_Member_Index := 182;
+      Member_Index_For_Parent : constant Struct_Member_Index := 183;
+      Member_Index_For_Parents : constant Struct_Member_Index := 184;
+      Member_Index_For_Children : constant Struct_Member_Index := 185;
+      Member_Index_For_Token_Start : constant Struct_Member_Index := 186;
+      Member_Index_For_Token_End : constant Struct_Member_Index := 187;
+      Member_Index_For_Child_Index : constant Struct_Member_Index := 188;
+      Member_Index_For_Previous_Sibling : constant Struct_Member_Index := 189;
+      Member_Index_For_Next_Sibling : constant Struct_Member_Index := 190;
+      Member_Index_For_Unit : constant Struct_Member_Index := 191;
+      Member_Index_For_Is_Ghost : constant Struct_Member_Index := 192;
+      Member_Index_For_Full_Sloc_Image : constant Struct_Member_Index := 193;
+      Member_Index_For_Completion_Item_Kind_To_Int : constant Struct_Member_Index := 194;
+      Member_Index_For_Lkt_Node_P_Set_Solver_Debug_Mode : constant Struct_Member_Index := 195;
+      Member_Index_For_Lkt_Node_P_Prelude_Unit : constant Struct_Member_Index := 196;
+      Member_Index_For_Lkt_Node_P_Basic_Trait_Gen : constant Struct_Member_Index := 197;
+      Member_Index_For_Lkt_Node_P_Basic_Trait : constant Struct_Member_Index := 198;
+      Member_Index_For_Lkt_Node_P_Node_Gen_Trait : constant Struct_Member_Index := 199;
+      Member_Index_For_Lkt_Node_P_Node_Trait : constant Struct_Member_Index := 200;
+      Member_Index_For_Lkt_Node_P_Indexable_Gen_Trait : constant Struct_Member_Index := 201;
+      Member_Index_For_Lkt_Node_P_Indexable_Trait : constant Struct_Member_Index := 202;
+      Member_Index_For_Lkt_Node_P_Iterable_Gen_Trait : constant Struct_Member_Index := 203;
+      Member_Index_For_Lkt_Node_P_Iterable_Trait : constant Struct_Member_Index := 204;
+      Member_Index_For_Lkt_Node_P_Token_Node_Trait : constant Struct_Member_Index := 205;
+      Member_Index_For_Lkt_Node_P_Error_Node_Trait : constant Struct_Member_Index := 206;
+      Member_Index_For_Lkt_Node_P_Char_Type : constant Struct_Member_Index := 207;
+      Member_Index_For_Lkt_Node_P_Int_Type : constant Struct_Member_Index := 208;
+      Member_Index_For_Lkt_Node_P_Bool_Type : constant Struct_Member_Index := 209;
+      Member_Index_For_Lkt_Node_P_Bigint_Type : constant Struct_Member_Index := 210;
+      Member_Index_For_Lkt_Node_P_String_Type : constant Struct_Member_Index := 211;
+      Member_Index_For_Lkt_Node_P_Symbol_Type : constant Struct_Member_Index := 212;
+      Member_Index_For_Lkt_Node_P_Property_Error_Type : constant Struct_Member_Index := 213;
+      Member_Index_For_Lkt_Node_P_Regexp_Type : constant Struct_Member_Index := 214;
+      Member_Index_For_Lkt_Node_P_Entity_Gen_Type : constant Struct_Member_Index := 215;
+      Member_Index_For_Lkt_Node_P_Entity_Type : constant Struct_Member_Index := 216;
+      Member_Index_For_Lkt_Node_P_Logicvar_Type : constant Struct_Member_Index := 217;
+      Member_Index_For_Lkt_Node_P_Equation_Type : constant Struct_Member_Index := 218;
+      Member_Index_For_Lkt_Node_P_Array_Gen_Type : constant Struct_Member_Index := 219;
+      Member_Index_For_Lkt_Node_P_Array_Type : constant Struct_Member_Index := 220;
+      Member_Index_For_Lkt_Node_P_Stream_Gen_Type : constant Struct_Member_Index := 221;
+      Member_Index_For_Lkt_Node_P_Stream_Type : constant Struct_Member_Index := 222;
+      Member_Index_For_Lkt_Node_P_Astlist_Gen_Type : constant Struct_Member_Index := 223;
+      Member_Index_For_Lkt_Node_P_Astlist_Type : constant Struct_Member_Index := 224;
+      Member_Index_For_Lkt_Node_P_Node_Builder_Gen_Type : constant Struct_Member_Index := 225;
+      Member_Index_For_Lkt_Node_P_Node_Builder_Type : constant Struct_Member_Index := 226;
+      Member_Index_For_Lkt_Node_P_Iterator_Gen_Trait : constant Struct_Member_Index := 227;
+      Member_Index_For_Lkt_Node_P_Iterator_Trait : constant Struct_Member_Index := 228;
+      Member_Index_For_Lkt_Node_P_Analysis_Unit_Gen_Trait : constant Struct_Member_Index := 229;
+      Member_Index_For_Lkt_Node_P_Analysis_Unit_Trait : constant Struct_Member_Index := 230;
+      Member_Index_For_Lkt_Node_P_Topmost_Invalid_Decl : constant Struct_Member_Index := 231;
+      Member_Index_For_Lkt_Node_P_Nameres_Diagnostics : constant Struct_Member_Index := 232;
+      Member_Index_For_Lkt_Node_P_Solve_Enclosing_Context : constant Struct_Member_Index := 233;
+      Member_Index_For_Lkt_Node_P_Xref_Entry_Point : constant Struct_Member_Index := 234;
+      Member_Index_For_Lkt_Node_P_Complete : constant Struct_Member_Index := 235;
+      Member_Index_For_Base_Import_P_Referenced_Units : constant Struct_Member_Index := 236;
+      Member_Index_For_Base_Match_Branch_P_Match_Part : constant Struct_Member_Index := 237;
+      Member_Index_For_Class_Qualifier_P_As_Bool : constant Struct_Member_Index := 238;
+      Member_Index_For_Decl_P_Custom_Image : constant Struct_Member_Index := 239;
+      Member_Index_For_Decl_P_Decl_Type_Name : constant Struct_Member_Index := 240;
+      Member_Index_For_Decl_P_Def_Ids : constant Struct_Member_Index := 241;
+      Member_Index_For_Decl_P_As_Bare_Decl : constant Struct_Member_Index := 242;
+      Member_Index_For_Decl_P_Get_Type : constant Struct_Member_Index := 243;
+      Member_Index_For_Decl_P_Get_Cast_Type : constant Struct_Member_Index := 244;
+      Member_Index_For_Decl_P_Get_Keep_Type : constant Struct_Member_Index := 245;
+      Member_Index_For_Decl_P_Get_Suffix_Type : constant Struct_Member_Index := 246;
+      Member_Index_For_Decl_P_Is_Generic : constant Struct_Member_Index := 247;
+      Member_Index_For_Decl_P_Return_Type_Is_Instantiated : constant Struct_Member_Index := 248;
+      Member_Index_For_Decl_P_Is_Instantiated : constant Struct_Member_Index := 249;
+      Member_Index_For_Decl_P_Name : constant Struct_Member_Index := 250;
+      Member_Index_For_Decl_P_Full_Name : constant Struct_Member_Index := 251;
+      Member_Index_For_Fun_Decl_P_Is_Dynamic_Combiner : constant Struct_Member_Index := 252;
+      Member_Index_For_Fun_Decl_P_Find_All_Overrides : constant Struct_Member_Index := 253;
+      Member_Index_For_Type_Decl_P_Def_Id : constant Struct_Member_Index := 254;
+      Member_Index_For_Type_Decl_P_Base_Type : constant Struct_Member_Index := 255;
+      Member_Index_For_Excludes_Null_P_As_Bool : constant Struct_Member_Index := 256;
+      Member_Index_For_Expr_P_Get_Type : constant Struct_Member_Index := 257;
+      Member_Index_For_Expr_P_Get_Generic_Type : constant Struct_Member_Index := 258;
+      Member_Index_For_Expr_P_Get_Expected_Type : constant Struct_Member_Index := 259;
+      Member_Index_For_Expr_P_Referenced_Decl : constant Struct_Member_Index := 260;
+      Member_Index_For_Token_Lit_P_Denoted_Value : constant Struct_Member_Index := 261;
+      Member_Index_For_Token_Pattern_Lit_P_Denoted_Value : constant Struct_Member_Index := 262;
+      Member_Index_For_Id_P_Custom_Image : constant Struct_Member_Index := 263;
+      Member_Index_For_Def_Id_P_Name : constant Struct_Member_Index := 264;
+      Member_Index_For_Def_Id_P_Get_Implementatinons : constant Struct_Member_Index := 265;
+      Member_Index_For_Def_Id_P_Decl_Detail : constant Struct_Member_Index := 266;
+      Member_Index_For_Def_Id_P_Completion_Item_Kind : constant Struct_Member_Index := 267;
+      Member_Index_For_Def_Id_P_Doc : constant Struct_Member_Index := 268;
+      Member_Index_For_Def_Id_P_Find_All_References : constant Struct_Member_Index := 269;
+      Member_Index_For_Ref_Id_P_Referenced_Defining_Name : constant Struct_Member_Index := 270;
+      Member_Index_For_Char_Lit_P_Denoted_Value : constant Struct_Member_Index := 271;
+      Member_Index_For_String_Lit_P_Denoted_Value : constant Struct_Member_Index := 272;
+      Member_Index_For_String_Lit_P_Is_Prefixed_String : constant Struct_Member_Index := 273;
+      Member_Index_For_String_Lit_P_Prefix : constant Struct_Member_Index := 274;
+      Member_Index_For_String_Lit_P_Is_Regexp_Literal : constant Struct_Member_Index := 275;
+      Member_Index_For_Full_Decl_P_Has_Annotation : constant Struct_Member_Index := 276;
+      Member_Index_For_Is_Empty_List : constant Struct_Member_Index := 277;
+      Member_Index_For_Null_Cond_Qualifier_P_As_Bool : constant Struct_Member_Index := 278;
+      Member_Index_For_Regex_Pattern_P_Denoted_Value : constant Struct_Member_Index := 279;
+      Member_Index_For_Type_Ref_P_Referenced_Decl : constant Struct_Member_Index := 280;
 
    --------------------------------
    -- Token kind index constants --
@@ -3731,29 +3732,13 @@ private package Liblktlang.Generic_Introspection is
          Debug_Name    => Debug_Name_For_Internal_Entity_Any_Type_Pattern'Access,
          Documentation => Type_Doc_For_Internal_Entity_Any_Type_Pattern'Access);
       
-      Debug_Name_For_Internal_Entity_Bool_Pattern : aliased constant String :=
-        "BoolPattern";
-      Type_Doc_For_Internal_Entity_Bool_Pattern        : aliased constant Text_Type := "";
-      Desc_For_Internal_Entity_Bool_Pattern       : aliased constant Type_Descriptor :=
+      Debug_Name_For_Internal_Entity_Binding_Pattern : aliased constant String :=
+        "BindingPattern";
+      Type_Doc_For_Internal_Entity_Binding_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Binding_Pattern       : aliased constant Type_Descriptor :=
         (Category      => Struct_Category,
-         Debug_Name    => Debug_Name_For_Internal_Entity_Bool_Pattern'Access,
-         Documentation => Type_Doc_For_Internal_Entity_Bool_Pattern'Access);
-      
-      Debug_Name_For_Internal_Entity_Bool_Pattern_False : aliased constant String :=
-        "BoolPattern.False";
-      Type_Doc_For_Internal_Entity_Bool_Pattern_False        : aliased constant Text_Type := "";
-      Desc_For_Internal_Entity_Bool_Pattern_False       : aliased constant Type_Descriptor :=
-        (Category      => Struct_Category,
-         Debug_Name    => Debug_Name_For_Internal_Entity_Bool_Pattern_False'Access,
-         Documentation => Type_Doc_For_Internal_Entity_Bool_Pattern_False'Access);
-      
-      Debug_Name_For_Internal_Entity_Bool_Pattern_True : aliased constant String :=
-        "BoolPattern.True";
-      Type_Doc_For_Internal_Entity_Bool_Pattern_True        : aliased constant Text_Type := "";
-      Desc_For_Internal_Entity_Bool_Pattern_True       : aliased constant Type_Descriptor :=
-        (Category      => Struct_Category,
-         Debug_Name    => Debug_Name_For_Internal_Entity_Bool_Pattern_True'Access,
-         Documentation => Type_Doc_For_Internal_Entity_Bool_Pattern_True'Access);
+         Debug_Name    => Debug_Name_For_Internal_Entity_Binding_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Binding_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Complex_Pattern : aliased constant String :=
         "ComplexPattern";
@@ -3779,6 +3764,30 @@ private package Liblktlang.Generic_Introspection is
          Debug_Name    => Debug_Name_For_Internal_Entity_Ellipsis_Pattern'Access,
          Documentation => Type_Doc_For_Internal_Entity_Ellipsis_Pattern'Access);
       
+      Debug_Name_For_Internal_Entity_Bool_Pattern : aliased constant String :=
+        "BoolPattern";
+      Type_Doc_For_Internal_Entity_Bool_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Bool_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Bool_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Bool_Pattern'Access);
+      
+      Debug_Name_For_Internal_Entity_Bool_Pattern_False : aliased constant String :=
+        "BoolPattern.False";
+      Type_Doc_For_Internal_Entity_Bool_Pattern_False        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Bool_Pattern_False       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Bool_Pattern_False'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Bool_Pattern_False'Access);
+      
+      Debug_Name_For_Internal_Entity_Bool_Pattern_True : aliased constant String :=
+        "BoolPattern.True";
+      Type_Doc_For_Internal_Entity_Bool_Pattern_True        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Bool_Pattern_True       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Bool_Pattern_True'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Bool_Pattern_True'Access);
+      
       Debug_Name_For_Internal_Entity_Integer_Pattern : aliased constant String :=
         "IntegerPattern";
       Type_Doc_For_Internal_Entity_Integer_Pattern        : aliased constant Text_Type := "";
@@ -3794,14 +3803,6 @@ private package Liblktlang.Generic_Introspection is
         (Category      => Struct_Category,
          Debug_Name    => Debug_Name_For_Internal_Entity_List_Pattern'Access,
          Documentation => Type_Doc_For_Internal_Entity_List_Pattern'Access);
-      
-      Debug_Name_For_Internal_Entity_Not_Pattern : aliased constant String :=
-        "NotPattern";
-      Type_Doc_For_Internal_Entity_Not_Pattern        : aliased constant Text_Type := "";
-      Desc_For_Internal_Entity_Not_Pattern       : aliased constant Type_Descriptor :=
-        (Category      => Struct_Category,
-         Debug_Name    => Debug_Name_For_Internal_Entity_Not_Pattern'Access,
-         Documentation => Type_Doc_For_Internal_Entity_Not_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Null_Pattern : aliased constant String :=
         "NullPattern";
@@ -3834,6 +3835,22 @@ private package Liblktlang.Generic_Introspection is
         (Category      => Struct_Category,
          Debug_Name    => Debug_Name_For_Internal_Entity_Regex_Pattern'Access,
          Documentation => Type_Doc_For_Internal_Entity_Regex_Pattern'Access);
+      
+      Debug_Name_For_Internal_Entity_Scoped_Pattern : aliased constant String :=
+        "ScopedPattern";
+      Type_Doc_For_Internal_Entity_Scoped_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Scoped_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Scoped_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Scoped_Pattern'Access);
+      
+      Debug_Name_For_Internal_Entity_Not_Pattern : aliased constant String :=
+        "NotPattern";
+      Type_Doc_For_Internal_Entity_Not_Pattern        : aliased constant Text_Type := "";
+      Desc_For_Internal_Entity_Not_Pattern       : aliased constant Type_Descriptor :=
+        (Category      => Struct_Category,
+         Debug_Name    => Debug_Name_For_Internal_Entity_Not_Pattern'Access,
+         Documentation => Type_Doc_For_Internal_Entity_Not_Pattern'Access);
       
       Debug_Name_For_Internal_Entity_Type_Pattern : aliased constant String :=
         "TypePattern";
@@ -4152,19 +4169,21 @@ Desc_For_Internal_Entity_Op_Stream_Concat'Access,
 Desc_For_Internal_Entity_Op_Stream_Cons'Access,
 Desc_For_Internal_Entity_Pattern'Access,
 Desc_For_Internal_Entity_Any_Type_Pattern'Access,
-Desc_For_Internal_Entity_Bool_Pattern'Access,
-Desc_For_Internal_Entity_Bool_Pattern_False'Access,
-Desc_For_Internal_Entity_Bool_Pattern_True'Access,
+Desc_For_Internal_Entity_Binding_Pattern'Access,
 Desc_For_Internal_Entity_Complex_Pattern'Access,
 Desc_For_Internal_Entity_Renaming_Complex_Pattern'Access,
 Desc_For_Internal_Entity_Ellipsis_Pattern'Access,
+Desc_For_Internal_Entity_Bool_Pattern'Access,
+Desc_For_Internal_Entity_Bool_Pattern_False'Access,
+Desc_For_Internal_Entity_Bool_Pattern_True'Access,
 Desc_For_Internal_Entity_Integer_Pattern'Access,
 Desc_For_Internal_Entity_List_Pattern'Access,
-Desc_For_Internal_Entity_Not_Pattern'Access,
 Desc_For_Internal_Entity_Null_Pattern'Access,
 Desc_For_Internal_Entity_Or_Pattern'Access,
 Desc_For_Internal_Entity_Paren_Pattern'Access,
 Desc_For_Internal_Entity_Regex_Pattern'Access,
+Desc_For_Internal_Entity_Scoped_Pattern'Access,
+Desc_For_Internal_Entity_Not_Pattern'Access,
 Desc_For_Internal_Entity_Type_Pattern'Access,
 Desc_For_Internal_Entity_Pattern_Detail'Access,
 Desc_For_Internal_Entity_Destructuring_Pattern_Detail'Access,
@@ -9158,21 +9177,23 @@ Type_Index_For_Grammar_Implicit_Pick => 1);
       
 
       
-         Indexes_For_Complex_Pattern_F_Decl : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Complex_Pattern => 1,
-Type_Index_For_Renaming_Complex_Pattern => 1);
+         Indexes_For_Binding_Pattern_F_Decl : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Binding_Pattern => 0,
+Type_Index_For_Complex_Pattern => 1,
+Type_Index_For_Renaming_Complex_Pattern => 1,
+Type_Index_For_Ellipsis_Pattern => 1);
 
-      Member_Name_For_Complex_Pattern_F_Decl : aliased constant Text_Type :=
+      Member_Name_For_Binding_Pattern_F_Decl : aliased constant Text_Type :=
         "F_Decl";
-      Member_Doc_For_Complex_Pattern_F_Decl  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
-      Member_Desc_For_Complex_Pattern_F_Decl  : aliased constant Struct_Member_Descriptor :=
+      Member_Doc_For_Binding_Pattern_F_Decl  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
+      Member_Desc_For_Binding_Pattern_F_Decl  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
-         Name          => Member_Name_For_Complex_Pattern_F_Decl'Access,
-         Documentation => Member_Doc_For_Complex_Pattern_F_Decl'Access,
-         Owner         => Type_Index_For_Complex_Pattern,
+         Name          => Member_Name_For_Binding_Pattern_F_Decl'Access,
+         Documentation => Member_Doc_For_Binding_Pattern_F_Decl'Access,
+         Owner         => Type_Index_For_Binding_Pattern,
          Member_Type   => Type_Index_For_Binding_Val_Decl,
          Null_For      => null,
-         Indexes       => Indexes_For_Complex_Pattern_F_Decl'Access,
+         Indexes       => Indexes_For_Binding_Pattern_F_Decl'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -9262,36 +9283,12 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
       
 
       
-         Indexes_For_Ellipsis_Pattern_F_Binding : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Ellipsis_Pattern => 1);
-
-      Member_Name_For_Ellipsis_Pattern_F_Binding : aliased constant Text_Type :=
-        "F_Binding";
-      Member_Doc_For_Ellipsis_Pattern_F_Binding  : aliased constant Text_Type := "This field may be null even when there are no parsing errors.";
-      Member_Desc_For_Ellipsis_Pattern_F_Binding  : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Ellipsis_Pattern_F_Binding'Access,
-         Documentation => Member_Doc_For_Ellipsis_Pattern_F_Binding'Access,
-         Owner         => Type_Index_For_Ellipsis_Pattern,
-         Member_Type   => Type_Index_For_Id,
-         Null_For      => null,
-         Indexes       => Indexes_For_Ellipsis_Pattern_F_Binding'Access,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
          Indexes_For_List_Pattern_F_Sub_Patterns : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_List_Pattern => 1);
 
       Member_Name_For_List_Pattern_F_Sub_Patterns : aliased constant Text_Type :=
         "F_Sub_Patterns";
-      Member_Doc_For_List_Pattern_F_Sub_Patterns  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`ComplexPattern`, :typeref:`EllipsisPattern`, :typeref:`NotPattern`" & Character_Type'Val (10)
+      Member_Doc_For_List_Pattern_F_Sub_Patterns  : aliased constant Text_Type := "This field contains a list that itself contains one of the following nodes: :typeref:`BindingPattern`, :typeref:`NotPattern`" & Character_Type'Val (10)
  & Character_Type'Val (10)
  & "When there are no parsing errors, this field is never null.";
       Member_Desc_For_List_Pattern_F_Sub_Patterns  : aliased constant Struct_Member_Descriptor :=
@@ -9312,46 +9309,18 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
       
 
       
-         Indexes_For_Not_Pattern_F_Sub_Pattern : aliased constant Syntax_Field_Indexes :=
-           (Type_Index_For_Not_Pattern => 1);
-
-      Member_Name_For_Not_Pattern_F_Sub_Pattern : aliased constant Text_Type :=
-        "F_Sub_Pattern";
-      Member_Doc_For_Not_Pattern_F_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ComplexPattern`, :typeref:`NotPattern`" & Character_Type'Val (10)
- & Character_Type'Val (10)
- & "When there are no parsing errors, this field is never null.";
-      Member_Desc_For_Not_Pattern_F_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
-        (Last_Argument => 0,
-         Name          => Member_Name_For_Not_Pattern_F_Sub_Pattern'Access,
-         Documentation => Member_Doc_For_Not_Pattern_F_Sub_Pattern'Access,
-         Owner         => Type_Index_For_Not_Pattern,
-         Member_Type   => Type_Index_For_Pattern,
-         Null_For      => null,
-         Indexes       => Indexes_For_Not_Pattern_F_Sub_Pattern'Access,
-         Arguments     =>
-           (1 .. 0 => <>)
-        );
-
-      
-
-
-      
-
-      
          Indexes_For_Or_Pattern_F_Left_Sub_Pattern : aliased constant Syntax_Field_Indexes :=
            (Type_Index_For_Or_Pattern => 1);
 
       Member_Name_For_Or_Pattern_F_Left_Sub_Pattern : aliased constant Text_Type :=
         "F_Left_Sub_Pattern";
-      Member_Doc_For_Or_Pattern_F_Left_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ComplexPattern`, :typeref:`NotPattern`" & Character_Type'Val (10)
- & Character_Type'Val (10)
- & "When there are no parsing errors, this field is never null.";
+      Member_Doc_For_Or_Pattern_F_Left_Sub_Pattern  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
       Member_Desc_For_Or_Pattern_F_Left_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Or_Pattern_F_Left_Sub_Pattern'Access,
          Documentation => Member_Doc_For_Or_Pattern_F_Left_Sub_Pattern'Access,
          Owner         => Type_Index_For_Or_Pattern,
-         Member_Type   => Type_Index_For_Pattern,
+         Member_Type   => Type_Index_For_Scoped_Pattern,
          Null_For      => null,
          Indexes       => Indexes_For_Or_Pattern_F_Left_Sub_Pattern'Access,
          Arguments     =>
@@ -9369,15 +9338,13 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
 
       Member_Name_For_Or_Pattern_F_Right_Sub_Pattern : aliased constant Text_Type :=
         "F_Right_Sub_Pattern";
-      Member_Doc_For_Or_Pattern_F_Right_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ComplexPattern`, :typeref:`NotPattern`, :typeref:`OrPattern`" & Character_Type'Val (10)
- & Character_Type'Val (10)
- & "When there are no parsing errors, this field is never null.";
+      Member_Doc_For_Or_Pattern_F_Right_Sub_Pattern  : aliased constant Text_Type := "When there are no parsing errors, this field is never null.";
       Member_Desc_For_Or_Pattern_F_Right_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => 0,
          Name          => Member_Name_For_Or_Pattern_F_Right_Sub_Pattern'Access,
          Documentation => Member_Doc_For_Or_Pattern_F_Right_Sub_Pattern'Access,
          Owner         => Type_Index_For_Or_Pattern,
-         Member_Type   => Type_Index_For_Pattern,
+         Member_Type   => Type_Index_For_Scoped_Pattern,
          Null_For      => null,
          Indexes       => Indexes_For_Or_Pattern_F_Right_Sub_Pattern'Access,
          Arguments     =>
@@ -9406,6 +9373,33 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          Member_Type   => Type_Index_For_Pattern,
          Null_For      => null,
          Indexes       => Indexes_For_Paren_Pattern_F_Sub_Pattern'Access,
+         Arguments     =>
+           (1 .. 0 => <>)
+        );
+
+      
+
+
+      
+
+      
+         Indexes_For_Scoped_Pattern_F_Sub_Pattern : aliased constant Syntax_Field_Indexes :=
+           (Type_Index_For_Scoped_Pattern => 1,
+Type_Index_For_Not_Pattern => 1);
+
+      Member_Name_For_Scoped_Pattern_F_Sub_Pattern : aliased constant Text_Type :=
+        "F_Sub_Pattern";
+      Member_Doc_For_Scoped_Pattern_F_Sub_Pattern  : aliased constant Text_Type := "This field can contain one of the following nodes: :typeref:`ComplexPattern`, :typeref:`NotPattern`, :typeref:`OrPattern`" & Character_Type'Val (10)
+ & Character_Type'Val (10)
+ & "When there are no parsing errors, this field is never null.";
+      Member_Desc_For_Scoped_Pattern_F_Sub_Pattern  : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => 0,
+         Name          => Member_Name_For_Scoped_Pattern_F_Sub_Pattern'Access,
+         Documentation => Member_Doc_For_Scoped_Pattern_F_Sub_Pattern'Access,
+         Owner         => Type_Index_For_Scoped_Pattern,
+         Member_Type   => Type_Index_For_Pattern,
+         Null_For      => null,
+         Indexes       => Indexes_For_Scoped_Pattern_F_Sub_Pattern'Access,
          Arguments     =>
            (1 .. 0 => <>)
         );
@@ -12262,16 +12256,15 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
       Member_Index_For_Lexer_Case_Rule_F_Alts => Member_Desc_For_Lexer_Case_Rule_F_Alts'Access,
       Member_Index_For_Lexer_Case_Rule_Send_F_Sent => Member_Desc_For_Lexer_Case_Rule_Send_F_Sent'Access,
       Member_Index_For_Lexer_Case_Rule_Send_F_Match_Size => Member_Desc_For_Lexer_Case_Rule_Send_F_Match_Size'Access,
-      Member_Index_For_Complex_Pattern_F_Decl => Member_Desc_For_Complex_Pattern_F_Decl'Access,
+      Member_Index_For_Binding_Pattern_F_Decl => Member_Desc_For_Binding_Pattern_F_Decl'Access,
       Member_Index_For_Complex_Pattern_F_Pattern => Member_Desc_For_Complex_Pattern_F_Pattern'Access,
       Member_Index_For_Complex_Pattern_F_Details => Member_Desc_For_Complex_Pattern_F_Details'Access,
       Member_Index_For_Complex_Pattern_F_Predicate => Member_Desc_For_Complex_Pattern_F_Predicate'Access,
-      Member_Index_For_Ellipsis_Pattern_F_Binding => Member_Desc_For_Ellipsis_Pattern_F_Binding'Access,
       Member_Index_For_List_Pattern_F_Sub_Patterns => Member_Desc_For_List_Pattern_F_Sub_Patterns'Access,
-      Member_Index_For_Not_Pattern_F_Sub_Pattern => Member_Desc_For_Not_Pattern_F_Sub_Pattern'Access,
       Member_Index_For_Or_Pattern_F_Left_Sub_Pattern => Member_Desc_For_Or_Pattern_F_Left_Sub_Pattern'Access,
       Member_Index_For_Or_Pattern_F_Right_Sub_Pattern => Member_Desc_For_Or_Pattern_F_Right_Sub_Pattern'Access,
       Member_Index_For_Paren_Pattern_F_Sub_Pattern => Member_Desc_For_Paren_Pattern_F_Sub_Pattern'Access,
+      Member_Index_For_Scoped_Pattern_F_Sub_Pattern => Member_Desc_For_Scoped_Pattern_F_Sub_Pattern'Access,
       Member_Index_For_Type_Pattern_F_Type_Name => Member_Desc_For_Type_Pattern_F_Type_Name'Access,
       Member_Index_For_Destructuring_Pattern_Detail_F_Decl => Member_Desc_For_Destructuring_Pattern_Detail_F_Decl'Access,
       Member_Index_For_Field_Pattern_Detail_F_Id => Member_Desc_For_Field_Pattern_Detail_F_Id'Access,
@@ -17592,7 +17585,7 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          Node_Repr_Name_For_Pattern : aliased constant Text_Type :=
            "Pattern";
       Node_Desc_For_Pattern : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 12,
+        (Derivations_Count => 11,
          Member_Count      => 0,
          Base_Type         => Type_Index_For_Lkt_Node,
          Is_Abstract       => True,
@@ -17606,17 +17599,16 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          Inherited_Members => 53,
          Derivations       => (
              1 => Type_Index_For_Any_Type_Pattern,
-2 => Type_Index_For_Bool_Pattern,
-3 => Type_Index_For_Complex_Pattern,
-4 => Type_Index_For_Ellipsis_Pattern,
-5 => Type_Index_For_Integer_Pattern,
-6 => Type_Index_For_List_Pattern,
-7 => Type_Index_For_Not_Pattern,
-8 => Type_Index_For_Null_Pattern,
-9 => Type_Index_For_Or_Pattern,
-10 => Type_Index_For_Paren_Pattern,
-11 => Type_Index_For_Regex_Pattern,
-12 => Type_Index_For_Type_Pattern
+2 => Type_Index_For_Binding_Pattern,
+3 => Type_Index_For_Bool_Pattern,
+4 => Type_Index_For_Integer_Pattern,
+5 => Type_Index_For_List_Pattern,
+6 => Type_Index_For_Null_Pattern,
+7 => Type_Index_For_Or_Pattern,
+8 => Type_Index_For_Paren_Pattern,
+9 => Type_Index_For_Regex_Pattern,
+10 => Type_Index_For_Scoped_Pattern,
+11 => Type_Index_For_Type_Pattern
          ),
          Members           => (
               1 .. 0 => <>
@@ -17639,6 +17631,105 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          Name              => Node_Name_For_Any_Type_Pattern'Access,
          Repr_Name         => Node_Repr_Name_For_Any_Type_Pattern'Access,
          Inherited_Members => 53,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 .. 0 => <>
+         ));
+      
+      Node_Name_For_Binding_Pattern : aliased constant Text_Type :=
+        "Binding_Pattern";
+         Node_Repr_Name_For_Binding_Pattern : aliased constant Text_Type :=
+           "BindingPattern";
+      Node_Desc_For_Binding_Pattern : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 2,
+         Member_Count      => 1,
+         Base_Type         => Type_Index_For_Pattern,
+         Is_Abstract       => True,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Binding_Pattern'Access,
+         Repr_Name         => Node_Repr_Name_For_Binding_Pattern'Access,
+         Inherited_Members => 54,
+         Derivations       => (
+             1 => Type_Index_For_Complex_Pattern,
+2 => Type_Index_For_Ellipsis_Pattern
+         ),
+         Members           => (
+              1 => Member_Index_For_Binding_Pattern_F_Decl
+         ));
+      
+      Node_Name_For_Complex_Pattern : aliased constant Text_Type :=
+        "Complex_Pattern";
+         Node_Repr_Name_For_Complex_Pattern : aliased constant Text_Type :=
+           "ComplexPattern";
+      Node_Desc_For_Complex_Pattern : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 1,
+         Member_Count      => 3,
+         Base_Type         => Type_Index_For_Binding_Pattern,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Complex_Pattern'Access,
+         Repr_Name         => Node_Repr_Name_For_Complex_Pattern'Access,
+         Inherited_Members => 57,
+         Derivations       => (
+             1 => Type_Index_For_Renaming_Complex_Pattern
+         ),
+         Members           => (
+              1 => Member_Index_For_Complex_Pattern_F_Pattern,
+2 => Member_Index_For_Complex_Pattern_F_Details,
+3 => Member_Index_For_Complex_Pattern_F_Predicate
+         ));
+      
+      Node_Name_For_Renaming_Complex_Pattern : aliased constant Text_Type :=
+        "Renaming_Complex_Pattern";
+         Node_Repr_Name_For_Renaming_Complex_Pattern : aliased constant Text_Type :=
+           "RenamingComplexPattern";
+      Node_Desc_For_Renaming_Complex_Pattern : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 0,
+         Base_Type         => Type_Index_For_Complex_Pattern,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Renaming_Complex_Pattern'Access,
+         Repr_Name         => Node_Repr_Name_For_Renaming_Complex_Pattern'Access,
+         Inherited_Members => 57,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 .. 0 => <>
+         ));
+      
+      Node_Name_For_Ellipsis_Pattern : aliased constant Text_Type :=
+        "Ellipsis_Pattern";
+         Node_Repr_Name_For_Ellipsis_Pattern : aliased constant Text_Type :=
+           "EllipsisPattern";
+      Node_Desc_For_Ellipsis_Pattern : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 0,
+         Base_Type         => Type_Index_For_Binding_Pattern,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Ellipsis_Pattern'Access,
+         Repr_Name         => Node_Repr_Name_For_Ellipsis_Pattern'Access,
+         Inherited_Members => 54,
          Derivations       => (
              1 .. 0 => <>
          ),
@@ -17719,81 +17810,6 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
               1 .. 0 => <>
          ));
       
-      Node_Name_For_Complex_Pattern : aliased constant Text_Type :=
-        "Complex_Pattern";
-         Node_Repr_Name_For_Complex_Pattern : aliased constant Text_Type :=
-           "ComplexPattern";
-      Node_Desc_For_Complex_Pattern : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 1,
-         Member_Count      => 4,
-         Base_Type         => Type_Index_For_Pattern,
-         Is_Abstract       => False,
-         Is_Error_Node     => False,
-         Is_Synthetic      => False,
-         Is_Token_Node     => False,
-         Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Complex_Pattern'Access,
-         Repr_Name         => Node_Repr_Name_For_Complex_Pattern'Access,
-         Inherited_Members => 57,
-         Derivations       => (
-             1 => Type_Index_For_Renaming_Complex_Pattern
-         ),
-         Members           => (
-              1 => Member_Index_For_Complex_Pattern_F_Decl,
-2 => Member_Index_For_Complex_Pattern_F_Pattern,
-3 => Member_Index_For_Complex_Pattern_F_Details,
-4 => Member_Index_For_Complex_Pattern_F_Predicate
-         ));
-      
-      Node_Name_For_Renaming_Complex_Pattern : aliased constant Text_Type :=
-        "Renaming_Complex_Pattern";
-         Node_Repr_Name_For_Renaming_Complex_Pattern : aliased constant Text_Type :=
-           "RenamingComplexPattern";
-      Node_Desc_For_Renaming_Complex_Pattern : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 0,
-         Member_Count      => 0,
-         Base_Type         => Type_Index_For_Complex_Pattern,
-         Is_Abstract       => False,
-         Is_Error_Node     => False,
-         Is_Synthetic      => False,
-         Is_Token_Node     => False,
-         Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Renaming_Complex_Pattern'Access,
-         Repr_Name         => Node_Repr_Name_For_Renaming_Complex_Pattern'Access,
-         Inherited_Members => 57,
-         Derivations       => (
-             1 .. 0 => <>
-         ),
-         Members           => (
-              1 .. 0 => <>
-         ));
-      
-      Node_Name_For_Ellipsis_Pattern : aliased constant Text_Type :=
-        "Ellipsis_Pattern";
-         Node_Repr_Name_For_Ellipsis_Pattern : aliased constant Text_Type :=
-           "EllipsisPattern";
-      Node_Desc_For_Ellipsis_Pattern : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 0,
-         Member_Count      => 1,
-         Base_Type         => Type_Index_For_Pattern,
-         Is_Abstract       => False,
-         Is_Error_Node     => False,
-         Is_Synthetic      => False,
-         Is_Token_Node     => False,
-         Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Ellipsis_Pattern'Access,
-         Repr_Name         => Node_Repr_Name_For_Ellipsis_Pattern'Access,
-         Inherited_Members => 54,
-         Derivations       => (
-             1 .. 0 => <>
-         ),
-         Members           => (
-              1 => Member_Index_For_Ellipsis_Pattern_F_Binding
-         ));
-      
       Node_Name_For_Integer_Pattern : aliased constant Text_Type :=
         "Integer_Pattern";
          Node_Repr_Name_For_Integer_Pattern : aliased constant Text_Type :=
@@ -17840,30 +17856,6 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          ),
          Members           => (
               1 => Member_Index_For_List_Pattern_F_Sub_Patterns
-         ));
-      
-      Node_Name_For_Not_Pattern : aliased constant Text_Type :=
-        "Not_Pattern";
-         Node_Repr_Name_For_Not_Pattern : aliased constant Text_Type :=
-           "NotPattern";
-      Node_Desc_For_Not_Pattern : aliased constant Struct_Type_Descriptor :=
-        (Derivations_Count => 0,
-         Member_Count      => 1,
-         Base_Type         => Type_Index_For_Pattern,
-         Is_Abstract       => False,
-         Is_Error_Node     => False,
-         Is_Synthetic      => False,
-         Is_Token_Node     => False,
-         Token_Node_Kind   => No_Token_Kind_Index,
-         List_Element_Type => No_Type_Index,
-         Name              => Node_Name_For_Not_Pattern'Access,
-         Repr_Name         => Node_Repr_Name_For_Not_Pattern'Access,
-         Inherited_Members => 54,
-         Derivations       => (
-             1 .. 0 => <>
-         ),
-         Members           => (
-              1 => Member_Index_For_Not_Pattern_F_Sub_Pattern
          ));
       
       Node_Name_For_Null_Pattern : aliased constant Text_Type :=
@@ -17961,6 +17953,54 @@ Type_Index_For_Renaming_Complex_Pattern => 4);
          ),
          Members           => (
               1 => Member_Index_For_Regex_Pattern_P_Denoted_Value
+         ));
+      
+      Node_Name_For_Scoped_Pattern : aliased constant Text_Type :=
+        "Scoped_Pattern";
+         Node_Repr_Name_For_Scoped_Pattern : aliased constant Text_Type :=
+           "ScopedPattern";
+      Node_Desc_For_Scoped_Pattern : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 1,
+         Member_Count      => 1,
+         Base_Type         => Type_Index_For_Pattern,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Scoped_Pattern'Access,
+         Repr_Name         => Node_Repr_Name_For_Scoped_Pattern'Access,
+         Inherited_Members => 54,
+         Derivations       => (
+             1 => Type_Index_For_Not_Pattern
+         ),
+         Members           => (
+              1 => Member_Index_For_Scoped_Pattern_F_Sub_Pattern
+         ));
+      
+      Node_Name_For_Not_Pattern : aliased constant Text_Type :=
+        "Not_Pattern";
+         Node_Repr_Name_For_Not_Pattern : aliased constant Text_Type :=
+           "NotPattern";
+      Node_Desc_For_Not_Pattern : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => 0,
+         Member_Count      => 0,
+         Base_Type         => Type_Index_For_Scoped_Pattern,
+         Is_Abstract       => False,
+         Is_Error_Node     => False,
+         Is_Synthetic      => False,
+         Is_Token_Node     => False,
+         Token_Node_Kind   => No_Token_Kind_Index,
+         List_Element_Type => No_Type_Index,
+         Name              => Node_Name_For_Not_Pattern'Access,
+         Repr_Name         => Node_Repr_Name_For_Not_Pattern'Access,
+         Inherited_Members => 54,
+         Derivations       => (
+             1 .. 0 => <>
+         ),
+         Members           => (
+              1 .. 0 => <>
          ));
       
       Node_Name_For_Type_Pattern : aliased constant Text_Type :=
@@ -18442,19 +18482,21 @@ Type_Index_For_Op_Stream_Concat => Node_Desc_For_Op_Stream_Concat'Access,
 Type_Index_For_Op_Stream_Cons => Node_Desc_For_Op_Stream_Cons'Access,
 Type_Index_For_Pattern => Node_Desc_For_Pattern'Access,
 Type_Index_For_Any_Type_Pattern => Node_Desc_For_Any_Type_Pattern'Access,
-Type_Index_For_Bool_Pattern => Node_Desc_For_Bool_Pattern'Access,
-Type_Index_For_Bool_Pattern_False => Node_Desc_For_Bool_Pattern_False'Access,
-Type_Index_For_Bool_Pattern_True => Node_Desc_For_Bool_Pattern_True'Access,
+Type_Index_For_Binding_Pattern => Node_Desc_For_Binding_Pattern'Access,
 Type_Index_For_Complex_Pattern => Node_Desc_For_Complex_Pattern'Access,
 Type_Index_For_Renaming_Complex_Pattern => Node_Desc_For_Renaming_Complex_Pattern'Access,
 Type_Index_For_Ellipsis_Pattern => Node_Desc_For_Ellipsis_Pattern'Access,
+Type_Index_For_Bool_Pattern => Node_Desc_For_Bool_Pattern'Access,
+Type_Index_For_Bool_Pattern_False => Node_Desc_For_Bool_Pattern_False'Access,
+Type_Index_For_Bool_Pattern_True => Node_Desc_For_Bool_Pattern_True'Access,
 Type_Index_For_Integer_Pattern => Node_Desc_For_Integer_Pattern'Access,
 Type_Index_For_List_Pattern => Node_Desc_For_List_Pattern'Access,
-Type_Index_For_Not_Pattern => Node_Desc_For_Not_Pattern'Access,
 Type_Index_For_Null_Pattern => Node_Desc_For_Null_Pattern'Access,
 Type_Index_For_Or_Pattern => Node_Desc_For_Or_Pattern'Access,
 Type_Index_For_Paren_Pattern => Node_Desc_For_Paren_Pattern'Access,
 Type_Index_For_Regex_Pattern => Node_Desc_For_Regex_Pattern'Access,
+Type_Index_For_Scoped_Pattern => Node_Desc_For_Scoped_Pattern'Access,
+Type_Index_For_Not_Pattern => Node_Desc_For_Not_Pattern'Access,
 Type_Index_For_Type_Pattern => Node_Desc_For_Type_Pattern'Access,
 Type_Index_For_Pattern_Detail => Node_Desc_For_Pattern_Detail'Access,
 Type_Index_For_Destructuring_Pattern_Detail => Node_Desc_For_Destructuring_Pattern_Detail'Access,
@@ -18663,18 +18705,19 @@ Type_Index_For_Var_Bind => Node_Desc_For_Var_Bind'Access
       Lkt_Op_Stream_Concat => Type_Index_For_Op_Stream_Concat,
       Lkt_Op_Stream_Cons => Type_Index_For_Op_Stream_Cons,
       Lkt_Any_Type_Pattern => Type_Index_For_Any_Type_Pattern,
-      Lkt_Bool_Pattern_False => Type_Index_For_Bool_Pattern_False,
-      Lkt_Bool_Pattern_True => Type_Index_For_Bool_Pattern_True,
       Lkt_Complex_Pattern => Type_Index_For_Complex_Pattern,
       Lkt_Renaming_Complex_Pattern => Type_Index_For_Renaming_Complex_Pattern,
       Lkt_Ellipsis_Pattern => Type_Index_For_Ellipsis_Pattern,
+      Lkt_Bool_Pattern_False => Type_Index_For_Bool_Pattern_False,
+      Lkt_Bool_Pattern_True => Type_Index_For_Bool_Pattern_True,
       Lkt_Integer_Pattern => Type_Index_For_Integer_Pattern,
       Lkt_List_Pattern => Type_Index_For_List_Pattern,
-      Lkt_Not_Pattern => Type_Index_For_Not_Pattern,
       Lkt_Null_Pattern => Type_Index_For_Null_Pattern,
       Lkt_Or_Pattern => Type_Index_For_Or_Pattern,
       Lkt_Paren_Pattern => Type_Index_For_Paren_Pattern,
       Lkt_Regex_Pattern => Type_Index_For_Regex_Pattern,
+      Lkt_Scoped_Pattern => Type_Index_For_Scoped_Pattern,
+      Lkt_Not_Pattern => Type_Index_For_Not_Pattern,
       Lkt_Type_Pattern => Type_Index_For_Type_Pattern,
       Lkt_Destructuring_Pattern_Detail => Type_Index_For_Destructuring_Pattern_Detail,
       Lkt_Field_Pattern_Detail => Type_Index_For_Field_Pattern_Detail,

@@ -1935,13 +1935,13 @@ package body Liblktlang.Rewriting is
 
          function Create_Ellipsis_Pattern
            (Handle : Rewriting_Handle
-               ; F_Binding : Node_Rewriting_Handle
+               ; F_Decl : Node_Rewriting_Handle
             ) return Node_Rewriting_Handle is
          begin
             return Create_Regular_Node
               (Handle,
                Lkt_Ellipsis_Pattern,
-                 (1 => F_Binding));
+                 (1 => F_Decl));
          end;
 
 
@@ -1954,18 +1954,6 @@ package body Liblktlang.Rewriting is
               (Handle,
                Lkt_List_Pattern,
                  (1 => F_Sub_Patterns));
-         end;
-
-
-         function Create_Not_Pattern
-           (Handle : Rewriting_Handle
-               ; F_Sub_Pattern : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Not_Pattern,
-                 (1 => F_Sub_Pattern));
          end;
 
 
@@ -1991,6 +1979,30 @@ package body Liblktlang.Rewriting is
             return Create_Regular_Node
               (Handle,
                Lkt_Paren_Pattern,
+                 (1 => F_Sub_Pattern));
+         end;
+
+
+         function Create_Scoped_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Scoped_Pattern,
+                 (1 => F_Sub_Pattern));
+         end;
+
+
+         function Create_Not_Pattern
+           (Handle : Rewriting_Handle
+               ; F_Sub_Pattern : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Not_Pattern,
                  (1 => F_Sub_Pattern));
          end;
 
