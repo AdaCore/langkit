@@ -368,48 +368,52 @@ LangkitRoot[1:1-12:16]
 |  |  |  |  |f_pattern:
 |  |  |  |  |  OrPattern[10:14-10:31]
 |  |  |  |  |  |f_left_sub_pattern:
-|  |  |  |  |  |  ComplexPattern[10:14-10:19]
-|  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  ListPattern[10:14-10:19]
-|  |  |  |  |  |  |  |f_sub_patterns:
-|  |  |  |  |  |  |  |  PatternList[10:15-10:18]
-|  |  |  |  |  |  |  |  |  EllipsisPattern[10:15-10:18]
-|  |  |  |  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  PatternDetailList[10:19-10:19]: <empty list>
-|  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  ScopedPattern[10:14-10:19]
+|  |  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  |  ComplexPattern[10:14-10:19]
+|  |  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |  ListPattern[10:14-10:19]
+|  |  |  |  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  |  |  |  PatternList[10:15-10:18]
+|  |  |  |  |  |  |  |  |  |  EllipsisPattern[10:15-10:18]
+|  |  |  |  |  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  PatternDetailList[10:19-10:19]: <empty list>
+|  |  |  |  |  |  |  |f_predicate: <null>
 |  |  |  |  |  |f_right_sub_pattern:
-|  |  |  |  |  |  ComplexPattern[10:22-10:31]
-|  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  ListPattern[10:22-10:31]
-|  |  |  |  |  |  |  |f_sub_patterns:
-|  |  |  |  |  |  |  |  PatternList[10:23-10:30]
-|  |  |  |  |  |  |  |  |  ComplexPattern[10:23-10:24]
-|  |  |  |  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  |  IntegerPattern[10:23-10:24]: 1
-|  |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  |  PatternDetailList[10:24-10:24]: <empty list>
-|  |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |  |  |  ComplexPattern[10:26-10:27]
-|  |  |  |  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  |  IntegerPattern[10:26-10:27]: 2
-|  |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  |  PatternDetailList[10:27-10:27]: <empty list>
-|  |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |  |  |  ComplexPattern[10:29-10:30]
-|  |  |  |  |  |  |  |  |  |f_decl: <null>
-|  |  |  |  |  |  |  |  |  |f_pattern:
-|  |  |  |  |  |  |  |  |  |  IntegerPattern[10:29-10:30]: 3
-|  |  |  |  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  |  |  |  PatternDetailList[10:30-10:30]: <empty list>
-|  |  |  |  |  |  |  |  |  |f_predicate: <null>
-|  |  |  |  |  |  |f_details:
-|  |  |  |  |  |  |  PatternDetailList[10:31-10:31]: <empty list>
-|  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  ScopedPattern[10:22-10:31]
+|  |  |  |  |  |  |f_sub_pattern:
+|  |  |  |  |  |  |  ComplexPattern[10:22-10:31]
+|  |  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |  ListPattern[10:22-10:31]
+|  |  |  |  |  |  |  |  |f_sub_patterns:
+|  |  |  |  |  |  |  |  |  PatternList[10:23-10:30]
+|  |  |  |  |  |  |  |  |  |  ComplexPattern[10:23-10:24]
+|  |  |  |  |  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |  |  |  |  IntegerPattern[10:23-10:24]: 1
+|  |  |  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  |  |  PatternDetailList[10:24-10:24]: <empty list>
+|  |  |  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  |  |  |  |  ComplexPattern[10:26-10:27]
+|  |  |  |  |  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |  |  |  |  IntegerPattern[10:26-10:27]: 2
+|  |  |  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  |  |  PatternDetailList[10:27-10:27]: <empty list>
+|  |  |  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  |  |  |  |  ComplexPattern[10:29-10:30]
+|  |  |  |  |  |  |  |  |  |  |f_decl: <null>
+|  |  |  |  |  |  |  |  |  |  |f_pattern:
+|  |  |  |  |  |  |  |  |  |  |  IntegerPattern[10:29-10:30]: 3
+|  |  |  |  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  |  |  |  PatternDetailList[10:30-10:30]: <empty list>
+|  |  |  |  |  |  |  |  |  |  |f_predicate: <null>
+|  |  |  |  |  |  |  |f_details:
+|  |  |  |  |  |  |  |  PatternDetailList[10:31-10:31]: <empty list>
+|  |  |  |  |  |  |  |f_predicate: <null>
 |  |  FullDecl[11:1-11:57]
 |  |  |f_doc: <null>
 |  |  |f_decl_annotations:

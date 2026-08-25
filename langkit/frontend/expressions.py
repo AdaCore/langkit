@@ -3162,22 +3162,27 @@ class ExpressionCompiler:
         Flatten a pattern formed of TypePatterns & OrPatterns into a list of
         types. Error out if any other patterns are used.
         """
-        if isinstance(ptn, L.OrPattern):
-            return list(
-                itertools.chain(*map(self.flatten_pattern, ptn.children))
-            )
-        elif (
-            isinstance(ptn, L.ComplexPattern)
-            and isinstance(ptn.f_pattern, L.TypePattern)
-            and not ptn.f_details.children
-            and not ptn.f_predicate
-        ):
-            return [ptn.f_pattern.f_type_name]
-        else:
-            error(
-                "Only conjunctions of type patterns supported for now",
-                location=ptn,
-            )
+        match ptn:
+            case L.OrPattern():
+                return list(
+                    itertools.chain(*map(self.flatten_pattern, ptn.children))
+                )
+            case L.ComplexPattern() if isinstance(
+                ptn.f_pattern, L.TypePattern
+            ) and not ptn.f_details.children and not ptn.f_predicate:
+                return [ptn.f_pattern.f_type_name]
+            case L.ScopedPattern():
+                return self.flatten_pattern(ptn.f_sub_pattern)
+            case _:
+                error(
+                    "Only conjunctions of type patterns supported for now",
+                    location=ptn,
+                )
+
+        # NOTE: The following raise is useless, but is there because mypy is
+        # not clever enough to know that the previous match is covering all
+        # cases.
+        raise AssertionError("should not happen")
 
     def lower_is_a(self, expr: L.Isa, env: Scope) -> E.Expr:
         self.abort_if_static_required(expr)

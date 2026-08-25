@@ -3019,6 +3019,17 @@ class BindingPattern: Pattern {
     decl: BindingValDecl
 }
 
+|" A pattern that introduce a new lexical environment and delegate the matching
+|" logic to its subpattern.
+class ScopedPattern: Pattern {
+    @parse_field
+    sub_pattern: Pattern
+
+    env_spec {
+        add_env()
+    }
+}
+
 |" Pattern to match on booleans.
 enum class BoolPattern: Pattern {
     case True, False
@@ -3074,9 +3085,7 @@ class TypePattern: Pattern {
 |" For instance::
 |"
 |"    val non_objects = select not ObjectDecl
-class NotPattern: Pattern {
-    @parse_field
-    sub_pattern: Pattern
+class NotPattern: ScopedPattern {
 }
 
 |" Null pattern. Will only match the null value.
@@ -3090,9 +3099,9 @@ class NullPattern: Pattern {
 |"     val value_decls = select ObjectDecl | ParamSpec
 class OrPattern: Pattern {
     @parse_field
-    left_sub_pattern: Pattern
+    left_sub_pattern: ScopedPattern
     @parse_field
-    right_sub_pattern: Pattern
+    right_sub_pattern: ScopedPattern
 }
 
 |" A syntactically parenthesized pattern. Has no effect, only used to
