@@ -120,6 +120,11 @@ package Liblktlang.Rewriting is
    function Unparse (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type;
    --  Return the text associated to the given unit.
 
+   function Unparse_With_Partial_Formatting
+     (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type;
+   --  Return the text associated to the given unit with modified parts
+   --  formatted if possible.
+
    --------------------
    -- Node rewriting --
    --------------------

@@ -4,16 +4,15 @@ with System;
 with Ada.Unchecked_Deallocation;
 
 with Liblktlang.Implementation;
-with Liblktlang.Lexer_Implementation;
 with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
 
 package body Liblktlang.Generic_Impl is
 
    package Builtin_Files is
          Buffer_0   : constant Character
-         with Import, External_Name => "lkt_builtin_file_90be36e7e1d5ea4b9b2ca8863caa55a4";
+         with Import, External_Name => "lkt_builtin_file_b6194bc62e6e1435340b1066a472445c";
          Contents_0 : constant Memory_Buffer :=
-           (Buffer_0'Address, 48669);
+           (Buffer_0'Address, 54848);
    end Builtin_Files;
 
    ---------
@@ -562,6 +561,15 @@ package body Liblktlang.Generic_Impl is
    begin
       return Implementation.Text (+Node);
    end Node_Text;
+
+   -----------------
+   -- Node_Symbol --
+   -----------------
+
+   function Node_Symbol (Node : Internal_Node) return Symbol_Type is
+   begin
+      return Implementation.Get_Symbol (+Node);
+   end Node_Symbol;
 
    ---------------------
    -- Node_Sloc_Range --

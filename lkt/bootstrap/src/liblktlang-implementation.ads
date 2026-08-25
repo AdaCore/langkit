@@ -102,6 +102,7 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_Builder, --  builder
                Precomputed_Sym_Call, --  __call__
                Precomputed_Sym_Char, --  Char
+               Precomputed_Sym_Covariant, --  covariant
                Precomputed_Sym_Dedent, --  dedent
                Precomputed_Sym_Default_Metadata, --  __default_metadata
                Precomputed_Sym_Domain, --  domain
@@ -118,6 +119,7 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_Indexable, --  Indexable
                Precomputed_Sym_Int, --  Int
                Precomputed_Sym_Invalid, --  invalid
+               Precomputed_Sym_Iterable, --  Iterable
                Precomputed_Sym_Iterator, --  Iterator
                Precomputed_Sym_Keep, --  keep
                Precomputed_Sym_Lazy, --  lazy
@@ -125,11 +127,11 @@ private package Liblktlang.Implementation is
                Precomputed_Sym_List_Elements, --  list_elements
                Precomputed_Sym_Logicvar, --  LogicVar
                Precomputed_Sym_Metadata, --  Metadata
-               Precomputed_Sym_Metadata_49, --  metadata
+               Precomputed_Sym_Metadata_51, --  metadata
                Precomputed_Sym_Newline, --  newline
                Precomputed_Sym_No_Case, --  no_case
                Precomputed_Sym_Node, --  Node
-               Precomputed_Sym_Node_52, --  node
+               Precomputed_Sym_Node_54, --  node
                Precomputed_Sym_Nodebuilder, --  NodeBuilder
                Precomputed_Sym_Null_Field, --  null_field
                Precomputed_Sym_Nullable, --  nullable
@@ -14014,6 +14016,8 @@ Lkt_Var_Bind => 2);
                No_Bare_Lkt_Node;
             Query_F_Guard : aliased Bare_Expr :=
                No_Bare_Lkt_Node;
+            Query_F_Res_Elems_Type_Var : aliased Logic_Var_Record :=
+               Null_Var_Record;
 
          
 
@@ -18567,6 +18571,23 @@ function Completion_Item_Kind_To_Int
 
 
 
+      
+
+
+
+
+function Is_Empty_List
+   
+  (Node : Bare_Lkt_Node_Base_List
+  )
+
+   return Boolean
+
+   
+   ;
+--  Return whether this list node has no children.
+
+
 
    
 
@@ -19672,6 +19693,7 @@ type Mmz_Property is (
      ,  Mmz_Bare_Ref_Id_Ref_Id_P_Referenced_Decl
      ,  Mmz_Bare_Struct_Decl_Struct_Decl_P_Update_Func_Env
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Make_Array_Type
+     ,  Mmz_Bare_Type_Decl_Type_Decl_P_Make_Stream_Of_Common_Ancestor
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Make_Stream_Type
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Node_Builder_Scope
      ,  Mmz_Bare_Type_Decl_Type_Decl_P_Node_Decl

@@ -23,6 +23,7 @@ import abc
 import argparse
 import collections
 import ctypes
+import enum
 import io
 import json
 import os
@@ -124,11 +125,32 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
 
     if exc_wrap:
         def wrapper(*args, **kwargs):
+            exc = _Exception()
+            exc_ref = ctypes.byref(exc)
             check_argcount(args, kwargs)
             result = func(*args, **kwargs)
-            exc = _get_last_exception()
-            if exc:
-                raise exc.contents._wrap()
+            # Do not use the "get_last_exception" API so that getting exception
+            # details + checking if there is an exception is done atomically.
+            #
+            # We used to have::
+            #
+            #    result = func(*args, **kwargs)
+            #    exc = _get_last_exception()
+            #    if exc:
+            #        ...
+            #
+            # But starting with Python 3.13.14, the GC could trigger during the
+            # evaluation of "if exc:". As a result, exc could contain an
+            # exception, but the GC would trigger the destruction of an object,
+            # which would itself call a C API destructor, which would clear
+            # exception information, leading to a crash in _Exception._wrap().
+            # "_copy_last_exception" is more atomic: it copies exception
+            # information and return whether there is an exception at the same
+            # time, so the GC does not run in between.
+            if _copy_last_exception(exc_ref):
+                py_exc = exc._wrap()
+                _free_exception(exc_ref)
+                raise py_exc
             return result
     else:
         def wrapper(*args, **kwargs):
@@ -181,10 +203,17 @@ def _log_uncaught_error(context):
     traceback.print_exc()
 
 
-_get_last_exception = _import_func(
-   'lkt_get_last_exception',
-   [], ctypes.POINTER(_Exception),
-   exc_wrap=False
+_copy_last_exception = _import_func(
+   'lkt_copy_last_exception',
+   [ctypes.POINTER(_Exception)],
+   ctypes.c_int,
+   exc_wrap=False,
+)
+_free_exception = _import_func(
+   'lkt_free_exception',
+   [ctypes.POINTER(_Exception)],
+   None,
+   exc_wrap=False,
 )
 
 
@@ -452,44 +481,8 @@ class _String:
     ))
 
 
-if TYPE_CHECKING:
-    _EnumType = TypeVar("_EnumType", bound=_Enum)
 
-
-class _Enum:
-
-    _name: ClassVar[str]
-    """
-    Name for this enumeration type.
-    """
-
-    _c_to_py: ClassVar[List[str]]
-    """
-    Mapping from C values to user-level Python values.
-    """
-
-    _py_to_c: ClassVar[Dict[str, int]]
-    """
-    Mapping from user-level Python values to C values.
-    """
-
-    @classmethod
-    def _unwrap(cls, py_value: str) -> int:
-        if not isinstance(py_value, str):
-            _raise_type_error('str', py_value)
-        try:
-            return cls._py_to_c[py_value]
-        except KeyError:
-            raise ValueError('Invalid {}: {}'.format(cls._name, py_value))
-
-    @classmethod
-    def _wrap(cls: Type[_EnumType], c_value: Any) -> _EnumType:
-        if isinstance(c_value, ctypes.c_int):
-            c_value = c_value.value
-        return cls._c_to_py[c_value]
-
-
-class AnalysisUnitKind(_Enum):
+class AnalysisUnitKind(str, enum.Enum):
     """
     Specify a kind of analysis unit. Specification units provide an interface
     to the outer world while body units provide an implementation for the
@@ -499,11 +492,16 @@ class AnalysisUnitKind(_Enum):
     unit_specification = 'unit_specification'
     unit_body = 'unit_body'
 
-    _name = 'AnalysisUnitKind'
-    _c_to_py = [
-        unit_specification, unit_body]
-    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
-class CompletionItemKind(_Enum):
+    def __str__(self) -> str:
+        return self.value
+
+
+_AnalysisUnitKind_c_to_py = list(AnalysisUnitKind)
+_AnalysisUnitKind_py_to_c = {name: index for index, name in enumerate(_AnalysisUnitKind_c_to_py)}
+
+
+
+class CompletionItemKind(str, enum.Enum):
     """
     Type of completion item. Refer to the official LSP specification.
     """
@@ -534,11 +532,16 @@ class CompletionItemKind(_Enum):
     operator_kind = 'operator_kind'
     type_parameter_kind = 'type_parameter_kind'
 
-    _name = 'CompletionItemKind'
-    _c_to_py = [
-        text_kind, method_kind, function_kind, constructor_kind, field_kind, variable_kind, class_kind, interface_kind, module_kind, property_kind, unit_kind, value_kind, enum_kind, keyword_kind, snippet_kind, color_kind, file_kind, reference_kind, folder_kind, enum_member_kind, constant_kind, struct_kind, event_kind, operator_kind, type_parameter_kind]
-    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
-class DesignatedEnvKind(_Enum):
+    def __str__(self) -> str:
+        return self.value
+
+
+_CompletionItemKind_c_to_py = list(CompletionItemKind)
+_CompletionItemKind_py_to_c = {name: index for index, name in enumerate(_CompletionItemKind_c_to_py)}
+
+
+
+class DesignatedEnvKind(str, enum.Enum):
     """
     Discriminant for DesignatedEnv structures.
     """
@@ -548,11 +551,16 @@ class DesignatedEnvKind(_Enum):
     named_env = 'named_env'
     direct_env = 'direct_env'
 
-    _name = 'DesignatedEnvKind'
-    _c_to_py = [
-        none, current_env, named_env, direct_env]
-    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
-class GrammarRule(_Enum):
+    def __str__(self) -> str:
+        return self.value
+
+
+_DesignatedEnvKind_c_to_py = list(DesignatedEnvKind)
+_DesignatedEnvKind_py_to_c = {name: index for index, name in enumerate(_DesignatedEnvKind_c_to_py)}
+
+
+
+class GrammarRule(str, enum.Enum):
     """
     Gramar rule to use for parsing.
     """
@@ -665,11 +673,16 @@ class GrammarRule(_Enum):
     decl_annotation_rule = 'decl_annotation_rule'
     query_comprehension_rule = 'query_comprehension_rule'
 
-    _name = 'GrammarRule'
-    _c_to_py = [
-        main_rule_rule, id_rule, ref_id_rule, type_ref_id_rule, module_id_rule, def_id_rule, doc_rule, module_doc_rule, imported_names_rule, import_clause_rule, imports_rule, lexer_decl_rule, grammar_decl_rule, grammar_rule_rule, lexer_case_rule_rule, lexer_case_alt_rule, lexer_case_send_rule, grammar_primary_rule, grammar_expr_rule, grammar_pick_rule, grammar_implicit_pick_rule, grammar_opt_rule, grammar_opt_error_rule, grammar_cut_rule, grammar_stopcut_rule, grammar_or_expr_rule, grammar_discard_expr_rule, token_literal_rule, token_no_case_literal_rule, token_pattern_rule, token_pattern_literal_rule, parse_node_expr_rule, grammar_rule_ref_rule, grammar_list_expr_rule, grammar_list_sep_rule, grammar_skip_rule, grammar_null_rule, grammar_token_rule, type_decl_rule, generic_decl_rule, generic_param_type_rule, enum_lit_decl_rule, fun_decl_rule, lambda_param_decl_rule, fun_param_decl_rule, fun_param_list_rule, lambda_param_list_rule, field_decl_rule, lexer_family_decl_rule, bare_decl_rule, decl_rule, type_member_ref_rule, type_expr_rule, type_ref_rule, type_list_rule, decls_rule, decl_block_rule, val_decl_rule, dynvar_decl_rule, var_bind_rule, env_spec_action_rule, env_spec_decl_rule, block_rule, pattern_rule, neg_pattern_rule, pattern_binding_rule, complex_pattern_rule, value_pattern_rule, regex_pattern_rule, bool_pattern_rule, ellipsis_pattern_rule, integer_pattern_rule, list_pattern_rule, pattern_arg_rule, expr_rule, stream_concat_rule, logic_rule, rel_rule, eq_rule, arith_1_rule, arith_2_rule, arith_3_rule, isa_or_primary_rule, logic_propagate_call_rule, primary_rule, match_expr_rule, num_lit_rule, big_num_lit_rule, string_lit_rule, block_string_lit_rule, char_lit_rule, if_expr_rule, raise_expr_rule, try_expr_rule, array_literal_rule, callable_ref_rule, null_cond_qual_rule, basic_expr_rule, term_rule, basic_name_rule, lambda_expr_rule, null_lit_rule, argument_rule, args_rule, decl_annotation_args_rule, decl_annotation_rule, query_comprehension_rule]
-    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
-class LanguageMode(_Enum):
+    def __str__(self) -> str:
+        return self.value
+
+
+_GrammarRule_c_to_py = list(GrammarRule)
+_GrammarRule_py_to_c = {name: index for index, name in enumerate(_GrammarRule_c_to_py)}
+
+
+
+class LanguageMode(str, enum.Enum):
     """
     All languages that can be analyzed by Liblktlang. This enumeration is used
     to provide information when creating a new unit provider.
@@ -678,11 +691,16 @@ class LanguageMode(_Enum):
     lkt = 'lkt'
     lkql = 'lkql'
 
-    _name = 'LanguageMode'
-    _c_to_py = [
-        lkt, lkql]
-    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
-class LookupKind(_Enum):
+    def __str__(self) -> str:
+        return self.value
+
+
+_LanguageMode_c_to_py = list(LanguageMode)
+_LanguageMode_py_to_c = {name: index for index, name in enumerate(_LanguageMode_c_to_py)}
+
+
+
+class LookupKind(str, enum.Enum):
     """
 
     """
@@ -691,10 +709,13 @@ class LookupKind(_Enum):
     flat = 'flat'
     minimal = 'minimal'
 
-    _name = 'LookupKind'
-    _c_to_py = [
-        recursive, flat, minimal]
-    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
+    def __str__(self) -> str:
+        return self.value
+
+
+_LookupKind_c_to_py = list(LookupKind)
+_LookupKind_py_to_c = {name: index for index, name in enumerate(_LookupKind_c_to_py)}
+
 
 
 default_grammar_rule = GrammarRule.main_rule_rule
@@ -757,12 +778,12 @@ class _UnitProviderWrapper:
     def get_unit_location(
         self: _UnitProviderWrapper,
         name: _text,
-        kind: ctypes.c_int,
+        kind: int,
         filename_ptr: ctypes.POINTER(ctypes.c_char_p),
         ple_root_index_ptr: ctypes.POINTER(ctypes.c_int),
     ) -> None:
         py_name = name.contents._wrap()
-        py_kind = AnalysisUnitKind._c_to_py[kind]
+        py_kind = _AnalysisUnitKind_c_to_py[kind]
         try:
             py_filename, py_ple_root_index = self.unit_provider.unit_location(
                 py_name, py_kind
@@ -1231,11 +1252,13 @@ class AnalysisContext:
     def __hash__(self) -> int:
         return hash(self._c_value)
 
-    def get_from_file(self,
-                      filename: AnyStr,
-                      charset: Opt[str] = None,
-                      reparse: bool = False,
-                      rule: str = default_grammar_rule) -> AnalysisUnit:
+    def get_from_file(
+        self,
+        filename: AnyStr,
+        charset: Opt[str] = None,
+        reparse: bool = False,
+        rule: GrammarRule = default_grammar_rule,
+    ) -> AnalysisUnit:
         """
         Create a new analysis unit for ``Filename`` or return the existing one
         if any. If ``Reparse`` is true and the analysis unit already exists,
@@ -1252,17 +1275,23 @@ class AnalysisContext:
         """
         _filename = _unwrap_filename(filename)
         _charset = _unwrap_charset(charset)
-        c_value = _get_analysis_unit_from_file(self._c_value, _filename,
-                                               _charset, reparse,
-                                               GrammarRule._unwrap(rule))
+        c_value = _get_analysis_unit_from_file(
+            self._c_value,
+            _filename,
+            _charset,
+            reparse,
+            _GrammarRule_py_to_c[GrammarRule(rule)],
+        )
         return AnalysisUnit._wrap(c_value)
 
-    def get_from_buffer(self,
-                        filename: AnyStr,
-                        buffer: AnyStr,
-                        charset: Opt[str] = None,
-                        reparse: bool = False,
-                        rule: str = default_grammar_rule) -> AnalysisUnit:
+    def get_from_buffer(
+        self,
+        filename: AnyStr,
+        buffer: AnyStr,
+        charset: Opt[str] = None,
+        reparse: bool = False,
+        rule: GrammarRule = default_grammar_rule,
+    ) -> AnalysisUnit:
         """
         Create a new analysis unit for ``Filename`` or return the existing one
         if any. Whether the analysis unit already exists or not, (re)parse it
@@ -1280,10 +1309,14 @@ class AnalysisContext:
         _filename = _unwrap_filename(filename)
         _charset = _unwrap_charset(charset)
         _buffer, _charset = _canonicalize_buffer(buffer, _charset)
-        c_value = _get_analysis_unit_from_buffer(self._c_value, _filename,
-                                                 _charset,
-                                                 _buffer, len(_buffer),
-                                                 GrammarRule._unwrap(rule))
+        c_value = _get_analysis_unit_from_buffer(
+            self._c_value,
+            _filename,
+            _charset,
+            _buffer,
+            len(_buffer),
+            _GrammarRule_py_to_c[GrammarRule(rule)],
+        )
         return AnalysisUnit._wrap(c_value)
 
     def get_from_provider(
@@ -1320,7 +1353,7 @@ class AnalysisContext:
         _charset = _unwrap_charset(charset)
 
         _name = _text._unwrap(text_name)
-        _kind = AnalysisUnitKind._unwrap(kind)
+        _kind = _AnalysisUnitKind_py_to_c[AnalysisUnitKind(kind)]
         c_value = _get_analysis_unit_from_provider(
             self._c_value, ctypes.byref(_name), _kind, _charset, reparse
         )
@@ -2084,21 +2117,21 @@ class UnitProvider:
 
 
     @classmethod
-    def create_default(cls, mode: str) -> UnitProvider:
+    def create_default(cls, mode: LanguageMode) -> UnitProvider:
         """
         Create a default unit provider that is going to use the environment
         variable associated to the provided language mode to fetch sources.
         Note that the current working directory is implicitly looked at first.
         """
         c_value = _create_default_provider(
-            LanguageMode._unwrap(mode),
+            _LanguageMode_py_to_c[LanguageMode(mode)],
         )
         return _CUnitProvider(c_value)
 
     @classmethod
     def from_directories(
         cls,
-        mode: str,
+        mode: LanguageMode,
         directories: list[str],
     ) -> UnitProvider:
         """
@@ -2125,7 +2158,7 @@ class UnitProvider:
         )
 
         c_value = _create_default_provider_from_directories(
-            LanguageMode._unwrap(mode),
+            _LanguageMode_py_to_c[LanguageMode(mode)],
             directories_arg,
             len(directories),
         )
@@ -2405,7 +2438,7 @@ class LktNode:
         return result
     
     def completion_item_kind_to_int(
-        self, kind: str
+        self, kind: CompletionItemKind
     ) -> int:
         """
         Convert a CompletionItemKind enum to its corresponding integer value.
@@ -2414,7 +2447,7 @@ class LktNode:
 
         
 
-        unwrapped_kind = CompletionItemKind._unwrap(kind)
+        unwrapped_kind = _CompletionItemKind_py_to_c[CompletionItemKind(kind)]
 
         
         c_result = self._eval_field(ctypes.c_int(), _lkt_node_completion_item_kind_to_int, unwrapped_kind)
@@ -2543,7 +2576,7 @@ class LktNode:
         self
     ) -> GenericDecl:
         """
-        Unit method. Return the ``Node`` builtin generic trait.
+        Unit method. Return the ``Indexable`` builtin generic trait.
         """
         
 
@@ -2562,7 +2595,7 @@ class LktNode:
         self
     ) -> TraitDecl:
         """
-        Unit method. Return the ``Node`` builtin trait.
+        Unit method. Return the ``Indexable`` builtin trait.
         """
         
 
@@ -2571,6 +2604,44 @@ class LktNode:
 
         
         c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_indexable_trait)
+        result = LktNode._wrap(c_result)
+
+
+        return result
+    
+    @property
+    def p_iterable_gen_trait(
+        self
+    ) -> GenericDecl:
+        """
+        Unit method. Return the ``Iterable`` builtin generic trait.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_iterable_gen_trait)
+        result = LktNode._wrap(c_result)
+
+
+        return result
+    
+    @property
+    def p_iterable_trait(
+        self
+    ) -> TraitDecl:
+        """
+        Unit method. Return the ``Iterable`` builtin trait.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(_Entity_c_type(), _lkt_node_p_iterable_trait)
         result = LktNode._wrap(c_result)
 
 
@@ -4581,8 +4652,8 @@ class Decl(LktNode):
         self, prefix_type: TypeDecl
     ) -> TypeDecl:
         """
-        Retun the type of ``E.F`` when ``self`` is the declaration of the ``F``
-        member and ``prefix_type`` is the type of ``E``.
+        Return the type of ``E.F`` when ``self`` is the declaration of the
+        ``F`` member and ``prefix_type`` is the type of ``E``.
         """
         
 
@@ -5876,7 +5947,7 @@ class TypeDecl(Decl):
 
         Note that this includes "logic" base types for covariant types, like
         ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
-        ``Entity[Child]``.
+        ``Entity[Child]``).
         """
         
 
@@ -10156,7 +10227,8 @@ class Query(Expr):
     """
     Subclass of :py:class:`Expr`.
 
-    Query comprehension. ``from <expr> match <pattern> [if <expr>]``
+    Query comprehension. ``from <source> match <pattern> [select <mapping>] [if
+    <guard>]``
 
     This node type has no derivation.
     """
@@ -11083,6 +11155,25 @@ class LktNodeBaseList(LktNode):
 
     
 
+    
+    @property
+    def is_empty_list(
+        self
+    ) -> bool:
+        """
+        Return whether this list node has no children.
+        """
+        
+
+        
+
+
+        
+        c_result = self._eval_field(ctypes.c_uint8(), _lkt_node_base_list_is_empty_list)
+        result = bool(c_result.value)
+
+
+        return result
 
     _field_names = LktNode._field_names + (
     )
@@ -15472,6 +15563,18 @@ _lkt_node_p_indexable_trait = _import_func(
      ctypes.POINTER(_Entity_c_type)],
     ctypes.c_int
 )
+_lkt_node_p_iterable_gen_trait = _import_func(
+    'lkt_lkt_node_p_iterable_gen_trait',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_lkt_node_p_iterable_trait = _import_func(
+    'lkt_lkt_node_p_iterable_trait',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
 _lkt_node_p_token_node_trait = _import_func(
     'lkt_lkt_node_p_token_node_trait',
     [ctypes.POINTER(_Entity_c_type),
@@ -16762,6 +16865,12 @@ _lexer_case_rule_send_f_match_size = _import_func(
     'lkt_lexer_case_rule_send_f_match_size',
     [ctypes.POINTER(_Entity_c_type),
      ctypes.POINTER(_Entity_c_type)],
+    ctypes.c_int
+)
+_lkt_node_base_list_is_empty_list = _import_func(
+    'lkt_lkt_node_base_list_is_empty_list',
+    [ctypes.POINTER(_Entity_c_type),
+     ctypes.POINTER(ctypes.c_uint8)],
     ctypes.c_int
 )
 _null_cond_qualifier_p_as_bool = _import_func(

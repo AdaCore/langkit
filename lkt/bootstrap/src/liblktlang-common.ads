@@ -711,667 +711,667 @@ package Liblktlang.Common is
 
       subtype Lkt_Lkt_Node is Lkt_Node_Kind_Type
             range Lkt_Argument .. Lkt_Var_Bind;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Argument_Range is Lkt_Node_Kind_Type
             range Lkt_Argument .. Lkt_Argument;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Base_Import is Lkt_Node_Kind_Type
             range Lkt_Import .. Lkt_Import_From;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Import_Range is Lkt_Node_Kind_Type
             range Lkt_Import .. Lkt_Import;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Import_All_From_Range is Lkt_Node_Kind_Type
             range Lkt_Import_All_From .. Lkt_Import_All_From;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Import_From_Range is Lkt_Node_Kind_Type
             range Lkt_Import_From .. Lkt_Import_From;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Base_Lexer_Case_Rule_Alt is Lkt_Node_Kind_Type
             range Lkt_Error_Lexer_Case_Rule_Alt .. Lkt_Lexer_Case_Rule_Default_Alt;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Error_Lexer_Case_Rule_Alt_Range is Lkt_Node_Kind_Type
             range Lkt_Error_Lexer_Case_Rule_Alt .. Lkt_Error_Lexer_Case_Rule_Alt;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lexer_Case_Rule_Cond_Alt_Range is Lkt_Node_Kind_Type
             range Lkt_Lexer_Case_Rule_Cond_Alt .. Lkt_Lexer_Case_Rule_Cond_Alt;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lexer_Case_Rule_Default_Alt_Range is Lkt_Node_Kind_Type
             range Lkt_Lexer_Case_Rule_Default_Alt .. Lkt_Lexer_Case_Rule_Default_Alt;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Base_Match_Branch is Lkt_Node_Kind_Type
             range Lkt_Match_Branch .. Lkt_Pattern_Match_Branch;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Match_Branch_Range is Lkt_Node_Kind_Type
             range Lkt_Match_Branch .. Lkt_Match_Branch;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Pattern_Match_Branch_Range is Lkt_Node_Kind_Type
             range Lkt_Pattern_Match_Branch .. Lkt_Pattern_Match_Branch;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Block_Expr_Clause_Range is Lkt_Node_Kind_Type
             range Lkt_Block_Expr_Clause .. Lkt_Block_Expr_Clause;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Block_String_Line_Range is Lkt_Node_Kind_Type
             range Lkt_Block_String_Line .. Lkt_Block_String_Line;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Class_Qualifier is Lkt_Node_Kind_Type
             range Lkt_Class_Qualifier_Absent .. Lkt_Class_Qualifier_Present;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Class_Qualifier_Absent_Range is Lkt_Node_Kind_Type
             range Lkt_Class_Qualifier_Absent .. Lkt_Class_Qualifier_Absent;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Class_Qualifier_Present_Range is Lkt_Node_Kind_Type
             range Lkt_Class_Qualifier_Present .. Lkt_Class_Qualifier_Present;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Decl is Lkt_Node_Kind_Type
             range Lkt_Grammar_Rule_Decl .. Lkt_Trait_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Base_Grammar_Rule_Decl is Lkt_Node_Kind_Type
             range Lkt_Grammar_Rule_Decl .. Lkt_Synthetic_Lexer_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Rule_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Rule_Decl .. Lkt_Grammar_Rule_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Synthetic_Lexer_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Synthetic_Lexer_Decl .. Lkt_Synthetic_Lexer_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Base_Val_Decl is Lkt_Node_Kind_Type
             range Lkt_Node_Decl .. Lkt_Fun_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Node_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Node_Decl .. Lkt_Node_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Self_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Self_Decl .. Lkt_Self_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_User_Val_Decl is Lkt_Node_Kind_Type
             range Lkt_Binding_Val_Decl .. Lkt_Fun_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Binding_Val_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Binding_Val_Decl .. Lkt_Binding_Val_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Enum_Lit_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Enum_Lit_Decl .. Lkt_Enum_Lit_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Explicitly_Typed_Decl is Lkt_Node_Kind_Type
             range Lkt_Field_Decl .. Lkt_Val_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Component_Decl is Lkt_Node_Kind_Type
             range Lkt_Field_Decl .. Lkt_Lambda_Param_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Field_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Field_Decl .. Lkt_Field_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Fun_Param_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Fun_Param_Decl .. Lkt_Fun_Param_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lambda_Param_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Lambda_Param_Decl .. Lkt_Lambda_Param_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Dyn_Var_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Dyn_Var_Decl .. Lkt_Dyn_Var_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Match_Val_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Match_Val_Decl .. Lkt_Match_Val_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Val_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Val_Decl .. Lkt_Val_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Fun_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Fun_Decl .. Lkt_Fun_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Env_Spec_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Env_Spec_Decl .. Lkt_Env_Spec_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Error_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Error_Decl .. Lkt_Error_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Generic_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Generic_Decl .. Lkt_Generic_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Decl .. Lkt_Grammar_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Langkit_Root_Range is Lkt_Node_Kind_Type
             range Lkt_Langkit_Root .. Lkt_Langkit_Root;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lexer_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Lexer_Decl .. Lkt_Lexer_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lexer_Family_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Lexer_Family_Decl .. Lkt_Lexer_Family_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Synth_Fun_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Synth_Fun_Decl .. Lkt_Synth_Fun_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Synth_Param_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Synth_Param_Decl .. Lkt_Synth_Param_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Type_Decl is Lkt_Node_Kind_Type
             range Lkt_Any_Type_Decl .. Lkt_Trait_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Any_Type_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Any_Type_Decl .. Lkt_Any_Type_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Enum_Class_Alt_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Enum_Class_Alt_Decl .. Lkt_Enum_Class_Alt_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Function_Type_Range is Lkt_Node_Kind_Type
             range Lkt_Function_Type .. Lkt_Function_Type;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Generic_Param_Type_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Generic_Param_Type_Decl .. Lkt_Generic_Param_Type_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Named_Type_Decl is Lkt_Node_Kind_Type
             range Lkt_Class_Decl .. Lkt_Trait_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Basic_Class_Decl is Lkt_Node_Kind_Type
             range Lkt_Class_Decl .. Lkt_Enum_Class_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Class_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Class_Decl .. Lkt_Class_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Enum_Class_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Enum_Class_Decl .. Lkt_Enum_Class_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Enum_Type_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Enum_Type_Decl .. Lkt_Enum_Type_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Struct_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Struct_Decl .. Lkt_Struct_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Trait_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Trait_Decl .. Lkt_Trait_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Decl_Annotation_Range is Lkt_Node_Kind_Type
             range Lkt_Decl_Annotation .. Lkt_Decl_Annotation;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Decl_Annotation_Args_Range is Lkt_Node_Kind_Type
             range Lkt_Decl_Annotation_Args .. Lkt_Decl_Annotation_Args;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Dyn_Env_Wrapper_Range is Lkt_Node_Kind_Type
             range Lkt_Dyn_Env_Wrapper .. Lkt_Dyn_Env_Wrapper;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Elsif_Branch_Range is Lkt_Node_Kind_Type
             range Lkt_Elsif_Branch .. Lkt_Elsif_Branch;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Enum_Class_Case_Range is Lkt_Node_Kind_Type
             range Lkt_Enum_Class_Case .. Lkt_Enum_Class_Case;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Excludes_Null is Lkt_Node_Kind_Type
             range Lkt_Excludes_Null_Absent .. Lkt_Excludes_Null_Present;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Excludes_Null_Absent_Range is Lkt_Node_Kind_Type
             range Lkt_Excludes_Null_Absent .. Lkt_Excludes_Null_Absent;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Excludes_Null_Present_Range is Lkt_Node_Kind_Type
             range Lkt_Excludes_Null_Present .. Lkt_Excludes_Null_Present;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Expr is Lkt_Node_Kind_Type
             range Lkt_Any_Of .. Lkt_Un_Op;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Any_Of_Range is Lkt_Node_Kind_Type
             range Lkt_Any_Of .. Lkt_Any_Of;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Array_Literal_Range is Lkt_Node_Kind_Type
             range Lkt_Array_Literal .. Lkt_Array_Literal;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Base_Call_Expr is Lkt_Node_Kind_Type
             range Lkt_Call_Expr .. Lkt_Logic_Propagate_Call;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Call_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Call_Expr .. Lkt_Call_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Logic_Call_Expr is Lkt_Node_Kind_Type
             range Lkt_Logic_Predicate .. Lkt_Logic_Propagate_Call;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Logic_Predicate_Range is Lkt_Node_Kind_Type
             range Lkt_Logic_Predicate .. Lkt_Logic_Predicate;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Logic_Propagate_Call_Range is Lkt_Node_Kind_Type
             range Lkt_Logic_Propagate_Call .. Lkt_Logic_Propagate_Call;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Bin_Op_Range is Lkt_Node_Kind_Type
             range Lkt_Bin_Op .. Lkt_Bin_Op;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Block_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Block_Expr .. Lkt_Block_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Cast_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Cast_Expr .. Lkt_Cast_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Dot_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Dot_Expr .. Lkt_Dot_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Error_On_Null_Range is Lkt_Node_Kind_Type
             range Lkt_Error_On_Null .. Lkt_Error_On_Null;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Generic_Instantiation_Range is Lkt_Node_Kind_Type
             range Lkt_Generic_Instantiation .. Lkt_Generic_Instantiation;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Expr is Lkt_Node_Kind_Type
             range Lkt_Error_Grammar_Expr .. Lkt_Token_Ref;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Error_Grammar_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Error_Grammar_Expr .. Lkt_Error_Grammar_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Cut_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Cut .. Lkt_Grammar_Cut;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Discard_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Discard .. Lkt_Grammar_Discard;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Dont_Skip_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Dont_Skip .. Lkt_Grammar_Dont_Skip;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_List_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_List .. Lkt_Grammar_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Null_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Null .. Lkt_Grammar_Null;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Opt_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Opt .. Lkt_Grammar_Opt;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Opt_Error_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Opt_Error .. Lkt_Grammar_Opt_Error;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Opt_Error_Group_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Opt_Error_Group .. Lkt_Grammar_Opt_Error_Group;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Opt_Group_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Opt_Group .. Lkt_Grammar_Opt_Group;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Or_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Or_Expr .. Lkt_Grammar_Or_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Pick_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Pick .. Lkt_Grammar_Implicit_Pick;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Implicit_Pick_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Implicit_Pick .. Lkt_Grammar_Implicit_Pick;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Predicate_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Predicate .. Lkt_Grammar_Predicate;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Rule_Ref_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Rule_Ref .. Lkt_Grammar_Rule_Ref;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Skip_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Skip .. Lkt_Grammar_Skip;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Stop_Cut_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Stop_Cut .. Lkt_Grammar_Stop_Cut;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Parse_Node_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Parse_Node_Expr .. Lkt_Parse_Node_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Token_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Token_Lit .. Lkt_Token_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Token_No_Case_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Token_No_Case_Lit .. Lkt_Token_No_Case_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Token_Pattern_Concat_Range is Lkt_Node_Kind_Type
             range Lkt_Token_Pattern_Concat .. Lkt_Token_Pattern_Concat;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Token_Pattern_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Token_Pattern_Lit .. Lkt_Token_Pattern_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Token_Ref_Range is Lkt_Node_Kind_Type
             range Lkt_Token_Ref .. Lkt_Token_Ref;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Id_Range is Lkt_Node_Kind_Type
             range Lkt_Id .. Lkt_Ref_Id;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Def_Id_Range is Lkt_Node_Kind_Type
             range Lkt_Def_Id .. Lkt_Def_Id;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Imported_Id_Range is Lkt_Node_Kind_Type
             range Lkt_Imported_Id .. Lkt_Imported_Id;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Module_Id_Range is Lkt_Node_Kind_Type
             range Lkt_Module_Id .. Lkt_Module_Id;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Ref_Id_Range is Lkt_Node_Kind_Type
             range Lkt_Ref_Id .. Lkt_Ref_Id;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_If_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_If_Expr .. Lkt_If_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Isa_Range is Lkt_Node_Kind_Type
             range Lkt_Isa .. Lkt_Isa;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Keep_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Keep_Expr .. Lkt_Keep_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lambda_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Lambda_Expr .. Lkt_Lambda_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lit is Lkt_Node_Kind_Type
             range Lkt_Big_Num_Lit .. Lkt_Pattern_Single_Line_String_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Big_Num_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Big_Num_Lit .. Lkt_Big_Num_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Char_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Char_Lit .. Lkt_Char_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Null_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Null_Lit .. Lkt_Null_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Num_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Num_Lit .. Lkt_Num_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_String_Lit is Lkt_Node_Kind_Type
             range Lkt_Block_String_Lit .. Lkt_Pattern_Single_Line_String_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Block_String_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Block_String_Lit .. Lkt_Block_String_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Module_Doc_String_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Module_Doc_String_Lit .. Lkt_Module_Doc_String_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Single_Line_String_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Single_Line_String_Lit .. Lkt_Pattern_Single_Line_String_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Pattern_Single_Line_String_Lit_Range is Lkt_Node_Kind_Type
             range Lkt_Pattern_Single_Line_String_Lit .. Lkt_Pattern_Single_Line_String_Lit;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Logic_Assign_Range is Lkt_Node_Kind_Type
             range Lkt_Logic_Assign .. Lkt_Logic_Assign;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Logic_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Logic_Expr .. Lkt_Logic_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Logic_Propagate_Range is Lkt_Node_Kind_Type
             range Lkt_Logic_Propagate .. Lkt_Logic_Propagate;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Logic_Unify_Range is Lkt_Node_Kind_Type
             range Lkt_Logic_Unify .. Lkt_Logic_Unify;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Match_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Match_Expr .. Lkt_Match_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Not_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Not_Expr .. Lkt_Not_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Paren_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Paren_Expr .. Lkt_Paren_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Query_Range is Lkt_Node_Kind_Type
             range Lkt_Query .. Lkt_Query;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Raise_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Raise_Expr .. Lkt_Raise_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Subscript_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Subscript_Expr .. Lkt_Subscript_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Try_Expr_Range is Lkt_Node_Kind_Type
             range Lkt_Try_Expr .. Lkt_Try_Expr;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Un_Op_Range is Lkt_Node_Kind_Type
             range Lkt_Un_Op .. Lkt_Un_Op;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Full_Decl_Range is Lkt_Node_Kind_Type
             range Lkt_Full_Decl .. Lkt_Full_Decl;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_List_Sep_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_List_Sep .. Lkt_Grammar_List_Sep;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Imported_Name_Range is Lkt_Node_Kind_Type
             range Lkt_Imported_Name .. Lkt_Imported_Name;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lexer_Case_Rule_Range is Lkt_Node_Kind_Type
             range Lkt_Lexer_Case_Rule .. Lkt_Lexer_Case_Rule;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lexer_Case_Rule_Send_Range is Lkt_Node_Kind_Type
             range Lkt_Lexer_Case_Rule_Send .. Lkt_Lexer_Case_Rule_Send;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_List_Kind is Lkt_Node_Kind_Type
             range Lkt_List_Kind_One .. Lkt_List_Kind_Zero;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_List_Kind_One_Range is Lkt_Node_Kind_Type
             range Lkt_List_Kind_One .. Lkt_List_Kind_One;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_List_Kind_Zero_Range is Lkt_Node_Kind_Type
             range Lkt_List_Kind_Zero .. Lkt_List_Kind_Zero;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lkt_Node_Base_List is Lkt_Node_Kind_Type
             range Lkt_Argument_List .. Lkt_Synthetic_Type_Ref_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Argument_List_Range is Lkt_Node_Kind_Type
             range Lkt_Argument_List .. Lkt_Argument_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Base_Import_List_Range is Lkt_Node_Kind_Type
             range Lkt_Base_Import_List .. Lkt_Base_Import_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Base_Lexer_Case_Rule_Alt_List_Range is Lkt_Node_Kind_Type
             range Lkt_Base_Lexer_Case_Rule_Alt_List .. Lkt_Base_Lexer_Case_Rule_Alt_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Base_Match_Branch_List_Range is Lkt_Node_Kind_Type
             range Lkt_Base_Match_Branch_List .. Lkt_Base_Match_Branch_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Block_String_Line_List_Range is Lkt_Node_Kind_Type
             range Lkt_Block_String_Line_List .. Lkt_Block_String_Line_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Call_Expr_List_Range is Lkt_Node_Kind_Type
             range Lkt_Call_Expr_List .. Lkt_Call_Expr_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Decl_Annotation_List_Range is Lkt_Node_Kind_Type
             range Lkt_Decl_Annotation_List .. Lkt_Decl_Annotation_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Elsif_Branch_List_Range is Lkt_Node_Kind_Type
             range Lkt_Elsif_Branch_List .. Lkt_Elsif_Branch_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Enum_Class_Alt_Decl_List_Range is Lkt_Node_Kind_Type
             range Lkt_Enum_Class_Alt_Decl_List .. Lkt_Enum_Class_Alt_Decl_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Enum_Class_Case_List_Range is Lkt_Node_Kind_Type
             range Lkt_Enum_Class_Case_List .. Lkt_Enum_Class_Case_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Enum_Lit_Decl_List_Range is Lkt_Node_Kind_Type
             range Lkt_Enum_Lit_Decl_List .. Lkt_Enum_Lit_Decl_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Expr_List_Range is Lkt_Node_Kind_Type
             range Lkt_Expr_List .. Lkt_Any_Of_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Any_Of_List_Range is Lkt_Node_Kind_Type
             range Lkt_Any_Of_List .. Lkt_Any_Of_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Full_Decl_List_Range is Lkt_Node_Kind_Type
             range Lkt_Full_Decl_List .. Lkt_Generic_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Decl_Block_Range is Lkt_Node_Kind_Type
             range Lkt_Decl_Block .. Lkt_Decl_Block;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Generic_Param_Decl_List_Range is Lkt_Node_Kind_Type
             range Lkt_Generic_Param_Decl_List .. Lkt_Generic_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Fun_Param_Decl_List_Range is Lkt_Node_Kind_Type
             range Lkt_Fun_Param_Decl_List .. Lkt_Fun_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Expr_List_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Expr_List .. Lkt_Grammar_Expr_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Grammar_Expr_List_List_Range is Lkt_Node_Kind_Type
             range Lkt_Grammar_Expr_List_List .. Lkt_Grammar_Expr_List_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Imported_Name_List_Range is Lkt_Node_Kind_Type
             range Lkt_Imported_Name_List .. Lkt_Imported_Name_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lambda_Param_Decl_List_Range is Lkt_Node_Kind_Type
             range Lkt_Lambda_Param_Decl_List .. Lkt_Lambda_Param_Decl_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Lkt_Node_List_Range is Lkt_Node_Kind_Type
             range Lkt_Lkt_Node_List .. Lkt_Lkt_Node_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Module_Doc_String_Line_List_Range is Lkt_Node_Kind_Type
             range Lkt_Module_Doc_String_Line_List .. Lkt_Module_Doc_String_Line_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Pattern_Detail_List_Range is Lkt_Node_Kind_Type
             range Lkt_Pattern_Detail_List .. Lkt_Pattern_Detail_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Pattern_List_Range is Lkt_Node_Kind_Type
             range Lkt_Pattern_List .. Lkt_Pattern_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Ref_Id_List_Range is Lkt_Node_Kind_Type
             range Lkt_Ref_Id_List .. Lkt_Ref_Id_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Type_Ref_List_Range is Lkt_Node_Kind_Type
             range Lkt_Type_Ref_List .. Lkt_Synthetic_Type_Ref_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Synthetic_Type_Ref_List_Range is Lkt_Node_Kind_Type
             range Lkt_Synthetic_Type_Ref_List .. Lkt_Synthetic_Type_Ref_List;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Module_Doc_String_Line_Range is Lkt_Node_Kind_Type
             range Lkt_Module_Doc_String_Line .. Lkt_Module_Doc_String_Line;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Null_Cond_Qualifier is Lkt_Node_Kind_Type
             range Lkt_Null_Cond_Qualifier_Absent .. Lkt_Null_Cond_Qualifier_Present;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Null_Cond_Qualifier_Absent_Range is Lkt_Node_Kind_Type
             range Lkt_Null_Cond_Qualifier_Absent .. Lkt_Null_Cond_Qualifier_Absent;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Null_Cond_Qualifier_Present_Range is Lkt_Node_Kind_Type
             range Lkt_Null_Cond_Qualifier_Present .. Lkt_Null_Cond_Qualifier_Present;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op is Lkt_Node_Kind_Type
             range Lkt_Op_Amp .. Lkt_Op_Stream_Cons;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Amp_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Amp .. Lkt_Op_Amp;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_And_Range is Lkt_Node_Kind_Type
             range Lkt_Op_And .. Lkt_Op_And;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Div_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Div .. Lkt_Op_Div;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Eq_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Eq .. Lkt_Op_Eq;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Gt_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Gt .. Lkt_Op_Gt;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Gte_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Gte .. Lkt_Op_Gte;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Logic_And_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Logic_And .. Lkt_Op_Logic_And;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Logic_Or_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Logic_Or .. Lkt_Op_Logic_Or;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Lt_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Lt .. Lkt_Op_Lt;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Lte_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Lte .. Lkt_Op_Lte;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Minus_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Minus .. Lkt_Op_Minus;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Mult_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Mult .. Lkt_Op_Mult;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Ne_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Ne .. Lkt_Op_Ne;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Or_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Or .. Lkt_Op_Or;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Or_Int_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Or_Int .. Lkt_Op_Or_Int;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Plus_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Plus .. Lkt_Op_Plus;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Stream_Concat_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Stream_Concat .. Lkt_Op_Stream_Concat;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Op_Stream_Cons_Range is Lkt_Node_Kind_Type
             range Lkt_Op_Stream_Cons .. Lkt_Op_Stream_Cons;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Pattern is Lkt_Node_Kind_Type
             range Lkt_Any_Type_Pattern .. Lkt_Type_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Any_Type_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Any_Type_Pattern .. Lkt_Any_Type_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Bool_Pattern is Lkt_Node_Kind_Type
             range Lkt_Bool_Pattern_False .. Lkt_Bool_Pattern_True;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Bool_Pattern_False_Range is Lkt_Node_Kind_Type
             range Lkt_Bool_Pattern_False .. Lkt_Bool_Pattern_False;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Bool_Pattern_True_Range is Lkt_Node_Kind_Type
             range Lkt_Bool_Pattern_True .. Lkt_Bool_Pattern_True;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Complex_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Complex_Pattern .. Lkt_Renaming_Complex_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Renaming_Complex_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Renaming_Complex_Pattern .. Lkt_Renaming_Complex_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Ellipsis_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Ellipsis_Pattern .. Lkt_Ellipsis_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Integer_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Integer_Pattern .. Lkt_Integer_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_List_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_List_Pattern .. Lkt_List_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Not_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Not_Pattern .. Lkt_Not_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Null_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Null_Pattern .. Lkt_Null_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Or_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Or_Pattern .. Lkt_Or_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Paren_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Paren_Pattern .. Lkt_Paren_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Regex_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Regex_Pattern .. Lkt_Regex_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Type_Pattern_Range is Lkt_Node_Kind_Type
             range Lkt_Type_Pattern .. Lkt_Type_Pattern;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Pattern_Detail is Lkt_Node_Kind_Type
             range Lkt_Destructuring_Pattern_Detail .. Lkt_Property_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Destructuring_Pattern_Detail_Range is Lkt_Node_Kind_Type
             range Lkt_Destructuring_Pattern_Detail .. Lkt_Destructuring_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Field_Pattern_Detail_Range is Lkt_Node_Kind_Type
             range Lkt_Field_Pattern_Detail .. Lkt_Field_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Property_Pattern_Detail_Range is Lkt_Node_Kind_Type
             range Lkt_Property_Pattern_Detail .. Lkt_Property_Pattern_Detail;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Type_Ref is Lkt_Node_Kind_Type
             range Lkt_Default_List_Type_Ref .. Lkt_Simple_Type_Ref;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Default_List_Type_Ref_Range is Lkt_Node_Kind_Type
             range Lkt_Default_List_Type_Ref .. Lkt_Default_List_Type_Ref;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Function_Type_Ref_Range is Lkt_Node_Kind_Type
             range Lkt_Function_Type_Ref .. Lkt_Function_Type_Ref;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Generic_Type_Ref_Range is Lkt_Node_Kind_Type
             range Lkt_Generic_Type_Ref .. Lkt_Generic_Type_Ref;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Simple_Type_Ref_Range is Lkt_Node_Kind_Type
             range Lkt_Simple_Type_Ref .. Lkt_Simple_Type_Ref;
-      --% no-document: True
+      --  @exclude
       subtype Lkt_Var_Bind_Range is Lkt_Node_Kind_Type
             range Lkt_Var_Bind .. Lkt_Var_Bind;
-      --% no-document: True
+      --  @exclude
 
    subtype Synthetic_Nodes is Lkt_Node_Kind_Type
       with Static_Predicate =>
@@ -1572,7 +1572,7 @@ package Liblktlang.Common is
       Lkt_Whitespace => Default_Family);
    --  Associate a token family to all token kinds
    --
-   --% document-value: False
+   --  @exclude-value
 
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    --  Return a human-readable name for a token kind.

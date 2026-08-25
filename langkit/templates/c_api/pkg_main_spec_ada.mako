@@ -811,6 +811,19 @@ package ${ada_lib_name}.Implementation.C is
           External_Name => "${capi.get_name('get_last_exception')}";
    ${ada_c_doc('langkit.get_last_exception', 3)}
 
+   function ${capi.get_name('copy_last_exception')}
+     (Exc : ${exception_type}_Ptr) return int
+     with Export        => True,
+          Convention    => C,
+          External_Name => "${capi.get_name('copy_last_exception')}";
+   ${ada_c_doc('langkit.copy_last_exception', 3)}
+
+   procedure ${capi.get_name('free_exception')} (Exc : ${exception_type}_Ptr)
+     with Export        => True,
+          Convention    => C,
+          External_Name => "${capi.get_name('free_exception')}";
+   ${ada_c_doc('langkit.free_exception', 3)}
+
    function ${capi.get_name('exception_name')}
      (Kind : ${exception_kind_type}) return chars_ptr
       with Export, Convention => C;

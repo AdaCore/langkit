@@ -511,23 +511,6 @@ package body Liblktlang_Support.Prettier_Utils is
       Process (Self, State, Breaks);
    end Process_Required_Spacing;
 
-   ------------------
-   -- Node_Matches --
-   ------------------
-
-   function Node_Matches
-     (Node : Lk_Node; Types : Type_Vectors.Vector) return Boolean
-   is
-      N : constant Value_Ref := From_Node (Node.Language, Node);
-   begin
-      for T of Types loop
-         if Type_Matches (N, T) then
-            return True;
-         end if;
-      end loop;
-      return False;
-   end Node_Matches;
-
    ------------
    -- Lookup --
    ------------
@@ -627,16 +610,6 @@ package body Liblktlang_Support.Prettier_Utils is
          end loop;
       end return;
    end Extract_Definitions;
-
-   -------------
-   -- Matches --
-   -------------
-
-   function Matches (Node : Lk_Node; Matcher : Matcher_Record) return Boolean
-   is
-   begin
-      return (for some T of Matcher.Matched_Types => Type_Matches (Node, T));
-   end Matches;
 
    --------------------------
    -- To_Prettier_Document --
@@ -819,6 +792,16 @@ package body Liblktlang_Support.Prettier_Utils is
    begin
       return Recurse (Document);
    end To_Prettier_Document;
+
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize (Self : in out Document_Pool; Language : Language_Id)
+   is
+   begin
+      Self.Language := Language;
+   end Initialize;
 
    --------------------------------
    -- Refresh_Prettier_Documents --
@@ -1019,16 +1002,11 @@ package body Liblktlang_Support.Prettier_Utils is
                      M : constant Matcher_Record := Self.Match_Matchers (I);
                   begin
                      Matchers.Append
-                       (Matcher_Record'
-                          (M.Matched_Types, Recurse (M.Document)));
+                       (Matcher_Record'(M.Pattern, Recurse (M.Document)));
                   end;
                end loop;
 
-               return Pool.Create_Match
-                 (Self.Match_Field,
-                  Matchers,
-                  Recurse (Self.Match_Default),
-                  Recurse (Self.Match_Absent));
+               return Pool.Create_Match (Self.Match_Node, Matchers);
             end;
       end case;
    end Deep_Copy;
@@ -1589,43 +1567,96 @@ package body Liblktlang_Support.Prettier_Utils is
    ------------------
 
    function Create_Match
-     (Self           : in out Document_Pool;
-      Match_Field    : Struct_Member_Ref;
-      Match_Matchers : in out Matcher_Vectors.Vector;
-      Match_Default  : Document_Type;
-      Match_Absent   : Document_Type) return Document_Type
-   is
+     (Self     : in out Document_Pool;
+      Node     : Document_Type;
+      Matchers : in out Matcher_Vectors.Vector) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind           => Match,
-           Match_Field    => Match_Field,
-           Match_Matchers => Matcher_Vectors.Empty_Vector,
-           Match_Default  => Match_Default,
-           Match_Absent   => Match_Absent)
+           Match_Node     => Node,
+           Match_Matchers => Matcher_Vectors.Empty_Vector)
       do
-         Result.Match_Matchers.Move (Match_Matchers);
+         Result.Match_Matchers.Move (Matchers);
          Self.Register (Result);
       end return;
    end Create_Match;
+
+   -------------------
+   -- Create_Bin_Op --
+   -------------------
+
+   function Create_Bin_Op
+     (Self  : in out Document_Pool;
+      Op    : Binary_Operator;
+      LHS   : Document_Type;
+      RHS   : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind       => Bin_Op,
+           Bin_Op_Op  => Op,
+           Bin_Op_LHS => LHS,
+           Bin_Op_RHS => RHS)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Bin_Op;
+
+   ------------------------
+   -- Create_Eval_Member --
+   ------------------------
+
+   function Create_Eval_Member
+     (Self   : in out Document_Pool;
+      Prefix : Document_Type;
+      Member : Struct_Member_Ref;
+      Args   : in out Document_Vectors.Vector) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Eval_Member)
+      do
+         Result.Eval_Member_Prefix := Prefix;
+         Result.Eval_Member_Ref := Member;
+         Result.Eval_Member_Args.Move (Args);
+         Self.Register (Result);
+      end return;
+   end Create_Eval_Member;
+
+   -----------------
+   -- Create_Cast --
+   -----------------
+
+   function Create_Cast
+     (Self    : in out Document_Pool;
+      Prefix  : Document_Type;
+      To_Type : Type_Ref) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind        => Cast,
+           Cast_Prefix => Prefix,
+           Cast_Type   => To_Type)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Cast;
 
    -----------------
    -- Create_Is_A --
    -----------------
 
    function Create_Is_A
-     (Self  : in out Document_Pool;
-      Node  : Document_Type;
-      Kinds : in out Type_Vectors.Vector) return Document_Type
-   is
+     (Self    : in out Document_Pool;
+      Node    : Document_Type;
+      Pattern : Document_Type) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind       => Is_A,
-           Is_A_Node  => Node,
-           Is_A_Kinds => Type_Vectors.Empty_Vector)
+          (Kind         => Is_A,
+           Is_A_Node    => Node,
+           Is_A_Pattern => Pattern)
       do
-         Result.Is_A_Kinds.Move (Kinds);
          Self.Register (Result);
       end return;
    end Create_Is_A;
@@ -1645,6 +1676,83 @@ package body Liblktlang_Support.Prettier_Utils is
       end return;
    end Create_Is_Empty;
 
+   ------------------------
+   -- Create_Node_Symbol --
+   ------------------------
+
+   function Create_Node_Symbol
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Node_Symbol, Node_Symbol_Node => Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Node_Symbol;
+
+   ----------------------
+   -- Create_Node_Text --
+   ----------------------
+
+   function Create_Node_Text
+     (Self : in out Document_Pool;
+      Node : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Node_Text, Node_Text_Node => Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Node_Text;
+
+   ---------------------
+   -- Create_Not_Expr --
+   ---------------------
+
+   function Create_Not_Expr
+     (Self    : in out Document_Pool;
+      Operand : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Not_Expr, Not_Expr_Operand => Operand)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Not_Expr;
+
+   -----------------------
+   -- Create_String_Lit --
+   -----------------------
+
+   function Create_String_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind             => String_Lit,
+           String_Lit_Value => From_String (Self.Language, Value))
+      do
+         Self.Register (Result);
+      end return;
+   end Create_String_Lit;
+
+   -----------------------
+   -- Create_Symbol_Lit --
+   -----------------------
+
+   function Create_Symbol_Lit
+     (Self : in out Document_Pool; Value : Text_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind             => Symbol_Lit,
+           Symbol_Lit_Value => From_Symbol (Self.Language, Value))
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Symbol_Lit;
+
    -----------------------
    -- Create_This_Field --
    -----------------------
@@ -1658,6 +1766,119 @@ package body Liblktlang_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_This_Field;
+
+   ----------------------
+   -- Create_This_Node --
+   ----------------------
+
+   function Create_This_Node
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => This_Node)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_This_Node;
+
+   ----------------------------
+   -- Create_Default_Pattern --
+   ----------------------------
+
+   function Create_Default_Pattern
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Default_Pattern)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Default_Pattern;
+
+   ----------------------------
+   -- Create_Literal_Pattern --
+   ----------------------------
+
+   function Create_Literal_Pattern
+     (Self : in out Document_Pool; Value : Value_Ref) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind                  => Literal_Pattern,
+           Literal_Pattern_Value => Value)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Literal_Pattern;
+
+   ---------------------------
+   -- Create_Member_Pattern --
+   ---------------------------
+
+   function Create_Member_Pattern
+     (Self   : in out Document_Pool;
+      Member : Struct_Member_Ref;
+      Args   : in out Document_Vectors.Vector;
+      Sub    : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Member_Pattern)
+      do
+         Result.Member_Pattern_Ref := Member;
+         Result.Member_Pattern_Args.Move (Args);
+         Result.Member_Pattern_Sub := Sub;
+         Self.Register (Result);
+      end return;
+   end Create_Member_Pattern;
+
+   -------------------------
+   -- Create_Node_Pattern --
+   -------------------------
+
+   function Create_Node_Pattern
+     (Self      : in out Document_Pool;
+      Node_Type : Type_Ref;
+      Members   : in out Document_Vectors.Vector) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Node_Pattern)
+      do
+         Result.Node_Pattern_Type := Node_Type;
+         Result.Node_Pattern_Members.Move (Members);
+         Self.Register (Result);
+      end return;
+   end Create_Node_Pattern;
+
+   ------------------------
+   -- Create_Not_Pattern --
+   ------------------------
+
+   function Create_Not_Pattern
+     (Self    : in out Document_Pool;
+      Pattern : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Not_Pattern, Not_Pattern_Sub => Pattern)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Not_Pattern;
+
+   -----------------------
+   -- Create_Or_Pattern --
+   -----------------------
+
+   function Create_Or_Pattern
+     (Self     : in out Document_Pool;
+      Patterns : in out Document_Vectors.Vector) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Or_Pattern)
+      do
+         Result.Or_Pattern_List.Move (Patterns);
+         Self.Register (Result);
+      end return;
+   end Create_Or_Pattern;
 
    -----------------------
    -- Bubble_Up_Trivias --
@@ -1942,6 +2163,29 @@ package body Liblktlang_Support.Prettier_Utils is
       Dump (Self, Broken_Groups_Trace);
    end Detect_Broken_Groups;
 
+   ------------------------
+   -- Is_Default_Pattern --
+   ------------------------
+
+   function Is_Default_Pattern (Document : Document_Type) return Boolean is
+   begin
+      case Template_Pattern_Kind (Document.Kind) is
+         when Default_Pattern =>
+            return True;
+
+         when Literal_Pattern | Member_Pattern | Node_Pattern | Not_Pattern =>
+            return False;
+
+         when Or_Pattern =>
+            for I in 1 .. Document.Or_Pattern_List.Last_Index loop
+               if Is_Default_Pattern (Document.Or_Pattern_List (I)) then
+                  return True;
+               end if;
+            end loop;
+            return False;
+      end case;
+   end Is_Default_Pattern;
+
    ----------
    -- Dump --
    ----------
@@ -2192,65 +2436,149 @@ package body Liblktlang_Support.Prettier_Utils is
 
             when Match =>
                Write (Prefix & "match");
-               Write (Prefix & Simple_Indent & "default:");
+               Write (Prefix & Simple_Indent & "node:");
                Process
-                 (Document.Match_Default,
-                  Prefix & Simple_Indent & Simple_Indent);
-               Write (Prefix & Simple_Indent & "absent:");
-               Process
-                 (Document.Match_Absent,
+                 (Document.Match_Node,
                   Prefix & Simple_Indent & Simple_Indent);
                Write (Prefix & Simple_Indent & "matchers:");
                declare
-                  Matcher_Kind_Indent     : constant Unbounded_String :=
+                  Pattern_Indent  : constant Unbounded_String :=
                     Prefix & Simple_Indent & Simple_Indent;
-                  Matcher_Document_Indent : constant Unbounded_String :=
+                  Document_Indent : constant Unbounded_String :=
                     Prefix & Simple_Indent & Simple_Indent & Simple_Indent;
-
                begin
-                  for Matcher_Index in
-                    Document.Match_Matchers.First_Index
-                    .. Document.Match_Matchers.Last_Index
-                  loop
+                  for I in 1 .. Document.Match_Matchers.Last_Index loop
                      declare
-                        Types     : constant Type_Ref_Vectors.Vector :=
-                          Document
-                            .Match_Matchers (Matcher_Index)
-                            .Matched_Types;
-                        Types_Str : Unbounded_String;
+                        M : constant Matcher_Record :=
+                          Document.Match_Matchers (I);
                      begin
-                        for Kind_Index in Types.First_Index .. Types.Last_Index
-                        loop
-                           if Kind_Index > Types.First_Index then
-                              Append (Types_Str, " | ");
-                           end if;
-                           Append (Types_Str, Debug_Name (Types (Kind_Index)));
-                        end loop;
-                        Write (Matcher_Kind_Indent & Types_Str);
+                        Process (M.Pattern, Pattern_Indent);
+                        Process (M.Document, Document_Indent);
                      end;
-                     Process
-                       (Document.Match_Matchers (Matcher_Index).Document,
-                        Matcher_Document_Indent);
                   end loop;
                end;
 
+            when Bin_Op =>
+               Write (Prefix & "bin_op:");
+               Write
+                 (Prefix
+                  & Simple_Indent
+                  & "op: "
+                  & Document.Bin_Op_Op'Image);
+               Process (Document.Bin_Op_LHS, Prefix & List_Indent);
+               Process (Document.Bin_Op_RHS, Prefix & List_Indent);
+
+            when Eval_Member =>
+               Write (Prefix & "eval_member:");
+
+               Write (Prefix & Simple_Indent & "prefix:");
+               Process (Document.Eval_Member_Prefix, Prefix & List_Indent);
+
+               Write
+                 (Prefix
+                  & Simple_Indent
+                  & "member: "
+                  & Debug_Name (Document.Eval_Member_Ref));
+
+               for I in 1 .. Document.Eval_Member_Args.Last_Index loop
+                  Write (Prefix & Simple_Indent & "arg:");
+                  Process
+                    (Document.Eval_Member_Args (I), Prefix & List_Indent);
+               end loop;
+
+            when Cast =>
+               Write (Prefix & "cast:");
+               Write
+                 (Prefix & Simple_Indent & Debug_Name (Document.Cast_Type));
+               Process (Document.Cast_Prefix, Prefix & List_Indent);
+
             when Is_A =>
                Write (Prefix & "is_a:");
-               for I in 1 .. Document.Is_A_Kinds.Last_Index loop
-                  declare
-                     T : constant Type_Ref := Document.Is_A_Kinds.Element (I);
-                  begin
-                     Write (Prefix & Simple_Indent & Debug_Name (T));
-                  end;
-               end loop;
-               Process (Document.Is_A_Node, Prefix & List_Indent);
+
+               Write (Prefix & Simple_Indent & "node:");
+               Process (Document.Is_A_Node, List_Indent);
+
+               Write (Prefix & Simple_Indent & "pattern:");
+               Process (Document.Is_A_Pattern, List_Indent);
 
             when Is_Empty =>
                Write (Prefix & "is_empty:");
                Process (Document.Is_Empty_Node, Prefix & List_Indent);
 
+            when Node_Symbol =>
+               Write (Prefix & "node_symbol:");
+               Process (Document.Node_Symbol_Node, Prefix & List_Indent);
+
+            when Node_Text =>
+               Write (Prefix & "node_text:");
+               Process (Document.Node_Text_Node, Prefix & List_Indent);
+
+            when Not_Expr =>
+               Write (Prefix & "not_expr:");
+               Process (Document.Not_Expr_Operand, Prefix & List_Indent);
+
+            when String_Lit =>
+               Write (Prefix & "string_lit:");
+               Write
+                 (Prefix & List_Indent
+                  & Image (As_String (Document.String_Lit_Value)));
+
+            when Symbol_Lit =>
+               Write (Prefix & "symbol_lit:");
+               Write
+                 (Prefix & List_Indent
+                  & Image (As_Symbol (Document.Symbol_Lit_Value)));
+
             when This_Field =>
                Write (Prefix & "this_field");
+
+            when This_Node =>
+               Write (Prefix & "this_node");
+
+            when Default_Pattern =>
+               Write (Prefix & "default_pattern");
+
+            when Literal_Pattern =>
+               Write (Prefix & "literal_pattern:");
+               Write
+                 (Prefix & List_Indent
+                  & Image (Document.Literal_Pattern_Value));
+
+            when Member_Pattern =>
+               Write (Prefix & "member_pattern:");
+               Write
+                 (Prefix
+                  & Simple_Indent
+                  & "member: "
+                  & Debug_Name (Document.Member_Pattern_Ref));
+
+               for I in 1 .. Document.Member_Pattern_Args.Last_Index loop
+                  Write (Prefix & Simple_Indent & "arg:");
+                  Process
+                    (Document.Member_Pattern_Args (I), Prefix & List_Indent);
+               end loop;
+
+               Write (Prefix & Simple_Indent & "sub:");
+               Process (Document.Member_Pattern_Sub, Prefix & List_Indent);
+
+            when Node_Pattern =>
+               Write (Prefix & "node_pattern:");
+               Write (Prefix & Simple_Indent
+                      & Debug_Name (Document.Node_Pattern_Type));
+               for I in 1 .. Document.Node_Pattern_Members.Last_Index loop
+                  Process
+                    (Document.Node_Pattern_Members (I), Prefix & List_Indent);
+               end loop;
+
+            when Not_Pattern =>
+               Write (Prefix & "not_pattern:");
+               Process (Document.Not_Pattern_Sub, Prefix & List_Indent);
+
+            when Or_Pattern =>
+               Write (Prefix & "or_pattern:");
+               for I in 1 .. Document.Or_Pattern_List.Last_Index loop
+                  Process (Document.Or_Pattern_List (I), Prefix & List_Indent);
+               end loop;
          end case;
       end Process;
    begin

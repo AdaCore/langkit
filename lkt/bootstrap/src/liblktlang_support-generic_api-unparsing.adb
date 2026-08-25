@@ -469,11 +469,27 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    --  template instantiation: ``Instantiate_Template`` takes care of the
    --  template unwrapping.
 
+   procedure Process_Evaluation_Exception
+     (State : Instantiation_State; Exc : Exception_Occurrence);
+   --  If ``Exc`` is a managed exception, log it. Otherwise, repropagate it
+
+   function Evaluate_Condition
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Boolean;
+   --  Helper for ``Instantiate_Template_Helper``. Evaluate a condition tree
+   --  and return its result.
+
    function Evaluate_Expression
      (State      : in out Instantiation_State;
       Expression : Document_Type) return Value_Ref;
-   --  Helper for ``Instantiate_Template_Helper``. Evaluate an expression tree
-   --  and return the resulting value.
+   --  Helper for ``Evaluate_Condition``. Evaluate an expression tree
+   --  and return the resulting value. This may propagate a managed exception.
+
+   function Pattern_Matches
+     (State   : in out Instantiation_State;
+      Pattern : Document_Type;
+      Value   : Value_Ref) return Boolean;
+   --  Return whether the given pattern matches the given value
 
    -----------------------
    -- Check_Same_Tokens --
@@ -868,6 +884,14 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    is
       Trace : constant Boolean := Trivias_Trace.Is_Active;
 
+      function Preceeded_By_List_Separator (Node : Lk_Node) return Boolean;
+      --  Return whether the first token that preceeds ``Node`` is a list
+      --  separator.
+      --
+      --  Note that this can be the case if ``Node.Parent`` itself is the list
+      --  node that owns the separator, but also if any of its own parents is
+      --  the list node that owns the separator.
+
       procedure Process (Node : Lk_Node; Index : Positive);
       --  Reattach relevant trivias to ``Node``. This processes ``Node``'s
       --  children recursively.
@@ -878,6 +902,47 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       procedure Reattach (T : Lk_Token; To : Lk_Node; What : String);
       --  Reattach ``T`` to the ``To`` node. ``What`` is used to qualify this
       --  trivia in debug logs.
+
+      ---------------------------------
+      -- Preceeded_By_List_Separator --
+      ---------------------------------
+
+      function Preceeded_By_List_Separator (Node : Lk_Node) return Boolean is
+         T_First     : constant Lk_Token := Node.Token_Start;
+         Cur, Parent : Lk_Node;
+      begin
+         --  Exit early if T_First is the first token in this unit
+
+         if T_First.Previous (Exclude_Trivia => True).Is_Null then
+            return False;
+         end if;
+
+         --  Find the Node ancestor that:
+         --
+         --  1. is a list node;
+         --  2. has separators (the unparsing tables tell us this);
+         --  3. has a child which has the same first token as Node.
+
+         Cur := Node;
+         loop
+            Parent := Cur.Parent;
+            if Parent.Is_Null then
+               return False;
+            end if;
+
+            if Parent.Token_Start = T_First then
+               Cur := Parent;
+            else
+               declare
+                  Unparser : Node_Unparser_Impl renames
+                    Node_Unparser_For (Type_Of (Parent)).all;
+               begin
+                  return
+                    Unparser.Kind = List and then Unparser.Separator /= null;
+               end;
+            end if;
+         end loop;
+      end Preceeded_By_List_Separator;
 
       -------------
       -- Process --
@@ -894,13 +959,16 @@ package body Liblktlang_Support.Generic_API.Unparsing is
            and then (Node.Parent.Is_Null
                      or else Is_Field_Present (Node, Index));
       begin
-         --  Register reattached trivias that come before list nodes
+         --  Register reattached trivias that come before list nodes, except if
+         --  they follow a list separator.
 
          if Is_Present_List then
             declare
                First_Trivia : constant Lk_Token := First_Trivia_Before (Node);
             begin
-               if not First_Trivia.Is_Null then
+               if not First_Trivia.Is_Null
+                  and then not Preceeded_By_List_Separator (Node)
+               then
                   Reattach
                     (First_Trivia, Node, "leading trivias before list node");
                end if;
@@ -1065,7 +1133,9 @@ package body Liblktlang_Support.Generic_API.Unparsing is
    function Is_Empty_List (Node : Lk_Node) return Boolean is
       T : Lk_Token;
    begin
-      if not Node.Is_List_Node or else Node.Children_Count > 0 then
+      if Node.Is_Null then
+         return True;
+      elsif not Node.Is_List_Node or else Node.Children_Count > 0 then
          return False;
       end if;
 
@@ -1751,10 +1821,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
 
          when If_Then_Else =>
             declare
-               Condition   : constant Value_Ref :=
-                 Evaluate_Expression (State, Template.If_Condition);
                Subtemplate : constant Document_Type :=
-                 (if Condition.As_Bool
+                 (if Evaluate_Condition (State, Template.If_Condition)
                   then Template.If_Then
                   else Template.If_Else);
             begin
@@ -1763,44 +1831,102 @@ package body Liblktlang_Support.Generic_API.Unparsing is
 
          when Match =>
             declare
-               Field_Node       : constant Lk_Node :=
-                 Eval_Syntax_Field (State.Node, Template.Match_Field);
-               Matched_Template : Document_Type := Template.Match_Default;
-
+               Doc  : Document_Type;
+               Node : Value_Ref := No_Value_Ref;
             begin
-               --  If the field is present, pick the document for the first
-               --  matcher that accepts it.
+               --  First evaluate the controlling node. If an exception occurs
+               --  at this point, we will use the default matcher below.
 
-               if Is_Field_Present
-                    (Field_Node,
-                     Syntax_Field_Index
-                       (Template.Match_Field, Type_Of (State.Node)))
-               then
-                  for I in
-                    Template.Match_Matchers.First_Index
-                    .. Template.Match_Matchers.Last_Index
-                  loop
-                     if Matches
-                          (Field_Node, Template.Match_Matchers.Reference (I))
+               begin
+                  Node := Evaluate_Expression (State, Template.Match_Node);
+               exception
+                  when Exc : others =>
+                     Process_Evaluation_Exception (State, Exc);
+               end;
+
+               --  Now find the first matcher that applies for this node, and
+               --  then instantiate the associated template.
+
+               for I in 1 .. Template.Match_Matchers.Last_Index loop
+                  declare
+                     M : Matcher_Record renames
+                       Template.Match_Matchers.Constant_Reference (I);
+                  begin
+                     if (Node = No_Value_Ref
+                         and then Is_Default_Pattern (M.Pattern))
+                         or else (Node /= No_Value_Ref
+                                  and then Pattern_Matches
+                                             (State, M.Pattern, Node))
                      then
-                        Matched_Template :=
-                          Template.Match_Matchers (I).Document;
+                        Doc := M.Document;
                         exit;
                      end if;
-                  end loop;
+                  end;
+               end loop;
 
-               --  Otherwise, use the null template, if present. For all
-               --  other cases, use the default template.
+               --  Configuration parsing is supposed to ensure that each
+               --  match template has a matcher with a default pattern, so
+               --  we must match one alternative in all cases.
 
-               elsif Template.Match_Absent /= null then
-                  Matched_Template := Template.Match_Absent;
-               end if;
+               pragma Assert (Doc /= null);
 
-               return Instantiate_Template_Helper
-                        (Pool, State, Matched_Template);
+               return Instantiate_Template_Helper (Pool, State, Doc);
             end;
       end case;
    end Instantiate_Template_Helper;
+
+   ----------------------------------
+   -- Process_Evaluation_Exception --
+   ----------------------------------
+
+   procedure Process_Evaluation_Exception
+     (State : Instantiation_State; Exc : Exception_Occurrence) is
+   begin
+      --  Let unmanaged exceptions propagate: they are true bugs
+
+      if not Is_Managed_Exception (State.Language, Exception_Identity (Exc))
+      then
+         Reraise_Occurrence (Exc);
+
+      --  If requested, log managed exceptions
+
+      elsif Expansion_Errors_Trace.Is_Active then
+         declare
+            Context : constant String :=
+              (if State.Field.Is_Null
+               then ""
+               else "field " & State.Field.Image & " of ")
+              & State.Node.Image;
+         begin
+            Expansion_Errors_Trace.Trace
+              ("Exception caught during the expansion of " & Context);
+            Expansion_Errors_Trace.Trace (Exception_Information (Exc));
+         end;
+      end if;
+   end Process_Evaluation_Exception;
+
+   ------------------------
+   -- Evaluate_Condition --
+   ------------------------
+
+   function Evaluate_Condition
+     (State      : in out Instantiation_State;
+      Expression : Document_Type) return Boolean
+   is
+      Result : Value_Ref;
+   begin
+      --  Evaluate the condition itself. Consider that the condition evaluates
+      --  to false in case of error.
+
+      begin
+         Result := Evaluate_Expression (State, Expression);
+      exception
+         when Exc : others =>
+            Process_Evaluation_Exception (State, Exc);
+            return False;
+      end;
+      return As_Bool (Result);
+   end Evaluate_Condition;
 
    -------------------------
    -- Evaluate_Expression --
@@ -1808,18 +1934,75 @@ package body Liblktlang_Support.Generic_API.Unparsing is
 
    function Evaluate_Expression
      (State      : in out Instantiation_State;
-      Expression : Document_Type) return Value_Ref is
+      Expression : Document_Type) return Value_Ref
+   is
+      Lang : Language_Id renames State.Language;
    begin
       case Template_Expression_Kind (Expression.Kind) is
+         when Bin_Op =>
+            declare
+               function LHS return Value_Ref is
+                 (Evaluate_Expression (State, Expression.Bin_Op_LHS));
+               function RHS return Value_Ref is
+                 (Evaluate_Expression (State, Expression.Bin_Op_RHS));
+            begin
+               case Expression.Bin_Op_Op is
+                  when Equal =>
+                     return From_Bool (Lang, LHS = RHS);
+                  when And_Then =>
+                     return From_Bool
+                              (Lang, As_Bool (LHS) and then As_Bool (RHS));
+                  when Or_Else =>
+                     return From_Bool
+                              (Lang, As_Bool (LHS) or else As_Bool (RHS));
+               end case;
+            end;
+
+         when Cast =>
+            declare
+               Prefix : constant Lk_Node :=
+                 Evaluate_Expression (State, Expression.Cast_Prefix).As_Node;
+               Result : constant Lk_Node :=
+                 (if Prefix.Is_Null
+                     or else not Type_Matches (Prefix, Expression.Cast_Type)
+                  then No_Lk_Node
+                  else Prefix);
+            begin
+               return From_Node (Lang, Result);
+            end;
+
+         when Eval_Member =>
+            declare
+               Prefix : constant Value_Ref :=
+                 Evaluate_Expression (State, Expression.Eval_Member_Prefix);
+               Member : constant Struct_Member_Ref :=
+                 Expression.Eval_Member_Ref;
+               Arguments : Value_Ref_Array
+                 (1 ..  Expression.Eval_Member_Args.Last_Index);
+            begin
+               for I in Arguments'Range loop
+                  declare
+                     A : constant Document_Type :=
+                       Expression.Eval_Member_Args (I);
+                  begin
+                     Arguments (I) :=
+                       (if A = null
+                        then Member_Argument_Default_Value
+                               (Member, Argument_Index (I))
+                        else Evaluate_Expression (State, A));
+                  end;
+               end loop;
+               return Eval_Member (Prefix, Member, Arguments);
+            end;
+
          when Is_A =>
             declare
-               Node : constant Lk_Node :=
-                 Evaluate_Expression (State, Expression.Is_A_Node).As_Node;
+               Node : constant Value_Ref :=
+                 Evaluate_Expression (State, Expression.Is_A_Node);
                Result : constant Boolean :=
-                 not Node.Is_Null
-                 and then Node_Matches (Node, Expression.Is_A_Kinds);
+                 Pattern_Matches (State, Expression.Is_A_Pattern, Node);
             begin
-               return From_Bool (State.Language, Result);
+               return From_Bool (Lang, Result);
             end;
 
          when Is_Empty =>
@@ -1827,13 +2010,123 @@ package body Liblktlang_Support.Generic_API.Unparsing is
                Node : constant Lk_Node :=
                  Evaluate_Expression (State, Expression.Is_Empty_Node).As_Node;
             begin
-               return From_Bool (State.Language, Is_Empty_List (Node));
+               return From_Bool (Lang, Is_Empty_List (Node));
             end;
 
+         when Node_Symbol | Node_Text =>
+            declare
+               Expr : constant Document_Type :=
+                 (if Expression.Kind = Node_Symbol
+                  then Expression.Node_Symbol_Node
+                  else Expression.Node_Text_Node);
+               Node : constant Lk_Node :=
+                 Evaluate_Expression (State, Expr).As_Node;
+               Text : constant Text_Type :=
+                 (if Node.Is_Null
+                  then ""
+                  elsif Expression.Kind = Node_Symbol
+                  then Node.Symbol
+                  else Node.Text);
+            begin
+               return
+                 (if Expression.Kind = Node_Symbol
+                  then From_Symbol (Lang, Text)
+                  else From_String (Lang, Text));
+            end;
+
+         when Not_Expr =>
+            declare
+               Operand : constant Value_Ref :=
+                 Evaluate_Expression (State, Expression.Not_Expr_Operand);
+            begin
+               return From_Bool (Lang, not As_Bool (Operand));
+            end;
+
+         when String_Lit =>
+            return Expression.String_Lit_Value;
+
+         when Symbol_Lit =>
+            return Expression.Symbol_Lit_Value;
+
          when This_Field =>
-            return From_Node (State.Language, State.Field);
+            return From_Node (Lang, State.Field);
+
+         when This_Node =>
+            return From_Node (Lang, State.Node);
       end case;
    end Evaluate_Expression;
+
+   ---------------------
+   -- Pattern_Matches --
+   ---------------------
+
+   function Pattern_Matches
+     (State   : in out Instantiation_State;
+      Pattern : Document_Type;
+      Value   : Value_Ref) return Boolean
+   is
+   begin
+      case Template_Pattern_Kind (Pattern.Kind) is
+         when Default_Pattern =>
+            return True;
+
+         when Literal_Pattern =>
+            return Pattern.Literal_Pattern_Value = Value;
+
+         when Member_Pattern =>
+            declare
+               Member : Value_Ref;
+               Args   : Value_Ref_Array
+                          (1 ..  Pattern.Member_Pattern_Args.Last_Index);
+            begin
+               begin
+                  for I in Args'Range loop
+                     Args (I) := Evaluate_Expression
+                                   (State, Pattern.Member_Pattern_Args (I));
+                  end loop;
+                  Member := Eval_Member
+                    (Value, Pattern.Member_Pattern_Ref, Args);
+               exception
+                  when Exc : others =>
+                     Process_Evaluation_Exception (State, Exc);
+                     return False;
+               end;
+
+               return Pattern_Matches
+                        (State, Pattern.Member_Pattern_Sub, Member);
+            end;
+
+         when Node_Pattern =>
+            if As_Node (Value).Is_Null
+               or else not Is_Derived_From
+                             (Type_Of (Value), Pattern.Node_Pattern_Type)
+            then
+               return False;
+            end if;
+
+            for I in 1 .. Pattern.Node_Pattern_Members.Last_Index loop
+               if not Pattern_Matches
+                        (State, Pattern.Node_Pattern_Members (I), Value)
+               then
+                  return False;
+               end if;
+            end loop;
+
+            return True;
+
+         when Not_Pattern =>
+            return not Pattern_Matches (State, Pattern.Not_Pattern_Sub, Value);
+
+         when Or_Pattern =>
+            for I in 1 .. Pattern.Or_Pattern_List.Last_Index loop
+               if Pattern_Matches (State, Pattern.Or_Pattern_List (I), Value)
+               then
+                  return True;
+               end if;
+            end loop;
+            return False;
+      end case;
+   end Pattern_Matches;
 
    -------------------------
    -- Unparse_To_Prettier --
@@ -2713,6 +3006,8 @@ package body Liblktlang_Support.Generic_API.Unparsing is
       elsif Node.Unit.Has_Diagnostics then
          raise Precondition_Failure with "node's unit has parsing errors";
       end if;
+
+      Pool.Initialize (Config.Value.Language);
 
       --  Refresh memoized Prettier documents stored in the unparsing
       --  configuration, since they use Prettier's document IDs that may be

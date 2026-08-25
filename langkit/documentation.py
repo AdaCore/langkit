@@ -986,6 +986,15 @@ base_langkit_docs = {
         current thread. Will be automatically allocated on error and free'd on
         the next error.
     """,
+    "langkit.copy_last_exception": """
+        Return 0 if the last API call returned without error. Otherwise, return
+        1 and copy exception details into EXC (which must be free'd once done
+        with it: see ``${capi.get_name('free_exception')}``.
+    """,
+    "langkit.free_exception": """
+        Free resources allocated with EXC (to be used only for exception data
+        created by ``${capi.get_name('copy_last_exception')}``.
+    """,
     "langkit.exception_name": """
         Return the name of the given exception kind. Callers are responsible
         for free'ing the result.

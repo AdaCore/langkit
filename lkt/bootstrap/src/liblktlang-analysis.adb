@@ -8560,6 +8560,66 @@ package body Liblktlang.Analysis is
    end;
 
          
+   function P_Iterable_Gen_Trait
+     (Node : Lkt_Node'Class) return Generic_Decl is
+      
+
+
+      Property_Result : Internal_Entity_Generic_Decl;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Impl_0.Lkt_Node_P_Iterable_Gen_Trait
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Generic_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Generic_Decl do
+
+
+            null;
+      end return;
+
+   end;
+
+         
+   function P_Iterable_Trait
+     (Node : Lkt_Node'Class) return Trait_Decl is
+      
+
+
+      Property_Result : Internal_Entity_Trait_Decl;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Impl_0.Lkt_Node_P_Iterable_Trait
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Trait_Decl := Wrap_Node (Property_Result.Node, Property_Result.Info).As_Trait_Decl do
+
+
+            null;
+      end return;
+
+   end;
+
+         
    function P_Token_Node_Trait
      (Node : Lkt_Node'Class) return Named_Type_Decl is
       
@@ -10213,6 +10273,36 @@ package body Liblktlang.Analysis is
 
 
 
+
+         
+   function Is_Empty_List
+     (Node : Lkt_Node_Base_List'Class) return Boolean is
+      
+
+
+      Property_Result : Boolean;
+
+
+   begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
+      Check_Safety_Net (Node);
+
+
+      
+      Property_Result :=
+         Liblktlang.Implementation.Is_Empty_List
+            (Bare_Lkt_Node (Node.Internal.Node));
+
+      return Result : Boolean := Property_Result do
+
+
+            null;
+      end return;
+
+   end;
 
 
 

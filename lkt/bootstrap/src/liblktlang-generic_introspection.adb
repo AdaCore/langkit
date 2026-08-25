@@ -2079,6 +2079,36 @@ Free (Result);
 end if;
 raise;
 end;
+when Member_Index_For_Lkt_Node_P_Iterable_Gen_Trait =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N.P_Iterable_Gen_Trait);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when Member_Index_For_Lkt_Node_P_Iterable_Trait =>
+declare
+R : Internal_Acc_Node :=  new Internal_Rec_Node;
+begin
+Set_Node (R, N.P_Iterable_Trait);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
 when Member_Index_For_Lkt_Node_P_Token_Node_Trait =>
 declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
@@ -6082,6 +6112,29 @@ declare
 R : Internal_Acc_Node :=  new Internal_Rec_Node;
 begin
 Set_Node (R, N_Bare_Lexer_Case_Rule_Send.F_Match_Size);
+Result := Internal_Value_Access (R);
+exception
+when Exc : others =>
+if Implementation.Properties_May_Raise (Exc) then
+Result := Internal_Value_Access (R);
+Result.Destroy;
+Free (Result);
+end if;
+raise;
+end;
+when others => null;
+end case;
+end;
+when Lkt_Lkt_Node_Base_List =>
+declare
+N_Bare_Lkt_Node_Base_List : constant Analysis.Lkt_Node_Base_List := N.As_Lkt_Node_Base_List;
+begin
+case Member is
+when Member_Index_For_Is_Empty_List =>
+declare
+R : Internal_Acc_Bool :=  new Internal_Rec_Bool;
+begin
+R.Value := N_Bare_Lkt_Node_Base_List.Is_Empty_List;
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>

@@ -1280,6 +1280,37 @@ package body ${ada_lib_name}.Implementation.C is
       end if;
    end;
 
+   function ${capi.get_name('copy_last_exception')}
+     (Exc : ${exception_type}_Ptr) return int
+   is
+      Exc_Src : constant ${exception_type}_Ptr :=
+        ${capi.get_name("get_last_exception")};
+   begin
+      if Exc_Src = null then
+         return 0;
+      else
+         declare
+            ST_Size : constant Natural := Exc_Src.Stack_Trace.Size;
+         begin
+            Exc.Kind := Exc_Src.Kind;
+            Exc.Information := New_String (Value (Exc_Src.Information));
+            Exc.Stack_Trace :=
+              new Stack_Trace_Record'
+                (Capacity => ST_Size,
+                 Size     => ST_Size,
+                 Items    => Exc_Src.Stack_Trace.Items (1 .. ST_Size));
+            return 1;
+         end;
+      end if;
+   end;
+
+   procedure ${capi.get_name('free_exception')} (Exc : ${exception_type}_Ptr)
+   is
+   begin
+      Free (Exc.Information);
+      Free (Exc.Stack_Trace);
+   end;
+
    function ${capi.get_name('exception_name')}
      (Kind : ${exception_kind_type}) return chars_ptr is
    begin
