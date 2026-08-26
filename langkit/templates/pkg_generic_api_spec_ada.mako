@@ -8,6 +8,10 @@ with Langkit_Support.Generic_API.Introspection;
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
+--  This package exposes the language ID for ${ada_lib_name} as well as
+--  converters between generic API types (``Langkit_Support.Generic_API``) and
+--  ${ada_lib_name} types.
+
 package ${ada_lib_name}.Generic_API is
 
    <% lang_id_name = f"{cfg.library.language_name}_Lang_Id" %>
