@@ -182,7 +182,7 @@ package Langkit_Support.Generic_API.Rewriting is
    --  will raise an ``Existing_Rewriting_Handle_Error`` exception if
    --  ``Context`` already has a living rewriting session.
    --
-   --  ``Config`` is used to format the rewritten parts of the trees. Use the
+   --  ``Options`` is used to format the rewritten parts of the trees. Use the
    --  language's default if not provided.
 
    procedure Abort_Rewriting (Handle : in out Rewriting_Handle);
