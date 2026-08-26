@@ -29,6 +29,9 @@ ext_config = ctx.config.vscode_ext
     "languages": [
       {
         "id": "${lang_name}",
+% if ext_config.language_config_file is not None:
+        "configuration": "${lang_name}-language-configuration.json",
+% endif
         "extensions": [
           ${", ".join(
             f'"{ext}"' for ext in ctx.config.language_server.file_extensions

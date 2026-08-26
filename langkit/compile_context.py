@@ -2703,16 +2703,26 @@ class CompileCtx:
             errors_checkpoint_pass,
         )
 
+        has_language_config = (
+            self.config.vscode_ext is not None
+            and self.config.vscode_ext.language_config_file is not None
+        )
+
         has_textmate_config = (
             self.config.vscode_ext is not None
             and self.config.vscode_ext.textmate_config_file is not None
         )
 
-        # Create the list of passes to generate the VScode extension
+        # Create the list of passes to generate the VSCode extension
         res = [
             *self.start_code_emission_passes,
             EmitterPass(
                 "emit VS Code extension", Emitter.emit_vscode_extension
+            ),
+            EmitterPass(
+                "copy language configuration",
+                Emitter.copy_language_config,
+                disabled=not has_language_config,
             ),
             EmitterPass(
                 "emit TextMate grammar",

@@ -1,0 +1,57 @@
+{
+    "keyword.control": [
+        "\\b@IfKw\\b",
+        "\\b@ElifKw\\b",
+        "\\b@ElseKw\\b",
+        "\\b@ThenKw\\b",
+        "\\b@MatchKw\\b",
+        "\\b@CaseKw\\b",
+        "\\b@FromKw\\b",
+        "\\b@SelectKw\\b",
+        "\\b@WhenKw\\b",
+        "\\b@RaiseKw\\b",
+        "\\b@TryKw\\b",
+        "\\b@ImportKw\\b"
+    ],
+    "keyword.operator.logical": [
+        "\\b@InKw\\b",
+        "\\b@IsKw\\b",
+        "\\b@AndKw\\b",
+        "\\b@OrKw\\b",
+        "\\b@NotKw\\b"
+    ],
+    "keyword.other": "\\b@DiscardKw\\b",
+    "storage.type": [
+        "\\b@ValKw\\b",
+        "\\b@BindKw\\b",
+        "\\b@FunKw\\b",
+        "\\b@StructKw\\b",
+        "\\b@ClassKw\\b",
+        "\\b@EnumKw\\b",
+        "\\b@GenericKw\\b",
+        "\\b@GrammarKw\\b",
+        "\\b@LexerKw\\b",
+        "\\b@TraitKw\\b",
+        "\\b@DynVarKw\\b"
+    ],
+    "storage.modifier": [
+        "\\b@PublicKw\\b",
+        "\\b@PrivateKw\\b",
+        "\\b@ImplementsKw\\b"
+    ],
+    "constant.language": [
+        "\\b@NullKw\\b",
+        "/\\btrue\\b",
+        "/\\bfalse\\b"
+    ],
+    "constant.numeric": [
+        "\\b@Number\\b",
+        "\\b@BigNumber\\b"
+    ],
+    "string.quoted.double": "@String",
+    "string.regexp": "@PString",
+    "constant.character": "@Char",
+    "comment.block.documentation": "@ModuleDocStringLine",
+    "string.quoted.other": "@BlockStringLine",
+    "comment.line": "@Comment"
+}

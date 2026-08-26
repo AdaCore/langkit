@@ -1,0 +1,17 @@
+Code generation was successful
+
+== test.py ==
+Copied language configuration:
+-----
+{
+    "This file is going to be copied verbatim": true
+}
+
+-----
+
+Produced package.json "languages" field
+-----
+[{'id': 'Foo', 'configuration': 'Foo-language-configuration.json', 'extensions': ['.foo']}]
+-----
+
+vscode_ext_generate: Done

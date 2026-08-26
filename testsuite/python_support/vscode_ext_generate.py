@@ -1,5 +1,5 @@
 """
-Test script to generate a VScode extension in the current directory and to
+Test script to generate a VSCode extension in the current directory and to
 print error messages (if any). If there is a "test.py" script in the test
 directory, also execute it at the end of the driver execution.
 """

@@ -637,6 +637,13 @@ class VSCodeExtConfig:
     Version of the extension (must be SemVer compatible).
     """
 
+    language_config_file: str | None = None
+    """
+    Filename relative to the extensions directory, it contains the language
+    configuration to provide verbatim to the generated VSCode extension. If
+    ``None``, no configuration is forwarded.
+    """
+
     textmate_config_file: str | None = None
     """
     Filename relative to the extensions directory, containing the JSON

@@ -1,0 +1,4 @@
+driver: vscode_ext_generate
+config:
+  vscode_ext:
+    language_config_file: config.json
