@@ -198,12 +198,12 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     |" Unit method. Return the array builtin generic type.
     @exported
     fun array_gen_type(): Entity[GenericDecl] =
-        node.get_builtin_gen_decl(s"Array")
+        node.array_type().parent.as[GenericDecl]
 
     |" Unit method. Return the array builtin type.
     @exported
     fun array_type(): Entity[NamedTypeDecl] =
-        node.array_gen_type().decl.as[NamedTypeDecl]
+        node.get_builtin_type(s"Array__")
 
     |" Unit method. Return the stream builtin generic type.
     @exported
@@ -972,7 +972,9 @@ class Decl: LktNode implements DeclarationInterface {
     fun instantiate_generic_decl(
         param_types: Array[Entity[TypeDecl]]
     ): Entity[Decl] =
-        if self.is_null or param_types.any((t) => t.is_null)
+        if self.is_null
+           or param_types.any((t) => t.is_null)
+           or not self.parent is GenericDecl
         then null[Entity[TypeDecl]]
         else
             DynEnvWrapper(
@@ -1180,7 +1182,27 @@ class Decl: LktNode implements DeclarationInterface {
                     else
                         []: EnvAssoc;
 
-                [regular_entry] & root_node_entry & metadata_entry
+                # If the type is the definition of the built-in array type,
+                # register it in the root scope under a unique symbol, so that
+                # it can be fetched in a generic manner when needed (see for
+                # example type resolution of `ArrayLiteral` nodes).
+                val array_entry =
+                    if self.full_decl()?.has_annotation(s"array") then
+                        EnvAssoc(
+                            key=s"Array__",
+                            value=node,
+                            dest_env=DesignatedEnv(
+                                kind=DesignatedEnvKind.direct_env,
+                                env_name=null[Symbol],
+                                direct_env=node.root_env()
+                            ),
+                            metadata=null[Metadata]
+                        ).singleton()
+                    else
+                        []: EnvAssoc;
+
+                [regular_entry]
+                & root_node_entry & metadata_entry & array_entry
             }
         )
     }
@@ -2203,7 +2225,7 @@ class TypeDecl: Decl implements TypeInterface {
     |" parameter.
     @memoized
     fun make_array_type(): Entity[TypeDecl] =
-        self?.array_type().instantiate_generic_type_decl([self])
+        self?.array_type()?.instantiate_generic_type_decl([self])
 
     |" Create a rebound ``Stream`` type declaration, using ``self`` as the type
     |" parameter.

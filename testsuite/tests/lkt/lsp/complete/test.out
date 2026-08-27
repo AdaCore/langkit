@@ -56,6 +56,7 @@ Completing <RefId "Stru" test.lkt:8:9-8:13> ('Stru')
  - Address: struct_kind
  - AnalysisUnit: interface_kind
  - AnalysisUnitKind: enum_kind
+ - Array[T]: struct_kind
  - Bar: class_kind
  - Baz: class_kind
  - BigInt: struct_kind
@@ -111,6 +112,7 @@ Completing <RefId "v" test.lkt:8:16-8:17> ('v')
  - Address: struct_kind
  - AnalysisUnit: interface_kind
  - AnalysisUnitKind: enum_kind
+ - Array[T]: struct_kind
  - Bar: class_kind
  - Baz: class_kind
  - BigInt: struct_kind

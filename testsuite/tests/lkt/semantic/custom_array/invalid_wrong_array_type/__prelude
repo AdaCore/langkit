@@ -1,0 +1,4 @@
+struct Int {}
+
+@array
+struct List {}
