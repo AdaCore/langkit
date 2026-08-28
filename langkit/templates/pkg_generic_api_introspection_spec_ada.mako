@@ -18,6 +18,7 @@ package ${ada_lib_name}.Generic_API.Introspection is
       % for i, t in enumerate(generic_api.all_types, 1):
          ${t.api_name} : constant G.Type_Ref :=
            G.From_Index (Self_Id, ${i});
+           --  @exclude-value
       % endfor
    end Type_Refs;
 
@@ -30,6 +31,7 @@ package ${ada_lib_name}.Generic_API.Introspection is
        ],
        3
    )};
+   --  @exclude-value
 
    -----------------------
    -- Member references --
@@ -39,6 +41,7 @@ package ${ada_lib_name}.Generic_API.Introspection is
       % for i, m in enumerate(generic_api.all_members, 1):
          ${generic_api.member_name(m)} : constant G.Struct_Member_Ref :=
            G.From_Index (Self_Id, ${i});
+         --  @exclude-value
       % endfor
    end Member_Refs;
 
