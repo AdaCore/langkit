@@ -1289,7 +1289,7 @@ class Emitter:
         Generate the TextMate grammar file.
         """
         code = ctx.render_template(
-            "vscode_ext/textmate/grammar",
+            "vscode_ext/textmate_grammar",
             tm_settings=ctx.textmate_grammar_settings,
         )
         self.write_source_file(
