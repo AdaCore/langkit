@@ -13,13 +13,6 @@
         "\\b@TryKw\\b",
         "\\b@ImportKw\\b"
     ],
-    "keyword.operator.logical": [
-        "\\b@InKw\\b",
-        "\\b@IsKw\\b",
-        "\\b@AndKw\\b",
-        "\\b@OrKw\\b",
-        "\\b@NotKw\\b"
-    ],
     "keyword.other": "\\b@DiscardKw\\b",
     "storage.type": [
         "\\b@ValKw\\b",
@@ -48,10 +41,20 @@
         "\\b@Number\\b",
         "\\b@BigNumber\\b"
     ],
+    "entity.name.function": [
+        "\\b@InKw\\b",
+        "\\b@IsKw\\b",
+        "\\b@AndKw\\b",
+        "\\b@OrKw\\b",
+        "\\b@NotKw\\b"
+    ],
+    "entity.name.tag": {
+        "combination": "and",
+        "matchers": ["/\\s", "@At", "/[a-z]", "@Identifier"]
+    },
     "string.quoted.double": "@String",
     "string.regexp": "@PString",
     "constant.character": "@Char",
-    "comment.block.documentation": "@ModuleDocStringLine",
-    "string.quoted.other": "@BlockStringLine",
+    "string.quoted.other": ["@ModuleDocStringLine", "@BlockStringLine"],
     "comment.line": "@Comment"
 }
