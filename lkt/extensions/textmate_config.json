@@ -50,7 +50,7 @@
     ],
     "entity.name.tag": {
         "combination": "and",
-        "matchers": ["/\\s", "@At", "/[a-z]", "@Identifier"]
+        "matchers": ["/(\\s|^)", "@At", "/[a-z]", "@Identifier"]
     },
     "string.quoted.double": "@String",
     "string.regexp": "@PString",
