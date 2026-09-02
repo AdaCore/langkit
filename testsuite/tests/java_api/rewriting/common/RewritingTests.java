@@ -151,91 +151,130 @@ public class RewritingTests {
         try (
             AnalysisContext context1 = AnalysisContext.create();
             AnalysisContext context2 = AnalysisContext.create();
-            RewritingContext rcontext = context1.startRewriting();
         ) {
-            // Create rewriting units
-            System.out.println("Creating analysis and rewriting units");
-            AnalysisUnit unit1 = context1.getUnitFromFile("s1.txt");
-            AnalysisUnit unit2 = context2.getUnitFromFile("s2.txt");
-            RewritingUnit runit1 = unit1.getRewritingUnit();
+            var unit1 = context1.getUnitFromFile("s1.txt");
+            var unit2 = context2.getUnitFromFile("s2.txt");
+            var node1 = unit1.getRoot();
+            var node2 = unit2.getRoot();
 
-            // Get the roots and verify them
-            System.out.println("\nGetting rewriting units root nodes");
-            FooNode node1 = unit1.getRoot();
-            FooNode node2 = unit2.getRoot();
-            RewritingNode rnode1 = runit1.getRoot();
-            assertTrue("Rewriting root is not None", !rnode1.isNone());
-            assertTrue("Rewriting node parsed node reference",
-                       node1.equals(rnode1.getParsedNode()));
-            assertTrue("Parsed node rewriting reference",
-                       rnode1.equals(node1.getRewritingNode()));
-            assertTrue("Rewriting root kind is the same as root",
-                       rnode1.getKind() == node1.getKind());
-            assertTrue("Rewriting node context reference",
-                       rcontext.equals(rnode1.getRewritingContext()));
-            assertTrue("Rewriting root is tied", rnode1.isTied());
-            assertLangkitException(
-                "Create a rewriting node from a non rewriting context",
-                () -> node2.getRewritingNode()
-            );
-            System.out.println("s1.txt rewriting root node image");
-            System.out.println(rnode1.image());
-            System.out.println("s1.txt rewriting root node unparsing");
-            System.out.println("#####");
-            System.out.println(rnode1.unparse());
-            System.out.println("#####");
-            assertTrue("Unit and root unparsing results are the same",
-                       runit1.unparse().equals(rnode1.unparse()));
+            try (
+                var rcontext = context1.startRewriting();
+            ) {
+                // Create rewriting units
+                System.out.println("Creating analysis and rewriting units");
+                var runit1 = unit1.getRewritingUnit();
 
-            // Root children visiting
-            System.out.println("\nGetting the rewriting root children");
-            RewritingNode[] children = rnode1.children();
-            System.out.println(
-                "Root rewriting node children: " + Arrays.toString(children)
-            );
-            assertTrue("Children count is 4", children.length == 4);
-            assertTrue("Child parent is the root",
-                       children[0].parent().equals(rnode1));
+                // Get the roots and verify them
+                System.out.println("\nGetting rewriting units root nodes");
+                var rnode1 = runit1.getRoot();
+                assertTrue("Rewriting root is not None", !rnode1.isNone());
+                assertTrue(
+                    "Rewriting node parsed node reference",
+                    node1.equals(rnode1.getParsedNode())
+                );
+                assertTrue(
+                    "Parsed node rewriting reference",
+                    rnode1.equals(node1.getRewritingNode())
+                );
+                assertTrue(
+                    "Rewriting root kind is the same as root",
+                    rnode1.getKind() == node1.getKind()
+                );
+                assertTrue(
+                    "Rewriting node context reference",
+                    rcontext.equals(rnode1.getRewritingContext())
+                );
+                assertTrue("Rewriting root is tied", rnode1.isTied());
+                assertLangkitException(
+                    "Create a rewriting node from a non rewriting context",
+                    () -> node2.getRewritingNode()
+                );
+                System.out.println("s1.txt rewriting root node image");
+                System.out.println(rnode1.image());
+                System.out.println("s1.txt rewriting root node unparsing");
+                System.out.println("#####");
+                System.out.println(rnode1.unparse());
+                System.out.println("#####");
+                assertTrue(
+                    "Unit and root unparsing results are the same",
+                    runit1.unparse().equals(rnode1.unparse())
+                );
 
-            // Child navigation
-            System.out.println("\nNavigating the root node children");
-            RewritingNode rfirstChild = rnode1.firstChild();
-            RewritingNode rlastChild = rnode1.lastChild();
-            System.out.println("Root first child: " + rfirstChild);
-            System.out.println("Root last child: " + rlastChild);
-            assertTrue("Last child second previous is the first child next",
-                       rlastChild.previousChild().previousChild()
-                                 .equals(rfirstChild.nextChild()));
-            assertTrue("Last child next is None",
-                       rlastChild.nextChild().isNone());
-            assertTrue("First child previous is None",
-                       rfirstChild.previousChild().isNone());
+                // Root children visiting
+                System.out.println("\nGetting the rewriting root children");
+                var children = rnode1.children();
+                System.out.println(
+                    "Root rewriting node children: "
+                    + Arrays.toString(children)
+                );
+                assertTrue("Children count is 4", children.length == 4);
+                assertTrue(
+                    "Child parent is the root",
+                    children[0].parent().equals(rnode1)
+                );
 
-            // First declaration visiting
-            System.out.println(
-                "\nGetting the name and expression of the first declaration"
-            );
-            RewritingNode rdecl1 = children[0];
-            RewritingNode rname1 = rdecl1.getChild(
-                MemberReference.FOO_DECL_F_NAME
-            );
-            RewritingNode rexpr1 = rdecl1.getChild(
-                MemberReference.FOO_DECL_F_EXPR
-            );
-            System.out.println("  name: " + rname1.toString());
-            System.out.println("  expr: " + rexpr1.toString());
-            assertLangkitException(
-                "Getting f_name child on the root list",
-                () -> rnode1.getChild(MemberReference.FOO_DECL_F_NAME)
-            );
-            assertLangkitException(
-                "Getting f_expr child on a name node",
-                () -> rname1.getChild(MemberReference.FOO_DECL_F_EXPR)
-            );
-            assertTrue("First child of the name is None",
-                       rname1.firstChild().isNone());
-            assertTrue("Last child of the expr is None",
-                       rexpr1.lastChild().isNone());
+                // Child navigation
+                System.out.println("\nNavigating the root node children");
+                var rfirstChild = rnode1.firstChild();
+                var rlastChild = rnode1.lastChild();
+                System.out.println("Root first child: " + rfirstChild);
+                System.out.println("Root last child: " + rlastChild);
+                assertTrue(
+                    "Last child second previous is the first child next",
+                    rlastChild.previousChild().previousChild().equals(
+                        rfirstChild.nextChild()
+                    )
+                );
+                assertTrue(
+                    "Last child next is None",
+                    rlastChild.nextChild().isNone()
+                );
+                assertTrue(
+                    "First child previous is None",
+                    rfirstChild.previousChild().isNone()
+                );
+
+                // First declaration visiting
+                System.out.println(
+                    "\nGetting the name and expression of the first "
+                    + "declaration"
+                );
+                var rdecl1 = children[0];
+                var rname1 = rdecl1.getChild(MemberReference.FOO_DECL_F_NAME);
+                RewritingNode rexpr1 = rdecl1.getChild(
+                    MemberReference.FOO_DECL_F_EXPR
+                );
+                System.out.println("  name: " + rname1.toString());
+                System.out.println("  expr: " + rexpr1.toString());
+                assertLangkitException(
+                    "Getting f_name child on the root list",
+                    () -> rnode1.getChild(MemberReference.FOO_DECL_F_NAME)
+                );
+                assertLangkitException(
+                    "Getting f_expr child on a name node",
+                    () -> rname1.getChild(MemberReference.FOO_DECL_F_EXPR)
+                );
+                assertTrue(
+                    "First child of the name is None",
+                    rname1.firstChild().isNone()
+                );
+                assertTrue(
+                    "Last child of the expr is None",
+                    rexpr1.lastChild().isNone()
+                );
+            }
+
+            // Closing the rewriting context and opening a new one
+            try (
+                var rcontext = context1.startRewriting();
+            ) {
+                assertTrue(
+                    "Rewriting node of root has changed",
+                    rcontext.equals(
+                        node1.getRewritingNode().getRewritingContext()
+                    )
+                );
+            }
         }
         footer("Rewriting node");
     }

@@ -4346,6 +4346,13 @@ public final class ${ctx.lib_name.camel}
             null
         );
 
+        /**
+         * A cache containing all created rewriting context, mapped from their
+         * native addresses.
+         */
+        private static final Map<PointerWrapper, RewritingContext>
+        INSTANCE_CACHE = new HashMap<>();
+
         // ----- Instance attributes -----
 
         /** The reference to the native rewriting context handle. */
@@ -4401,10 +4408,16 @@ public final class ${ctx.lib_name.camel}
         static RewritingContext fromReference(
             final PointerWrapper reference
         ) {
-            return new RewritingContext(
-                reference,
-                getAnalysisContextFromRef(reference)
-            );
+            if (!INSTANCE_CACHE.containsKey(reference)) {
+                INSTANCE_CACHE.put(
+                    reference,
+                    new RewritingContext(
+                        reference,
+                        getAnalysisContextFromRef(reference)
+                    )
+                );
+            }
+            return INSTANCE_CACHE.get(reference);
         }
 
         // ----- Graal C API methods -----
@@ -4440,7 +4453,6 @@ public final class ${ctx.lib_name.camel}
         public boolean isClosed() {
             return this.closed;
         }
-
 
         ${java_doc('langkit.rewriting.handle_context', 8)}
         public AnalysisContext getAnalysisContext() {
@@ -4663,6 +4675,9 @@ public final class ${ctx.lib_name.camel}
 
             // Flag the rewriting context as closed
             this.closed = true;
+
+            // Remove the context from the instance cache
+            INSTANCE_CACHE.remove(this.reference);
         }
 
         ${java_doc('langkit.rewriting.abort_rewriting', 8)}
@@ -4900,9 +4915,6 @@ public final class ${ctx.lib_name.camel}
         /** Cache for the associated parsed node. */
         private ${root_node_type} parsedNode;
 
-        /** Cache for the rewriting context containing this node. */
-        private RewritingContext rewritingContext;
-
         // ----- Constructors -----
 
         /** Create a new rewriting node with its native reference. */
@@ -4997,21 +5009,18 @@ public final class ${ctx.lib_name.camel}
 
         ${java_doc('langkit.rewriting.node_context', 8)}
         public RewritingContext getRewritingContext() {
-            if(this.rewritingContext == null) {
-
-                if(ImageInfo.inImageCode()) {
-                    this.rewritingContext = RewritingContext.wrap(
-                        NI_LIB.${nat("rewriting_node_to_context")}(
-                            this.unwrap()
-                        )
+            if(ImageInfo.inImageCode()) {
+                final var nativeRewritingContext = NI_LIB
+                    .${nat("rewriting_node_to_context")}(
+                        this.unwrap()
                     );
-                } else {
-                    this.rewritingContext =
-                        JNI_LIB.${nat("rewriting_node_to_context")}(this);
-                }
-
+                checkException();
+                return RewritingContext.wrap(
+                    nativeRewritingContext
+                );
+            } else {
+                return JNI_LIB.${nat("rewriting_node_to_context")}(this);
             }
-            return this.rewritingContext;
         }
 
         /** Get whether the rewriting node is a none node. */
@@ -5481,11 +5490,6 @@ public final class ${ctx.lib_name.camel}
         /** The entity of the node. */
         public final Entity entity;
 
-        % if ctx.generate_unparsers:
-        /** Cache for the associated rewriting node. */
-        protected RewritingNode rewritingNode;
-        % endif
-
         /** The analysis unit that owns the node. */
         protected AnalysisUnit unit;
 
@@ -5809,25 +5813,18 @@ public final class ${ctx.lib_name.camel}
         % if ctx.generate_unparsers:
         ${java_doc('langkit.rewriting.node_handle', 8)}
         public RewritingNode getRewritingNode() {
-            if(this.rewritingNode == null) {
-                final RewritingNode tmp;
-
-                if(ImageInfo.inImageCode()) {
-                    tmp = RewritingNode.wrap(
-                        NI_LIB.${nat("rewriting_node_to_handle")}(
-                            (Pointer) this.entity.node.ni()
-                        )
+            if(ImageInfo.inImageCode()) {
+                final var nativeRewritingNode =
+                    NI_LIB.${nat("rewriting_node_to_handle")}(
+                        (Pointer) this.entity.node.ni()
                     );
-                } else {
-                    tmp = JNI_LIB.${nat("rewriting_node_to_handle")}(
-                        this.entity
-                    );
-                }
                 checkException();
-                this.rewritingNode = tmp;
-
+                return RewritingNode.wrap(nativeRewritingNode);
+            } else {
+                return JNI_LIB.${nat("rewriting_node_to_handle")}(
+                    this.entity
+                );
             }
-            return this.rewritingNode;
         }
         % endif
 

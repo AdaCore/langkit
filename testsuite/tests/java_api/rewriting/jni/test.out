@@ -91,6 +91,7 @@ Try: Getting f_expr child on a name node
   Exception message = Name does not have the Decl.f_expr member
 Asserting: First child of the name is None
 Asserting: Last child of the expr is None
+Asserting: Rewriting node of root has changed
 ----------------------
 
 --- Rewriting node text getting/setting ---

@@ -1103,13 +1103,14 @@ void encode_utf_32(
     );
 }
 
-void check_exception(JNIEnv *env) {
+uint8_t check_exception(JNIEnv *env) {
     // Call the Java checking exception function
     (*env)->CallStaticVoidMethod(
         env,
         main_class_ref,
         check_exception_method_id
     );
+    return (*env)->ExceptionCheck(env);
 }
 
 % for node_type in ctx.node_types:
@@ -3051,7 +3052,7 @@ ${api.jni_func_sig("rewriting_start_rewriting", "jobject")}(
             analysis_context
         )
     );
-    check_exception(env);
+    if (check_exception(env)) return NULL;
     return RewritingContext_wrap(env, rctx);
 }
 
@@ -3396,13 +3397,13 @@ ${api.jni_func_sig("rewriting_node_to_handle", "jobject")}(
     JNIEnv *env,
     jclass jni_lib,
     jobject entity
- ) {
-    return RewritingNode_wrap(
-        env,
+) {
+    ${node_rewriting_handle_type} native_rewriting_node =
         ${nat("rewriting_node_to_handle")}(
             Entity_unwrap(env, entity).node
-        )
-    );
+        );
+    if (check_exception(env)) return NULL;
+    return RewritingNode_wrap(env, native_rewriting_node);
 }
 
 // Get the parsed node from the given rewriting node
@@ -3431,12 +3432,12 @@ ${api.jni_func_sig("rewriting_node_to_context", "jobject")}(
     jclass jni_lib,
     jobject rewriting_node
 ) {
-    return RewritingContext_wrap(
-        env,
+    ${rewriting_handle_type} native_rewriting_context =
         ${nat("rewriting_node_to_context")}(
             RewritingNode_unwrap(env, rewriting_node)
-        )
-    );
+        );
+    if (check_exception(env)) return NULL;
+    return RewritingContext_wrap(env, native_rewriting_context);
 }
 
 // Clone the given rewriting node and return the result
