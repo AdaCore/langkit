@@ -229,6 +229,7 @@ trait Iterable {
 
 |" Base class for array types.
 @builtin
+@array
 generic[T]
 struct Array implements Sized, Indexable[T], Iterable[T] {
     |" Turn the array into an iterator.

@@ -1,0 +1,6 @@
+@array
+generic[T]
+struct List implements Sized, Indexable[T], Iterable[T] {}
+
+
+val x: List[Int] = [1, 2, 3]

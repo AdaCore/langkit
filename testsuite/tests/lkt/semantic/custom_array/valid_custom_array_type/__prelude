@@ -1,0 +1,5 @@
+struct Int {}
+
+@array
+generic[T]
+struct List {}

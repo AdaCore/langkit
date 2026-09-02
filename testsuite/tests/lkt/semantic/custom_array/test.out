@@ -1,0 +1,42 @@
+main.py: defining a second @array type.
+test.lkt:6:20-6:29: error: expected List[Int], got Array[Int]
+ 6 | val x: List[Int] = [1, 2, 3]
+   |                    ^^^^^^^^^ 
+
+main.py: replacing prelude's @array type.
+Resolving test.lkt
+==================
+Decl <ValDecl "x" test.lkt:1:1-1:29>
+     has_type <StructDecl prelude: "List[Int]">
+
+   Id   <RefId "List" test.lkt:1:8-1:12>
+        has_type None
+        references <StructDecl prelude: "List[T]">
+
+   Id   <RefId "Int" test.lkt:1:13-1:16>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <ArrayLiteral test.lkt:1:20-1:29>
+        has_type <StructDecl prelude: "List[Int]">
+
+      Expr <NumLit test.lkt:1:21-1:22>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:1:24-1:25>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:1:27-1:28>
+           has_type <StructDecl prelude: "Int">
+
+main.py: missing definition of @array type.
+test.lkt:1:5-1:6: error: could not determine type
+ 1 | val x = [1, 2, 3]
+   |     ^ 
+
+main.py: wrong definition of @array type.
+test.lkt:1:5-1:6: error: could not determine type
+ 1 | val x = [1, 2, 3]
+   |     ^ 
+
+main.py: Done
