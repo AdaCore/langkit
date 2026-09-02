@@ -334,6 +334,13 @@ class ManageScript:
             help="NPX to use in order to build the extension. If not provided,"
             " use 'npx'.",
         )
+        self.create_extension_parser.add_argument(
+            "--npm-config-cache",
+            help="NPM config cache directory to use for offline build. It must"
+            " contain the dependencies for the extension and the"
+            " 'package-lock.json' that lists available dependencies. If unset,"
+            " `npm install` is run instead to generate a new lock file.",
+        )
 
         #############################
         # Compute a coverage report #
@@ -1655,10 +1662,30 @@ class ManageScript:
         shutil.copytree(dyn_deps_dir, extension_dir, dirs_exist_ok=True)
 
         # Set the build environment
-        subprocess.check_call(
-            [args.with_npm or "npm", "install"],
-            cwd=extension_dir,
-        )
+        if args.npm_config_cache is None:
+            # Download the dependencies from the npm online registry
+            subprocess.check_call(
+                [args.with_npm or "npm", "install"],
+                cwd=extension_dir,
+            )
+        else:
+            # Use the package-lock.json file from the cache, and install the
+            # dependencies from it in the extension directory.
+            shutil.copyfile(
+                os.path.join(args.npm_config_cache, "package-lock.json"),
+                os.path.join(extension_dir, "package-lock.json"),
+            )
+            subprocess.check_call(
+                [
+                    args.with_npm or "npm",
+                    "ci",
+                    f"--cache={args.npm_config_cache}",
+                    "--offline",
+                ],
+                cwd=extension_dir,
+            )
+
+        # Build and package the extension
         argv = [
             args.with_npx or "npx",
             "vsce",
