@@ -5806,10 +5806,7 @@ class Query: Expr {
                 )
                 %and self.res_elems_type_var <-> self.mapping.actual_type_var
             else
-                self.res_elems_type_var
-                <- TypeDecl.get_indexable_content_type%(
-                    self.source_type_var
-                )
+                self.res_elems_type_var <- self.pattern.get_output_type()
         )
 
         # Ensure the guard is a boolean
