@@ -1,0 +1,40 @@
+Resolving test.lkt
+==================
+<ValDecl "untyped" test.lkt:1:1-1:26> failed nameres:
+test.lkt:1:22-1:25: error: expected Int, got String
+ 1 | val untyped = [1, 2, "3"]
+   |                      ^^^ 
+
+Decl <ValDecl "untyped" test.lkt:1:1-1:26>
+     has_type None
+
+   Expr <ArrayLiteral test.lkt:1:15-1:26>
+        has_type None
+
+      Expr <NumLit test.lkt:1:16-1:17>
+           has_type None
+
+      Expr <NumLit test.lkt:1:19-1:20>
+           has_type None
+
+      Expr <SingleLineStringLit test.lkt:1:22-1:25>
+           has_type None
+
+<ValDecl "no_crash" test.lkt:4:1-4:36> failed nameres:
+test.lkt:4:5-4:13: error: could not determine type
+ 4 | val no_crash = from untyped match i
+   |     ^^^^^^^^ 
+
+Decl <ValDecl "no_crash" test.lkt:4:1-4:36>
+     has_type None
+
+   Expr <Query test.lkt:4:16-4:36>
+        has_type None
+
+      Id   <RefId "untyped" test.lkt:4:21-4:28>
+           has_type None
+           references <ValDecl "untyped" test.lkt:1:1-1:26>
+
+      Decl <BindingValDecl "i" test.lkt:4:35-4:36>
+           has_type None
+

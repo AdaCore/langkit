@@ -3039,7 +3039,7 @@ class Pattern: LktNode {
         match interesting_parent {
             case i: Isa => i.expr.get_type()
             case m: MatchExpr => m.match_expr.get_type()
-            case q: Query => q.source.get_type().get_indexable_content_type()
+            case q: Query => q.source.get_type()?.get_indexable_content_type()
             case l: ListPattern =>
                 if self is EllipsisPattern then
                     l.get_output_type()

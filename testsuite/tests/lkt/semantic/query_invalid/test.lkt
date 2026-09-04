@@ -1,0 +1,4 @@
+val untyped = [1, 2, "3"]
+
+# The following should emit a diagnostic and not raise an exception
+val no_crash = from untyped match i
