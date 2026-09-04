@@ -3163,6 +3163,15 @@ class TypePattern: Pattern {
 |"
 |"    val non_objects = select not ObjectDecl
 class NotPattern: ScopedPattern {
+    fun get_output_type(): Entity[TypeDecl] =
+        # All we know is that the type of matched values is not the output
+        # type of `self.sub_pattern`, but that doesn't allow us to make our
+        # own output type much more precise. It could be possible in some
+        # corner cases: e.g. if the input type hierarchy is an abstract root
+        # type with two concrete child types and the not pattern completely
+        # eliminates one of them, then we could infer the output type to the
+        # other, but that would be non-trivial effort for questionable gains.
+        self.get_input_type()
 }
 
 |" Null pattern. Will only match the null value.
