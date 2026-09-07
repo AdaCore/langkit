@@ -4,3 +4,15 @@ val b = true
 val _ = b is x@(not true) when x
 val _ = b is not (x@true when x)
 val _ = b is (not x@true) when x
+
+# Test that the output type of "not patterns" is sound, i.e. the type of `x`
+# in the pattern below should be inferred to `A` and not `B`.
+class A {
+    v: Bool
+}
+class B : A {
+    w: Bool
+}
+
+val valid = A(true) is x@(not B) when x.v
+val invalid = A(true) is x@(not B) when x.w

@@ -22,5 +22,8 @@ val propagate2: Stream[A] = from int_arr match 1 select null
 val guard_depends_on_pattern_and_source =
     from int_arr match a select a if a == 1
 
+val no_select1: Stream[Int] = from int_arr match 1
+val no_select2: Stream[B] = from explicit3 match B
+
 val not_iterable_source = from 42 match 1
 val not_bool_guard = from int_arr match 1 if "not a bool"

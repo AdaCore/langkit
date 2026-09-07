@@ -63,3 +63,96 @@ test.lkt:6:32-6:33: error: undefined entity
            has_type None
            references None
 
+Decl <FieldDecl "v" test.lkt:11:5-11:12>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "Bool" test.lkt:11:8-11:12>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "A" test.lkt:13:11-13:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:10:1-12:2>
+
+Decl <FieldDecl "w" test.lkt:14:5-14:12>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "Bool" test.lkt:14:8-14:12>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+Decl <ValDecl "valid" test.lkt:17:1-17:42>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:17:13-17:42>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <CallExpr test.lkt:17:13-17:20>
+           has_type <ClassDecl "A" test.lkt:10:1-12:2>
+
+         Id   <RefId "A" test.lkt:17:13-17:14>
+              has_type <FunctionType "(Bool) -> A" test.lkt>
+              references <ClassDecl "A" test.lkt:10:1-12:2>
+
+         Id   <RefId "true" test.lkt:17:15-17:19>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "true">
+
+      Decl <BindingValDecl "x" test.lkt:17:24-17:25>
+           has_type <ClassDecl "A" test.lkt:10:1-12:2>
+
+      Id   <RefId "B" test.lkt:17:31-17:32>
+           has_type None
+           references <ClassDecl "B" test.lkt:13:1-15:2>
+
+      Expr <DotExpr test.lkt:17:39-17:42>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+         Id   <RefId "x" test.lkt:17:39-17:40>
+              has_type <ClassDecl "A" test.lkt:10:1-12:2>
+              references <BindingValDecl "x" test.lkt:17:24-17:25>
+
+         Id   <RefId "v" test.lkt:17:41-17:42>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <FieldDecl "v" test.lkt:11:5-11:12>
+
+Decl <ValDecl "invalid" test.lkt:18:1-18:44>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:18:15-18:44>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <CallExpr test.lkt:18:15-18:22>
+           has_type <ClassDecl "A" test.lkt:10:1-12:2>
+
+         Id   <RefId "A" test.lkt:18:15-18:16>
+              has_type <FunctionType "(Bool) -> A" test.lkt>
+              references <ClassDecl "A" test.lkt:10:1-12:2>
+
+         Id   <RefId "true" test.lkt:18:17-18:21>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "true">
+
+<ComplexPattern test.lkt:18:26-18:44> failed nameres:
+test.lkt:18:43-18:44: error: undefined entity
+ 18 | val invalid = A(true) is x@(not B) when x.w
+    |                                           ^ 
+
+      Decl <BindingValDecl "x" test.lkt:18:26-18:27>
+           has_type <ClassDecl "A" test.lkt:10:1-12:2>
+
+      Id   <RefId "B" test.lkt:18:33-18:34>
+           has_type None
+           references <ClassDecl "B" test.lkt:13:1-15:2>
+
+      Expr <DotExpr test.lkt:18:41-18:44>
+           has_type None
+
+         Id   <RefId "x" test.lkt:18:41-18:42>
+              has_type <ClassDecl "A" test.lkt:10:1-12:2>
+              references <BindingValDecl "x" test.lkt:18:26-18:27>
+
+         Id   <RefId "w" test.lkt:18:43-18:44>
+              has_type None
+              references None
+
