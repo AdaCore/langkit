@@ -5,6 +5,7 @@ use Ada.Strings.Wide_Wide_Unbounded.Wide_Wide_Text_IO;
 with Ada.Text_IO;
 with Ada.Wide_Wide_Text_IO;           use Ada.Wide_Wide_Text_IO;
 
+with Liblktlang.Common; use Liblktlang.Common;
 with Liblktlang.Implementation.Extensions;
 use Liblktlang.Implementation.Extensions;
 with Liblktlang_Support.Slocs; use Liblktlang_Support.Slocs;
@@ -85,6 +86,20 @@ package body Liblktlang.Semantic_Diagnostics is
    function Render_Solver_Diagnostic
      (Diag : Solver_Diagnostic) return Unbounded_Text_Type
    is
+      function Render_Node (N : Lkt_Node) return Wide_Wide_String;
+      --  Render the given node into the text that should be subsituted in a
+      --  hole of diagnostic message.
+
+      function Render_Node (N : Lkt_Node) return Wide_Wide_String is
+      begin
+         case N.Kind is
+            when Lkt_Decl =>
+               return N.As_Decl.P_Full_Name;
+            when others =>
+               return N.Text;
+         end case;
+      end Render_Node;
+
       --  The following implementation assumes that '{' characters in message
       --  templates are always used to encode a "{}" placeholder (currently
       --  always true in Liblktlang predicate error message templates), and so
@@ -99,7 +114,7 @@ package body Liblktlang.Semantic_Diagnostics is
       for Arg of Args (Diag) loop
          Last_Index := Index (Result, "{}", Last_Index);
          Replace_Slice
-            (Result, Last_Index, Last_Index + 1, Arg.As_Decl.P_Full_Name);
+            (Result, Last_Index, Last_Index + 1, Render_Node (Arg));
       end loop;
       return Result;
    end Render_Solver_Diagnostic;

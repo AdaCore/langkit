@@ -562,7 +562,7 @@ Decl <ValDecl "_" test.lkt:40:1-40:34>
            references <ValDecl "a" test.lkt:15:1-15:12>
 
 <RenamingComplexPattern test.lkt:40:14-40:34> failed nameres:
-test.lkt:40:23-40:34: error: undefined entity
+test.lkt:40:23-40:34: error: A has no component other_field
  40 | val _ = a is x when x.other_field
     |                       ^^^^^^^^^^^ 
 

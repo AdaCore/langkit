@@ -115,7 +115,7 @@ Decl <ValDecl "not_match1" test.lkt:16:1-16:35>
            references None
 
 <ValDecl "enum_no_field" test.lkt:18:1-18:40> failed nameres:
-test.lkt:18:38-18:40: error: undefined entity
+test.lkt:18:38-18:40: error: Basic has no component b1
  18 | val enum_no_field : Basic = Basic.a1.b1
     |                                      ^^ 
 

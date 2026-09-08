@@ -134,7 +134,7 @@ Decl <ValDecl "invalid" test.lkt:18:1-18:44>
               references <EnumLitDecl prelude: "true">
 
 <ComplexPattern test.lkt:18:26-18:44> failed nameres:
-test.lkt:18:43-18:44: error: undefined entity
+test.lkt:18:43-18:44: error: A has no component w
  18 | val invalid = A(true) is x@(not B) when x.w
     |                                           ^ 
 
