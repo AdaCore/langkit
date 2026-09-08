@@ -73,7 +73,7 @@ Decl <FunDecl "f" test.lkt:8:5-8:36>
            has_type <StructDecl prelude: "Int">
 
 <FunDecl "g" test.lkt:9:5-9:36> failed nameres:
-test.lkt:9:25-9:30: error: undefined entity
+test.lkt:9:25-9:30: error: C has no component super
  9 |     fun g(): Int = node.super() + 3
    |                         ^^^^^ 
 

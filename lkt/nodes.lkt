@@ -519,6 +519,12 @@ class Decl: LktNode implements DeclarationInterface {
     @predicate_error("undefined entity")
     fun is_defined(): Bool = not node.is_null
 
+    @predicate_error("$holder has no component $name")
+    fun has_component(
+        @ignored holder: Entity[Decl],
+        @ignored name: Entity[RefId]
+    ): Bool = not node.is_null
+
     |" Infer the type of the function from the expected_call if Entity is a
     |" generic declaration.
     |"
@@ -3829,7 +3835,15 @@ class DotExpr: Expr {
                     self.suffix.ref_var <- self.first_var_in_prefix_env()
                     %and {
                         bind error_location = node.suffix;
-                        Decl.is_defined%(self.suffix.ref_var)
+                        val holder = (
+                            self.prefix.get_type() or?
+                            self.prefix.referenced_decl()
+                        );
+                        if holder.is_null
+                        then Decl.is_defined%(self.suffix.ref_var)
+                        else Decl.has_component%(
+                            self.suffix.ref_var, holder, self.suffix
+                        )
                     }
                 )
                 %and (
@@ -4107,10 +4121,9 @@ class CastExpr: Expr {
         self.expr.expected_type_var <- null[Entity[TypeDecl]]
 
     fun xref_equation(): Equation =
-        self.dest_type.xref_equation()
-        %and self.actual_type_var
-        <- self.expr.get_type()
-               ?.get_cast_type(self.dest_type.referenced_decl())
+        self.actual_type_var <-
+            self.expr.get_type()
+            ?.get_cast_type(self.dest_type.referenced_decl())
 }
 
 |" Expression that throws an error if LHS is null.

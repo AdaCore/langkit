@@ -104,7 +104,7 @@ Decl <ValDecl "recursive_access" test.lkt:11:1-11:42>
            references <FieldDecl "f1" test.lkt:2:5-2:13>
 
 <ValDecl "not_existing" test.lkt:13:1-13:24> failed nameres:
-test.lkt:13:22-13:24: error: undefined entity
+test.lkt:13:22-13:24: error: TestStruct has no component f3
  13 | val not_existing = t.f3
     |                      ^^ 
 
@@ -127,7 +127,7 @@ Decl <ValDecl "not_existing" test.lkt:13:1-13:24>
            references None
 
 <ValDecl "no_instance" test.lkt:14:1-14:32> failed nameres:
-test.lkt:14:30-14:32: error: undefined entity
+test.lkt:14:30-14:32: error: TestStruct has no component f1
  14 | val no_instance = TestStruct.f1
     |                              ^^ 
 
