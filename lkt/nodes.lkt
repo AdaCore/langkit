@@ -525,6 +525,9 @@ class Decl: LktNode implements DeclarationInterface {
         @ignored name: Entity[RefId]
     ): Bool = not node.is_null
 
+    @predicate_error("no corresponding member in $holder")
+    fun extra_component(@ignored holder: Entity[Decl]): Bool = not node.is_null
+
     |" Infer the type of the function from the expected_call if Entity is a
     |" generic declaration.
     |"
@@ -657,7 +660,9 @@ class Decl: LktNode implements DeclarationInterface {
                         )
                 case bvd: BindingValDecl =>
                     match bvd.parent {
-                        case cp: BindingPattern => cp.get_output_type()
+                        case p: BindingPattern => p.get_output_type()
+                        case p: DestructuringPatternDetail =>
+                            p.referenced_decl()?.get_type()
                         case _ => raise[Entity[TypeDecl]] PropertyError(
                             "Invalid parsing tree"
                         )
@@ -3310,8 +3315,26 @@ class DestructuringPatternDetail: PatternDetail {
     @parse_field
     decl: BindingValDecl
 
-    |" TODO (eng/libadalang/langkit#929): handle destructuring pattern details
-    fun xref_detail_equation(): Equation = %true
+    |" Return the member that this pattern detail matches.
+    fun referenced_decl(): Entity[Decl] = {
+        # This pattern detail is the Nth detail of the parent pattern: match it
+        # with the Nth member of the parent type, in constructor order.
+        val holder_type = self.parent_pattern().get_output_type();
+        val params = holder_type?.get_params();
+        params.at(self.child_index).decl
+    }
+
+    fun xref_detail_equation(): Equation = {
+        # Set decl's type to the corresponding member of the parent type. If
+        # there is no such member, emit a diagnostic.
+        val decl = self.referenced_decl();
+        bind error_location = node;
+        self.decl.syn_name.actual_type_var <- decl?.get_type()
+        %and Decl.extra_component%(
+            self.decl.syn_name.actual_type_var,
+            self.parent_pattern().get_output_type()
+        )
+    }
 }
 
 |" Base class for expressions. Encompasses regular expressions as well as

@@ -10,6 +10,11 @@ class C1 {
 
 class C2: C1 {
     s: S
+
+    @property
+    fun p1(): String = "foo"
+
+    fun p2(): String = "foo"
 }
 
 val s = null[S]
@@ -28,3 +33,10 @@ val _ = c2 is C1(i: i_c, t: t_c)
 val _ = s is S(unknown_field: 1)
 val _ = s is S(i: "foo")
 val _ = s is S(i: x when x)
+
+val _ = s is S(a)
+val _ = s is S(a, b)
+val _ = s is S(a, b, c)
+
+val _ = c2 is C2(p1: "foo")
+val _ = c2 is C2(p2: "foo")
