@@ -4107,10 +4107,9 @@ class CastExpr: Expr {
         self.expr.expected_type_var <- null[Entity[TypeDecl]]
 
     fun xref_equation(): Equation =
-        self.dest_type.xref_equation()
-        %and self.actual_type_var
-        <- self.expr.get_type()
-               ?.get_cast_type(self.dest_type.referenced_decl())
+        self.actual_type_var <-
+            self.expr.get_type()
+            ?.get_cast_type(self.dest_type.referenced_decl())
 }
 
 |" Expression that throws an error if LHS is null.

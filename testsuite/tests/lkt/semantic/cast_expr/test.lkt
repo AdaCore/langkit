@@ -1,0 +1,13 @@
+class A {
+    v: Bool
+}
+class B : A {
+    w: Bool
+}
+
+val x: A = null
+
+val valid: B = x.as[B]
+
+val invalid: A = x.as[C]
+
