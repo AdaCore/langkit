@@ -364,7 +364,7 @@ grammar lkt_grammar {
         "[" list*(or(ellipsis_pattern | neg_pattern), ",") "]"
     )
     pattern_arg <- or(
-        | FieldPatternDetail(id ":" / pattern)
+        | FieldPatternDetail(ref_id ":" / pattern)
         | PropertyPatternDetail(
             CallExpr(ref_id "(" / args ")") ":" / pattern
         )

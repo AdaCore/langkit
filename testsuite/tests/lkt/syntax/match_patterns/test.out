@@ -52,7 +52,7 @@ LangkitRoot[1:1-6:2]
 |  |  |  |  |  |  |  |  PatternDetailList[2:22-2:46]
 |  |  |  |  |  |  |  |  |  FieldPatternDetail[2:22-2:46]
 |  |  |  |  |  |  |  |  |  |f_id:
-|  |  |  |  |  |  |  |  |  |  Id[2:22-2:33]: f_somefield
+|  |  |  |  |  |  |  |  |  |  RefId[2:22-2:33]: f_somefield
 |  |  |  |  |  |  |  |  |  |f_expected_value:
 |  |  |  |  |  |  |  |  |  |  ComplexPattern[2:35-2:46]
 |  |  |  |  |  |  |  |  |  |  |f_decl: <null>

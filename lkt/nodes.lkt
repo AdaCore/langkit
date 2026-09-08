@@ -3247,7 +3247,7 @@ class PatternDetail: LktNode {
 |" Pattern detail denoting an access to a field.
 class FieldPatternDetail: PatternDetail {
     @parse_field
-    id: Id
+    id: RefId
     @parse_field
     expected_value: Pattern
 }
