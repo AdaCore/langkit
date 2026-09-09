@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from enum import Enum
+import os.path
 from typing import TYPE_CHECKING
 
 
@@ -34,7 +35,11 @@ def gen_code_loc(context: Context, frame: gdb.Frame) -> AdaLocation | None:
     if current_symtab is None:
         return None
 
+    # Normalize the filename, to avoid '/' vs '\' path discrepancies on
+    # Windows.
     current_file = current_symtab.fullname()
+    if current_file:
+        current_file = os.path.abspath(current_file)
     if current_file not in context.debug_info.filenames:
         return None
 

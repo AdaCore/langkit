@@ -106,6 +106,9 @@ class DebugInfo:
         Internal method. Same semantics as parse_from_iterable, but work on an
         existing instance.
         """
+        # Normalize the filename, to avoid '/' vs '\' path discrepancies on
+        # Windows.
+        filename = os.path.abspath(filename)
         self.filenames.add(filename)
         try:
             self._parse_file(filename, lines)
