@@ -139,7 +139,7 @@ run_continue()
 gdb.print_expr(
     "map_result_vec",
     "Bare_Foo_Node_Array_Access vector of length 1 = {"
-    "\n  Bare_Foo_Node array of length 0}",
+    "Bare_Foo_Node array of length 0}",
 )
 
 # Check pretty-printing for tokens
