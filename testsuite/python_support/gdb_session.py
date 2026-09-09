@@ -47,9 +47,9 @@ class GDBSession:
         self.execute("set interactive-mode off")
 
         # Make the output deterministic, independent of the actual terminal
-        # size.
+        # size: unset height (resp. width) to disable paging (resp. wrapping).
         self.execute("set height 0")
-        self.execute("set width 80")
+        self.execute("set width 0")
 
         if program:
             # Only then, load the inferior. Loading gnatdbg before checks that
