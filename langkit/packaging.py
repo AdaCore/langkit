@@ -98,10 +98,13 @@ class BasePackager:
             LibraryType.relocatable in self.library_types
         ), "Shared libraries support is disabled"
 
-    def copy_shared_lib(self, pattern: str, dest: str) -> None:
+    def copy_shared_lib(self, pattern: str, dest: str, strip: bool) -> None:
         """
         Copy the shared library (or libraries) matched by "pattern" to the
         "dest" directory.
+
+        :param strip: Whether to strip debug info from shipped dynamic
+            libraries.
         """
         self.assert_with_relocatable()
         # On Linux, the name of shared objects files can (but does not need
@@ -113,7 +116,11 @@ class BasePackager:
         src_files = glob.glob(pattern)
         assert src_files, f"No shared lib found for {pattern}"
         for f in src_files:
-            shutil.copy2(f, os.path.join(dest, os.path.basename(f)))
+            dest_f = os.path.join(dest, os.path.basename(f))
+            if strip:
+                subprocess.check_call(["strip", "-g", "-o", dest_f, f])
+            else:
+                shutil.copy2(f, dest_f)
 
     def std_path(self, prefix: str, lib_subdir: str, libname: str) -> str:
         """
@@ -140,15 +147,21 @@ class BasePackager:
         lib_subdir: str,
         libname: str,
         package_dir: str,
+        strip: bool,
     ) -> None:
         """
         Copy a dynamic library installed by gprinstall to "package_dir".
 
-        See the std_path method for argument semantics.
+        :param strip: Whether to strip debug info from shipped dynamic
+            libraries.
+
+        See the std_path method for the semantics of other arguments.
         """
         self.assert_with_relocatable()
         self.copy_shared_lib(
-            self.std_path(prefix, lib_subdir, libname), package_dir
+            self.std_path(prefix, lib_subdir, libname),
+            package_dir,
+            strip,
         )
 
 
@@ -168,6 +181,7 @@ class WheelPackager(BasePackager):
         lib_name: str | None = None,
         python_interpreter: str | None = None,
         no_isolation: bool = False,
+        strip: bool = False,
     ) -> None:
         """
         Create a Python wheel for a Langkit-generated library.
@@ -190,6 +204,8 @@ class WheelPackager(BasePackager):
             current interpreter.
         :param no_isolation: Whether to pass --no-isolation to the "build
             --wheel" command.
+        :param strip: Whether to strip debug info from shipped dynamic
+            libraries.
         """
         self.assert_with_relocatable()
 
@@ -205,9 +221,14 @@ class WheelPackager(BasePackager):
         # Import all required dynamic libraries in the Python package
         package_dir = os.path.join(build_dir, project_name)
         self.package_std_dyn(
-            langlib_prefix, project_name, lib_name, package_dir
+            langlib_prefix, project_name, lib_name, package_dir, strip
         )
         shutil.copytree(dyn_deps_dir, package_dir, dirs_exist_ok=True)
+        if strip:
+            for filename in os.listdir(dyn_deps_dir):
+                subprocess.check_call(
+                    ["strip", "-g", os.path.join(package_dir, filename)]
+                )
 
         # Finally create the wheel. Make the wheel directory absolute since
         # the build command is run from the build directory.
@@ -590,7 +611,7 @@ class NativeLibPackager(BasePackager):
             + prettier_ada_libs
             + adasat_lib
         ):
-            self.copy_shared_lib(libpath, package_dir)
+            self.copy_shared_lib(libpath, package_dir, strip=False)
 
     def package_langkit_support_dyn(self, package_dir: str) -> None:
         """
@@ -602,4 +623,5 @@ class NativeLibPackager(BasePackager):
             "langkit_support",
             "liblangkit_support",
             package_dir,
+            strip=False,
         )
