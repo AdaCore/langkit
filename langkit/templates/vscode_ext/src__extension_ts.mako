@@ -50,7 +50,10 @@ export function activate(context: vscode.ExtensionContext) {
             serverPath[String(process.arch)][String(process.platform)],
         transport: TransportKind.stdio,
         args: ${dumps(ctx.config.vscode_ext.launch_args)},
-        options: { env: libs[process.arch][process.platform] }
+        options: { env: {
+            ...process.env,
+            ...libs[process.arch][process.platform]
+        } }
     };
 
     const clientOptions: LanguageClientOptions = {
