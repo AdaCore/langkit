@@ -1,0 +1,30 @@
+struct S {
+    i: Int
+    t: String
+}
+
+class C1 {
+    i: Int
+    t: String
+}
+
+class C2: C1 {
+    s: S
+}
+
+val s = null[S]
+val c1 = null[C1]
+val c2 = null[C2]
+
+val _ = s is S(i: 1)
+val _ = s is S(t: t_ref)
+val _ = s is S(i: i_ref, t: "foo")
+
+val _ = c1 is
+    C2(i: i_c, t: t_c, s: S(i: i_s, t: t_s))
+    when i_c == i_s and t_c == t_s
+val _ = c2 is C1(i: i_c, t: t_c)
+
+val _ = s is S(unknown_field: 1)
+val _ = s is S(i: "foo")
+val _ = s is S(i: x when x)

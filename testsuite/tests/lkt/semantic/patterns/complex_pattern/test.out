@@ -598,3 +598,312 @@ test.lkt:43:21-43:33: error: expected Bool, got String
       Expr <SingleLineStringLit test.lkt:43:21-43:33>
            has_type None
 
+Resolving destructuring.lkt
+===========================
+Decl <FieldDecl "i" destructuring.lkt:2:5-2:11>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" destructuring.lkt:2:8-2:11>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <FieldDecl "t" destructuring.lkt:3:5-3:14>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" destructuring.lkt:3:8-3:14>
+        has_type None
+        references <StructDecl prelude: "String">
+
+Decl <FieldDecl "i" destructuring.lkt:7:5-7:11>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" destructuring.lkt:7:8-7:11>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <FieldDecl "t" destructuring.lkt:8:5-8:14>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" destructuring.lkt:8:8-8:14>
+        has_type None
+        references <StructDecl prelude: "String">
+
+Id   <RefId "C1" destructuring.lkt:11:11-11:13>
+     has_type None
+     references <ClassDecl "C1" destructuring.lkt:6:1-9:2>
+
+Decl <FieldDecl "s" destructuring.lkt:12:5-12:9>
+     has_type <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+   Id   <RefId "S" destructuring.lkt:12:8-12:9>
+        has_type None
+        references <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+Decl <ValDecl "s" destructuring.lkt:15:1-15:16>
+     has_type <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+   Expr <NullLit destructuring.lkt:15:9-15:16>
+        has_type <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+      Id   <RefId "S" destructuring.lkt:15:14-15:15>
+           has_type None
+           references <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+Decl <ValDecl "c1" destructuring.lkt:16:1-16:18>
+     has_type <ClassDecl "C1" destructuring.lkt:6:1-9:2>
+
+   Expr <NullLit destructuring.lkt:16:10-16:18>
+        has_type <ClassDecl "C1" destructuring.lkt:6:1-9:2>
+
+      Id   <RefId "C1" destructuring.lkt:16:15-16:17>
+           has_type None
+           references <ClassDecl "C1" destructuring.lkt:6:1-9:2>
+
+Decl <ValDecl "c2" destructuring.lkt:17:1-17:18>
+     has_type <ClassDecl "C2" destructuring.lkt:11:1-13:2>
+
+   Expr <NullLit destructuring.lkt:17:10-17:18>
+        has_type <ClassDecl "C2" destructuring.lkt:11:1-13:2>
+
+      Id   <RefId "C2" destructuring.lkt:17:15-17:17>
+           has_type None
+           references <ClassDecl "C2" destructuring.lkt:11:1-13:2>
+
+Decl <ValDecl "_" destructuring.lkt:19:1-19:21>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:19:9-19:21>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "s" destructuring.lkt:19:9-19:10>
+           has_type <StructDecl "S" destructuring.lkt:1:1-4:2>
+           references <ValDecl "s" destructuring.lkt:15:1-15:16>
+
+      Id   <RefId "S" destructuring.lkt:19:14-19:15>
+           has_type None
+           references <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+      Id   <RefId "i" destructuring.lkt:19:16-19:17>
+           has_type None
+           references <FieldDecl "i" destructuring.lkt:2:5-2:11>
+
+Decl <ValDecl "_" destructuring.lkt:20:1-20:25>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:20:9-20:25>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "s" destructuring.lkt:20:9-20:10>
+           has_type <StructDecl "S" destructuring.lkt:1:1-4:2>
+           references <ValDecl "s" destructuring.lkt:15:1-15:16>
+
+      Id   <RefId "S" destructuring.lkt:20:14-20:15>
+           has_type None
+           references <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+      Id   <RefId "t" destructuring.lkt:20:16-20:17>
+           has_type None
+           references <FieldDecl "t" destructuring.lkt:3:5-3:14>
+
+      Decl <BindingValDecl "t_ref" destructuring.lkt:20:19-20:24>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "_" destructuring.lkt:21:1-21:35>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:21:9-21:35>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "s" destructuring.lkt:21:9-21:10>
+           has_type <StructDecl "S" destructuring.lkt:1:1-4:2>
+           references <ValDecl "s" destructuring.lkt:15:1-15:16>
+
+      Id   <RefId "S" destructuring.lkt:21:14-21:15>
+           has_type None
+           references <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+      Id   <RefId "i" destructuring.lkt:21:16-21:17>
+           has_type None
+           references <FieldDecl "i" destructuring.lkt:2:5-2:11>
+
+      Decl <BindingValDecl "i_ref" destructuring.lkt:21:19-21:24>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "t" destructuring.lkt:21:26-21:27>
+           has_type None
+           references <FieldDecl "t" destructuring.lkt:3:5-3:14>
+
+Decl <ValDecl "_" destructuring.lkt:23:1-25:35>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:23:9-25:35>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c1" destructuring.lkt:23:9-23:11>
+           has_type <ClassDecl "C1" destructuring.lkt:6:1-9:2>
+           references <ValDecl "c1" destructuring.lkt:16:1-16:18>
+
+      Id   <RefId "C2" destructuring.lkt:24:5-24:7>
+           has_type None
+           references <ClassDecl "C2" destructuring.lkt:11:1-13:2>
+
+      Id   <RefId "i" destructuring.lkt:24:8-24:9>
+           has_type None
+           references <FieldDecl "i" destructuring.lkt:7:5-7:11>
+
+      Decl <BindingValDecl "i_c" destructuring.lkt:24:11-24:14>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "t" destructuring.lkt:24:16-24:17>
+           has_type None
+           references <FieldDecl "t" destructuring.lkt:8:5-8:14>
+
+      Decl <BindingValDecl "t_c" destructuring.lkt:24:19-24:22>
+           has_type <StructDecl prelude: "String">
+
+      Id   <RefId "s" destructuring.lkt:24:24-24:25>
+           has_type None
+           references <FieldDecl "s" destructuring.lkt:12:5-12:9>
+
+      Id   <RefId "S" destructuring.lkt:24:27-24:28>
+           has_type None
+           references <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+      Id   <RefId "i" destructuring.lkt:24:29-24:30>
+           has_type None
+           references <FieldDecl "i" destructuring.lkt:2:5-2:11>
+
+      Decl <BindingValDecl "i_s" destructuring.lkt:24:32-24:35>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "t" destructuring.lkt:24:37-24:38>
+           has_type None
+           references <FieldDecl "t" destructuring.lkt:3:5-3:14>
+
+      Decl <BindingValDecl "t_s" destructuring.lkt:24:40-24:43>
+           has_type <StructDecl prelude: "String">
+
+      Expr <BinOp destructuring.lkt:25:10-25:35>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+         Expr <BinOp destructuring.lkt:25:10-25:20>
+              has_type <EnumTypeDecl prelude: "Bool">
+
+            Id   <RefId "i_c" destructuring.lkt:25:10-25:13>
+                 has_type <StructDecl prelude: "Int">
+                 references <BindingValDecl "i_c" destructuring.lkt:24:11-24:14>
+
+            Id   <RefId "i_s" destructuring.lkt:25:17-25:20>
+                 has_type <StructDecl prelude: "Int">
+                 references <BindingValDecl "i_s" destructuring.lkt:24:32-24:35>
+
+         Expr <BinOp destructuring.lkt:25:25-25:35>
+              has_type <EnumTypeDecl prelude: "Bool">
+
+            Id   <RefId "t_c" destructuring.lkt:25:25-25:28>
+                 has_type <StructDecl prelude: "String">
+                 references <BindingValDecl "t_c" destructuring.lkt:24:19-24:22>
+
+            Id   <RefId "t_s" destructuring.lkt:25:32-25:35>
+                 has_type <StructDecl prelude: "String">
+                 references <BindingValDecl "t_s" destructuring.lkt:24:40-24:43>
+
+Decl <ValDecl "_" destructuring.lkt:26:1-26:33>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:26:9-26:33>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c2" destructuring.lkt:26:9-26:11>
+           has_type <ClassDecl "C2" destructuring.lkt:11:1-13:2>
+           references <ValDecl "c2" destructuring.lkt:17:1-17:18>
+
+      Id   <RefId "C1" destructuring.lkt:26:15-26:17>
+           has_type None
+           references <ClassDecl "C1" destructuring.lkt:6:1-9:2>
+
+      Id   <RefId "i" destructuring.lkt:26:18-26:19>
+           has_type None
+           references <FieldDecl "i" destructuring.lkt:7:5-7:11>
+
+      Decl <BindingValDecl "i_c" destructuring.lkt:26:21-26:24>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "t" destructuring.lkt:26:26-26:27>
+           has_type None
+           references <FieldDecl "t" destructuring.lkt:8:5-8:14>
+
+      Decl <BindingValDecl "t_c" destructuring.lkt:26:29-26:32>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "_" destructuring.lkt:28:1-28:33>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:28:9-28:33>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "s" destructuring.lkt:28:9-28:10>
+           has_type <StructDecl "S" destructuring.lkt:1:1-4:2>
+           references <ValDecl "s" destructuring.lkt:15:1-15:16>
+
+<ComplexPattern destructuring.lkt:28:14-28:33> failed nameres:
+destructuring.lkt:28:16-28:29: error: S has no component unknown_field
+ 28 | val _ = s is S(unknown_field: 1)
+    |                ^^^^^^^^^^^^^ 
+
+      Id   <RefId "S" destructuring.lkt:28:14-28:15>
+           has_type None
+           references <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+      Id   <RefId "unknown_field" destructuring.lkt:28:16-28:29>
+           has_type None
+           references None
+
+Decl <ValDecl "_" destructuring.lkt:29:1-29:25>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:29:9-29:25>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "s" destructuring.lkt:29:9-29:10>
+           has_type <StructDecl "S" destructuring.lkt:1:1-4:2>
+           references <ValDecl "s" destructuring.lkt:15:1-15:16>
+
+      Id   <RefId "S" destructuring.lkt:29:14-29:15>
+           has_type None
+           references <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+      Id   <RefId "i" destructuring.lkt:29:16-29:17>
+           has_type None
+           references <FieldDecl "i" destructuring.lkt:2:5-2:11>
+
+Decl <ValDecl "_" destructuring.lkt:30:1-30:28>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:30:9-30:28>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "s" destructuring.lkt:30:9-30:10>
+           has_type <StructDecl "S" destructuring.lkt:1:1-4:2>
+           references <ValDecl "s" destructuring.lkt:15:1-15:16>
+
+      Id   <RefId "S" destructuring.lkt:30:14-30:15>
+           has_type None
+           references <StructDecl "S" destructuring.lkt:1:1-4:2>
+
+      Id   <RefId "i" destructuring.lkt:30:16-30:17>
+           has_type None
+           references <FieldDecl "i" destructuring.lkt:2:5-2:11>
+
+<RenamingComplexPattern destructuring.lkt:30:19-30:27> failed nameres:
+destructuring.lkt:30:26-30:27: error: expected Bool, got Int
+ 30 | val _ = s is S(i: x when x)
+    |                          ^ 
+
+      Decl <BindingValDecl "x" destructuring.lkt:30:19-30:20>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "x" destructuring.lkt:30:26-30:27>
+           has_type None
+           references None
+

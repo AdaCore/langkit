@@ -55,7 +55,7 @@ LangkitRoot[1:1-12:16]
 |  |  |  |  |  |  PatternDetailList[2:18-2:27]
 |  |  |  |  |  |  |  FieldPatternDetail[2:18-2:27]
 |  |  |  |  |  |  |  |f_id:
-|  |  |  |  |  |  |  |  Id[2:18-2:23]: pouet
+|  |  |  |  |  |  |  |  RefId[2:18-2:23]: pouet
 |  |  |  |  |  |  |  |f_expected_value:
 |  |  |  |  |  |  |  |  ComplexPattern[2:25-2:27]
 |  |  |  |  |  |  |  |  |f_decl: <null>
@@ -464,7 +464,7 @@ LangkitRoot[1:1-12:16]
 |  |  |  |  |  |  |  |  |  PatternDetailList[11:42-11:55]
 |  |  |  |  |  |  |  |  |  |  FieldPatternDetail[11:42-11:55]
 |  |  |  |  |  |  |  |  |  |  |f_id:
-|  |  |  |  |  |  |  |  |  |  |  Id[11:42-11:49]: f_field
+|  |  |  |  |  |  |  |  |  |  |  RefId[11:42-11:49]: f_field
 |  |  |  |  |  |  |  |  |  |  |f_expected_value:
 |  |  |  |  |  |  |  |  |  |  |  ComplexPattern[11:51-11:55]
 |  |  |  |  |  |  |  |  |  |  |  |f_decl: <null>
