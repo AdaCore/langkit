@@ -1031,3 +1031,386 @@ Decl <ValDecl "_" destructuring.lkt:42:1-42:28>
            has_type None
            references <FunDecl "p2" destructuring.lkt:17:5-17:29>
 
+Resolving properties.lkt
+========================
+Decl <FieldDecl "i" properties.lkt:2:5-2:11>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" properties.lkt:2:8-2:11>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <FieldDecl "t" properties.lkt:3:5-3:14>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" properties.lkt:3:8-3:14>
+        has_type None
+        references <StructDecl prelude: "String">
+
+Decl <FunDecl "p1" properties.lkt:7:5-7:72>
+     has_type <FunctionType "(Int, Bool) -> S" properties.lkt>
+
+   Decl <FunParamDecl "i" properties.lkt:7:12-7:18>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "Int" properties.lkt:7:15-7:18>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+   Decl <FunParamDecl "b" properties.lkt:7:20-7:35>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "Bool" properties.lkt:7:23-7:27>
+           has_type None
+           references <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "false" properties.lkt:7:30-7:35>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "false">
+
+   Id   <RefId "S" properties.lkt:7:38-7:39>
+        has_type None
+        references <StructDecl "S" properties.lkt:1:1-4:2>
+
+   Expr <CallExpr properties.lkt:7:42-7:72>
+        has_type <StructDecl "S" properties.lkt:1:1-4:2>
+
+      Id   <RefId "S" properties.lkt:7:42-7:43>
+           has_type <FunctionType "(Int, String) -> S" properties.lkt>
+           references <StructDecl "S" properties.lkt:1:1-4:2>
+
+      Id   <RefId "i" properties.lkt:7:44-7:45>
+           has_type <StructDecl prelude: "Int">
+           references <FunParamDecl "i" properties.lkt:7:12-7:18>
+
+      Expr <IfExpr properties.lkt:7:47-7:71>
+           has_type <StructDecl prelude: "String">
+
+         Id   <RefId "b" properties.lkt:7:50-7:51>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <FunParamDecl "b" properties.lkt:7:20-7:35>
+
+         Expr <SingleLineStringLit properties.lkt:7:57-7:61>
+              has_type <StructDecl prelude: "String">
+
+         Expr <SingleLineStringLit properties.lkt:7:67-7:71>
+              has_type <StructDecl prelude: "String">
+
+Expr <Id "property" properties.lkt:9:6-9:14>
+     has_type None
+
+Decl <FunDecl "p2" properties.lkt:10:5-10:29>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" properties.lkt:10:15-10:21>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <SingleLineStringLit properties.lkt:10:24-10:29>
+        has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "c" properties.lkt:13:1-13:16>
+     has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+
+   Expr <NullLit properties.lkt:13:9-13:16>
+        has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Id   <RefId "C" properties.lkt:13:14-13:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+Decl <ValDecl "_" properties.lkt:15:1-15:36>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:15:9-15:36>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:15:9-15:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+<ComplexPattern properties.lkt:15:14-15:36> failed nameres:
+properties.lkt:15:16-15:26: error: C has no component nosuchprop
+ 15 | val _ = c is C(nosuchprop(): "foo")
+    |                ^^^^^^^^^^ 
+
+      Id   <RefId "C" properties.lkt:15:14-15:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Expr <CallExpr properties.lkt:15:16-15:28>
+           has_type None
+
+         Id   <RefId "nosuchprop" properties.lkt:15:16-15:26>
+              has_type None
+              references None
+
+Decl <ValDecl "_" properties.lkt:16:1-16:27>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:16:9-16:27>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:16:9-16:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+<ComplexPattern properties.lkt:16:14-16:27> failed nameres:
+properties.lkt:16:16-16:17: error: String is not callable
+ 16 | val _ = c is S(t(): "foo")
+    |                ^ 
+
+      Id   <RefId "S" properties.lkt:16:14-16:15>
+           has_type None
+           references <StructDecl "S" properties.lkt:1:1-4:2>
+
+      Expr <CallExpr properties.lkt:16:16-16:19>
+           has_type None
+
+         Id   <RefId "t" properties.lkt:16:16-16:17>
+              has_type None
+              references None
+
+Decl <ValDecl "_" properties.lkt:17:1-17:32>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:17:9-17:32>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:17:9-17:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+      Id   <RefId "C" properties.lkt:17:14-17:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Expr <CallExpr properties.lkt:17:16-17:28>
+           has_type None
+
+         Id   <RefId "p1" properties.lkt:17:16-17:18>
+              has_type <FunctionType "(Int, Bool) -> S" properties.lkt>
+              references <FunDecl "p1" properties.lkt:7:5-7:72>
+
+         Expr <NumLit properties.lkt:17:19-17:20>
+              has_type <StructDecl prelude: "Int">
+
+         Id   <RefId "false" properties.lkt:17:22-17:27>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "false">
+
+      Decl <BindingValDecl "s" properties.lkt:17:30-17:31>
+           has_type <StructDecl "S" properties.lkt:1:1-4:2>
+
+Decl <ValDecl "_" properties.lkt:18:1-18:42>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:18:9-18:42>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:18:9-18:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+      Id   <RefId "C" properties.lkt:18:14-18:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Expr <CallExpr properties.lkt:18:16-18:28>
+           has_type None
+
+         Id   <RefId "p1" properties.lkt:18:16-18:18>
+              has_type <FunctionType "(Int, Bool) -> S" properties.lkt>
+              references <FunDecl "p1" properties.lkt:7:5-7:72>
+
+         Expr <NumLit properties.lkt:18:19-18:20>
+              has_type <StructDecl prelude: "Int">
+
+         Id   <RefId "false" properties.lkt:18:22-18:27>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "false">
+
+      Id   <RefId "S" properties.lkt:18:30-18:31>
+           has_type None
+           references <StructDecl "S" properties.lkt:1:1-4:2>
+
+      Decl <BindingValDecl "i_s" properties.lkt:18:32-18:35>
+           has_type <StructDecl prelude: "Int">
+
+      Decl <BindingValDecl "t_s" properties.lkt:18:37-18:40>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "_" properties.lkt:19:1-19:25>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:19:9-19:25>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:19:9-19:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+      Id   <RefId "C" properties.lkt:19:14-19:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Expr <CallExpr properties.lkt:19:16-19:21>
+           has_type None
+
+         Id   <RefId "p1" properties.lkt:19:16-19:18>
+              has_type <FunctionType "(Int, Bool) -> S" properties.lkt>
+              references <FunDecl "p1" properties.lkt:7:5-7:72>
+
+         Expr <NumLit properties.lkt:19:19-19:20>
+              has_type <StructDecl prelude: "Int">
+
+      Decl <BindingValDecl "s" properties.lkt:19:23-19:24>
+           has_type <StructDecl "S" properties.lkt:1:1-4:2>
+
+Decl <ValDecl "_" properties.lkt:20:1-20:29>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:20:9-20:29>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:20:9-20:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+<ComplexPattern properties.lkt:20:14-20:29> failed nameres:
+properties.lkt:20:19-20:24: error: expected Int, got String
+ 20 | val _ = c is C(p1("foo"): s)
+    |                   ^^^^^ 
+
+      Id   <RefId "C" properties.lkt:20:14-20:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Expr <CallExpr properties.lkt:20:16-20:25>
+           has_type None
+
+         Id   <RefId "p1" properties.lkt:20:16-20:18>
+              has_type None
+              references None
+
+         Expr <SingleLineStringLit properties.lkt:20:19-20:24>
+              has_type <StructDecl prelude: "String">
+
+      Decl <BindingValDecl "s" properties.lkt:20:27-20:28>
+           has_type <StructDecl "S" properties.lkt:1:1-4:2>
+
+Decl <ValDecl "_" properties.lkt:21:1-21:36>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:21:9-21:36>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:21:9-21:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+      Id   <RefId "C" properties.lkt:21:14-21:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Expr <CallExpr properties.lkt:21:16-21:28>
+           has_type None
+
+         Id   <RefId "p1" properties.lkt:21:16-21:18>
+              has_type <FunctionType "(Int, Bool) -> S" properties.lkt>
+              references <FunDecl "p1" properties.lkt:7:5-7:72>
+
+         Expr <NumLit properties.lkt:21:19-21:20>
+              has_type <StructDecl prelude: "Int">
+
+         Id   <RefId "false" properties.lkt:21:22-21:27>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <EnumLitDecl prelude: "false">
+
+Decl <ValDecl "_" properties.lkt:22:1-22:31>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:22:9-22:31>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:22:9-22:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+      Id   <RefId "C" properties.lkt:22:14-22:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Expr <CallExpr properties.lkt:22:16-22:23>
+           has_type None
+
+         Id   <RefId "p1" properties.lkt:22:16-22:18>
+              has_type <FunctionType "(Int, Bool) -> S" properties.lkt>
+              references <FunDecl "p1" properties.lkt:7:5-7:72>
+
+         Id   <RefId "i" properties.lkt:22:19-22:20>
+              has_type None
+              references <FunParamDecl "i" properties.lkt:7:12-7:18>
+
+         Expr <NumLit properties.lkt:22:21-22:22>
+              has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "_" properties.lkt:23:1-23:35>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:23:9-23:35>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:23:9-23:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+<ComplexPattern properties.lkt:23:14-23:35> failed nameres:
+properties.lkt:23:21-23:26: error: expected Int, got String
+ 23 | val _ = c is C(p1(i="foo"): "foo")
+    |                     ^^^^^ 
+
+      Id   <RefId "C" properties.lkt:23:14-23:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Expr <CallExpr properties.lkt:23:16-23:27>
+           has_type None
+
+         Id   <RefId "p1" properties.lkt:23:16-23:18>
+              has_type None
+              references None
+
+         Id   <RefId "i" properties.lkt:23:19-23:20>
+              has_type None
+              references None
+
+         Expr <SingleLineStringLit properties.lkt:23:21-23:26>
+              has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "_" properties.lkt:24:1-24:28>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa properties.lkt:24:9-24:28>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c" properties.lkt:24:9-24:10>
+           has_type <ClassDecl "C" properties.lkt:6:1-11:2>
+           references <ValDecl "c" properties.lkt:13:1-13:16>
+
+<ComplexPattern properties.lkt:24:14-24:28> failed nameres:
+properties.lkt:24:16-24:18: error: String is not callable
+ 24 | val _ = c is C(p2(): "foo")
+    |                ^^ 
+
+      Id   <RefId "C" properties.lkt:24:14-24:15>
+           has_type None
+           references <ClassDecl "C" properties.lkt:6:1-11:2>
+
+      Expr <CallExpr properties.lkt:24:16-24:20>
+           has_type None
+
+         Id   <RefId "p2" properties.lkt:24:16-24:18>
+              has_type None
+              references None
+

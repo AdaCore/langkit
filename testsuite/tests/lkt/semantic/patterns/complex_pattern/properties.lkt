@@ -1,0 +1,24 @@
+struct S {
+    i: Int
+    t: String
+}
+
+class C {
+    fun p1(i: Int, b: Bool = false): S = S(i, if b then "OK" else "KO")
+
+    @property
+    fun p2(): String = "foo"
+}
+
+val c = null[C]
+
+val _ = c is C(nosuchprop(): "foo")
+val _ = c is S(t(): "foo")
+val _ = c is C(p1(1, false): s)
+val _ = c is C(p1(1, false): S(i_s, t_s))
+val _ = c is C(p1(1): s)
+val _ = c is C(p1("foo"): s)
+val _ = c is C(p1(1, false): "foo")
+val _ = c is C(p1(i=1): "foo")
+val _ = c is C(p1(i="foo"): "foo")
+val _ = c is C(p2(): "foo")

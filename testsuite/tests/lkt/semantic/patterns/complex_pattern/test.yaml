@@ -2,3 +2,4 @@ driver: lkt
 entry_points:
   - test.lkt
   - destructuring.lkt
+  - properties.lkt
