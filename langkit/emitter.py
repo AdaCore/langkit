@@ -1215,6 +1215,33 @@ class Emitter:
                 self.write_source_file(
                     os.path.join(export_dir, export_file), code, language
                 )
+
+            if ctx.config.language_server.main is None:
+                code = ctx.render_template(
+                    template,
+                    c_api=ctx.c_api_settings,
+                    java_api=ctx.java_api_settings,
+                )
+                self.write_source_file(
+                    os.path.join(export_dir, export_file), code, language
+                )
+            else:
+                with open(
+                    os.path.join(
+                        ctx.extensions_dir,
+                        ctx.config.language_server.main,
+                    ),
+                    "r",
+                ) as f:
+                    self.write_source_file(
+                        os.path.join(
+                            self.lklsp_package,
+                            os.path.basename(ctx.config.language_server.main),
+                        ),
+                        f.read(),
+                        Language.java,
+                    )
+
             os.chmod(
                 os.path.join(
                     self.lklsp_dir,

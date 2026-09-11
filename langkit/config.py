@@ -592,6 +592,13 @@ class LanguageServerConfig:
     server if there is no custom project manager.
     """
 
+    main: str | None = None
+    """
+    Filename relative to the extensions directory, designating the entry point
+    function main class for the language server executable. if ``None``, a
+    default main class is generated.
+    """
+
 
 @dataclasses.dataclass
 class VSCodeExtConfig:
@@ -650,6 +657,11 @@ class VSCodeExtConfig:
     configuration for the TextMate grammar generation pass. If ``None``, the
     pass is skipped and no TextMate grammar is included in the generated
     extension.
+    """
+
+    launch_args: list[str] = dataclasses.field(default_factory=list)
+    """
+    Arguments passed to the language server executable on launch.
     """
 
 

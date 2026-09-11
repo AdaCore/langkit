@@ -1,4 +1,5 @@
 <%
+from json import dumps
 lang_name = ctx.config.library.language_name.camel
 short_name = ctx.short_name_or_long
 %>
@@ -48,7 +49,11 @@ export function activate(context: vscode.ExtensionContext) {
         command:
             serverPath[String(process.arch)][String(process.platform)],
         transport: TransportKind.stdio,
-        options: { env: libs[process.arch][process.platform] }
+        args: ${dumps(ctx.config.vscode_ext.launch_args)},
+        options: { env: {
+            ...process.env,
+            ...libs[process.arch][process.platform]
+        } }
     };
 
     const clientOptions: LanguageClientOptions = {
