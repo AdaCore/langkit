@@ -40,3 +40,8 @@ val _ = s is S(a, b, c)
 
 val _ = c2 is C2(p1: "foo")
 val _ = c2 is C2(p2: "foo")
+
+# Check that using non-complex patterns as subpattern of a pattern detail
+# is also supported.
+val _ = c2 is C2(s: not null)
+val _ = c2 is C2(s: "a" | "b")
