@@ -1031,6 +1031,42 @@ Decl <ValDecl "_" destructuring.lkt:42:1-42:28>
            has_type None
            references <FunDecl "p2" destructuring.lkt:17:5-17:29>
 
+Decl <ValDecl "_" destructuring.lkt:46:1-46:30>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:46:9-46:30>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c2" destructuring.lkt:46:9-46:11>
+           has_type <ClassDecl "C2" destructuring.lkt:11:1-18:2>
+           references <ValDecl "c2" destructuring.lkt:22:1-22:18>
+
+      Id   <RefId "C2" destructuring.lkt:46:15-46:17>
+           has_type None
+           references <ClassDecl "C2" destructuring.lkt:11:1-18:2>
+
+      Id   <RefId "s" destructuring.lkt:46:18-46:19>
+           has_type None
+           references <FieldDecl "s" destructuring.lkt:12:5-12:9>
+
+Decl <ValDecl "_" destructuring.lkt:47:1-47:31>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa destructuring.lkt:47:9-47:31>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "c2" destructuring.lkt:47:9-47:11>
+           has_type <ClassDecl "C2" destructuring.lkt:11:1-18:2>
+           references <ValDecl "c2" destructuring.lkt:22:1-22:18>
+
+      Id   <RefId "C2" destructuring.lkt:47:15-47:17>
+           has_type None
+           references <ClassDecl "C2" destructuring.lkt:11:1-18:2>
+
+      Id   <RefId "s" destructuring.lkt:47:18-47:19>
+           has_type None
+           references <FieldDecl "s" destructuring.lkt:12:5-12:9>
+
 Resolving properties.lkt
 ========================
 Decl <FieldDecl "i" properties.lkt:2:5-2:11>

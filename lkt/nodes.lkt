@@ -3071,6 +3071,8 @@ class Pattern: LktNode {
     |" Return the type of values that match this pattern.
     @memoized
     fun get_output_type(): Entity[TypeDecl] = self.get_input_type()
+
+    fun xref_equation(): Equation = %true
 }
 
 |" Base of all patterns that may introduce a new binding in the lexical
