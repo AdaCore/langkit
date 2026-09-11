@@ -525,6 +525,9 @@ class Decl: LktNode implements DeclarationInterface {
         @ignored name: Entity[RefId]
     ): Bool = not node.is_null
 
+    @predicate_error("no corresponding member in $holder")
+    fun extra_component(@ignored holder: Entity[Decl]): Bool = not node.is_null
+
     |" Infer the type of the function from the expected_call if Entity is a
     |" generic declaration.
     |"
@@ -657,7 +660,11 @@ class Decl: LktNode implements DeclarationInterface {
                         )
                 case bvd: BindingValDecl =>
                     match bvd.parent {
-                        case cp: BindingPattern => cp.get_output_type()
+                        case p: BindingPattern => p.get_output_type()
+                        case p: PropertyPatternDetail =>
+                            p.referenced_decl()?.get_type()
+                        case p: DestructuringPatternDetail =>
+                            p.referenced_decl()?.get_type()
                         case _ => raise[Entity[TypeDecl]] PropertyError(
                             "Invalid parsing tree"
                         )
@@ -3053,8 +3060,8 @@ class Pattern: LktNode {
                     l.get_output_type()?.get_indexable_content_type()
             case p: Pattern => p.get_input_type()
             case d: FieldPatternDetail => d.referenced_decl()?.get_type()
-            # TODO: Support all PatternDetail here (see
-            # eng/libadalang/langkit#929).
+            case d: PropertyPatternDetail =>
+                d.referenced_decl()?.get_type().as[FunctionType]?.return_type
             case _ => raise[Entity[TypeDecl]] PropertyError(
                 "Cannot determine input type of the pattern"
             )
@@ -3301,8 +3308,45 @@ class PropertyPatternDetail: PatternDetail {
     @parse_field
     expected_value: Pattern
 
-    |" TODO (eng/libadalang/langkit#929): handle property pattern details
-    fun xref_detail_equation(): Equation = %true
+    |" Return the identifier that designates the property referenced by this
+    |" pattern detail.
+    fun property_name(): Entity[RefId] = self.call.name.as![RefId]
+
+    |" Return the property referenced by this pattern detail.
+    fun referenced_decl(): Entity[Decl] =
+        self
+            .parent_pattern()
+            .get_output_type()
+            ?.type_var_suffix_ref(self.property_name())
+
+    fun xref_detail_equation(): Equation = {
+        val name = self.property_name();
+        val holder_type = self.parent_pattern().get_output_type();
+        val member = self.referenced_decl();
+
+        # Bind the property identifier to the referenced property
+        name.ref_var <- member
+        %and {
+            bind error_location = name.node;
+            Decl.has_component%(name.ref_var, holder_type, name)
+        }
+
+        # Include equation to resolve arguments to emit diagnostics in case of
+        # argument mismatches.
+        %and self.call.xref_call_equation()
+
+        # Bind the resolved property return type to CallExpr.name, to satisfy
+        # xref_call_equation's requirements.
+        %and name.actual_type_var <- member?.get_type()
+
+        # Include equations from the "expected_value" field if they do not
+        # belong to an independent xref entry point.
+        %and (
+            if self.expected_value.xref_entry_point()
+            then %true
+            else self.expected_value.xref_equation()
+        )
+    }
 }
 
 |" Pattern detail denoting the destructuring of a field as a shorthand.
@@ -3310,8 +3354,26 @@ class DestructuringPatternDetail: PatternDetail {
     @parse_field
     decl: BindingValDecl
 
-    |" TODO (eng/libadalang/langkit#929): handle destructuring pattern details
-    fun xref_detail_equation(): Equation = %true
+    |" Return the member that this pattern detail matches.
+    fun referenced_decl(): Entity[Decl] = {
+        # This pattern detail is the Nth detail of the parent pattern: match it
+        # with the Nth member of the parent type, in constructor order.
+        val holder_type = self.parent_pattern().get_output_type();
+        val params = holder_type?.get_params();
+        params.at(self.child_index).decl
+    }
+
+    fun xref_detail_equation(): Equation = {
+        # Set decl's type to the corresponding member of the parent type. If
+        # there is no such member, emit a diagnostic.
+        val decl = self.referenced_decl();
+        bind error_location = node;
+        self.decl.syn_name.actual_type_var <- decl?.get_type()
+        %and Decl.extra_component%(
+            self.decl.syn_name.actual_type_var,
+            self.parent_pattern().get_output_type()
+        )
+    }
 }
 
 |" Base class for expressions. Encompasses regular expressions as well as
