@@ -289,6 +289,11 @@ class ManageScript:
             " command",
         )
         self.create_wheel_parser.add_argument(
+            "--strip",
+            action="store_true",
+            help="Whether to strip debug info from shipped dynamic libraries.",
+        )
+        self.create_wheel_parser.add_argument(
             "--plat-name", help="Forwarded to setuptools bdist_wheel."
         )
         self.create_wheel_parser.add_argument(
@@ -1624,6 +1629,7 @@ class ManageScript:
             ),
             python_interpreter=args.with_python,
             no_isolation=args.no_isolation,
+            strip=args.strip,
         )
 
     def do_create_extension(self, args: argparse.Namespace) -> None:
