@@ -615,10 +615,7 @@ class Decl: LktNode implements DeclarationInterface {
                         # entity of the function's owning type.
                         FunctionType(
                             params=(
-                                node.entity_type()
-                                    .instantiate_generic_type_decl(
-                                        [td.owning_type().as_entity]
-                                    )
+                                td.owning_type().as_entity.make_entity_type()
                                     .singleton()
                                 & ft.params
                             ),
@@ -685,10 +682,7 @@ class Decl: LktNode implements DeclarationInterface {
                 case etd: ExplicitlyTypedDecl =>
                     etd.decl_type.referenced_decl()
                 case gd: GenericDecl => gd.decl.get_type()
-                case sd: SelfDecl =>
-                    self.entity_type().instantiate_generic_type_decl(
-                        [sd.owning_type()]
-                    )
+                case sd: SelfDecl => sd.owning_type()?.make_entity_type()
                 case nd: NodeDecl => nd.owning_type()
                 case _ => null[Entity[TypeDecl]]
             }
@@ -705,7 +699,7 @@ class Decl: LktNode implements DeclarationInterface {
             not (cast_to.is_null or self.is_null)
             and node == node.entity_type().node
             and cast_to.node != node.entity_type().node
-        then node.entity_type().instantiate_generic_type_decl([cast_to])
+        then cast_to.make_entity_type()
         else cast_to
 
     |" Return the type of ``E.keep[T]`` when ``keep_type`` materializes the
@@ -727,7 +721,7 @@ class Decl: LktNode implements DeclarationInterface {
                     )
                 )
                 and keep_type.node != node.entity_type().node
-            then node.entity_type().instantiate_generic_type_decl([keep_type])
+            then keep_type.make_entity_type()
             else keep_type;
 
         elt_type?.make_array_type()
@@ -745,7 +739,7 @@ class Decl: LktNode implements DeclarationInterface {
             not prefix_type.is_null
             and prefix_type.node == node.entity_type().node
             and self.full_decl()?.has_annotation(s"parse_field")
-        then node.entity_type().instantiate_generic_type_decl([suffix_type])
+        then suffix_type?.make_entity_type()
 
         # If we are accessing a lazy field through a type, or a @property
         # annotated function, consider it as a reference to a property-like
@@ -902,10 +896,9 @@ class Decl: LktNode implements DeclarationInterface {
                         ResolvedParam(
                                 name=s"var",
                                 param_type=(
-                                    node.entity_type()
-                                    .instantiate_generic_type_decl(
-                                        [fd.owning_type().as_entity]
-                                    )
+                                    fd.owning_type()
+                                    .as_entity
+                                    .make_entity_type()
                                 ),
                                 has_default_value=false,
                                 decl=SynthParamDecl().as_entity
@@ -2044,9 +2037,7 @@ class TypeDecl: Decl implements TypeInterface {
         node.is_null
         or not (node is ClassDecl)
         or rhs.is_null
-        or rhs.is_subtype(
-            self.entity_type().instantiate_generic_type_decl([self])
-        )
+        or rhs.is_subtype(self.make_entity_type())
 
     |" Wrapper around ``TypeDecl.common_ancestor`` that returns the nearest
     |" common ancestor for ``self`` and all types for the ``other_types`` slice
@@ -2271,6 +2262,12 @@ class TypeDecl: Decl implements TypeInterface {
     @memoized
     fun make_stream_type(): Entity[TypeDecl] =
         self?.stream_type().instantiate_generic_type_decl([self])
+
+    |" Create a rebound ``Entity`` type declaration, using ``self`` as the type
+    |" parameter.
+    @memoized
+    fun make_entity_type(): Entity[TypeDecl] =
+        self?.entity_type()?.instantiate_generic_type_decl([self])
 
     |" For a stream type declaration and another one, create a new stream type
     |" instantiated with the common ancestor of ``self`` elements type and
