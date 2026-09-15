@@ -186,5 +186,5 @@ class GDBSession:
 
         # No matter what, write the session logs to make post-mortem debugging
         # possible.
-        with open(self.log_file, "w") as f:
+        with open(self.log_file, "a") as f:
             f.write(self.proc.get_session_logs())
