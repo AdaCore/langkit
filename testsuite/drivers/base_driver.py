@@ -133,7 +133,7 @@ class BaseDriver(DiffTestDriver):
             self.lkt_traces_dir = self.working_dir("lkt_srctraces")
             mkdir(self.lkt_traces_dir)
 
-    def tear_down(self):
+    def analyze(self):
         # Allow test drivers to create "*.log" files in their working space
         # just for logging purposes, and so forward them to the test result,
         # for post-mortem investigation.
@@ -147,6 +147,9 @@ class BaseDriver(DiffTestDriver):
                 "\n\n== END =="
             )
 
+        super().analyze()
+
+    def tear_down(self):
         if self.env.lkt_coverage:
             for filename in glob.glob(
                 os.path.join(self.lkt_traces_dir, "*.srctrace")
