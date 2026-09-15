@@ -1977,13 +1977,15 @@ class TypeDecl: Decl implements TypeInterface {
     fun is_int_type(): Bool =
         (self.is_null or self == self.int_type()) or self == self.bigint_type()
 
+    |" Return whether ``self`` is a node type, or is null.
+    fun is_node_type(): Bool =
+        self.is_null
+        or self.is_subtype(self.node_env.get_first(s"RootNode__").as[TypeDecl])
+
     @predicate_error(
         "expression must be of type Int, BigInt or Node, got $Self"
     )
-    fun is_int_or_node(): Bool =
-        self.is_null
-        or self.is_int_type()
-        or self.is_subtype(self.node_env.get_first(s"RootNode__").as[TypeDecl])
+    fun is_int_or_node(): Bool = self.is_int_type() or self.is_node_type()
 
     @predicate_error("expression must be a stream, got $Self")
     fun is_stream(): Bool =
