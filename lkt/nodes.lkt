@@ -3167,6 +3167,7 @@ enum class BoolPattern: Pattern {
 
 |" Pattern to match on integers.
 class IntegerPattern: Pattern implements TokenNode {
+    fun get_output_type(): Entity[TypeDecl] = self.int_type()
 }
 
 |" Pattern to match on lists.
