@@ -663,10 +663,7 @@ class Decl: LktNode implements DeclarationInterface {
                 case bvd: BindingValDecl =>
                     match bvd.parent {
                         case p: BindingPattern => p.get_output_type()
-                        case p: PropertyPatternDetail =>
-                            p.referenced_decl()?.get_type()
-                        case p: DestructuringPatternDetail =>
-                            p.referenced_decl()?.get_type()
+                        case d: DestructuringPatternDetail => d.get_type()
                         case _ =>
                             raise[Entity[TypeDecl]] PropertyError(
                                 "Invalid parsing tree"
@@ -740,7 +737,7 @@ class Decl: LktNode implements DeclarationInterface {
 
         elif
             not prefix_type.is_null
-            and prefix_type.node == node.entity_type().node
+            and prefix_type.is_entity_type()
             and self.is_parse_field()
         then suffix_type?.make_entity_type()
 
@@ -1990,6 +1987,10 @@ class TypeDecl: Decl implements TypeInterface {
         self.is_null
         or self.is_subtype(self.node_env.get_first(s"RootNode__").as[TypeDecl])
 
+    |" Return whether the type is an instantiation of the ``Entity`` type.
+    fun is_entity_type(): Bool =
+        self.is_null or node == self.entity_type().node
+
     @predicate_error(
         "expression must be of type Int, BigInt or Node, got $Self"
     )
@@ -3119,9 +3120,7 @@ class Pattern: LktNode {
                 if self is EllipsisPattern then l.get_output_type()
                 else l.get_output_type()?.get_indexable_content_type()
             case p: Pattern => p.get_input_type()
-            case d: FieldPatternDetail => d.referenced_decl()?.get_type()
-            case d: PropertyPatternDetail =>
-                d.referenced_decl()?.get_type().as[FunctionType]?.return_type
+            case d: PatternDetail => d.get_type()
             case _ =>
                 raise[Entity[TypeDecl]] PropertyError(
                     "Cannot determine input type of the pattern"
@@ -3236,7 +3235,19 @@ class TypePattern: Pattern {
     @parse_field
     type_name: TypeRef
 
-    fun get_output_type(): Entity[TypeDecl] = self.type_name.referenced_decl()
+    fun get_output_type(): Entity[TypeDecl] =
+        # Implicitly wrap the referenced type in an entity if it is a node
+        # type and the input type is an entity type.
+        if (
+            self.referenced_type().is_node_type()
+            and self.get_input_type().is_entity_type()
+        )
+        then self.referenced_type().make_entity_type()
+        else self.referenced_type()
+
+    |" Return the ``TypeDecl`` referenced by this type pattern.
+    @memoized
+    fun referenced_type(): Entity[TypeDecl] = self.type_name.referenced_decl()
 }
 
 |" Pattern that matches if its inner pattern doesn't match.
@@ -3323,8 +3334,26 @@ class PatternDetail: LktNode {
     @abstract
     fun xref_detail_equation(): Equation
 
+    |" Return the type of values that this pattern detail matches.
+    @abstract
+    @memoized
+    fun get_type(): Entity[TypeDecl]
+
     |" Return the pattern that owns this pattern detail.
-    fun parent_pattern(): Entity[Pattern] = self.parent.parent.as![Pattern]
+    fun parent_pattern(): Entity[ComplexPattern] =
+        self.parent.parent.as![ComplexPattern]
+
+    |" Return the type of the provided ``decl`` wrapped in an ``Entity``
+    |" instantiation if this declaration designates a parse field and the
+    |" output type of the parent pattern is also an instance of ``Entity``.
+    fun wrap_type_in_entity(decl: Entity[Decl]): Entity[TypeDecl] = {
+        val ref_type = decl?.get_type();
+        val wrap_in_entity = (
+            self.parent_pattern().get_output_type()?.is_entity_type()
+            and decl?.is_parse_field()
+        );
+        if wrap_in_entity then ref_type.make_entity_type() else ref_type
+    }
 }
 
 |" Pattern detail denoting an access to a field.
@@ -3337,6 +3366,9 @@ class FieldPatternDetail: PatternDetail {
     |" Return the member that "id" references.
     fun referenced_decl(): Entity[Decl] =
         self.parent_pattern().get_output_type()?.type_var_suffix_ref(self.id)
+
+    fun get_type(): Entity[TypeDecl] =
+        self.wrap_type_in_entity(self.referenced_decl())
 
     fun xref_detail_equation(): Equation =
         # Bind "id" to the member declaration, emit a diagnostic if we could
@@ -3376,6 +3408,9 @@ class PropertyPatternDetail: PatternDetail {
             self.property_name()
         )
 
+    fun get_type(): Entity[TypeDecl] =
+        self.referenced_decl()?.get_type().as[FunctionType]?.return_type
+
     fun xref_detail_equation(): Equation = {
         val name = self.property_name();
         val holder_type = self.parent_pattern().get_output_type();
@@ -3410,14 +3445,29 @@ class DestructuringPatternDetail: PatternDetail {
     @parse_field
     decl: BindingValDecl
 
+    |" Return the type designated by the parent pattern.
+    fun pattern_designated_type(): Entity[TypeDecl] = match
+        self.parent_pattern().pattern
+    {
+        # In the case of a `TypePattern` we get the constructor of the
+        # referenced type.
+        case t: TypePattern => t.referenced_type()
+        case _ => self.parent_pattern().get_output_type()
+    }
+
     |" Return the member that this pattern detail matches.
     fun referenced_decl(): Entity[Decl] = {
-        # This pattern detail is the Nth detail of the parent pattern: match it
-        # with the Nth member of the parent type, in constructor order.
-        val holder_type = self.parent_pattern().get_output_type();
+        # When matching against an explicit type, use it instead of the
+        # inferred type. This is necessary so that bare node type matchers
+        # applied to entity values have access to the members of the bare node
+        # type instead of the ones of the entity type.
+        val holder_type = self.pattern_designated_type();
         val params = holder_type?.get_params();
         params.at(self.child_index).decl
     }
+
+    fun get_type(): Entity[TypeDecl] =
+        self.wrap_type_in_entity(self.referenced_decl())
 
     fun xref_detail_equation(): Equation = {
         # Set decl's type to the corresponding member of the parent type. If
@@ -3427,7 +3477,7 @@ class DestructuringPatternDetail: PatternDetail {
         self.decl.syn_name.actual_type_var <- decl?.get_type()
         %and Decl.extra_component%(
             self.decl.syn_name.actual_type_var,
-            self.parent_pattern().get_output_type()
+            self.pattern_designated_type()
         )
     }
 }

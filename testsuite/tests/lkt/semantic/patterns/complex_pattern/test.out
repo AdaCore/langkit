@@ -1450,3 +1450,318 @@ properties.lkt:24:16-24:18: error: String is not callable
               has_type None
               references None
 
+Resolving node_types.lkt
+========================
+Id   <RefId "Node" node_types.lkt:1:26-1:30>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "FooNode" node_types.lkt:1:31-1:38>
+     has_type None
+     references <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+Decl <FunDecl "my_prop" node_types.lkt:2:5-2:32>
+     has_type <FunctionType "() -> Bool" node_types.lkt>
+
+   Id   <RefId "Bool" node_types.lkt:2:20-2:24>
+        has_type None
+        references <EnumTypeDecl prelude: "Bool">
+
+   Id   <RefId "false" node_types.lkt:2:27-2:32>
+        has_type <EnumTypeDecl prelude: "Bool">
+        references <EnumLitDecl prelude: "false">
+
+Id   <RefId "FooNode" node_types.lkt:4:14-4:21>
+     has_type None
+     references <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+Expr <Id "parse_field" node_types.lkt:5:6-5:17>
+     has_type None
+
+Decl <FieldDecl "left" node_types.lkt:6:5-6:21>
+     has_type <ClassDecl "IntLiteral" node_types.lkt:11:1-11:50>
+
+   Id   <RefId "IntLiteral" node_types.lkt:6:11-6:21>
+        has_type None
+        references <ClassDecl "IntLiteral" node_types.lkt:11:1-11:50>
+
+Expr <Id "parse_field" node_types.lkt:8:6-8:17>
+     has_type None
+
+Decl <FieldDecl "right" node_types.lkt:9:5-9:19>
+     has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+   Id   <RefId "FooNode" node_types.lkt:9:12-9:19>
+        has_type None
+        references <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+Id   <RefId "FooNode" node_types.lkt:11:19-11:26>
+     has_type None
+     references <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+Id   <RefId "TokenNode" node_types.lkt:11:38-11:47>
+     has_type None
+     references <TraitDecl prelude: "TokenNode">
+
+Decl <ValDecl "node" node_types.lkt:13:1-13:25>
+     has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+   Id   <RefId "FooNode" node_types.lkt:13:11-13:18>
+        has_type None
+        references <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+   Expr <NullLit node_types.lkt:13:21-13:25>
+        has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+Decl <ValDecl "entity" node_types.lkt:14:1-14:33>
+     has_type <StructDecl prelude: "Entity[BinOp]">
+
+   Id   <RefId "Entity" node_types.lkt:14:13-14:19>
+        has_type None
+        references <StructDecl prelude: "Entity[N]">
+
+   Id   <RefId "BinOp" node_types.lkt:14:20-14:25>
+        has_type None
+        references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+   Expr <NullLit node_types.lkt:14:29-14:33>
+        has_type <StructDecl prelude: "Entity[BinOp]">
+
+Decl <ValDecl "_" node_types.lkt:17:1-17:28>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa node_types.lkt:17:9-17:28>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "node" node_types.lkt:17:9-17:13>
+           has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+           references <ValDecl "node" node_types.lkt:13:1-13:25>
+
+      Id   <RefId "BinOp" node_types.lkt:17:17-17:22>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Decl <BindingValDecl "x" node_types.lkt:17:23-17:24>
+           has_type <ClassDecl "IntLiteral" node_types.lkt:11:1-11:50>
+
+      Decl <BindingValDecl "y" node_types.lkt:17:26-17:27>
+           has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+Decl <ValDecl "_" node_types.lkt:18:1-18:30>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa node_types.lkt:18:9-18:30>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "entity" node_types.lkt:18:9-18:15>
+           has_type <StructDecl prelude: "Entity[BinOp]">
+           references <ValDecl "entity" node_types.lkt:14:1-14:33>
+
+      Id   <RefId "BinOp" node_types.lkt:18:19-18:24>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Decl <BindingValDecl "x" node_types.lkt:18:25-18:26>
+           has_type <StructDecl prelude: "Entity[IntLiteral]">
+
+      Decl <BindingValDecl "y" node_types.lkt:18:28-18:29>
+           has_type <StructDecl prelude: "Entity[FooNode]">
+
+Decl <ValDecl "_" node_types.lkt:19:1-19:38>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa node_types.lkt:19:9-19:38>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "entity" node_types.lkt:19:9-19:15>
+           has_type <StructDecl prelude: "Entity[BinOp]">
+           references <ValDecl "entity" node_types.lkt:14:1-14:33>
+
+      Id   <RefId "Entity" node_types.lkt:19:19-19:25>
+           has_type None
+           references <StructDecl prelude: "Entity[N]">
+
+      Id   <RefId "BinOp" node_types.lkt:19:26-19:31>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Decl <BindingValDecl "x" node_types.lkt:19:33-19:34>
+           has_type <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Decl <BindingValDecl "y" node_types.lkt:19:36-19:37>
+           has_type <StructDecl prelude: "EntityInfo">
+
+Decl <ValDecl "_" node_types.lkt:22:1-22:41>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa node_types.lkt:22:9-22:41>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "node" node_types.lkt:22:9-22:13>
+           has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+           references <ValDecl "node" node_types.lkt:13:1-13:25>
+
+      Id   <RefId "BinOp" node_types.lkt:22:17-22:22>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Id   <RefId "left" node_types.lkt:22:23-22:27>
+           has_type None
+           references <FieldDecl "left" node_types.lkt:6:5-6:21>
+
+      Decl <BindingValDecl "x" node_types.lkt:22:29-22:30>
+           has_type <ClassDecl "IntLiteral" node_types.lkt:11:1-11:50>
+
+      Id   <RefId "right" node_types.lkt:22:32-22:37>
+           has_type None
+           references <FieldDecl "right" node_types.lkt:9:5-9:19>
+
+      Decl <BindingValDecl "y" node_types.lkt:22:39-22:40>
+           has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+Decl <ValDecl "_" node_types.lkt:23:1-23:43>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa node_types.lkt:23:9-23:43>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "entity" node_types.lkt:23:9-23:15>
+           has_type <StructDecl prelude: "Entity[BinOp]">
+           references <ValDecl "entity" node_types.lkt:14:1-14:33>
+
+      Id   <RefId "BinOp" node_types.lkt:23:19-23:24>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Id   <RefId "left" node_types.lkt:23:25-23:29>
+           has_type None
+           references <FieldDecl "left" node_types.lkt:6:5-6:21>
+
+      Decl <BindingValDecl "x" node_types.lkt:23:31-23:32>
+           has_type <StructDecl prelude: "Entity[IntLiteral]">
+
+      Id   <RefId "right" node_types.lkt:23:34-23:39>
+           has_type None
+           references <FieldDecl "right" node_types.lkt:9:5-9:19>
+
+      Decl <BindingValDecl "y" node_types.lkt:23:41-23:42>
+           has_type <StructDecl prelude: "Entity[FooNode]">
+
+Decl <ValDecl "_" node_types.lkt:24:1-24:51>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa node_types.lkt:24:9-24:51>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "node" node_types.lkt:24:9-24:13>
+           has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+           references <ValDecl "node" node_types.lkt:13:1-13:25>
+
+      Id   <RefId "BinOp" node_types.lkt:24:17-24:22>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Id   <RefId "left" node_types.lkt:24:23-24:27>
+           has_type None
+           references <FieldDecl "left" node_types.lkt:6:5-6:21>
+
+      Decl <BindingValDecl "x" node_types.lkt:24:29-24:30>
+           has_type <ClassDecl "IntLiteral" node_types.lkt:11:1-11:50>
+
+      Id   <RefId "right" node_types.lkt:24:32-24:37>
+           has_type None
+           references <FieldDecl "right" node_types.lkt:9:5-9:19>
+
+      Id   <RefId "BinOp" node_types.lkt:24:39-24:44>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Decl <BindingValDecl "y" node_types.lkt:24:45-24:46>
+           has_type <ClassDecl "IntLiteral" node_types.lkt:11:1-11:50>
+
+      Decl <BindingValDecl "z" node_types.lkt:24:48-24:49>
+           has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+
+Decl <ValDecl "_" node_types.lkt:25:1-25:53>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa node_types.lkt:25:9-25:53>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "entity" node_types.lkt:25:9-25:15>
+           has_type <StructDecl prelude: "Entity[BinOp]">
+           references <ValDecl "entity" node_types.lkt:14:1-14:33>
+
+      Id   <RefId "BinOp" node_types.lkt:25:19-25:24>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Id   <RefId "left" node_types.lkt:25:25-25:29>
+           has_type None
+           references <FieldDecl "left" node_types.lkt:6:5-6:21>
+
+      Decl <BindingValDecl "x" node_types.lkt:25:31-25:32>
+           has_type <StructDecl prelude: "Entity[IntLiteral]">
+
+      Id   <RefId "right" node_types.lkt:25:34-25:39>
+           has_type None
+           references <FieldDecl "right" node_types.lkt:9:5-9:19>
+
+      Id   <RefId "BinOp" node_types.lkt:25:41-25:46>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Decl <BindingValDecl "y" node_types.lkt:25:47-25:48>
+           has_type <StructDecl prelude: "Entity[IntLiteral]">
+
+      Decl <BindingValDecl "z" node_types.lkt:25:50-25:51>
+           has_type <StructDecl prelude: "Entity[FooNode]">
+
+Decl <ValDecl "_" node_types.lkt:28:1-28:36>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa node_types.lkt:28:9-28:36>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "node" node_types.lkt:28:9-28:13>
+           has_type <ClassDecl "FooNode" node_types.lkt:1:1-3:2>
+           references <ValDecl "node" node_types.lkt:13:1-13:25>
+
+      Id   <RefId "BinOp" node_types.lkt:28:17-28:22>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Expr <CallExpr node_types.lkt:28:23-28:32>
+           has_type None
+
+         Id   <RefId "my_prop" node_types.lkt:28:23-28:30>
+              has_type <FunctionType "() -> Bool" node_types.lkt>
+              references <FunDecl "my_prop" node_types.lkt:2:5-2:32>
+
+      Decl <BindingValDecl "x" node_types.lkt:28:34-28:35>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+Decl <ValDecl "_" node_types.lkt:29:1-29:38>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa node_types.lkt:29:9-29:38>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "entity" node_types.lkt:29:9-29:15>
+           has_type <StructDecl prelude: "Entity[BinOp]">
+           references <ValDecl "entity" node_types.lkt:14:1-14:33>
+
+      Id   <RefId "BinOp" node_types.lkt:29:19-29:24>
+           has_type None
+           references <ClassDecl "BinOp" node_types.lkt:4:1-10:2>
+
+      Expr <CallExpr node_types.lkt:29:25-29:34>
+           has_type None
+
+         Id   <RefId "my_prop" node_types.lkt:29:25-29:32>
+              has_type <FunctionType "() -> Bool" node_types.lkt>
+              references <FunDecl "my_prop" node_types.lkt:2:5-2:32>
+
+      Decl <BindingValDecl "x" node_types.lkt:29:36-29:37>
+           has_type <EnumTypeDecl prelude: "Bool">
+

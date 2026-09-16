@@ -1,0 +1,29 @@
+class FooNode implements Node[FooNode] {
+    fun my_prop(): Bool = false
+}
+class BinOp: FooNode {
+    @parse_field
+    left: IntLiteral
+
+    @parse_field
+    right: FooNode
+}
+class IntLiteral: FooNode implements TokenNode {}
+
+val node: FooNode = null
+val entity: Entity[BinOp] = null
+
+# Test destructuring details
+val _ = node is BinOp(x, y)
+val _ = entity is BinOp(x, y)
+val _ = entity is Entity[BinOp](x, y)
+
+# Test field details
+val _ = node is BinOp(left: x, right: y)
+val _ = entity is BinOp(left: x, right: y)
+val _ = node is BinOp(left: x, right: BinOp(y, z))
+val _ = entity is BinOp(left: x, right: BinOp(y, z))
+
+# Test property details
+val _ = node is BinOp(my_prop(): x)
+val _ = entity is BinOp(my_prop(): x)
