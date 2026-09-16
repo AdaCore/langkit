@@ -738,7 +738,7 @@ class Decl: LktNode implements DeclarationInterface {
         elif
             not prefix_type.is_null
             and prefix_type.node == node.entity_type().node
-            and self.full_decl()?.has_annotation(s"parse_field")
+            and self.is_parse_field()
         then suffix_type?.make_entity_type()
 
         # If we are accessing a lazy field through a type, or a @property
@@ -759,6 +759,11 @@ class Decl: LktNode implements DeclarationInterface {
 
         else suffix_type
     }
+
+    |" Return whether this field is a node parse field (is annotated with
+    |" ``@parse_field``).
+    fun is_parse_field(): Bool =
+        self.full_decl()?.has_annotation(s"parse_field")
 
     |" Return the declaration that ``E.M`` references when ``self`` is the type
     |" of ``E`` and ``current_name`` is the member reference ``M``.
@@ -2496,7 +2501,7 @@ class TypeDecl: Decl implements TypeInterface {
                                 # corresponding ``NodeBuilder`` type, and the
                                 # parameter for a user field has the same type
                                 # as the field.
-                                if f.full_decl().has_annotation(s"parse_field")
+                                if f.is_parse_field()
                                 then t?.as_node_builder_type()
                                 else t
                             },
