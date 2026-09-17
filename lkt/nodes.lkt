@@ -2325,6 +2325,37 @@ class TypeDecl: Decl implements TypeInterface {
             else le
         )
 
+    |" Common implementation of the ``defined_scope`` method for struct and
+    |" class types.
+    |"
+    |" ``own_envs`` must contain members declared in ``self`` itself (i.e. not
+    |" coming from inherittance).
+    @with_dynvars(origin)
+    fun struct_defined_scope(own_envs: Array[LexicalEnv]): LexicalEnv =
+        # Ensure the result includes members from the basic trait (if
+        # appropriate compared to ``origin``).
+        self.with_basic_trait_from_self(
+            (
+                # Include members from ``self`` itself
+                own_envs
+                # Then members from its base type (if any). Use the base type
+                # from the syntax instead of the `base_type()` method so that
+                # we do not get "semantic base types" from covariance: we do
+                # not want members from G[B] to hide members from G[T] if G is
+                # a covariant generic struct and T a subclass of B.
+                & [
+                    self
+                        .syn_base_type
+                        ?.referenced_decl()
+                        .as[NamedTypeDecl]
+                        ?.defined_scope()
+                ]
+                # And finally members from the traits that ``self`` implements
+                & self.traits.map((t) => t.referenced_decl()?.defined_scope())
+            )
+            .env_group()
+        )
+
     |" Traverse ``Entity`` and ``origin`` simultaneously and list all
     |" all types found in origin that would replace ty in Entity.
     |"
@@ -2639,16 +2670,7 @@ class BasicClassDecl: NamedTypeDecl {
     @call_memoizable
     @with_dynvars(origin)
     fun defined_scope(): LexicalEnv =
-        self.with_basic_trait_from_self(
-            (
-                [
-                    self.decls.children_env,
-                    self.base_type().as[NamedTypeDecl]?.defined_scope()
-                ]
-                & self.traits.map((t) => t.referenced_decl()?.defined_scope())
-            )
-            .env_group()
-        )
+        self.struct_defined_scope([self.decls.children_env])
 
     @with_dynvars(origin)
     fun defined_scope_as_entity(): LexicalEnv = {
@@ -2886,13 +2908,12 @@ class StructDecl: NamedTypeDecl {
 
     @with_dynvars(origin)
     fun defined_scope(): LexicalEnv =
-        self.with_basic_trait_from_self(
-            (
-                [self.decls.children_env]
-                & self.traits.map((t) => t.referenced_decl()?.defined_scope())
-                & [self.entity_scope(), self.update_func_env()]
-            )
-            .env_group()
+        self.struct_defined_scope(
+            [
+                self.decls.children_env,
+                self.entity_scope(),
+                self.update_func_env()
+            ]
         )
 }
 
