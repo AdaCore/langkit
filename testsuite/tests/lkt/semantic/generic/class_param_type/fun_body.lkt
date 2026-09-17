@@ -1,0 +1,18 @@
+class C1 {
+    i1: Int
+}
+class C2: C1 {
+    i2: Int
+}
+trait Tr {
+    fun get_int(): Int
+}
+
+generic[class T: C2]
+fun f1(c: T): Int = c.i2 + c.i1
+
+generic[class T implements Tr]
+fun f2(c: T): Int = c.get_int()
+
+generic[class T: C2 implements Tr]
+fun f3(c: T): Int = c.i2 + c.get_int()

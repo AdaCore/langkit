@@ -438,11 +438,6 @@ class BlockStringLine: LktNode implements TokenNode {
 class ModuleDocStringLine: LktNode implements TokenNode {
 }
 
-|" Whether this generic parameter type must be a class.
-@qualifier
-enum class ClassQualifier: LktNode {
-}
-
 |" Whether the "?" operation qualifier (to denote the null-conditional
 |" behavior) is present.
 @qualifier
@@ -950,7 +945,7 @@ class Decl: LktNode implements DeclarationInterface {
     @exported
     fun is_instantiated(): Bool =
         if self.is_null then true
-        elif self is GenericParamTypeDecl then false
+        elif self is BaseGenericParamTypeDecl then false
         else
             self.parent.as[GenericDecl].do(
                 (gd) =>
@@ -1763,14 +1758,14 @@ class GenericDecl: Decl {
                 ))
         ) & "]"
 
-    fun generic_params(): Array[Entity[GenericParamTypeDecl]] =
+    fun generic_params(): Array[Entity[BaseGenericParamTypeDecl]] =
         self.generic_param_decls.map(
-            (gfd) => gfd.decl.as[GenericParamTypeDecl]
+            (gfd) => gfd.decl.as[BaseGenericParamTypeDecl]
         )
 
     fun generic_params_names(): Array[Symbol] =
         self.generic_param_decls.map(
-            (gfd) => gfd.decl.as[GenericParamTypeDecl].name()
+            (gfd) => gfd.decl.as[BaseGenericParamTypeDecl].name()
         )
 
     fun decl_type_name(): String = "generic " & self.decl.decl_type_name()
@@ -2390,7 +2385,7 @@ class TypeDecl: Decl implements TypeInterface {
                         )
                     )
                 ),
-                # Go through each GenericParamTypeDecl
+                # Go through each BaseGenericParamTypeDecl
                 default_val=self.parent.as[GenericDecl].do(
                     (gd) =>
                     origin.parent.as[GenericDecl].do(
@@ -2626,22 +2621,35 @@ class FunctionType: TypeDecl {
         self.is_null or self.return_type.matching_type(self.bool_type())
 }
 
-|" Declaration of a parameter type in a generic declaration.
-class GenericParamTypeDecl: TypeDecl {
-    @parse_field
-    has_class: ClassQualifier
+|" Base class for the declaration of a parameter type in a generic declaration.
+@abstract
+class BaseGenericParamTypeDecl: TypeDecl {
     @parse_field
     syn_name: DefId
+}
+
+|" Declaration of a simple parameter type in a generic declaration.
+class GenericParamTypeDecl: BaseGenericParamTypeDecl {
+    @null_field
+    @parse_field
+    syn_base_type: TypeRef
     @parse_field
     traits: ASTList[TypeRef]
-    @parse_field
-    @null_field
-    syn_base_type: TypeRef
 
-    fun decl_type_name(): String =
-        if node.has_class.as_bool()
-        then "generic class parameter type declaration"
-        else "generic parameter type declaration"
+    fun decl_type_name(): String = "generic parameter type declaration"
+}
+
+|" Declaration of a class parameter type in a generic declaration.
+class GenericClassParamTypeDecl: BaseGenericParamTypeDecl {
+    @parse_field
+    syn_base_type: TypeRef
+    @parse_field
+    traits: ASTList[TypeRef]
+
+    fun decl_type_name(): String = "generic class parameter type declaration"
+
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv = self.struct_defined_scope([]: LexicalEnv)
 }
 
 |" Explicit named type declaration.
@@ -4555,7 +4563,7 @@ class DefId: Id implements TokenNode, DefiningNameInterface {
                 case _: EnumClassDecl => CompletionItemKind.enum_kind
                 case _: EnumLitDecl => CompletionItemKind.enum_member_kind
                 case _: EnumClassAltDecl => CompletionItemKind.enum_member_kind
-                case _: GenericParamTypeDecl =>
+                case _: BaseGenericParamTypeDecl =>
                     CompletionItemKind.type_parameter_kind
                 case _: TraitDecl => CompletionItemKind.interface_kind
                 case _ => CompletionItemKind.text_kind

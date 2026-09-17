@@ -1,0 +1,3 @@
+driver: lkt
+entry_points:
+  - fun_body.lkt
