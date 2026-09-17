@@ -1,0 +1,20 @@
+fun foo(f: (Int) -> Int): Int = f(2)
+val valid1 = foo((x) => null)
+
+generic[U]
+fun bar(f: (Int) -> U): U = null[U]
+
+val valid2 = bar((x) => x)
+val valid3: Int = bar((x) => null)
+
+generic[U]
+fun baz(f: (Int) -> U): U = null[U]
+
+val valid4 = baz((x) => baz((y) => x))
+
+val valid5 = 1.do((x) => x.do((y) => y))
+
+val valid6 = 1.do((x) => [x]) & 2.do((x) => [x])
+val valid7 = 1.do((x) => [x]) & [2].map((x) => x)
+val valid8 = [1].map((x) => x) & 2.do((x) => [x])
+val valid9 = [1].map((x) => x) & [2].map((x) => x)

@@ -2619,6 +2619,13 @@ class FunctionType: TypeDecl {
     @predicate_error("Predicate functions must return booleans")
     fun returns_bool(): Bool =
         self.is_null or self.return_type.matching_type(self.bool_type())
+
+    |" Proxy to ``Decl.infer_function_type`` but taking as first argument the
+    |" function type from which to infer the generic formals of ``decl``,
+    |" which allows it to be called from a propagate equation.
+    @with_dynvars(in_logic_call=false)
+    fun infer_generic_decl(decl: Entity[Decl]): Entity[FunctionType] =
+        decl?.infer_function_type(self)
 }
 
 |" Base class for the declaration of a parameter type in a generic declaration.
@@ -3648,6 +3655,11 @@ class BaseCallExpr: Expr {
     @parse_field
     args: ASTList[Argument]
 
+    |" Hold the expected return type of the function called. It will either
+    |" be assigned to `expected_type` or to `None`, but will have a value in
+    |" any case, unlike `expected_type` which may not be defined at all.
+    expected_ret_type: LogicVar
+
     @with_dynvars(in_logic_call=false)
     fun generic_type_equation_helper(): Equation =
         (
@@ -3772,7 +3784,36 @@ class BaseCallExpr: Expr {
             # If the name is not an identifier, bind the generic
             # function type to the actual type (The function type
             # should already be instanciated in that case).
-            if self.name is DotExpr | RefId then %true
+            if self.name is DotExpr | RefId
+            then {
+                # Create the function type expected for `self.name`, by using
+                # what is known of the arguments' types and the expected
+                # result type of this call. We use the `generic_func_type_var`
+                # logic vars to hold that information for the arguments, as
+                # we know they aren't use for anything else at this stage,
+                # unlike `actual_type_var` and `expected_type_var`.
+                self.args.logic_all(
+                    (a) =>
+                    if a.value.xref_entry_point()
+                    then a.value.generic_func_type_var <- a.value.get_type()
+                    else %any(
+                        a.value.generic_func_type_var
+                        <-> a.value.actual_type_var,
+                        a.value.generic_func_type_var
+                        <- self.any_type()
+                    )
+                )
+                %and self.name.expected_type_var
+                <- TypeDecl.create_function_type%(
+                    [self.expected_ret_type] & self.args.map(
+                        (a) => a.value.generic_func_type_var
+                    )
+                )
+                %and (
+                    self.expected_ret_type <-> self.expected_type_var
+                    %or self.expected_ret_type <- null[Entity[TypeDecl]]
+                )
+            }
             else
                 self.name.generic_func_type_var <-> self.name.actual_type_var
         )
@@ -3841,6 +3882,26 @@ class BaseCallExpr: Expr {
             elif ri.symbol == s"domain" then self.xref_equation()
             else self.xlogic_unknown(),
             default_val=self.xlogic_unknown()
+        )
+
+    fun has_context_free_type(): Bool =
+        # A call is context-free only if the return type of the called
+        # function type can be inferred without the expected type of the call.
+
+        # Thus, first check whether the called function has a statically known
+        # return type, e.g. Int -> Int. It could also be generic but with
+        # the formal not appearing in the return type, e.g. [T](x: T) -> Int.
+        self.name.get_generic_type().as[FunctionType].do(
+            (ft) =>
+            ft.return_type_is_instantiated()
+
+            # If it's not the case, meaning a generic formal appears in the
+            # return type, we might be able to infer it without using the
+            # expected type, only using the types of the arguments which have
+            # a context-free type.
+            or self.name.get_expected_type().as[FunctionType]
+            ?.infer_generic_decl(ft)?.return_type_is_instantiated(),
+            default_val=true
         )
 }
 
@@ -3962,39 +4023,46 @@ class DotExpr: Expr {
             # suffix was found.
             self.actual_type_var <- null[Entity[TypeDecl]]
         )
-        else (
+        else {
+            val first_var = self.first_var_in_prefix_env();
+
             # When there is a suffix:
-            (
-                (
-                    self.suffix.ref_var <- self.first_var_in_prefix_env()
-                    %and {
-                        bind error_location = node.suffix;
-                        val holder = (
-                            self.prefix.get_type() or?
-                            self.prefix.referenced_decl()
-                        );
-                        if holder.is_null
-                        then Decl.is_defined%(self.suffix.ref_var)
-                        else Decl.has_component%(
-                            self.suffix.ref_var, holder, self.suffix
-                        )
-                    }
+            self.suffix.ref_var <- first_var
+            %and {
+                bind error_location = node.suffix;
+                val holder = (
+                    self.prefix.get_type() or?
+                    self.prefix.referenced_decl()
+                );
+                if holder.is_null
+                then Decl.is_defined%(self.suffix.ref_var)
+                else Decl.has_component%(
+                    self.suffix.ref_var, holder, self.suffix
                 )
-                %and (
-                    if self.suffix.is_being_called()
+            }
+            %and (
+                if self.suffix.is_being_called()
+                then
+                    if first_var?.is_generic()
                     then
                         self.actual_type_var
-                        <- self.suffix.get_generic_type()?.infer_function_type(
-                            self.get_expected_type().as[FunctionType]
+                        <- FunctionType.infer_generic_decl%(
+                            self.expected_type_var,
+                            self.suffix.get_generic_type()
                         )
-                    else (
-                        # When the expression is not being called, simply get
-                        # the of the field. This also keeps parse_fields as
-                        # Entity if necessary.
-                        self.suffix.actual_type_var
-                        <- self.first_var_in_prefix_env()?.get_suffix_type(
-                            self.prefix.get_type()
+                    else
+                        self.actual_type_var <- first_var.do(
+                            (fv) =>
+                            if in_logic_call
+                            then fv.logic_function_type()
+                            else fv.function_type()
                         )
+                else (
+                    # When the expression is not being called, simply get
+                    # the of the field. This also keeps parse_fields as
+                    # Entity if necessary.
+                    self.suffix.actual_type_var <- first_var?.get_suffix_type(
+                        self.prefix.get_type()
                     )
                 )
             )
@@ -4002,7 +4070,7 @@ class DotExpr: Expr {
                 # DotExpr.actual <- B.actual
                 self.actual_type_var <-> self.suffix.actual_type_var
             )
-        )
+        }
 
     fun xref_equation(): Equation =
         # When the DotExpr is used as a callee, we need to know its
@@ -4767,8 +4835,9 @@ class RefId: Id implements TokenNode, ReferenceInterface{
                         bind in_logic_call = false;
 
                         self.actual_type_var
-                        <- self.get_generic_type().infer_function_type(
-                            self.get_expected_type().as[FunctionType]
+                        <- FunctionType.infer_generic_decl%(
+                            self.expected_type_var,
+                            self.get_generic_type()
                         )
                     }
                     %and self.generic_func_type_var
@@ -5046,8 +5115,13 @@ class LambdaExpr: Expr {
                 }
             else
                 self.body.xref_equation()
-                %and self.actual_type_var
-                <- TypeDecl.create_function_type%(
+                # Assign the known type of the parameters to their `type_var`
+                # so that we can call `TypeDecl.create_function_type`
+                # dynamically with the actual type inferred for the body.
+                %and self.params.logic_all(
+                    (p) => p.type_var <- p.get_type()
+                )
+                %and self.actual_type_var <- TypeDecl.create_function_type%(
                     [self.body.actual_type_var] & param_type_vars
                 )
         )
@@ -5064,9 +5138,9 @@ class LambdaExpr: Expr {
                 self.body.expected_type_var <- null[Entity[TypeDecl]]
                 %or (
                     self.body.expected_type_var
-                    <- self.get_expected_type()?.get_return_type()
+                    <- TypeDecl.get_return_type%(self.expected_type_var)
                     %and Decl.return_type_is_instantiated%(
-                        self.generic_func_type_var
+                        self.actual_type_var
                     )
                 )
             )

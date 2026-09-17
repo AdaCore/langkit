@@ -1,0 +1,453 @@
+Resolving test.lkt
+==================
+Decl <FunDecl "foo" test.lkt:1:1-1:37>
+     has_type <FunctionType "((Int) -> Int) -> Int" test.lkt>
+
+   Decl <FunParamDecl "f" test.lkt:1:9-1:24>
+        has_type <FunctionType prelude: "(Int) -> Int">
+
+      Id   <RefId "Int" test.lkt:1:13-1:16>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+      Id   <RefId "Int" test.lkt:1:21-1:24>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:1:27-1:30>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:1:33-1:37>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "f" test.lkt:1:33-1:34>
+           has_type <FunctionType prelude: "(Int) -> Int">
+           references <FunParamDecl "f" test.lkt:1:9-1:24>
+
+      Expr <NumLit test.lkt:1:35-1:36>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "valid1" test.lkt:2:1-2:30>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:2:14-2:30>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "foo" test.lkt:2:14-2:17>
+           has_type <FunctionType "((Int) -> Int) -> Int" test.lkt>
+           references <FunDecl "foo" test.lkt:1:1-1:37>
+
+      Expr <LambdaExpr test.lkt:2:18-2:29>
+           has_type <FunctionType prelude: "(Int) -> Int">
+
+         Decl <LambdaParamDecl "x" test.lkt:2:19-2:20>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <NullLit test.lkt:2:25-2:29>
+              has_type <StructDecl prelude: "Int">
+
+Decl <FunDecl "bar[U]" test.lkt:5:1-5:36>
+     has_type <FunctionType "((Int) -> U) -> U" test.lkt>
+
+   Decl <FunParamDecl "f" test.lkt:5:9-5:22>
+        has_type <FunctionType "(Int) -> U" test.lkt>
+
+      Id   <RefId "Int" test.lkt:5:13-5:16>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+      Id   <RefId "U" test.lkt:5:21-5:22>
+           has_type None
+           references <GenericParamTypeDecl "U" test.lkt:4:9-4:10>
+
+   Id   <RefId "U" test.lkt:5:25-5:26>
+        has_type None
+        references <GenericParamTypeDecl "U" test.lkt:4:9-4:10>
+
+   Expr <NullLit test.lkt:5:29-5:36>
+        has_type <GenericParamTypeDecl "U" test.lkt:4:9-4:10>
+
+      Id   <RefId "U" test.lkt:5:34-5:35>
+           has_type None
+           references <GenericParamTypeDecl "U" test.lkt:4:9-4:10>
+
+Decl <ValDecl "valid2" test.lkt:7:1-7:27>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:7:14-7:27>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "bar" test.lkt:7:14-7:17>
+           has_type <FunctionType "((Int) -> Int) -> Int" test.lkt>
+           references <FunDecl "bar[U]" test.lkt:5:1-5:36>
+
+      Expr <LambdaExpr test.lkt:7:18-7:26>
+           has_type <FunctionType prelude: "(Int) -> Int">
+
+         Decl <LambdaParamDecl "x" test.lkt:7:19-7:20>
+              has_type <StructDecl prelude: "Int">
+
+         Id   <RefId "x" test.lkt:7:25-7:26>
+              has_type <StructDecl prelude: "Int">
+              references <LambdaParamDecl "x" test.lkt:7:19-7:20>
+
+Decl <ValDecl "valid3" test.lkt:8:1-8:35>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:8:13-8:16>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:8:19-8:35>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "bar" test.lkt:8:19-8:22>
+           has_type <FunctionType "((Int) -> Int) -> Int" test.lkt>
+           references <FunDecl "bar[U]" test.lkt:5:1-5:36>
+
+      Expr <LambdaExpr test.lkt:8:23-8:34>
+           has_type <FunctionType prelude: "(Int) -> Int">
+
+         Decl <LambdaParamDecl "x" test.lkt:8:24-8:25>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <NullLit test.lkt:8:30-8:34>
+              has_type <StructDecl prelude: "Int">
+
+Decl <FunDecl "baz[U]" test.lkt:11:1-11:36>
+     has_type <FunctionType "((Int) -> U) -> U" test.lkt>
+
+   Decl <FunParamDecl "f" test.lkt:11:9-11:22>
+        has_type <FunctionType "(Int) -> U" test.lkt>
+
+      Id   <RefId "Int" test.lkt:11:13-11:16>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+      Id   <RefId "U" test.lkt:11:21-11:22>
+           has_type None
+           references <GenericParamTypeDecl "U" test.lkt:10:9-10:10>
+
+   Id   <RefId "U" test.lkt:11:25-11:26>
+        has_type None
+        references <GenericParamTypeDecl "U" test.lkt:10:9-10:10>
+
+   Expr <NullLit test.lkt:11:29-11:36>
+        has_type <GenericParamTypeDecl "U" test.lkt:10:9-10:10>
+
+      Id   <RefId "U" test.lkt:11:34-11:35>
+           has_type None
+           references <GenericParamTypeDecl "U" test.lkt:10:9-10:10>
+
+Decl <ValDecl "valid4" test.lkt:13:1-13:39>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:13:14-13:39>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "baz" test.lkt:13:14-13:17>
+           has_type <FunctionType "((Int) -> Int) -> Int" test.lkt>
+           references <FunDecl "baz[U]" test.lkt:11:1-11:36>
+
+      Expr <LambdaExpr test.lkt:13:18-13:38>
+           has_type <FunctionType prelude: "(Int) -> Int">
+
+         Decl <LambdaParamDecl "x" test.lkt:13:19-13:20>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <CallExpr test.lkt:13:25-13:38>
+              has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "baz" test.lkt:13:25-13:28>
+                 has_type <FunctionType "((Int) -> Int) -> Int" test.lkt>
+                 references <FunDecl "baz[U]" test.lkt:11:1-11:36>
+
+            Expr <LambdaExpr test.lkt:13:29-13:37>
+                 has_type <FunctionType prelude: "(Int) -> Int">
+
+               Decl <LambdaParamDecl "y" test.lkt:13:30-13:31>
+                    has_type <StructDecl prelude: "Int">
+
+               Id   <RefId "x" test.lkt:13:36-13:37>
+                    has_type <StructDecl prelude: "Int">
+                    references <LambdaParamDecl "x" test.lkt:13:19-13:20>
+
+Decl <ValDecl "valid5" test.lkt:15:1-15:41>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:15:14-15:41>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <DotExpr test.lkt:15:14-15:18>
+           has_type <FunctionType prelude: "((Int) -> Int, Int) -> Int">
+
+         Expr <NumLit test.lkt:15:14-15:15>
+              has_type <StructDecl prelude: "Int">
+
+         Id   <RefId "do" test.lkt:15:16-15:18>
+              has_type <FunctionType prelude: "((Int) -> Int, Int) -> Int">
+              references <FunDecl prelude: "do[U]">
+
+      Expr <LambdaExpr test.lkt:15:19-15:40>
+           has_type <FunctionType prelude: "(Int) -> Int">
+
+         Decl <LambdaParamDecl "x" test.lkt:15:20-15:21>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <CallExpr test.lkt:15:26-15:40>
+              has_type <StructDecl prelude: "Int">
+
+            Expr <DotExpr test.lkt:15:26-15:30>
+                 has_type <FunctionType prelude: "((Int) -> Int, Int) -> Int">
+
+               Id   <RefId "x" test.lkt:15:26-15:27>
+                    has_type <StructDecl prelude: "Int">
+                    references <LambdaParamDecl "x" test.lkt:15:20-15:21>
+
+               Id   <RefId "do" test.lkt:15:28-15:30>
+                    has_type <FunctionType prelude: "((Int) -> Int, Int) -> Int">
+                    references <FunDecl prelude: "do[U]">
+
+            Expr <LambdaExpr test.lkt:15:31-15:39>
+                 has_type <FunctionType prelude: "(Int) -> Int">
+
+               Decl <LambdaParamDecl "y" test.lkt:15:32-15:33>
+                    has_type <StructDecl prelude: "Int">
+
+               Id   <RefId "y" test.lkt:15:38-15:39>
+                    has_type <StructDecl prelude: "Int">
+                    references <LambdaParamDecl "y" test.lkt:15:32-15:33>
+
+Decl <ValDecl "valid6" test.lkt:17:1-17:49>
+     has_type <StructDecl prelude: "Array[Int]">
+
+   Expr <BinOp test.lkt:17:14-17:49>
+        has_type <StructDecl prelude: "Array[Int]">
+
+      Expr <CallExpr test.lkt:17:14-17:30>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <DotExpr test.lkt:17:14-17:18>
+              has_type <FunctionType prelude: "((Int) -> Array[Int], Array[Int]) -> Array[Int]">
+
+            Expr <NumLit test.lkt:17:14-17:15>
+                 has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "do" test.lkt:17:16-17:18>
+                 has_type <FunctionType prelude: "((Int) -> Array[Int], Array[Int]) -> Array[Int]">
+                 references <FunDecl prelude: "do[U]">
+
+         Expr <LambdaExpr test.lkt:17:19-17:29>
+              has_type <FunctionType prelude: "(Int) -> Array[Int]">
+
+            Decl <LambdaParamDecl "x" test.lkt:17:20-17:21>
+                 has_type <StructDecl prelude: "Int">
+
+            Expr <ArrayLiteral test.lkt:17:26-17:29>
+                 has_type <StructDecl prelude: "Array[Int]">
+
+               Id   <RefId "x" test.lkt:17:27-17:28>
+                    has_type <StructDecl prelude: "Int">
+                    references <LambdaParamDecl "x" test.lkt:17:20-17:21>
+
+      Expr <CallExpr test.lkt:17:33-17:49>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <DotExpr test.lkt:17:33-17:37>
+              has_type <FunctionType prelude: "((Int) -> Array[Int], Array[Int]) -> Array[Int]">
+
+            Expr <NumLit test.lkt:17:33-17:34>
+                 has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "do" test.lkt:17:35-17:37>
+                 has_type <FunctionType prelude: "((Int) -> Array[Int], Array[Int]) -> Array[Int]">
+                 references <FunDecl prelude: "do[U]">
+
+         Expr <LambdaExpr test.lkt:17:38-17:48>
+              has_type <FunctionType prelude: "(Int) -> Array[Int]">
+
+            Decl <LambdaParamDecl "x" test.lkt:17:39-17:40>
+                 has_type <StructDecl prelude: "Int">
+
+            Expr <ArrayLiteral test.lkt:17:45-17:48>
+                 has_type <StructDecl prelude: "Array[Int]">
+
+               Id   <RefId "x" test.lkt:17:46-17:47>
+                    has_type <StructDecl prelude: "Int">
+                    references <LambdaParamDecl "x" test.lkt:17:39-17:40>
+
+Decl <ValDecl "valid7" test.lkt:18:1-18:50>
+     has_type <StructDecl prelude: "Array[Int]">
+
+   Expr <BinOp test.lkt:18:14-18:50>
+        has_type <StructDecl prelude: "Array[Int]">
+
+      Expr <CallExpr test.lkt:18:14-18:30>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <DotExpr test.lkt:18:14-18:18>
+              has_type <FunctionType prelude: "((Int) -> Array[Int], Array[Int]) -> Array[Int]">
+
+            Expr <NumLit test.lkt:18:14-18:15>
+                 has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "do" test.lkt:18:16-18:18>
+                 has_type <FunctionType prelude: "((Int) -> Array[Int], Array[Int]) -> Array[Int]">
+                 references <FunDecl prelude: "do[U]">
+
+         Expr <LambdaExpr test.lkt:18:19-18:29>
+              has_type <FunctionType prelude: "(Int) -> Array[Int]">
+
+            Decl <LambdaParamDecl "x" test.lkt:18:20-18:21>
+                 has_type <StructDecl prelude: "Int">
+
+            Expr <ArrayLiteral test.lkt:18:26-18:29>
+                 has_type <StructDecl prelude: "Array[Int]">
+
+               Id   <RefId "x" test.lkt:18:27-18:28>
+                    has_type <StructDecl prelude: "Int">
+                    references <LambdaParamDecl "x" test.lkt:18:20-18:21>
+
+      Expr <CallExpr test.lkt:18:33-18:50>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <DotExpr test.lkt:18:33-18:40>
+              has_type <FunctionType prelude: "((Int) -> Int) -> Array[Int]">
+
+            Expr <ArrayLiteral test.lkt:18:33-18:36>
+                 has_type <StructDecl prelude: "Array[Int]">
+
+               Expr <NumLit test.lkt:18:34-18:35>
+                    has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "map" test.lkt:18:37-18:40>
+                 has_type <FunctionType prelude: "((Int) -> Int) -> Array[Int]">
+                 references <FunDecl prelude: "map[U]">
+
+         Expr <LambdaExpr test.lkt:18:41-18:49>
+              has_type <FunctionType prelude: "(Int) -> Int">
+
+            Decl <LambdaParamDecl "x" test.lkt:18:42-18:43>
+                 has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "x" test.lkt:18:48-18:49>
+                 has_type <StructDecl prelude: "Int">
+                 references <LambdaParamDecl "x" test.lkt:18:42-18:43>
+
+Decl <ValDecl "valid8" test.lkt:19:1-19:50>
+     has_type <StructDecl prelude: "Array[Int]">
+
+   Expr <BinOp test.lkt:19:14-19:50>
+        has_type <StructDecl prelude: "Array[Int]">
+
+      Expr <CallExpr test.lkt:19:14-19:31>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <DotExpr test.lkt:19:14-19:21>
+              has_type <FunctionType prelude: "((Int) -> Int) -> Array[Int]">
+
+            Expr <ArrayLiteral test.lkt:19:14-19:17>
+                 has_type <StructDecl prelude: "Array[Int]">
+
+               Expr <NumLit test.lkt:19:15-19:16>
+                    has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "map" test.lkt:19:18-19:21>
+                 has_type <FunctionType prelude: "((Int) -> Int) -> Array[Int]">
+                 references <FunDecl prelude: "map[U]">
+
+         Expr <LambdaExpr test.lkt:19:22-19:30>
+              has_type <FunctionType prelude: "(Int) -> Int">
+
+            Decl <LambdaParamDecl "x" test.lkt:19:23-19:24>
+                 has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "x" test.lkt:19:29-19:30>
+                 has_type <StructDecl prelude: "Int">
+                 references <LambdaParamDecl "x" test.lkt:19:23-19:24>
+
+      Expr <CallExpr test.lkt:19:34-19:50>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <DotExpr test.lkt:19:34-19:38>
+              has_type <FunctionType prelude: "((Int) -> Array[Int], Array[Int]) -> Array[Int]">
+
+            Expr <NumLit test.lkt:19:34-19:35>
+                 has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "do" test.lkt:19:36-19:38>
+                 has_type <FunctionType prelude: "((Int) -> Array[Int], Array[Int]) -> Array[Int]">
+                 references <FunDecl prelude: "do[U]">
+
+         Expr <LambdaExpr test.lkt:19:39-19:49>
+              has_type <FunctionType prelude: "(Int) -> Array[Int]">
+
+            Decl <LambdaParamDecl "x" test.lkt:19:40-19:41>
+                 has_type <StructDecl prelude: "Int">
+
+            Expr <ArrayLiteral test.lkt:19:46-19:49>
+                 has_type <StructDecl prelude: "Array[Int]">
+
+               Id   <RefId "x" test.lkt:19:47-19:48>
+                    has_type <StructDecl prelude: "Int">
+                    references <LambdaParamDecl "x" test.lkt:19:40-19:41>
+
+Decl <ValDecl "valid9" test.lkt:20:1-20:51>
+     has_type <StructDecl prelude: "Array[Int]">
+
+   Expr <BinOp test.lkt:20:14-20:51>
+        has_type <StructDecl prelude: "Array[Int]">
+
+      Expr <CallExpr test.lkt:20:14-20:31>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <DotExpr test.lkt:20:14-20:21>
+              has_type <FunctionType prelude: "((Int) -> Int) -> Array[Int]">
+
+            Expr <ArrayLiteral test.lkt:20:14-20:17>
+                 has_type <StructDecl prelude: "Array[Int]">
+
+               Expr <NumLit test.lkt:20:15-20:16>
+                    has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "map" test.lkt:20:18-20:21>
+                 has_type <FunctionType prelude: "((Int) -> Int) -> Array[Int]">
+                 references <FunDecl prelude: "map[U]">
+
+         Expr <LambdaExpr test.lkt:20:22-20:30>
+              has_type <FunctionType prelude: "(Int) -> Int">
+
+            Decl <LambdaParamDecl "x" test.lkt:20:23-20:24>
+                 has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "x" test.lkt:20:29-20:30>
+                 has_type <StructDecl prelude: "Int">
+                 references <LambdaParamDecl "x" test.lkt:20:23-20:24>
+
+      Expr <CallExpr test.lkt:20:34-20:51>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Expr <DotExpr test.lkt:20:34-20:41>
+              has_type <FunctionType prelude: "((Int) -> Int) -> Array[Int]">
+
+            Expr <ArrayLiteral test.lkt:20:34-20:37>
+                 has_type <StructDecl prelude: "Array[Int]">
+
+               Expr <NumLit test.lkt:20:35-20:36>
+                    has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "map" test.lkt:20:38-20:41>
+                 has_type <FunctionType prelude: "((Int) -> Int) -> Array[Int]">
+                 references <FunDecl prelude: "map[U]">
+
+         Expr <LambdaExpr test.lkt:20:42-20:50>
+              has_type <FunctionType prelude: "(Int) -> Int">
+
+            Decl <LambdaParamDecl "x" test.lkt:20:43-20:44>
+                 has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "x" test.lkt:20:49-20:50>
+                 has_type <StructDecl prelude: "Int">
+                 references <LambdaParamDecl "x" test.lkt:20:43-20:44>
+

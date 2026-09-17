@@ -2,10 +2,30 @@ generic[T]
 fun identity(t: T): T = t
 generic[T]
 fun f(arr: Array[T], t: T): T
+generic[T]
+fun g(x: T): Int = 2
 
 val v1 = identity(1)
 val infer_arg_1 = f([null], 1)
 val infer_arg_2 = f([1], null)
+val infer_arg_from_call = identity(g(2))
+
+val infer_from_expected_1: String = identity(null)
+val infer_from_expected_2: String = identity(identity(null))
+val infer_lambda = [true].filter((x) => x.do((y) => y))
 
 val invalid1 : String = identity(1)
-val invalid2 : String = identity(null)
+
+class A {}
+class B : A {}
+
+val infer_if_branch_1 = (
+    if true
+    then null
+    else 1.do((x) => null[A])
+)
+val infer_if_branch_2 = (
+    if true
+    then null[A]
+    else 1.do((x) => null)
+)
