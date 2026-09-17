@@ -2327,7 +2327,7 @@ class TypeDecl: Decl implements TypeInterface {
         )
         ?.make_stream_type()
 
-    |" Get the type parameter used to rebind the Array type declaration.
+    |" Return the type parameter used to rebind the Array type declaration.
     fun get_indexable_content_type(): Entity[TypeDecl] =
         if self.is_null then null[Entity[TypeDecl]]
         elif self.is_indexable_type()
@@ -5017,8 +5017,8 @@ class RefId: Id implements TokenNode, ReferenceInterface {
                 or p.parent.do((v1) => v1.parent is BlockExpr)
         )
 
-    |" Get the first declaration found for this RefId. This first tries to get
-    |" variables declared before Self.from_node, if no variable was found,
+    |" Return the first declaration found for this RefId. This first tries to
+    |" get variables declared before Self.from_node, if no variable was found,
     |" find a type or function anywhere in the node environment.
     @memoized
     fun first_var_in_env(): Entity[Decl] = {
