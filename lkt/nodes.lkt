@@ -1997,6 +1997,27 @@ class TypeDecl: Decl implements TypeInterface {
     fun get_entity_node_type(): Entity[TypeDecl] =
         self.get_instantiation_type(self.entity_type())
 
+    |" Assuming that ``self`` is a generic type instantiated by node type
+    |" ``T``, return the instantiation of the same generic type with
+    |" ``Entity[T]``.
+    fun reinstantiate_with_entity(): Entity[TypeDecl] = {
+        # Fetch the uninstantiated declaration for Entity
+        val generic_entity_type =
+            self.entity_type().as_bare_decl().as[TypeDecl];
+        # Recover the T that was used to instantiate self
+        val node_param_type = self.node_env.get_first(s"T").as[TypeDecl];
+        # Compute Entity[T]
+        val entity_type =
+            generic_entity_type
+                .instantiate_generic_type_decl([node_param_type]);
+
+        # Finally reinstantiate self with Entity[T]
+        self
+            .as_bare_decl()
+            .instantiate_generic_decl([entity_type])
+            .as[TypeDecl]
+    }
+
     |" Return whether ``rhs`` is equal to or is a subtype of ``self``.
     @predicate_error("$rhs is not a subtype of $Self")
     fun is_subtype_pred(rhs: Entity[TypeDecl]): Bool =
@@ -2630,15 +2651,7 @@ class BasicClassDecl: NamedTypeDecl {
     fun defined_scope_as_entity(): LexicalEnv = {
         val entity =
             if node == node.astlist_type().node
-            then
-                self.as_bare_decl().instantiate_generic_decl(
-                    self.entity_type().as_bare_decl().as[TypeDecl]
-                    .instantiate_generic_type_decl(
-                        [self.node_env.get_first(s"T").as[TypeDecl]]
-                    )
-                    .singleton()
-                )
-                .as[BasicClassDecl]
+            then self.reinstantiate_with_entity().as[BasicClassDecl]
             else self;
         val scopes =
             [
@@ -2911,17 +2924,7 @@ class TraitDecl: NamedTypeDecl {
     fun defined_scope_as_entity(): LexicalEnv =
         if node == node.node_trait().node
         then
-            self.as_bare_decl().instantiate_generic_decl(
-                self
-                    .entity_type()
-                    .as_bare_decl()
-                    .as[TypeDecl]
-                    .instantiate_generic_type_decl(
-                        [self.node_env.get_first(s"T").as[TypeDecl]]
-                    )
-                    .singleton()
-            )
-            .defined_scope()
+            self.reinstantiate_with_entity().defined_scope()
         else self.super()
 }
 
