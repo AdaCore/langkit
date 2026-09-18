@@ -1997,15 +1997,16 @@ class TypeDecl: Decl implements TypeInterface {
     fun get_entity_node_type(): Entity[TypeDecl] =
         self.get_instantiation_type(self.entity_type())
 
-    |" Assuming that ``self`` is a generic type instantiated by node type
-    |" ``T``, return the instantiation of the same generic type with
-    |" ``Entity[T]``.
+    |" Assuming that ``self`` is a generic type with one generic parameter type
+    |" instantiated by node type ``T``, return the instantiation of the same
+    |" generic type with ``Entity[T]``.
     fun reinstantiate_with_entity(): Entity[TypeDecl] = {
         # Fetch the uninstantiated declaration for Entity
         val generic_entity_type =
             self.entity_type().as_bare_decl().as[TypeDecl];
         # Recover the T that was used to instantiate self
-        val node_param_type = self.node_env.get_first(s"T").as[TypeDecl];
+        val node_param_type =
+            self.parent.as[GenericDecl]?.instantiated_generic_params().at(0);
         # Compute Entity[T]
         val entity_type =
             generic_entity_type
