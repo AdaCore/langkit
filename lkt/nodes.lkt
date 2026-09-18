@@ -2626,6 +2626,9 @@ class FunctionType: TypeDecl {
 class BaseGenericParamTypeDecl: TypeDecl {
     @parse_field
     syn_name: DefId
+
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv = self.struct_defined_scope([]: LexicalEnv)
 }
 
 |" Declaration of a simple parameter type in a generic declaration.
@@ -2647,9 +2650,6 @@ class GenericClassParamTypeDecl: BaseGenericParamTypeDecl {
     traits: ASTList[TypeRef]
 
     fun decl_type_name(): String = "generic class parameter type declaration"
-
-    @with_dynvars(origin)
-    fun defined_scope(): LexicalEnv = self.struct_defined_scope([]: LexicalEnv)
 }
 
 |" Explicit named type declaration.

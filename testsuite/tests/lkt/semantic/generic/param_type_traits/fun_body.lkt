@@ -1,0 +1,6 @@
+trait Tr {
+    fun get_int(): Int
+}
+
+generic[T implements Tr]
+fun f(value: T): Int = value.get_int()

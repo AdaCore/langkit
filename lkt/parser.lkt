@@ -223,7 +223,10 @@ grammar lkt_grammar {
         doc
         list*(decl_annotation)
         or(
-            | GenericParamTypeDecl(def_id null(ASTList[TypeRef]))
+            | GenericParamTypeDecl(
+                def_id
+                ?pick("implements" / type_list)
+            )
             | GenericClassParamTypeDecl(
                 "class"
                 def_id

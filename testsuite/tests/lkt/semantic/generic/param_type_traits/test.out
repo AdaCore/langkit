@@ -1,0 +1,41 @@
+Resolving fun_body.lkt
+======================
+Decl <FunDecl "get_int" fun_body.lkt:2:5-2:23>
+     has_type <FunctionType "() -> Int" fun_body.lkt>
+
+   Id   <RefId "Int" fun_body.lkt:2:20-2:23>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Id   <RefId "Tr" fun_body.lkt:5:22-5:24>
+     has_type None
+     references <TraitDecl "Tr" fun_body.lkt:1:1-3:2>
+
+Decl <FunDecl "f[T]" fun_body.lkt:6:1-6:39>
+     has_type <FunctionType "(T) -> Int" fun_body.lkt>
+
+   Decl <FunParamDecl "value" fun_body.lkt:6:7-6:15>
+        has_type <GenericParamTypeDecl "T" fun_body.lkt:5:9-5:24>
+
+      Id   <RefId "T" fun_body.lkt:6:14-6:15>
+           has_type None
+           references <GenericParamTypeDecl "T" fun_body.lkt:5:9-5:24>
+
+   Id   <RefId "Int" fun_body.lkt:6:18-6:21>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <CallExpr fun_body.lkt:6:24-6:39>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <DotExpr fun_body.lkt:6:24-6:37>
+           has_type <FunctionType "() -> Int" fun_body.lkt>
+
+         Id   <RefId "value" fun_body.lkt:6:24-6:29>
+              has_type <GenericParamTypeDecl "T" fun_body.lkt:5:9-5:24>
+              references <FunParamDecl "value" fun_body.lkt:6:7-6:15>
+
+         Id   <RefId "get_int" fun_body.lkt:6:30-6:37>
+              has_type <FunctionType "() -> Int" fun_body.lkt>
+              references <FunDecl "get_int" fun_body.lkt:2:5-2:23>
+

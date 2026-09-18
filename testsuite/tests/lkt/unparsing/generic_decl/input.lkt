@@ -4,9 +4,10 @@ struct S1 {
 
 generic[
 T,
-class U: Base,
-class V implements Tr, Tr2,
-class W: Base implements Tr
+U implements Tr,
+class V: Base,
+class W implements Tr, Tr2,
+class Y: Base implements Tr
 ]
 struct S2 {
 }
@@ -31,7 +32,9 @@ T,
 |" It is quite long.
 U,
 |" Documentation for V.
-class V: Base implements Tr
+V implements Tr,
+|" Documentation for W.
+class W: Base implements Tr
 ]
 struct S5 {
 }
