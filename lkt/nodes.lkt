@@ -2640,25 +2640,16 @@ class BasicClassDecl: NamedTypeDecl {
                 )
                 .as[BasicClassDecl]
             else self;
-
-        (
+        val scopes =
             [
                 entity.decls.children_env,
                 entity.base_type().as[NamedTypeDecl]?.defined_scope_as_entity()
             ]
             & entity.traits.map(
                 (t) => t.referenced_decl()?.defined_scope_as_entity()
-            )
-        )
-        .env_group()
-        .do(
-            (le) =>
-            if self == origin
-            then
-                [le, entity.basic_trait_from_self().defined_scope()]
-                .env_group()
-            else le
-        )
+            );
+
+        scopes.env_group()
     }
 }
 
