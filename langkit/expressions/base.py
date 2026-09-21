@@ -146,16 +146,6 @@ def maybe_cast(
         ),
         location=error_location,
     )
-
-    # If the type matches expectation but is incompatible in the generated
-    # code, generate a conversion. This is needed for the various ASTNodeType
-    # instances.
-    if expected_type != expr.type:
-        from langkit.expressions import CastExpr
-
-        assert isinstance(expected_type, (ASTNodeType, EntityType))
-        expr = CastExpr(None, expr, expected_type)
-
     return expr
 
 
