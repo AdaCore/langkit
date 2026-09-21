@@ -3200,6 +3200,7 @@ class EntityType(StructType):
             # Langkit_Support.Lexical_Envs_Impl, and re-exported in
             # $.Implementation.
             has_builtin_equivalent_function=self.astnode.is_root_node,
+            codegen_type=None if self.astnode.is_root_node else T.entity,
         )
         self.is_entity_type = True
         self._element_type = astnode
