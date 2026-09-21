@@ -1717,8 +1717,13 @@ class CompiledType:
         """
         Return whether `self` matches `formal`.
 
-        This is mere equality for all types but AST nodes, in which `self` is
-        allowed to be a subtype for `formal`.
+        For node and entity types, this checks the traditional inheritance
+        relation: `self` must be equal to `formal` or derive from it.
+
+        For covariant types (e.g. `Array[T1]` and `Array[T2]`), this checks
+        whether ``T1` matches `T2`.
+
+        For all other types, this checks type equality.
 
         :param formal: Type to match. `self` is checked to be a subtype of it.
         """
@@ -1729,6 +1734,8 @@ class CompiledType:
             formal, NodeBuilderType
         ):
             return self.node_type.matches(formal.node_type)
+        elif isinstance(self, ArrayType) and isinstance(formal, ArrayType):
+            return self.element_type.matches(formal.element_type)
 
         if formal.is_ast_node and self.is_ast_node:
             return formal in self.get_inheritance_chain()
@@ -4994,6 +5001,11 @@ class ArrayType(CompiledType):
             null_allowed=True,
             has_equivalent_function=True,
             hashable=element_type.hashable,
+            codegen_type=(
+                self
+                if element_type.is_codegen_type
+                else element_type.codegen_type.array
+            ),
         )
 
         self._requires_unique_function = False
@@ -5017,7 +5029,11 @@ class ArrayType(CompiledType):
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.unique_name + names.Name("Array_Access")
+        return (
+            self.element_type.unique_name + names.Name("Array_Access")
+            if self.is_codegen_type
+            else self.codegen_type.name
+        )
 
     @property
     def unique_name(self) -> names.Name:

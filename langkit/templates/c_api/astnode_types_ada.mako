@@ -70,8 +70,6 @@
                (if ${arg_ref}.Node = null
                 then ${arg.type.nullexpr}
                 else (${arg_ref}.Node, ${arg_ref}.Info))
-            % elif arg.type.is_array and not arg.type.emit_c_type:
-               Convert (${arg_ref})
             % elif arg.type.is_token_type:
                Unwrap (${arg_ref})
             % elif arg.type.is_source_location_type:
@@ -115,6 +113,10 @@
                   actuals.append('{} => Node.Info'.format(
                       field.entity_info_name
                   ))
+              iterator_requires_wrapping = (
+                  field.type.is_iterator_type
+                  and not field.type.emit_c_type
+              )
             %>
 
             Result : ${field.type.name};
@@ -137,7 +139,7 @@
                    (Result, Node.Info)
                % elif field.type.is_entity_type:
                   (Result.Node, Result.Info)
-               % elif is_array_or_iterator and not field.type.emit_c_type:
+               % elif iterator_requires_wrapping:
                   Convert (Result)
                % elif field.type.is_token_type:
                    Wrap (Result)

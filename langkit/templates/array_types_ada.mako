@@ -105,6 +105,37 @@
    % endif
 </%def>
 
+<%def name="to_iterator_decl(cls)">
+   % if cls.requires_to_iterator_property:
+      function To_Iterator
+        (Self    : ${cls.name};
+         Context : Internal_Context) return ${cls.element_type.iterator.name};
+      --  Return an iterator on values from Self. Context is used to create the
+      --  corresponding safety net.
+   % endif
+</%def>
+
+<%def name="to_iterator_body(cls)">
+   % if cls.requires_to_iterator_property:
+      -----------------
+      -- To_Iterator --
+      -----------------
+
+      function To_Iterator
+        (Self    : ${cls.name};
+         Context : Internal_Context) return ${cls.element_type.iterator.name}
+      is
+      begin
+         Inc_Ref (Self);
+         return new ${cls.element_type.iterator.iterator_type_name}'
+           (Ref_Count  => 1,
+            Safety_Net => Create_Safety_Net (Context),
+            Elements   => Self,
+            Index      => 1);
+      end To_Iterator;
+   % endif
+</%def>
+
 <%def name="decl(cls)">
 
    <% elt_type = cls.element_type.name %>
@@ -169,14 +200,6 @@
    procedure Dec_Ref (T : in out ${cls.name});
 
    function Equivalent (L, R : ${cls.name}) return Boolean;
-
-   % if cls.requires_to_iterator_property:
-      function To_Iterator
-        (Self    : ${cls.name};
-         Context : Internal_Context) return ${cls.element_type.iterator.name};
-      --  Return an iterator on values from Self. Context is used to create the
-      --  corresponding safety net.
-   % endif
 
    % if ctx.properties_logging:
       function Trace_Image (A : ${cls.name}) return String;
@@ -411,25 +434,6 @@
 
       return True;
    end Equivalent;
-
-   % if cls.requires_to_iterator_property:
-      -----------------
-      -- To_Iterator --
-      -----------------
-
-      function To_Iterator
-        (Self    : ${cls.name};
-         Context : Internal_Context) return ${cls.element_type.iterator.name}
-      is
-      begin
-         Inc_Ref (Self);
-         return new ${cls.element_type.iterator.iterator_type_name}'
-           (Ref_Count  => 1,
-            Safety_Net => Create_Safety_Net (Context),
-            Elements   => Self,
-            Index      => 1);
-      end To_Iterator;
-   % endif
 
    % if ctx.properties_logging:
       -----------------

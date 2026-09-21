@@ -176,36 +176,31 @@ Decl <ValDecl "not_valid_operands" test.lkt:14:1-14:31>
       Expr <NumLit test.lkt:14:30-14:31>
            has_type None
 
-<ValDecl "no_covariance" test.lkt:15:1-15:34> failed nameres:
-test.lkt:15:29-15:34: error: expected Array[B], got Array[A]
- 15 | val no_covariance = [B()] & [A()]
-    |                             ^^^^^ 
-
 Decl <ValDecl "no_covariance" test.lkt:15:1-15:34>
-     has_type None
+     has_type <StructDecl prelude: "Array[B]">
 
    Expr <BinOp test.lkt:15:21-15:34>
-        has_type None
+        has_type <StructDecl prelude: "Array[B]">
 
       Expr <ArrayLiteral test.lkt:15:21-15:26>
-           has_type None
+           has_type <StructDecl prelude: "Array[B]">
 
          Expr <CallExpr test.lkt:15:22-15:25>
-              has_type None
+              has_type <ClassDecl "B" test.lkt:2:1-2:14>
 
             Id   <RefId "B" test.lkt:15:22-15:23>
-                 has_type None
-                 references None
+                 has_type <FunctionType "() -> B" test.lkt>
+                 references <ClassDecl "B" test.lkt:2:1-2:14>
 
       Expr <ArrayLiteral test.lkt:15:29-15:34>
-           has_type None
+           has_type <StructDecl prelude: "Array[A]">
 
          Expr <CallExpr test.lkt:15:30-15:33>
-              has_type None
+              has_type <ClassDecl "A" test.lkt:1:1-1:11>
 
             Id   <RefId "A" test.lkt:15:30-15:31>
-                 has_type None
-                 references None
+                 has_type <FunctionType "() -> A" test.lkt>
+                 references <ClassDecl "A" test.lkt:1:1-1:11>
 
 <ValDecl "not_valid_propagated_down" test.lkt:16:1-16:49> failed nameres:
 test.lkt:16:38-16:42: error: expression must be a string or an array, got Int

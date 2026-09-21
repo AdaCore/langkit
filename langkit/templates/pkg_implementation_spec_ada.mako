@@ -801,8 +801,11 @@ private package ${ada_lib_name}.Implementation is
    --  can be done without copy.
 
    % for array_type in ctx.array_types:
-      % if not array_type.has_early_decl and array_type.is_codegen_type:
-         ${array_types.decl(array_type)}
+      % if not array_type.has_early_decl:
+         % if array_type.is_codegen_type:
+            ${array_types.decl(array_type)}
+         % endif
+         ${array_types.to_iterator_decl(array_type)}
       % endif
    % endfor
 

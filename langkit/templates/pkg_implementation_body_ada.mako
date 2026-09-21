@@ -1594,6 +1594,7 @@ package body ${ada_lib_name}.Implementation is
       % if array_type.is_codegen_type:
          ${array_types.body(array_type)}
       % endif
+      ${array_types.to_iterator_body(array_type)}
    % endfor
 
    % for iterator_type in ctx.iterator_types:

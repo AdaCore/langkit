@@ -1,0 +1,33 @@
+# Test that covariant generics (Array) are correctly handled during code
+# generation.
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun to_int(): Int = 1
+
+    # Check that both Array[Entity[Node]] and Array[Entity[Example]] values can
+    # be passed to an Array[Entity[Node]] formal.
+
+    fun sum(items: Array[Entity[FooNode]], next: Int): Int =
+        if next >= items.length()
+        then 0
+        else items.at(next).to_int() + self.sum(items, next + 1)
+
+    @exported
+    fun test_array_root(items: Array[Entity[FooNode]]): Int = self.sum(items, 0)
+
+    @exported
+    fun test_array_example(items: Array[Entity[Example]]): Int =
+        self.sum(items, 0)
+}
+
+class Example: FooNode implements TokenNode {
+    fun to_int(): Int = 2
+}
