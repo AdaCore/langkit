@@ -1591,17 +1591,21 @@ package body ${ada_lib_name}.Implementation is
    end Register_Destroyable_Gen;
 
    % for array_type in ctx.array_types:
-      ${array_types.body(array_type)}
+      % if array_type.is_codegen_type:
+         ${array_types.body(array_type)}
+      % endif
    % endfor
 
    % for iterator_type in ctx.iterator_types:
-      % if iterator_type.is_used:
+      % if iterator_type.is_used and iterator_type.is_codegen_type:
          ${iterator_types.body(iterator_type)}
       % endif
    % endfor
 
    % for set_type in ctx.set_types:
-      ${set_types.body(set_type)}
+      % if set_type.is_codegen_type:
+         ${set_types.body(set_type)}
+      % endif
    % endfor
 
    ---------
@@ -3048,7 +3052,7 @@ package body ${ada_lib_name}.Implementation is
    % endif
 
    % for enum_type in ctx.enum_types:
-      % if enum_type.requires_hash_function:
+      % if enum_type.requires_hash_function and enum_type.is_codegen_type:
          ----------
          -- Hash --
          ----------
@@ -5160,7 +5164,9 @@ package body ${ada_lib_name}.Implementation is
    % endif
 
    % for struct_type in ctx.struct_types:
-   ${struct_types.body(struct_type)}
+      % if struct_type.is_codegen_type:
+         ${struct_types.body(struct_type)}
+      % endif
    % endfor
 
    % for astnode in ctx.node_types:

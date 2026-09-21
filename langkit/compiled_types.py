@@ -912,6 +912,7 @@ class CompiledType:
         api_name: str | names.Name | None = None,
         lkt_name: str | None = None,
         conversion_requires_context: bool = False,
+        codegen_type: CompiledType | None = None,
     ) -> None:
         """
         :param context: Compilation context that owns this type.
@@ -1001,6 +1002,10 @@ class CompiledType:
 
         :param conversion_requires_context: Whether converting this type from
             public to internal values requires an analysis context.
+
+        :param codegen_type: If Ada implementation code emission uses a single
+            Ada type for "compatible" compiled types (e.g. entity types), this
+            is a reference to the canonical type (e.g. the root entity type).
         """
         assert isinstance(context, CompileCtx)
 
@@ -1040,7 +1045,15 @@ class CompiledType:
         self._api_name = api_name
         self._lkt_name = lkt_name
 
-        self.type_repo_name = type_repo_name or lkt_name or name.camel
+        self.codegen_type: CompiledType
+        if codegen_type is None:
+            self.codegen_type = self
+        else:
+            self.codegen_type = codegen_type
+
+        self.type_repo_name = (
+            type_repo_name or lkt_name or self.unique_name.camel
+        )
         assert self.type_repo_name is not None
         CompiledTypeRepo.type_dict[self.type_repo_name] = self
 
@@ -1121,7 +1134,7 @@ class CompiledType:
 
     def __lt__(self, other: object) -> bool:
         assert isinstance(other, CompiledType)
-        return self.name < other.name
+        return self.unique_name < other.unique_name
 
     @property
     def public_type(self) -> CompiledType:
@@ -1172,22 +1185,22 @@ class CompiledType:
         """
         Tag this type as requiring a hash function.
         """
-        self._requires_hash_function = True
+        self.codegen_type._requires_hash_function = True
 
     def add_as_memoization_key(self, context: CompileCtx) -> None:
         """
         Add `self` to the set of types that are used as keys in the hashed maps
         used to implement properties memoization. It has to be hashable.
         """
-        context.memoization_keys.add(self)
-        context.add_pending_required_hash_function(self)
+        context.memoization_keys.add(self.codegen_type)
+        context.add_pending_required_hash_function(self.codegen_type)
 
     def add_as_memoization_value(self, context: CompileCtx) -> None:
         """
         Add `self` to the set of types that are used as values in the hashed
         maps used to implement properties memoization.
         """
-        context.memoization_values.add(self)
+        context.memoization_values.add(self.codegen_type)
 
     @property
     def memoization_kind(self) -> str:
@@ -1202,7 +1215,27 @@ class CompiledType:
         """
         Name of the type for general values in the Ada generated code.
         """
+        return (
+            self._name if self.codegen_type == self else self.codegen_type.name
+        )
+
+    @property
+    def unique_name(self) -> names.Name:
+        """
+        Unique identifier for this compiled type in the generated Ada code.
+
+        Due to type canonicalization (see ``codegen_type``), this may return a
+        name that does not correspond to an actual Ada type, but it can be used
+        to create unique names for a given compiled type.
+        """
         return self._name
+
+    @property
+    def is_codegen_type(self) -> bool:
+        """
+        Return whether ``self`` is its own codegen type.
+        """
+        return self == self.codegen_type
 
     @property
     def api_name(self) -> names.Name:
@@ -1551,7 +1584,9 @@ class CompiledType:
 
         Must be overriden in subclasses.
         """
-        if self._nullexpr is None:
+        if self.codegen_type != self:
+            return self.codegen_type.nullexpr
+        elif self._nullexpr is None:
             raise NoNullexprError(
                 f"{self.lkt_name} has no Ada null expression"
             )
@@ -2817,6 +2852,7 @@ class BaseStructType(CompiledType):
         api_name: str | names.Name | None = None,
         lkt_name: str | None = None,
         conversion_requires_context: bool = False,
+        codegen_type: CompiledType | None = None,
     ):
         """
         See CompiledType.__init__ for a description of the other arguments.
@@ -2858,6 +2894,7 @@ class BaseStructType(CompiledType):
             api_name=api_name,
             lkt_name=lkt_name,
             conversion_requires_context=conversion_requires_context,
+            codegen_type=codegen_type,
         )
 
     @property
@@ -2971,6 +3008,7 @@ class StructType(BaseStructType):
         has_builtin_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         conversion_requires_context: bool = False,
+        codegen_type: CompiledType | None = None,
     ):
         """
         :param name: See CompiledType.__init__.
@@ -3004,6 +3042,7 @@ class StructType(BaseStructType):
             api_name=name,
             lkt_name=name.camel,
             conversion_requires_context=conversion_requires_context,
+            codegen_type=codegen_type,
         )
         context.add_pending_composite_type(self)
 
@@ -3030,7 +3069,7 @@ class StructType(BaseStructType):
         )
 
     def require_hash_function(self) -> None:
-        if self._requires_hash_function:
+        if self.codegen_type._requires_hash_function:
             return
         super().require_hash_function()
         for f in self.get_fields():
@@ -4855,7 +4894,7 @@ class NodeBuilderType(CompiledType):
         return result
 
     def require_hash_function(self) -> None:
-        if self._requires_hash_function:
+        if self.codegen_type._requires_hash_function:
             return
         super().require_hash_function()
         for arg in self.synth_constructor_args:
@@ -4936,7 +4975,7 @@ class ArrayType(CompiledType):
     """
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
-        name = element_type.name + names.Name("Array_Type")
+        name = element_type.unique_name + names.Name("Array_Type")
         self.null_constant = names.Name("No") + name
 
         # By default, array types are not exposed. A compilation pass will tag
@@ -4976,7 +5015,16 @@ class ArrayType(CompiledType):
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.name + names.Name("Array_Access")
+        return self.element_type.unique_name + names.Name("Array_Access")
+
+    @property
+    def unique_name(self) -> names.Name:
+        return self.element_type.unique_name + names.Name("Array")
+
+    @property
+    def array_codegen_type(self) -> ArrayType:
+        assert isinstance(self.codegen_type, ArrayType)
+        return self.codegen_type
 
     @property
     def api_name(self) -> names.Name:
@@ -5001,7 +5049,13 @@ class ArrayType(CompiledType):
         Name of the internal Ada functions to instantiate this array.
         """
         return (
-            names.Name("Create") + self.element_type.name + names.Name("Array")
+            (
+                names.Name("Create")
+                + self.element_type.unique_name
+                + names.Name("Array")
+            )
+            if self.is_codegen_type
+            else self.array_codegen_type.constructor_name
         )
 
     @property
@@ -5014,9 +5068,13 @@ class ArrayType(CompiledType):
         Name of the Ada array type.
         """
         return (
-            names.Name("Internal")
-            + self.element_type.name
-            + names.Name("Array")
+            (
+                names.Name("Internal")
+                + self.element_type.unique_name
+                + names.Name("Array")
+            )
+            if self.is_codegen_type
+            else self.array_codegen_type.array_type_name
         )
 
     @property
@@ -5024,7 +5082,11 @@ class ArrayType(CompiledType):
         """
         Name of the type for values that are pointed to by general values.
         """
-        return self.element_type.name + names.Name("Array_Record")
+        return (
+            self.element_type.unique_name + names.Name("Array_Record")
+            if self.is_codegen_type
+            else self.array_codegen_type.pointed
+        )
 
     @property
     def pkg_vector(self) -> names.Name:
@@ -5032,7 +5094,11 @@ class ArrayType(CompiledType):
         Name of the Langkit_Support.Vectors package instantiation corresponding
         to this element_type.
         """
-        return self.element_type.name + names.Name("Vectors")
+        return (
+            self.element_type.unique_name + names.Name("Vectors")
+            if self.is_codegen_type
+            else self.array_codegen_type.pkg_vector
+        )
 
     def c_type(self, c_api_settings: CAPISettings) -> CAPIType:
         if (
@@ -5051,8 +5117,7 @@ class ArrayType(CompiledType):
         """
         Name of the index type for this array type.
         """
-        pkg_vector_name = self.element_type.name + names.Name("Vectors")
-        return "{}.Index_Type".format(pkg_vector_name.camel_with_underscores)
+        return f"{self.pkg_vector.camel_with_underscores}.Index_Type"
 
     def vector(self) -> str:
         """
@@ -5125,10 +5190,10 @@ class ArrayType(CompiledType):
 
     def require_unique_function(self) -> None:
         self.element_type.require_hash_function()
-        self._requires_unique_function = True
+        self.array_codegen_type._requires_unique_function = True
 
     def require_hash_function(self) -> None:
-        if self._requires_hash_function:
+        if self.codegen_type._requires_hash_function:
             return
         super().require_hash_function()
 
@@ -5142,6 +5207,7 @@ class ArrayType(CompiledType):
 
     def require_vector(self) -> None:
         self._requires_vector = True
+        self.array_codegen_type._requires_vector = True
 
     @property
     def requires_to_iterator_property(self) -> bool:
@@ -5197,7 +5263,7 @@ class SetType(CompiledType):
     """
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
-        name = element_type.name + names.Name("Set_Type")
+        name = element_type.unique_name + names.Name("Set_Type")
         self.null_constant = names.Name("No") + name
 
         # Set types cannot be exposed
@@ -5219,7 +5285,11 @@ class SetType(CompiledType):
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.name + names.Name("Set_Access")
+        return self.element_type.unique_name + names.Name("Set_Access")
+
+    @property
+    def unique_name(self) -> names.Name:
+        return self.element_type.unique_name + names.Name("Set")
 
     @property
     def lkt_name(self) -> str:
@@ -5231,7 +5301,9 @@ class SetType(CompiledType):
         Name of the Ada set type.
         """
         return (
-            names.Name("Internal") + self.element_type.name + names.Name("Set")
+            names.Name("Internal")
+            + self.element_type.unique_name
+            + names.Name("Set")
         )
 
     @property
@@ -5239,7 +5311,7 @@ class SetType(CompiledType):
         """
         Name of the type for values that are pointed to by general values.
         """
-        return self.element_type.name + names.Name("Set_Record")
+        return self.element_type.unique_name + names.Name("Set_Record")
 
     @property
     def hashed_sets_pkg_name(self) -> names.Name:
@@ -5247,7 +5319,7 @@ class SetType(CompiledType):
         Name of the instance of ``Ada.Containers.Hashed_Sets`` used by this
         set type to store its elements.
         """
-        return self.element_type.name + names.Name("Hashed_Sets")
+        return self.element_type.unique_name + names.Name("Hashed_Sets")
 
 
 class IteratorType(CompiledType):
@@ -5256,7 +5328,7 @@ class IteratorType(CompiledType):
     """
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
-        name = element_type.name + names.Name("Iterator_Type")
+        name = element_type.unique_name + names.Name("Iterator_Type")
         self.null_constant = names.Name("No") + name
         self._is_used = False
 
@@ -5279,7 +5351,11 @@ class IteratorType(CompiledType):
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.name + names.Name("Iterator_Access")
+        return self.element_type.unique_name + names.Name("Iterator_Access")
+
+    @property
+    def unique_name(self) -> names.Name:
+        return self.element_type.unique_name + names.Name("Iterator")
 
     @property
     def lkt_name(self) -> str:
@@ -5358,7 +5434,7 @@ class IteratorType(CompiledType):
         """
         return (
             names.Name("Internal")
-            + self.element_type.name
+            + self.element_type.unique_name
             + names.Name("Iterator")
         )
 

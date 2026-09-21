@@ -99,9 +99,9 @@ private package ${ada_lib_name}.Generic_Introspection is
    <% type_descs = [] %>
    % for t in all_types:
       <%
-         desc_const = f"Desc_For_{t.name}"
-         debug_name_const = f"Debug_Name_For_{t.name}"
-         doc_const = f"Type_Doc_For_{t.name}"
+         desc_const = f"Desc_For_{t.unique_name}"
+         debug_name_const = f"Debug_Name_For_{t.unique_name}"
+         doc_const = f"Type_Doc_For_{t.unique_name}"
          type_descs.append(f"{desc_const}'Access")
 
          # Do not include ".entity" for entity types, as we do not expose bare
@@ -168,9 +168,9 @@ private package ${ada_lib_name}.Generic_Introspection is
    <% enum_type_descs = [] %>
    % for t in G.enum_types:
       <%
-         desc_const = f"Enum_Desc_For_{t.name}"
-         name_const = f"Enum_Name_For_{t.name}"
-         values_const = f"Enum_Values_Name_For_{t.name}"
+         desc_const = f"Enum_Desc_For_{t.unique_name}"
+         name_const = f"Enum_Name_For_{t.unique_name}"
+         values_const = f"Enum_Values_Name_For_{t.unique_name}"
          enum_type_descs.append(f"{G.type_index(t)} => {desc_const}'Access")
       %>
 
