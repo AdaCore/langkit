@@ -122,8 +122,7 @@
 
    Empty_${cls.pointed} : aliased ${cls.pointed} :=
      (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
-   ${cls.null_constant} : constant ${cls.name} :=
-      Empty_${cls.pointed}'Access;
+   ${cls.nullexpr} : constant ${cls.name} := Empty_${cls.pointed}'Access;
 
    ## If we are on the entity type, we need a conversion function
    ## to be able to get element arrays starting from 0 and convert them into

@@ -164,9 +164,9 @@
    Empty_${cls.iterator_type_name} : aliased ${cls.iterator_type_name} :=
      (Ref_Count  => -1,
       Safety_Net => No_Iterator_Safety_Net,
-      Elements   => ${cls.element_type.array.null_constant},
+      Elements   => ${cls.element_type.array.nullexpr},
       Index      => 1);
-   ${cls.null_constant} : constant ${cls.name} :=
+   ${cls.nullexpr} : constant ${cls.name} :=
       Empty_${cls.iterator_type_name}'Access;
 
    function Next

@@ -3427,10 +3427,11 @@ class ASTNodeType(BaseStructType):
         is_root_list = base is not None and base.is_generic_list_type
         is_list = base is not None and (is_root_list or base.is_list_type)
 
-        if base is None:
-            self.null_constant = names.Name("No") + name
-        else:
-            self.null_constant = context.root_node_type.null_constant
+        null_constant = (
+            (names.Name("No") + name).camel_with_underscores
+            if base is None
+            else context.root_node_type.nullexpr
+        )
 
         if is_root_list:
             assert element_type is not None and element_type.is_ast_node
@@ -3473,7 +3474,7 @@ class ASTNodeType(BaseStructType):
             # public APIs and will (un)wrap them as entities automatically.
             exposed=True,
             is_refcounted=False,
-            nullexpr=self.null_constant.camel_with_underscores,
+            nullexpr=null_constant,
             py_nullexpr="None",
             java_nullexpr="null",
             element_type=element_type,
@@ -4977,7 +4978,7 @@ class ArrayType(CompiledType):
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
         name = element_type.unique_name + names.Name("Array_Type")
-        self.null_constant = names.Name("No") + name
+        null_constant = names.Name("No") + name
 
         # By default, array types are not exposed. A compilation pass will tag
         # only the ones that are exposed through the public API.
@@ -4988,7 +4989,7 @@ class ArrayType(CompiledType):
             fields=self.builtin_properties,
             is_ptr=True,
             is_refcounted=True,
-            nullexpr=self.null_constant.camel_with_underscores,
+            nullexpr=null_constant.camel_with_underscores,
             element_type=element_type,
             null_allowed=True,
             has_equivalent_function=True,
@@ -5265,7 +5266,7 @@ class SetType(CompiledType):
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
         name = element_type.unique_name + names.Name("Set_Type")
-        self.null_constant = names.Name("No") + name
+        null_constant = names.Name("No") + name
 
         # Set types cannot be exposed
         super().__init__(
@@ -5274,7 +5275,7 @@ class SetType(CompiledType):
             location=Location.builtin,
             is_ptr=True,
             is_refcounted=True,
-            nullexpr=self.null_constant.camel_with_underscores,
+            nullexpr=null_constant.camel_with_underscores,
             element_type=element_type,
             null_allowed=True,
             has_equivalent_function=True,
@@ -5330,7 +5331,7 @@ class IteratorType(CompiledType):
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
         name = element_type.unique_name + names.Name("Iterator_Type")
-        self.null_constant = names.Name("No") + name
+        null_constant = names.Name("No") + name
         self._is_used = False
 
         # By default, iterator types are not exposed. A compilation pass will
@@ -5341,7 +5342,7 @@ class IteratorType(CompiledType):
             location=Location.builtin,
             is_ptr=True,
             is_refcounted=True,
-            nullexpr=self.null_constant.camel_with_underscores,
+            nullexpr=null_constant.camel_with_underscores,
             element_type=element_type,
             has_equivalent_function=False,
             hashable=False,

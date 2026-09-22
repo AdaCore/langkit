@@ -31,8 +31,7 @@
 
    Empty_${cls.pointed} : aliased ${cls.pointed} :=
      (Ref_Count => -1, Items => <>);
-   ${cls.null_constant} : constant ${cls.name} :=
-      Empty_${cls.pointed}'Access;
+   ${cls.nullexpr} : constant ${cls.name} := Empty_${cls.pointed}'Access;
 
    function Contains
      (S : ${cls.name}; E : ${elt_type.name}) return Boolean;

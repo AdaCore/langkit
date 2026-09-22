@@ -127,7 +127,7 @@ private package ${ada_lib_name}.Implementation is
 
    type ${T.root_node.value_type_name};
    type ${T.root_node.name} is access all ${T.root_node.value_type_name};
-   ${T.root_node.null_constant} : constant ${T.root_node.name} := null;
+   ${T.root_node.nullexpr} : constant ${T.root_node.name} := null;
    --  Most generic AST node type
 
    pragma No_Strict_Aliasing (Internal_Context);
