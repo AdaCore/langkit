@@ -332,3 +332,52 @@ Decl <ValDecl "infer_if_branch_2" test.lkt:27:1-31:2>
                Expr <NullLit test.lkt:30:22-30:26>
                     has_type <ClassDecl "A" test.lkt:19:1-19:11>
 
+Decl <FunDecl "nil[T]" test.lkt:34:1-34:37>
+     has_type <FunctionType "() -> Array[T]" test.lkt>
+
+   Id   <RefId "Array" test.lkt:34:12-34:17>
+        has_type None
+        references <StructDecl prelude: "Array[T]">
+
+   Id   <RefId "T" test.lkt:34:18-34:19>
+        has_type None
+        references <GenericParamTypeDecl "T" test.lkt:33:9-33:10>
+
+   Expr <NullLit test.lkt:34:23-34:37>
+        has_type <StructDecl prelude: "Array[T]">
+
+      Id   <RefId "Array" test.lkt:34:28-34:33>
+           has_type None
+           references <StructDecl prelude: "Array[T]">
+
+      Id   <RefId "T" test.lkt:34:34-34:35>
+           has_type None
+           references <GenericParamTypeDecl "T" test.lkt:33:9-33:10>
+
+Decl <ValDecl "infer_generic_return_type" test.lkt:35:1-37:2>
+     has_type <StructDecl prelude: "Array[Int]">
+
+   Id   <RefId "Array" test.lkt:35:32-35:37>
+        has_type None
+        references <StructDecl prelude: "Array[T]">
+
+   Id   <RefId "Int" test.lkt:35:38-35:41>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <MatchExpr test.lkt:35:45-37:2>
+        has_type <StructDecl prelude: "Array[Int]">
+
+      Expr <NumLit test.lkt:35:51-35:52>
+           has_type <StructDecl prelude: "Int">
+
+      Decl <BindingValDecl "_" test.lkt:36:10-36:11>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <CallExpr test.lkt:36:15-36:20>
+           has_type <StructDecl prelude: "Array[Int]">
+
+         Id   <RefId "nil" test.lkt:36:15-36:18>
+              has_type <FunctionType "() -> Array[Int]" test.lkt>
+              references <FunDecl "nil[T]" test.lkt:34:1-34:37>
+

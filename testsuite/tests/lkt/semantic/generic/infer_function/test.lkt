@@ -29,3 +29,9 @@ val infer_if_branch_2 = (
     then null[A]
     else 1.do((x) => null)
 )
+
+generic[T]
+fun nil(): Array[T] = null[Array[T]]
+val infer_generic_return_type: Array[Int] = match 1 {
+    case _ => nil()
+}

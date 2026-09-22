@@ -938,22 +938,28 @@ class Decl: LktNode implements DeclarationInterface {
     |" Return True if the return type of this function is instantiated.
     @exported
     fun return_type_is_instantiated(): Bool =
-        self.as[FunctionType]?.return_type.is_instantiated()
+        self.as[FunctionType].do(
+            (ft) => {
+                val formals = ft.origin?.parent.as[GenericDecl].do(
+                    (gen) => gen.generic_params()
+                ).to_set();
+                ft.return_type.is_instantiated(formals)
+            }
+        )
 
     |" Return True if Self is an instantiated declaration, meaning that it
     |" does not use any of its declared generic types.
-    @exported
-    fun is_instantiated(): Bool =
+    fun is_instantiated(formals: Set[Entity[BaseGenericParamTypeDecl]]): Bool =
         if self.is_null then true
-        elif self is BaseGenericParamTypeDecl then false
+        elif self is BaseGenericParamTypeDecl
+        then not formals.contains(self.as[BaseGenericParamTypeDecl])
         else
             self.parent.as[GenericDecl].do(
                 (gd) =>
                 gd.generic_params().all(
                     (gf) =>
-                    not gd.children_env.get_first(gf.name())
-                    .as![TypeDecl]
-                    .matching_type(gf)
+                    gd.children_env.get_first(gf.name())
+                    .as![TypeDecl].is_instantiated(formals)
                 ),
                 default_val=true
             )
