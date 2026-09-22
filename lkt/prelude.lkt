@@ -265,6 +265,7 @@ struct Stream implements Indexable[T], Iterable[T] {
 
 |" Base class for iterator types.
 @builtin
+@covariant
 generic[T]
 struct Iterator {
 }

@@ -15,10 +15,20 @@ if u.diagnostics:
 roots = [u.root, u.root[0]]
 examples = [u.root[0], u.root[0]]
 
-for prop_root, prop_example in [
-    ("p_test_array_root", "p_test_array_example"),
+print("array:")
+for prop, arg in [
+    ("p_test_array_root", roots),
+    ("p_test_array_example", examples),
 ]:
-    print(f"{prop_root}:", getattr(u.root, prop_root)(roots))
-    print(f"{prop_example}:", getattr(u.root, prop_example)(examples))
+    print(f"  {prop}:", getattr(u.root, prop)(arg))
+print()
+
+print("iterator:")
+for prop, arg in [
+    ("p_test_iterator_root", roots),
+    ("p_test_iterator_example", examples),
+]:
+    print(f"  {prop}:", list(getattr(u.root, prop)(arg)))
+print()
 
 print("main.py: Done.")

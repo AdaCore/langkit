@@ -1734,7 +1734,11 @@ class CompiledType:
             formal, NodeBuilderType
         ):
             return self.node_type.matches(formal.node_type)
-        elif isinstance(self, ArrayType) and isinstance(formal, ArrayType):
+        elif (
+            isinstance(self, ArrayType) and isinstance(formal, ArrayType)
+        ) or (
+            isinstance(self, IteratorType) and isinstance(formal, IteratorType)
+        ):
             return self.element_type.matches(formal.element_type)
 
         if formal.is_ast_node and self.is_ast_node:
@@ -1772,9 +1776,10 @@ class CompiledType:
         if self._iterator is None:
             self._iterator = IteratorType(self.context, self)
 
-        # Only one usage of this iterator type is enough to consider it used
+        # Only one usage of an iterator type is enough to consider its codegen
+        # type to be used.
         if used:
-            self._iterator._is_used = True
+            self._iterator.iterator_codegen_type._is_used = True
 
         return self._iterator
 
@@ -5363,13 +5368,22 @@ class IteratorType(CompiledType):
             has_equivalent_function=False,
             hashable=False,
             exposed=False,
+            codegen_type=(
+                self
+                if element_type.is_codegen_type
+                else element_type.codegen_type.iterator
+            ),
         )
 
         context.add_pending_composite_type(self)
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.unique_name + names.Name("Iterator_Access")
+        return (
+            self.element_type.unique_name + names.Name("Iterator_Access")
+            if self.is_codegen_type
+            else self.codegen_type.name
+        )
 
     @property
     def unique_name(self) -> names.Name:
@@ -5378,6 +5392,11 @@ class IteratorType(CompiledType):
     @property
     def lkt_name(self) -> str:
         return f"Iterator[{self.element_type.lkt_name}]"
+
+    @property
+    def iterator_codegen_type(self) -> IteratorType:
+        assert isinstance(self.codegen_type, IteratorType)
+        return self.codegen_type
 
     @property
     def api_name(self) -> names.Name:
@@ -5451,9 +5470,13 @@ class IteratorType(CompiledType):
         Name of the Ada iterator type.
         """
         return (
-            names.Name("Internal")
-            + self.element_type.unique_name
-            + names.Name("Iterator")
+            (
+                names.Name("Internal")
+                + self.element_type.unique_name
+                + names.Name("Iterator")
+            )
+            if self.is_codegen_type
+            else self.iterator_codegen_type.iterator_type_name
         )
 
     @property
