@@ -1735,9 +1735,12 @@ class CompiledType:
         ):
             return self.node_type.matches(formal.node_type)
         elif (
-            isinstance(self, ArrayType) and isinstance(formal, ArrayType)
-        ) or (
-            isinstance(self, IteratorType) and isinstance(formal, IteratorType)
+            (isinstance(self, ArrayType) and isinstance(formal, ArrayType))
+            or (
+                isinstance(self, IteratorType)
+                and isinstance(formal, IteratorType)
+            )
+            or (isinstance(self, SetType) and isinstance(formal, SetType))
         ):
             return self.element_type.matches(formal.element_type)
 
@@ -5302,17 +5305,31 @@ class SetType(CompiledType):
             has_equivalent_function=True,
             hashable=False,
             exposed=False,
+            codegen_type=(
+                self
+                if element_type.is_codegen_type
+                else element_type.codegen_type.set
+            ),
         )
         context.add_pending_composite_type(self)
         context.add_pending_required_hash_function(element_type)
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.unique_name + names.Name("Set_Access")
+        return (
+            self.element_type.unique_name + names.Name("Set_Access")
+            if self.is_codegen_type
+            else self.codegen_type.name
+        )
 
     @property
     def unique_name(self) -> names.Name:
         return self.element_type.unique_name + names.Name("Set")
+
+    @property
+    def set_codegen_type(self) -> SetType:
+        assert isinstance(self.codegen_type, SetType)
+        return self.codegen_type
 
     @property
     def lkt_name(self) -> str:
@@ -5324,9 +5341,13 @@ class SetType(CompiledType):
         Name of the Ada set type.
         """
         return (
-            names.Name("Internal")
-            + self.element_type.unique_name
-            + names.Name("Set")
+            (
+                names.Name("Internal")
+                + self.element_type.unique_name
+                + names.Name("Set")
+            )
+            if self.is_codegen_type
+            else self.set_codegen_type.set_type_name
         )
 
     @property
@@ -5334,7 +5355,11 @@ class SetType(CompiledType):
         """
         Name of the type for values that are pointed to by general values.
         """
-        return self.element_type.unique_name + names.Name("Set_Record")
+        return (
+            self.element_type.unique_name + names.Name("Set_Record")
+            if self.is_codegen_type
+            else self.set_codegen_type.pointed
+        )
 
     @property
     def hashed_sets_pkg_name(self) -> names.Name:
@@ -5342,7 +5367,11 @@ class SetType(CompiledType):
         Name of the instance of ``Ada.Containers.Hashed_Sets`` used by this
         set type to store its elements.
         """
-        return self.element_type.unique_name + names.Name("Hashed_Sets")
+        return (
+            self.element_type.unique_name + names.Name("Hashed_Sets")
+            if self.is_codegen_type
+            else self.set_codegen_type.hashed_sets_pkg_name
+        )
 
 
 class IteratorType(CompiledType):

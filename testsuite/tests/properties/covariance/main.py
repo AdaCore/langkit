@@ -31,4 +31,12 @@ for prop, arg in [
     print(f"  {prop}:", list(getattr(u.root, prop)(arg)))
 print()
 
+print("set:")
+for prop, arg in [
+    ("p_test_set_root", roots),
+    ("p_test_set_example", examples),
+]:
+    print(f"  {prop}:", getattr(u.root, prop)(arg))
+print()
+
 print("main.py: Done.")
