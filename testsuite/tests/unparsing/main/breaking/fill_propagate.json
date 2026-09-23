@@ -1,0 +1,19 @@
+{
+  "node_configs": {
+    "DottedName": {
+      "node": {"kind": "fill", "document": "recurse"}
+    },
+    "Addition": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "recurse_field", "field": "f_lhs"},
+          "whitespace",
+          {"kind": "text", "text": "+"},
+          "line",
+          {"kind": "recurse_field", "field": "f_rhs"}
+        ]
+      }
+    }
+  }
+}

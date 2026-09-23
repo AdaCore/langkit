@@ -159,6 +159,19 @@ gpr_mains:
         breaking/comment_in_var.txt
         -t final
 
+    # Breaks after a "fill" document must break the parent group, and so must
+    # line breaks in a "fill" document. Otherwise, an extra line break is
+    # unconditionally added after the comment, resulting in a non idempotent
+    # result.
+    - main.adb
+        -c breaking/fill_restore.json
+        -A
+        breaking/comment_after_fill.txt
+    - main.adb
+        -c breaking/fill_propagate.json
+        -A
+        breaking/comment_before_fill.txt
+
     - main.adb -c table_align/no_split.json table_align/var_decls.txt
     - main.adb -c table_align/split_all.json table_align/var_decls.txt
     - main.adb -c table_align/split_comments.json table_align/var_decls.txt
