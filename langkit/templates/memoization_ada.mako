@@ -35,7 +35,7 @@ type Mmz_Key_Item (Kind : Mmz_Key_Kind := ${default_key}) is record
    case Kind is
       % for t in key_types:
          when ${t.memoization_kind} =>
-            As_${t.name} : ${t.name};
+            ${t.memoization_component} : ${t.name};
       % endfor
    end case;
 end record;

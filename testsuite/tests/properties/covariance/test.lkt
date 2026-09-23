@@ -12,6 +12,26 @@ grammar foo_grammar {
 class FooNode implements Node[FooNode] {
     fun to_int(): Int = 1
 
+    # Check that both Array[Node] and Array[Example] values can be passed to an
+    # Array[Node] formal.
+
+    fun bare_sum(items: Array[FooNode], next: Int): Int =
+        if next >= items.length()
+        then 0
+        else items.at(next).to_int() + self.bare_sum(items, next + 1)
+
+    @exported
+    fun test_array_bare_root(items: Array[Entity[FooNode]]): Int = {
+        val array_bare: Array[FooNode] = items.map((e) => e.node);
+        self.bare_sum(array_bare, 0)
+    }
+
+    @exported
+    fun test_array_bare_example(items: Array[Entity[Example]]): Int = {
+        val array_bare: Array[Example] = items.map((e) => e.node);
+        self.bare_sum(array_bare, 0)
+    }
+
     # Check that both Array[Entity[Node]] and Array[Entity[Example]] values can
     # be passed to an Array[Entity[Node]] formal.
 

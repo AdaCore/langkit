@@ -1208,7 +1208,20 @@ class CompiledType:
         Return the enumerator name that corresponds to this type for the
         discriminated record to materialize memoization keys/values.
         """
-        return (names.Name("Mmz") + self.name).camel_with_underscores
+        # Since ".name" may return the name of a subtype (instead of the name
+        # of the codegen type itself), manually fetch the codegen type.
+        result = names.Name("Mmz") + self.codegen_type.name
+        return result.camel_with_underscores
+
+    @property
+    def memoization_component(self) -> str:
+        """
+        TODO.
+        """
+        # Since ".name" may return the name of a subtype (instead of the name
+        # of the codegen type itself), manually fetch the codegen type.
+        result = names.Name("As") + self.codegen_type.name
+        return result.camel_with_underscores
 
     @property
     def name(self) -> names.Name:
@@ -3496,6 +3509,7 @@ class ASTNodeType(BaseStructType):
             hashable=True,
             type_repo_name=self.raw_name.camel,
             lkt_name=lkt_name or self.raw_name.camel,
+            codegen_type=self if is_root else T.root_node,
         )
         self._is_root_node = is_root
         self.is_generic_list_type: bool = is_generic_list_type
@@ -3658,6 +3672,12 @@ class ASTNodeType(BaseStructType):
             result = append_paragraph(result, addition)
 
         return result
+
+    @property
+    def name(self) -> names.Name:
+        # Force the use of the Ada subtype, so that we get dynamic checks in
+        # generated code.
+        return self._name
 
     def repr_name(self) -> str:
         """
@@ -3929,7 +3949,7 @@ class ASTNodeType(BaseStructType):
         returns "A.B.C".
         """
         return ".".join(
-            node.name.base_name for node in self.get_inheritance_chain()
+            node.unique_name.base_name for node in self.get_inheritance_chain()
         )
 
     @property
@@ -4663,6 +4683,14 @@ class ASTNodeType(BaseStructType):
         context: str | None = None,
     ) -> str:
         return "{}.Internal.Node".format(public_expr)
+
+    @property
+    def alloc_pkg(self) -> str:
+        """
+        Return the name of the ``Langkit_Support.Bump_Ptr.Alloc`` package
+        instantiation for this node.
+        """
+        return f"{self.unique_name}_Alloc"
 
     @property
     def parser_allocator(self) -> str:

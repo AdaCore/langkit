@@ -17,6 +17,8 @@ examples = [u.root[0], u.root[0]]
 
 print("array:")
 for prop, arg in [
+    ("p_test_array_bare_root", roots),
+    ("p_test_array_bare_example", examples),
     ("p_test_array_root", roots),
     ("p_test_array_example", examples),
 ]:

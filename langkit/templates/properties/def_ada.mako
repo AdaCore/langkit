@@ -92,19 +92,23 @@ is
            (Property => ${property.memoization_enum},
             Items    => new Mmz_Key_Array (1 ..  ${key_length}))
          do
-            Mmz_K.Items (1) := (Kind => ${property.owner.memoization_kind},
-                                As_${property.owner.name} => Self);
+            Mmz_K.Items (1) :=
+              (Kind => ${property.owner.memoization_kind},
+               ${property.owner.memoization_component} => Self);
             % for i, arg in enumerate(property.arguments, 2):
-               Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
-                                      As_${arg.type.name} => ${arg.name});
+               Mmz_K.Items (${i}) :=
+                 (Kind => ${arg.type.memoization_kind},
+                  ${arg.type.memoization_component} => ${arg.name});
                % if arg.type.is_refcounted:
-                  Inc_Ref (Mmz_K.Items (${i}).As_${arg.type.name});
+                  Inc_Ref
+                    (Mmz_K.Items (${i}).${arg.type.memoization_component});
                % endif
             % endfor
             % if property.uses_entity_info:
                Mmz_K.Items (${key_length}) :=
                  (Kind => ${T.EntityInfo.memoization_kind},
-                  As_${T.EntityInfo.name} => ${property.entity_info_name});
+                  ${T.EntityInfo.memoization_component} =>
+                    ${property.entity_info_name});
             % endif
          end return;
       end Create_Mmz_Key;
@@ -205,7 +209,8 @@ begin
                Reraise_Memoized_Error (Mmz_Val);
 
             else
-               Property_Result := Mmz_Val.As_${property.type.name};
+               Property_Result :=
+                 Mmz_Val.${property.type.memoization_component};
                % if property.type.is_refcounted:
                   Inc_Ref (Property_Result);
                % endif
@@ -314,8 +319,9 @@ begin
       if Self /= null
          and then not Self.Unit.Context.In_Populate_Lexical_Env
       then
-         Mmz_Val := (Kind => ${property.type.memoization_kind},
-                     As_${property.type.name} => Property_Result);
+         Mmz_Val :=
+           (Kind => ${property.type.memoization_kind},
+            ${property.type.memoization_component} => Property_Result);
          Add_Memoized_Value (Self.Unit, Mmz_Handle, Mmz_Val, Mmz_Stored);
          % if property.type.is_refcounted:
             if Mmz_Stored then

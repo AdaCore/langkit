@@ -63,8 +63,7 @@ package body ${ada_lib_name}.Parsers_Impl is
             ${T.root_node.value_type_name} (${cls.ada_kind_name});
          type ${access} is access all ${subtype};
          pragma No_Strict_Aliasing (${access});
-         package ${cls.name}_Alloc is new Alloc
-           (${subtype}, ${access});
+         package ${cls.alloc_pkg} is new Alloc (${subtype}, ${access});
 
          function ${cls.parser_allocator}
            (Pool : Bump_Ptr_Pool) return ${cls.name};
@@ -72,7 +71,7 @@ package body ${ada_lib_name}.Parsers_Impl is
          function ${cls.parser_allocator}
            (Pool : Bump_Ptr_Pool) return ${cls.name}
          is
-            Result      : constant ${access} := ${cls.name}_Alloc.Alloc (Pool);
+            Result      : constant ${access} := ${cls.alloc_pkg}.Alloc (Pool);
             Result_Kind : ${T.node_kind}
                with Import, Address => Result.Kind'Address;
             --  Result.Kind is a discriminant, so we can't modify it directly.

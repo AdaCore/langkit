@@ -1,5 +1,7 @@
 main.py: Running...
 array:
+  p_test_array_bare_root: 3
+  p_test_array_bare_example: 4
   p_test_array_root: 3
   p_test_array_example: 4
 
