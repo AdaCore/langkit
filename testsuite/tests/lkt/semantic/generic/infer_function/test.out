@@ -381,3 +381,26 @@ Decl <ValDecl "infer_generic_return_type" test.lkt:35:1-37:2>
               has_type <FunctionType "() -> Array[Int]" test.lkt>
               references <FunDecl "nil[T]" test.lkt:34:1-34:37>
 
+Decl <FunDecl "rec[T]" test.lkt:40:1-42:2>
+     has_type <FunctionType "() -> T" test.lkt>
+
+   Id   <RefId "T" test.lkt:40:12-40:13>
+        has_type None
+        references <GenericParamTypeDecl "T" test.lkt:39:9-39:10>
+
+   Expr <MatchExpr test.lkt:40:16-42:2>
+        has_type <GenericParamTypeDecl "T" test.lkt:39:9-39:10>
+
+      Expr <NumLit test.lkt:40:22-40:23>
+           has_type <StructDecl prelude: "Int">
+
+      Decl <BindingValDecl "_" test.lkt:41:10-41:11>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <CallExpr test.lkt:41:15-41:20>
+           has_type <GenericParamTypeDecl "T" test.lkt:39:9-39:10>
+
+         Id   <RefId "rec" test.lkt:41:15-41:18>
+              has_type <FunctionType "() -> T" test.lkt>
+              references <FunDecl "rec[T]" test.lkt:40:1-42:2>
+

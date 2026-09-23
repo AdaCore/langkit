@@ -35,3 +35,9 @@ fun nil(): Array[T] = null[Array[T]]
 val infer_generic_return_type: Array[Int] = match 1 {
     case _ => nil()
 }
+
+generic[T]
+fun rec(): T = match 1 {
+    case _ => rec()
+}
+

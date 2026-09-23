@@ -548,11 +548,7 @@ class Decl: LktNode implements DeclarationInterface {
                     expected_call.find_types_that_replace_ty(gf, generic_func)
                     .do(
                         (arr) =>
-                        arr.at(0)?.imprecise_common_ancestor_list(arr).do(
-                            (t) =>
-                            if t.matching_type(gf) then null[Entity[TypeDecl]]
-                            else t
-                        )
+                        arr.at(0)?.imprecise_common_ancestor_list(arr)
                     )
                 )
             )
