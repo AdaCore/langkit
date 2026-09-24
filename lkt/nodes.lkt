@@ -438,11 +438,6 @@ class BlockStringLine: LktNode implements TokenNode {
 class ModuleDocStringLine: LktNode implements TokenNode {
 }
 
-|" Whether this generic parameter type must be a class.
-@qualifier
-enum class ClassQualifier: LktNode {
-}
-
 |" Whether the "?" operation qualifier (to denote the null-conditional
 |" behavior) is present.
 @qualifier
@@ -950,7 +945,7 @@ class Decl: LktNode implements DeclarationInterface {
     @exported
     fun is_instantiated(): Bool =
         if self.is_null then true
-        elif self is GenericParamTypeDecl then false
+        elif self is BaseGenericParamTypeDecl then false
         else
             self.parent.as[GenericDecl].do(
                 (gd) =>
@@ -1763,14 +1758,14 @@ class GenericDecl: Decl {
                 ))
         ) & "]"
 
-    fun generic_params(): Array[Entity[GenericParamTypeDecl]] =
+    fun generic_params(): Array[Entity[BaseGenericParamTypeDecl]] =
         self.generic_param_decls.map(
-            (gfd) => gfd.decl.as[GenericParamTypeDecl]
+            (gfd) => gfd.decl.as[BaseGenericParamTypeDecl]
         )
 
     fun generic_params_names(): Array[Symbol] =
         self.generic_param_decls.map(
-            (gfd) => gfd.decl.as[GenericParamTypeDecl].name()
+            (gfd) => gfd.decl.as[BaseGenericParamTypeDecl].name()
         )
 
     fun decl_type_name(): String = "generic " & self.decl.decl_type_name()
@@ -1996,6 +1991,28 @@ class TypeDecl: Decl implements TypeInterface {
     |" which it was instantiated. Return ``self`` otherwise.
     fun get_entity_node_type(): Entity[TypeDecl] =
         self.get_instantiation_type(self.entity_type())
+
+    |" Assuming that ``self`` is a generic type with one generic parameter type
+    |" instantiated by node type ``T``, return the instantiation of the same
+    |" generic type with ``Entity[T]``.
+    fun reinstantiate_with_entity(): Entity[TypeDecl] = {
+        # Fetch the uninstantiated declaration for Entity
+        val generic_entity_type =
+            self.entity_type().as_bare_decl().as[TypeDecl];
+        # Recover the T that was used to instantiate self
+        val node_param_type =
+            self.parent.as[GenericDecl]?.instantiated_generic_params().at(0);
+        # Compute Entity[T]
+        val entity_type =
+            generic_entity_type
+                .instantiate_generic_type_decl([node_param_type]);
+
+        # Finally reinstantiate self with Entity[T]
+        self
+            .as_bare_decl()
+            .instantiate_generic_decl([entity_type])
+            .as[TypeDecl]
+    }
 
     |" Return whether ``rhs`` is equal to or is a subtype of ``self``.
     @predicate_error("$rhs is not a subtype of $Self")
@@ -2292,6 +2309,48 @@ class TypeDecl: Decl implements TypeInterface {
     fun basic_trait_from_self(): Entity[TypeDecl] =
         self.basic_trait().instantiate_generic_type_decl([self])
 
+    |" If ``self`` is the origin, return ``env`` extended with the basic trait
+    |" scope. Otherwise, return ``env`` unchanged.
+    @with_dynvars(origin)
+    fun with_basic_trait_from_self(env: LexicalEnv): LexicalEnv =
+        env.do(
+            (le) =>
+            if self == origin
+            then [le, self.basic_trait_from_self().defined_scope()].env_group()
+            else le
+        )
+
+    |" Common implementation of the ``defined_scope`` method for struct and
+    |" class types.
+    |"
+    |" ``own_envs`` must contain members declared in ``self`` itself (i.e. not
+    |" coming from inherittance).
+    @with_dynvars(origin)
+    fun struct_defined_scope(own_envs: Array[LexicalEnv]): LexicalEnv =
+        # Ensure the result includes members from the basic trait (if
+        # appropriate compared to ``origin``).
+        self.with_basic_trait_from_self(
+            (
+                # Include members from ``self`` itself
+                own_envs
+                # Then members from its base type (if any). Use the base type
+                # from the syntax instead of the `base_type()` method so that
+                # we do not get "semantic base types" from covariance: we do
+                # not want members from G[B] to hide members from G[T] if G is
+                # a covariant generic struct and T a subclass of B.
+                & [
+                    self
+                        .syn_base_type
+                        ?.referenced_decl()
+                        .as[NamedTypeDecl]
+                        ?.defined_scope()
+                ]
+                # And finally members from the traits that ``self`` implements
+                & self.traits.map((t) => t.referenced_decl()?.defined_scope())
+            )
+            .env_group()
+        )
+
     |" Traverse ``Entity`` and ``origin`` simultaneously and list all
     |" all types found in origin that would replace ty in Entity.
     |"
@@ -2326,7 +2385,7 @@ class TypeDecl: Decl implements TypeInterface {
                         )
                     )
                 ),
-                # Go through each GenericParamTypeDecl
+                # Go through each BaseGenericParamTypeDecl
                 default_val=self.parent.as[GenericDecl].do(
                     (gd) =>
                     origin.parent.as[GenericDecl].do(
@@ -2562,22 +2621,35 @@ class FunctionType: TypeDecl {
         self.is_null or self.return_type.matching_type(self.bool_type())
 }
 
-|" Declaration of a parameter type in a generic declaration.
-class GenericParamTypeDecl: TypeDecl {
-    @parse_field
-    has_class: ClassQualifier
+|" Base class for the declaration of a parameter type in a generic declaration.
+@abstract
+class BaseGenericParamTypeDecl: TypeDecl {
     @parse_field
     syn_name: DefId
+
+    @with_dynvars(origin)
+    fun defined_scope(): LexicalEnv = self.struct_defined_scope([]: LexicalEnv)
+}
+
+|" Declaration of a simple parameter type in a generic declaration.
+class GenericParamTypeDecl: BaseGenericParamTypeDecl {
+    @null_field
+    @parse_field
+    syn_base_type: TypeRef
     @parse_field
     traits: ASTList[TypeRef]
-    @parse_field
-    @null_field
-    syn_base_type: TypeRef
 
-    fun decl_type_name(): String =
-        if node.has_class.as_bool()
-        then "generic class parameter type declaration"
-        else "generic parameter type declaration"
+    fun decl_type_name(): String = "generic parameter type declaration"
+}
+
+|" Declaration of a class parameter type in a generic declaration.
+class GenericClassParamTypeDecl: BaseGenericParamTypeDecl {
+    @parse_field
+    syn_base_type: TypeRef
+    @parse_field
+    traits: ASTList[TypeRef]
+
+    fun decl_type_name(): String = "generic class parameter type declaration"
 }
 
 |" Explicit named type declaration.
@@ -2589,12 +2661,7 @@ class NamedTypeDecl: TypeDecl {
 
     @with_dynvars(origin)
     fun defined_scope(): LexicalEnv =
-        self.decls.children_env.do(
-            (le) =>
-            if self == origin
-            then [le, self.basic_trait_from_self().defined_scope()].env_group()
-            else le
-        )
+        self.with_basic_trait_from_self(self.decls.children_env)
 }
 
 |" Common ancestor for declarations of regular classes and enum classes.
@@ -2611,54 +2678,24 @@ class BasicClassDecl: NamedTypeDecl {
     @call_memoizable
     @with_dynvars(origin)
     fun defined_scope(): LexicalEnv =
-        (
-            [
-                self.decls.children_env,
-                self.base_type().as[NamedTypeDecl]?.defined_scope()
-            ]
-            & self.traits.map((t) => t.referenced_decl()?.defined_scope())
-        )
-        .env_group()
-        .do(
-            (le) =>
-            if self == origin
-            then [le, self.basic_trait_from_self().defined_scope()].env_group()
-            else le
-        )
+        self.struct_defined_scope([self.decls.children_env])
 
     @with_dynvars(origin)
     fun defined_scope_as_entity(): LexicalEnv = {
         val entity =
             if node == node.astlist_type().node
-            then
-                self.as_bare_decl().instantiate_generic_decl(
-                    self.entity_type().as_bare_decl().as[TypeDecl]
-                    .instantiate_generic_type_decl(
-                        [self.node_env.get_first(s"T").as[TypeDecl]]
-                    )
-                    .singleton()
-                )
-                .as[BasicClassDecl]
+            then self.reinstantiate_with_entity().as[BasicClassDecl]
             else self;
-
-        (
+        val scopes =
             [
                 entity.decls.children_env,
                 entity.base_type().as[NamedTypeDecl]?.defined_scope_as_entity()
             ]
             & entity.traits.map(
                 (t) => t.referenced_decl()?.defined_scope_as_entity()
-            )
-        )
-        .env_group()
-        .do(
-            (le) =>
-            if self == origin
-            then
-                [le, entity.basic_trait_from_self().defined_scope()]
-                .env_group()
-            else le
-        )
+            );
+
+        scopes.env_group()
     }
 }
 
@@ -2879,17 +2916,12 @@ class StructDecl: NamedTypeDecl {
 
     @with_dynvars(origin)
     fun defined_scope(): LexicalEnv =
-        (
-            [self.decls.children_env]
-            & self.traits.map((t) => t.referenced_decl()?.defined_scope())
-            & [self.entity_scope(), self.update_func_env()]
-        )
-        .env_group()
-        .do(
-            (le) =>
-            if self == origin
-            then [le, self.basic_trait_from_self().defined_scope()].env_group()
-            else le
+        self.struct_defined_scope(
+            [
+                self.decls.children_env,
+                self.entity_scope(),
+                self.update_func_env()
+            ]
         )
 }
 
@@ -2920,17 +2952,7 @@ class TraitDecl: NamedTypeDecl {
     fun defined_scope_as_entity(): LexicalEnv =
         if node == node.node_trait().node
         then
-            self.as_bare_decl().instantiate_generic_decl(
-                self
-                    .entity_type()
-                    .as_bare_decl()
-                    .as[TypeDecl]
-                    .instantiate_generic_type_decl(
-                        [self.node_env.get_first(s"T").as[TypeDecl]]
-                    )
-                    .singleton()
-            )
-            .defined_scope()
+            self.reinstantiate_with_entity().defined_scope()
         else self.super()
 }
 
@@ -4541,7 +4563,7 @@ class DefId: Id implements TokenNode, DefiningNameInterface {
                 case _: EnumClassDecl => CompletionItemKind.enum_kind
                 case _: EnumLitDecl => CompletionItemKind.enum_member_kind
                 case _: EnumClassAltDecl => CompletionItemKind.enum_member_kind
-                case _: GenericParamTypeDecl =>
+                case _: BaseGenericParamTypeDecl =>
                     CompletionItemKind.type_parameter_kind
                 case _: TraitDecl => CompletionItemKind.interface_kind
                 case _ => CompletionItemKind.text_kind

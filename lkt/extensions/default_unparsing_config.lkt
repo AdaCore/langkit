@@ -189,9 +189,6 @@ class ClassDecl {
         else [indent(hardline, recurse), hardline]
 }
 
-class ClassQualifier {
-}
-
 class DeclAnnotation {
     val node = [recurse, hardline]
 }
@@ -431,6 +428,11 @@ class GenericParamDeclList {
 }
 
 class GenericParamTypeDecl {
+}
+
+class GenericClassParamTypeDecl {
+    val f_syn_base_type = [":", whitespace, recurse]
+    val f_traits = [whitespace, "implements", recurse]
 }
 
 class GenericInstantiation {

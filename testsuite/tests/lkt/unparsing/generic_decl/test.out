@@ -2,7 +2,13 @@ generic[T]
 struct S1 {
 }
 
-generic[T, U]
+generic[
+    T,
+    U implements Tr,
+    class V: Base,
+    class W implements Tr, Tr2,
+    class Y: Base implements Tr
+]
 struct S2 {
 }
 
@@ -28,7 +34,9 @@ generic[
     |" It is quite long.
     U,
     |" Documentation for V.
-    V
+    V implements Tr,
+    |" Documentation for W.
+    class W: Base implements Tr
 ]
 struct S5 {
 }

@@ -222,8 +222,17 @@ grammar lkt_grammar {
     generic_param_type <- FullDecl(
         doc
         list*(decl_annotation)
-        GenericParamTypeDecl(
-            ClassQualifier("class") def_id null(ASTList[TypeRef])
+        or(
+            | GenericParamTypeDecl(
+                def_id
+                ?pick("implements" / type_list)
+            )
+            | GenericClassParamTypeDecl(
+                "class"
+                def_id
+                ?pick(":" / type_ref)
+                ?pick("implements" / type_list)
+            )
         )
     )
     enum_lit_decl <- EnumLitDecl(def_id)
