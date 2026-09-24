@@ -100,3 +100,19 @@
    fun:start_thread
    fun:clone
 }
+
+# On RHES8, the OCaml testcase exhibits memory leaks during the elaboration of
+# some shared libraries. The precise cause is unknown, but these leaks do not
+# really matter.
+{
+   RHES8 dl-tls leak
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:UnknownInlinedFun
+   fun:allocate_dtv_entry
+   fun:allocate_and_init
+   fun:tls_get_addr_tail.isra.0
+   fun:__tls_get_addr
+   ...
+}
