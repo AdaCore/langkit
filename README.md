@@ -83,11 +83,11 @@ directory:
 This is just a wrapper passing convenient options to the real testsuite
 driver that is in `testsuite/testsuite.py`.
 
-Note that even though the testsuite framework requires Python 3.11, it is
+Note that even though the testsuite framework requires Python 3.11+, it is
 possible to run the tests themselves using a different Python interpreter. For
-instance, to run them using Python 3.7, run:
+instance, to run them using Python 3.14, run:
 
-    $ python manage.py test --with-python=python3.7
+    $ python manage.py test --with-python=python3.14
 
 If you want to learn more about this test driver's options (for instance to run
 tests under Valgrind), add a `-h` flag.
