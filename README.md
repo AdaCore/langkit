@@ -52,7 +52,8 @@ First, clone the `adasat` repository in the `langkit` subdirectory of the
 
     $ git clone https://github.com/AdaCore/adasat langkit/adasat
 
-Then, install the Langkit Python package itself:
+Then, install the Langkit Python package itself in the current Python
+environment:
 
     $ python -m pip install .
 
@@ -60,11 +61,11 @@ Build the `Langkit_Support` library as well as the Liblktlang support library:
 
     $ python manage.py make --no-mypy --library-types=static,static-pic,relocatable
 
-Install the `Langkit_Support` library:
+Install the `Langkit_Support` library to `$PREFIX`:
 
     $ python manage.py install-langkit-support $PREFIX --library-types=static,static-pic,relocatable
 
-Install the Liblktlang support library:
+Install the Liblktlang support library to `$PREFIX`:
 
     $ python -m langkit.scripts.lkm install -c lkt/langkit.yaml $PREFIX --library-types=static,static-pic,relocatable --disable-all-mains
 
