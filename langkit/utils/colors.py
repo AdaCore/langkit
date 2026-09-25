@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+import os
 import sys
 from typing import Iterator
 
@@ -39,9 +40,15 @@ class Colors:
         cls._enabled = False
 
 
-# Keep colors when we are running under GDB. Otherwise, disable colors as soon
-# as one of stdout or stderr is not a TTY.
-if not has_gdb and (not sys.stdout.isatty() or not sys.stderr.isatty()):
+# Disable colors if one of the following is true:
+#
+# * The NO_COLOR environment variable is set and not empty (see
+#   https://no-color.org/).
+#
+# * One of stdout or stderr is not a TTY, except if we are running under GDB.
+if os.environ.get("NO_COLOR") or not (
+    (sys.stdout.isatty() and sys.stderr.isatty()) or has_gdb
+):
     Colors.disable_colors()
 
 
