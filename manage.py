@@ -6,6 +6,7 @@ import json
 import os
 import os.path as P
 from pathlib import Path, PurePath
+import shlex
 import shutil
 import subprocess
 import sys
@@ -13,10 +14,9 @@ import tempfile
 from typing import Callable, Dict, List
 
 from langkit.packaging import NativeLibPackager, Platform
-import langkit.scripts.lkm as lkm
+import langkit.utils
 from langkit.utils import (
     LibraryType,
-    add_to_path,
     format_printenv,
     get_cpu_count,
     parse_cmdline_args,
@@ -73,6 +73,7 @@ def create_subparser(
     with_no_lksp: bool = False,
     with_no_mypy: bool = False,
     with_output: bool = False,
+    with_verbose: bool = False,
 ) -> ArgumentParser:
     """
     Create a subparser with given ``fn`` as func. Extract doc and name from
@@ -94,6 +95,7 @@ def create_subparser(
     :param with_no_lksp: Whether to create the --no-langkit-support option.
     :param with_no_mypy: Whether to create the --no-mypy option.
     :param with_output: Whether to create the --output option.
+    :param with_verbose: Whether to create the --verbose option.
     """
     subparser = subparsers.add_parser(
         name=fn.__name__.replace("_", "-"),
@@ -185,6 +187,13 @@ def create_subparser(
             action="store_true",
             help="Whether to disable type-checking with mypy.",
         )
+    if with_verbose:
+        subparser.add_argument(
+            "--verbose",
+            "-v",
+            action="store_true",
+            help="Enable verbose mode.",
+        )
 
     def wrapper(args: Namespace, rest: List[str]):
         if len(rest) > 0:
@@ -201,6 +210,46 @@ def create_subparser(
     return subparser
 
 
+def run_subprocess(
+    args: Namespace,
+    argv: list[str],
+    cwd: str | None = None,
+    env: dict[str, str] | None = None,
+    check: bool = True,
+) -> subprocess.CompletedProcess:
+    """
+    ``subprocess.run`` wrapper that logs the command line arguments if nedeed.
+    """
+    if args.verbose:
+        print(shlex.join(argv))
+    return subprocess.run(argv, cwd=cwd, env=env, check=check)
+
+
+def run_lkm(
+    args: Namespace,
+    argv: list[str],
+):
+    """
+    ``lkm`` script wrapper that logs the command line arguments if nedeed.
+    """
+    run_subprocess(args, [sys.executable, "-m", "langkit.scripts.lkm"] + argv)
+
+
+def add_to_path(
+    args: Namespace,
+    env: dict[str, str],
+    name: str,
+    item: str,
+) -> None:
+    """
+    ``langkit.utils.add_to_path`` wrapper that logs the new environment
+    variable value if nedeed.
+    """
+    if args.verbose:
+        print(f"export {name}={shlex.join([env[name]])}")
+    langkit.utils.add_to_path(env, name, item)
+
+
 def build_langkit_support(args: Namespace) -> None:
     """
     Build Langkit_Support.
@@ -215,6 +264,8 @@ def build_langkit_support(args: Namespace) -> None:
     ]
     if args.build_dir:
         base_argv.extend([f"--relocate-build-tree={build_dir}"])
+    if args.verbose:
+        base_argv.append("-v")
 
     gargs = parse_cmdline_args(args.gargs)
 
@@ -228,15 +279,18 @@ def build_langkit_support(args: Namespace) -> None:
     for library_type in args.library_types:
         for lexch in glob.glob(lexch_pattern):
             os.remove(lexch)
-        subprocess.check_call(
+        run_subprocess(
+            args,
             base_argv
             + ["-P", SUPPORT_GPR, f"-XLIBRARY_TYPE={library_type.value}"]
-            + gargs
+            + gargs,
         )
 
     # SigSegV handler is a relocatable library, skip if only static requested
     if LibraryType.relocatable in args.library_types:
-        subprocess.check_call(base_argv + ["-P", SIGSEGV_HANDLER_GPR] + gargs)
+        run_subprocess(
+            args, base_argv + ["-P", str(SIGSEGV_HANDLER_GPR)] + gargs
+        )
 
 
 def langkit_support_env_map(
@@ -284,18 +338,21 @@ def install_langkit_support(args: Namespace) -> None:
         base_argv.extend([f"--relocate-build-tree={args.build_dir}"])
     if args.force:
         base_argv.append("-f")
+    if args.verbose:
+        base_argv.append("-v")
 
     # Install the static libraries first, so that in the resulting project
     # files, "static" is the default library type.
     lib_types = [l.value for l in args.library_types]
     for library_type in ("static", "static-pic", "relocatable"):
         if library_type in lib_types:
-            subprocess.check_call(
+            run_subprocess(
+                args,
                 base_argv
                 + [
                     f"-XLIBRARY_TYPE={library_type}",
                     f"--build-name={library_type}",
-                ]
+                ],
             )
 
     # Also deploy the unparsing configuration format doc so that downstream
@@ -408,6 +465,9 @@ def bootstrap_build_args(args: Namespace, generate: bool = False) -> list[str]:
         # is unreliable for them: just don't rely on it.
         argv.append("--force")
 
+    if args.verbose:
+        argv.append("-v")
+
     return argv
 
 
@@ -427,16 +487,16 @@ def prepare_bootstrap(args: Namespace) -> None:
 
     # First check if Liblktlang can be imported: if that's the case, there is
     # nothing else to do.
-    p = subprocess.run([*check_argv, "-q"])
+    p = run_subprocess(args, [*check_argv, "-q"], check=False)
     if p.returncode == 0:
         return
 
     print("Bootstrap Liblktlang needs to be built")
     sys.stdout.flush()
-    lkm.main(bootstrap_build_args(args))
+    run_lkm(args, bootstrap_build_args(args))
 
     # For dev convenience, abort early if Liblktlang still cannot be imported
-    subprocess.check_call(check_argv)
+    run_subprocess(args, check_argv)
 
 
 def bootstrap(args: Namespace) -> None:
@@ -462,12 +522,13 @@ def bootstrap(args: Namespace) -> None:
     )
 
     # Regenerate the Lkt project in the bootstrap directory
-    lkm.main(
-        [
-            *BOOTSTRAP_LKM_RUN_BASE_ARGS,
-            *bootstrap_build_args(args, generate=True),
-        ]
-    )
+    argv = [
+        *BOOTSTRAP_LKM_RUN_BASE_ARGS,
+        *bootstrap_build_args(args, generate=True),
+    ]
+    if args.verbose:
+        argv.append("-v")
+    run_lkm(args, argv)
 
     # Now that we have the codegen for the bootstrap project, its Lkt sources
     # (just copies of the Lkt project itself) are no longer useful: just remove
@@ -507,7 +568,9 @@ def make(args: Namespace) -> None:
     # built and available to build Liblktlang.
     if not args.no_langkit_support:
         build_langkit_support(args)
-        add_to_path(os.environ, "GPR_PROJECT_PATH", str(SUPPORT_ROOT))
+        env = dict(os.environ)
+        add_to_path(args, env, "GPR_PROJECT_PATH", str(SUPPORT_ROOT))
+        os.environ.update(env)
 
     lib_types = ",".join(l.value for l in args.library_types)
     argv = [
@@ -534,7 +597,10 @@ def make(args: Namespace) -> None:
     for gargs in args.gargs or []:
         argv.append(f"--gargs={gargs}")
 
-    lkm.main([*BOOTSTRAP_LKM_RUN_BASE_ARGS, *argv])
+    if args.verbose:
+        argv.append("-v")
+
+    run_lkm(args, [*BOOTSTRAP_LKM_RUN_BASE_ARGS, *argv])
 
     # Unless disabled, run mypy to type check Langkit itself. We need to do
     # this after building Liblktlang as Langkit depend on them.
@@ -549,8 +615,8 @@ def run_mypy(args: Namespace) -> None:
     # Make sure mypy can find the type hints for the Liblktlang Python
     # bindings.
     env = dict(os.environ)
-    add_to_path(env, "MYPYPATH", str(LKT_LIB_ROOT / "build" / "python"))
-    subprocess.check_call(["mypy"], cwd=LANGKIT_ROOT, env=env)
+    add_to_path(args, env, "MYPYPATH", str(LKT_LIB_ROOT / "build" / "python"))
+    run_subprocess(args, ["mypy"], cwd=str(LANGKIT_ROOT), env=env)
 
 
 def make_lsp(args: Namespace) -> None:
@@ -570,8 +636,10 @@ def make_lsp(args: Namespace) -> None:
         argv.append("--native-lsp")
     if args.maven_executable is not None:
         argv.append(f"--maven-executable={args.maven_executable}")
+    if args.verbose:
+        argv.append("-v")
 
-    lkm.main([*BOOTSTRAP_LKM_RUN_BASE_ARGS, *argv])
+    run_lkm(args, [*BOOTSTRAP_LKM_RUN_BASE_ARGS, *argv])
 
 
 def test(args: Namespace, remaining_args: List[str]) -> None:
@@ -581,16 +649,17 @@ def test(args: Namespace, remaining_args: List[str]) -> None:
     # Propagate the return code from the testsuite to our own parent process.
     # This is useful for scripts (for instance CIs) to easily detect when there
     # is at least one failure.
-    sys.exit(
-        subprocess.call(
-            [
-                sys.executable,
-                str(LANGKIT_ROOT / "testsuite" / "testsuite.py"),
-                "-E",
-            ]
-            + remaining_args
-        )
+    p = run_subprocess(
+        args,
+        [
+            sys.executable,
+            str(LANGKIT_ROOT / "testsuite" / "testsuite.py"),
+            "-E",
+        ]
+        + remaining_args,
+        check=False,
     )
+    sys.exit(p.returncode)
 
 
 if __name__ == "__main__":
@@ -603,15 +672,20 @@ if __name__ == "__main__":
         with_build_dir=True,
         with_gargs=True,
         with_jobs=True,
+        with_verbose=True,
     )
     create_subparser(
         subparsers,
         printenv_langkit_support,
         with_build_dir=True,
         with_output=True,
+        with_verbose=True,
     )
     install_lksp = create_subparser(
-        subparsers, install_langkit_support, with_build_dir=True
+        subparsers,
+        install_langkit_support,
+        with_build_dir=True,
+        with_verbose=True,
     )
     install_lksp.add_argument(
         "--force",
@@ -640,6 +714,7 @@ if __name__ == "__main__":
         with_libs=True,
         with_no_lksp=True,
         with_no_mypy=True,
+        with_verbose=True,
     )
     printenv_parser = create_subparser(
         subparsers,
@@ -656,13 +731,14 @@ if __name__ == "__main__":
         help="Output necessary env keys to JSON.",
     )
 
-    create_subparser(subparsers, run_mypy)
+    create_subparser(subparsers, run_mypy, with_verbose=True)
 
     make_lsp_parser = create_subparser(
         subparsers,
         make_lsp,
         with_build_dir=True,
         with_jobs=True,
+        with_verbose=True,
     )
     make_lsp_parser.add_argument(
         "--native-lsp",
@@ -674,9 +750,20 @@ if __name__ == "__main__":
         help='Specify the Maven executable to use. The default one is "mvn".',
     )
 
-    create_subparser(subparsers, test, accept_unknown_args=True)
+    create_subparser(
+        subparsers,
+        test,
+        accept_unknown_args=True,
+        with_verbose=True,
+    )
 
-    create_subparser(subparsers, bootstrap, with_gargs=True, with_jobs=True)
+    create_subparser(
+        subparsers,
+        bootstrap,
+        with_gargs=True,
+        with_jobs=True,
+        with_verbose=True,
+    )
 
     create_subparser(subparsers, clean, no_basic_options=True)
 
