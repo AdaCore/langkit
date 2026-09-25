@@ -1,7 +1,6 @@
 ## vim: filetype=makoada
 
 <%namespace name="collection_expr" file="collection_expr_ada.mako" />
-<%namespace name="scopes"          file="scopes_ada.mako" />
 
 <%
    result_var = find.result_var.codegen_name
