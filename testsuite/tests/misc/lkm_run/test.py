@@ -17,7 +17,7 @@ lkm.main(["make", "-vnone", build_dir_arg])
 run_parse_cmd = [sys.executable, "run_parse.py", "libmylanglang_parse"]
 
 for label, opts in [
-    # Try to run the parse executable without the right build dir: tt
+    # Try to run the parse executable without the right build dir: it
     # should fail, as the executable is not in the PATH.
     ("Sanity check", run_parse_cmd),
     # With the right build dir however, the executable will be in the PATH.
@@ -31,10 +31,16 @@ for label, opts in [
     # that "lkm run" supports (short for --config), so the following checks
     # that it is correctly directed to the subcommand.
     ("Unknown args", ["--", sys.executable, "-c", "print('Hello world')"]),
+    # Make sure non-zero status code are correctly forwarded
+    (
+        "Non-zero status code",
+        ["--", sys.executable, "-c", "import sys; sys.exit(42)"],
+    ),
 ]:
     print("#", label)
     sys.stdout.flush()
-    lkm.main(["run", *opts])
+    status = lkm.main_no_exit(["run", *opts])
+    print(">>> run subcommand exited with status", status)
     print()
 
 print("Done")

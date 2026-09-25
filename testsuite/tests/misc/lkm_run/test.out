@@ -1,10 +1,16 @@
 # Sanity check
 File not found: libmylanglang_parse
+>>> run subcommand exited with status 0
 
 # Correct build dir
 libmylanglang_parse succeeded
+>>> run subcommand exited with status 0
 
 # Unknown args
 Hello world
+>>> run subcommand exited with status 0
+
+# Non-zero status code
+>>> run subcommand exited with status 42
 
 Done
