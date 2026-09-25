@@ -3,7 +3,7 @@ Langkit
 
 Langkit (nickname for language kit) is a tool whose purpose is to make it easy
 to create syntactic and semantic analysis engines. Write a language
-specification in our Python DSL and Langkit will generate for you an Ada
+specification in the Lkt language and Langkit will generate for you an Ada
 library with bindings for the C and Python programming languages.
 
 The generated library is meant to provide a basis to write tooling, including
@@ -50,13 +50,13 @@ We assume below that all the Ada dependencies are installed under the
 First, clone the `adasat` repository in the `langkit` subdirectory of the
 `langkit` repository:
 
-    $ (cd langkit; git clone https://github.com/AdaCore/adasat)
+    $ git clone https://github.com/AdaCore/adasat langkit/adasat
 
 Then, install the Langkit Python package itself:
 
-    $ pip install .
+    $ python -m pip install .
 
-Build the Liblktlang support library:
+Build the `Langkit_Support` library as well as the Liblktlang support library:
 
     $ python manage.py make --no-mypy --library-types=static,static-pic,relocatable
 
@@ -67,7 +67,10 @@ Install the `Langkit_Support` library:
 Install the Liblktlang support library:
 
     $ python -m langkit.scripts.lkm install -c lkt/langkit.yaml $PREFIX --library-types=static,static-pic,relocatable --disable-all-mains
-    $ pip install lkt/build/python
+
+Install the Python bindings for Liblktlang in the current Python environment:
+
+    $ python -m pip install lkt/build/python
 
 If you are interested in shared (`relocatable`) libraries only, you can omit
 the `--library-types` arguments.
