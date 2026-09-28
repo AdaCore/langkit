@@ -222,7 +222,10 @@ def run_subprocess(
     """
     if args.verbose:
         print(shlex.join(argv))
-    return subprocess.run(argv, cwd=cwd, env=env, check=check)
+    result = subprocess.run(argv, cwd=cwd, env=env)
+    if check and result.returncode != 0:
+        sys.exit(1)
+    return result
 
 
 def run_lkm(
