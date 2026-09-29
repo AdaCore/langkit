@@ -3694,6 +3694,15 @@ def f():T{}var v2:
 # Comment
 T=2;
 
+== main.adb -c breaking/fill_restore.json -A breaking/comment_after_fill.txt ==
+var v:T=a.b
+# c
++ d;
+
+== main.adb -c breaking/fill_propagate.json -A breaking/comment_before_fill.txt ==
+var v:T=a + # c
+b.c;
+
 == main.adb -c table_align/no_split.json table_align/var_decls.txt ==
 null var v1 : Int = 1;
 var v22     : Int = 2;
