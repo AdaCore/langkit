@@ -2703,6 +2703,11 @@ class CompileCtx:
             errors_checkpoint_pass,
         )
 
+        has_readme = (
+            self.config.vscode_ext is not None
+            and self.config.vscode_ext.readme_file is not None
+        )
+
         has_language_config = (
             self.config.vscode_ext is not None
             and self.config.vscode_ext.language_config_file is not None
@@ -2718,6 +2723,11 @@ class CompileCtx:
             *self.start_code_emission_passes,
             EmitterPass(
                 "emit VS Code extension", Emitter.emit_vscode_extension
+            ),
+            EmitterPass(
+                "copy README",
+                Emitter.copy_readme,
+                disabled=not has_readme,
             ),
             EmitterPass(
                 "copy language configuration",
