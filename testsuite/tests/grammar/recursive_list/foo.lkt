@@ -5,7 +5,7 @@ grammar foo_grammar {
     @main_rule stmt_rule <- list*(
         or(def_rule | pick("{" list*(stmt_rule) "}"))
     )
-    def_rule <- Def(Name(@identifier) "(" stmt_rule ")")
+    def_rule <- Def(Name(@Identifier) "(" stmt_rule ")")
 }
 
 class FooNode implements Node[FooNode] {
