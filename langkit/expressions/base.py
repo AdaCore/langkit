@@ -1501,9 +1501,12 @@ class BindingScope(ComputingExpr):
     """
     Expression that materializes new bindings.
 
-    This expression is just an annotation: it is useless from a code generation
-    point of view. It makes it possible to describe the creation of new
-    bindings for some scope.
+    Such expressions are used to handle the lifecycle of bindings in simple
+    cases: when a group of bindings must occur before starting the evaluation
+    of an expression (``expr`` constructor argument), and when the scope
+    associated to the ``BindingScope`` expression (``scope`` constructor
+    argument) needs to be finalized after the evaluation of ``expr`` has
+    completed.
     """
 
     def __init__(
@@ -3373,10 +3376,24 @@ class LocalVars:
         """
         Local variables are organized in a traditional scope hierarchy.
 
-        During properties compilation, scopes are created and variables are put
-        in a specific scope. This will help memory management: when execution
-        goes out of a scope, the ref-count for all the variables is
+        Properties compilation may create multiple scopes (``LocalVars.Scope``)
+        and variables (``LocalVars.LocalVar``):
+
+        * Each variable is associated to a specific scope.
+        * The root scope is associated to the property itself: it is finalized
+          once the root expression evaluation has completed.
+        * Each non-root scopes is associated to a specific expression. Only a
+          few being able to host a scope: ``BindingScope,
+          ``BaseCollectionExpr`` subclasses).
+
+        It is the responsibility of each expression associated to a scope to
+        finalize this scope. This is necessary for memory management: when
+        execution goes of of the scope, the ref-count for all its variables is
         decremented.
+
+        Note that properties set up a top-level exception handler that
+        finalizes all the scopes it covers: this avoids memory leaks when
+        any subexpression propagates an exception.
         """
 
         COUNT = count(0)

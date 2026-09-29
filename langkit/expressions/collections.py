@@ -60,6 +60,15 @@ class BaseCollectionExpr(ComputingExpr):
         self.iter_vars = common.iter_vars
 
         self.inner_expr = common.inner_expr
+
+        # Code generation for the loop body must take care of 1) generating GDB
+        # annotations to bind iteration variables and 2) finalize inner_scope
+        # after each iteration.
+        #
+        # Note that we do not use a BindingScope expression in this context
+        # because the scope may have to cover multiple expressions for each
+        # iteration (e.g. one expression to compute the filter, and another one
+        # to transform each collection element).
         self.inner_scope = common.inner_scope
 
         super().__init__(debug_info, result_var_name)
