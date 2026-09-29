@@ -393,8 +393,8 @@ class ManageScript:
     def add_subcommand(
         self,
         callback: (
-            Callable[[argparse.Namespace], None]
-            | Callable[[argparse.Namespace, list[str]], None]
+            Callable[[argparse.Namespace], int | None]
+            | Callable[[argparse.Namespace, list[str]], int | None]
         ),
         *,
         accept_unknown_args: bool = False,
@@ -439,13 +439,13 @@ class ManageScript:
 
         def wrapper(
             parsed_args: argparse.Namespace, unknown_args: list[str]
-        ) -> None:
+        ) -> int | None:
             if accept_unknown_args:
                 cb_full = cast(
-                    Callable[[argparse.Namespace, list[str]], None],
+                    Callable[[argparse.Namespace, list[str]], int | None],
                     callback,
                 )
-                cb_full(parsed_args, unknown_args)
+                return cb_full(parsed_args, unknown_args)
             elif unknown_args:
                 print(
                     f"{sys.argv[0]}: error: unrecognized arguments:"
@@ -454,9 +454,9 @@ class ManageScript:
                 sys.exit(1)
             else:
                 cb_single = cast(
-                    Callable[[argparse.Namespace], None], callback
+                    Callable[[argparse.Namespace], int | None], callback
                 )
-                cb_single(parsed_args)
+                return cb_single(parsed_args)
 
         parser.set_defaults(func=wrapper)
         return parser
@@ -871,8 +871,8 @@ class ManageScript:
             if getattr(parsed_args, "list_warnings", False):
                 WarningSet.print_list(self.context)
                 return 0
-            parsed_args.func(parsed_args, unknown_args)
-            return 0
+            result = parsed_args.func(parsed_args, unknown_args)
+            return 0 if result is None else result
 
         except DiagnosticError:
             if parsed_args.debug:
@@ -1598,7 +1598,7 @@ class ManageScript:
         else:
             self.write_printenv(args.output)
 
-    def do_run(self, args: argparse.Namespace, argv: list[str]) -> None:
+    def do_run(self, args: argparse.Namespace, argv: list[str]) -> int:
         """
         Run a subcommand with the environment set up to use the generated
         library.
@@ -1608,7 +1608,14 @@ class ManageScript:
         # present, do not include it in the subprocess command line.
         if argv and argv[0] == "--":
             argv = argv[1:]
-        self.check_call("Subcommand", argv)
+
+        # This subcommand is meant to be a simple wrapper: just forward its
+        # exit code, do not add extra error messages like "check_call" would.
+        try:
+            return subprocess.run(argv, env=self.derived_env()).returncode
+        except FileNotFoundError:
+            print(f"{argv[0]}: command not found", file=sys.stderr)
+            sys.exit(127)
 
     def do_create_wheel(self, args: argparse.Namespace) -> None:
         """
