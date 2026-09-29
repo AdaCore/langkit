@@ -21,6 +21,7 @@ vscode_ext:
   display_name: Lkt
   description: Extension for the Lkt language
   publisher: adacore
+  readme_file: vscode_readme.md
   language_config_file: vscode_language_config.json
   textmate_config_file: textmate_config.json
   launch_args: ["--mode=lkt"]
