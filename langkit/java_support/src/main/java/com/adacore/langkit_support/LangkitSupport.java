@@ -935,6 +935,9 @@ public class LangkitSupport {
 
         /** The parent of the node. */
         public abstract NodeInterface parent();
+
+        /** The parents of the node. */
+        public abstract NodeInterface[] parents(boolean includingSelf);
     }
 
     /**
