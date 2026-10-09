@@ -644,6 +644,12 @@ class VSCodeExtConfig:
     Version of the extension (must be SemVer compatible).
     """
 
+    readme_file: str | None = None
+    """
+    Filename relative to the extensions directory, its content is going to be
+    copied verbatim to the README.md file of the generated VS Code extension.
+    """
+
     language_config_file: str | None = None
     """
     Filename relative to the extensions directory, it contains the language

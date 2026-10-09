@@ -1,0 +1,13 @@
+Code generation was successful
+
+== test.py ==
+Copied README content:
+-----
+# Test extension
+
+This is a test extension readme file.
+
+-----
+
+
+vscode_ext_generate: Done

@@ -1285,6 +1285,22 @@ class Emitter:
                 os.path.join(export_dir, export_file), code, None
             )
 
+    def copy_readme(self, ctx: CompileCtx) -> None:
+        """
+        Copy the content ``readme_file`` in the README.md file generated in the
+        VSCode extension directory.
+        """
+        # Asser that the configuration contains a readme file
+        assert ctx.config.vscode_ext is not None
+        assert ctx.config.vscode_ext.readme_file is not None
+
+        # Then copy the readme file
+        self.copy_file_to_vscode_dir(
+            ctx,
+            ctx.config.vscode_ext.readme_file,
+            "README.md",
+        )
+
     def copy_language_config(self, ctx: CompileCtx) -> None:
         """
         Copy the language configuration provided through the language config to
@@ -1294,22 +1310,34 @@ class Emitter:
         assert ctx.config.vscode_ext is not None
         assert ctx.config.vscode_ext.language_config_file is not None
 
-        source = os.path.join(
-            ctx.extensions_dir, ctx.config.vscode_ext.language_config_file
+        # Then copy the language configuration
+        self.copy_file_to_vscode_dir(
+            ctx,
+            ctx.config.vscode_ext.language_config_file,
+            (
+                ctx.config.library.language_name.camel
+                + "-language-configuration.json"
+            ),
         )
-        target = os.path.join(
-            self.vscode_ext_dir,
-            ctx.config.library.language_name.camel
-            + "-language-configuration.json",
-        )
+
+    def copy_file_to_vscode_dir(
+        self, ctx: CompileCtx, source_file: str, target_file: str
+    ) -> None:
+        """
+        Helper function to copy the ``source_file`` (that should be relative to
+        the extensions directory) to the ``target_file`` in the VSCode
+        extension generated directory.
+        """
+        source_path = os.path.join(ctx.extensions_dir, source_file)
+        target_path = os.path.join(self.vscode_ext_dir, target_file)
 
         # Read the source configuration
-        language_config_content = None
-        with open(source, "r") as f:
-            language_config_content = f.read()
+        source_content = None
+        with open(source_path, "r") as f:
+            source_content = f.read()
 
         # Write the target file with the language configuration
-        self.write_source_file(target, language_config_content, None)
+        self.write_source_file(target_path, source_content, None)
 
     def emit_textmate_grammar(self, ctx: CompileCtx) -> None:
         """
