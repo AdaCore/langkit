@@ -10,6 +10,17 @@ struct GenStruct2 {
     g: T
 }
 
-val v1 = GenStruct(1, "")
+fun foo(x: GenStruct[Int, String]): Bool = true
+fun bar(): Bool = false
 
-val invalid1 = GenStruct2(1, "")
+val valid1 = GenStruct(1, "")
+val valid2 = GenStruct(bar(), bar())
+val valid3: GenStruct[Int, String] = GenStruct(null, null)
+val valid4: GenStruct[Int, String] = (GenStruct(null, null))
+fun valid5(): GenStruct[Int, String] = GenStruct(null, null)
+val valid6: Bool = foo(GenStruct(null, null))
+
+val invalid1: GenStruct[Int, String] = GenStruct("", null)
+val invalid2 = GenStruct(null, null)
+val invalid3: Bool = foo(GenStruct(1, 2))
+val invalid4 = GenStruct2(1, "")
