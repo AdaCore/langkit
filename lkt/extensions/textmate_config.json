@@ -11,7 +11,8 @@
         "\\b@WhenKw\\b",
         "\\b@RaiseKw\\b",
         "\\b@TryKw\\b",
-        "\\b@ImportKw\\b"
+        "\\b@ImportKw\\b",
+        "/\\bas\\b"
     ],
     "keyword.other": "\\b@DiscardKw\\b",
     "storage.type": [

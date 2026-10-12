@@ -11,8 +11,13 @@
     { "open": "{", "close": "}" },
     { "open": "[", "close": "]" },
     { "open": "(", "close": ")" },
-    { "open": "'", "close": "'", "notIn": ["string", "comment"] },
-    { "open": "\"", "close": "\"", "notIn": ["string"] }
+    { "open": "'", "close": "'" },
+    { "open": "|\"", "close": "" },
+    { "open": "|\"\"", "close": "" },
+    { "open": "\"", "close": "\"", "notIn": ["string"] },
+    { "open": "s\"", "close": "\"", "notIn": ["string"] },
+    { "open": "p\"", "close": "\"", "notIn": ["string"] },
+    { "open": "`", "close": "`" }
   ],
   "autoCloseBefore": ";.,=}]) \n\t",
   "surroundingPairs": [
@@ -21,5 +26,29 @@
     ["(", ")"],
     ["'", "'"],
     ["\"", "\""]
+  ],
+  "onEnterRules": [
+    {
+      "beforeText": "^\\s*#.*$",
+      "afterText": "^.+$",
+      "action": {
+        "indent": "none",
+        "appendText": "# "
+      }
+    },
+    {
+      "beforeText": "^\\s*\\|\" .*$",
+      "action": {
+        "indent": "none",
+        "appendText": "|\" "
+      }
+    },
+    {
+      "beforeText": "^\\s*\\|\"\" .*$",
+      "action": {
+        "indent": "none",
+        "appendText": "|\"\" "
+      }
+    }
   ]
 }
