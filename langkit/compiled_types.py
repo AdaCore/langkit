@@ -3290,6 +3290,8 @@ class ASTNodeType(BaseStructType):
     Type for an AST node.
     """
 
+    _is_root_node: bool
+    is_enum_node: bool
     kwless_raw_name: names.Name
 
     # If this is an enum onde, list of descriptions for its enum alternatives
