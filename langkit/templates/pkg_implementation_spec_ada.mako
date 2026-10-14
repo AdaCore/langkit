@@ -127,7 +127,7 @@ private package ${ada_lib_name}.Implementation is
 
    type ${T.root_node.value_type_name};
    type ${T.root_node.name} is access all ${T.root_node.value_type_name};
-   ${T.root_node.null_constant} : constant ${T.root_node.name} := null;
+   ${T.root_node.nullexpr} : constant ${T.root_node.name} := null;
    --  Most generic AST node type
 
    pragma No_Strict_Aliasing (Internal_Context);
@@ -485,7 +485,7 @@ private package ${ada_lib_name}.Implementation is
 
    ## Also generate hash functions for enum types that need one
    % for enum_type in ctx.enum_types:
-      % if enum_type.requires_hash_function:
+      % if enum_type.requires_hash_function and enum_type.is_codegen_type:
          function Hash (Self : ${enum_type.name}) return Hash_Type;
       % endif
    % endfor
@@ -686,7 +686,7 @@ private package ${ada_lib_name}.Implementation is
    -----------------------------------------------
 
    % for struct_type in ctx.struct_types:
-      % if not struct_type.has_early_decl:
+      % if not struct_type.has_early_decl and struct_type.is_codegen_type:
          ${struct_types.incomplete_decl(struct_type)}
       % endif
    % endfor
@@ -696,7 +696,7 @@ private package ${ada_lib_name}.Implementation is
    -------------------------------------------
 
    % for array_type in ctx.array_types:
-      % if not array_type.has_early_decl:
+      % if not array_type.has_early_decl and array_type.is_codegen_type:
          ${array_types.incomplete_decl(array_type)}
       % endif
    % endfor
@@ -706,7 +706,9 @@ private package ${ada_lib_name}.Implementation is
    ----------------------------------------------
 
    % for iterator_type in ctx.iterator_types:
-      % if not iterator_type.has_early_decl and iterator_type.is_used:
+      % if not iterator_type.has_early_decl \
+         and iterator_type.is_used \
+         and iterator_type.is_codegen_type:
          ${iterator_types.incomplete_decl(iterator_type)}
       % endif
    % endfor
@@ -716,7 +718,7 @@ private package ${ada_lib_name}.Implementation is
    -----------------------------------------
 
    % for set_type in ctx.set_types:
-      % if not set_type.has_early_decl:
+      % if not set_type.has_early_decl and set_type.is_codegen_type:
          ${set_types.incomplete_decl(set_type)}
       % endif
    % endfor
@@ -786,7 +788,7 @@ private package ${ada_lib_name}.Implementation is
    -----------------------------------------
 
    % for struct_type in ctx.struct_types:
-      % if not struct_type.has_early_decl:
+      % if not struct_type.has_early_decl and struct_type.is_codegen_type:
          ${struct_types.decl(struct_type)}
       % endif
    % endfor
@@ -800,7 +802,10 @@ private package ${ada_lib_name}.Implementation is
 
    % for array_type in ctx.array_types:
       % if not array_type.has_early_decl:
-         ${array_types.decl(array_type)}
+         % if array_type.is_codegen_type:
+            ${array_types.decl(array_type)}
+         % endif
+         ${array_types.to_iterator_decl(array_type)}
       % endif
    % endfor
 
@@ -809,7 +814,9 @@ private package ${ada_lib_name}.Implementation is
    --------------------
 
    % for iterator_type in ctx.iterator_types:
-      % if not iterator_type.has_early_decl and iterator_type.is_used:
+      % if not iterator_type.has_early_decl \
+         and iterator_type.is_used \
+         and iterator_type.is_codegen_type:
          ${iterator_types.decl(iterator_type)}
       % endif
    % endfor
@@ -819,7 +826,7 @@ private package ${ada_lib_name}.Implementation is
    ---------------
 
    % for set_type in ctx.set_types:
-      % if not set_type.has_early_decl:
+      % if not set_type.has_early_decl and set_type.is_codegen_type:
          ${set_types.decl(set_type)}
       % endif
    % endfor
@@ -2555,7 +2562,7 @@ private
    --  arrays and structs.
 
    % for struct_type in ctx.struct_types:
-      % if not struct_type.has_early_decl:
+      % if not struct_type.has_early_decl and struct_type.is_codegen_type:
          ${struct_types.nullexpr_decl(struct_type)}
       % endif
    % endfor

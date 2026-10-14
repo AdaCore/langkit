@@ -55,7 +55,7 @@ package body Libfoolang.Implementation.Extensions is
         (Empty   => Empty_Struct,
          Sloc    => (1, 42),
          Big_Int => Create_Big_Integer ("42"),
-         Som     => (Examples => No_Internal_Entity_Example_Array_Type));
+         Som     => (Examples => No_Internal_Entity_Array_Type));
    end Foo_Node_P_New_Struct_With_Inner;
 
 end Libfoolang.Implementation.Extensions;

@@ -912,6 +912,7 @@ class CompiledType:
         api_name: str | names.Name | None = None,
         lkt_name: str | None = None,
         conversion_requires_context: bool = False,
+        codegen_type: CompiledType | None = None,
     ) -> None:
         """
         :param context: Compilation context that owns this type.
@@ -1001,6 +1002,10 @@ class CompiledType:
 
         :param conversion_requires_context: Whether converting this type from
             public to internal values requires an analysis context.
+
+        :param codegen_type: If Ada implementation code emission uses a single
+            Ada type for "compatible" compiled types (e.g. entity types), this
+            is a reference to the canonical type (e.g. the root entity type).
         """
         assert isinstance(context, CompileCtx)
 
@@ -1040,7 +1045,15 @@ class CompiledType:
         self._api_name = api_name
         self._lkt_name = lkt_name
 
-        self.type_repo_name = type_repo_name or lkt_name or name.camel
+        self.codegen_type: CompiledType
+        if codegen_type is None:
+            self.codegen_type = self
+        else:
+            self.codegen_type = codegen_type
+
+        self.type_repo_name = (
+            type_repo_name or lkt_name or self.unique_name.camel
+        )
         assert self.type_repo_name is not None
         CompiledTypeRepo.type_dict[self.type_repo_name] = self
 
@@ -1121,7 +1134,7 @@ class CompiledType:
 
     def __lt__(self, other: object) -> bool:
         assert isinstance(other, CompiledType)
-        return self.name < other.name
+        return self.unique_name < other.unique_name
 
     @property
     def public_type(self) -> CompiledType:
@@ -1172,22 +1185,22 @@ class CompiledType:
         """
         Tag this type as requiring a hash function.
         """
-        self._requires_hash_function = True
+        self.codegen_type._requires_hash_function = True
 
     def add_as_memoization_key(self, context: CompileCtx) -> None:
         """
         Add `self` to the set of types that are used as keys in the hashed maps
         used to implement properties memoization. It has to be hashable.
         """
-        context.memoization_keys.add(self)
-        context.add_pending_required_hash_function(self)
+        context.memoization_keys.add(self.codegen_type)
+        context.add_pending_required_hash_function(self.codegen_type)
 
     def add_as_memoization_value(self, context: CompileCtx) -> None:
         """
         Add `self` to the set of types that are used as values in the hashed
         maps used to implement properties memoization.
         """
-        context.memoization_values.add(self)
+        context.memoization_values.add(self.codegen_type)
 
     @property
     def memoization_kind(self) -> str:
@@ -1195,14 +1208,47 @@ class CompiledType:
         Return the enumerator name that corresponds to this type for the
         discriminated record to materialize memoization keys/values.
         """
-        return (names.Name("Mmz") + self.name).camel_with_underscores
+        # Since ".name" may return the name of a subtype (instead of the name
+        # of the codegen type itself), manually fetch the codegen type.
+        result = names.Name("Mmz") + self.codegen_type.name
+        return result.camel_with_underscores
+
+    @property
+    def memoization_component(self) -> str:
+        """
+        TODO.
+        """
+        # Since ".name" may return the name of a subtype (instead of the name
+        # of the codegen type itself), manually fetch the codegen type.
+        result = names.Name("As") + self.codegen_type.name
+        return result.camel_with_underscores
 
     @property
     def name(self) -> names.Name:
         """
         Name of the type for general values in the Ada generated code.
         """
+        return (
+            self._name if self.codegen_type == self else self.codegen_type.name
+        )
+
+    @property
+    def unique_name(self) -> names.Name:
+        """
+        Unique identifier for this compiled type in the generated Ada code.
+
+        Due to type canonicalization (see ``codegen_type``), this may return a
+        name that does not correspond to an actual Ada type, but it can be used
+        to create unique names for a given compiled type.
+        """
         return self._name
+
+    @property
+    def is_codegen_type(self) -> bool:
+        """
+        Return whether ``self`` is its own codegen type.
+        """
+        return self == self.codegen_type
 
     @property
     def api_name(self) -> names.Name:
@@ -1551,7 +1597,9 @@ class CompiledType:
 
         Must be overriden in subclasses.
         """
-        if self._nullexpr is None:
+        if self.codegen_type != self:
+            return self.codegen_type.nullexpr
+        elif self._nullexpr is None:
             raise NoNullexprError(
                 f"{self.lkt_name} has no Ada null expression"
             )
@@ -1682,8 +1730,13 @@ class CompiledType:
         """
         Return whether `self` matches `formal`.
 
-        This is mere equality for all types but AST nodes, in which `self` is
-        allowed to be a subtype for `formal`.
+        For node and entity types, this checks the traditional inheritance
+        relation: `self` must be equal to `formal` or derive from it.
+
+        For covariant types (e.g. `Array[T1]` and `Array[T2]`), this checks
+        whether ``T1` matches `T2`.
+
+        For all other types, this checks type equality.
 
         :param formal: Type to match. `self` is checked to be a subtype of it.
         """
@@ -1694,6 +1747,15 @@ class CompiledType:
             formal, NodeBuilderType
         ):
             return self.node_type.matches(formal.node_type)
+        elif (
+            (isinstance(self, ArrayType) and isinstance(formal, ArrayType))
+            or (
+                isinstance(self, IteratorType)
+                and isinstance(formal, IteratorType)
+            )
+            or (isinstance(self, SetType) and isinstance(formal, SetType))
+        ):
+            return self.element_type.matches(formal.element_type)
 
         if formal.is_ast_node and self.is_ast_node:
             return formal in self.get_inheritance_chain()
@@ -1730,9 +1792,10 @@ class CompiledType:
         if self._iterator is None:
             self._iterator = IteratorType(self.context, self)
 
-        # Only one usage of this iterator type is enough to consider it used
+        # Only one usage of an iterator type is enough to consider its codegen
+        # type to be used.
         if used:
-            self._iterator._is_used = True
+            self._iterator.iterator_codegen_type._is_used = True
 
         return self._iterator
 
@@ -2817,6 +2880,7 @@ class BaseStructType(CompiledType):
         api_name: str | names.Name | None = None,
         lkt_name: str | None = None,
         conversion_requires_context: bool = False,
+        codegen_type: CompiledType | None = None,
     ):
         """
         See CompiledType.__init__ for a description of the other arguments.
@@ -2858,6 +2922,7 @@ class BaseStructType(CompiledType):
             api_name=api_name,
             lkt_name=lkt_name,
             conversion_requires_context=conversion_requires_context,
+            codegen_type=codegen_type,
         )
 
     @property
@@ -2971,6 +3036,7 @@ class StructType(BaseStructType):
         has_builtin_equivalent_function: bool = False,
         type_repo_name: str | None = None,
         conversion_requires_context: bool = False,
+        codegen_type: CompiledType | None = None,
     ):
         """
         :param name: See CompiledType.__init__.
@@ -3004,6 +3070,7 @@ class StructType(BaseStructType):
             api_name=name,
             lkt_name=name.camel,
             conversion_requires_context=conversion_requires_context,
+            codegen_type=codegen_type,
         )
         context.add_pending_composite_type(self)
 
@@ -3030,7 +3097,7 @@ class StructType(BaseStructType):
         )
 
     def require_hash_function(self) -> None:
-        if self._requires_hash_function:
+        if self.codegen_type._requires_hash_function:
             return
         super().require_hash_function()
         for f in self.get_fields():
@@ -3161,6 +3228,7 @@ class EntityType(StructType):
             # Langkit_Support.Lexical_Envs_Impl, and re-exported in
             # $.Implementation.
             has_builtin_equivalent_function=self.astnode.is_root_node,
+            codegen_type=None if self.astnode.is_root_node else T.entity,
         )
         self.is_entity_type = True
         self._element_type = astnode
@@ -3290,6 +3358,8 @@ class ASTNodeType(BaseStructType):
     Type for an AST node.
     """
 
+    _is_root_node: bool
+    is_enum_node: bool
     kwless_raw_name: names.Name
 
     # If this is an enum onde, list of descriptions for its enum alternatives
@@ -3385,10 +3455,11 @@ class ASTNodeType(BaseStructType):
         is_root_list = base is not None and base.is_generic_list_type
         is_list = base is not None and (is_root_list or base.is_list_type)
 
-        if base is None:
-            self.null_constant = names.Name("No") + name
-        else:
-            self.null_constant = context.root_node_type.null_constant
+        null_constant = (
+            (names.Name("No") + name).camel_with_underscores
+            if base is None
+            else context.root_node_type.nullexpr
+        )
 
         if is_root_list:
             assert element_type is not None and element_type.is_ast_node
@@ -3431,13 +3502,14 @@ class ASTNodeType(BaseStructType):
             # public APIs and will (un)wrap them as entities automatically.
             exposed=True,
             is_refcounted=False,
-            nullexpr=self.null_constant.camel_with_underscores,
+            nullexpr=null_constant,
             py_nullexpr="None",
             java_nullexpr="null",
             element_type=element_type,
             hashable=True,
             type_repo_name=self.raw_name.camel,
             lkt_name=lkt_name or self.raw_name.camel,
+            codegen_type=self if is_root else T.root_node,
         )
         self._is_root_node = is_root
         self.is_generic_list_type: bool = is_generic_list_type
@@ -3600,6 +3672,12 @@ class ASTNodeType(BaseStructType):
             result = append_paragraph(result, addition)
 
         return result
+
+    @property
+    def name(self) -> names.Name:
+        # Force the use of the Ada subtype, so that we get dynamic checks in
+        # generated code.
+        return self._name
 
     def repr_name(self) -> str:
         """
@@ -3871,7 +3949,7 @@ class ASTNodeType(BaseStructType):
         returns "A.B.C".
         """
         return ".".join(
-            node.name.base_name for node in self.get_inheritance_chain()
+            node.unique_name.base_name for node in self.get_inheritance_chain()
         )
 
     @property
@@ -4607,6 +4685,14 @@ class ASTNodeType(BaseStructType):
         return "{}.Internal.Node".format(public_expr)
 
     @property
+    def alloc_pkg(self) -> str:
+        """
+        Return the name of the ``Langkit_Support.Bump_Ptr.Alloc`` package
+        instantiation for this node.
+        """
+        return f"{self.unique_name}_Alloc"
+
+    @property
     def parser_allocator(self) -> str:
         """
         Return the name of the function to call in parsers to allocate this
@@ -4853,7 +4939,7 @@ class NodeBuilderType(CompiledType):
         return result
 
     def require_hash_function(self) -> None:
-        if self._requires_hash_function:
+        if self.codegen_type._requires_hash_function:
             return
         super().require_hash_function()
         for arg in self.synth_constructor_args:
@@ -4934,8 +5020,8 @@ class ArrayType(CompiledType):
     """
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
-        name = element_type.name + names.Name("Array_Type")
-        self.null_constant = names.Name("No") + name
+        name = element_type.unique_name + names.Name("Array_Type")
+        null_constant = names.Name("No") + name
 
         # By default, array types are not exposed. A compilation pass will tag
         # only the ones that are exposed through the public API.
@@ -4946,11 +5032,16 @@ class ArrayType(CompiledType):
             fields=self.builtin_properties,
             is_ptr=True,
             is_refcounted=True,
-            nullexpr=self.null_constant.camel_with_underscores,
+            nullexpr=null_constant.camel_with_underscores,
             element_type=element_type,
             null_allowed=True,
             has_equivalent_function=True,
             hashable=element_type.hashable,
+            codegen_type=(
+                self
+                if element_type.is_codegen_type
+                else element_type.codegen_type.array
+            ),
         )
 
         self._requires_unique_function = False
@@ -4974,7 +5065,20 @@ class ArrayType(CompiledType):
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.name + names.Name("Array_Access")
+        return (
+            self.element_type.unique_name + names.Name("Array_Access")
+            if self.is_codegen_type
+            else self.codegen_type.name
+        )
+
+    @property
+    def unique_name(self) -> names.Name:
+        return self.element_type.unique_name + names.Name("Array")
+
+    @property
+    def array_codegen_type(self) -> ArrayType:
+        assert isinstance(self.codegen_type, ArrayType)
+        return self.codegen_type
 
     @property
     def api_name(self) -> names.Name:
@@ -4999,7 +5103,13 @@ class ArrayType(CompiledType):
         Name of the internal Ada functions to instantiate this array.
         """
         return (
-            names.Name("Create") + self.element_type.name + names.Name("Array")
+            (
+                names.Name("Create")
+                + self.element_type.unique_name
+                + names.Name("Array")
+            )
+            if self.is_codegen_type
+            else self.array_codegen_type.constructor_name
         )
 
     @property
@@ -5012,9 +5122,13 @@ class ArrayType(CompiledType):
         Name of the Ada array type.
         """
         return (
-            names.Name("Internal")
-            + self.element_type.name
-            + names.Name("Array")
+            (
+                names.Name("Internal")
+                + self.element_type.unique_name
+                + names.Name("Array")
+            )
+            if self.is_codegen_type
+            else self.array_codegen_type.array_type_name
         )
 
     @property
@@ -5022,7 +5136,11 @@ class ArrayType(CompiledType):
         """
         Name of the type for values that are pointed to by general values.
         """
-        return self.element_type.name + names.Name("Array_Record")
+        return (
+            self.element_type.unique_name + names.Name("Array_Record")
+            if self.is_codegen_type
+            else self.array_codegen_type.pointed
+        )
 
     @property
     def pkg_vector(self) -> names.Name:
@@ -5030,7 +5148,11 @@ class ArrayType(CompiledType):
         Name of the Langkit_Support.Vectors package instantiation corresponding
         to this element_type.
         """
-        return self.element_type.name + names.Name("Vectors")
+        return (
+            self.element_type.unique_name + names.Name("Vectors")
+            if self.is_codegen_type
+            else self.array_codegen_type.pkg_vector
+        )
 
     def c_type(self, c_api_settings: CAPISettings) -> CAPIType:
         if (
@@ -5049,8 +5171,7 @@ class ArrayType(CompiledType):
         """
         Name of the index type for this array type.
         """
-        pkg_vector_name = self.element_type.name + names.Name("Vectors")
-        return "{}.Index_Type".format(pkg_vector_name.camel_with_underscores)
+        return f"{self.pkg_vector.camel_with_underscores}.Index_Type"
 
     def vector(self) -> str:
         """
@@ -5123,10 +5244,10 @@ class ArrayType(CompiledType):
 
     def require_unique_function(self) -> None:
         self.element_type.require_hash_function()
-        self._requires_unique_function = True
+        self.array_codegen_type._requires_unique_function = True
 
     def require_hash_function(self) -> None:
-        if self._requires_hash_function:
+        if self.codegen_type._requires_hash_function:
             return
         super().require_hash_function()
 
@@ -5140,6 +5261,7 @@ class ArrayType(CompiledType):
 
     def require_vector(self) -> None:
         self._requires_vector = True
+        self.array_codegen_type._requires_vector = True
 
     @property
     def requires_to_iterator_property(self) -> bool:
@@ -5195,8 +5317,8 @@ class SetType(CompiledType):
     """
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
-        name = element_type.name + names.Name("Set_Type")
-        self.null_constant = names.Name("No") + name
+        name = element_type.unique_name + names.Name("Set_Type")
+        null_constant = names.Name("No") + name
 
         # Set types cannot be exposed
         super().__init__(
@@ -5205,19 +5327,37 @@ class SetType(CompiledType):
             location=Location.builtin,
             is_ptr=True,
             is_refcounted=True,
-            nullexpr=self.null_constant.camel_with_underscores,
+            nullexpr=null_constant.camel_with_underscores,
             element_type=element_type,
             null_allowed=True,
             has_equivalent_function=True,
             hashable=False,
             exposed=False,
+            codegen_type=(
+                self
+                if element_type.is_codegen_type
+                else element_type.codegen_type.set
+            ),
         )
         context.add_pending_composite_type(self)
         context.add_pending_required_hash_function(element_type)
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.name + names.Name("Set_Access")
+        return (
+            self.element_type.unique_name + names.Name("Set_Access")
+            if self.is_codegen_type
+            else self.codegen_type.name
+        )
+
+    @property
+    def unique_name(self) -> names.Name:
+        return self.element_type.unique_name + names.Name("Set")
+
+    @property
+    def set_codegen_type(self) -> SetType:
+        assert isinstance(self.codegen_type, SetType)
+        return self.codegen_type
 
     @property
     def lkt_name(self) -> str:
@@ -5229,7 +5369,13 @@ class SetType(CompiledType):
         Name of the Ada set type.
         """
         return (
-            names.Name("Internal") + self.element_type.name + names.Name("Set")
+            (
+                names.Name("Internal")
+                + self.element_type.unique_name
+                + names.Name("Set")
+            )
+            if self.is_codegen_type
+            else self.set_codegen_type.set_type_name
         )
 
     @property
@@ -5237,7 +5383,11 @@ class SetType(CompiledType):
         """
         Name of the type for values that are pointed to by general values.
         """
-        return self.element_type.name + names.Name("Set_Record")
+        return (
+            self.element_type.unique_name + names.Name("Set_Record")
+            if self.is_codegen_type
+            else self.set_codegen_type.pointed
+        )
 
     @property
     def hashed_sets_pkg_name(self) -> names.Name:
@@ -5245,7 +5395,11 @@ class SetType(CompiledType):
         Name of the instance of ``Ada.Containers.Hashed_Sets`` used by this
         set type to store its elements.
         """
-        return self.element_type.name + names.Name("Hashed_Sets")
+        return (
+            self.element_type.unique_name + names.Name("Hashed_Sets")
+            if self.is_codegen_type
+            else self.set_codegen_type.hashed_sets_pkg_name
+        )
 
 
 class IteratorType(CompiledType):
@@ -5254,8 +5408,8 @@ class IteratorType(CompiledType):
     """
 
     def __init__(self, context: CompileCtx, element_type: CompiledType):
-        name = element_type.name + names.Name("Iterator_Type")
-        self.null_constant = names.Name("No") + name
+        name = element_type.unique_name + names.Name("Iterator_Type")
+        null_constant = names.Name("No") + name
         self._is_used = False
 
         # By default, iterator types are not exposed. A compilation pass will
@@ -5266,22 +5420,40 @@ class IteratorType(CompiledType):
             location=Location.builtin,
             is_ptr=True,
             is_refcounted=True,
-            nullexpr=self.null_constant.camel_with_underscores,
+            nullexpr=null_constant.camel_with_underscores,
             element_type=element_type,
             has_equivalent_function=False,
             hashable=False,
             exposed=False,
+            codegen_type=(
+                self
+                if element_type.is_codegen_type
+                else element_type.codegen_type.iterator
+            ),
         )
 
         context.add_pending_composite_type(self)
 
     @property
     def name(self) -> names.Name:
-        return self.element_type.name + names.Name("Iterator_Access")
+        return (
+            self.element_type.unique_name + names.Name("Iterator_Access")
+            if self.is_codegen_type
+            else self.codegen_type.name
+        )
+
+    @property
+    def unique_name(self) -> names.Name:
+        return self.element_type.unique_name + names.Name("Iterator")
 
     @property
     def lkt_name(self) -> str:
         return f"Iterator[{self.element_type.lkt_name}]"
+
+    @property
+    def iterator_codegen_type(self) -> IteratorType:
+        assert isinstance(self.codegen_type, IteratorType)
+        return self.codegen_type
 
     @property
     def api_name(self) -> names.Name:
@@ -5355,9 +5527,13 @@ class IteratorType(CompiledType):
         Name of the Ada iterator type.
         """
         return (
-            names.Name("Internal")
-            + self.element_type.name
-            + names.Name("Iterator")
+            (
+                names.Name("Internal")
+                + self.element_type.unique_name
+                + names.Name("Iterator")
+            )
+            if self.is_codegen_type
+            else self.iterator_codegen_type.iterator_type_name
         )
 
     @property

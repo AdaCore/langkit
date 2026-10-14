@@ -387,6 +387,13 @@ def make_to_iterator(
     # Make sure we generate code for this iterator type
     elt_type.create_iterator(used=True)
 
+    # If the owner type of "node_data" has a codegen type, then what actually
+    # gets called is the corresponding node data of its codegen type.
+    owner = prefix.type
+    assert isinstance(owner, ArrayType)
+    assert node_data == owner._to_iterator_property
+    node_data = owner.array_codegen_type._to_iterator_property
+
     return CallExpr(
         debug_info,
         result_var_name="Iter",

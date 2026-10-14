@@ -1,0 +1,98 @@
+# Test that covariant generics (Array, Iterator, Set) are correctly handled
+# during code generation.
+
+from lexer_example import foo_lexer
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun to_int(): Int = 1
+
+    # Check that both Array[Node] and Array[Example] values can be passed to an
+    # Array[Node] formal.
+
+    fun bare_sum(items: Array[FooNode], next: Int): Int =
+        if next >= items.length()
+        then 0
+        else items.at(next).to_int() + self.bare_sum(items, next + 1)
+
+    @exported
+    fun test_array_bare_root(items: Array[Entity[FooNode]]): Int = {
+        val array_bare: Array[FooNode] = items.map((e) => e.node);
+        self.bare_sum(array_bare, 0)
+    }
+
+    @exported
+    fun test_array_bare_example(items: Array[Entity[Example]]): Int = {
+        val array_bare: Array[Example] = items.map((e) => e.node);
+        self.bare_sum(array_bare, 0)
+    }
+
+    # Check that both Array[Entity[Node]] and Array[Entity[Example]] values can
+    # be passed to an Array[Entity[Node]] formal.
+
+    fun sum(items: Array[Entity[FooNode]], next: Int): Int =
+        if next >= items.length()
+        then 0
+        else items.at(next).to_int() + self.sum(items, next + 1)
+
+    @exported
+    fun test_array_root(items: Array[Entity[FooNode]]): Int = self.sum(items, 0)
+
+    @exported
+    fun test_array_example(items: Array[Entity[Example]]): Int =
+        self.sum(items, 0)
+
+    # Check that both Iterator[Entity[Node]] and Iterator[Entity[Example]]
+    # values can be passed to an Iterator[Entity[[Node]].
+
+    fun iterator_identity(
+        it: Iterator[Entity[FooNode]]
+    ): Iterator[Entity[FooNode]] = it
+
+    @exported
+    fun test_iterator_root(
+        items: Array[Entity[FooNode]]
+    ): Iterator[Entity[FooNode]] = {
+        val it: Iterator[Entity[FooNode]] = items.to_iterator();
+        self.iterator_identity(it)
+    }
+
+    @exported
+    fun test_iterator_example(
+        items: Array[Entity[Example]]
+    ): Iterator[Entity[FooNode]] = {
+        val it: Iterator[Entity[Example]] = items.to_iterator();
+        self.iterator_identity(it)
+    }
+
+    # Check that both Set[Entity[Node]] and Set[Entity[Example]] values can be
+    # passed to an Set[Entity[[Node]].
+
+    @external()
+    fun set_to_array(s: Set[Entity[FooNode]]): Array[Entity[FooNode]]
+
+    @exported
+    fun test_set_root(
+        items: Array[Entity[FooNode]]
+    ): Array[Entity[FooNode]] = {
+        val s: Set[Entity[FooNode]] = items.to_set();
+        self.set_to_array(s)
+    }
+
+    @exported
+    fun test_set_example(
+        items: Array[Entity[Example]]
+    ): Array[Entity[FooNode]] = {
+        val s: Set[Entity[Example]] = items.to_set();
+        self.set_to_array(s)
+    }
+}
+
+class Example: FooNode implements TokenNode {
+    fun to_int(): Int = 2
+}

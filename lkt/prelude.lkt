@@ -230,6 +230,7 @@ trait Iterable {
 |" Base class for array types.
 @builtin
 @array
+@covariant
 generic[T]
 struct Array implements Sized, Indexable[T], Iterable[T] {
     |" Turn the array into an iterator.
@@ -252,6 +253,7 @@ struct Array implements Sized, Indexable[T], Iterable[T] {
 }
 
 @builtin
+@covariant
 generic[T]
 struct Set implements Sized, Iterable[T] {
 }
@@ -264,6 +266,7 @@ struct Stream implements Indexable[T], Iterable[T] {
 
 |" Base class for iterator types.
 @builtin
+@covariant
 generic[T]
 struct Iterator {
 }

@@ -992,8 +992,9 @@ package ${ada_lib_name}.Implementation.C is
      (chars_ptr, System.Address);
 
    % for array_type in ctx.array_types:
-      % if array_type.element_type.is_entity_type and \
-            array_type.element_type != T.entity:
+      % if array_type.element_type.is_entity_type \
+            and array_type.element_type != T.entity \
+            and array_type.is_codegen_type:
          function Convert is new Ada.Unchecked_Conversion
            (${array_type.name}, ${T.entity.array.name});
          function Convert is new Ada.Unchecked_Conversion

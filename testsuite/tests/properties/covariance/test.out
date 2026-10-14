@@ -1,0 +1,17 @@
+main.py: Running...
+array:
+  p_test_array_bare_root: 3
+  p_test_array_bare_example: 4
+  p_test_array_root: 3
+  p_test_array_example: 4
+
+iterator:
+  p_test_iterator_root: [<ExampleList main.txt:1:1-1:8>, <Example main.txt:1:1-1:8>]
+  p_test_iterator_example: [<Example main.txt:1:1-1:8>, <Example main.txt:1:1-1:8>]
+
+set:
+  p_test_set_root: [<Example main.txt:1:1-1:8>, <ExampleList main.txt:1:1-1:8>]
+  p_test_set_example: [<Example main.txt:1:1-1:8>]
+
+main.py: Done.
+Done
