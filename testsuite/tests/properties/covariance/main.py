@@ -38,7 +38,9 @@ for prop, arg in [
     ("p_test_set_root", roots),
     ("p_test_set_example", examples),
 ]:
-    print(f"  {prop}:", getattr(u.root, prop)(arg))
+    print(
+        f"  {prop}:", sorted(getattr(u.root, prop)(arg), key=lambda n: str(n))
+    )
 print()
 
 print("main.py: Done.")
