@@ -293,17 +293,17 @@ class BaseDriver(DiffTestDriver):
         for_coverage=False,
         memcheck=False,
         valgrind_suppressions=None,
+        catch_error=True,
         analyze_output=True,
     ):
         """
-        Run a subprocess with `argv` and check it completes with status code 0.
+        Wrapper around e3.testsuite.driver.classic.ClassicTestDriver.shell to
+        handle code coverage and memory checking with Valgrind.
 
-        In case of failure, the test output is appended to the actual output
-        and a TestError is raised.
-
-        :param list[str] argv: List of arguments to pass to the subprocess.
-        :param None|dict[str, str] env: If provided, environment variables to
-            pass to the subprocess.
+        :param argv: See
+            e3.testsuite.driver.classic.ClassicTestDriver.shell.
+        :param env: See
+            e3.testsuite.driver.classic.ClassicTestDriver.shell.
         :param bool for_coverage: If true and if coverage is enabled, produce a
             trace file.
         :param bool memcheck: If true and if Valgrind runs are requested, run
@@ -312,7 +312,9 @@ class BaseDriver(DiffTestDriver):
             non-zero.
         :param suppressions: List of names for suppression files to pass to
             Valgrind (see drivers.valgrind.suppression_file).
-        :param bool analyze_output: See
+        :param catch_error: See
+            e3.testsuite.driver.classic.ClassicTestDriver.shell.
+        :param analyze_output: See
             e3.testsuite.driver.classic.ClassicTestDriver.shell.
         """
         if for_coverage and self.coverage_enabled:
@@ -330,7 +332,12 @@ class BaseDriver(DiffTestDriver):
         for dirname in self.extra_lkt_path:
             self.add_path(env, "LKT_PATH", dirname)
 
-        self.shell(argv, env=env, analyze_output=analyze_output)
+        return self.shell(
+            argv,
+            env=env,
+            catch_error=catch_error,
+            analyze_output=analyze_output,
+        )
 
     @property
     def memcheck_for_lkt(self) -> bool:

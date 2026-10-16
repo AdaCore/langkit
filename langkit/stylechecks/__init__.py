@@ -1016,6 +1016,7 @@ def langkit_main(langkit_root: str, files: list[str] = []) -> None:
         os.path.join("langkit", "support", "obj"),
         os.path.join("lkt", "bootstrap"),
         os.path.join("lkt", "build"),
+        os.path.join("lkt", "lktformat", "obj"),
         "out",
         os.path.join("stylechecks", "tests.py"),
         os.path.join("testsuite", "python_support", "expect.py"),

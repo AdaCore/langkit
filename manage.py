@@ -30,6 +30,7 @@ SIGSEGV_HANDLER_ROOT = LANGKIT_ROOT / "sigsegv_handler"
 SIGSEGV_HANDLER_GPR = SIGSEGV_HANDLER_ROOT / "langkit_sigsegv_handler.gpr"
 LKT_LIB_ROOT = LANGKIT_ROOT / "lkt"
 LKT_BOOTSTRAP_ROOT = LKT_LIB_ROOT / "bootstrap"
+LKTFORMAT_GPR = LKT_LIB_ROOT / "lktformat" / "lktformat.gpr"
 
 BOOTSTRAP_LKM_BASE_ARGS = [
     f"--config={LKT_BOOTSTRAP_ROOT / 'langkit.yaml'}",
@@ -613,6 +614,27 @@ def make(args: Namespace) -> None:
 
     run_lkm(args, [*BOOTSTRAP_LKM_RUN_BASE_ARGS, *argv])
 
+    # Build lktformat, with the same build mode as Liblktlang, and any library
+    # type that is active.
+    build_mode = args.build_mode
+    library_type = args.library_types[0]
+    run_lkm(
+        args,
+        [
+            "run",
+            *lkt_config_args(args),
+            "--",
+            "gprbuild",
+            "-P",
+            str(LKTFORMAT_GPR),
+            f"-XBUILD_MODE={build_mode}",
+            f"-XLIBRARY_TYPE={library_type.value}",
+            # Liblktformat was built above: do not let gprbuild rebuild it just
+            # because compiler switches may be slightly different.
+            "-XLIBLKTLANG_EXTERNALLY_BUILT=true",
+        ],
+    )
+
     # Unless disabled, run mypy to type check Langkit itself. We need to do
     # this after building Liblktlang as Langkit depend on them.
     if not args.no_mypy:
@@ -655,6 +677,18 @@ def test(args: Namespace, remaining_args: List[str]) -> None:
     """
     Run Langkit's testsuite.
     """
+    env = dict(os.environ)
+
+    # Make the lktformat built in the source tree available in the environment.
+    # For dev envs, we expect a previous version of it in the env: this is not
+    # the one we want to test here.
+    add_to_path(
+        args,
+        env,
+        "PATH",
+        str(LKT_LIB_ROOT / "lktformat" / "obj" / args.build_mode),
+    )
+
     # Propagate the return code from the testsuite to our own parent process.
     # This is useful for scripts (for instance CIs) to easily detect when there
     # is at least one failure.
@@ -666,6 +700,7 @@ def test(args: Namespace, remaining_args: List[str]) -> None:
             "-E",
         ]
         + remaining_args,
+        env=env,
         check=False,
     )
     sys.exit(p.returncode)

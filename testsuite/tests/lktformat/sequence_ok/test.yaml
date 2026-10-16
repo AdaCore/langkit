@@ -1,0 +1,5 @@
+description: |
+  Basic check that all given Lkt source files are reformatted.
+driver: lktformat
+argv: [foo.lkt, bar.lkt]
+expected_status_code: 0
