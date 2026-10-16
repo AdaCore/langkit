@@ -13,3 +13,26 @@ val in_broken =
         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
         bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
     )
+
+val with_comments =
+    # Comment 1
+    n is
+    # Comment 2
+    Aaaaaaaaaaaaaaaaaaaa
+    | Bbbbbbbbbbbbbbbbbbb
+    # Comment 3
+    | Cccccccccccccccc
+    | Dddddddddddddddd
+    | Eeeeeeeeeeee
+
+val in_binop =
+    n is Aaaaaaaaaaaaaaaaaaaa
+    | Bbbbbbbbbbbbbbbbbbb
+    | Cccccccccccccccc
+    | Dddddddddddddddd
+    | Eeeeeeeeeeee
+    and n.parent is Aaaaaaaaaaaaaaaaaaaa
+    | Bbbbbbbbbbbbbbbbbbb
+    | Cccccccccccccccc
+    | Dddddddddddddddd
+    | Eeeeeeeeeeee
