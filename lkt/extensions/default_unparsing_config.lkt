@@ -228,19 +228,25 @@ class ElsifBranch {
     val node =
         [
             hardline,
-            "elif",
-            whitespace,
-            recurse(f_cond_expr),
-            group(line, "then", whitespace, recurse(f_then_expr))
+            flushLineBreaks,
+            group(
+                match this_node.f_cond_expr {
+                    case BlockExpr | ParenExpr =>
+                        ["elif", whitespace, recurse(f_cond_expr)]
+                    case _ =>
+                        group(indent("elif", line, recurse(f_cond_expr)))
+                },
+                line,
+
+                flushLineBreaks,
+                match this_node.f_then_expr {
+                    case BlockExpr | ParenExpr =>
+                        ["then", whitespace, recurse(f_then_expr)]
+                    case _ =>
+                        group(indent("then", line, recurse(f_then_expr)))
+                }
+            )
         ]
-    val f_cond_expr = match this_field {
-        case BlockExpr | ParenExpr => recurse
-        case _ => group(indent(softline, recurse))
-    }
-    val f_then_expr = match this_field {
-        case BlockExpr | ParenExpr => recurse
-        case _ => group(indent(softline, recurse))
-    }
 }
 
 class ElsifBranchList {
@@ -578,30 +584,36 @@ class IfExpr {
     val node =
         group(
             group(
-                "if",
-                whitespace,
-                recurse(f_cond_expr),
+                flushLineBreaks,
+                match this_node.f_cond_expr {
+                    case BlockExpr | ParenExpr =>
+                        ["if", whitespace, recurse(f_cond_expr)]
+                    case _ =>
+                        group(indent("if", line, recurse(f_cond_expr)))
+                },
                 line,
-                "then",
-                whitespace,
-                recurse(f_then_expr)
+
+                flushLineBreaks,
+                match this_node.f_then_expr {
+                    case BlockExpr | ParenExpr =>
+                        ["then", whitespace, recurse(f_then_expr)]
+                    case _ =>
+                        group(indent("then", line, recurse(f_then_expr)))
+                }
             ),
+
             group(recurse(f_alternatives)),
             line,
-            group("else", whitespace, recurse(f_else_expr))
+
+            flushLineBreaks,
+            match this_node.f_else_expr {
+                case BlockExpr | ParenExpr =>
+                    ["else", whitespace, recurse(f_else_expr)]
+                case _ =>
+                    group(indent("else", line, recurse(f_else_expr)))
+            }
+
         )
-    val f_cond_expr = match this_field {
-        case BlockExpr | ParenExpr => recurse
-        case _ => group(indent(softline, recurse))
-    }
-    val f_else_expr = match this_field {
-        case BlockExpr | ParenExpr => recurse
-        case _ => group(indent(softline, recurse))
-    }
-    val f_then_expr = match this_field {
-        case BlockExpr | ParenExpr => recurse
-        case _ => group(indent(softline, recurse))
-    }
 }
 
 class Import {
