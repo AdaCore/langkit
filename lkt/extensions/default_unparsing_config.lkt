@@ -789,7 +789,26 @@ class LktNodeList {
 
 class LogicAssign {
     val node =
-        group(recurse(f_dest_var), line, "<-", whitespace, recurse(f_value))
+        if this_node.parent is BinOp
+        then
+            group(
+                indent(
+                    recurse(f_dest_var),
+                    line,
+                    "<-",
+                    whitespace,
+                    recurse(f_value),
+                    bubbleUpTrailingTrivias=true
+                )
+            )
+        else
+            group(
+                recurse(f_dest_var),
+                line,
+                "<-",
+                whitespace,
+                recurse(f_value)
+            )
 }
 
 class LogicExpr {
@@ -800,11 +819,50 @@ class LogicPredicate {
 
 class LogicPropagate {
     val node =
-        group(recurse(f_dest_var), line, "<-", whitespace, recurse(f_call))
+        if this_node.parent is BinOp
+        then
+            group(
+                indent(
+                    recurse(f_dest_var),
+                    line,
+                    "<-",
+                    whitespace,
+                    recurse(f_call),
+                    bubbleUpTrailingTrivias=true
+                )
+            )
+        else
+            group(
+                recurse(f_dest_var),
+                line,
+                "<-",
+                whitespace,
+                recurse(f_call)
+            )
 }
 
 class LogicUnify {
-    val node = group(recurse(f_lhs), line, "<->", whitespace, recurse(f_rhs))
+    val node =
+        if this_node.parent is BinOp
+        then
+            group(
+                indent(
+                    recurse(f_lhs),
+                    line,
+                    "<->",
+                    whitespace,
+                    recurse(f_rhs),
+                    bubbleUpTrailingTrivias=true
+                )
+            )
+        else
+            group(
+                recurse(f_lhs),
+                line,
+                "<->",
+                whitespace,
+                recurse(f_rhs)
+            )
 }
 
 class MatchBranch {

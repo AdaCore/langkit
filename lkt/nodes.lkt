@@ -1364,7 +1364,7 @@ class ComponentDecl: ExplicitlyTypedDecl {
             (
                 self.default_val.xref_equation()
                 %and self.default_val.expected_type_var
-                <- self.decl_type?.referenced_decl()
+                    <- self.decl_type?.referenced_decl()
             )
             %and {
                 bind error_location = node.default_val;
@@ -1575,7 +1575,7 @@ class FunDecl: UserValDecl {
             (
                 self.body.xref_equation()
                 %and self.body.expected_type_var
-                <- self.return_type.referenced_decl()
+                    <- self.return_type.referenced_decl()
             )
             %and {
                 bind error_location = node.body;
@@ -1685,7 +1685,7 @@ class EnvSpecDecl: Decl {
             (
                 action.xref_equation()
                 %and action.expected_type_var
-                <- self.get_builtin_type(s"EnvAction")
+                    <- self.get_builtin_type(s"EnvAction")
             )
             %and {
                 bind error_location = action.node;
