@@ -346,7 +346,7 @@ class FieldDecl {
             recurse(f_trait_ref),
             recurse(f_default_val)
         ]
-    val f_trait_ref = [whitespace, recurse]
+    val f_trait_ref = [whitespace, "implements", recurse]
     val f_default_val =
         [
             whitespace,

@@ -1,0 +1,8 @@
+class C: Foo[T] implements GI {
+
+fld: Foo[T]implements GI.f
+
+@exported
+fun f(): Foo[T]implements GI.f
+
+}
