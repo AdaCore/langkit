@@ -366,6 +366,7 @@ class FieldDecl {
 }
 
 class FullDecl {
+    val f_doc = [recurse, hardline]
 }
 
 class FullDeclList {
