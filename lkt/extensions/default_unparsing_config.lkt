@@ -257,7 +257,13 @@ class DefaultListTypeRef {
 }
 
 class DotExpr {
-    val node = group(recurse)
+    val node =
+        if this_node.parent is BinOp
+        then
+            group(indent(recurse, bubbleUpTrailingTrivias=true))
+        else
+            group(recurse)
+
     val f_prefix = [
         if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
         then recurse_flatten

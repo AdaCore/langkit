@@ -95,3 +95,27 @@ val long_call_in_parens = (
     .bbbbbbbbbb
     .ccccccccc
 )
+
+val long_in_binop =
+    aaaaaaaaaaaaaaaaaa
+        .bbbbbbbbbbbb
+        .ccccccccccccccc
+        .dddddddddddddddd
+        .eeeeeeeeeeeee
+    and fffffffffffffffffff
+        .ggggggggggggggggggggg
+        .hhhhhhhhhhhhhhhhhhh
+        .gggggggggggggg
+
+val long_in_binop_with_comments =
+    # Comment LHS
+    aaaaaaaaaaaaaaaaaa
+        .bbbbbbbbbbbb
+        .ccccccccccccccc
+        .dddddddddddddddd
+        .eeeeeeeeeeeee
+    # Comment RHS
+    and fffffffffffffffffff
+        .ggggggggggggggggggggg
+        .hhhhhhhhhhhhhhhhhhh
+        .gggggggggggggg
