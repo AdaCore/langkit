@@ -1,8 +1,15 @@
-class C: Foo[T] implements GI {
+class LongClassName: LongGenericName[LongTypeArgName]implements
+LongGenericInterfaceName {
 
 fld: Foo[T]implements GI.f
 
+long_fld_name: LongGenericName[LongTypeArgName]implements
+LongGenericInterfaceName.long_method_name =
+self.compute_the_thing().do_some_conversion()
+
 @exported
-fun f(): Foo[T]implements GI.f
+fun long_function_name(): LongGenericName[T]implements
+LongGenericInterfaceName.long_method_name =
+self.compute_the_thing().do_some_conversion()
 
 }
