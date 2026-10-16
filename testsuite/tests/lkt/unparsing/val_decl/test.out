@@ -1,0 +1,13 @@
+# Putting a comment between "=" and the initialization expression used to break
+# the group in that expression, so we used to have::
+#
+#   val v =
+#       # Commenting a complex expression
+#       aaaaaaaaaaaaaaaa
+#       + bbbbbbbbbbbbbb
+#       + ccccccccccccc
+#       + dddddddddddd
+
+val v =
+    # Commenting a complex expression
+    aaaaaaaaaaaaaaaa + bbbbbbbbbbbbbb + ccccccccccccc + dddddddddddd
