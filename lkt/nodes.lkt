@@ -6097,6 +6097,31 @@ enum class Op: LktNode {
     fun is_arith_op(): Bool = node is Op.Plus | Op.Minus | Op.Mult | Op.Div
 
     fun is_order_op(): Bool = node is Op.Lt | Op.Lte | Op.Gt | Op.Gte
+
+    |" Return the precedence for parsing this binary operation encoded as an
+    |" integer. Lower precedence is encoded with low numbers (0 is the lowest
+    |" priority).
+    @exported
+    fun parsing_precedence(): Int = match node {
+        case _: Op.StreamConcat => 0
+        case _: Op.StreamCons => 1
+        case _: Op.OrInt => 2
+        case _: Op.Or => 2
+        case _: Op.And => 2
+        case _: Op.LogicAnd => 2
+        case _: Op.LogicOr => 2
+        case _: Op.Lte => 3
+        case _: Op.Lt => 3
+        case _: Op.Gte => 3
+        case _: Op.Gt => 3
+        case _: Op.Eq => 3
+        case _: Op.Ne => 3
+        case _: Op.Plus => 4
+        case _: Op.Minus => 4
+        case _: Op.Amp => 4
+        case _: Op.Mult => 5
+        case _: Op.Div => 5
+    }
 }
 
 |" Argument for function calls or for annotations.

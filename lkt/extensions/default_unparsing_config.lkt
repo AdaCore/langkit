@@ -127,13 +127,59 @@ class BigNumLit {
 
 class BinOp {
     val node =
-        group(
-            recurse(f_left),
-            line,
-            recurse(f_op),
-            whitespace,
-            recurse(f_right)
-        )
+        if this_node.parent is BinOp
+        then
+            # When a binary operation does not fit on one line, also break
+            # directly nested binary operations that have the same parsing
+            # precedence.
+            #
+            # This allows logical grouping, for instance::
+            #
+            #   aaaaaa == bbbbbb
+            #   and cccccc == dddddd
+            #   and eeeeee == ffffff
+            #   and gggggg == hhhhhh
+            #
+            # "==" has higher parsing precedence, so it breaks "less easily"
+            # than "and", which has lower parsing precedence.
+            if this_node.parent.as[BinOp].f_op.p_parsing_precedence()
+               == this_node.as[BinOp].f_op.p_parsing_precedence()
+            then
+                [
+                    recurse(f_left),
+                    line,
+                    recurse(f_op),
+                    whitespace,
+                    recurse(f_right)
+                ]
+            else
+                # When the parent is a binary operation of different
+                # precedence, also schedule an extra indentation level to
+                # highlight the parse tree structure::
+                #
+                #   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                #       == bbbbbbbbbbbbbbbbbbbbbbbbbbb
+                #   and then ccccccccccccccccccccccccccccccccc
+                #       == ddddddddddddddddddd
+                group(
+                    indent(
+                        recurse(f_left),
+                        line,
+                        recurse(f_op),
+                        whitespace,
+                        recurse(f_right),
+                        bubbleUpTrailingTrivias=true
+                    )
+                )
+        else
+            group(
+                recurse(f_left),
+                line,
+                recurse(f_op),
+                whitespace,
+                recurse(f_right),
+                bubbleUpTrailingTrivias=true
+            )
 }
 
 class BlockExpr {

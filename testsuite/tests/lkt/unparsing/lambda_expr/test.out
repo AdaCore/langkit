@@ -20,10 +20,16 @@ val v7 =
 val v8 =
     n.map(
         (n) =>
-        aaaaaaaaaaaaaa + bbbbbbbbbbbbbbbb + ccccccccccccccc + ddddddddddddddd
+        aaaaaaaaaaaaaa
+        + bbbbbbbbbbbbbbbb
+        + ccccccccccccccc
+        + ddddddddddddddd
         + eeeeeeee,
         (n) =>
-        aaaaaaaaaa or bbbbbbbbbbbbbb or cccccccccccccccccc or ddddddddddd
+        aaaaaaaaaa
+        or bbbbbbbbbbbbbb
+        or cccccccccccccccccc
+        or ddddddddddd
         or eeeeeeeeee
     )
 val v9 =
