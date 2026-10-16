@@ -3,7 +3,9 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
-with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
+pragma Warnings (Off, "internal");
+with Ada.Strings.Unbounded.Aux;
+pragma Warnings (On, "internal");
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Wide_Wide_Characters.Handling;
 with Interfaces;                      use Interfaces;
@@ -196,6 +198,72 @@ package body Langkit_Support.Text is
    begin
       return Decode (S, "UTF-8");
    end From_UTF8;
+
+   -------------------
+   -- Write_Encoded --
+   -------------------
+
+   procedure Write_Encoded
+     (Output                   : File_Type;
+      Content                  : Unbounded_String;
+      From_Charset, To_Charset : String)
+   is
+      use Ada.Strings.Unbounded.Aux;
+
+      Content_Buffer      : Big_String_Access;
+      Content_Buffer_Last : Natural;
+   begin
+      --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
+      --  them here.
+
+      if Content = Null_Unbounded_String then
+         return;
+      end if;
+
+      --  To avoid both useless copies and possibly overflowing the secondary
+      --  stack with big strings, use the internal
+      --  Ada.Strings.Wide_Wide_Unbounded.Aux.Get_String API to access the
+      --  underlying string buffer.
+
+      Get_String (Content, Content_Buffer, Content_Buffer_Last);
+
+      --  Delegate the transcoding itself to GNATCOLL.Iconv using a 4096-bytes
+      --  long transcoding buffer (work in chunks).
+
+      declare
+         use GNATCOLL.Iconv;
+
+         State  : Iconv_T;
+         Status : Iconv_Result := Full_Buffer;
+
+         Inbuf       : String renames
+           Content_Buffer.all (1 ..  Content_Buffer_Last);
+         Input_Index : Positive := Inbuf'First;
+
+         Outbuf       : String (1 .. 4096);
+         Output_Index : Positive := Outbuf'First;
+      begin
+         State :=
+           Iconv_Open (To_Code => To_Charset, From_Code => From_Charset);
+
+         while Status /= GNATCOLL.Iconv.Success loop
+            Iconv (State, Inbuf, Input_Index, Outbuf, Output_Index, Status);
+            case Status is
+               when GNATCOLL.Iconv.Invalid_Multibyte_Sequence =>
+                  raise Invalid_Sequence_Error;
+
+               when GNATCOLL.Iconv.Incomplete_Multibyte_Sequence =>
+                  raise Incomplete_Sequence_Error;
+
+               when GNATCOLL.Iconv.Success | Full_Buffer =>
+                  Put (Output, Outbuf (Outbuf'First .. Output_Index - 1));
+                  Output_Index := Outbuf'First;
+            end case;
+         end loop;
+
+         Iconv_Close (State);
+      end;
+   end Write_Encoded;
 
    --------------
    -- To_Lower --

@@ -4,9 +4,11 @@
 --
 
 with Ada.Containers;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.UTF_Encoding;
 with Ada.Strings.Wide_Wide_Hash;
 with Ada.Strings.Wide_Wide_Unbounded.Wide_Wide_Hash;
+with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
 --  This package is a convenience package providing an alias for
@@ -99,6 +101,23 @@ package Langkit_Support.Text is
    function From_UTF8
      (S : Ada.Strings.UTF_Encoding.UTF_8_String) return Text_Type;
    --  Decode the given UTF-8 string into text
+
+   procedure Write_Encoded
+     (Output                   : File_Type;
+      Content                  : Unbounded_String;
+      From_Charset, To_Charset : String);
+   --  Transcode ``Content`` (encoded in ``From_Charset``) to ``To_Charset``
+   --  and write the result to ``Output``.
+   --
+   --  This propagates:
+   --
+   --  * A :ada:ref:`GNATCOLL.Iconv.Unsupported_Conversion` exception if one of
+   --    the specified charset is unsupported.
+   --  * A :ada:ref:`GNATCOLL.Iconv.Invalid_Sequence_Error` exception if
+   --    ``Content`` contains byte sequences that are invalid according to
+   --    ``From_Charset``.
+   --  * A :ada:ref:`GNATCOLL.Iconv.Incomplete_Multibyte_Sequence` exception if
+   --    ``Contents`` ends with an incomplete bytes sequence.
 
    function To_Lower (C : Character_Type) return Character_Type with Inline;
    --  Wrapper around :ada:ref:`Ada.Wide_Wide_Characters.Handling.To_Lower` to
