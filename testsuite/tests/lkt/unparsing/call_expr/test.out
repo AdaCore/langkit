@@ -88,3 +88,53 @@ val in_broken =
         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
         bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
     )
+
+val long_in_binop =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa(
+        bbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+        ccccccccccccccccccc
+    )
+    and ddddddddddddddddddddddddddddd(
+        eeeeeeeeeeeeeeeeeeeeeeeeeeee,
+        ffffffffffffffffffffff
+    )
+
+val long_in_binop_with_comments =
+    # Comment for LHS
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa(
+        bbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+        ccccccccccccccccccc
+    )
+    # Comment for RHS
+    and ddddddddddddddddddddddddddddd(
+        eeeeeeeeeeeeeeeeeeeeeeeeeeee,
+        ffffffffffffffffffffff
+    )
+
+val long_over_binop_in_binop =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        .bbbbbbbbbbbbbbbbbbbbb
+        .cccccccccccccccccccc
+        .dddddddddddddd(eeeeeeeeeeeeeeeeeeeeeeeeeeee, fffffffffffffffffff)
+    and ggggggggggggggggggggggggggggg
+        .hhhhhhhhhhhhhhhhhhhhh
+        .iiiiiiiiiiiiiiiiiiii
+        .jjjjjjjjjjjjjjj(
+            kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk,
+            llllllllllllllllllllll
+    )
+
+val long_over_binop_in_binop_with_comments =
+    # Comment for LHS
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        .bbbbbbbbbbbbbbbbbbbbb
+        .cccccccccccccccccccc
+        .dddddddddddddd(eeeeeeeeeeeeeeeeeeeeeeeeeeee, fffffffffffffffffff)
+    # Comment for RHS
+    and ggggggggggggggggggggggggggggg
+        .hhhhhhhhhhhhhhhhhhhhh
+        .iiiiiiiiiiiiiiiiiiii
+        .jjjjjjjjjjjjjjj(
+            kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk,
+            llllllllllllllllllllll
+    )

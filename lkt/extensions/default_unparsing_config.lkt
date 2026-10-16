@@ -105,14 +105,32 @@ class DestructuringPatternDetail {
 class BaseCallExpr {
     val node = group(recurse)
     val f_name = group(
-        if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
-        then recurse_flatten
-        else recurse
+        group(
+            if this_node.parent is BinOp
+            then
+                indent(
+                    if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+                    then recurse_flatten
+                    else recurse
+                )
+            else
+                if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
+                then recurse_flatten
+                else recurse,
+            id="name"
+        )
     )
     val f_args =
-      if this_field.is_empty
-      then recurse
-      else group(indent(softline, recurse), softline)
+        if this_field.is_empty
+        then recurse
+        elif this_node.parent is BinOp
+        then
+            ifBreak(
+                group(indent(indent(softline, recurse)), softline),
+                group(indent(softline, recurse), softline),
+                groupId="name"
+            )
+        else group(indent(softline, recurse), softline)
 }
 
 class BaseLexerCaseRuleAlt {
