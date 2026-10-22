@@ -1453,7 +1453,7 @@ class CompileCtx:
             self,
             name="GrammarRule",
             location=Location.builtin,
-            doc="Gramar rule to use for parsing.",
+            doc="Grammar rule to use for parsing.",
             value_names=[
                 self.grammar_rule_api_name(n)
                 for n in self.grammar.user_defined_rules
