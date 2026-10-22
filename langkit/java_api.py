@@ -71,6 +71,11 @@ class StructField:
     The Langkit compiled type of the field.
     """
 
+    doc: str | None
+    """
+    Documentation of the structure field.
+    """
+
     fields: list[StructField] | None = None
     """
     List of sub-fields if this field is a structure, None otherwise.
@@ -278,6 +283,7 @@ class JavaAPISettings(AbstractAPISettings):
                 StructField(
                     field.names.api.lower,
                     field.type,
+                    field.doc,
                     fields=(
                         self.get_struct_fields(field.type)
                         if isinstance(field.type, ct.StructType)
@@ -458,6 +464,17 @@ class JavaAPISettings(AbstractAPISettings):
         :param name: The name to mangle.
         """
         return name if name != "NONE" else "NONE_ENUM"
+
+    def format_doc_arg(self, entity: CompiledType | StructField) -> str:
+        """
+        Create a Java optional instance containing the documentation of the
+        specified entity of there is one.
+        """
+        return (
+            f'Optional.of("""\n{entity.doc}""")'
+            if entity.doc
+            else "Optional.empty()"
+        )
 
     # ----- Typing methods -----
 

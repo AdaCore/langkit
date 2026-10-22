@@ -70,10 +70,13 @@ public class LangkitSupport {
          * This class represents the description of an enumeration type.
          *
          * @param clazz Java class of the enumeration.
+         * @param doc Documentation of this enumeration type, if one has been
+         *            defined.
          * @param values Values available in this enumeration.
          */
         public record Enum(
             Class<? extends EnumInterface> clazz,
+            Optional<String> doc,
             List<EnumValue> values
         ) {}
 
@@ -91,12 +94,16 @@ public class LangkitSupport {
         /**
          * This class represents the description of a structure type.
          *
+         * @param isPublic Whether this struct type is exposed in the library
+         *                 public API.
          * @param clazz Java class corresponding to the structure.
+         * @param doc Documentation of this struct type, if there is one.
          * @param fields Fields present in the structure.
          */
         public record Struct(
             boolean isPublic,
             Class<? extends StructInterface> clazz,
+            Optional<String> doc,
             List<StructField> fields
         ) {}
 
@@ -104,10 +111,13 @@ public class LangkitSupport {
          * This class represents a field in a structure type.
          *
          * @param name Name of the field as defined in the Lkt spec.
+         * @param doc Documentation of this field, if there is one.
          * @param type Java class representing the type of the field.
+         * @param defaultValue Default value of this field, if there is one.
          */
         public record StructField(
             String name,
+            Optional<String> doc,
             Class<?> type,
             Optional<Object> defaultValue
         ) {}
@@ -121,6 +131,7 @@ public class LangkitSupport {
         * @param isListNode Whether the node is a list node.
         * @param clazz Java class of the node.
         * @param className Simple name of the Java class of the node.
+        * @param doc Documentation of this node type, if there is one.
         * @param fields Fields of the node, sorted by parsing order.
         * @param fieldDescriptions Map containing description for all fields
         *                          of the node.
@@ -131,6 +142,7 @@ public class LangkitSupport {
             boolean isListNode,
             Class<? extends NodeInterface> clazz,
             String className,
+            Optional<String> doc,
             String[] fields,
             Map<String, Field> fieldDescriptions
         ) {}
@@ -138,12 +150,14 @@ public class LangkitSupport {
         /**
         * This class represents the description of a node field.
         *
+        * @param doc Documentation of the field, if there is one.
         * @param javaMethod Reference to the Java method for the field.
         * @param params Parameters of the method.
         * @param memberRef Member reference corresponding to this field.
         * @param isNullable Whether the field result may be null.
         */
         public record Field(
+            Optional<String> doc,
             Method javaMethod,
             List<Param> params,
             MemberReferenceInterface memberRef,

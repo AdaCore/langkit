@@ -32,6 +32,7 @@
             new LangkitSupport.Reflection.Struct(
                 ${str(cls.exposed and not cls.is_entity_type).lower()},
                 ${java_type}.class,
+                ${api.format_doc_arg(cls)},
                 new ArrayList<>()
             );
 
@@ -51,9 +52,13 @@
             description.fields().add(
                 new LangkitSupport.Reflection.StructField(
                     "${field.lower_name}",
+
+                    ${api.format_doc_arg(field)},
+
                     ${api.wrapping_type(
                         field.public_type, ast_wrapping=wrap_nodes
                     )}.class,
+
                     % if field.default_value is not None:
                     Optional.ofNullable(${field.default_value})
                     % else:
