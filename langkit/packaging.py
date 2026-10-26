@@ -69,12 +69,6 @@ class BasePackager:
         )
         self.with_relocatable = LibraryType.relocatable in library_types
 
-        if self.with_static:
-            if self.platform.os == "linux" and self.platform.is_64bits:
-                self._static_libdir_name = "lib64"
-            else:
-                self._static_libdir_name = "lib"
-
         if self.with_relocatable:
             self._dyn_libdir_name = (
                 "bin" if self.platform.os == "windows" else "lib"
@@ -82,11 +76,6 @@ class BasePackager:
 
         self.is_windows = self.platform.os == "windows"
         self.dllext = ".dll" if self.is_windows else ".so"
-
-    @property
-    def static_libdir_name(self) -> str:
-        assert self.with_static
-        return self._static_libdir_name
 
     @property
     def dyn_libdir_name(self) -> str:
@@ -379,12 +368,7 @@ class NativeLibPackager(BasePackager):
         :param package_dir: Name of the directory where the package should be
             created.
         """
-        # Destination directory for copies of static libs. Make sure it exists.
-        if self.with_static:
-            static_libdir = os.path.join(package_dir, self.static_libdir_name)
-            os.makedirs(static_libdir, exist_ok=True)
-
-        # Likewise for the destination directory for copies of dynamic libs
+        # Make sure the destination directory for copies of dynamic libs exists
         if self.with_relocatable:
             dyn_libdir = os.path.join(package_dir, self.dyn_libdir_name)
             os.makedirs(dyn_libdir, exist_ok=True)
@@ -398,8 +382,6 @@ class NativeLibPackager(BasePackager):
         # Ship non-GNAT libraries. Copy all files that gprinstall created:
         # shared libs, static libs, manifests, sources, etc.
         for prefix, name in [
-            (self.gnatcoll_gmp_prefix, "gnatcoll_gmp"),
-            (self.gnatcoll_iconv_prefix, "gnatcoll_iconv"),
             (self.vss_prefix, "vss"),
             (self.prettier_ada_prefix, "prettier_ada"),
         ]:
@@ -421,41 +403,6 @@ class NativeLibPackager(BasePackager):
                         shutil.copy2(item, dest)
                     else:
                         shutil.copytree(item, dest, dirs_exist_ok=True)
-
-        # TODO??? For some reason, gnatcoll_gmp's project file tells the linker
-        # to always put "-lgmp" although it's not needed when linking with
-        # libgnatcoll_gmp.so (as it contains libgmp.a already). As a result,
-        # linking programs with Libadalang can fail because of missing gmp
-        # although it's already available. Investigation happens under
-        # R613-014. To workaround this, just provide the static library.
-        #
-        # Likewise for gnatcoll_iconv/libiconv.a.
-        #
-        # On Linux 64-bit, copy these static libraries to lib64 so that they
-        # take precedence over shared libs that would also be in lib64
-        # directories.
-        #
-        # So ship gmp and libiconv.
-        if self.with_static:
-            lib_files = [os.path.join(self.gmp_prefix, "lib", "libgmp.a")]
-            if self.libiconv_prefix:
-                lib_files.append(
-                    os.path.join(self.libiconv_prefix, "lib", "libiconv.a")
-                )
-            for f in lib_files:
-                copy_in(f, static_libdir)
-
-        # Ship libiconv's shared lib, as needed by the shared
-        # libgnatcoll_iconv.
-        if self.with_relocatable and self.libiconv_prefix:
-            for item in glob.glob(
-                os.path.join(
-                    self.libiconv_prefix,
-                    self.dyn_libdir_name,
-                    "libiconv*" + self.dllext + "*",
-                )
-            ):
-                copy_in(item, dyn_libdir)
 
         # Ship AdaSAT as well. We can simply copy the whole package.
         shutil.copytree(self.adasat_prefix, package_dir, dirs_exist_ok=True)
