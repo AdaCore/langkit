@@ -202,8 +202,7 @@ class LktNode implements Node[LktNode], LspNodeInterface {
 
     |" Unit method. Return the array builtin type.
     @exported
-    fun array_type(): Entity[NamedTypeDecl] =
-        node.get_builtin_type(s"Array__")
+    fun array_type(): Entity[NamedTypeDecl] = node.get_builtin_type(s"Array__")
 
     |" Unit method. Return the stream builtin generic type.
     @exported
@@ -286,14 +285,15 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     fun topmost_invalid_decl(): LktNode =
         node.parents().filter(
             (p) => p.as[FullDecl].do((fd) => fd.has_annotation(s"invalid"))
-        ).at(-1)
+        )
+        .at(-1)
 
     |" If name resolution on this Lkt compilation unit fails, this returns all
     |" the diagnostics that were produced while resolving it.
     @exported
     fun nameres_diagnostics(): Array[SolverDiagnostic]
-            implements LspNodeInterface.nameres_diagnostics =
-        self.solve_equation().diagnostics
+        implements LspNodeInterface.nameres_diagnostics
+    = self.solve_equation().diagnostics
 
     |" Solve the equation created by this node. This should be used on xref
     |" entry points only.
@@ -330,8 +330,7 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     @call_memoizable
     fun solve_expected_types(): Bool = self.expected_type_equation().solve()
 
-    fun generic_type_entry_point(): Bool =
-        self is BaseCallExpr
+    fun generic_type_entry_point(): Bool = self is BaseCallExpr
 
     @memoized
     @call_memoizable
@@ -392,14 +391,16 @@ class LktNode implements Node[LktNode], LspNodeInterface {
     |" Return an array of completion item for language server clients.
     @exported
     fun complete(): Array[CompleteItem]
-            implements LspNodeInterface.complete_items = {
+        implements LspNodeInterface.complete_items
+    = {
         val items = self.unit.root.children_env.get(null[Symbol]);
         # When completing a type expression, we only care about types
         if self.parents().any((p) => p is TypeRef)
-        then items.filtermap(
-            (d) => CompleteItem(declaration=d.as[Decl]),
-            (d) => d is TypeDecl
-        )
+        then
+            items.filtermap(
+                (d) => CompleteItem(declaration=d.as[Decl]),
+                (d) => d is TypeDecl
+            )
         else items.map((d) => CompleteItem(declaration=d.as[Decl]))
     }
 
@@ -474,8 +475,8 @@ class Decl: LktNode implements DeclarationInterface {
     |" Return all the defining names that this declaration defines.
     @exported
     fun def_ids(): Array[Entity[DefId]]
-            implements DeclarationInterface.defining_names =
-        [self.syn_name]
+        implements DeclarationInterface.defining_names
+    = [self.syn_name]
 
     |" Return if this declaration implements the ``Node`` trait.
     |"
@@ -483,19 +484,19 @@ class Decl: LktNode implements DeclarationInterface {
     fun implements_node(): Bool =
         self.as[ClassDecl].do(
             (cd) =>
-            not cd.traits.find(
-                (t) =>
-                t.as[GenericTypeRef].do(
-                    (gtr) =>
-                    node.children_env.get_first(
-                        gtr.type_name.as[RefId]?.symbol
-                    )
-                    .as[GenericDecl]
-                    .decl
+                not cd.traits.find(
+                    (t) =>
+                        t.as[GenericTypeRef].do(
+                            (gtr) =>
+                                node.children_env.get_first(
+                                    gtr.type_name.as[RefId]?.symbol
+                                )
+                                .as[GenericDecl]
+                                .decl
+                        )
+                        == node.node_trait()
                 )
-                == node.node_trait()
-            )
-            .is_null,
+                .is_null,
             default_val=false
         )
 
@@ -516,12 +517,17 @@ class Decl: LktNode implements DeclarationInterface {
 
     @predicate_error("$holder has no component $name")
     fun has_component(
-        @ignored holder: Entity[Decl],
-        @ignored name: Entity[RefId]
+        @ignored
+        holder: Entity[Decl],
+        @ignored
+        name: Entity[RefId]
     ): Bool = not node.is_null
 
     @predicate_error("no corresponding member in $holder")
-    fun extra_component(@ignored holder: Entity[Decl]): Bool = not node.is_null
+    fun extra_component(
+        @ignored
+        holder: Entity[Decl]
+    ): Bool = not node.is_null
 
     |" Infer the type of the function from the expected_call if Entity is a
     |" generic declaration.
@@ -545,17 +551,20 @@ class Decl: LktNode implements DeclarationInterface {
             origin.instantiate_generic_decl(
                 origin.parent.as![GenericDecl].generic_params().map(
                     (gf) =>
-                    expected_call.find_types_that_replace_ty(gf, generic_func)
-                    .do(
-                        (arr) =>
-                        arr.at(0)?.imprecise_common_ancestor_list(arr)
-                    )
+                        expected_call.find_types_that_replace_ty(
+                            gf,
+                            generic_func
+                        )
+                        .do(
+                            (arr) =>
+                                arr.at(0)?.imprecise_common_ancestor_list(arr)
+                        )
                 )
             )
             .do(
                 (rd) =>
-                if in_logic_call then rd.logic_function_type()
-                else rd.function_type()
+                    if in_logic_call then rd.logic_function_type()
+                    else rd.function_type()
             )
     }
 
@@ -585,36 +594,39 @@ class Decl: LktNode implements DeclarationInterface {
         case td: FunDecl =>
             td.function_type_aux().do(
                 (ft) =>
-                if td.is_dynamic_combiner()
-                then
-                    # Create a function type similar to the normal one, with
-                    # the exception that the first argument is an array of
-                    # logic variables instead.
-                    FunctionType(
-                        params=[self.logicvar_type().make_array_type()]
-                               & ft.params.ifilter((_, i) => i >= 1),
-                        return_type=ft.return_type,
-                        origin=ft.origin,
-                        traits=node.get_empty_type_ref_list()
-                    )
-                    .as_entity
-                else
-                    # Add a new argument at the beginning of the function type
-                    # when it is a static combiner. It must accept an entity of
-                    # the function's owning type.
-                    FunctionType(
-                        params=
-                            node.entity_type()
-                                .instantiate_generic_type_decl(
-                                    [td.owning_type().as_entity]
-                                )
-                                .singleton()
-                            & ft.params,
-                        return_type=ft.return_type,
-                        origin=ft.origin,
-                        traits=node.get_empty_type_ref_list()
-                    )
-                    .as_entity
+                    if td.is_dynamic_combiner()
+                    then
+                        # Create a function type similar to the normal one,
+                        # with the exception that the first argument is an
+                        # array of logic variables instead.
+                        FunctionType(
+                            params=(
+                                [self.logicvar_type().make_array_type()]
+                                & ft.params.ifilter((_, i) => i >= 1)
+                            ),
+                            return_type=ft.return_type,
+                            origin=ft.origin,
+                            traits=node.get_empty_type_ref_list()
+                        )
+                        .as_entity
+                    else
+                        # Add a new argument at the beginning of the function
+                        # type when it is a static combiner. It must accept an
+                        # entity of the function's owning type.
+                        FunctionType(
+                            params=(
+                                node.entity_type()
+                                    .instantiate_generic_type_decl(
+                                        [td.owning_type().as_entity]
+                                    )
+                                    .singleton()
+                                & ft.params
+                            ),
+                            return_type=ft.return_type,
+                            origin=ft.origin,
+                            traits=node.get_empty_type_ref_list()
+                        )
+                        .as_entity
             )
         case _ => null[Entity[FunctionType]]
     }
@@ -629,8 +641,7 @@ class Decl: LktNode implements DeclarationInterface {
     @call_memoizable
     fun get_type(): Entity[TypeDecl] =
         self.do(
-            (v1) =>
-            match v1 {
+            (v1) => match v1 {
                 case td: TypeDecl => td
                 case fd: FunDecl =>
                     if fd.full_decl().has_annotation(s"property")
@@ -656,18 +667,19 @@ class Decl: LktNode implements DeclarationInterface {
                             p.referenced_decl()?.get_type()
                         case p: DestructuringPatternDetail =>
                             p.referenced_decl()?.get_type()
-                        case _ => raise[Entity[TypeDecl]] PropertyError(
-                            "Invalid parsing tree"
-                        )
+                        case _ =>
+                            raise[Entity[TypeDecl]] PropertyError(
+                                "Invalid parsing tree"
+                            )
                     }
                 case lad: LambdaParamDecl =>
                     if lad.decl_type.is_null
                     then
                         lad.parent.parent.as[LambdaExpr].do(
                             (le) =>
-                            if le.solve_generic_types()
-                            then lad.type_var.get_value().as[TypeDecl]
-                            else null[Entity[TypeDecl]]
+                                if le.solve_generic_types()
+                                then lad.type_var.get_value().as[TypeDecl]
+                                else null[Entity[TypeDecl]]
                         )
                     else lad.decl_type.referenced_decl()
                 case etd: ExplicitlyTypedDecl =>
@@ -727,15 +739,13 @@ class Decl: LktNode implements DeclarationInterface {
     fun get_suffix_type(prefix_type: Entity[TypeDecl]): Entity[TypeDecl] = {
         val suffix_type = self?.get_type();
 
-        if self.is_null
-        then suffix_type
+        if self.is_null then suffix_type
 
         elif
             not prefix_type.is_null
             and prefix_type.node == node.entity_type().node
             and self.full_decl()?.has_annotation(s"parse_field")
-        then
-            node.entity_type().instantiate_generic_type_decl([suffix_type])
+        then node.entity_type().instantiate_generic_type_decl([suffix_type])
 
         # If we are accessing a lazy field through a type, or a @property
         # annotated function, consider it as a reference to a property-like
@@ -759,8 +769,7 @@ class Decl: LktNode implements DeclarationInterface {
     |" Return the declaration that ``E.M`` references when ``self`` is the type
     |" of ``E`` and ``current_name`` is the member reference ``M``.
     fun type_var_suffix_ref(current_name: Entity[RefId]): Entity[Decl] =
-        if self.is_null
-        then null[Entity[Decl]]
+        if self.is_null then null[Entity[Decl]]
         else {
             bind origin = self;
             val scope = match self {
@@ -770,10 +779,9 @@ class Decl: LktNode implements DeclarationInterface {
                     e.basic_trait_from_self().defined_scope()
                 case _ => self.defined_scope()
             };
-            val result = scope.get_first(
-                current_name.symbol,
-                lookup=LookupKind.flat
-            ).as[Decl];
+            val result =
+                scope.get_first(current_name.symbol, lookup=LookupKind.flat)
+                .as[Decl];
 
             result?.subdecl_if_generic()
         }
@@ -785,8 +793,7 @@ class Decl: LktNode implements DeclarationInterface {
         current_name: Entity[RefId]
     ): Entity[Decl] =
         self.do(
-            (v1) =>
-            match v1 {
+            (v1) => match v1 {
                 case e: EnumTypeDecl =>
                     {
                         bind origin = null[Entity[TypeDecl]];
@@ -817,10 +824,10 @@ class Decl: LktNode implements DeclarationInterface {
                         .get(current_name.symbol, lookup=LookupKind.flat)
                         .find(
                             (d) =>
-                            d is TypeDecl | FunDecl
-                            or d.as[FieldDecl]?.full_decl().has_annotation(
-                                s"lazy"
-                            )
+                                d is TypeDecl | FunDecl
+                                or d.as[FieldDecl]?.full_decl().has_annotation(
+                                    s"lazy"
+                                )
                         )
                         .as[Decl]
                         ?.subdecl_if_generic()
@@ -873,33 +880,37 @@ class Decl: LktNode implements DeclarationInterface {
     @memoized
     fun get_params(is_logic: Bool = false): Array[ResolvedParam] =
         self.do(
-            (c) =>
-            match c {
+            (c) => match c {
                 case fd: FunDecl =>
                     if not is_logic
                     then fd.params.map((p) => p.to_generic_param())
                     elif fd.is_dynamic_combiner()
                     then
                         ResolvedParam(
-                            name=fd.params.at(0).name(),
-                            param_type=self.logicvar_type()
-                            .make_array_type(),
-                            has_default_value=false,
-                            decl=fd.params.at(0)
-                        ).singleton()
-                        & fd.params.ifilter((_, i) => i >= 1)
-                                   .map((p) => p.to_generic_param())
+                                name=fd.params.at(0).name(),
+                                param_type=(
+                                    self.logicvar_type().make_array_type()
+                                ),
+                                has_default_value=false,
+                                decl=fd.params.at(0)
+                            )
+                            .singleton()
+                        & fd.params.ifilter((_, i) => i >= 1).map(
+                            (p) => p.to_generic_param()
+                        )
                     else
                         ResolvedParam(
-                            name=s"var",
-                            param_type=
-                                node.entity_type()
+                                name=s"var",
+                                param_type=(
+                                    node.entity_type()
                                     .instantiate_generic_type_decl(
                                         [fd.owning_type().as_entity]
-                                    ),
-                            has_default_value=false,
-                            decl=SynthParamDecl().as_entity
-                        ).singleton()
+                                    )
+                                ),
+                                has_default_value=false,
+                                decl=SynthParamDecl().as_entity
+                            )
+                            .singleton()
                         & fd.params.map((p) => p.to_generic_param())
                 case lfd: SynthFunDecl => lfd.params
                 case cd: ClassDecl =>
@@ -936,9 +947,11 @@ class Decl: LktNode implements DeclarationInterface {
     fun return_type_is_instantiated(): Bool =
         self.as[FunctionType].do(
             (ft) => {
-                val formals = ft.origin?.parent.as[GenericDecl].do(
-                    (gen) => gen.generic_params()
-                ).to_set();
+                val formals =
+                    ft.origin?.parent.as[GenericDecl].do(
+                        (gen) => gen.generic_params()
+                    )
+                    .to_set();
                 ft.return_type.is_instantiated(formals)
             }
         )
@@ -952,11 +965,12 @@ class Decl: LktNode implements DeclarationInterface {
         else
             self.parent.as[GenericDecl].do(
                 (gd) =>
-                gd.generic_params().all(
-                    (gf) =>
-                    gd.children_env.get_first(gf.name())
-                    .as![TypeDecl].is_instantiated(formals)
-                ),
+                    gd.generic_params().all(
+                        (gf) =>
+                            gd.children_env.get_first(gf.name())
+                            .as![TypeDecl]
+                            .is_instantiated(formals)
+                    ),
                 default_val=true
             )
 
@@ -965,8 +979,7 @@ class Decl: LktNode implements DeclarationInterface {
     fun has_correct_type_arg_number(nb_types: Int): Bool =
         self.is_null
         or match self.parent {
-            case gd: GenericDecl =>
-                gd.generic_param_decls.length() == nb_types
+            case gd: GenericDecl => gd.generic_param_decls.length() == nb_types
             case _ => true
         }
 
@@ -982,9 +995,10 @@ class Decl: LktNode implements DeclarationInterface {
     fun instantiate_generic_decl(
         param_types: Array[Entity[TypeDecl]]
     ): Entity[Decl] =
-        if self.is_null
-           or param_types.any((t) => t.is_null)
-           or not self.parent is GenericDecl
+        if
+            self.is_null
+            or param_types.any((t) => t.is_null)
+            or not self.parent is GenericDecl
         then null[Entity[TypeDecl]]
         else
             DynEnvWrapper(
@@ -993,7 +1007,7 @@ class Decl: LktNode implements DeclarationInterface {
             )
             .do(
                 (dew) =>
-                self.get_rebound_decl(dew.dynenvwrapper_instantiation_env)
+                    self.get_rebound_decl(dew.dynenvwrapper_instantiation_env)
             )
 
     |" Create a new Entity from Self using rebindings_env as the new
@@ -1028,14 +1042,12 @@ class Decl: LktNode implements DeclarationInterface {
     |" in diagnostics. This property is not public: using it avoids calling PLE
     |" when used with ``custom_image``
     fun full_name_internal(): String =
-        self.name().image()
-        & self.parent.as[GenericDecl]?.image_suffix()
+        self.name().image() & self.parent.as[GenericDecl]?.image_suffix()
 
     |" Return the full name of this decl, as it should be seen by users/shown
     |" in diagnostics.
     @exported
-    fun full_name(): String =
-        self.full_name_internal()
+    fun full_name(): String = self.full_name_internal()
 
     |" Return the lexical environment defined by the declaration (ie. fields
     |" of a StructDecl).
@@ -1062,10 +1074,12 @@ class Decl: LktNode implements DeclarationInterface {
 
     @predicate_error("$Self cannot be directly referenced")
     fun is_directly_referenceable(): Bool =
-        self.is_null or (
+        self.is_null
+        or (
             not self is FieldDecl
             and self.as[FunDecl].do(
-                (f) => f.owning_type().is_null, default_val=true
+                (f) => f.owning_type().is_null,
+                default_val=true
             )
         )
 
@@ -1138,13 +1152,14 @@ class Decl: LktNode implements DeclarationInterface {
             {
                 # Regular env entry, so that this declaration is available
                 # using its name in this module.
-                val regular_entry = self.make_env_assoc(
-                    DesignatedEnv(
-                        kind=DesignatedEnvKind.current_env,
-                        env_name=null[Symbol],
-                        direct_env=null[LexicalEnv]
-                    )
-                );
+                val regular_entry =
+                    self.make_env_assoc(
+                        DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        )
+                    );
 
                 # If the type explicitly implements the ``Node`` trait, or it
                 # is annotated with "@root_node", consider it the root node of
@@ -1166,15 +1181,16 @@ class Decl: LktNode implements DeclarationInterface {
                                 direct_env=node.root_env()
                             ),
                             metadata=null[Metadata]
-                        ).singleton()
-                    else
-                        []: EnvAssoc;
+                        )
+                        .singleton()
+                    else []: EnvAssoc;
 
                 # If the type is a metadata struct declaration, register it in
                 # the root scope under the appropriate symbol: see the doc for
                 # __default_metadata in the prelude unit.
                 val metadata_entry =
-                    if self.full_decl()?.has_annotation(s"metadata") then
+                    if self.full_decl()?.has_annotation(s"metadata")
+                    then
                         EnvAssoc(
                             key=(
                                 if node.is_from_prelude()
@@ -1188,16 +1204,17 @@ class Decl: LktNode implements DeclarationInterface {
                                 direct_env=node.root_env()
                             ),
                             metadata=null[Metadata]
-                        ).singleton()
-                    else
-                        []: EnvAssoc;
+                        )
+                        .singleton()
+                    else []: EnvAssoc;
 
                 # If the type is the definition of the built-in array type,
                 # register it in the root scope under a unique symbol, so that
                 # it can be fetched in a generic manner when needed (see for
                 # example type resolution of `ArrayLiteral` nodes).
                 val array_entry =
-                    if self.full_decl()?.has_annotation(s"array") then
+                    if self.full_decl()?.has_annotation(s"array")
+                    then
                         EnvAssoc(
                             key=s"Array__",
                             value=node,
@@ -1207,12 +1224,14 @@ class Decl: LktNode implements DeclarationInterface {
                                 direct_env=node.root_env()
                             ),
                             metadata=null[Metadata]
-                        ).singleton()
-                    else
-                        []: EnvAssoc;
+                        )
+                        .singleton()
+                    else []: EnvAssoc;
 
                 [regular_entry]
-                & root_node_entry & metadata_entry & array_entry
+                & root_node_entry
+                & metadata_entry
+                & array_entry
             }
         )
     }
@@ -1420,16 +1439,17 @@ class FieldDecl: ComponentDecl {
             then
                 node.owning_type().do(
                     (ot) =>
-                    EnvAssoc(
-                        key=s"node",
-                        value=ot.node_decl(),
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.current_env,
-                            env_name=null[Symbol],
-                            direct_env=null[LexicalEnv]
-                        ),
-                        metadata=null[Metadata]
-                    ).singleton()
+                        EnvAssoc(
+                            key=s"node",
+                            value=ot.node_decl(),
+                            dest_env=DesignatedEnv(
+                                kind=DesignatedEnvKind.current_env,
+                                env_name=null[Symbol],
+                                direct_env=null[LexicalEnv]
+                            ),
+                            metadata=null[Metadata]
+                        )
+                        .singleton()
                 )
             else null[Array[EnvAssoc]]
         )
@@ -1522,8 +1542,7 @@ class ValDecl: ExplicitlyTypedDecl {
                     TypeDecl.could_determine_type%(self.expr.actual_type_var)
                 }
             else
-                self.expr.expected_type_var
-                <- self.decl_type.referenced_decl()
+                self.expr.expected_type_var <- self.decl_type.referenced_decl()
                 %and (
                     if self.decl_type.referenced_decl().is_null then %false
                     else {
@@ -1565,8 +1584,8 @@ class FunDecl: UserValDecl {
         val array_type = self.params.at(0)?.get_type();
 
         array_type?.node == self.array_type().node
-            and array_type?.get_indexable_content_type().node
-                == self.entity_type().node
+        and array_type?.get_indexable_content_type().node
+            == self.entity_type().node
     }
 
     fun xref_equation(): Equation =
@@ -1598,8 +1617,7 @@ class FunDecl: UserValDecl {
         # Add node & self if there is an owning type
         add_all_to_env(
             node.owning_type().do(
-                (ot) =>
-                [
+                (ot) => [
                     EnvAssoc(
                         key=s"self",
                         value=ot.self_decl(),
@@ -1628,18 +1646,22 @@ class FunDecl: UserValDecl {
     fun find_all_overrides_helper(
         current_node: Entity[LktNode]
     ): Array[Entity[FunDecl]] =
-        if current_node.as[FunDecl].do((f) =>
-            f.syn_name.symbol == self.syn_name.symbol
-            and not f.owning_type().as_entity
-                     ?.common_ancestor(self.owning_type().as_entity).is_null
-        )
+        if
+            current_node.as[FunDecl].do(
+                (f) =>
+                    f.syn_name.symbol == self.syn_name.symbol
+                    and not f.owning_type().as_entity?.common_ancestor(
+                        self.owning_type().as_entity
+                    )
+                    .is_null
+            )
         then current_node.as[FunDecl].singleton()
-        else current_node.children.mapcat(
-            (child) =>
-                if child.is_null
-                then null[Array[Entity[FunDecl]]]
-                else self.find_all_overrides_helper(child)
-        )
+        else
+            current_node.children.mapcat(
+                (child) =>
+                    if child.is_null then null[Array[Entity[FunDecl]]]
+                    else self.find_all_overrides_helper(child)
+            )
 
     |" Return the list of all RefId that refer to this DefId.
     @exported
@@ -1654,11 +1676,8 @@ class FunDecl: UserValDecl {
     |" overrides, including itself.
     fun base_fun_decls(): Array[Entity[FunDecl]] = {
         bind origin = null[Entity[LktNode]];
-        self.owning_type()
-            .as_entity
-            .defined_scope()
-            .get(self.name())
-            .keep[FunDecl]
+        self.owning_type().as_entity.defined_scope().get(self.name())
+        .keep[FunDecl]
     }
 }
 
@@ -1682,18 +1701,18 @@ class EnvSpecDecl: Decl {
     fun xref_equation(): Equation =
         self.actions.logic_all(
             (action) =>
-            (
-                action.xref_equation()
-                %and action.expected_type_var
-                    <- self.get_builtin_type(s"EnvAction")
-            )
-            %and {
-                bind error_location = action.node;
-                TypeDecl.matching_type%(
-                    action.expected_type_var,
-                    action.actual_type_var
+                (
+                    action.xref_equation()
+                    %and action.expected_type_var
+                        <- self.get_builtin_type(s"EnvAction")
                 )
-            }
+                %and {
+                    bind error_location = action.node;
+                    TypeDecl.matching_type%(
+                        action.expected_type_var,
+                        action.actual_type_var
+                    )
+                }
         )
 
     env_spec {
@@ -1701,8 +1720,7 @@ class EnvSpecDecl: Decl {
         # Add node & self if there is an owning type
         add_all_to_env(
             node.owning_type().do(
-                (ot) =>
-                [
+                (ot) => [
                     EnvAssoc(
                         key=s"self",
                         value=ot.self_decl(),
@@ -1744,21 +1762,27 @@ class GenericDecl: Decl {
 
     |" Return the suffix of the node's image that contains the type parameters.
     fun image_suffix(): String =
-        "[" & (
+        "["
+        & (
             # When no rebindings are present, use the generic_param_decls of
             # the GenericDecl to avoid using the environment as for
             # instantiated type parameters: The result would be the same either
             # way.
             if self.info.rebindings.is_null
             then
-                ", ".join(self.generic_param_decls.map(
-                    (gp) => gp.decl.full_name_internal()
-                ))
+                ", ".join(
+                    self.generic_param_decls.map(
+                        (gp) => gp.decl.full_name_internal()
+                    )
+                )
             else
-                ", ".join(self.instantiated_generic_params().map(
-                    (gp) => gp.full_name_internal()
-                ))
-        ) & "]"
+                ", ".join(
+                    self.instantiated_generic_params().map(
+                        (gp) => gp.full_name_internal()
+                    )
+                )
+        )
+        & "]"
 
     fun generic_params(): Array[Entity[BaseGenericParamTypeDecl]] =
         self.generic_param_decls.map(
@@ -1812,16 +1836,16 @@ class LexerDecl: Decl {
     fun builtin_decls(): Array[EnvAssoc] =
         [s"newline", s"indent", s"dedent"].map(
             (sym) =>
-            EnvAssoc(
-                key=sym,
-                value=SyntheticLexerDecl(sym=sym),
-                dest_env=DesignatedEnv(
-                    kind=DesignatedEnvKind.direct_env,
-                    env_name=null[Symbol],
-                    direct_env=node.children_env
-                ),
-                metadata=null[Metadata]
-            )
+                EnvAssoc(
+                    key=sym,
+                    value=SyntheticLexerDecl(sym=sym),
+                    dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.direct_env,
+                        env_name=null[Symbol],
+                        direct_env=node.children_env
+                    ),
+                    metadata=null[Metadata]
+                )
         )
 
     env_spec {
@@ -1890,8 +1914,7 @@ class TypeDecl: Decl implements TypeInterface {
     @memoized
     fun node_decl(): NodeDecl = NodeDecl()
 
-    fun full_name(): String implements TypeInterface.full_name =
-        self.super()
+    fun full_name(): String implements TypeInterface.full_name = self.super()
 
     |" Return the defining name of this type declaration
     @exported
@@ -1917,9 +1940,9 @@ class TypeDecl: Decl implements TypeInterface {
                     val type_param = self.get_instantiation_type(self);
                     type_param.base_type().do(
                         (base_type) =>
-                            node
-                                .as_bare_entity
-                                .instantiate_generic_type_decl([base_type])
+                            node.as_bare_entity.instantiate_generic_type_decl(
+                                [base_type]
+                            )
                     )
                 }
                 else null[Entity[TypeDecl]]
@@ -1935,9 +1958,7 @@ class TypeDecl: Decl implements TypeInterface {
     |" If ``include_self``, also include this type.
     fun base_types(include_self: Bool = false): Array[Entity[TypeDecl]] = {
         val self_part =
-            if include_self
-            then [self]
-            else null[Array[Entity[TypeDecl]]];
+            if include_self then [self] else null[Array[Entity[TypeDecl]]];
 
         self_part & self.base_type().do((b) => [b] & b.base_types())
     }
@@ -1971,9 +1992,7 @@ class TypeDecl: Decl implements TypeInterface {
         or self.is_int_type()
         or self.is_subtype(self.node_env.get_first(s"RootNode__").as[TypeDecl])
 
-    @predicate_error(
-        "expression must be a stream, got $Self"
-    )
+    @predicate_error("expression must be a stream, got $Self")
     fun is_stream(): Bool =
         self.is_null or self.node == self.stream_type().node
 
@@ -1981,8 +2000,7 @@ class TypeDecl: Decl implements TypeInterface {
     |" instantiation of ``gen_type``, return the type with which it was
     |" instantiated. Return ``self`` otherwise.
     fun get_instantiation_type(gen_type: Entity[TypeDecl]): Entity[TypeDecl] =
-        if self.is_null
-        then null[Entity[TypeDecl]]
+        if self.is_null then null[Entity[TypeDecl]]
 
         elif node == gen_type.node
         then self.parent.as[GenericDecl]?.instantiated_generic_params().at(0)
@@ -2006,14 +2024,13 @@ class TypeDecl: Decl implements TypeInterface {
             self.parent.as[GenericDecl]?.instantiated_generic_params().at(0);
         # Compute Entity[T]
         val entity_type =
-            generic_entity_type
-                .instantiate_generic_type_decl([node_param_type]);
+            generic_entity_type.instantiate_generic_type_decl(
+                [node_param_type]
+            );
 
         # Finally reinstantiate self with Entity[T]
-        self
-            .as_bare_decl()
-            .instantiate_generic_decl([entity_type])
-            .as[TypeDecl]
+        self.as_bare_decl().instantiate_generic_decl([entity_type])
+        .as[TypeDecl]
     }
 
     |" Return whether ``rhs`` is equal to or is a subtype of ``self``.
@@ -2046,14 +2063,14 @@ class TypeDecl: Decl implements TypeInterface {
         else
             other_types.at(idx).do(
                 (t) =>
-                t.common_ancestor(
-                    self.common_ancestor_helper(
-                        other_types,
-                        idx + 1,
+                    t.common_ancestor(
+                        self.common_ancestor_helper(
+                            other_types,
+                            idx + 1,
+                            imprecise
+                        ),
                         imprecise
-                    ),
-                    imprecise
-                )
+                    )
             )
 
     |" Return the nearest common ancestor of ``self`` and ``other_types``,
@@ -2062,17 +2079,14 @@ class TypeDecl: Decl implements TypeInterface {
     fun imprecise_common_ancestor_list(
         other_types: Array[Entity[TypeDecl]]
     ): Entity[TypeDecl] =
-        if other_types.length() == 0
-        then self
+        if other_types.length() == 0 then self
 
         elif self.is_null
         then
-            other_types
-                .find((t) => not t.is_null)
-                ?.imprecise_common_ancestor_list(other_types)
+            other_types.find((t) => not t.is_null)
+            ?.imprecise_common_ancestor_list(other_types)
 
-        else
-            self.common_ancestor_helper(other_types, 0, true)
+        else self.common_ancestor_helper(other_types, 0, true)
 
     |" Return true if Self and other are matching type that can be permuted.
     @predicate_error("expected $Self, got $other")
@@ -2119,9 +2133,7 @@ class TypeDecl: Decl implements TypeInterface {
     @predicate_error("$Self does not implement the $tr trait")
     fun has_trait(tr: Entity[TraitDecl]): Bool =
         self.is_null
-        or self.traits.any(
-            (tref) => tref.referenced_decl().node == tr.node
-        )
+        or self.traits.any((tref) => tref.referenced_decl().node == tr.node)
         or self.base_type()?.has_trait(tr)
 
         # In the case of an entity type, we look in the inner node type for
@@ -2145,15 +2157,11 @@ class TypeDecl: Decl implements TypeInterface {
         val ft = self.as[FunctionType];
         val origin = ft?.origin;
 
-        if origin.is_null
-        then null[Entity[Decl]]
+        if origin.is_null then null[Entity[Decl]]
         else
             current_name.parent.parent.as[BaseCallExpr].do(
                 (ce) =>
-                ce.match_params(
-                    origin.get_params(in_logic_call),
-                    ce.args
-                )
+                    ce.match_params(origin.get_params(in_logic_call), ce.args)
             )
             .find((pm) => pm.arg == current_name)
             ?.param
@@ -2169,10 +2177,8 @@ class TypeDecl: Decl implements TypeInterface {
         if origin.is_null then null[Entity[Decl]]
         else
             current_name.parent.parent.as![CallExpr].do(
-                (ce) => ce.match_params(
-                    origin.get_params(in_logic_call),
-                    ce.args
-                )
+                (ce) =>
+                    ce.match_params(origin.get_params(in_logic_call), ce.args)
             )
             .find((pm) => pm.arg == current_name)
             ?.param
@@ -2187,7 +2193,8 @@ class TypeDecl: Decl implements TypeInterface {
             param_decl.parent.parent.as[LambdaExpr].params.imap(
                 (p, idx) => if p == param_decl then idx else -1
             )
-            .filter((i) => i != -1).at(0);
+            .filter((i) => i != -1)
+            .at(0);
 
         self.as[FunctionType].do((ft) => ft.params.at(param_idx))
     }
@@ -2200,37 +2207,37 @@ class TypeDecl: Decl implements TypeInterface {
         val matched =
             self.as[FunctionType].do(
                 (ft) =>
-                args.parent.as[Expr].match_params(
-                    ft.origin?.get_params(in_logic_call),
-                    args
-                )
+                    args.parent.as[Expr].match_params(
+                        ft.origin?.get_params(in_logic_call),
+                        args
+                    )
             );
 
         self.as[FunctionType].do(
             (ft) =>
-            (
-                matched == null[Array[ParamMatch]]
-                and args.length() == ft.params.length()
-            )
-            or (
-                # Verify that all arguments of the CallExpr have been matched
-                # with a parameter.
-                args.all(
-                    (a) =>
-                    not (
-                        a.name.is_null
-                        and matched.find((m) => m.arg == a).is_null
-                    )
+                (
+                    matched == null[Array[ParamMatch]]
+                    and args.length() == ft.params.length()
                 )
-                and (
-                    # Verify that all parameters have been matched with an
-                    # argument of the CallExpr, and that their types match.
-                    matched.all(
-                        (p) =>
-                        not p.arg.is_null or p.param.has_default_value
+                or (
+                    # Verify that all arguments of the CallExpr have been
+                    # matched with a parameter.
+                    args.all(
+                        (a) =>
+                            not (
+                                a.name.is_null
+                                and matched.find((m) => m.arg == a).is_null
+                            )
                     )
-                )
-            ),
+                    and (
+                        # Verify that all parameters have been matched with an
+                        # argument of the CallExpr, and that their types match.
+                        matched.all(
+                            (p) =>
+                                not p.arg.is_null or p.param.has_default_value
+                        )
+                    )
+                ),
             default_val=true
         )
     }
@@ -2246,11 +2253,11 @@ class TypeDecl: Decl implements TypeInterface {
     ): Entity[TypeDecl] =
         ([self] & params).find((t) => not t.is_null).do(
             (t) =>
-            t.function_type_helper(
-                params,
-                self.do((e) => e, default_val=t.any_type()),
-                null[Entity[Decl]]
-            )
+                t.function_type_helper(
+                    params,
+                    self.do((e) => e, default_val=t.any_type()),
+                    null[Entity[Decl]]
+                )
         )
 
     |" Create a rebound ``Array`` type declaration, using ``self`` as the type
@@ -2272,9 +2279,10 @@ class TypeDecl: Decl implements TypeInterface {
     fun make_stream_of_common_ancestor(
         other_type: Entity[TypeDecl]
     ): Entity[TypeDecl] =
-        self?.get_indexable_content_type()
-            ?.imprecise_common_ancestor_list([other_type])
-            ?.make_stream_type()
+        self?.get_indexable_content_type()?.imprecise_common_ancestor_list(
+            [other_type]
+        )
+        ?.make_stream_type()
 
     |" Get the type parameter used to rebind the Array type declaration.
     fun get_indexable_content_type(): Entity[TypeDecl] =
@@ -2317,9 +2325,11 @@ class TypeDecl: Decl implements TypeInterface {
     fun with_basic_trait_from_self(env: LexicalEnv): LexicalEnv =
         env.do(
             (le) =>
-            if self == origin
-            then [le, self.basic_trait_from_self().defined_scope()].env_group()
-            else le
+                if self == origin
+                then
+                    [le, self.basic_trait_from_self().defined_scope()]
+                    .env_group()
+                else le
         )
 
     |" Common implementation of the ``defined_scope`` method for struct and
@@ -2341,11 +2351,9 @@ class TypeDecl: Decl implements TypeInterface {
                 # not want members from G[B] to hide members from G[T] if G is
                 # a covariant generic struct and T a subclass of B.
                 & [
-                    self
-                        .syn_base_type
-                        ?.referenced_decl()
-                        .as[NamedTypeDecl]
-                        ?.defined_scope()
+                    self.syn_base_type?.referenced_decl()
+                    .as[NamedTypeDecl]
+                    ?.defined_scope()
                 ]
                 # And finally members from the traits that ``self`` implements
                 & self.traits.map((t) => t.referenced_decl()?.defined_scope())
@@ -2375,31 +2383,34 @@ class TypeDecl: Decl implements TypeInterface {
             # Go through each type of the function
             self.as[FunctionType].do(
                 (ft) =>
-                (ft.params & [ft.return_type]).do(
-                    (lhs_types) =>
-                    origin.as[FunctionType].do(
-                        (oft) =>
-                        (oft.params & [oft.return_type]).imapcat(
-                            (ot, idx) =>
-                            lhs_types.at(idx)?.find_types_that_replace_ty(
-                                ty, ot
+                    (ft.params & [ft.return_type]).do(
+                        (lhs_types) =>
+                            origin.as[FunctionType].do(
+                                (oft) =>
+                                    (oft.params & [oft.return_type]).imapcat(
+                                        (ot, idx) =>
+                                            lhs_types.at(idx)
+                                            ?.find_types_that_replace_ty(
+                                                ty,
+                                                ot
+                                            )
+                                    )
                             )
-                        )
-                    )
-                ),
+                    ),
                 # Go through each BaseGenericParamTypeDecl
                 default_val=self.parent.as[GenericDecl].do(
                     (gd) =>
-                    origin.parent.as[GenericDecl].do(
-                        (ogd) =>
-                        gd.instantiated_generic_params().imapcat(
-                            (t, i) =>
-                            t.find_types_that_replace_ty(
-                                ty,
-                                ogd.instantiated_generic_params().at(i)
-                            )
-                        )
-                    ),
+                        origin.parent.as[GenericDecl].do(
+                            (ogd) =>
+                                gd.instantiated_generic_params().imapcat(
+                                    (t, i) =>
+                                        t.find_types_that_replace_ty(
+                                            ty,
+                                            ogd.instantiated_generic_params()
+                                            .at(i)
+                                        )
+                                )
+                        ),
                     default_val=null[Array[Entity[TypeDecl]]]
                 )
             )
@@ -2418,8 +2429,9 @@ class TypeDecl: Decl implements TypeInterface {
     fun is_subtype(other: Entity[TypeDecl]): Bool =
         # A given type is always a subtype of itself, so include "self" in the
         # equivalence checks with "other".
-        self.base_types(include_self=true)
-            .any((t) => t == other or t.is_equivalent_decl(other))
+        self.base_types(include_self=true).any(
+            (t) => t == other or t.is_equivalent_decl(other)
+        )
 
     |" Return the nearest common ancestor between ``self`` and ``other``.
     |"
@@ -2429,11 +2441,9 @@ class TypeDecl: Decl implements TypeInterface {
         other: Entity[TypeDecl],
         imprecise: Bool = false
     ): Entity[TypeDecl] =
-        if self.is_null
-        then other
+        if self.is_null then other
 
-        elif other.is_null
-        then self
+        elif other.is_null then self
 
         else {
             # Considering chains of base types, return the nearest ancestor
@@ -2456,57 +2466,57 @@ class TypeDecl: Decl implements TypeInterface {
         then {
             val params =
                 self.base_types().find(
-                    (t) => t.node == self.astlist_type().node
-                )
-                .do(
-                    # When the class is an ASTList, its ``builder`` method needs
-                    # to accept an array of the list's element as a NodeBuilder
-                    # type for the first argument.
-                    (list_type) => {
-                        val elt_t = list_type.get_indexable_content_type();
-                        ResolvedParam(
-                            name=s"list_elements",
-                            param_type=elt_t.as_node_builder_type()
-                            .make_array_type(),
-                            has_default_value=false,
-                            decl=SynthParamDecl().as_entity
-                        ).singleton()
-                    }
-                )
+                        (t) => t.node == self.astlist_type().node
+                    )
+                    .do(
+                        # When the class is an ASTList, its ``builder`` method
+                        # needs to accept an array of the list's element as a
+                        # NodeBuilder type for the first argument.
+                        (list_type) => {
+                            val elt_t = list_type.get_indexable_content_type();
+                            ResolvedParam(
+                                name=s"list_elements",
+                                param_type=elt_t.as_node_builder_type()
+                                .make_array_type(),
+                                has_default_value=false,
+                                decl=SynthParamDecl().as_entity
+                            )
+                            .singleton()
+                        }
+                    )
                 # For all node types, the ``builder`` method takes one
                 # parameter per parse/user field.
                 & self.as[ClassDecl].constructor_fields().map(
                     (f) =>
-                    ResolvedParam(
-                        name=f.name(),
-                        param_type={
-                           val t = f.get_type();
+                        ResolvedParam(
+                            name=f.name(),
+                            param_type={
+                                val t = f.get_type();
 
-                           # The parameter for a parse field has the
-                           # corresponding ``NodeBuilder`` type, and the
-                           # parameter for a user field has the same type as
-                           # the field.
-                           if f.full_decl().has_annotation(s"parse_field")
-                           then t?.as_node_builder_type()
-                           else t
-                        },
-                        has_default_value=false,
-                        decl=SynthParamDecl().as_entity
-                    )
+                                # The parameter for a parse field has the
+                                # corresponding ``NodeBuilder`` type, and the
+                                # parameter for a user field has the same type
+                                # as the field.
+                                if f.full_decl().has_annotation(s"parse_field")
+                                then t?.as_node_builder_type()
+                                else t
+                            },
+                            has_default_value=false,
+                            decl=SynthParamDecl().as_entity
+                        )
                 );
             # Create a dynamic environment that contains the synthesized
             # function.
             DynEnvWrapper(
                 names=[s"builder"],
-                types=
-                    SynthFunDecl(
-                        params=params,
-                        return_type=self.as_node_builder_type()
-                    )
-                    .as_bare_entity
-                    .function_type_aux()
-                    .as[TypeDecl]
-                    .singleton()
+                types=SynthFunDecl(
+                    params=params,
+                    return_type=self.as_node_builder_type()
+                )
+                .as_bare_entity
+                .function_type_aux()
+                .as[TypeDecl]
+                .singleton()
             )
             .do((dew) => dew.dynenvwrapper_instantiation_env)
         }
@@ -2586,7 +2596,8 @@ class FunctionType: TypeDecl {
 
     fun full_name_internal(): String =
         "("
-        & ", ".join(self.params.map((t) => t.full_name_internal())) & ") -> "
+        & ", ".join(self.params.map((t) => t.full_name_internal()))
+        & ") -> "
         & self.return_type.full_name_internal()
 
     fun decl_type_name(): String = "function type"
@@ -2600,14 +2611,13 @@ class FunctionType: TypeDecl {
         # Function types are...
         or other.as[FunctionType].do(
             (rhs) =>
-            self.params.length() == rhs.params.length()
-            # ... covariant on their return type
-            and self.params.iall(
-                (lhs_param, i) =>
-                rhs.params.at(i).is_subtype(lhs_param)
-            )
-            # ... contravariant on their argument types
-            and self.return_type.is_subtype(rhs.return_type)
+                self.params.length() == rhs.params.length()
+                # ... covariant on their return type
+                and self.params.iall(
+                    (lhs_param, i) => rhs.params.at(i).is_subtype(lhs_param)
+                )
+                # ... contravariant on their argument types
+                and self.return_type.is_subtype(rhs.return_type)
         )
 
     |" Return True if the arguments should be ignored.
@@ -2721,21 +2731,21 @@ class ClassDecl: BasicClassDecl {
     fun constructor_fields(): Array[Entity[FieldDecl]] =
         self.base_types(true).mapcat(
             (base) =>
-            base.as[ClassDecl].decls.filtermap(
-                (d) => d.decl.as[FieldDecl],
-                (d) =>
-                d.decl is FieldDecl
+                base.as[ClassDecl].decls.filtermap(
+                    (d) => d.decl.as[FieldDecl],
+                    (d) =>
+                        d.decl is FieldDecl
 
-                # Do not include parse fields if they have either the @abstract
-                # or @null_field annotations.
-                and not (
-                    d.has_annotation(s"parse_field")
-                    and (
-                        d.has_annotation(s"abstract")
-                        or d.has_annotation(s"null_field")
-                    )
+                        # Do not include parse fields if they have either the
+                        # @abstract or @null_field annotations.
+                        and not (
+                            d.has_annotation(s"parse_field")
+                            and (
+                                d.has_annotation(s"abstract")
+                                or d.has_annotation(s"null_field")
+                            )
+                        )
                 )
-            )
         )
 
     fun function_type_aux(): Entity[FunctionType] =
@@ -2767,16 +2777,16 @@ class EnumClassDecl: BasicClassDecl {
         add_all_to_env(
             self.alts().map(
                 (alt) =>
-                EnvAssoc(
-                    key=alt.name(),
-                    value=alt.node,
-                    dest_env=DesignatedEnv(
-                        kind=DesignatedEnvKind.direct_env,
-                        env_name=null[Symbol],
-                        direct_env=node.decls.children_env
-                    ),
-                    metadata=null[Metadata]
-                )
+                    EnvAssoc(
+                        key=alt.name(),
+                        value=alt.node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.direct_env,
+                            env_name=null[Symbol],
+                            direct_env=node.decls.children_env
+                        ),
+                        metadata=null[Metadata]
+                    )
             )
             & (
                 if self.full_decl().has_annotation(s"qualifier")
@@ -2795,7 +2805,8 @@ class EnumClassDecl: BasicClassDecl {
                             direct_env=node.decls.children_env
                         ),
                         metadata=null[Metadata]
-                    ).singleton()
+                    )
+                    .singleton()
                 else null[Array[EnvAssoc]]
             )
         )
@@ -2825,16 +2836,16 @@ class EnumTypeDecl: NamedTypeDecl {
         add_all_to_env(
             self.literals.map(
                 (lit) =>
-                EnvAssoc(
-                    key=lit.name(),
-                    value=lit.node,
-                    dest_env=DesignatedEnv(
-                        kind=DesignatedEnvKind.direct_env,
-                        env_name=null[Symbol],
-                        direct_env=node.decls.children_env
-                    ),
-                    metadata=null[Metadata]
-                )
+                    EnvAssoc(
+                        key=lit.name(),
+                        value=lit.node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.direct_env,
+                            env_name=null[Symbol],
+                            direct_env=node.decls.children_env
+                        ),
+                        metadata=null[Metadata]
+                    )
             )
         )
         # If the enum is marked as @open, add enum literals to the enum type's
@@ -2844,16 +2855,16 @@ class EnumTypeDecl: NamedTypeDecl {
             then
                 self.literals.map(
                     (lit) =>
-                    EnvAssoc(
-                        key=lit.name(),
-                        value=lit.node,
-                        dest_env=DesignatedEnv(
-                            kind=DesignatedEnvKind.direct_env,
-                            env_name=null[Symbol],
-                            direct_env=node.node_env
-                        ),
-                        metadata=null[Metadata]
-                    )
+                        EnvAssoc(
+                            key=lit.name(),
+                            value=lit.node,
+                            dest_env=DesignatedEnv(
+                                kind=DesignatedEnvKind.direct_env,
+                                env_name=null[Symbol],
+                                direct_env=node.node_env
+                            ),
+                            metadata=null[Metadata]
+                        )
                 )
             else null[Array[EnvAssoc]]
         )
@@ -2903,16 +2914,16 @@ class StructDecl: NamedTypeDecl {
     fun update_func_env(): LexicalEnv =
         DynEnvWrapper(
             names=[s"update"],
-            types=
+            types=(
                 SynthFunDecl(
                     params=self.decls.filter((d) => d.decl is FieldDecl).map(
                         (a) =>
-                        ResolvedParam(
-                            name=a.decl.name(),
-                            param_type=a.decl.as[FieldDecl].get_type(),
-                            has_default_value=true,
-                            decl=SynthParamDecl().as_entity
-                        )
+                            ResolvedParam(
+                                name=a.decl.name(),
+                                param_type=a.decl.as[FieldDecl].get_type(),
+                                has_default_value=true,
+                                decl=SynthParamDecl().as_entity
+                            )
                     ),
                     return_type=self
                 )
@@ -2920,6 +2931,7 @@ class StructDecl: NamedTypeDecl {
                 .function_type_aux()
                 .as[TypeDecl]
                 .singleton()
+            )
         )
         .do((dew) => dew.dynenvwrapper_instantiation_env)
 
@@ -2960,8 +2972,7 @@ class TraitDecl: NamedTypeDecl {
     @with_dynvars(origin)
     fun defined_scope_as_entity(): LexicalEnv =
         if node == node.node_trait().node
-        then
-            self.reinstantiate_with_entity().defined_scope()
+        then self.reinstantiate_with_entity().defined_scope()
         else self.super()
 }
 
@@ -2973,30 +2984,30 @@ class DeclAnnotation: LktNode {
     @nullable
     args: DeclAnnotationArgs
 
-    fun xref_entry_point(): Bool =
-        self.args.do((p) => p.args.length() != 0)
+    fun xref_entry_point(): Bool = self.args.do((p) => p.args.length() != 0)
 
     |" Build an equation for solving type and name resolution of the
     |" 'with_dynvars' annotation.
     fun with_dynvars_equation(): Equation =
         self.args.do(
-            (args) => args.args.logic_all(
-                (p) =>
-                p.xref_equation()
-                %and (
-                    if not p.name.is_null
-                    then {
-                        bind error_location = p.node;
-                        Decl.is_dynvar%(p.name.ref_var)
-                    }
-                    elif p.value is RefId
-                    then {
-                        bind error_location = p.node;
-                        Decl.is_dynvar%(p.value.as[RefId].ref_var)
-                    }
-                    else %true
-                )
-            ),
+            (args) =>
+                args.args.logic_all(
+                    (p) =>
+                        p.xref_equation()
+                        %and (
+                            if not p.name.is_null
+                            then {
+                                bind error_location = p.node;
+                                Decl.is_dynvar%(p.name.ref_var)
+                            }
+                            elif p.value is RefId
+                            then {
+                                bind error_location = p.node;
+                                Decl.is_dynvar%(p.value.as[RefId].ref_var)
+                            }
+                            else %true
+                        )
+                ),
             default_val=%true
         )
 
@@ -3039,12 +3050,12 @@ class DynEnvWrapper: LktNode {
     fun instantiation_bindings(): Array[InnerEnvAssoc] =
         self.names.imap(
             (name, i) =>
-            InnerEnvAssoc(
-                key=name,
-                value=self.types.at(i).node,
-                rebindings=self.types.at(i).info.rebindings,
-                metadata=null[Metadata]
-            )
+                InnerEnvAssoc(
+                    key=name,
+                    value=self.types.at(i).node,
+                    rebindings=self.types.at(i).info.rebindings,
+                    metadata=null[Metadata]
+                )
         )
 }
 
@@ -3077,25 +3088,25 @@ class Pattern: LktNode {
     |" Return the type of the value passed to this pattern.
     @memoized
     fun get_input_type(): Entity[TypeDecl] = {
-        val interesting_parent = self
-            .parents(with_self=false)
-            .find((p) => p is Expr | Pattern | PatternDetail);
+        val interesting_parent =
+            self.parents(with_self=false).find(
+                (p) => p is Expr | Pattern | PatternDetail
+            );
         match interesting_parent {
             case i: Isa => i.expr.get_type()
             case m: MatchExpr => m.match_expr.get_type()
             case q: Query => q.source.get_type()?.get_indexable_content_type()
             case l: ListPattern =>
-                if self is EllipsisPattern then
-                    l.get_output_type()
-                else
-                    l.get_output_type()?.get_indexable_content_type()
+                if self is EllipsisPattern then l.get_output_type()
+                else l.get_output_type()?.get_indexable_content_type()
             case p: Pattern => p.get_input_type()
             case d: FieldPatternDetail => d.referenced_decl()?.get_type()
             case d: PropertyPatternDetail =>
                 d.referenced_decl()?.get_type().as[FunctionType]?.return_type
-            case _ => raise[Entity[TypeDecl]] PropertyError(
-                "Cannot determine input type of the pattern"
-            )
+            case _ =>
+                raise[Entity[TypeDecl]] PropertyError(
+                    "Cannot determine input type of the pattern"
+                )
         }
     }
 
@@ -3173,13 +3184,11 @@ class ComplexPattern: BindingPattern {
 
     fun xref_equation(): Equation = {
         # Build one sub-equation for each pattern detail
-        val details_eq = self.details.logic_all(
-            (d) => d.xref_detail_equation()
-        );
+        val details_eq =
+            self.details.logic_all((d) => d.xref_detail_equation());
 
         # Build the equation for the predicate (if present)
-        if self.predicate.is_null then
-            details_eq
+        if self.predicate.is_null then details_eq
         else
             details_eq
             %and self.predicate.xref_equation()
@@ -3194,10 +3203,8 @@ class ComplexPattern: BindingPattern {
     }
 
     fun get_output_type(): Entity[TypeDecl] =
-        if self.pattern.is_null then
-            self.get_input_type()
-        else
-            self.pattern.get_output_type()
+        if self.pattern.is_null then self.get_input_type()
+        else self.pattern.get_output_type()
 }
 
 |" Special case of a complex pattern with no pattern part. This subclass exists
@@ -3328,8 +3335,7 @@ class FieldPatternDetail: PatternDetail {
         # Include equations from the "expected_value" field if they do not
         # belong to an independent xref entry point.
         %and (
-            if self.expected_value.xref_entry_point()
-            then %true
+            if self.expected_value.xref_entry_point() then %true
             else self.expected_value.xref_equation()
         )
 }
@@ -3347,10 +3353,9 @@ class PropertyPatternDetail: PatternDetail {
 
     |" Return the property referenced by this pattern detail.
     fun referenced_decl(): Entity[Decl] =
-        self
-            .parent_pattern()
-            .get_output_type()
-            ?.type_var_suffix_ref(self.property_name())
+        self.parent_pattern().get_output_type()?.type_var_suffix_ref(
+            self.property_name()
+        )
 
     fun xref_detail_equation(): Equation = {
         val name = self.property_name();
@@ -3375,8 +3380,7 @@ class PropertyPatternDetail: PatternDetail {
         # Include equations from the "expected_value" field if they do not
         # belong to an independent xref entry point.
         %and (
-            if self.expected_value.xref_entry_point()
-            then %true
+            if self.expected_value.xref_entry_point() then %true
             else self.expected_value.xref_equation()
         )
     }
@@ -3487,17 +3491,19 @@ class Expr: LktNode {
     ): Array[ParamMatch] =
         params.imap(
             (p, i) =>
-            # Arg at i if it does not have a name
-            if args?.at(i)?.name.is_null
-            then
-                ParamMatch(has_matched=true, arg=args?.at(i), param=p)
-            else
-                # Find an argument that has the corresponding name
-                args?.find((a) => a.name?.symbol == p.name).do(
-                    (a) => ParamMatch(has_matched=true, arg=a, param=p)
-                )
-                # No argument was found
-                or? ParamMatch(has_matched=not p.has_default_value, param=p)
+                # Arg at i if it does not have a name
+                if args?.at(i)?.name.is_null
+                then ParamMatch(has_matched=true, arg=args?.at(i), param=p)
+                else
+                    # Find an argument that has the corresponding name
+                    args?.find((a) => a.name?.symbol == p.name).do(
+                        (a) => ParamMatch(has_matched=true, arg=a, param=p)
+                    )
+                    # No argument was found
+                    or? ParamMatch(
+                        has_matched=not p.has_default_value,
+                        param=p
+                    )
         )
 
     |" Build an equation to solve type and name resolution for logic
@@ -3544,26 +3550,26 @@ class AnyOf: Expr {
                 %and self.actual_type_var <- self.bool_type()
             )
             %and self.expr.expected_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(
-                ([self.expr] & self.values.as_array()).filtermap(
-                    (e) => e.actual_type_var,
-                    (e) => e.has_context_free_type()
+                <- TypeDecl.imprecise_common_ancestor_list%(
+                    ([self.expr] & self.values.as_array()).filtermap(
+                        (e) => e.actual_type_var,
+                        (e) => e.has_context_free_type()
+                    )
                 )
-            )
         )
         %and self.values.logic_all(
             (v) =>
-            (
-                v.xref_equation()
-                %and v.expected_type_var <-> self.expr.actual_type_var
-            )
-            %and {
-                bind error_location = v.node;
-                TypeDecl.commutative_matching_type%(
-                    v.expected_type_var,
-                    v.actual_type_var
+                (
+                    v.xref_equation()
+                    %and v.expected_type_var <-> self.expr.actual_type_var
                 )
-            }
+                %and {
+                    bind error_location = v.node;
+                    TypeDecl.commutative_matching_type%(
+                        v.expected_type_var,
+                        v.actual_type_var
+                    )
+                }
         )
 
     fun has_context_free_type(): Bool = true
@@ -3629,23 +3635,24 @@ class ArrayLiteral: Expr {
 
         # Set the type of the array
         %and self.actual_type_var
-        <- TypeDecl.make_array_type%(self.actual_element_type)
+            <- TypeDecl.make_array_type%(self.actual_element_type)
 
         # Type the elements
-        %and self.exprs.logic_all((expr) =>
-            expr.xref_equation()
+        %and self.exprs.logic_all(
+            (expr) =>
+                expr.xref_equation()
 
-            # Set the expected types of elements
-            %and expr.expected_type_var <-> self.expected_exprs_type_var
+                # Set the expected types of elements
+                %and expr.expected_type_var <-> self.expected_exprs_type_var
 
-            # Verify that the types of elements all match
-            %and {
-                bind error_location = expr.node;
-                TypeDecl.matching_type%(
-                    expr.expected_type_var,
-                    expr.actual_type_var
-                )
-            }
+                # Verify that the types of elements all match
+                %and {
+                    bind error_location = expr.node;
+                    TypeDecl.matching_type%(
+                        expr.expected_type_var,
+                        expr.actual_type_var
+                    )
+                }
         )
 }
 
@@ -3685,8 +3692,7 @@ class BaseCallExpr: Expr {
             }
         )
 
-    fun generic_type_equation(): Equation =
-        self.generic_type_equation_helper()
+    fun generic_type_equation(): Equation = self.generic_type_equation_helper()
 
     |" Compute the expected type of name and expressions in args.
     fun expected_type_equation(): Equation =
@@ -3696,14 +3702,13 @@ class BaseCallExpr: Expr {
         # themselves depend on the infered function type.
         # Example: ``f(1, null)`` => (Int, Any) -> Any.
         self.name.expected_type_var
-        <- self.any_type().create_function_type(
-            self.args.map(
-                (a) =>
-                if a.value.xref_entry_point()
-                then a.value.get_type()
-                else self.any_type()
+            <- self.any_type().create_function_type(
+                self.args.map(
+                    (a) =>
+                        if a.value.xref_entry_point() then a.value.get_type()
+                        else self.any_type()
+                )
             )
-        )
         %and self.args.filter((p) => p.value.xref_entry_point()).logic_all(
             (p) => p.value.expected_type_var <- null[Entity[TypeDecl]]
         )
@@ -3714,67 +3719,73 @@ class BaseCallExpr: Expr {
     fun xref_call_args_equation(): Equation =
         self.args.logic_all(
             (arg) =>
-            (
-                if not arg.value.xref_entry_point()
-                then arg.value.xref_equation()
-                else %true
-            )
-            %and {
-                bind error_location = arg.name.node;
-                bind current_name = arg;
-                # Set the expected type of the argument
-                arg.value.expected_type_var
-                <- TypeDecl.match_param_get_type%(self.name.actual_type_var)
-                # Bind the name of the argument, if any
-                %and if arg.name.is_null
-                    then %true
-                    else
-                        arg.name.ref_var
-                        <- TypeDecl.match_param_get_decl%(
+                (
+                    if not arg.value.xref_entry_point()
+                    then arg.value.xref_equation()
+                    else %true
+                )
+                %and {
+                    bind error_location = arg.name.node;
+                    bind current_name = arg;
+                    # Set the expected type of the argument
+                    arg.value.expected_type_var
+                        <- TypeDecl.match_param_get_type%(
                             self.name.actual_type_var
                         )
-                        %and self.name.get_rightmost_refid().do(
-                            (id) => Decl.extraneous_parameter%(
-                                arg.name.ref_var,
-                                self.name.actual_type_var,
-                                id.ref_var
-                            ),
-                            # If the callee is not a RefId or a DotExpr, use a
-                            # simpler predicate.
-                            default_val=Decl.unmatched_argument%(
-                                arg.name.ref_var,
-                                self.name.actual_type_var
+                    # Bind the name of the argument, if any
+                    %and (
+                        if arg.name.is_null then %true
+                        else
+                            arg.name.ref_var
+                                <- TypeDecl.match_param_get_decl%(
+                                    self.name.actual_type_var
+                                )
+                            %and self.name.get_rightmost_refid().do(
+                                (id) =>
+                                    Decl.extraneous_parameter%(
+                                        arg.name.ref_var,
+                                        self.name.actual_type_var,
+                                        id.ref_var
+                                    ),
+                                # If the callee is not a RefId or a DotExpr,
+                                # use a simpler predicate.
+                                default_val=Decl.unmatched_argument%(
+                                    arg.name.ref_var,
+                                    self.name.actual_type_var
+                                )
                             )
-                        )
-            }
-            %and {
-                # When typing a logic call, parameters that are Entities also
-                # accept logic variables.
-                bind error_location = arg.value.node;
-                if in_logic_call
-                then
-                    if arg.value.xref_entry_point()
-                    then TypeDecl.matching_logic_type%(
-                            arg.value.expected_type_var,
-                            arg.value.get_type()
-                        )
+                    )
+                }
+                %and {
+                    # When typing a logic call, parameters that are Entities
+                    # also accept logic variables.
+                    bind error_location = arg.value.node;
+                    if in_logic_call
+                    then
+                        if arg.value.xref_entry_point()
+                        then
+                            TypeDecl.matching_logic_type%(
+                                arg.value.expected_type_var,
+                                arg.value.get_type()
+                            )
+                        else
+                            TypeDecl.matching_logic_type%(
+                                arg.value.expected_type_var,
+                                arg.value.actual_type_var
+                            )
                     else
-                        TypeDecl.matching_logic_type%(
-                            arg.value.expected_type_var,
-                            arg.value.actual_type_var
-                        )
-                else
-                    if arg.value.xref_entry_point()
-                    then TypeDecl.matching_type%(
-                            arg.value.expected_type_var,
-                            arg.value.get_type()
-                        )
-                    else
-                        TypeDecl.matching_type%(
-                            arg.value.expected_type_var,
-                            arg.value.actual_type_var
-                        )
-            }
+                        if arg.value.xref_entry_point()
+                        then
+                            TypeDecl.matching_type%(
+                                arg.value.expected_type_var,
+                                arg.value.get_type()
+                            )
+                        else
+                            TypeDecl.matching_type%(
+                                arg.value.expected_type_var,
+                                arg.value.actual_type_var
+                            )
+                }
         )
 
     |" Build an equation to solve type and name resolution for calling this
@@ -3796,28 +3807,28 @@ class BaseCallExpr: Expr {
                 # unlike `actual_type_var` and `expected_type_var`.
                 self.args.logic_all(
                     (a) =>
-                    if a.value.xref_entry_point()
-                    then a.value.generic_func_type_var <- a.value.get_type()
-                    else %any(
-                        a.value.generic_func_type_var
-                        <-> a.value.actual_type_var,
-                        a.value.generic_func_type_var
-                        <- self.any_type()
-                    )
+                        if a.value.xref_entry_point()
+                        then
+                            a.value.generic_func_type_var <- a.value.get_type()
+                        else
+                            %any(
+                                a.value.generic_func_type_var
+                                <-> a.value.actual_type_var,
+                                a.value.generic_func_type_var
+                                <- self.any_type()
+                            )
                 )
                 %and self.name.expected_type_var
-                <- TypeDecl.create_function_type%(
-                    [self.expected_ret_type] & self.args.map(
-                        (a) => a.value.generic_func_type_var
+                    <- TypeDecl.create_function_type%(
+                        [self.expected_ret_type]
+                        & self.args.map((a) => a.value.generic_func_type_var)
                     )
-                )
                 %and (
                     self.expected_ret_type <-> self.expected_type_var
                     %or self.expected_ret_type <- null[Entity[TypeDecl]]
                 )
             }
-            else
-                self.name.generic_func_type_var <-> self.name.actual_type_var
+            else self.name.generic_func_type_var <-> self.name.actual_type_var
         )
         %and {
             bind error_location = node;
@@ -3850,8 +3861,8 @@ class BaseCallExpr: Expr {
         }
         %and self.args.logic_all(
             (a) =>
-            a.xref_equation()
-            %and a.value.expected_type_var <- null[Entity[TypeDecl]]
+                a.xref_equation()
+                %and a.value.expected_type_var <- null[Entity[TypeDecl]]
         )
         %and self.name.actual_type_var <- null[Entity[TypeDecl]]
 
@@ -3862,27 +3873,27 @@ class BaseCallExpr: Expr {
         )
         %and self.args.logic_all(
             (a) =>
-            (
-                a.xref_equation()
-                %and a.value.expected_type_var <- self.equation_type()
-            )
-            %and {
-                bind error_location = a.node;
-                TypeDecl.matching_type%(
-                    a.value.expected_type_var,
-                    a.value.actual_type_var
+                (
+                    a.xref_equation()
+                    %and a.value.expected_type_var <- self.equation_type()
                 )
-            }
+                %and {
+                    bind error_location = a.node;
+                    TypeDecl.matching_type%(
+                        a.value.expected_type_var,
+                        a.value.actual_type_var
+                    )
+                }
         )
 
     |" Called when a CallExpr is used inside a LogicExpr.
     fun xlogic_equation(): Equation =
         self.name.as[RefId].do(
             (ri) =>
-            if ri.symbol == s"all" or ri.symbol == s"any"
-            then self.xlogic_any_all()
-            elif ri.symbol == s"domain" then self.xref_equation()
-            else self.xlogic_unknown(),
+                if ri.symbol == s"all" or ri.symbol == s"any"
+                then self.xlogic_any_all()
+                elif ri.symbol == s"domain" then self.xref_equation()
+                else self.xlogic_unknown(),
             default_val=self.xlogic_unknown()
         )
 
@@ -3895,14 +3906,16 @@ class BaseCallExpr: Expr {
         # the formal not appearing in the return type, e.g. [T](x: T) -> Int.
         self.name.get_generic_type().as[FunctionType].do(
             (ft) =>
-            ft.return_type_is_instantiated()
+                ft.return_type_is_instantiated()
 
-            # If it's not the case, meaning a generic formal appears in the
-            # return type, we might be able to infer it without using the
-            # expected type, only using the types of the arguments which have
-            # a context-free type.
-            or self.name.get_expected_type().as[FunctionType]
-            ?.infer_generic_decl(ft)?.return_type_is_instantiated(),
+                # If it's not the case, meaning a generic formal appears in the
+                # return type, we might be able to infer it without using the
+                # expected type, only using the types of the arguments which
+                # have a context-free type.
+                or self.name.get_expected_type()
+                    .as[FunctionType]
+                    ?.infer_generic_decl(ft)
+                    ?.return_type_is_instantiated(),
             default_val=true
         )
 }
@@ -4033,14 +4046,15 @@ class DotExpr: Expr {
             %and {
                 bind error_location = node.suffix;
                 val holder = (
-                    self.prefix.get_type() or?
-                    self.prefix.referenced_decl()
+                    self.prefix.get_type() or? self.prefix.referenced_decl()
                 );
-                if holder.is_null
-                then Decl.is_defined%(self.suffix.ref_var)
-                else Decl.has_component%(
-                    self.suffix.ref_var, holder, self.suffix
-                )
+                if holder.is_null then Decl.is_defined%(self.suffix.ref_var)
+                else
+                    Decl.has_component%(
+                        self.suffix.ref_var,
+                        holder,
+                        self.suffix
+                    )
             }
             %and (
                 if self.suffix.is_being_called()
@@ -4053,19 +4067,18 @@ class DotExpr: Expr {
                             self.suffix.get_generic_type()
                         )
                     else
-                        self.actual_type_var <- first_var.do(
+                        self.actual_type_var
+                        <- first_var.do(
                             (fv) =>
-                            if in_logic_call
-                            then fv.logic_function_type()
-                            else fv.function_type()
+                                if in_logic_call then fv.logic_function_type()
+                                else fv.function_type()
                         )
                 else (
                     # When the expression is not being called, simply get
                     # the of the field. This also keeps parse_fields as
                     # Entity if necessary.
-                    self.suffix.actual_type_var <- first_var?.get_suffix_type(
-                        self.prefix.get_type()
-                    )
+                    self.suffix.actual_type_var
+                    <- first_var?.get_suffix_type(self.prefix.get_type())
                 )
             )
             %and (
@@ -4090,14 +4103,15 @@ class DotExpr: Expr {
     fun complete(): Array[CompleteItem] = {
         val d = self.prefix.get_type() or? self.prefix.referenced_decl();
         bind origin = self.prefix.get_type();
-        val items = d?.defined_scope()
-            .get(null[Symbol], lookup=LookupKind.flat);
+        val items =
+            d?.defined_scope().get(null[Symbol], lookup=LookupKind.flat);
         # When the completing a type expression, we only care about types
         if self.parents().any((p) => p is TypeRef)
-        then items.filtermap(
-            (d) => CompleteItem(declaration=d.as[Decl]),
-            (d) => d is TypeDecl
-        )
+        then
+            items.filtermap(
+                (d) => CompleteItem(declaration=d.as[Decl]),
+                (d) => d is TypeDecl
+            )
         else items.map((d) => CompleteItem(declaration=d.as[Decl]))
     }
 }
@@ -4141,9 +4155,9 @@ class BinOp: Expr {
         # expected type of this expression to the right and left operands if
         # this is required.
         val full_propagation = (
-            if self.has_context_free_type() then
-                l_and_r_propagation
-            elif self.xref_entry_point() then
+            if self.has_context_free_type() then l_and_r_propagation
+            elif self.xref_entry_point()
+            then
                 self.left.expected_type_var <- self.get_expected_type()
                 %and self.right.expected_type_var <- self.get_expected_type()
             else
@@ -4151,7 +4165,8 @@ class BinOp: Expr {
                 %and self.right.expected_type_var <-> self.expected_type_var
         );
 
-        self.left.xref_equation() %and self.right.xref_equation()
+        self.left.xref_equation()
+        %and self.right.xref_equation()
         %and (
             # "and" "or"
             if self.op.is_bool_op()
@@ -4209,7 +4224,9 @@ class BinOp: Expr {
                 %and check_right_type
                 %and {
                     bind error_location = node.left;
-                    TypeDecl.is_string_or_array_type%(self.left.actual_type_var)
+                    TypeDecl.is_string_or_array_type%(
+                        self.left.actual_type_var
+                    )
                 }
             # "::"
             elif self.op is Op.StreamCons
@@ -4220,7 +4237,8 @@ class BinOp: Expr {
                         self.left.actual_type_var
                     )
                 %and (
-                    if self.has_context_free_type() then
+                    if self.has_context_free_type()
+                    then
                         self.left.expected_type_var
                             <- TypeDecl.get_indexable_content_type%(
                                 self.right.actual_type_var
@@ -4229,15 +4247,16 @@ class BinOp: Expr {
                             <- TypeDecl.make_stream_type%(
                                 self.left.actual_type_var
                             )
-                    elif self.xref_entry_point() then
+                    elif self.xref_entry_point()
+                    then
                         self.left.expected_type_var
                             <- self.get_expected_type()
                                 .get_indexable_content_type()
                         %and self.right.expected_type_var
                             <- self.get_expected_type()
                     else
-                        self.left.expected_type_var <-
-                            TypeDecl.get_indexable_content_type%(
+                        self.left.expected_type_var
+                            <- TypeDecl.get_indexable_content_type%(
                                 self.expected_type_var
                             )
                         %and self.right.expected_type_var
@@ -4247,25 +4266,24 @@ class BinOp: Expr {
             # ":::"
             elif self.op is Op.StreamConcat
             then
-                self.actual_type_var <- TypeDecl.common_ancestor%(
-                    self.left.actual_type_var,
-                    self.right.actual_type_var
-                )
+                self.actual_type_var
+                    <- TypeDecl.common_ancestor%(
+                        self.left.actual_type_var,
+                        self.right.actual_type_var
+                    )
                 %and full_propagation
                 %and check_right_type
                 %and {
                     bind error_location = node.left;
-                    TypeDecl.is_stream%(
-                        self.left.actual_type_var
-                    )
+                    TypeDecl.is_stream%(self.left.actual_type_var)
                 }
             # "or?"
             elif self.op is Op.OrInt
             then
                 self.actual_type_var
-                <- TypeDecl.imprecise_common_ancestor_list%(
-                    [self.left.actual_type_var, self.right.actual_type_var]
-                )
+                    <- TypeDecl.imprecise_common_ancestor_list%(
+                        [self.left.actual_type_var, self.right.actual_type_var]
+                    )
                 %and full_propagation
                 %and check_right_type
             # "==" "!="
@@ -4325,9 +4343,10 @@ class CastExpr: Expr {
         self.expr.expected_type_var <- null[Entity[TypeDecl]]
 
     fun xref_equation(): Equation =
-        self.actual_type_var <-
-            self.expr.get_type()
-            ?.get_cast_type(self.dest_type.referenced_decl())
+        self.actual_type_var
+        <- self.expr.get_type()?.get_cast_type(
+            self.dest_type.referenced_decl()
+        )
 }
 
 |" Expression that throws an error if LHS is null.
@@ -4373,23 +4392,23 @@ class GenericInstantiation: Expr {
             )
             %and self.name.get_rightmost_refid().do(
                 (ri) =>
-                (
-                    self.rebinded_var
-                    <- Decl.instantiate_generic_decl%(
-                        [ri.ref_var] & self.args.map((a) => a.type_var)
+                    (
+                        self.rebinded_var
+                            <- Decl.instantiate_generic_decl%(
+                                [ri.ref_var] & self.args.map((a) => a.type_var)
+                            )
+                        %and {
+                            bind error_location = ri.node;
+                            Decl.is_generic%(ri.ref_var)
+                        }
                     )
                     %and {
-                        bind error_location = ri.node;
-                        Decl.is_generic%(ri.ref_var)
-                    }
-                )
-                %and {
-                    bind error_location = node.args;
-                    Decl.has_correct_type_arg_number%(
-                        ri.ref_var,
-                        self.args.length()
-                    )
-                },
+                        bind error_location = node.args;
+                        Decl.has_correct_type_arg_number%(
+                            ri.ref_var,
+                            self.args.length()
+                        )
+                    },
                 default_val=self.rebinded_var <- null[Entity[TypeDecl]]
             )
         )
@@ -4592,23 +4611,23 @@ class DefId: Id implements TokenNode, DefiningNameInterface {
     |" Return the type of the symbol defined by this DefId.
     @exported
     fun get_type(): Entity[TypeDecl]
-            implements DefiningNameInterface.get_type =
-        self.decl().get_type()
+        implements DefiningNameInterface.get_type
+    = self.decl().get_type()
 
     |" Return the implementations of this name.
     @exported
     fun get_implementatinons(units: Array[AnalysisUnit]): Array[Entity[DefId]]
-            implements DefiningNameInterface.find_implementations =
-        self.decl()
-            .as[FunDecl]
-            ?.find_all_overrides(units)
-            .map((f) => f.syn_name)
+        implements DefiningNameInterface.find_implementations
+    = self.decl().as[FunDecl]?.find_all_overrides(units).map((f) => f.syn_name)
 
     |" Return the details to display in the language server client when it
     |" requests for completion or hovering information.
     @exported
-    fun decl_detail(): String implements DefiningNameInterface.decl_detail = (
-        "(" & self.decl().decl_type_name() & ") " & self.decl().full_name()
+    fun decl_detail(): String implements DefiningNameInterface.decl_detail =
+        "("
+        & self.decl().decl_type_name()
+        & ") "
+        & self.decl().full_name()
         & self.get_type().do(
             (t) => match self.decl() {
                 case _: FunDecl => t.full_name()
@@ -4616,12 +4635,12 @@ class DefId: Id implements TokenNode, DefiningNameInterface {
                 case _ => ": " & t.full_name()
             }
         )
-    )
 
     |" Return the kind of completion item for this DefId.
     @exported
     fun completion_item_kind(): Int
-            implements DefiningNameInterface.completion_item_kind =
+        implements DefiningNameInterface.completion_item_kind
+    =
         self.completion_item_kind_to_int(
             match self.decl() {
                 case _: FunDecl => CompletionItemKind.function_kind
@@ -4642,35 +4661,42 @@ class DefId: Id implements TokenNode, DefiningNameInterface {
 
     |" Return the documentation associated to this DefId.
     @exported
-    fun doc(): String implements DefiningNameInterface.documentation =
-        match self.decl() {
-            case f: FunDecl => f.base_fun_decls().find(
-                (f) => not f.full_decl()?.doc.is_null
-            )?.full_decl()?.doc.denoted_value().value
-            case d: Decl => d?.full_decl()?.doc?.denoted_value().value
-        }
+    fun doc(): String implements DefiningNameInterface.documentation = match
+        self.decl()
+    {
+        case f: FunDecl =>
+            f.base_fun_decls().find((f) => not f.full_decl()?.doc.is_null)
+            ?.full_decl()
+            ?.doc
+            .denoted_value()
+            .value
+        case d: Decl => d?.full_decl()?.doc?.denoted_value().value
+    }
 
     fun find_all_references_helper(
         current_node: Entity[LktNode]
     ): Array[Entity[RefId]] =
-        if current_node.as[RefId].do(
-            (r) => r.referenced_decl().node == self.decl().node
-        )
+        if
+            current_node.as[RefId].do(
+                (r) => r.referenced_decl().node == self.decl().node
+            )
         then current_node.as[RefId].singleton()
-        else current_node.children.mapcat(
-            (child) =>
-                if child.is_null
-                then null[Array[Entity[RefId]]]
-                else self.find_all_references_helper(child)
-        )
+        else
+            current_node.children.mapcat(
+                (child) =>
+                    if child.is_null then null[Array[Entity[RefId]]]
+                    else self.find_all_references_helper(child)
+            )
 
     |" Return the list of all RefId that refer to this DefId.
     @exported
     fun find_all_references(units: Array[AnalysisUnit]): Array[RefResult]
-            implements DefiningNameInterface.find_all_references =
+        implements DefiningNameInterface.find_all_references
+    =
         units.mapcat(
             (unit) => self.find_all_references_helper(unit.root.as_entity)
-        ).map((r) => RefResult(ref=r))
+        )
+        .map((r) => RefResult(ref=r))
 }
 
 |" Id referencing a Lkt module. It is not a derivation of RefId because
@@ -4729,14 +4755,13 @@ class ImportedId: Id implements TokenNode {
         # Only values have a type
         self.referenced_decl().do(
             (d) =>
-                if d is BaseValDecl
-                then d.get_type()
+                if d is BaseValDecl then d.get_type()
                 else null[Entity[TypeDecl]]
         )
 }
 
 |" Reference identifier.
-class RefId: Id implements TokenNode, ReferenceInterface{
+class RefId: Id implements TokenNode, ReferenceInterface {
     ref_var: LogicVar
 
     |" Find the limiting node to search in the environment to avoid variables
@@ -4744,15 +4769,14 @@ class RefId: Id implements TokenNode, ReferenceInterface{
     fun from_node(): LktNode =
         node.parents().find(
             (p) =>
-            p.parent is
-                BlockExpr
+                p.parent is BlockExpr
                 | BaseMatchBranch
                 | LambdaExpr
                 | FunDecl
                 | ComplexPattern
                 | Isa
                 | Query
-            or p.parent.do((v1) => v1.parent is BlockExpr)
+                or p.parent.do((v1) => v1.parent is BlockExpr)
         )
 
     |" Get the first declaration found for this RefId. This first tries to get
@@ -4761,14 +4785,16 @@ class RefId: Id implements TokenNode, ReferenceInterface{
     @memoized
     fun first_var_in_env(): Entity[Decl] = {
         val first_decls =
-            self.node_env.get(self.symbol, origin=node.from_node())
-            .filter((d) => not self.parents().contains(d));
+            self.node_env.get(self.symbol, origin=node.from_node()).filter(
+                (d) => not self.parents().contains(d)
+            );
         first_decls.find((d) => not d is FieldDecl).as[BaseValDecl]
         or? self.node_env.get_first(self.symbol).as[Decl]?.subdecl_if_generic()
-            .do((d) =>
-                if d is TypeDecl or d.as[FunDecl]?.owning_type().is_null
-                then d
-                else null[Entity[Decl]]
+            .do(
+                (d) =>
+                    if d is TypeDecl or d.as[FunDecl]?.owning_type().is_null
+                    then d
+                    else null[Entity[Decl]]
             )
         # When returning the result below, it is expected that the decl
         # returned is invalid and a diagnostic should be emitted by the solver.
@@ -4779,9 +4805,7 @@ class RefId: Id implements TokenNode, ReferenceInterface{
     fun is_being_called(): Bool =
         self.parent is BaseCallExpr
         or self.parent.as[DotExpr].do(
-            (de) =>
-            de.suffix == self
-            and de.parent is BaseCallExpr,
+            (de) => de.suffix == self and de.parent is BaseCallExpr,
             default_val=false
         )
 
@@ -4817,8 +4841,8 @@ class RefId: Id implements TokenNode, ReferenceInterface{
     |" Return the referenced defining name.
     @exported
     fun referenced_defining_name(): Entity[DefId]
-            implements ReferenceInterface.referenced_defining_name =
-        self.referenced_decl()?.syn_name
+        implements ReferenceInterface.referenced_defining_name
+    = self.referenced_decl()?.syn_name
 
     fun generic_type_equation(): Equation =
         # Assign the generic type
@@ -4831,22 +4855,23 @@ class RefId: Id implements TokenNode, ReferenceInterface{
             # If the ref_id is being called, get the function_type of the Decl
             first_var.do(
                 (td) =>
-                if first_var.is_generic()
-                then
-                    {
-                        bind in_logic_call = false;
+                    if first_var.is_generic()
+                    then
+                        {
+                            bind in_logic_call = false;
 
-                        self.actual_type_var
-                        <- FunctionType.infer_generic_decl%(
-                            self.expected_type_var,
-                            self.get_generic_type()
-                        )
-                    }
-                    %and self.generic_func_type_var
-                    <- Decl.function_type%(self.ref_var)
-                else
-                    self.actual_type_var <- td.function_type()
-                    %and self.generic_func_type_var <-> self.actual_type_var,
+                            self.actual_type_var
+                            <- FunctionType.infer_generic_decl%(
+                                self.expected_type_var,
+                                self.get_generic_type()
+                            )
+                        }
+                        %and self.generic_func_type_var
+                            <- Decl.function_type%(self.ref_var)
+                    else
+                        self.actual_type_var <- td.function_type()
+                        %and self.generic_func_type_var
+                            <-> self.actual_type_var,
                 default_val=%false
             )
         )
@@ -4872,7 +4897,8 @@ class RefId: Id implements TokenNode, ReferenceInterface{
                     bind error_location = node;
                     Decl.is_defined%(self.ref_var)
                 }
-            else self.bind_actual_type_equation(first_var)
+            else
+                self.bind_actual_type_equation(first_var)
                 %and {
                     bind error_location = node;
                     Decl.is_directly_referenceable%(self.ref_var)
@@ -4888,7 +4914,7 @@ class RefId: Id implements TokenNode, ReferenceInterface{
             # ``false``. As they are enum values, looking inside the Bool type
             # environment is enough and will avoid using other declarations.
             self.ref_var
-            <- self.bool_type().children_env.get_first(self.symbol)
+                <- self.bool_type().children_env.get_first(self.symbol)
             %and self.actual_type_var <- self.bool_type()
         )
         %and {
@@ -4933,7 +4959,7 @@ class IfExpr: Expr {
         # just use the expected type of the if expression itself.
         val logic_vars =
             self.branch_exprs().filter((expr) => expr.has_context_free_type())
-            .map((expr) => expr.actual_type_var)
+                .map((expr) => expr.actual_type_var)
             or? [self.expected_type_var];
 
         # Assign the common ancestor type for all branches to our "branch
@@ -4962,15 +4988,15 @@ class IfExpr: Expr {
         }
         %and self.alternatives.logic_all(
             (alt) =>
-            alt.cond_expr.xref_equation()
-            %and alt.cond_expr.expected_type_var <- self.bool_type()
-            %and {
-                bind error_location = alt.cond_expr.node;
-                TypeDecl.commutative_matching_type%(
-                    alt.cond_expr.expected_type_var,
-                    alt.cond_expr.actual_type_var
-                )
-            }
+                alt.cond_expr.xref_equation()
+                %and alt.cond_expr.expected_type_var <- self.bool_type()
+                %and {
+                    bind error_location = alt.cond_expr.node;
+                    TypeDecl.commutative_matching_type%(
+                        alt.cond_expr.expected_type_var,
+                        alt.cond_expr.actual_type_var
+                    )
+                }
         )
 
     fun xref_equation(): Equation =
@@ -4980,17 +5006,21 @@ class IfExpr: Expr {
         # Check the type of the branches
         %and self.branch_exprs().logic_all(
             (e) =>
-            e.xref_equation()
-            %and {
-                bind error_location = e.node;
-                TypeDecl.matching_type%(e.expected_type_var, e.actual_type_var)
-            }
+                e.xref_equation()
+                %and {
+                    bind error_location = e.node;
+                    TypeDecl.matching_type%(
+                        e.expected_type_var,
+                        e.actual_type_var
+                    )
+                }
         )
 
         # Set the type of the IfExpr
-        %and self.actual_type_var <- TypeDecl.imprecise_common_ancestor_list%(
-            self.branch_exprs().map((e) => e.actual_type_var)
-        )
+        %and self.actual_type_var
+            <- TypeDecl.imprecise_common_ancestor_list%(
+                self.branch_exprs().map((e) => e.actual_type_var)
+            )
 }
 
 |" Isa expression.
@@ -5025,18 +5055,18 @@ class KeepExpr: Expr {
     fun xref_equation(): Equation =
         self.expr.xref_equation()
         %and self.keep_type.xref_equation()
-        %and self.actual_type_var <- Decl.get_keep_type%(
-            self.expr.actual_type_var,
-            self.keep_type.type_var
-        )
+        %and self.actual_type_var
+            <- Decl.get_keep_type%(
+                self.expr.actual_type_var,
+                self.keep_type.type_var
+            )
         %and self.expr.expected_type_var <- null[Entity[TypeDecl]]
         %and {
             bind error_location = node.expr;
             TypeDecl.is_indexable_type%(self.expr.actual_type_var)
         }
-        %and self.array_element_type <- TypeDecl.get_indexable_content_type%(
-            self.expr.actual_type_var
-        )
+        %and self.array_element_type
+            <- TypeDecl.get_indexable_content_type%(self.expr.actual_type_var)
         %and {
             bind error_location = node.keep_type;
             TypeDecl.is_subtype_pred%(
@@ -5071,15 +5101,16 @@ class LambdaExpr: Expr {
         val lambda_type =
             node.parents().find((p) => p is CallExpr).do(
                 (ce) =>
-                if ce.as[CallExpr].args.at(0).do((a) => node >= a)
-                then (
-                    # The lambda is used as an argument, use the generic type
-                    self.get_generic_type()
-                )
-                else (
-                    # The lambda is used as callee, get the expected call
-                    self.get_expected_type()
-                ),
+                    if ce.as[CallExpr].args.at(0).do((a) => node >= a)
+                    then (
+                        # The lambda is used as an argument, use the generic
+                        # type.
+                        self.get_generic_type()
+                    )
+                    else (
+                        # The lambda is used as callee, get the expected call
+                        self.get_expected_type()
+                    ),
                 default_val=self.get_generic_type()
             );
 
@@ -5087,9 +5118,9 @@ class LambdaExpr: Expr {
         # but then the LambdaExpr will only be in its arguments.
         self.params.logic_all(
             (p) =>
-            if p.decl_type.is_null and not lambda_type.is_null
-            then p.type_var <- lambda_type.lambda_param_get_type(p)
-            else %true
+                if p.decl_type.is_null and not lambda_type.is_null
+                then p.type_var <- lambda_type.lambda_param_get_type(p)
+                else %true
         )
     }
 
@@ -5108,9 +5139,9 @@ class LambdaExpr: Expr {
             elif self.has_context_free_type()
             then
                 self.actual_type_var
-                <- self.body.get_type()?.create_function_type(
-                    self.params.map((a) => a.get_type())
-                )
+                    <- self.body.get_type()?.create_function_type(
+                        self.params.map((a) => a.get_type())
+                    )
                 %and {
                     bind error_location = node;
                     TypeDecl.could_determine_type%(self.actual_type_var)
@@ -5120,12 +5151,11 @@ class LambdaExpr: Expr {
                 # Assign the known type of the parameters to their `type_var`
                 # so that we can call `TypeDecl.create_function_type`
                 # dynamically with the actual type inferred for the body.
-                %and self.params.logic_all(
-                    (p) => p.type_var <- p.get_type()
-                )
-                %and self.actual_type_var <- TypeDecl.create_function_type%(
-                    [self.body.actual_type_var] & param_type_vars
-                )
+                %and self.params.logic_all((p) => p.type_var <- p.get_type())
+                %and self.actual_type_var
+                    <- TypeDecl.create_function_type%(
+                        [self.body.actual_type_var] & param_type_vars
+                    )
         )
         %and (
             if self.has_context_free_type() then %true
@@ -5140,7 +5170,7 @@ class LambdaExpr: Expr {
                 self.body.expected_type_var <- null[Entity[TypeDecl]]
                 %or (
                     self.body.expected_type_var
-                    <- TypeDecl.get_return_type%(self.expected_type_var)
+                        <- TypeDecl.get_return_type%(self.expected_type_var)
                     %and Decl.return_type_is_instantiated%(
                         self.actual_type_var
                     )
@@ -5316,7 +5346,7 @@ class LogicAssign: Expr {
                         (
                             self.dest_var.xref_equation()
                             %and self.dest_var.expected_type_var
-                            <- self.logicvar_type()
+                                <- self.logicvar_type()
                         )
                         %and {
                             bind error_location = node.dest_var;
@@ -5329,9 +5359,9 @@ class LogicAssign: Expr {
                     %and self.value.xref_equation()
                 )
                 %and self.value.expected_type_var
-                <- self.entity_type().instantiate_generic_decl(
-                    [self.node_env.get_first(s"RootNode__").as[TypeDecl]]
-                )
+                    <- self.entity_type().instantiate_generic_decl(
+                        [self.node_env.get_first(s"RootNode__").as[TypeDecl]]
+                    )
             )
             %and {
                 bind error_location = node.value;
@@ -5407,7 +5437,7 @@ class LogicUnify: Expr {
                         (
                             self.lhs.xref_equation()
                             %and self.lhs.expected_type_var
-                            <- self.logicvar_type()
+                                <- self.logicvar_type()
                         )
                         %and {
                             bind error_location = node.lhs;
@@ -5452,7 +5482,7 @@ class MatchExpr: Expr {
     fun expected_branch_type_equation(): Equation = {
         val logic_vars =
             self.branch_exprs().filter((expr) => expr.has_context_free_type())
-            .map((expr) => expr.actual_type_var)
+                .map((expr) => expr.actual_type_var)
             or? [self.expected_type_var];
 
         self.expected_branch_type_var
@@ -5467,19 +5497,20 @@ class MatchExpr: Expr {
             self.expected_branch_type_equation()
             %and self.branches.logic_all(
                 (mb) =>
-                mb.expr.xref_equation()
-                %and {
-                    bind error_location = mb.expr.node;
-                    TypeDecl.matching_type%(
-                        mb.expr.expected_type_var,
-                        mb.expr.actual_type_var
-                    )
-                }
+                    mb.expr.xref_equation()
+                    %and {
+                        bind error_location = mb.expr.node;
+                        TypeDecl.matching_type%(
+                            mb.expr.expected_type_var,
+                            mb.expr.actual_type_var
+                        )
+                    }
             )
         )
-        %and self.actual_type_var <- TypeDecl.imprecise_common_ancestor_list%(
-            self.branch_exprs().map((e) => e.actual_type_var)
-        )
+        %and self.actual_type_var
+            <- TypeDecl.imprecise_common_ancestor_list%(
+                self.branch_exprs().map((e) => e.actual_type_var)
+            )
 }
 
 |" Boolean negation expression.
@@ -5567,9 +5598,9 @@ class SubscriptExpr: Expr {
 
         # The type of this expression is the content of the indexed array
         %and self.actual_type_var
-        <- TypeDecl.get_indexable_content_type%(
-            self.prefix.actual_type_var
-        )
+            <- TypeDecl.get_indexable_content_type%(
+                self.prefix.actual_type_var
+            )
 
         # The index should be an integer
         %and (
@@ -5583,11 +5614,12 @@ class SubscriptExpr: Expr {
         # Propagate the expected type of this expression to the prefix
         # expresion if this is required.
         %and (
-            if not self.xref_entry_point() then
+            if not self.xref_entry_point()
+            then
                 self.prefix.expected_type_var
                 <- TypeDecl.make_array_type%(self.expected_type_var)
-            elif self.prefix.has_context_free_type() then
-                self.prefix.expected_type_var <- null[Entity[TypeDecl]]
+            elif self.prefix.has_context_free_type()
+            then self.prefix.expected_type_var <- null[Entity[TypeDecl]]
             else
                 self.prefix.expected_type_var
                 <- self.get_expected_type()?.make_array_type()
@@ -5620,13 +5652,13 @@ class TryExpr: Expr {
     fun expected_exprs_type_equation(): Equation = {
         val logic_vars =
             self.exprs().filter((e) => e.has_context_free_type()).map(
-                (e) => e.actual_type_var
-            )
-            & [self.expected_type_var]
+                    (e) => e.actual_type_var
+                )
+                & [self.expected_type_var]
             or? [self.expected_type_var];
 
         self.expected_expr_type_var
-        <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
         %and self.exprs().logic_all(
             (e) => e.expected_type_var <-> self.expected_expr_type_var
         )
@@ -5640,20 +5672,20 @@ class TryExpr: Expr {
             )
             %and self.exprs().logic_all(
                 (e) =>
-                e.xref_equation()
-                %and {
-                    bind error_location = e.node;
-                    TypeDecl.commutative_matching_type%(
-                        e.expected_type_var,
-                        e.actual_type_var
-                    )
-                }
+                    e.xref_equation()
+                    %and {
+                        bind error_location = e.node;
+                        TypeDecl.commutative_matching_type%(
+                            e.expected_type_var,
+                            e.actual_type_var
+                        )
+                    }
             )
         )
         %and self.actual_type_var
-        <- TypeDecl.imprecise_common_ancestor_list%(
-            self.exprs().map((e) => e.actual_type_var)
-        )
+            <- TypeDecl.imprecise_common_ancestor_list%(
+                self.exprs().map((e) => e.actual_type_var)
+            )
 
     fun has_context_free_type(): Bool = false
 }
@@ -5738,28 +5770,31 @@ class ImportedName: LktNode {
     |" Lexical env resolver for imported names from ``from M import ...``
     |" nodes.
     fun resolve_import_from(): Entity[LktNode] = {
-        val module = node.referenced_module(
-            node.parent.parent.as![ImportFrom].module_name
-        );
+        val module =
+            node.referenced_module(
+                node.parent.parent.as![ImportFrom].module_name
+            );
         val module_scope = module.children_env;
         module_scope.get_first(node.original_name.symbol).as![Decl]
     }
 
     |" Helper for env specs: return an env association for this imported name.
-    fun env_assoc(): EnvAssoc = EnvAssoc(
-        # The imported entity is reachable through its renaming name (if
-        # present), or its original name.
-        key=(node.renaming or? node.original_name).symbol,
-        # The imported entity belongs to another unit, so we need to go through
-        # a resolver to fetch it: add the imported name itself to the env.
-        value=node,
-        dest_env=DesignatedEnv(
-            kind=DesignatedEnvKind.current_env,
-            env_name=null[Symbol],
-            direct_env=null[LexicalEnv]
-        ),
-        metadata=null[Metadata]
-    )
+    fun env_assoc(): EnvAssoc =
+        EnvAssoc(
+            # The imported entity is reachable through its renaming name (if
+            # present), or its original name.
+            key=(node.renaming or? node.original_name).symbol,
+            # The imported entity belongs to another unit, so we need to go
+            # through a resolver to fetch it: add the imported name itself to
+            # the env.
+            value=node,
+            dest_env=DesignatedEnv(
+                kind=DesignatedEnvKind.current_env,
+                env_name=null[Symbol],
+                direct_env=null[LexicalEnv]
+            ),
+            metadata=null[Metadata]
+        )
 }
 
 |" Clause to import modules.
@@ -5881,9 +5916,7 @@ class LangkitRoot: Decl {
         # Add a dynamic entry to resolve to the right Metadata type
         add_to_env_kv(
             key=s"Metadata",
-            value=(
-                if node.is_from_prelude() then node else null[LktNode]
-            ),
+            value=if node.is_from_prelude() then node else null[LktNode],
             dest_env=DesignatedEnv(
                 kind=DesignatedEnvKind.direct_env,
                 env_name=null[Symbol],
@@ -5947,7 +5980,7 @@ class BaseMatchBranch: LktNode {
     |" legacy match branch with variable declaration.
     @abstract
     @exported
-    fun match_part() : Entity[LktNode]
+    fun match_part(): Entity[LktNode]
 
     env_spec {
         add_env()
@@ -5964,7 +5997,7 @@ class MatchBranch: BaseMatchBranch {
     @parse_field
     expr: Expr
 
-    fun match_part() : Entity[LktNode] = self.decl
+    fun match_part(): Entity[LktNode] = self.decl
 }
 
 |" Branch inside a match expression.
@@ -5976,7 +6009,7 @@ class PatternMatchBranch: BaseMatchBranch {
     @parse_field
     expr: Expr
 
-    fun match_part() : Entity[LktNode] = self.pattern
+    fun match_part(): Entity[LktNode] = self.pattern
 }
 
 |" Query comprehension.
@@ -6000,9 +6033,8 @@ class Query: Expr {
     source_type_var: LogicVar
 
     fun xref_equation(): Equation =
-        self.actual_type_var <- TypeDecl.make_stream_type%(
-            self.res_elems_type_var
-        )
+        self.actual_type_var
+            <- TypeDecl.make_stream_type%(self.res_elems_type_var)
 
         # Ensure the source is an iterable value. TODO: We introduce
         # `source_type_var` only to simplify the emission of error messages.
@@ -6010,40 +6042,39 @@ class Query: Expr {
         %and self.source_type_var <- self.source.get_type()
         %and {
             bind error_location = self.source.node;
-            TypeDecl.has_trait%(
-                self.source_type_var,
-                self.iterable_trait()
-            )
+            TypeDecl.has_trait%(self.source_type_var, self.iterable_trait())
         }
 
         # Propagate the expected type of this expression to the mapping
         # expresion if this is required.
         %and (
-            if not self.mapping.is_null then
+            if not self.mapping.is_null
+            then
                 self.mapping.xref_equation()
                 %and (
-                    if not self.xref_entry_point() then
+                    if not self.xref_entry_point()
+                    then
                         self.mapping.expected_type_var
                         <- TypeDecl.get_indexable_content_type%(
                             self.expected_type_var
                         )
-                    elif self.mapping.has_context_free_type() then
+                    elif self.mapping.has_context_free_type()
+                    then
                         self.mapping.expected_type_var
                         <- null[Entity[TypeDecl]]
                     else
                         self.mapping.expected_type_var
-                        <- self
-                            .get_expected_type()
+                        <- self.get_expected_type()
                             ?.get_indexable_content_type()
                 )
                 %and self.res_elems_type_var <-> self.mapping.actual_type_var
-            else
-                self.res_elems_type_var <- self.pattern.get_output_type()
+            else self.res_elems_type_var <- self.pattern.get_output_type()
         )
 
         # Ensure the guard is a boolean
         %and (
-            if not self.guard.is_null then
+            if not self.guard.is_null
+            then
                 self.guard.xref_equation()
                 %and {
                     bind error_location = node.guard;
@@ -6053,15 +6084,12 @@ class Query: Expr {
                         self.guard.actual_type_var
                     )
                 }
-            else
-                %true
+            else %true
         )
 
     fun has_context_free_type(): Bool =
-        if self.mapping.is_null then
-            self.source.has_context_free_type()
-        else
-            self.mapping.has_context_free_type()
+        if self.mapping.is_null then self.source.has_context_free_type()
+        else self.mapping.has_context_free_type()
 
     env_spec {
         add_env()
@@ -6186,10 +6214,10 @@ class FunctionTypeRef: TypeRef {
             %and self.return_type.xref_equation()
         )
         %and self.type_var
-        <- TypeDecl.create_function_type%(
-            [self.return_type.type_var]
-            & self.param_types.map((tr) => tr.type_var)
-        )
+            <- TypeDecl.create_function_type%(
+                [self.return_type.type_var]
+                & self.param_types.map((tr) => tr.type_var)
+            )
 }
 
 |" Reference to a generic type.
@@ -6206,23 +6234,23 @@ class GenericTypeRef: TypeRef {
         )
         %and self.type_name.get_rightmost_refid().do(
             (ri) =>
-            (
-                self.type_var
-                <- Decl.instantiate_generic_decl%(
-                    [ri.ref_var] & self.args.map((p) => p.type_var)
+                (
+                    self.type_var
+                        <- Decl.instantiate_generic_decl%(
+                            [ri.ref_var] & self.args.map((p) => p.type_var)
+                        )
+                    %and {
+                        bind error_location = ri.node;
+                        Decl.is_generic%(ri.ref_var)
+                    }
                 )
                 %and {
-                    bind error_location = ri.node;
-                    Decl.is_generic%(ri.ref_var)
-                }
-            )
-            %and {
-                bind error_location = node.args;
-                Decl.has_correct_type_arg_number%(
-                    ri.ref_var,
-                    self.args.length()
-                )
-            },
+                    bind error_location = node.args;
+                    Decl.has_correct_type_arg_number%(
+                        ri.ref_var,
+                        self.args.length()
+                    )
+                },
             default_val=%false
         )
 }
