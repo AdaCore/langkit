@@ -19,6 +19,7 @@ class ArrayLiteral {
 }
 
 class BaseImportList {
+    val sep = [recurse, hardline]
 }
 
 class Pattern {
@@ -687,21 +688,27 @@ class IfExpr {
 }
 
 class Import {
-    val node = [recurse, hardline]
 }
 
 class ImportFrom {
-    val node = [recurse, hardline]
 }
 
 class ImportAllFrom {
-    val node = [recurse, hardline]
+    val node = [
+        "from",
+        recurse(f_module_name),
+        "import",
+        whitespace,
+        "*"
+    ]
 }
 
 class ImportedName {
 }
 
 class ImportedNameList {
+    val node = group(indent(line, recurse))
+    val sep = [recurse, softline]
 }
 
 class ImportedId {
@@ -770,9 +777,9 @@ class LambdaExpr {
 class LangkitRoot {
     val f_imports = [
         recurse,
-        if this_field.is_empty
+        if this_field.is_empty or this_node.f_decls.is_empty
         then []
-        else hardline
+        else [hardline, hardline]
     ]
 }
 
