@@ -821,7 +821,7 @@ class LogicAssign {
                     line,
                     "<-",
                     whitespace,
-                    recurse(f_value),
+                    indent(recurse(f_value), bubbleUpTrailingTrivias=true),
                     bubbleUpTrailingTrivias=true
                 )
             )
@@ -831,7 +831,7 @@ class LogicAssign {
                 line,
                 "<-",
                 whitespace,
-                recurse(f_value)
+                indent(recurse(f_value), bubbleUpTrailingTrivias=true)
             )
 }
 
@@ -851,7 +851,7 @@ class LogicPropagate {
                     line,
                     "<-",
                     whitespace,
-                    recurse(f_call),
+                    indent(recurse(f_call), bubbleUpTrailingTrivias=true),
                     bubbleUpTrailingTrivias=true
                 )
             )
@@ -861,7 +861,7 @@ class LogicPropagate {
                 line,
                 "<-",
                 whitespace,
-                recurse(f_call)
+                indent(recurse(f_call), bubbleUpTrailingTrivias=true)
             )
 }
 
@@ -875,7 +875,7 @@ class LogicUnify {
                     line,
                     "<->",
                     whitespace,
-                    recurse(f_rhs),
+                    indent(recurse(f_rhs), bubbleUpTrailingTrivias=true),
                     bubbleUpTrailingTrivias=true
                 )
             )
@@ -885,7 +885,7 @@ class LogicUnify {
                 line,
                 "<->",
                 whitespace,
-                recurse(f_rhs)
+                indent(recurse(f_rhs), bubbleUpTrailingTrivias=true)
             )
 }
 

@@ -37,32 +37,32 @@ val propagate4 =
 val propagate5 =
     (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc)
     <- T.f%(
-        dddddddddddd,
-        eeeeeeeeeeeeeee,
-        fffffffff,
-        gggggggggggg,
-        hhhhhhhhhhhhh,
-        iiiiiiiiii
-    )
+            dddddddddddd,
+            eeeeeeeeeeeeeee,
+            fffffffff,
+            gggggggggggg,
+            hhhhhhhhhhhhh,
+            iiiiiiiiii
+        )
 val propagate6 =
     (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc)
         <- T.f%(
-            dddddddddddd,
-            eeeeeeeeeeeeeee,
-            fffffffff,
-            gggggggggggg,
-            hhhhhhhhhhhhh,
-            iiiiiiiiii
-        )
+                dddddddddddd,
+                eeeeeeeeeeeeeee,
+                fffffffff,
+                gggggggggggg,
+                hhhhhhhhhhhhh,
+                iiiiiiiiii
+            )
     %and (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc)
         <- T.f%(
-            dddddddddddd,
-            eeeeeeeeeeeeeee,
-            fffffffff,
-            gggggggggggg,
-            hhhhhhhhhhhhh,
-            iiiiiiiiii
-        )
+                dddddddddddd,
+                eeeeeeeeeeeeeee,
+                fffffffff,
+                gggggggggggg,
+                hhhhhhhhhhhhh,
+                iiiiiiiiii
+            )
 val propagate7 =
     a <- T.f%(b)
     # Comment foo
