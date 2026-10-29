@@ -404,6 +404,18 @@ class NativeLibPackager(BasePackager):
                     else:
                         shutil.copytree(item, dest, dirs_exist_ok=True)
 
+        # Ship libiconv's shared lib, as needed by the shared
+        # libgnatcoll_iconv.
+        if self.with_relocatable and self.libiconv_prefix:
+            for item in glob.glob(
+                os.path.join(
+                    self.libiconv_prefix,
+                    self.dyn_libdir_name,
+                    "libiconv*" + self.dllext + "*",
+                )
+            ):
+                copy_in(item, dyn_libdir)
+
         # Ship AdaSAT as well. We can simply copy the whole package.
         shutil.copytree(self.adasat_prefix, package_dir, dirs_exist_ok=True)
 
