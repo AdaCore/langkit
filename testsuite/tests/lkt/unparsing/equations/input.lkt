@@ -39,6 +39,14 @@ iiiiiiiiii)
 val propagate7 = a <- T.f%(b)
 # Comment foo
 %and foo
+val propagate8 = aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc <- match self {
+case _ => ddddddddddddddddddd.eeeeeeeeeeeeeeeeeee.ffffffffff
+case _ => ggggggggggggggggggggg.hhhhhhhhhhhhhhhhh.iiiiiiiiiiiiiii
+}
+%and match self {
+case _ => ddddddddddddddddddd.eeeeeeeeeeeeeeeeeee.ffffffffff
+case _ => ggggggggggggggggggggg.hhhhhhhhhhhhhhhhh.iiiiiiiiiiiiiii
+}
 
 val unify1 = a <-> b
 val unify2 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <->

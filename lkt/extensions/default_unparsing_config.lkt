@@ -107,7 +107,8 @@ class BaseCallExpr {
     val node = group(recurse)
     val f_name = group(
         group(
-            if this_node.parent is BinOp
+            if this_node.parent
+                is BinOp | LogicAssign | LogicPredicate | LogicUnify
             then
                 indent(
                     if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
@@ -124,7 +125,8 @@ class BaseCallExpr {
     val f_args =
         if this_field.is_empty
         then recurse
-        elif this_node.parent is BinOp
+        elif this_node.parent
+            is BinOp | LogicAssign | LogicPredicate | LogicUnify
         then
             ifBreak(
                 group(indent(indent(softline, recurse)), softline),
@@ -828,7 +830,10 @@ class LogicAssign {
                     line,
                     "<-",
                     whitespace,
-                    indent(recurse(f_value), bubbleUpTrailingTrivias=true),
+                    if this_node.f_value is BaseCallExpr | MatchExpr
+                    then recurse(f_value)
+                    else
+                        indent(recurse(f_value), bubbleUpTrailingTrivias=true),
                     bubbleUpTrailingTrivias=true
                 )
             )
@@ -838,7 +843,9 @@ class LogicAssign {
                 line,
                 "<-",
                 whitespace,
-                indent(recurse(f_value), bubbleUpTrailingTrivias=true)
+                if this_node.f_value is BaseCallExpr | MatchExpr
+                then recurse(f_value)
+                else indent(recurse(f_value), bubbleUpTrailingTrivias=true)
             )
 }
 
@@ -858,7 +865,7 @@ class LogicPropagate {
                     line,
                     "<-",
                     whitespace,
-                    indent(recurse(f_call), bubbleUpTrailingTrivias=true),
+                    recurse(f_call),
                     bubbleUpTrailingTrivias=true
                 )
             )
@@ -868,7 +875,7 @@ class LogicPropagate {
                 line,
                 "<-",
                 whitespace,
-                indent(recurse(f_call), bubbleUpTrailingTrivias=true)
+                recurse(f_call)
             )
 }
 
@@ -882,7 +889,9 @@ class LogicUnify {
                     line,
                     "<->",
                     whitespace,
-                    indent(recurse(f_rhs), bubbleUpTrailingTrivias=true),
+                    if this_node.f_rhs is BaseCallExpr | MatchExpr
+                    then recurse(f_rhs)
+                    else indent(recurse(f_rhs), bubbleUpTrailingTrivias=true),
                     bubbleUpTrailingTrivias=true
                 )
             )
@@ -892,7 +901,9 @@ class LogicUnify {
                 line,
                 "<->",
                 whitespace,
-                indent(recurse(f_rhs), bubbleUpTrailingTrivias=true)
+                if this_node.f_rhs is BaseCallExpr | MatchExpr
+                then recurse(f_rhs)
+                else indent(recurse(f_rhs), bubbleUpTrailingTrivias=true)
             )
 }
 
