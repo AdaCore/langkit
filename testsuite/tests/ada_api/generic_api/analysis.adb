@@ -26,6 +26,9 @@ procedure Analysis is
 
    Id : Language_Id renames Libfoolang.Generic_API.Foo_Lang_Id;
 
+   Eacute : constant String :=
+     (Character'Val (16#C3#), Character'Val (16#A9#));
+
    Ctx : Lk_Context;
    U   : Lk_Unit;
    N   : Lk_Node;
@@ -326,7 +329,8 @@ begin
            ("without_error.txt", "var foo = 1;", Charset => "utf-8"),
          Ctx.Get_From_Buffer
            ("with_error.txt", "var foo = 1", Charset => "ascii"),
-         Ctx.Get_From_File ("nosuchfile.txt"));
+         Ctx.Get_From_File ("nosuchfile.txt"),
+         Ctx.Get_From_File ("nonascii-" & Eacute & ".txt"));
    begin
       Put_Line ("Testing diagnostics-related primitives");
       for U of Units loop
@@ -615,6 +619,13 @@ begin
    Put_Line ("Last_Token.Image -> " & U.Last_Token.Image);
    Put_Line ("Comment_Tok.Image -> " & Comment_Tok.Image);
    Put_Line ("Last_Token.Previous.Image -> " & U.Last_Token.Previous.Image);
+   declare
+      U : constant Lk_Unit := Ctx.Get_From_Buffer
+        (Filename => "nonascii-" & Eacute & ".txt",
+         Buffer   => "example Foo");
+   begin
+      Put_Line ("[non-ascii] Root.Image -> " & U.Root.Image);
+   end;
    New_Line;
 
    Put_Line ("First_Token.Text -> "

@@ -3533,7 +3533,8 @@ package body ${ada_lib_name}.Implementation is
    begin
       return
         To_Text
-          (Ada.Directories.Simple_Name (Get_Filename (Unit (Self))))
+          (Ada.Directories.Simple_Name (Get_Filename (Unit (Self))),
+           Mode => Backslash_Replace)
         & ":"
         & To_Text
             (if Start_Only
@@ -5634,7 +5635,7 @@ package body ${ada_lib_name}.Implementation is
             Append
               (Result.Diagnostics,
                No_Source_Location_Range,
-               "Cannot read " & To_Text (Name));
+               "Cannot read " & To_Text (Name, Mode => Backslash_Replace));
             Rotate_TDH;
             return;
          end;

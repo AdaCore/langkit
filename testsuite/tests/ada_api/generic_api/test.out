@@ -202,6 +202,10 @@ nosuchfile.txt:
   Charset: utf-8
   Has_Diagnostics? TRUE
   nosuchfile.txt: Cannot read nosuchfile.txt
+nonascii-é.txt:
+  Charset: utf-8
+  Has_Diagnostics? TRUE
+  nonascii-é.txt: Cannot read nonascii-\\xc3\\xa9.txt
 
 Testing Print debug helpers for units:
 without_error.txt:
@@ -227,6 +231,10 @@ ASTList[FooNode][1:1-1:12]
 
 nosuchfile.txt:
 nosuchfile.txt: Cannot read nosuchfile.txt
+<no parse tree>
+
+nonascii-é.txt:
+nonascii-é.txt: Cannot read nonascii-\\xc3\\xa9.txt
 <no parse tree>
 
 Testing various node operations:
@@ -355,6 +363,7 @@ First_Token.Image -> <Token Kind=Example Text="example">
 Last_Token.Image -> <Token Kind=Termination Text="">
 Comment_Tok.Image -> <Token Kind=Comment Text="# Comment">
 Last_Token.Previous.Image -> <Token Kind=Whitespace Text="\x0a">
+[non-ascii] Root.Image -> <FooNodeList nonascii-\\xc3\\xa9.txt:1:1-1:12>
 
 First_Token.Text -> "example"
 Last_Token.Text -> ""
