@@ -57,14 +57,14 @@ package body Liblktlang.Analysis is
 
         
       function To_Public_Def_Id_Array
-         (Value : Internal_Entity_Def_Id_Array_Access) return Def_Id_Array;
+         (Value : Internal_Entity_Array_Access) return Def_Id_Array;
 
 
         
 
         
       function To_Public_Fun_Decl_Array
-         (Value : Internal_Entity_Fun_Decl_Array_Access) return Fun_Decl_Array;
+         (Value : Internal_Entity_Array_Access) return Fun_Decl_Array;
 
 
         
@@ -1220,6 +1220,34 @@ package body Liblktlang.Analysis is
          
             end if;
       end;
+      function As_Base_Generic_Param_Type_Decl
+        (Node : Lkt_Node'Class) return Base_Generic_Param_Type_Decl
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Base_Generic_Param_Type_Decl;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Base_Generic_Param_Type_Decl then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to BaseGenericParamTypeDecl";
+         
+            end if;
+      end;
       function As_Base_Grammar_Rule_Decl
         (Node : Lkt_Node'Class) return Base_Grammar_Rule_Decl
       is
@@ -2057,90 +2085,6 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to ClassDecl";
-         
-            end if;
-      end;
-      function As_Class_Qualifier
-        (Node : Lkt_Node'Class) return Class_Qualifier
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Class_Qualifier;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Class_Qualifier then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to ClassQualifier";
-         
-            end if;
-      end;
-      function As_Class_Qualifier_Absent
-        (Node : Lkt_Node'Class) return Class_Qualifier_Absent
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Class_Qualifier_Absent;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Class_Qualifier_Absent_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to ClassQualifier.Absent";
-         
-            end if;
-      end;
-      function As_Class_Qualifier_Present
-        (Node : Lkt_Node'Class) return Class_Qualifier_Present
-      is
-         N : constant Bare_Lkt_Node := Node.Internal.Node;
-      begin
-         if N = null then
-            return No_Class_Qualifier_Present;
-         end if;
-
-         Check_Safety_Net (Node);
-
-         
-         
-
-            if N.Kind in Lkt_Class_Qualifier_Present_Range then
-               
-            return (Internal   => (Node => N, Info => Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         
-            else
-               
-            raise Constraint_Error with
-              "Liblktlang: invalid type conversion from "
-              & Node.Kind_Name
-              & " to ClassQualifier.Present";
          
             end if;
       end;
@@ -3401,6 +3345,34 @@ package body Liblktlang.Analysis is
               "Liblktlang: invalid type conversion from "
               & Node.Kind_Name
               & " to FunctionTypeRef";
+         
+            end if;
+      end;
+      function As_Generic_Class_Param_Type_Decl
+        (Node : Lkt_Node'Class) return Generic_Class_Param_Type_Decl
+      is
+         N : constant Bare_Lkt_Node := Node.Internal.Node;
+      begin
+         if N = null then
+            return No_Generic_Class_Param_Type_Decl;
+         end if;
+
+         Check_Safety_Net (Node);
+
+         
+         
+
+            if N.Kind in Lkt_Generic_Class_Param_Type_Decl_Range then
+               
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         
+            else
+               
+            raise Constraint_Error with
+              "Liblktlang: invalid type conversion from "
+              & Node.Kind_Name
+              & " to GenericClassParamTypeDecl";
          
             end if;
       end;
@@ -7135,8 +7107,11 @@ package body Liblktlang.Analysis is
 
 
       
+
+
+      
       function To_Public_Def_Id_Array
-         (Value : Internal_Entity_Def_Id_Array_Access) return Def_Id_Array is
+         (Value : Internal_Entity_Array_Access) return Def_Id_Array is
       begin
          return Result : Def_Id_Array (1 .. Value.N) do
             for I in Result'Range loop
@@ -7163,7 +7138,7 @@ package body Liblktlang.Analysis is
 
       
       function To_Public_Fun_Decl_Array
-         (Value : Internal_Entity_Fun_Decl_Array_Access) return Fun_Decl_Array is
+         (Value : Internal_Entity_Array_Access) return Fun_Decl_Array is
       begin
          return Result : Fun_Decl_Array (1 .. Value.N) do
             for I in Result'Range loop
@@ -7174,9 +7149,6 @@ package body Liblktlang.Analysis is
             end loop;
          end return;
       end;
-
-
-      
 
 
       
@@ -7268,7 +7240,8 @@ package body Liblktlang.Analysis is
       begin
          for I in Value'Range loop
             Result.Items (I - Value'First + Result.Items'First) :=
-               Unwrap_Unit (Value (I));
+                  Unwrap_Unit (Value (I))
+            ;
          end loop;
          return Result;
       end;
@@ -8441,7 +8414,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8471,7 +8444,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Trait_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8501,7 +8474,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8531,7 +8504,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Trait_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8561,7 +8534,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8591,7 +8564,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Trait_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8621,7 +8594,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8651,7 +8624,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Trait_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8681,7 +8654,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8711,7 +8684,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8741,7 +8714,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8771,7 +8744,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8801,7 +8774,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8831,7 +8804,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8861,7 +8834,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8891,7 +8864,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8921,7 +8894,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8951,7 +8924,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -8981,7 +8954,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9011,7 +8984,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9041,7 +9014,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9071,7 +9044,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9101,7 +9074,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9131,7 +9104,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9161,7 +9134,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9191,7 +9164,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9221,7 +9194,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9251,7 +9224,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9281,7 +9254,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9311,7 +9284,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Named_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9341,7 +9314,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9371,7 +9344,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Trait_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9401,7 +9374,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Generic_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9431,7 +9404,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Trait_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9781,7 +9754,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Def_Id_Array_Access;
+      Property_Result : Internal_Entity_Array_Access;
 
          procedure Free_Internal;
          --  Dec-ref all internal arguments and the property result, when
@@ -9827,7 +9800,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9857,7 +9830,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9888,8 +9861,8 @@ package body Liblktlang.Analysis is
       
 
 
-         Internal_Arg_Cast_To : Internal_Entity_Type_Decl;
-      Property_Result : Internal_Entity_Type_Decl;
+         Internal_Arg_Cast_To : Internal_Entity;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9922,8 +9895,8 @@ package body Liblktlang.Analysis is
       
 
 
-         Internal_Arg_Keep_Type : Internal_Entity_Type_Decl;
-      Property_Result : Internal_Entity_Type_Decl;
+         Internal_Arg_Keep_Type : Internal_Entity;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -9956,8 +9929,8 @@ package body Liblktlang.Analysis is
       
 
 
-         Internal_Arg_Prefix_Type : Internal_Entity_Type_Decl;
-      Property_Result : Internal_Entity_Type_Decl;
+         Internal_Arg_Prefix_Type : Internal_Entity;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -10033,36 +10006,6 @@ package body Liblktlang.Analysis is
       
       Property_Result :=
          Liblktlang.Impl_0.Decl_P_Return_Type_Is_Instantiated
-            (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
-
-      return Result : Boolean := Property_Result do
-
-
-            null;
-      end return;
-
-   end;
-
-         
-   function P_Is_Instantiated
-     (Node : Decl'Class) return Boolean is
-      
-
-
-      Property_Result : Boolean;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Impl_0.Decl_P_Is_Instantiated
             (Bare_Lkt_Node (Node.Internal.Node), E_Info => Node.Internal.Info);
 
       return Result : Boolean := Property_Result do
@@ -10160,7 +10103,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -10190,7 +10133,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -10220,7 +10163,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -10250,7 +10193,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -10487,7 +10430,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Def_Id;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -10517,7 +10460,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -10771,6 +10714,11 @@ package body Liblktlang.Analysis is
                     Safety_Net => Node.Safety_Net);
          end if;
    end F_Args;
+
+
+
+
+
 
 
 
@@ -11819,51 +11767,6 @@ package body Liblktlang.Analysis is
 
 
 
-
-         
-   function P_As_Bool
-     (Node : Class_Qualifier'Class) return Boolean is
-      
-
-
-      Property_Result : Boolean;
-
-
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-
-
-      
-      Property_Result :=
-         Liblktlang.Impl_0.Dispatcher_Class_Qualifier_P_As_Bool
-            (Bare_Lkt_Node (Node.Internal.Node));
-
-      return Result : Boolean := Property_Result do
-
-
-            null;
-      end return;
-
-   end;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
          
    
 
@@ -12314,7 +12217,7 @@ package body Liblktlang.Analysis is
 
 
          Internal_Arg_Units : Internal_Unit_Array_Access;
-      Property_Result : Internal_Entity_Def_Id_Array_Access;
+      Property_Result : Internal_Entity_Array_Access;
 
          procedure Free_Internal;
          --  Dec-ref all internal arguments and the property result, when
@@ -12541,7 +12444,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Type_Decl;
+      Property_Result : Internal_Entity;
 
 
    begin
@@ -13258,9 +13161,9 @@ package body Liblktlang.Analysis is
    
 
    function F_Id
-     (Node : Field_Pattern_Detail'Class) return Id
+     (Node : Field_Pattern_Detail'Class) return Ref_Id
    is
-      Result : Bare_Id;
+      Result : Bare_Ref_Id;
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";
@@ -13269,7 +13172,7 @@ package body Liblktlang.Analysis is
       Check_Safety_Net (Node);
       Result := Implementation.Field_Pattern_Detail_F_Id (Node.Internal.Node);
          if Result = null then
-            return No_Id;
+            return No_Ref_Id;
          else
             return (Internal   => (Result, Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
@@ -13544,7 +13447,7 @@ package body Liblktlang.Analysis is
 
 
          Internal_Arg_Units : Internal_Unit_Array_Access;
-      Property_Result : Internal_Entity_Fun_Decl_Array_Access;
+      Property_Result : Internal_Entity_Array_Access;
 
          procedure Free_Internal;
          --  Dec-ref all internal arguments and the property result, when
@@ -13740,6 +13643,11 @@ package body Liblktlang.Analysis is
 
 
 
+
+
+
+
+
          
    
 
@@ -13845,33 +13753,6 @@ package body Liblktlang.Analysis is
 
 
 
-
-
-         
-   
-
-   function F_Has_Class
-     (Node : Generic_Param_Type_Decl'Class) return Class_Qualifier
-   is
-      Result : Bare_Class_Qualifier;
-   begin
-      if Node.Internal.Node = null then
-         raise Precondition_Failure with "null node argument";
-      end if;
-
-      Check_Safety_Net (Node);
-      Result := Implementation.Generic_Param_Type_Decl_F_Has_Class (Node.Internal.Node);
-         if Result = null then
-            return No_Class_Qualifier;
-         else
-            return (Internal   => (Result, Node.Internal.Info),
-                    Safety_Net => Node.Safety_Net);
-         end if;
-   end F_Has_Class;
-
-         function F_Has_Class (Node : Generic_Param_Type_Decl'Class) return Boolean
-         is (Class_Qualifier'(Node.F_Has_Class).Kind
-             = Lkt_Class_Qualifier_Present);
 
 
 
@@ -16828,7 +16709,7 @@ package body Liblktlang.Analysis is
       
 
 
-      Property_Result : Internal_Entity_Def_Id;
+      Property_Result : Internal_Entity;
 
 
    begin

@@ -7,6 +7,10 @@ with Liblktlang_Support.Generic_API.Introspection;
 with Liblktlang.Analysis; use Liblktlang.Analysis;
 with Liblktlang.Common;   use Liblktlang.Common;
 
+--  This package exposes the language ID for Liblktlang as well as
+--  converters between generic API types (``Liblktlang_Support.Generic_API``) and
+--  Liblktlang types.
+
 package Liblktlang.Generic_API is
 
    
@@ -65,7 +69,7 @@ package Liblktlang.Generic_API is
    function To_Generic_Node_Type
      (Kind : Lkt_Node_Kind_Type)
       return Liblktlang_Support.Generic_API.Introspection.Type_Ref;
-   --  Convert the given nodk ``Kind`` into a generic type reference
+   --  Convert the given node ``Kind`` into a generic type reference
 
    function From_Generic_Node_Type
      (Kind : Liblktlang_Support.Generic_API.Introspection.Type_Ref)

@@ -124,9 +124,8 @@ package Liblktlang.Analysis is
       --  Derived nodes: :ada:ref:`Argument`, :ada:ref:`Base_Import`,
       --  :ada:ref:`Base_Lexer_Case_Rule_Alt`, :ada:ref:`Base_Match_Branch`,
       --  :ada:ref:`Block_Expr_Clause`, :ada:ref:`Block_String_Line`,
-      --  :ada:ref:`Class_Qualifier`, :ada:ref:`Decl_Annotation_Args`,
-      --  :ada:ref:`Decl_Annotation`, :ada:ref:`Decl`,
-      --  :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
+      --  :ada:ref:`Decl_Annotation_Args`, :ada:ref:`Decl_Annotation`,
+      --  :ada:ref:`Decl`, :ada:ref:`Dyn_Env_Wrapper`, :ada:ref:`Elsif_Branch`,
       --  :ada:ref:`Enum_Class_Case`, :ada:ref:`Excludes_Null`,
       --  :ada:ref:`Expr`, :ada:ref:`Full_Decl`, :ada:ref:`Grammar_List_Sep`,
       --  :ada:ref:`Imported_Name`, :ada:ref:`Lexer_Case_Rule_Send`,
@@ -254,8 +253,9 @@ package Liblktlang.Analysis is
       --  Abstract base class for type declarations.
       --
       --  Derived nodes: :ada:ref:`Any_Type_Decl`,
+      --  :ada:ref:`Base_Generic_Param_Type_Decl`,
       --  :ada:ref:`Enum_Class_Alt_Decl`, :ada:ref:`Function_Type`,
-      --  :ada:ref:`Generic_Param_Type_Decl`, :ada:ref:`Named_Type_Decl`
+      --  :ada:ref:`Named_Type_Decl`
 
       type Any_Type_Decl is new Type_Decl with private
          with First_Controlling_Parameter
@@ -329,6 +329,15 @@ package Liblktlang.Analysis is
       --  Base class for expressions that are syntactically call-like.
       --
       --  Derived nodes: :ada:ref:`Call_Expr`, :ada:ref:`Logic_Call_Expr`
+
+      type Base_Generic_Param_Type_Decl is new Type_Decl with private
+         with First_Controlling_Parameter
+      ;
+      --  Base class for the declaration of a parameter type in a generic
+      --  declaration.
+      --
+      --  Derived nodes: :ada:ref:`Generic_Class_Param_Type_Decl`,
+      --  :ada:ref:`Generic_Param_Type_Decl`
 
       type Base_Grammar_Rule_Decl is new Decl with private
          with First_Controlling_Parameter
@@ -586,24 +595,6 @@ package Liblktlang.Analysis is
       --  moment, but might be extended to support regular classes in the
       --  future.
       --
-      --  This node type has no derivation.
-
-      type Class_Qualifier is new Lkt_Node with private
-         with First_Controlling_Parameter
-      ;
-      --  Whether this generic parameter type must be a class.
-      --
-      --  Derived nodes: :ada:ref:`Class_Qualifier_Absent`,
-      --  :ada:ref:`Class_Qualifier_Present`
-
-      type Class_Qualifier_Absent is new Class_Qualifier with private
-         with First_Controlling_Parameter
-      ;
-      --  This node type has no derivation.
-
-      type Class_Qualifier_Present is new Class_Qualifier with private
-         with First_Controlling_Parameter
-      ;
       --  This node type has no derivation.
 
       type Complex_Pattern is new Binding_Pattern with private
@@ -993,6 +984,13 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
+      type Generic_Class_Param_Type_Decl is new Base_Generic_Param_Type_Decl with private
+         with First_Controlling_Parameter
+      ;
+      --  Declaration of a class parameter type in a generic declaration.
+      --
+      --  This node type has no derivation.
+
       type Generic_Decl is new Decl with private
          with First_Controlling_Parameter
       ;
@@ -1014,10 +1012,10 @@ package Liblktlang.Analysis is
       --
       --  This node type has no derivation.
 
-      type Generic_Param_Type_Decl is new Type_Decl with private
+      type Generic_Param_Type_Decl is new Base_Generic_Param_Type_Decl with private
          with First_Controlling_Parameter
       ;
-      --  Declaration of a parameter type in a generic declaration.
+      --  Declaration of a simple parameter type in a generic declaration.
       --
       --  This node type has no derivation.
 
@@ -2016,6 +2014,8 @@ package Liblktlang.Analysis is
       --  @exclude
       No_Base_Call_Expr : constant Base_Call_Expr;
       --  @exclude
+      No_Base_Generic_Param_Type_Decl : constant Base_Generic_Param_Type_Decl;
+      --  @exclude
       No_Base_Grammar_Rule_Decl : constant Base_Grammar_Rule_Decl;
       --  @exclude
       No_Base_Import : constant Base_Import;
@@ -2075,12 +2075,6 @@ package Liblktlang.Analysis is
       No_Char_Lit : constant Char_Lit;
       --  @exclude
       No_Class_Decl : constant Class_Decl;
-      --  @exclude
-      No_Class_Qualifier : constant Class_Qualifier;
-      --  @exclude
-      No_Class_Qualifier_Absent : constant Class_Qualifier_Absent;
-      --  @exclude
-      No_Class_Qualifier_Present : constant Class_Qualifier_Present;
       --  @exclude
       No_Complex_Pattern : constant Complex_Pattern;
       --  @exclude
@@ -2171,6 +2165,8 @@ package Liblktlang.Analysis is
       No_Function_Type : constant Function_Type;
       --  @exclude
       No_Function_Type_Ref : constant Function_Type_Ref;
+      --  @exclude
+      No_Generic_Class_Param_Type_Decl : constant Generic_Class_Param_Type_Decl;
       --  @exclude
       No_Generic_Decl : constant Generic_Decl;
       --  @exclude
@@ -2969,7 +2965,9 @@ package Liblktlang.Analysis is
 
             
    type Complete_Item_Array is
-      array (Positive range <>) of Complete_Item;
+      array (Positive range <>) of
+         Complete_Item
+   ;
 
 
             
@@ -3056,17 +3054,23 @@ package Liblktlang.Analysis is
 
             
    type Lkt_Node_Array is
-      array (Positive range <>) of Lkt_Node;
+      array (Positive range <>) of
+         Lkt_Node
+   ;
 
 
             
    type Def_Id_Array is
-      array (Positive range <>) of Def_Id;
+      array (Positive range <>) of
+         Def_Id
+   ;
 
 
             
    type Fun_Decl_Array is
-      array (Positive range <>) of Fun_Decl;
+      array (Positive range <>) of
+         Fun_Decl
+   ;
 
 
             
@@ -3098,7 +3102,9 @@ package Liblktlang.Analysis is
 
             
    type Logic_Context_Array is
-      array (Positive range <>) of Logic_Context;
+      array (Positive range <>) of
+         Logic_Context
+   ;
 
 
             
@@ -3121,7 +3127,9 @@ package Liblktlang.Analysis is
 
             
    type Ref_Result_Array is
-      array (Positive range <>) of Ref_Result;
+      array (Positive range <>) of
+         Ref_Result
+   ;
 
 
             
@@ -3187,7 +3195,9 @@ package Liblktlang.Analysis is
 
             
    type Solver_Diagnostic_Array is
-      array (Positive range <>) of Solver_Diagnostic;
+      array (Positive range <>) of
+         Solver_Diagnostic
+   ;
 
 
             
@@ -3223,7 +3233,9 @@ package Liblktlang.Analysis is
 
             
    type Analysis_Unit_Array is
-      array (Positive range <>) of Analysis_Unit;
+      array (Positive range <>) of
+         Analysis_Unit
+   ;
 
 
 
@@ -3696,13 +3708,6 @@ package Liblktlang.Analysis is
    --  @belongs-to Decl
 
          
-   function P_Is_Instantiated
-     (Node : Decl'Class) return Boolean;
-   --  Return True if Self is an instantiated declaration, meaning that it does
-   --  not use any of its declared generic types.
-   --  @belongs-to Decl
-
-         
    function P_Name
      (Node : Decl'Class) return Unbounded_Text_Type;
    --  Return the symbol corresponding to the name of this declaration.
@@ -4027,6 +4032,11 @@ package Liblktlang.Analysis is
      (Node : Base_Call_Expr'Class) return Argument_List;
    --  When there are no parsing errors, this field is never null.
    --  @belongs-to Base_Call_Expr
+
+
+
+
+
 
 
 
@@ -4533,27 +4543,6 @@ package Liblktlang.Analysis is
      (Node : Char_Lit'Class) return Decoded_Char_Value;
    --  Return the content of the given character literal node.
    --  @belongs-to Char_Lit
-
-
-
-
-
-
-
-
-
-
-
-         
-   function P_As_Bool
-     (Node : Class_Qualifier'Class) return Boolean;
-   --  Return whether this node is present
-   --  @belongs-to Class_Qualifier
-
-
-
-
-
 
 
 
@@ -5209,7 +5198,7 @@ package Liblktlang.Analysis is
    
 
    function F_Id
-     (Node : Field_Pattern_Detail'Class) return Id;
+     (Node : Field_Pattern_Detail'Class) return Ref_Id;
    --  When there are no parsing errors, this field is never null.
    --  @belongs-to Field_Pattern_Detail
 
@@ -5259,12 +5248,12 @@ package Liblktlang.Analysis is
    function F_Decl
      (Node : Full_Decl'Class) return Decl;
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Dyn_Var_Decl`, :ada:ref:`Env_Spec_Decl`,
-   --  :ada:ref:`Error_Decl`, :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`,
-   --  :ada:ref:`Generic_Decl`, :ada:ref:`Generic_Param_Type_Decl`,
-   --  :ada:ref:`Grammar_Decl`, :ada:ref:`Grammar_Rule_Decl`,
-   --  :ada:ref:`Lexer_Decl`, :ada:ref:`Lexer_Family_Decl`,
-   --  :ada:ref:`Named_Type_Decl`, :ada:ref:`Val_Decl`
+   --  :ada:ref:`Base_Generic_Param_Type_Decl`, :ada:ref:`Dyn_Var_Decl`,
+   --  :ada:ref:`Env_Spec_Decl`, :ada:ref:`Error_Decl`, :ada:ref:`Field_Decl`,
+   --  :ada:ref:`Fun_Decl`, :ada:ref:`Generic_Decl`, :ada:ref:`Grammar_Decl`,
+   --  :ada:ref:`Grammar_Rule_Decl`, :ada:ref:`Lexer_Decl`,
+   --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Named_Type_Decl`,
+   --  :ada:ref:`Val_Decl`
    --
    --  When there are no parsing errors, this field is never null.
    --  @belongs-to Full_Decl
@@ -5432,6 +5421,11 @@ package Liblktlang.Analysis is
 
 
 
+
+
+
+
+
          
    
 
@@ -5503,18 +5497,6 @@ package Liblktlang.Analysis is
 
 
 
-
-
-         
-   
-
-   function F_Has_Class
-     (Node : Generic_Param_Type_Decl'Class) return Class_Qualifier;
-   --  When there are no parsing errors, this field is never null.
-   --  @belongs-to Generic_Param_Type_Decl
-
-      function F_Has_Class (Node : Generic_Param_Type_Decl'Class) return Boolean;
-      --  @belongs-to Generic_Param_Type_Decl
 
 
 
@@ -7938,6 +7920,9 @@ package Liblktlang.Analysis is
       function As_Base_Call_Expr
         (Node : Lkt_Node'Class) return Base_Call_Expr;
       --  @exclude
+      function As_Base_Generic_Param_Type_Decl
+        (Node : Lkt_Node'Class) return Base_Generic_Param_Type_Decl;
+      --  @exclude
       function As_Base_Grammar_Rule_Decl
         (Node : Lkt_Node'Class) return Base_Grammar_Rule_Decl;
       --  @exclude
@@ -8027,15 +8012,6 @@ package Liblktlang.Analysis is
       --  @exclude
       function As_Class_Decl
         (Node : Lkt_Node'Class) return Class_Decl;
-      --  @exclude
-      function As_Class_Qualifier
-        (Node : Lkt_Node'Class) return Class_Qualifier;
-      --  @exclude
-      function As_Class_Qualifier_Absent
-        (Node : Lkt_Node'Class) return Class_Qualifier_Absent;
-      --  @exclude
-      function As_Class_Qualifier_Present
-        (Node : Lkt_Node'Class) return Class_Qualifier_Present;
       --  @exclude
       function As_Complex_Pattern
         (Node : Lkt_Node'Class) return Complex_Pattern;
@@ -8171,6 +8147,9 @@ package Liblktlang.Analysis is
       --  @exclude
       function As_Function_Type_Ref
         (Node : Lkt_Node'Class) return Function_Type_Ref;
+      --  @exclude
+      function As_Generic_Class_Param_Type_Decl
+        (Node : Lkt_Node'Class) return Generic_Class_Param_Type_Decl;
       --  @exclude
       function As_Generic_Decl
         (Node : Lkt_Node'Class) return Generic_Decl;
@@ -8664,6 +8643,10 @@ private
       No_Base_Call_Expr : constant Base_Call_Expr :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
+         type Base_Generic_Param_Type_Decl is new Type_Decl with null record;
+      No_Base_Generic_Param_Type_Decl : constant Base_Generic_Param_Type_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
          type Base_Grammar_Rule_Decl is new Decl with null record;
       No_Base_Grammar_Rule_Decl : constant Base_Grammar_Rule_Decl :=
         (Internal   => Implementation.No_Entity,
@@ -8782,18 +8765,6 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Class_Decl is new Basic_Class_Decl with null record;
       No_Class_Decl : constant Class_Decl :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Class_Qualifier is new Lkt_Node with null record;
-      No_Class_Qualifier : constant Class_Qualifier :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Class_Qualifier_Absent is new Class_Qualifier with null record;
-      No_Class_Qualifier_Absent : constant Class_Qualifier_Absent :=
-        (Internal   => Implementation.No_Entity,
-         Safety_Net => Implementation.No_Node_Safety_Net);
-         type Class_Qualifier_Present is new Class_Qualifier with null record;
-      No_Class_Qualifier_Present : constant Class_Qualifier_Present :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
          type Complex_Pattern is new Binding_Pattern with null record;
@@ -8976,6 +8947,10 @@ private
       No_Function_Type_Ref : constant Function_Type_Ref :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
+         type Generic_Class_Param_Type_Decl is new Base_Generic_Param_Type_Decl with null record;
+      No_Generic_Class_Param_Type_Decl : constant Generic_Class_Param_Type_Decl :=
+        (Internal   => Implementation.No_Entity,
+         Safety_Net => Implementation.No_Node_Safety_Net);
          type Generic_Decl is new Decl with null record;
       No_Generic_Decl : constant Generic_Decl :=
         (Internal   => Implementation.No_Entity,
@@ -8988,7 +8963,7 @@ private
       No_Generic_Param_Decl_List : constant Generic_Param_Decl_List :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
-         type Generic_Param_Type_Decl is new Type_Decl with null record;
+         type Generic_Param_Type_Decl is new Base_Generic_Param_Type_Decl with null record;
       No_Generic_Param_Type_Decl : constant Generic_Param_Type_Decl :=
         (Internal   => Implementation.No_Entity,
          Safety_Net => Implementation.No_Node_Safety_Net);
