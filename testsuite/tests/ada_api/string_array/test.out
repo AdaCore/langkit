@@ -1,0 +1,22 @@
+Calling P_Prop with:
+  S1 = []
+  S2 = []
+  Regular API: []
+  Generic API: []
+Calling P_Prop with:
+  S1 = ["foo", "bar"]
+  S2 = []
+  Regular API: ["foo", "bar"]
+  Generic API: ["foo", "bar"]
+Calling P_Prop with:
+  S1 = []
+  S2 = ["foo", "bar"]
+  Regular API: ["foo", "bar"]
+  Generic API: ["foo", "bar"]
+Calling P_Prop with:
+  S1 = ["foo", "bar"]
+  S2 = ["qux"]
+  Regular API: ["foo", "bar", "qux"]
+  Generic API: ["foo", "bar", "qux"]
+Done.
+Done

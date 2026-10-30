@@ -265,15 +265,21 @@ package body ${ada_lib_name}.Generic_Introspection is
       overriding function Array_Item
         (Value : ${vt}; Index : Positive) return Internal_Value_Access
       is
-         Item : ${elt_type.qualified_api_name} renames Value.Value.all (Index);
-
          <%
             decls = []
             stmts = []
+            item_type = elt_type.qualified_api_name
+            item_ref = "Item"
+            if elt_type.is_string_type:
+               item_type = "Unbounded_Text_Type"
+               item_ref = f"To_Text ({item_ref})"
             result_var = public_to_value(
-               "Result", "Item", elt_type, decls, stmts
+               "Result", item_ref, elt_type, decls, stmts
             )
          %>
+
+         Item : ${item_type} renames Value.Value.all (Index);
+
          % for d in decls:
             ${d}
          % endfor
@@ -298,7 +304,12 @@ package body ${ada_lib_name}.Generic_Introspection is
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
-                  Result_Item : ${elt_type.qualified_api_name} renames
+                  <% item_type = (
+                        "Unbounded_Text_Type"
+                        if elt_type.is_string_type
+                        else elt_type.qualified_api_name
+                     ) %>
+                  Result_Item : ${item_type} renames
                     Result.Value (Result_Index);
                   Value       : ${G.internal_value_type(elt_type)} renames
                     ${G.internal_value_access(elt_type)} (Values (I)).all;
@@ -307,8 +318,6 @@ package body ${ada_lib_name}.Generic_Introspection is
                      Result_Item := Get_Unit (Value);
                   % elif elt_type.is_big_integer_type:
                      Get_Big_Int (Value, Result_Item);
-                  % elif elt_type.is_string_type:
-                     Result_Item := To_Unbounded_Text (Value.Value)
                   % elif elt_type.public_type.is_entity_type:
                      Result_Item := ${G.to_specific_node("Value", elt_type)};
                   % else:

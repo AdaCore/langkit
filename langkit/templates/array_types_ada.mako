@@ -2,7 +2,13 @@
 
 <%def name="public_api_decl(cls)">
    type ${cls.api_name} is
-      array (Positive range <>) of ${cls.element_type.api_name};
+      array (Positive range <>) of
+      % if cls.element_type.is_string_type:
+         Unbounded_Text_Type
+      % else:
+         ${cls.element_type.api_name}
+      % endif
+   ;
 
    ## It seems that arrays of limited types do not automatically get an
    ## equality operator even when the limited type itself does have one, so we
@@ -53,6 +59,8 @@
                Result (I - Value.Items'First + Result'First)
                   % if cls.element_type.is_big_int_type:
                      .Set (${to_public_expr})
+                  % elif cls.element_type.is_string_type:
+                     := To_Unbounded_Text (${to_public_expr})
                   % else:
                      := ${to_public_expr}
                   % endif
@@ -75,7 +83,14 @@
       begin
          for I in Value'Range loop
             Result.Items (I - Value'First + Result.Items'First) :=
-               ${cls.element_type.to_internal_expr('Value (I)', 'Context')};
+               % if cls.element_type.is_string_type:
+                  ${cls.element_type.to_internal_expr(
+                     'To_Text (Value (I))', 'Context'
+                  )}
+               % else:
+                  ${cls.element_type.to_internal_expr('Value (I)', 'Context')}
+               % endif
+            ;
          end loop;
          return Result;
       end;
