@@ -234,6 +234,7 @@ def build_and_run(
     java_main: Main | None = None,
     ni_main: Main | None = None,
     library_types: set[LibraryType] | None = None,
+    with_path_wrapper: bool = False,
 ) -> None:
     """
     Compile and emit code for a Lkt language spec and build the generated
@@ -263,6 +264,8 @@ def build_and_run(
     :param library_types: The set of library types to build for the generated
         library. If left to None, infer it from the mains/Python scripts
         passed.
+    :param with_path_wrapper: Whether to use the path_wrapper.py script to
+        execute Python scripts.
     """
     # All tests are expected to write their output encoded with UTF-8. This is
     # the default on Unix systems, but not on Windows: reconfigure stdout
@@ -388,7 +391,8 @@ def build_and_run(
 
         # Also note that since Python 3.8, we need special PATH processing for
         # DLLs: see the path_wrapper.py script.
-        args.append(P.join(python_support_dir, "path_wrapper.py"))
+        if with_path_wrapper:
+            args.append(P.join(python_support_dir, "path_wrapper.py"))
 
         args.append(py_script)
         run(*args)

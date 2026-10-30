@@ -42,6 +42,8 @@ ocaml_main = decode_main("ocaml_main")
 java_main = decode_main("java_main")
 ni_main = decode_main("ni_main")
 
+with_path_wrapper = test_env.get("with_path_wrapper", True)
+
 # lkt_build_and_run.py, like all scripts executed by the Python test driver
 # (python_driver.py), is run with the Python interpreter that has Langkit
 # installed (LANGKIT_PYTHON_INTERPRETER in python_driver.py).
@@ -64,6 +66,7 @@ build_and_run(
     ocaml_main=ocaml_main,
     java_main=java_main,
     ni_main=ni_main,
+    with_path_wrapper=with_path_wrapper,
 )
 
 # Run post scripts before exitting

@@ -1,0 +1,8 @@
+library project Dummy_Lib is
+   for Source_Dirs use (".");
+   for Object_Dir use "dummy_lib/obj";
+   for Library_Dir use "dummy_lib/lib";
+   for Library_Name use "foolang";
+   for Library_Kind use "relocatable";
+   for Library_Interface use ("dummy_lib");
+end Dummy_Lib;
