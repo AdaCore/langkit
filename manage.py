@@ -740,6 +740,7 @@ if __name__ == "__main__":
         subparsers,
         make_lsp,
         with_build_dir=True,
+        with_gargs=True,
         with_jobs=True,
         with_verbose=True,
     )
