@@ -2819,8 +2819,7 @@ package body ${ada_lib_name}.Implementation is
          if Node = null then
             return "null";
          end if;
-         return To_Text (Basename (Node.Unit))
-           & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node))));
+         return Node_Sloc_Image (Node, Start_Only => True);
       else
          return Short_Text_Image (Node);
       end if;
@@ -3528,16 +3527,23 @@ package body ${ada_lib_name}.Implementation is
    --- Node_Sloc_Image --
    ----------------------
 
-   function Node_Sloc_Image (Self : ${T.root_node.name}) return Text_Type
+   function Node_Sloc_Image
+     (Self       : ${T.root_node.name};
+      Start_Only : Boolean := False) return Text_Type
    is
       <% ext = ctx.ext("analysis", "node_sloc_image") %>
    begin
       % if ext:
          ${exts.include_extension(ext)}
       % else:
-         return To_Text
-                  (Ada.Directories.Simple_Name (Get_Filename (Unit (Self))))
-                & ":" & To_Text (Image (Sloc_Range (Self)));
+         return
+           To_Text
+             (Ada.Directories.Simple_Name (Get_Filename (Unit (Self))))
+           & ":"
+           & To_Text
+               (if Start_Only
+                then Image (Start_Sloc (Sloc_Range (Self)))
+                else Image (Sloc_Range (Self)));
       % endif
    end Node_Sloc_Image;
 
@@ -4909,11 +4915,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Full_Sloc_Image (Node : ${T.root_node.name}) return ${T.String.name}
    is
-      Res      : constant Text_Type :=
-        To_Text
-          (Ada.Directories.Simple_Name
-             (Get_Filename (Unit (Node))))
-           & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node)))) & ": ";
+      Res : constant Text_Type :=
+        Node_Sloc_Image (Node, Start_Only => True) & ": ";
    begin
       return Create_String (Res);
    end Full_Sloc_Image;
