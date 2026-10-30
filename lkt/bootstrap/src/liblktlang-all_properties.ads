@@ -203,7 +203,7 @@ private package Liblktlang.All_Properties is
       ; Entity_Name : Symbol_Type
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Root_Get;
          function Lkt_Node_P_Get_Builtin_Type
            
@@ -211,7 +211,7 @@ private package Liblktlang.All_Properties is
       ; Entity_Name : Symbol_Type
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Get_Builtin_Type;
          function Lkt_Node_P_Get_Builtin_Gen_Decl
            
@@ -219,245 +219,245 @@ private package Liblktlang.All_Properties is
       ; Entity_Name : Symbol_Type
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Get_Builtin_Gen_Decl;
          function Lkt_Node_P_Basic_Trait_Gen
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Basic_Trait_Gen;
          function Lkt_Node_P_Basic_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Trait_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Basic_Trait;
          function Lkt_Node_P_Node_Gen_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Node_Gen_Trait;
          function Lkt_Node_P_Node_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Trait_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Node_Trait;
          function Lkt_Node_P_Indexable_Gen_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Indexable_Gen_Trait;
          function Lkt_Node_P_Indexable_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Trait_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Indexable_Trait;
          function Lkt_Node_P_Iterable_Gen_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Iterable_Gen_Trait;
          function Lkt_Node_P_Iterable_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Trait_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Iterable_Trait;
          function Lkt_Node_P_Token_Node_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Token_Node_Trait;
          function Lkt_Node_P_Error_Node_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Error_Node_Trait;
          function Lkt_Node_P_Char_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Char_Type;
          function Lkt_Node_P_Int_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Int_Type;
          function Lkt_Node_P_Bool_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Bool_Type;
          function Lkt_Node_P_Bigint_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Bigint_Type;
          function Lkt_Node_P_String_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_String_Type;
          function Lkt_Node_P_Symbol_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Symbol_Type;
          function Lkt_Node_P_Property_Error_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Property_Error_Type;
          function Lkt_Node_P_Regexp_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Regexp_Type;
          function Lkt_Node_P_Entity_Gen_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Entity_Gen_Type;
          function Lkt_Node_P_Entity_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Entity_Type;
          function Lkt_Node_P_Logicvar_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Logicvar_Type;
          function Lkt_Node_P_Equation_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Equation_Type;
          function Lkt_Node_P_Array_Gen_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Array_Gen_Type;
          function Lkt_Node_P_Array_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Array_Type;
          function Lkt_Node_P_Stream_Gen_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Stream_Gen_Type;
          function Lkt_Node_P_Stream_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Stream_Type;
          function Lkt_Node_P_Astlist_Gen_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Astlist_Gen_Type;
          function Lkt_Node_P_Astlist_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Astlist_Type;
          function Lkt_Node_P_Node_Builder_Gen_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Node_Builder_Gen_Type;
          function Lkt_Node_P_Node_Builder_Type
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Named_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Node_Builder_Type;
          function Lkt_Node_P_Iterator_Gen_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Iterator_Gen_Trait;
          function Lkt_Node_P_Iterator_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Trait_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Iterator_Trait;
          function Lkt_Node_P_Analysis_Unit_Gen_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Generic_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Analysis_Unit_Gen_Trait;
          function Lkt_Node_P_Analysis_Unit_Trait
            
   (Node : Bare_Lkt_Node
   )
 
-            return Internal_Entity_Trait_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Analysis_Unit_Trait;
          function Lkt_Node_P_Get_Empty_Type_Ref_List
            
@@ -473,7 +473,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Any_Type;
          function Lkt_Node_P_Internal_Fetch_Referenced_Unit
            
@@ -496,7 +496,7 @@ private package Liblktlang.All_Properties is
       ; Module_Name : Bare_Id
   )
 
-            return Internal_Entity_Langkit_Root
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Referenced_Module;
          function Lkt_Node_P_Topmost_Invalid_Decl
            
@@ -571,14 +571,14 @@ private package Liblktlang.All_Properties is
          function Lkt_Node_P_Function_Type_Helper
            
   (Node : Bare_Lkt_Node
-      ; Param_Types : Internal_Entity_Type_Decl_Array_Access
-      ; Return_Type : Internal_Entity_Type_Decl
-      ; Origin : Internal_Entity_Decl
+      ; Param_Types : Internal_Entity_Array_Access
+      ; Return_Type : Internal_Entity
+      ; Origin : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Function_Type
+            return Internal_Entity
          renames Liblktlang.Impl_0.Lkt_Node_P_Function_Type_Helper;
          function Lkt_Node_P_Shed_Rebindings
            
@@ -717,14 +717,14 @@ private package Liblktlang.All_Properties is
   (Node : Bare_Base_Import
   )
 
-            return Bare_Id_Array_Access
+            return Bare_Lkt_Node_Array_Access
          renames Liblktlang.Impl_0.Dispatcher_Base_Import_P_Referenced_Modules;
          function Import_P_Referenced_Modules
            
   (Node : Bare_Import
   )
 
-            return Bare_Id_Array_Access
+            return Bare_Lkt_Node_Array_Access
          renames Liblktlang.Impl_0.Import_P_Referenced_Modules;
          function Internal_Env_Do_16
            
@@ -745,7 +745,7 @@ private package Liblktlang.All_Properties is
   (Node : Bare_Import_All_From
   )
 
-            return Bare_Id_Array_Access
+            return Bare_Lkt_Node_Array_Access
          renames Liblktlang.Impl_0.Import_All_From_P_Referenced_Modules;
          function Import_All_From_P_Referenced_Scope
            
@@ -773,7 +773,7 @@ private package Liblktlang.All_Properties is
   (Node : Bare_Import_From
   )
 
-            return Bare_Id_Array_Access
+            return Bare_Lkt_Node_Array_Access
          renames Liblktlang.Impl_0.Import_From_P_Referenced_Modules;
          function Internal_Env_Do_18
            
@@ -816,27 +816,6 @@ private package Liblktlang.All_Properties is
 
             return Internal_Entity
          renames Liblktlang.Impl_0.Pattern_Match_Branch_P_Match_Part;
-         function Dispatcher_Class_Qualifier_P_As_Bool
-           
-  (Node : Bare_Class_Qualifier
-  )
-
-            return Boolean
-         renames Liblktlang.Impl_0.Dispatcher_Class_Qualifier_P_As_Bool;
-         function Class_Qualifier_Absent_P_As_Bool
-           
-  (Node : Bare_Class_Qualifier_Absent
-  )
-
-            return Boolean
-         renames Liblktlang.Impl_0.Class_Qualifier_Absent_P_As_Bool;
-         function Class_Qualifier_Present_P_As_Bool
-           
-  (Node : Bare_Class_Qualifier_Present
-  )
-
-            return Boolean
-         renames Liblktlang.Impl_0.Class_Qualifier_Present_P_As_Bool;
          function Decl_P_Custom_Image
            
   (Node : Bare_Decl
@@ -862,7 +841,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Full_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Full_Decl;
          function Decl_P_Def_Ids
            
@@ -871,7 +850,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Def_Id_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Decl_P_Def_Ids;
          function Decl_P_Implements_Node
            
@@ -889,7 +868,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_As_Bare_Decl;
          function Decl_P_Is_Type_Decl
            
@@ -905,17 +884,34 @@ private package Liblktlang.All_Properties is
 
             return Boolean
          renames Liblktlang.Impl_0.Decl_P_Is_Defined;
+         function Decl_P_Has_Component
+           
+  (Node : Bare_Decl
+      ; Holder : Internal_Entity
+      ; Name : Internal_Entity
+  )
+
+            return Boolean
+         renames Liblktlang.Impl_0.Decl_P_Has_Component;
+         function Decl_P_Extra_Component
+           
+  (Node : Bare_Decl
+      ; Holder : Internal_Entity
+  )
+
+            return Boolean
+         renames Liblktlang.Impl_0.Decl_P_Extra_Component;
          function Decl_P_Infer_Function_Type
            
   (Node : Bare_Decl
-      ; Expected_Call : Internal_Entity_Function_Type
+      ; Expected_Call : Internal_Entity
       ; In_Logic_Call : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Function_Type
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Infer_Function_Type;
          function Decl_P_Function_Type
            
@@ -924,7 +920,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Function_Type
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Function_Type;
          function Decl_P_Logic_Function_Type
            
@@ -933,7 +929,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Function_Type
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Logic_Function_Type;
          function Decl_P_Get_Type
            
@@ -942,58 +938,58 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Get_Type;
          function Decl_P_Get_Cast_Type
            
   (Node : Bare_Decl
-      ; Cast_To : Internal_Entity_Type_Decl
+      ; Cast_To : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Get_Cast_Type;
          function Decl_P_Get_Keep_Type
            
   (Node : Bare_Decl
-      ; Keep_Type : Internal_Entity_Type_Decl
+      ; Keep_Type : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Get_Keep_Type;
          function Decl_P_Get_Suffix_Type
            
   (Node : Bare_Decl
-      ; Prefix_Type : Internal_Entity_Type_Decl
+      ; Prefix_Type : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Get_Suffix_Type;
          function Decl_P_Type_Var_Suffix_Ref
            
   (Node : Bare_Decl
-      ; Current_Name : Internal_Entity_Ref_Id
+      ; Current_Name : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Type_Var_Suffix_Ref;
          function Decl_P_Ref_Var_Suffix_Ref
            
   (Node : Bare_Decl
-      ; Type_Var : Internal_Entity_Type_Decl
-      ; Current_Name : Internal_Entity_Ref_Id
+      ; Type_Var : Internal_Entity
+      ; Current_Name : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Ref_Var_Suffix_Ref;
          function Decl_P_Get_Params
            
@@ -1013,7 +1009,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Subdecl_If_Generic;
          function Decl_P_Is_Generic
            
@@ -1036,6 +1032,7 @@ private package Liblktlang.All_Properties is
          function Decl_P_Is_Instantiated
            
   (Node : Bare_Decl
+      ; Formals : Internal_Entity_Set_Access
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -1055,7 +1052,7 @@ private package Liblktlang.All_Properties is
          function Decl_P_Could_Infer
            
   (Node : Bare_Decl
-      ; Generic_Type : Internal_Entity_Function_Type
+      ; Generic_Type : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -1065,12 +1062,12 @@ private package Liblktlang.All_Properties is
          function Decl_P_Instantiate_Generic_Decl
            
   (Node : Bare_Decl
-      ; Param_Types : Internal_Entity_Type_Decl_Array_Access
+      ; Param_Types : Internal_Entity_Array_Access
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Instantiate_Generic_Decl;
          function Decl_P_Get_Rebound_Decl
            
@@ -1080,7 +1077,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Decl_P_Get_Rebound_Decl;
          function Decl_P_Is_Dynvar
            
@@ -1148,8 +1145,8 @@ private package Liblktlang.All_Properties is
          function Decl_P_Extraneous_Parameter
            
   (Node : Bare_Decl
-      ; Callee_Type : Internal_Entity_Type_Decl
-      ; Callee : Internal_Entity_Decl
+      ; Callee_Type : Internal_Entity
+      ; Callee : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -1159,7 +1156,7 @@ private package Liblktlang.All_Properties is
          function Decl_P_Unmatched_Argument
            
   (Node : Bare_Decl
-      ; Callee_Type : Internal_Entity_Type_Decl
+      ; Callee_Type : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -1169,13 +1166,23 @@ private package Liblktlang.All_Properties is
          function Decl_P_Is_Equivalent_Decl
            
   (Node : Bare_Decl
-      ; Other : Internal_Entity_Decl
+      ; Other : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
             return Boolean
          renames Liblktlang.Impl_0.Decl_P_Is_Equivalent_Decl;
+         function Decl_P_Make_Env_Assoc
+           
+  (Node : Bare_Decl
+      ; Dest_Env : Internal_Designated_Env
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Env_Assoc
+         renames Liblktlang.Impl_0.Decl_P_Make_Env_Assoc;
          function Internal_Env_Mappings_1
            
   (Node : Bare_Decl
@@ -1288,7 +1295,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Node_Decl_P_Owning_Type;
          function Self_Decl_P_Name
            
@@ -1313,7 +1320,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Self_Decl_P_Owning_Type;
          function User_Val_Decl_P_Xref_Entry_Point
            
@@ -1377,7 +1384,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Enum_Lit_Decl_P_Parent_Type;
          function Component_Decl_P_Xref_Equation
            
@@ -1420,7 +1427,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Function_Type
+            return Internal_Entity
          renames Liblktlang.Impl_0.Field_Decl_P_Lazy_Field_Function_Type;
          function Internal_Env_Mappings_2
            
@@ -1501,7 +1508,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Expr
+            return Internal_Entity
          renames Liblktlang.Impl_0.Match_Val_Decl_P_Match_Expr;
          function Val_Decl_P_Decl_Type_Name
            
@@ -1562,7 +1569,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Function_Type
+            return Internal_Entity
          renames Liblktlang.Impl_0.Fun_Decl_P_Function_Type_Aux;
          function Fun_Decl_P_Find_All_Overrides_Helper
            
@@ -1572,7 +1579,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Fun_Decl_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Fun_Decl_P_Find_All_Overrides_Helper;
          function Fun_Decl_P_Find_All_Overrides
            
@@ -1582,7 +1589,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Fun_Decl_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Fun_Decl_P_Find_All_Overrides;
          function Fun_Decl_P_Base_Fun_Decls
            
@@ -1591,7 +1598,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Fun_Decl_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Fun_Decl_P_Base_Fun_Decls;
          function Internal_Env_Mappings_4
            
@@ -1682,7 +1689,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Generic_Param_Type_Decl_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Generic_Decl_P_Generic_Params;
          function Generic_Decl_P_Generic_Params_Names
            
@@ -1709,7 +1716,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Generic_Decl_P_Instantiated_Generic_Params;
          function Internal_Env_Mappings_7
            
@@ -1868,7 +1875,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Function_Type
+            return Internal_Entity
          renames Liblktlang.Impl_0.Synth_Fun_Decl_P_Function_Type_Aux;
          function Synth_Fun_Decl_P_Decl_Type_Name
            
@@ -1927,7 +1934,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Def_Id
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Def_Id;
          function Dispatcher_Type_Decl_P_Base_Type
            
@@ -1936,7 +1943,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Dispatcher_Type_Decl_P_Base_Type;
          function Type_Decl_P_Base_Types
            
@@ -1947,7 +1954,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Type_Decl_P_Base_Types;
          function Type_Decl_P_Is_Equation
            
@@ -2006,12 +2013,12 @@ private package Liblktlang.All_Properties is
          function Type_Decl_P_Get_Instantiation_Type
            
   (Node : Bare_Type_Decl
-      ; Gen_Type : Internal_Entity_Type_Decl
+      ; Gen_Type : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Get_Instantiation_Type;
          function Type_Decl_P_Get_Entity_Node_Type
            
@@ -2020,12 +2027,21 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Get_Entity_Node_Type;
+         function Type_Decl_P_Reinstantiate_With_Entity
+           
+  (Node : Bare_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Type_Decl_P_Reinstantiate_With_Entity;
          function Type_Decl_P_Is_Subtype_Pred
            
   (Node : Bare_Type_Decl
-      ; Rhs : Internal_Entity_Type_Decl
+      ; Rhs : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -2035,7 +2051,7 @@ private package Liblktlang.All_Properties is
          function Type_Decl_P_Is_Entity_Subtype_Or_Eq
            
   (Node : Bare_Type_Decl
-      ; Rhs : Internal_Entity_Type_Decl
+      ; Rhs : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -2045,29 +2061,29 @@ private package Liblktlang.All_Properties is
          function Type_Decl_P_Common_Ancestor_Helper
            
   (Node : Bare_Type_Decl
-      ; Other_Types : Internal_Entity_Type_Decl_Array_Access
+      ; Other_Types : Internal_Entity_Array_Access
       ; Idx : Integer
       ; Imprecise : Boolean
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Common_Ancestor_Helper;
          function Type_Decl_P_Imprecise_Common_Ancestor_List
            
   (Node : Bare_Type_Decl
-      ; Other_Types : Internal_Entity_Type_Decl_Array_Access
+      ; Other_Types : Internal_Entity_Array_Access
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Imprecise_Common_Ancestor_List;
          function Type_Decl_P_Commutative_Matching_Type
            
   (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
+      ; Other : Internal_Entity
       ; Allow_Common_Ancestor : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
@@ -2086,7 +2102,7 @@ private package Liblktlang.All_Properties is
          function Type_Decl_P_Matching_Type
            
   (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
+      ; Other : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -2096,7 +2112,7 @@ private package Liblktlang.All_Properties is
          function Type_Decl_P_Matching_Logic_Type
            
   (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
+      ; Other : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -2106,7 +2122,7 @@ private package Liblktlang.All_Properties is
          function Type_Decl_P_Has_Trait
            
   (Node : Bare_Type_Decl
-      ; Tr : Internal_Entity_Trait_Decl
+      ; Tr : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -2134,41 +2150,41 @@ private package Liblktlang.All_Properties is
          function Type_Decl_P_Match_Param_Get_Type
            
   (Node : Bare_Type_Decl
-      ; Current_Name : Internal_Entity_Argument
+      ; Current_Name : Internal_Entity
       ; In_Logic_Call : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Match_Param_Get_Type;
          function Type_Decl_P_Match_Param_Get_Decl
            
   (Node : Bare_Type_Decl
-      ; Current_Name : Internal_Entity_Argument
+      ; Current_Name : Internal_Entity
       ; In_Logic_Call : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Match_Param_Get_Decl;
          function Type_Decl_P_Lambda_Param_Get_Type
            
   (Node : Bare_Type_Decl
-      ; Param_Decl : Internal_Entity_Lambda_Param_Decl
+      ; Param_Decl : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Lambda_Param_Get_Type;
          function Type_Decl_P_Is_Valid_Call
            
   (Node : Bare_Type_Decl
-      ; Args : Internal_Entity_Argument_List
+      ; Args : Internal_Entity
       ; In_Logic_Call : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
@@ -2184,17 +2200,17 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Get_Return_Type;
          function Type_Decl_P_Create_Function_Type
            
   (Node : Bare_Type_Decl
-      ; Params : Internal_Entity_Type_Decl_Array_Access
+      ; Params : Internal_Entity_Array_Access
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Create_Function_Type;
          function Type_Decl_P_Make_Array_Type
            
@@ -2203,7 +2219,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Make_Array_Type;
          function Type_Decl_P_Make_Stream_Type
            
@@ -2212,17 +2228,17 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Make_Stream_Type;
          function Type_Decl_P_Make_Stream_Of_Common_Ancestor
            
   (Node : Bare_Type_Decl
-      ; Other_Type : Internal_Entity_Type_Decl
+      ; Other_Type : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Make_Stream_Of_Common_Ancestor;
          function Type_Decl_P_Get_Indexable_Content_Type
            
@@ -2231,7 +2247,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Get_Indexable_Content_Type;
          function Type_Decl_P_Get_Super_Of_Parent
            
@@ -2241,7 +2257,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Get_Super_Of_Parent;
          function Type_Decl_P_Basic_Trait_From_Self
            
@@ -2250,18 +2266,40 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Basic_Trait_From_Self;
-         function Type_Decl_P_Find_Types_That_Replace_Ty
+         function Type_Decl_P_With_Basic_Trait_From_Self
            
   (Node : Bare_Type_Decl
-      ; Ty : Internal_Entity_Type_Decl
-      ; Origin : Internal_Entity_Type_Decl
+      ; Env : Lexical_Env
+      ; Origin : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl_Array_Access
+            return Lexical_Env
+         renames Liblktlang.Impl_0.Type_Decl_P_With_Basic_Trait_From_Self;
+         function Type_Decl_P_Struct_Defined_Scope
+           
+  (Node : Bare_Type_Decl
+      ; Own_Envs : Lexical_Env_Array_Access
+      ; Origin : Internal_Entity
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Lexical_Env
+         renames Liblktlang.Impl_0.Type_Decl_P_Struct_Defined_Scope;
+         function Type_Decl_P_Find_Types_That_Replace_Ty
+           
+  (Node : Bare_Type_Decl
+      ; Ty : Internal_Entity
+      ; Origin : Internal_Entity
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Type_Decl_P_Find_Types_That_Replace_Ty;
          function Type_Decl_P_As_Node_Builder_Type
            
@@ -2270,12 +2308,12 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_As_Node_Builder_Type;
          function Dispatcher_Type_Decl_P_Is_Subtype
            
   (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
+      ; Other : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -2285,14 +2323,14 @@ private package Liblktlang.All_Properties is
          function Type_Decl_P_Common_Ancestor
            
   (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
+      ; Other : Internal_Entity
       ; Imprecise : Boolean
          := False
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Common_Ancestor;
          function Type_Decl_P_Node_Builder_Scope
            
@@ -2306,12 +2344,12 @@ private package Liblktlang.All_Properties is
          function Type_Decl_P_Instantiate_Generic_Type_Decl
            
   (Node : Bare_Type_Decl
-      ; Param_Types : Internal_Entity_Type_Decl_Array_Access
+      ; Param_Types : Internal_Entity_Array_Access
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Instantiate_Generic_Type_Decl;
          function Type_Decl_P_Base_Type
            
@@ -2320,12 +2358,12 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Decl_P_Base_Type;
          function Type_Decl_P_Is_Subtype
            
   (Node : Bare_Type_Decl
-      ; Other : Internal_Entity_Type_Decl
+      ; Other : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -2350,6 +2388,34 @@ private package Liblktlang.All_Properties is
 
             return String_Type
          renames Liblktlang.Impl_0.Any_Type_Decl_P_Decl_Type_Name;
+         function Base_Generic_Param_Type_Decl_P_Defined_Scope
+           
+  (Node : Bare_Base_Generic_Param_Type_Decl
+      ; Origin : Internal_Entity
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Lexical_Env
+         renames Liblktlang.Impl_0.Base_Generic_Param_Type_Decl_P_Defined_Scope;
+         function Generic_Class_Param_Type_Decl_P_Decl_Type_Name
+           
+  (Node : Bare_Generic_Class_Param_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return String_Type
+         renames Liblktlang.Impl_0.Generic_Class_Param_Type_Decl_P_Decl_Type_Name;
+         function Generic_Param_Type_Decl_P_Decl_Type_Name
+           
+  (Node : Bare_Generic_Param_Type_Decl
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return String_Type
+         renames Liblktlang.Impl_0.Generic_Param_Type_Decl_P_Decl_Type_Name;
          function Enum_Class_Alt_Decl_P_Decl_Type_Name
            
   (Node : Bare_Enum_Class_Alt_Decl
@@ -2376,7 +2442,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Enum_Class_Alt_Decl_P_Base_Type;
          function Function_Type_P_Full_Name_Internal
            
@@ -2409,7 +2475,7 @@ private package Liblktlang.All_Properties is
          function Function_Type_P_Is_Subtype
            
   (Node : Bare_Function_Type
-      ; Other : Internal_Entity_Type_Decl
+      ; Other : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -2443,15 +2509,18 @@ private package Liblktlang.All_Properties is
 
             return Boolean
          renames Liblktlang.Impl_0.Function_Type_P_Returns_Bool;
-         function Generic_Param_Type_Decl_P_Decl_Type_Name
+         function Function_Type_P_Infer_Generic_Decl
            
-  (Node : Bare_Generic_Param_Type_Decl
+  (Node : Bare_Function_Type
+      ; Decl : Internal_Entity
+      ; In_Logic_Call : Boolean
+         := False
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
 
-            return String_Type
-         renames Liblktlang.Impl_0.Generic_Param_Type_Decl_P_Decl_Type_Name;
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Function_Type_P_Infer_Generic_Decl;
          function Named_Type_Decl_P_Defined_Scope
            
   (Node : Bare_Named_Type_Decl
@@ -2498,7 +2567,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Field_Decl_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Class_Decl_P_Constructor_Fields;
          function Class_Decl_P_Function_Type_Aux
            
@@ -2507,7 +2576,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Function_Type
+            return Internal_Entity
          renames Liblktlang.Impl_0.Class_Decl_P_Function_Type_Aux;
          function Enum_Class_Decl_P_Decl_Type_Name
            
@@ -2525,7 +2594,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Enum_Class_Alt_Decl_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Enum_Class_Decl_P_Alts;
          function Internal_Env_Mappings_11
            
@@ -2597,7 +2666,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Function_Type
+            return Internal_Entity
          renames Liblktlang.Impl_0.Struct_Decl_P_Function_Type_Aux;
          function Struct_Decl_P_Entity_Scope
            
@@ -2726,7 +2795,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Dispatcher_Expr_P_Get_Type;
          function Expr_P_Get_Generic_Type
            
@@ -2735,7 +2804,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Expr_P_Get_Generic_Type;
          function Expr_P_Get_Expected_Type
            
@@ -2744,7 +2813,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Expr_P_Get_Expected_Type;
          function Expr_P_Get_Rightmost_Refid
            
@@ -2753,7 +2822,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Ref_Id
+            return Internal_Entity
          renames Liblktlang.Impl_0.Expr_P_Get_Rightmost_Refid;
          function Expr_P_Expected_Type_Equation
            
@@ -2768,7 +2837,7 @@ private package Liblktlang.All_Properties is
            
   (Node : Bare_Expr
       ; Params : Internal_Resolved_Param_Array_Access
-      ; Args : Internal_Entity_Argument_List
+      ; Args : Internal_Entity
   )
 
             return Internal_Param_Match_Array_Access
@@ -2798,7 +2867,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Dispatcher_Expr_P_Referenced_Decl;
          function Dispatcher_Expr_P_Has_Context_Free_Type
            
@@ -2816,7 +2885,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Expr_P_Get_Type;
          function Expr_P_Xlogic_Equation
            
@@ -2843,7 +2912,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Expr_P_Referenced_Decl;
          function Expr_P_Has_Context_Free_Type
            
@@ -2986,6 +3055,15 @@ private package Liblktlang.All_Properties is
 
             return Logic_Equation
          renames Liblktlang.Impl_0.Base_Call_Expr_P_Xlogic_Equation;
+         function Base_Call_Expr_P_Has_Context_Free_Type
+           
+  (Node : Bare_Base_Call_Expr
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Boolean
+         renames Liblktlang.Impl_0.Base_Call_Expr_P_Has_Context_Free_Type;
          function Logic_Predicate_P_Generic_Type_Equation
            
   (Node : Bare_Logic_Predicate
@@ -3029,7 +3107,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Expr
+            return Internal_Entity
          renames Liblktlang.Impl_0.Block_Expr_P_Expr;
          function Block_Expr_P_Xref_Equation
            
@@ -3074,7 +3152,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Dot_Expr_P_Referenced_Decl;
          function Dot_Expr_P_Has_Context_Free_Type
            
@@ -3092,7 +3170,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Dot_Expr_P_First_Var_In_Prefix_Env;
          function Dot_Expr_P_Xtype_Equation
            
@@ -3239,7 +3317,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Def_Id_P_Decl;
          function Def_Id_P_Name
            
@@ -3257,7 +3335,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Def_Id_P_Get_Type;
          function Def_Id_P_Get_Implementatinons
            
@@ -3267,7 +3345,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Def_Id_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Def_Id_P_Get_Implementatinons;
          function Def_Id_P_Decl_Detail
            
@@ -3304,7 +3382,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Ref_Id_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Def_Id_P_Find_All_References_Helper;
          function Def_Id_P_Find_All_References
            
@@ -3322,7 +3400,7 @@ private package Liblktlang.All_Properties is
       ; Module_Name : Bare_Module_Id
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Imported_Id_P_Referenced_Decl_From_Module;
          function Imported_Id_P_Referenced_Decl
            
@@ -3331,7 +3409,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Imported_Id_P_Referenced_Decl;
          function Imported_Id_P_Get_Type
            
@@ -3340,7 +3418,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Imported_Id_P_Get_Type;
          function Module_Id_P_Referenced_Decl
            
@@ -3349,7 +3427,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Module_Id_P_Referenced_Decl;
          function Module_Id_P_Xref_Equation
            
@@ -3367,7 +3445,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Module_Id_P_Get_Type;
          function Ref_Id_P_From_Node
            
@@ -3383,7 +3461,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Ref_Id_P_First_Var_In_Env;
          function Ref_Id_P_Is_Being_Called
            
@@ -3401,7 +3479,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Ref_Id_P_Referenced_Decl;
          function Ref_Id_P_Xtype_Equation
            
@@ -3419,7 +3497,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Def_Id
+            return Internal_Entity
          renames Liblktlang.Impl_0.Ref_Id_P_Referenced_Defining_Name;
          function Ref_Id_P_Generic_Type_Equation
            
@@ -3433,7 +3511,7 @@ private package Liblktlang.All_Properties is
          function Ref_Id_P_Bind_Actual_Type_Equation
            
   (Node : Bare_Ref_Id
-      ; First_Var : Internal_Entity_Decl
+      ; First_Var : Internal_Entity
    ; E_Info : Internal_Entity_Info :=
       No_Entity_Info
   )
@@ -3483,7 +3561,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Expr_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.If_Expr_P_Branch_Exprs;
          function If_Expr_P_Expected_Branch_Type_Equation
            
@@ -3797,7 +3875,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Expr_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Match_Expr_P_Branch_Exprs;
          function Match_Expr_P_Expected_Branch_Type_Equation
            
@@ -3914,7 +3992,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Expr_Array_Access
+            return Internal_Entity_Array_Access
          renames Liblktlang.Impl_0.Try_Expr_P_Exprs;
          function Try_Expr_P_Expected_Exprs_Type_Equation
            
@@ -4045,6 +4123,96 @@ private package Liblktlang.All_Properties is
 
             return Boolean
          renames Liblktlang.Impl_0.Op_P_Is_Order_Op;
+         function Pattern_P_Get_Input_Type
+           
+  (Node : Bare_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Pattern_P_Get_Input_Type;
+         function Dispatcher_Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Dispatcher_Pattern_P_Get_Output_Type;
+         function Pattern_P_Xref_Equation
+           
+  (Node : Bare_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Logic_Equation
+         renames Liblktlang.Impl_0.Pattern_P_Xref_Equation;
+         function Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Pattern_P_Get_Output_Type;
+         function Complex_Pattern_P_Xref_Entry_Point
+           
+  (Node : Bare_Complex_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Boolean
+         renames Liblktlang.Impl_0.Complex_Pattern_P_Xref_Entry_Point;
+         function Complex_Pattern_P_Xref_Equation
+           
+  (Node : Bare_Complex_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Logic_Equation
+         renames Liblktlang.Impl_0.Complex_Pattern_P_Xref_Equation;
+         function Complex_Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Complex_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Complex_Pattern_P_Get_Output_Type;
+         function Bool_Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Bool_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Bool_Pattern_P_Get_Output_Type;
+         function Or_Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Or_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Or_Pattern_P_Get_Output_Type;
+         function Paren_Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Paren_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Paren_Pattern_P_Get_Output_Type;
          function Regex_Pattern_P_Denoted_Value
            
   (Node : Bare_Regex_Pattern
@@ -4052,6 +4220,123 @@ private package Liblktlang.All_Properties is
 
             return Internal_Decoded_String_Value
          renames Liblktlang.Implementation.Extensions.Regex_Pattern_P_Denoted_Value;
+         function Regex_Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Regex_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Regex_Pattern_P_Get_Output_Type;
+         function Scoped_Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Scoped_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Scoped_Pattern_P_Get_Output_Type;
+         function Not_Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Not_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Not_Pattern_P_Get_Output_Type;
+         function Type_Pattern_P_Get_Output_Type
+           
+  (Node : Bare_Type_Pattern
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Type_Pattern_P_Get_Output_Type;
+         function Dispatcher_Pattern_Detail_P_Xref_Detail_Equation
+           
+  (Node : Bare_Pattern_Detail
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Logic_Equation
+         renames Liblktlang.Impl_0.Dispatcher_Pattern_Detail_P_Xref_Detail_Equation;
+         function Pattern_Detail_P_Parent_Pattern
+           
+  (Node : Bare_Pattern_Detail
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Pattern_Detail_P_Parent_Pattern;
+         function Destructuring_Pattern_Detail_P_Referenced_Decl
+           
+  (Node : Bare_Destructuring_Pattern_Detail
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Destructuring_Pattern_Detail_P_Referenced_Decl;
+         function Destructuring_Pattern_Detail_P_Xref_Detail_Equation
+           
+  (Node : Bare_Destructuring_Pattern_Detail
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Logic_Equation
+         renames Liblktlang.Impl_0.Destructuring_Pattern_Detail_P_Xref_Detail_Equation;
+         function Field_Pattern_Detail_P_Referenced_Decl
+           
+  (Node : Bare_Field_Pattern_Detail
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Field_Pattern_Detail_P_Referenced_Decl;
+         function Field_Pattern_Detail_P_Xref_Detail_Equation
+           
+  (Node : Bare_Field_Pattern_Detail
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Logic_Equation
+         renames Liblktlang.Impl_0.Field_Pattern_Detail_P_Xref_Detail_Equation;
+         function Property_Pattern_Detail_P_Property_Name
+           
+  (Node : Bare_Property_Pattern_Detail
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Property_Pattern_Detail_P_Property_Name;
+         function Property_Pattern_Detail_P_Referenced_Decl
+           
+  (Node : Bare_Property_Pattern_Detail
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Internal_Entity
+         renames Liblktlang.Impl_0.Property_Pattern_Detail_P_Referenced_Decl;
+         function Property_Pattern_Detail_P_Xref_Detail_Equation
+           
+  (Node : Bare_Property_Pattern_Detail
+   ; E_Info : Internal_Entity_Info :=
+      No_Entity_Info
+  )
+
+            return Logic_Equation
+         renames Liblktlang.Impl_0.Property_Pattern_Detail_P_Xref_Detail_Equation;
          function Type_Ref_P_Xref_Entry_Point
            
   (Node : Bare_Type_Ref
@@ -4068,7 +4353,7 @@ private package Liblktlang.All_Properties is
       No_Entity_Info
   )
 
-            return Internal_Entity_Type_Decl
+            return Internal_Entity
          renames Liblktlang.Impl_0.Type_Ref_P_Referenced_Decl;
          function Function_Type_Ref_P_Xref_Equation
            

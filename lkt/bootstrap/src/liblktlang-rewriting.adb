@@ -959,6 +959,38 @@ package body Liblktlang.Rewriting is
          end;
 
 
+         function Create_Generic_Class_Param_Type_Decl
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+               ; F_Syn_Base_Type : Node_Rewriting_Handle
+               ; F_Traits : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Generic_Class_Param_Type_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Syn_Base_Type,
+                  3 => F_Traits));
+         end;
+
+
+         function Create_Generic_Param_Type_Decl
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+               ; F_Syn_Base_Type : Node_Rewriting_Handle
+               ; F_Traits : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle,
+               Lkt_Generic_Param_Type_Decl,
+                 (1 => F_Syn_Name,
+                  2 => F_Syn_Base_Type,
+                  3 => F_Traits));
+         end;
+
+
          function Create_Enum_Class_Alt_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -988,24 +1020,6 @@ package body Liblktlang.Rewriting is
                  (1 => F_Syn_Name,
                   2 => F_Traits,
                   3 => F_Syn_Base_Type));
-         end;
-
-
-         function Create_Generic_Param_Type_Decl
-           (Handle : Rewriting_Handle
-               ; F_Has_Class : Node_Rewriting_Handle
-               ; F_Syn_Name : Node_Rewriting_Handle
-               ; F_Traits : Node_Rewriting_Handle
-               ; F_Syn_Base_Type : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle is
-         begin
-            return Create_Regular_Node
-              (Handle,
-               Lkt_Generic_Param_Type_Decl,
-                 (1 => F_Has_Class,
-                  2 => F_Syn_Name,
-                  3 => F_Traits,
-                  4 => F_Syn_Base_Type));
          end;
 
 

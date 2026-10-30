@@ -369,9 +369,10 @@ package body Liblktlang.Generic_Introspection is
       overriding function Array_Item
         (Value : Internal_Rec_Complete_Item_Array; Index : Positive) return Internal_Value_Access
       is
+         
+
          Item : Analysis.Complete_Item renames Value.Value.all (Index);
 
-         
             Result : Internal_Acc_Complete_Item :=  new Internal_Rec_Complete_Item;
       begin
             Result.Value := Item;
@@ -392,6 +393,7 @@ package body Liblktlang.Generic_Introspection is
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
+                  
                   Result_Item : Analysis.Complete_Item renames
                     Result.Value (Result_Index);
                   Value       : Internal_Rec_Complete_Item renames
@@ -448,9 +450,10 @@ package body Liblktlang.Generic_Introspection is
       overriding function Array_Item
         (Value : Internal_Rec_Lkt_Node_Array; Index : Positive) return Internal_Value_Access
       is
+         
+
          Item : Analysis.Lkt_Node renames Value.Value.all (Index);
 
-         
             Result : Internal_Acc_Node :=  new Internal_Rec_Node;
       begin
             Set_Node (Result, Item);
@@ -471,6 +474,7 @@ package body Liblktlang.Generic_Introspection is
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
+                  
                   Result_Item : Analysis.Lkt_Node renames
                     Result.Value (Result_Index);
                   Value       : Internal_Rec_Node renames
@@ -527,9 +531,10 @@ package body Liblktlang.Generic_Introspection is
       overriding function Array_Item
         (Value : Internal_Rec_Def_Id_Array; Index : Positive) return Internal_Value_Access
       is
+         
+
          Item : Analysis.Def_Id renames Value.Value.all (Index);
 
-         
             Result : Internal_Acc_Node :=  new Internal_Rec_Node;
       begin
             Set_Node (Result, Item);
@@ -550,6 +555,7 @@ package body Liblktlang.Generic_Introspection is
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
+                  
                   Result_Item : Analysis.Def_Id renames
                     Result.Value (Result_Index);
                   Value       : Internal_Rec_Node renames
@@ -606,9 +612,10 @@ package body Liblktlang.Generic_Introspection is
       overriding function Array_Item
         (Value : Internal_Rec_Fun_Decl_Array; Index : Positive) return Internal_Value_Access
       is
+         
+
          Item : Analysis.Fun_Decl renames Value.Value.all (Index);
 
-         
             Result : Internal_Acc_Node :=  new Internal_Rec_Node;
       begin
             Set_Node (Result, Item);
@@ -629,6 +636,7 @@ package body Liblktlang.Generic_Introspection is
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
+                  
                   Result_Item : Analysis.Fun_Decl renames
                     Result.Value (Result_Index);
                   Value       : Internal_Rec_Node renames
@@ -685,9 +693,10 @@ package body Liblktlang.Generic_Introspection is
       overriding function Array_Item
         (Value : Internal_Rec_Logic_Context_Array; Index : Positive) return Internal_Value_Access
       is
+         
+
          Item : Analysis.Logic_Context renames Value.Value.all (Index);
 
-         
             Result : Internal_Acc_Logic_Context :=  new Internal_Rec_Logic_Context;
       begin
             Result.Value := Item;
@@ -708,6 +717,7 @@ package body Liblktlang.Generic_Introspection is
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
+                  
                   Result_Item : Analysis.Logic_Context renames
                     Result.Value (Result_Index);
                   Value       : Internal_Rec_Logic_Context renames
@@ -764,9 +774,10 @@ package body Liblktlang.Generic_Introspection is
       overriding function Array_Item
         (Value : Internal_Rec_Ref_Result_Array; Index : Positive) return Internal_Value_Access
       is
+         
+
          Item : Analysis.Ref_Result renames Value.Value.all (Index);
 
-         
             Result : Internal_Acc_Ref_Result :=  new Internal_Rec_Ref_Result;
       begin
             Result.Value := Item;
@@ -787,6 +798,7 @@ package body Liblktlang.Generic_Introspection is
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
+                  
                   Result_Item : Analysis.Ref_Result renames
                     Result.Value (Result_Index);
                   Value       : Internal_Rec_Ref_Result renames
@@ -843,9 +855,10 @@ package body Liblktlang.Generic_Introspection is
       overriding function Array_Item
         (Value : Internal_Rec_Solver_Diagnostic_Array; Index : Positive) return Internal_Value_Access
       is
+         
+
          Item : Analysis.Solver_Diagnostic renames Value.Value.all (Index);
 
-         
             Result : Internal_Acc_Solver_Diagnostic :=  new Internal_Rec_Solver_Diagnostic;
       begin
             Result.Value := Item;
@@ -866,6 +879,7 @@ package body Liblktlang.Generic_Introspection is
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
+                  
                   Result_Item : Analysis.Solver_Diagnostic renames
                     Result.Value (Result_Index);
                   Value       : Internal_Rec_Solver_Diagnostic renames
@@ -922,9 +936,10 @@ package body Liblktlang.Generic_Introspection is
       overriding function Array_Item
         (Value : Internal_Rec_Analysis_Unit_Array; Index : Positive) return Internal_Value_Access
       is
+         
+
          Item : Analysis.Analysis_Unit renames Value.Value.all (Index);
 
-         
             Result : Internal_Acc_Analysis_Unit :=  new Internal_Rec_Analysis_Unit;
       begin
             Set_Unit (Result, Item);
@@ -945,6 +960,7 @@ package body Liblktlang.Generic_Introspection is
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
+                  
                   Result_Item : Analysis.Analysis_Unit renames
                     Result.Value (Result_Index);
                   Value       : Internal_Rec_Analysis_Unit renames
@@ -2896,29 +2912,6 @@ end;
 when others => null;
 end case;
 end;
-when Lkt_Class_Qualifier =>
-declare
-N_Bare_Class_Qualifier : constant Analysis.Class_Qualifier := N.As_Class_Qualifier;
-begin
-case Member is
-when Member_Index_For_Class_Qualifier_P_As_Bool =>
-declare
-R : Internal_Acc_Bool :=  new Internal_Rec_Bool;
-begin
-R.Value := N_Bare_Class_Qualifier.P_As_Bool;
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when others => null;
-end case;
-end;
 when Lkt_Decl =>
 declare
 N_Bare_Decl : constant Analysis.Decl := N.As_Decl;
@@ -3091,21 +3084,6 @@ declare
 R : Internal_Acc_Bool :=  new Internal_Rec_Bool;
 begin
 R.Value := N_Bare_Decl.P_Return_Type_Is_Instantiated;
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when Member_Index_For_Decl_P_Is_Instantiated =>
-declare
-R : Internal_Acc_Bool :=  new Internal_Rec_Bool;
-begin
-R.Value := N_Bare_Decl.P_Is_Instantiated;
 Result := Internal_Value_Access (R);
 exception
 when Exc : others =>
@@ -3646,29 +3624,6 @@ end;
 when others => null;
 end case;
 case Lkt_Type_Decl (Kind) is
-when Lkt_Generic_Param_Type_Decl_Range =>
-declare
-N_Bare_Generic_Param_Type_Decl : constant Analysis.Generic_Param_Type_Decl := N_Bare_Type_Decl.As_Generic_Param_Type_Decl;
-begin
-case Member is
-when Member_Index_For_Generic_Param_Type_Decl_F_Has_Class =>
-declare
-R : Internal_Acc_Node :=  new Internal_Rec_Node;
-begin
-Set_Node (R, N_Bare_Generic_Param_Type_Decl.F_Has_Class);
-Result := Internal_Value_Access (R);
-exception
-when Exc : others =>
-if Implementation.Properties_May_Raise (Exc) then
-Result := Internal_Value_Access (R);
-Result.Destroy;
-Free (Result);
-end if;
-raise;
-end;
-when others => null;
-end case;
-end;
 when Lkt_Named_Type_Decl =>
 declare
 N_Bare_Named_Type_Decl : constant Analysis.Named_Type_Decl := N_Bare_Type_Decl.As_Named_Type_Decl;

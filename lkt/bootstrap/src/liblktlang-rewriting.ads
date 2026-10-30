@@ -580,6 +580,22 @@ package Liblktlang.Rewriting is
             ) return Node_Rewriting_Handle;
 
 
+         function Create_Generic_Class_Param_Type_Decl
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+               ; F_Syn_Base_Type : Node_Rewriting_Handle
+               ; F_Traits : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
+         function Create_Generic_Param_Type_Decl
+           (Handle : Rewriting_Handle
+               ; F_Syn_Name : Node_Rewriting_Handle
+               ; F_Syn_Base_Type : Node_Rewriting_Handle
+               ; F_Traits : Node_Rewriting_Handle
+            ) return Node_Rewriting_Handle;
+
+
          function Create_Enum_Class_Alt_Decl
            (Handle : Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
@@ -590,15 +606,6 @@ package Liblktlang.Rewriting is
 
          function Create_Function_Type
            (Handle : Rewriting_Handle
-               ; F_Syn_Name : Node_Rewriting_Handle
-               ; F_Traits : Node_Rewriting_Handle
-               ; F_Syn_Base_Type : Node_Rewriting_Handle
-            ) return Node_Rewriting_Handle;
-
-
-         function Create_Generic_Param_Type_Decl
-           (Handle : Rewriting_Handle
-               ; F_Has_Class : Node_Rewriting_Handle
                ; F_Syn_Name : Node_Rewriting_Handle
                ; F_Traits : Node_Rewriting_Handle
                ; F_Syn_Base_Type : Node_Rewriting_Handle

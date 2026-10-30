@@ -612,8 +612,6 @@ package body Liblktlang.Implementation.C is
       Lkt_Pattern_Match_Branch => new Text_Type'(To_Text ("PatternMatchBranch")),
       Lkt_Block_Expr_Clause => new Text_Type'(To_Text ("BlockExprClause")),
       Lkt_Block_String_Line => new Text_Type'(To_Text ("BlockStringLine")),
-      Lkt_Class_Qualifier_Absent => new Text_Type'(To_Text ("ClassQualifierAbsent")),
-      Lkt_Class_Qualifier_Present => new Text_Type'(To_Text ("ClassQualifierPresent")),
       Lkt_Grammar_Rule_Decl => new Text_Type'(To_Text ("GrammarRuleDecl")),
       Lkt_Synthetic_Lexer_Decl => new Text_Type'(To_Text ("SyntheticLexerDecl")),
       Lkt_Node_Decl => new Text_Type'(To_Text ("NodeDecl")),
@@ -637,9 +635,10 @@ package body Liblktlang.Implementation.C is
       Lkt_Synth_Fun_Decl => new Text_Type'(To_Text ("SynthFunDecl")),
       Lkt_Synth_Param_Decl => new Text_Type'(To_Text ("SynthParamDecl")),
       Lkt_Any_Type_Decl => new Text_Type'(To_Text ("AnyTypeDecl")),
+      Lkt_Generic_Class_Param_Type_Decl => new Text_Type'(To_Text ("GenericClassParamTypeDecl")),
+      Lkt_Generic_Param_Type_Decl => new Text_Type'(To_Text ("GenericParamTypeDecl")),
       Lkt_Enum_Class_Alt_Decl => new Text_Type'(To_Text ("EnumClassAltDecl")),
       Lkt_Function_Type => new Text_Type'(To_Text ("FunctionType")),
-      Lkt_Generic_Param_Type_Decl => new Text_Type'(To_Text ("GenericParamTypeDecl")),
       Lkt_Class_Decl => new Text_Type'(To_Text ("ClassDecl")),
       Lkt_Enum_Class_Decl => new Text_Type'(To_Text ("EnumClassDecl")),
       Lkt_Enum_Type_Decl => new Text_Type'(To_Text ("EnumTypeDecl")),
@@ -2974,7 +2973,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Basic_Trait_Gen
               (Unwrapped_Node);
@@ -3021,7 +3020,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Trait_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Basic_Trait
               (Unwrapped_Node);
@@ -3068,7 +3067,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Node_Gen_Trait
               (Unwrapped_Node);
@@ -3115,7 +3114,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Trait_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Node_Trait
               (Unwrapped_Node);
@@ -3162,7 +3161,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Indexable_Gen_Trait
               (Unwrapped_Node);
@@ -3209,7 +3208,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Trait_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Indexable_Trait
               (Unwrapped_Node);
@@ -3256,7 +3255,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Iterable_Gen_Trait
               (Unwrapped_Node);
@@ -3303,7 +3302,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Trait_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Iterable_Trait
               (Unwrapped_Node);
@@ -3350,7 +3349,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Token_Node_Trait
               (Unwrapped_Node);
@@ -3397,7 +3396,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Error_Node_Trait
               (Unwrapped_Node);
@@ -3444,7 +3443,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Char_Type
               (Unwrapped_Node);
@@ -3491,7 +3490,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Int_Type
               (Unwrapped_Node);
@@ -3538,7 +3537,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Bool_Type
               (Unwrapped_Node);
@@ -3585,7 +3584,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Bigint_Type
               (Unwrapped_Node);
@@ -3632,7 +3631,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_String_Type
               (Unwrapped_Node);
@@ -3679,7 +3678,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Symbol_Type
               (Unwrapped_Node);
@@ -3726,7 +3725,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Property_Error_Type
               (Unwrapped_Node);
@@ -3773,7 +3772,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Regexp_Type
               (Unwrapped_Node);
@@ -3820,7 +3819,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Entity_Gen_Type
               (Unwrapped_Node);
@@ -3867,7 +3866,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Entity_Type
               (Unwrapped_Node);
@@ -3914,7 +3913,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Logicvar_Type
               (Unwrapped_Node);
@@ -3961,7 +3960,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Equation_Type
               (Unwrapped_Node);
@@ -4008,7 +4007,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Array_Gen_Type
               (Unwrapped_Node);
@@ -4055,7 +4054,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Array_Type
               (Unwrapped_Node);
@@ -4102,7 +4101,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Stream_Gen_Type
               (Unwrapped_Node);
@@ -4149,7 +4148,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Stream_Type
               (Unwrapped_Node);
@@ -4196,7 +4195,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Astlist_Gen_Type
               (Unwrapped_Node);
@@ -4243,7 +4242,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Astlist_Type
               (Unwrapped_Node);
@@ -4290,7 +4289,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Node_Builder_Gen_Type
               (Unwrapped_Node);
@@ -4337,7 +4336,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Named_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Node_Builder_Type
               (Unwrapped_Node);
@@ -4384,7 +4383,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Iterator_Gen_Trait
               (Unwrapped_Node);
@@ -4431,7 +4430,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Trait_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Iterator_Trait
               (Unwrapped_Node);
@@ -4478,7 +4477,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Generic_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Analysis_Unit_Gen_Trait
               (Unwrapped_Node);
@@ -4525,7 +4524,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Trait_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Lkt_Node_P_Analysis_Unit_Trait
               (Unwrapped_Node);
@@ -5561,57 +5560,6 @@ package body Liblktlang.Implementation.C is
    
    
 
-   function lkt_class_qualifier_p_as_bool
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_bool) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Class_Qualifier then
-
-         declare
-            
-
-            Result : Boolean;
-         begin
-            Result := Liblktlang.Impl_0.Dispatcher_Class_Qualifier_P_As_Bool
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   lkt_bool (Boolean'Pos (Result))
-            ;
-
-            return 1;
-         exception
-            when Exc : Liblktlang_Support.Errors.Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_class_qualifier_p_as_bool;
-
-
-           
-
-   
-
-   
-   
-
    function lkt_decl_f_syn_name
      (Node : lkt_node_Ptr;
 
@@ -5784,14 +5732,14 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Def_Id_Array_Access;
+            Result : Internal_Entity_Array_Access;
          begin
             Result := Liblktlang.Impl_0.Decl_P_Def_Ids
               (Unwrapped_Node,
                E_Info => Node.Info);
 
             Value_P.all :=
-                  Convert (Result)
+                   Result
             ;
 
             return 1;
@@ -5836,7 +5784,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Decl_P_As_Bare_Decl
               (Unwrapped_Node,
@@ -5888,7 +5836,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Decl_P_Get_Type
               (Unwrapped_Node,
@@ -5935,9 +5883,9 @@ package body Liblktlang.Implementation.C is
    is
       Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
          
-         Unwrapped_Cast_To : constant Internal_Entity_Type_Decl :=
+         Unwrapped_Cast_To : constant Internal_Entity :=
                (if Cast_To.all.Node = null
-                then No_Entity_Type_Decl
+                then No_Entity
                 else (Cast_To.all.Node, Cast_To.all.Info))
          ;
    begin
@@ -5949,7 +5897,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Decl_P_Get_Cast_Type
               (Unwrapped_Node,
@@ -5997,9 +5945,9 @@ package body Liblktlang.Implementation.C is
    is
       Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
          
-         Unwrapped_Keep_Type : constant Internal_Entity_Type_Decl :=
+         Unwrapped_Keep_Type : constant Internal_Entity :=
                (if Keep_Type.all.Node = null
-                then No_Entity_Type_Decl
+                then No_Entity
                 else (Keep_Type.all.Node, Keep_Type.all.Info))
          ;
    begin
@@ -6011,7 +5959,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Decl_P_Get_Keep_Type
               (Unwrapped_Node,
@@ -6059,9 +6007,9 @@ package body Liblktlang.Implementation.C is
    is
       Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
          
-         Unwrapped_Prefix_Type : constant Internal_Entity_Type_Decl :=
+         Unwrapped_Prefix_Type : constant Internal_Entity :=
                (if Prefix_Type.all.Node = null
-                then No_Entity_Type_Decl
+                then No_Entity
                 else (Prefix_Type.all.Node, Prefix_Type.all.Info))
          ;
    begin
@@ -6073,7 +6021,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Decl_P_Get_Suffix_Type
               (Unwrapped_Node,
@@ -6204,58 +6152,6 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_decl_p_return_type_is_instantiated;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_decl_p_is_instantiated
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_bool) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Decl then
-
-         declare
-            
-
-            Result : Boolean;
-         begin
-            Result := Liblktlang.Impl_0.Decl_P_Is_Instantiated
-              (Unwrapped_Node,
-               E_Info => Node.Info);
-
-            Value_P.all :=
-                   lkt_bool (Boolean'Pos (Result))
-            ;
-
-            return 1;
-         exception
-            when Exc : Liblktlang_Support.Errors.Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_decl_p_is_instantiated;
 
 
            
@@ -6954,7 +6850,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Fun_Decl_Array_Access;
+            Result : Internal_Entity_Array_Access;
          begin
             Result := Liblktlang.Impl_0.Fun_Decl_P_Find_All_Overrides
               (Unwrapped_Node,
@@ -6962,7 +6858,7 @@ package body Liblktlang.Implementation.C is
                E_Info => Node.Info);
 
             Value_P.all :=
-                  Convert (Result)
+                   Result
             ;
 
             return 1;
@@ -7568,7 +7464,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Def_Id;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Type_Decl_P_Def_Id
               (Unwrapped_Node,
@@ -7620,7 +7516,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Dispatcher_Type_Decl_P_Base_Type
               (Unwrapped_Node,
@@ -7646,57 +7542,6 @@ package body Liblktlang.Implementation.C is
          Set_Last_Exception (Exc);
          return 0;
    end lkt_type_decl_p_base_type;
-
-
-           
-
-   
-
-   
-   
-
-   function lkt_generic_param_type_decl_f_has_class
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-   is
-      Unwrapped_Node : constant Bare_Lkt_Node := Node.Node;
-   begin
-      Clear_Last_Exception;
-
-
-      if Unwrapped_Node.Kind in Lkt_Generic_Param_Type_Decl_Range then
-
-         declare
-            
-
-            Result : Bare_Class_Qualifier;
-         begin
-            Result := Generic_Param_Type_Decl_F_Has_Class
-              (Unwrapped_Node);
-
-            Value_P.all :=
-                   (Result, Node.Info)
-            ;
-
-            return 1;
-         exception
-            when Exc : Liblktlang_Support.Errors.Property_Error =>
-               Set_Last_Exception (Exc);
-               return 0;
-         end;
-
-      else
-         return 0;
-      end if;
-
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end lkt_generic_param_type_decl_f_has_class;
 
 
            
@@ -8233,7 +8078,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Dispatcher_Expr_P_Get_Type
               (Unwrapped_Node,
@@ -8285,7 +8130,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Expr_P_Get_Generic_Type
               (Unwrapped_Node,
@@ -8337,7 +8182,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Expr_P_Get_Expected_Type
               (Unwrapped_Node,
@@ -8389,7 +8234,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Dispatcher_Expr_P_Referenced_Decl
               (Unwrapped_Node,
@@ -11000,7 +10845,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Def_Id_Array_Access;
+            Result : Internal_Entity_Array_Access;
          begin
             Result := Liblktlang.Impl_0.Def_Id_P_Get_Implementatinons
               (Unwrapped_Node,
@@ -11008,7 +10853,7 @@ package body Liblktlang.Implementation.C is
                E_Info => Node.Info);
 
             Value_P.all :=
-                  Convert (Result)
+                   Result
             ;
 
             return 1;
@@ -11269,7 +11114,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Def_Id;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Ref_Id_P_Referenced_Defining_Name
               (Unwrapped_Node,
@@ -14899,7 +14744,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Bare_Id;
+            Result : Bare_Ref_Id;
          begin
             Result := Field_Pattern_Detail_F_Id
               (Unwrapped_Node);
@@ -15103,7 +14948,7 @@ package body Liblktlang.Implementation.C is
          declare
             
 
-            Result : Internal_Entity_Type_Decl;
+            Result : Internal_Entity;
          begin
             Result := Liblktlang.Impl_0.Type_Ref_P_Referenced_Decl
               (Unwrapped_Node,

@@ -1,0 +1,8 @@
+driver: lkt_build_and_run
+config:
+  emission:
+    generate_auto_dll_dirs: True
+py_script: main.py
+with_path_wrapper: False
+control:
+  - [SKIP, "os != 'windows'", "Checks a Windows-specific feature"]

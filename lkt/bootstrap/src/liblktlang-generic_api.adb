@@ -221,10 +221,6 @@ package body Liblktlang.Generic_API is
                      return Lkt_Block_Expr_Clause;
                   when Type_Index_For_Block_String_Line =>
                      return Lkt_Block_String_Line;
-                  when Type_Index_For_Class_Qualifier_Absent =>
-                     return Lkt_Class_Qualifier_Absent;
-                  when Type_Index_For_Class_Qualifier_Present =>
-                     return Lkt_Class_Qualifier_Present;
                   when Type_Index_For_Grammar_Rule_Decl =>
                      return Lkt_Grammar_Rule_Decl;
                   when Type_Index_For_Synthetic_Lexer_Decl =>
@@ -271,12 +267,14 @@ package body Liblktlang.Generic_API is
                      return Lkt_Synth_Param_Decl;
                   when Type_Index_For_Any_Type_Decl =>
                      return Lkt_Any_Type_Decl;
+                  when Type_Index_For_Generic_Class_Param_Type_Decl =>
+                     return Lkt_Generic_Class_Param_Type_Decl;
+                  when Type_Index_For_Generic_Param_Type_Decl =>
+                     return Lkt_Generic_Param_Type_Decl;
                   when Type_Index_For_Enum_Class_Alt_Decl =>
                      return Lkt_Enum_Class_Alt_Decl;
                   when Type_Index_For_Function_Type =>
                      return Lkt_Function_Type;
-                  when Type_Index_For_Generic_Param_Type_Decl =>
-                     return Lkt_Generic_Param_Type_Decl;
                   when Type_Index_For_Class_Decl =>
                      return Lkt_Class_Decl;
                   when Type_Index_For_Enum_Class_Decl =>

@@ -91,7 +91,9 @@ else:
 # DLL directories from the PATH environment variable manually.
 _add_dll_directory = getattr(os, "add_dll_directory", None)
 if _add_dll_directory:
-    for path in os.environ.get('PATH', '').split(os.pathsep):
+    # Make sure first directories in PATH have precedence over last directories
+    # during DLL lookup.
+    for path in reversed(os.environ.get('PATH', '').split(os.pathsep)):
         try:
             os.add_dll_directory(os.path.realpath(path))
         except FileNotFoundError as _:

@@ -1235,6 +1235,32 @@ private package Liblktlang.Unparsers is
 
          
 
+         Bare_Generic_Class_Param_Type_Decl_Fields_Unparser_List
+            : aliased constant Field_Unparser_List_Impl
+            := (N               => 3,
+                Field_Unparsers =>
+                  (1 => (Member_Index_For_Decl_F_Syn_Name, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   2 => (Member_Index_For_Type_Decl_F_Syn_Base_Type, Token_Sequence_23'Access, Empty_Token_Sequence, False),
+                   3 => (Member_Index_For_Type_Decl_F_Traits, Token_Sequence_60'Access, Empty_Token_Sequence, True)),
+                Inter_Tokens    =>
+                  (1 => Empty_Token_Sequence,
+                   2 => Empty_Token_Sequence,
+                   3 => Empty_Token_Sequence));
+
+         
+
+         Bare_Generic_Param_Type_Decl_Fields_Unparser_List
+            : aliased constant Field_Unparser_List_Impl
+            := (N               => 2,
+                Field_Unparsers =>
+                  (1 => (Member_Index_For_Decl_F_Syn_Name, Empty_Token_Sequence, Empty_Token_Sequence, False),
+                   2 => (Member_Index_For_Type_Decl_F_Traits, Token_Sequence_60'Access, Empty_Token_Sequence, True)),
+                Inter_Tokens    =>
+                  (1 => Empty_Token_Sequence,
+                   2 => Empty_Token_Sequence));
+
+         
+
          Bare_Enum_Class_Alt_Decl_Fields_Unparser_List
             : aliased constant Field_Unparser_List_Impl
             := (N               => 2,
@@ -1244,20 +1270,6 @@ private package Liblktlang.Unparsers is
                 Inter_Tokens    =>
                   (1 => Empty_Token_Sequence,
                    2 => Empty_Token_Sequence));
-
-         
-
-         Bare_Generic_Param_Type_Decl_Fields_Unparser_List
-            : aliased constant Field_Unparser_List_Impl
-            := (N               => 3,
-                Field_Unparsers =>
-                  (1 => (Member_Index_For_Generic_Param_Type_Decl_F_Has_Class, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   2 => (Member_Index_For_Decl_F_Syn_Name, Empty_Token_Sequence, Empty_Token_Sequence, False),
-                   3 => (Member_Index_For_Type_Decl_F_Traits, Empty_Token_Sequence, Empty_Token_Sequence, False)),
-                Inter_Tokens    =>
-                  (1 => Empty_Token_Sequence,
-                   2 => Empty_Token_Sequence,
-                   3 => Empty_Token_Sequence));
 
          
 
@@ -2281,22 +2293,6 @@ private package Liblktlang.Unparsers is
 
       
 
-         Unparser_For_Class_Qualifier_Absent : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Empty_Token_Sequence,
-            Field_Unparsers => Empty_Field_Unparser_List'Access,
-            Post_Tokens => Empty_Token_Sequence);
-      
-
-         Unparser_For_Class_Qualifier_Present : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Token_Sequence_45'Access,
-            Field_Unparsers => Empty_Field_Unparser_List'Access,
-            Post_Tokens => Empty_Token_Sequence);
-      
-
-      
-
       
 
          Unparser_For_Grammar_Rule_Decl : aliased constant Node_Unparser_Impl :=
@@ -2435,13 +2431,13 @@ private package Liblktlang.Unparsers is
 
       
 
-         Unparser_For_Enum_Class_Alt_Decl : aliased constant Node_Unparser_Impl :=
-           (Kind => Regular,
-            Pre_Tokens => Empty_Token_Sequence,
-            Field_Unparsers => Bare_Enum_Class_Alt_Decl_Fields_Unparser_List'Access,
-            Post_Tokens => Empty_Token_Sequence);
       
 
+         Unparser_For_Generic_Class_Param_Type_Decl : aliased constant Node_Unparser_Impl :=
+           (Kind => Regular,
+            Pre_Tokens => Token_Sequence_45'Access,
+            Field_Unparsers => Bare_Generic_Class_Param_Type_Decl_Fields_Unparser_List'Access,
+            Post_Tokens => Empty_Token_Sequence);
       
 
          Unparser_For_Generic_Param_Type_Decl : aliased constant Node_Unparser_Impl :=
@@ -2449,6 +2445,15 @@ private package Liblktlang.Unparsers is
             Pre_Tokens => Empty_Token_Sequence,
             Field_Unparsers => Bare_Generic_Param_Type_Decl_Fields_Unparser_List'Access,
             Post_Tokens => Empty_Token_Sequence);
+      
+
+         Unparser_For_Enum_Class_Alt_Decl : aliased constant Node_Unparser_Impl :=
+           (Kind => Regular,
+            Pre_Tokens => Empty_Token_Sequence,
+            Field_Unparsers => Bare_Enum_Class_Alt_Decl_Fields_Unparser_List'Access,
+            Post_Tokens => Empty_Token_Sequence);
+      
+
       
 
       
@@ -3507,12 +3512,6 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Block_String_Line => Unparser_For_Block_String_Line'Access
          ,
-         Type_Index_For_Class_Qualifier => null
-         ,
-         Type_Index_For_Class_Qualifier_Absent => Unparser_For_Class_Qualifier_Absent'Access
-         ,
-         Type_Index_For_Class_Qualifier_Present => Unparser_For_Class_Qualifier_Present'Access
-         ,
          Type_Index_For_Decl => null
          ,
          Type_Index_For_Base_Grammar_Rule_Decl => null
@@ -3573,11 +3572,15 @@ private package Liblktlang.Unparsers is
          ,
          Type_Index_For_Any_Type_Decl => null
          ,
+         Type_Index_For_Base_Generic_Param_Type_Decl => null
+         ,
+         Type_Index_For_Generic_Class_Param_Type_Decl => Unparser_For_Generic_Class_Param_Type_Decl'Access
+         ,
+         Type_Index_For_Generic_Param_Type_Decl => Unparser_For_Generic_Param_Type_Decl'Access
+         ,
          Type_Index_For_Enum_Class_Alt_Decl => Unparser_For_Enum_Class_Alt_Decl'Access
          ,
          Type_Index_For_Function_Type => null
-         ,
-         Type_Index_For_Generic_Param_Type_Decl => Unparser_For_Generic_Param_Type_Decl'Access
          ,
          Type_Index_For_Named_Type_Decl => null
          ,

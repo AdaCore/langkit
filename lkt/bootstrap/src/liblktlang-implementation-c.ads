@@ -2642,23 +2642,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    
    
 
-   function lkt_class_qualifier_p_as_bool
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_bool) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_class_qualifier_p_as_bool";
-   --  Return whether this node is present
-
-           
-   
-
-   
-   
-
    function lkt_decl_f_syn_name
      (Node : lkt_node_Ptr;
 
@@ -2859,24 +2842,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_decl_p_return_type_is_instantiated";
    --  Return True if the return type of this function is instantiated.
-
-           
-   
-
-   
-   
-
-   function lkt_decl_p_is_instantiated
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_bool) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_decl_p_is_instantiated";
-   --  Return True if Self is an instantiated declaration, meaning that it does
-   --  not use any of its declared generic types.
 
            
    
@@ -3410,23 +3375,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    --  Note that this includes "logic" base types for covariant types, like
    --  ``Entity`` (i.e. ``Entity[Parent]`` is returned as a base type of
    --  ``Entity[Child]``).
-
-           
-   
-
-   
-   
-
-   function lkt_generic_param_type_decl_f_has_class
-     (Node : lkt_node_Ptr;
-
-
-      Value_P : access lkt_node) return int
-
-      with Export        => True,
-           Convention    => C,
-           External_name => "lkt_generic_param_type_decl_f_has_class";
-   --  When there are no parsing errors, this field is never null.
 
            
    
@@ -5977,12 +5925,12 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
            Convention    => C,
            External_name => "lkt_full_decl_f_decl";
    --  This field can contain one of the following nodes:
-   --  :ada:ref:`Dyn_Var_Decl`, :ada:ref:`Env_Spec_Decl`,
-   --  :ada:ref:`Error_Decl`, :ada:ref:`Field_Decl`, :ada:ref:`Fun_Decl`,
-   --  :ada:ref:`Generic_Decl`, :ada:ref:`Generic_Param_Type_Decl`,
-   --  :ada:ref:`Grammar_Decl`, :ada:ref:`Grammar_Rule_Decl`,
-   --  :ada:ref:`Lexer_Decl`, :ada:ref:`Lexer_Family_Decl`,
-   --  :ada:ref:`Named_Type_Decl`, :ada:ref:`Val_Decl`
+   --  :ada:ref:`Base_Generic_Param_Type_Decl`, :ada:ref:`Dyn_Var_Decl`,
+   --  :ada:ref:`Env_Spec_Decl`, :ada:ref:`Error_Decl`, :ada:ref:`Field_Decl`,
+   --  :ada:ref:`Fun_Decl`, :ada:ref:`Generic_Decl`, :ada:ref:`Grammar_Decl`,
+   --  :ada:ref:`Grammar_Rule_Decl`, :ada:ref:`Lexer_Decl`,
+   --  :ada:ref:`Lexer_Family_Decl`, :ada:ref:`Named_Type_Decl`,
+   --  :ada:ref:`Val_Decl`
    --
    --  When there are no parsing errors, this field is never null.
 
@@ -6754,50 +6702,6 @@ procedure lkt_analysis_unit_array_dec_ref (A : Internal_Unit_Array_Access)
    function Convert is new Ada.Unchecked_Conversion
      (chars_ptr, System.Address);
 
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Argument_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Argument_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Def_Id_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Def_Id_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Enum_Class_Alt_Decl_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Enum_Class_Alt_Decl_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Expr_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Expr_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Field_Decl_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Field_Decl_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Full_Decl_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Full_Decl_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Fun_Decl_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Fun_Decl_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Fun_Param_Decl_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Fun_Param_Decl_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Generic_Param_Type_Decl_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Generic_Param_Type_Decl_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Ref_Id_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Ref_Id_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Type_Decl_Array_Access, Internal_Entity_Array_Access);
-         function Convert is new Ada.Unchecked_Conversion
-           (Internal_Entity_Array_Access, Internal_Entity_Type_Decl_Array_Access);
 
 
 end Liblktlang.Implementation.C;
