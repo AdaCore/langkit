@@ -3523,6 +3523,24 @@ package body ${ada_lib_name}.Implementation is
       </%self:case_dispatch>
    end Short_Text_Image;
 
+   -----------------------------
+   -- Default_Node_Sloc_Image --
+   -----------------------------
+
+   function Default_Node_Sloc_Image
+     (Self       : ${T.root_node.name};
+      Start_Only : Boolean := False) return Text_Type is
+   begin
+      return
+        To_Text
+          (Ada.Directories.Simple_Name (Get_Filename (Unit (Self))))
+        & ":"
+        & To_Text
+            (if Start_Only
+             then Image (Start_Sloc (Sloc_Range (Self)))
+             else Image (Sloc_Range (Self)));
+   end Default_Node_Sloc_Image;
+
    ----------------------
    --- Node_Sloc_Image --
    ----------------------
@@ -3536,14 +3554,7 @@ package body ${ada_lib_name}.Implementation is
       % if ext:
          ${exts.include_extension(ext)}
       % else:
-         return
-           To_Text
-             (Ada.Directories.Simple_Name (Get_Filename (Unit (Self))))
-           & ":"
-           & To_Text
-               (if Start_Only
-                then Image (Start_Sloc (Sloc_Range (Self)))
-                else Image (Sloc_Range (Self)));
+         return Default_Node_Sloc_Image (Self, Start_Only);
       % endif
    end Node_Sloc_Image;
 

@@ -171,6 +171,11 @@ private package ${ada_lib_name}.Implementation is
    --  Return the image of the sloc for ``Self`` (start sloc if ``Start_Only``,
    --  sloc range otherwise), to be used in ``Short_Text_Image``.
 
+   function Default_Node_Sloc_Image
+     (Self       : ${T.root_node.name};
+      Start_Only : Boolean := False) return Text_Type;
+   --  Equivalent to ``Node_Sloc_Image``, unless the language spec overrided it
+
    function Short_Text_Image (Self : ${T.root_node.name}) return Text_Type;
    --  Return a short representation of the node, containing just the kind
    --  name and the sloc, or "None" if Self is null.
