@@ -18,6 +18,9 @@ val assign5 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <-
 val assign6 = a <- b
 # Comment foo
 %and foo
+val assign7 = a <- [1, 2]
+val assign8 = a <- [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbbb,
+ccccccccccccccc]
 
 val propagate1 = a <- T.f%(b)
 val propagate2 = (aaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbb.cccccccccccccc)

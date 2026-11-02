@@ -492,7 +492,8 @@ class FunDecl {
         [
             if this_node.f_trait_ref is null then whitespace else [],
             match this_field {
-                case BlockExpr | MatchExpr => ["=", whitespace, recurse]
+                case ArrayLiteral | BlockExpr | MatchExpr =>
+                    ["=", whitespace, recurse]
                 case _ => group(indent("=", line, recurse))
             }
         ]
@@ -827,7 +828,8 @@ class LogicAssign {
                     line,
                     "<-",
                     whitespace,
-                    if this_node.f_value is BaseCallExpr | MatchExpr
+                    if this_node.f_value
+                        is ArrayLiteral |BaseCallExpr | MatchExpr
                     then recurse(f_value)
                     else
                         indent(recurse(f_value), bubbleUpTrailingTrivias=true),
@@ -840,7 +842,8 @@ class LogicAssign {
                 line,
                 "<-",
                 whitespace,
-                if this_node.f_value is BaseCallExpr | MatchExpr
+                if this_node.f_value
+                    is ArrayLiteral |BaseCallExpr | MatchExpr
                 then recurse(f_value)
                 else indent(recurse(f_value), bubbleUpTrailingTrivias=true)
             )
@@ -886,7 +889,8 @@ class LogicUnify {
                     line,
                     "<->",
                     whitespace,
-                    if this_node.f_rhs is BaseCallExpr | MatchExpr
+                    if this_node.f_rhs
+                        is ArrayLiteral | BaseCallExpr | MatchExpr
                     then recurse(f_rhs)
                     else indent(recurse(f_rhs), bubbleUpTrailingTrivias=true),
                     bubbleUpTrailingTrivias=true
@@ -898,7 +902,8 @@ class LogicUnify {
                 line,
                 "<->",
                 whitespace,
-                if this_node.f_rhs is BaseCallExpr | MatchExpr
+                if this_node.f_rhs
+                    is ArrayLiteral | BaseCallExpr | MatchExpr
                 then recurse(f_rhs)
                 else indent(recurse(f_rhs), bubbleUpTrailingTrivias=true)
             )
@@ -1092,7 +1097,7 @@ class ValDecl {
             recurse(f_decl_type),
             whitespace,
             match this_node.f_expr {
-                case BlockExpr | ParenExpr | MatchExpr =>
+                case ArrayLiteral | BlockExpr | ParenExpr | MatchExpr =>
                     ["=", whitespace, recurse(f_expr)]
                 case _ => group(indent("=", line, recurse(f_expr)))
             }

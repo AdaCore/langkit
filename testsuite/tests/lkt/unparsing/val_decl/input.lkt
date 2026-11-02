@@ -7,6 +7,15 @@
 #       + bbbbbbbbbbbbbb
 #       + ccccccccccccc
 #       + dddddddddddd
-val v =
+val v1 =
     # Commenting a complex expression
     aaaaaaaaaaaaaaaa + bbbbbbbbbbbbbb + ccccccccccccc + dddddddddddd
+
+val v2 = match self {case _ => 0}
+val v3 = {val v = 0; v + 1}
+val v4 =
+[1, 2]
+
+val v5 =
+[aaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbb, cccccccccccccccccccccccc,
+ddddddddddddddddd, eeeeeeeeeee]
