@@ -21,9 +21,25 @@ val v9 = n.map(
 )
 val v10 = n.map(
     (n) =>
-    # Comment about what follows
     {
+        # Comment about what follows
         val v = n + 1;
         v + v
     }
 )
+
+val v11 =
+(n) =>
+# Commenting a complex expression
+aaaaaaaaaaaaaaaa + bbbbbbbbbbbbbb + ccccccccccccc + dddddddddddd
+
+val v12 = (n) => match self {case _ => 0}
+val v13 = (n) => {val v = 0; v + 1}
+val v14 =
+(n) =>
+[1, 2]
+
+val v15 =
+(n) =>
+[aaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbb, cccccccccccccccccccccccc,
+ddddddddddddddddd, eeeeeeeeeee]
