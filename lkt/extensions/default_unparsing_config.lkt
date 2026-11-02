@@ -754,23 +754,20 @@ class LambdaExpr {
             recurse(f_return_type),
             whitespace,
             group(
-                "=>",
-                flushLineBreaks,
-                id="comments",
+                indent(
+                    "=>",
+                    line,
+                    flushLineBreaks,
+                    match this_node.f_body {
+                        case BlockExpr =>
+                            [recurse(f_body)]
+                        case _ =>
+                            group(recurse(f_body))
+                    }
+                ),
+                bubbleUpLeadingTrivias=false,
                 bubbleUpTrailingTrivias=false
-            ),
-            match this_node.f_body {
-                case BlockExpr =>
-                    [
-                        ifBreak([], whitespace, groupId="comments"),
-                        recurse(f_body)
-                    ]
-                case _ =>
-                    group(
-                        ifBreak([], line, groupId="comments"),
-                        recurse(f_body)
-                    )
-            }
+            )
         ]
     val f_params = group(indent(softline, recurse), softline)
     val f_return_type = [":", whitespace, recurse]

@@ -16,34 +16,34 @@ val v6 =
     ) => 0
 val v7 =
     (a: Int, b: Int) =>
-    aaaaaaaa + bbbbbbbbbb + ccccccccc + dddddddddddd + eeeeeeeeee
+        aaaaaaaa + bbbbbbbbbb + ccccccccc + dddddddddddd + eeeeeeeeee
 val v8 =
     n.map(
         (n) =>
-        aaaaaaaaaaaaaa
-        + bbbbbbbbbbbbbbbb
-        + ccccccccccccccc
-        + ddddddddddddddd
-        + eeeeeeee,
+            aaaaaaaaaaaaaa
+            + bbbbbbbbbbbbbbbb
+            + ccccccccccccccc
+            + ddddddddddddddd
+            + eeeeeeee,
         (n) =>
-        aaaaaaaaaa
-        or bbbbbbbbbbbbbb
-        or cccccccccccccccccc
-        or ddddddddddd
-        or eeeeeeeeee
+            aaaaaaaaaa
+            or bbbbbbbbbbbbbb
+            or cccccccccccccccccc
+            or ddddddddddd
+            or eeeeeeeeee
     )
 val v9 =
     n.map(
         (n) =>
-        # Comment about what follows
-        n + 1
+            # Comment about what follows
+            n + 1
     )
 val v10 =
     n.map(
         (n) =>
-        # Comment about what follows
-        {
-            val v = n + 1;
-            v + v
-        }
+            # Comment about what follows
+            {
+                val v = n + 1;
+                v + v
+            }
     )
