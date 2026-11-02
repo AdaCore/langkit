@@ -3,9 +3,10 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
+with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Wide_Wide_Characters.Handling;
-with Interfaces;            use Interfaces;
+with Interfaces;                      use Interfaces;
 with System;
 
 with GNATCOLL.Iconv;
@@ -30,21 +31,33 @@ package body Langkit_Support.Text is
    -- To_Text --
    -------------
 
-   function To_Text (S : String) return Text_Type is
-      Result : Text_Type (1 .. S'Length);
+   function To_Text
+     (S : String; Mode : Transcoding_Error_Mode := Strict) return Text_Type
+   is
+      Result : Unbounded_Text_Type;
    begin
-      for I in Result'Range loop
+      for I in S'Range loop
          declare
-            C : constant Character := S (S'First + I - 1);
+            Codepoint : constant Unsigned_32 := Character'Pos (S (I));
          begin
-            if C in ASCII.NUL .. Character'Val (16#7f#) then
-               Result (I) := Wide_Wide_Character'Val (Character'Pos (C));
+            if Codepoint < 16#80# then
+               Append (Result, Wide_Wide_Character'Val (Codepoint));
             else
-               raise Constraint_Error with "Invalid ASCII character";
+               case Mode is
+                  when Strict =>
+                     raise Constraint_Error with "Invalid ASCII character";
+                  when Backslash_Replace =>
+                     declare
+                        Hex_Escape : constant String :=
+                          Image ((1 => Wide_Wide_Character'Val (Codepoint)));
+                     begin
+                        Append (Result, To_Text (Hex_Escape));
+                     end;
+               end case;
             end if;
          end;
       end loop;
-      return Result;
+      return To_Text (Result);
    end To_Text;
 
    -----------

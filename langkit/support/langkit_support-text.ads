@@ -50,9 +50,17 @@ package Langkit_Support.Text is
    --  Return the name of the charset used to encode :ada:ref:`Text_Type`
    --  values.
 
-   function To_Text (S : String) return Text_Type;
-   --  Convenience converter for pure ASCII strings. Raises a
-   --  ``Constraint_Error`` if a non-ASCII character is met.
+   type Transcoding_Error_Mode is (Strict, Backslash_Replace);
+   --  Determine how to handle transcoding errors (in conversions between
+   --  String and Text_Type).
+   --
+   --  * ``Strict``: propagate a ``Constraint_Error`` exception.
+   --  * ``Backslash_Replace``: replace with backslash escaped sequences.
+
+   function To_Text
+     (S : String; Mode : Transcoding_Error_Mode := Strict) return Text_Type;
+   --  Convenience converter for pure ASCII strings. Non-ASCII bytes are
+   --  processed according to ``Mode``.
 
    function To_Text (UT : Unbounded_Text_Type) return Text_Type
       renames Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String;
