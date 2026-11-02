@@ -1,0 +1,24 @@
+val _ = {
+    bind v1 =
+        # Commenting a complex expression
+        aaaaaaaaaaaaaaaa + bbbbbbbbbbbbbb + ccccccccccccc + dddddddddddd;
+
+    bind v2 = match self {
+        case _ => 0
+    };
+    bind v3 = {
+        val v = 0;
+        v + 1
+    };
+    bind v4 = [1, 2];
+
+    bind v5 = [
+        aaaaaaaaaaaaaaaaaa,
+        bbbbbbbbbbbbbbb,
+        cccccccccccccccccccccccc,
+        ddddddddddddddddd,
+        eeeeeeeeeee
+    ];
+
+    0
+}

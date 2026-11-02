@@ -1111,7 +1111,10 @@ class VarBind {
             "bind",
             recurse(f_name),
             whitespace,
-            "=",
-            indent(line, recurse(f_expr))
+            match this_node.f_expr {
+                case ArrayLiteral | BlockExpr | ParenExpr | MatchExpr =>
+                    ["=", whitespace, recurse(f_expr)]
+                case _ => group(indent("=", line, recurse(f_expr)))
+            }
         )
 }
