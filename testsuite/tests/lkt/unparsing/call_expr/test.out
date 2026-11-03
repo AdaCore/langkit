@@ -122,7 +122,7 @@ val long_over_binop_in_binop =
         .jjjjjjjjjjjjjjj(
             kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk,
             llllllllllllllllllllll
-    )
+        )
 
 val long_over_binop_in_binop_with_comments =
     # Comment for LHS
@@ -137,4 +137,4 @@ val long_over_binop_in_binop_with_comments =
         .jjjjjjjjjjjjjjj(
             kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk,
             llllllllllllllllllllll
-    )
+        )

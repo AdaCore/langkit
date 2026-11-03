@@ -104,7 +104,6 @@ class DestructuringPatternDetail {
 }
 
 class BaseCallExpr {
-    val node = group(recurse)
     val f_name = group(
         group(
             if this_node.parent
@@ -122,18 +121,6 @@ class BaseCallExpr {
             id="name"
         )
     )
-    val f_args =
-        if this_field.is_empty
-        then recurse
-        elif this_node.parent
-            is BinOp | LogicAssign | LogicPredicate | LogicUnify
-        then
-            ifBreak(
-                group(indent(indent(softline, recurse)), softline),
-                group(indent(softline, recurse), softline),
-                groupId="name"
-            )
-        else group(indent(softline, recurse), softline)
 }
 
 class BaseLexerCaseRuleAlt {
@@ -217,6 +204,25 @@ class BlockStringLineList {
 }
 
 class BlockStringLit {
+}
+
+class CallExpr {
+    val node = group(
+        recurse(f_name),
+        "(",
+        if this_node.f_args.is_empty
+        then recurse(f_args)
+        elif this_node.parent
+            is BinOp | LogicAssign | LogicPredicate | LogicUnify
+        then
+            ifBreak(
+                group(indent(indent(softline, recurse(f_args)), softline)),
+                group(indent(softline, recurse(f_args)), softline),
+                groupId="name"
+            )
+        else group(indent(softline, recurse(f_args)), softline),
+        ")"
+    )
 }
 
 class CallExprList {
@@ -858,6 +864,23 @@ class LogicExpr {
 }
 
 class LogicPredicate {
+    val node = group(
+        recurse(f_name),
+        "%",
+        "(",
+        if this_node.f_args.is_empty
+        then recurse(f_args)
+        elif this_node.parent
+            is BinOp | LogicAssign | LogicPredicate | LogicUnify
+        then
+            ifBreak(
+                group(indent(indent(softline, recurse(f_args)), softline)),
+                group(indent(softline, recurse(f_args)), softline),
+                groupId="name"
+            )
+        else group(indent(softline, recurse(f_args)), softline),
+        ")"
+    )
 }
 
 class LogicPropagate {
@@ -882,6 +905,26 @@ class LogicPropagate {
                 whitespace,
                 recurse(f_call)
             )
+}
+
+class LogicPropagateCall {
+    val node = group(
+        recurse(f_name),
+        "%",
+        "(",
+        if this_node.f_args.is_empty
+        then recurse(f_args)
+        elif this_node.parent
+            is BinOp | LogicAssign | LogicPredicate | LogicUnify
+        then
+            ifBreak(
+                group(indent(indent(softline, recurse(f_args)), softline)),
+                group(indent(softline, recurse(f_args)), softline),
+                groupId="name"
+            )
+        else group(indent(softline, recurse(f_args)), softline),
+        ")"
+    )
 }
 
 class LogicUnify {
