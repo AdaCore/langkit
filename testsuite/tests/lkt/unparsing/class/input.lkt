@@ -15,3 +15,15 @@ class C5: C1 implements T1 {
 
 class C6: C1[T1] implements T2 {
 }
+
+# The following used to be formatted as::
+#
+#   |" With documentation
+#   class C7: C1
+#       implements T2
+#   {
+#   }
+
+|" With documentation
+class C7: C1 implements T2 {
+}

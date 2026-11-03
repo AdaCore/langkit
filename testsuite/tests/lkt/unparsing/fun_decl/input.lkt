@@ -28,3 +28,16 @@ fun f10(): T implements T.m
 fun f11(): T implements T.m = 1
 
 fun f12(): T1[T2] implements T.m = 1
+
+fun f13(): T =
+match self {case _ => 0}
+
+fun f14(): T =
+{val v = 0; v + 1}
+
+fun f15(): T =
+[1, 2]
+
+fun f16(): T =
+[aaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbb, cccccccccccccccccccccccc,
+ddddddddddddddddd, eeeeeeeeeee]

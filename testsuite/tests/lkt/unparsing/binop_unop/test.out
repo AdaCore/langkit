@@ -2,8 +2,150 @@ val binop = a + b
 val or_nullcond = a or? b
 
 val long_binop_mix =
-    aaaaaaaaaaaaaa == bbbbbbbbbbbbbbbb and ccccccccccccc == ddddddddddddddd
+    aaaaaaaaaaaaaa == bbbbbbbbbbbbbbbb
+    and ccccccccccccc == ddddddddddddddd
     and eeeeeeeee == fffffff
+
+val very_long_binop_mix =
+    aaaaaaaaaaaaaa.bbbbbbbbbbbbbb.ccccccccccccc.dddddddddd
+        == eeeeeeeeeeeeeee.fffffffffffffff.ggggggggggggggg
+    and hhhhhhhhhhhhh.iiiiiiiiiiiiii.jjjjjjjjjjjj
+        == kkkkkkkkkkkkk.llllllllllllll.mmmmmmmmmmmmmmmm
+
+val very_long_binop_with_comments =
+    # Comment the first condition
+    aaaaaaaaaaaaaa.bbbbbbbbbbbbbb.ccccccccccccc.dddddddddd
+        == eeeeeeeeeeeeeee.fffffffffffffff.ggggggggggggggg
+
+    # Comment the second condition
+    and hhhhhhhhhhhhh.iiiiiiiiiiiiii.jjjjjjjjjjjj
+        == kkkkkkkkkkkkk.llllllllllllll.mmmmmmmmmmmmmmmm
+
+val precedence_stream_concat_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa :: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    ::: ccccccccccccccccccccccc :: ddddddddddddddddddddddddd
+val precedence_stream_concat_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    ::: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    ::: ccccccccccccccccccccccc
+
+val precedence_stream_cons_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa and bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    :: ccccccccccccccccccccccc and ddddddddddddddddddddddddd
+val precedence_stream_cons_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    :: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    :: ccccccccccccccccccccccc
+
+val precedence_or_int_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa == bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    or? ccccccccccccccccccccccc == ddddddddddddddddddddddddd
+val precedence_or_int_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    and bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    or? ccccccccccccccccccccccc
+val precedence_or_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa == bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    or ccccccccccccccccccccccc == ddddddddddddddddddddddddd
+val precedence_or_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    and bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    or ccccccccccccccccccccccc
+val precedence_and_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa == bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    and ccccccccccccccccccccccc == ddddddddddddddddddddddddd
+val precedence_and_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    or bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    and ccccccccccccccccccccccc
+val precedence_logic_and_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa == bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    %and ccccccccccccccccccccccc == ddddddddddddddddddddddddd
+val precedence_logic_and_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    or bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    %and ccccccccccccccccccccccc
+val precedence_logic_or_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa == bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    %or ccccccccccccccccccccccc == ddddddddddddddddddddddddd
+val precedence_logic_or_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    or bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    %or ccccccccccccccccccccccc
+
+val precedence_lte_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    <= ccccccccccccccccccccccc + ddddddddddddddddddddddddd
+val precedence_lte_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    == bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    <= ccccccccccccccccccccccc
+val precedence_lt_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    < ccccccccccccccccccccccc + ddddddddddddddddddddddddd
+val precedence_lt_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    == bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    < ccccccccccccccccccccccc
+val precedence_gte_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    >= ccccccccccccccccccccccc + ddddddddddddddddddddddddd
+val precedence_gte_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    == bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    >= ccccccccccccccccccccccc
+val precedence_gt_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    > ccccccccccccccccccccccc + ddddddddddddddddddddddddd
+val precedence_gt_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    == bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    > ccccccccccccccccccccccc
+val precedence_eq_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    == ccccccccccccccccccccccc + ddddddddddddddddddddddddd
+val precedence_eq_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    <= bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    == ccccccccccccccccccccccc
+val precedence_ne_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    != ccccccccccccccccccccccc + ddddddddddddddddddddddddd
+val precedence_ne_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    <= bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    != ccccccccccccccccccccccc
+
+val precedence_plus_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa * bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    + ccccccccccccccccccccccc * ddddddddddddddddddddddddd
+val precedence_plus_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    & bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    + ccccccccccccccccccccccc
+val precedence_minus_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa * bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    - ccccccccccccccccccccccc * ddddddddddddddddddddddddd
+val precedence_minus_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    & bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    - ccccccccccccccccccccccc
+val precedence_amp_0 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa * bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    & ccccccccccccccccccccccc * ddddddddddddddddddddddddd
+val precedence_amp_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    & ccccccccccccccccccccccc
+
+val precedence_mult_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    / bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    * ccccccccccccccccccccccc
+val precedence_div_1 =
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    * bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    / ccccccccccccccccccccccc
 
 val not_expr_1 = not a
 val not_expr_2 = not [].empty

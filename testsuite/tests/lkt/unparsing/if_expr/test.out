@@ -64,9 +64,81 @@ val v7 =
 val v8 =
     if a + b
     then
-        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
         + cccccccccccc
 
     elif a + b then abc
 
     else def
+
+val v9 =
+    if {
+        val result = cond_1;
+        result
+    }
+    then {
+        val result = expr_1;
+        result
+    }
+    elif {
+        val result = cond_2;
+        result
+    }
+    then {
+        val result = expr_3;
+        result
+    }
+    else {
+        val result = expr_2;
+        result
+    }
+
+val v10 =
+    if
+        # Comment condition 1
+        cond_1
+    then
+        # Comment then branch 1
+        expr_1
+    elif
+        # Comment condition 2
+        cond_2
+    then
+        # Comment then branch 2
+        expr_2
+    else
+        # Comment else branch
+        expr_3
+
+val v11 =
+    if
+    # Comment condition 1
+    {
+        val result = cond_1;
+        result
+    }
+    then
+    # Comment then branch 1
+    {
+        val result = expr_1;
+        result
+    }
+    elif
+    # Comment condition 2
+    {
+        val result = cond_2;
+        result
+    }
+    then
+    # Comment then branch 2
+    {
+        val result = expr_3;
+        result
+    }
+    else
+    # Comment else branch
+    {
+        val result = expr_2;
+        result
+    }

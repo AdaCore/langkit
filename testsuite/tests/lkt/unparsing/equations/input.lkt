@@ -11,6 +11,16 @@ aaaaaaaaaaaaaaaaaaaaa
 <- (bbbbbbbbbbbbbbbbbbbb.cccccccccccccccc.dddddddddddddddd)
 val assign4 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <-
 (dddddddddddd.eeeeeeeeeeeeeee.fffffffff)
+val assign5 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <-
+(dddddddddddd.eeeeeeeeeeeeeee.fffffffff)
+%and (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <-
+(dddddddddddd.eeeeeeeeeeeeeee.fffffffff)
+val assign6 = a <- b
+# Comment foo
+%and foo
+val assign7 = a <- [1, 2]
+val assign8 = a <- [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbbb,
+ccccccccccccccc]
 
 val propagate1 = a <- T.f%(b)
 val propagate2 = (aaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbb.cccccccccccccc)
@@ -23,6 +33,23 @@ T.f%(dddddddddddd.eeeeeeeeeeeeeee.fffffffff)
 val propagate5 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <- T.f%(
 dddddddddddd, eeeeeeeeeeeeeee, fffffffff, gggggggggggg, hhhhhhhhhhhhh,
 iiiiiiiiii)
+val propagate6 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <- T.f%(
+dddddddddddd, eeeeeeeeeeeeeee, fffffffff, gggggggggggg, hhhhhhhhhhhhh,
+iiiiiiiiii)
+%and (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <- T.f%(
+dddddddddddd, eeeeeeeeeeeeeee, fffffffff, gggggggggggg, hhhhhhhhhhhhh,
+iiiiiiiiii)
+val propagate7 = a <- T.f%(b)
+# Comment foo
+%and foo
+val propagate8 = aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc <- match self {
+case _ => ddddddddddddddddddd.eeeeeeeeeeeeeeeeeee.ffffffffff
+case _ => ggggggggggggggggggggg.hhhhhhhhhhhhhhhhh.iiiiiiiiiiiiiii
+}
+%and match self {
+case _ => ddddddddddddddddddd.eeeeeeeeeeeeeeeeeee.ffffffffff
+case _ => ggggggggggggggggggggg.hhhhhhhhhhhhhhhhh.iiiiiiiiiiiiiii
+}
 
 val unify1 = a <-> b
 val unify2 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <->
@@ -32,3 +59,10 @@ aaaaaaaaaaaaaaaaaaaaa
 <-> (bbbbbbbbbbbbbbbbbbbb.cccccccccccccccc.dddddddddddddddd)
 val unify4 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <->
 (dddddddddddd.eeeeeeeeeeeeeee.fffffffff)
+val unify5 = (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <->
+(dddddddddddd.eeeeeeeeeeeeeee.fffffffff)
+%and (aaaaaaaaaaa.bbbbbbbbbbb.cccccccccccccc) <->
+(dddddddddddd.eeeeeeeeeeeeeee.fffffffff)
+val unify6 = a <-> b
+# Comment foo
+%and foo

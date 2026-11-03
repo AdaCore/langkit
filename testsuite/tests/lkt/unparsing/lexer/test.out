@@ -36,7 +36,9 @@ lexer l2 {
     val p2 =
         p"aaaaaaaaaaaaaaaa" & p"bbbbbbbbbbbbbbbbbbbb" & p"ccccccccccccccccc"
     val p3 =
-        p"aaaaaaaaaaaaaaaa" & p"bbbbbbbbbbbbbbbbbbbb" & p"ccccccccccccccccc"
+        p"aaaaaaaaaaaaaaaa"
+        & p"bbbbbbbbbbbbbbbbbbbb"
+        & p"ccccccccccccccccc"
         & "ddddddddddddddddddddd"
 
     @text()

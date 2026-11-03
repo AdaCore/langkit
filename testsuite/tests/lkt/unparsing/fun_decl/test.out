@@ -1,7 +1,16 @@
 fun f1(): T = foo
 
 fun f2(): T =
-    foo1 + foo2 + foo3 + foo4 + foo5 + foo6 + foo7 + foo8 + foo9 + foo10
+    foo1
+    + foo2
+    + foo3
+    + foo4
+    + foo5
+    + foo6
+    + foo7
+    + foo8
+    + foo9
+    + foo10
     + foo11
 
 fun f3(a: Int): T = a + 1
@@ -44,3 +53,22 @@ fun f10(): T implements T.m
 fun f11(): T implements T.m = 1
 
 fun f12(): T1[T2] implements T.m = 1
+
+fun f13(): T = match self {
+    case _ => 0
+}
+
+fun f14(): T = {
+    val v = 0;
+    v + 1
+}
+
+fun f15(): T = [1, 2]
+
+fun f16(): T = [
+    aaaaaaaaaaaaaaaaaa,
+    bbbbbbbbbbbbbbb,
+    cccccccccccccccccccccccc,
+    ddddddddddddddddd,
+    eeeeeeeeeee
+]

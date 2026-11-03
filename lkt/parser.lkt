@@ -17,9 +17,7 @@ grammar lkt_grammar {
     )
     imported_names <- list+(
         ImportedName(
-            ImportedId(@Identifier)
-            /
-            ?pick(@Identifier("as") / def_id)
+            ImportedId(@Identifier) / ?pick(@Identifier("as") / def_id)
         ),
         ","
     )
@@ -81,9 +79,7 @@ grammar lkt_grammar {
         | GrammarDontSkip(
             grammar_expr "." @Identifier("dont_skip") "(" grammar_expr ")"
         )
-        | GrammarPredicate(
-            grammar_expr "|>" "when" "(" basic_name ")"
-        )
+        | GrammarPredicate(grammar_expr "|>" "when" "(" basic_name ")")
         | grammar_primary
     )
     grammar_pick <- GrammarPick(
@@ -108,7 +104,9 @@ grammar lkt_grammar {
         "or"
         "("
         list+(
-            list+(grammar_expr).dont_skip("|"), "|", allow_leading
+            list+(grammar_expr).dont_skip("|"),
+            "|",
+            allow_leading
         ).dont_skip(")")
         ")"
     )
@@ -123,11 +121,7 @@ grammar lkt_grammar {
     )
     token_pattern_literal <- TokenPatternLit(@PString)
     parse_node_expr <- ParseNodeExpr(
-        type_ref
-        "("
-        /
-        list*(grammar_expr).dont_skip(")")
-        ")"
+        type_ref "(" / list*(grammar_expr).dont_skip(")") ")"
     )
     grammar_rule_ref <- GrammarRuleRef(ref_id)
     grammar_list_expr <- GrammarList(
@@ -223,10 +217,7 @@ grammar lkt_grammar {
         doc
         list*(decl_annotation)
         or(
-            | GenericParamTypeDecl(
-                def_id
-                ?pick("implements" / type_list)
-            )
+            | GenericParamTypeDecl(def_id ?pick("implements" / type_list))
             | GenericClassParamTypeDecl(
                 "class"
                 def_id
@@ -257,11 +248,7 @@ grammar lkt_grammar {
     fun_param_list <- list*(fun_param_decl, ",")
     lambda_param_list <- list*(lambda_param_decl, ",")
     field_decl <- FieldDecl(
-        def_id
-        ":"
-        type_ref
-        ?pick("implements" type_member_ref)
-        ?pick("=" expr)
+        def_id ":" type_ref ?pick("implements" type_member_ref) ?pick("=" expr)
     )
     lexer_family_decl <- LexerFamilyDecl(
         @Identifier("family") / def_id "{" list*(decl).dont_skip("}") "}"
@@ -281,10 +268,12 @@ grammar lkt_grammar {
         | skip(ErrorDecl)
     )
     decl <- FullDecl(doc list*(decl_annotation) bare_decl)
-    type_member_ref <- DotExpr(type_ref_id null(NullCondQualifier)"." / ref_id)
+    type_member_ref <- DotExpr(
+        type_ref_id null(NullCondQualifier) "." / ref_id
+    )
     type_expr <- or(
-        | DotExpr(module_id null(NullCondQualifier)"." / type_ref_id)
-        | DotExpr(type_expr null(NullCondQualifier)"." / type_ref_id)
+        | DotExpr(module_id null(NullCondQualifier) "." / type_ref_id)
+        | DotExpr(type_expr null(NullCondQualifier) "." / type_ref_id)
         | type_ref_id
     )
     type_ref <- or(
@@ -318,35 +307,35 @@ grammar lkt_grammar {
         | OrPattern(ScopedPattern(neg_pattern) "|" ScopedPattern(pattern))
         | neg_pattern
     )
-    neg_pattern <- or(
-        | NotPattern("not" neg_pattern)
-        | complex_pattern
-    )
+    neg_pattern <- or(NotPattern("not" neg_pattern) | complex_pattern)
     pattern_binding <- BindingValDecl(def_id)
     complex_pattern <- or(
         | ComplexPattern(
-                null(BindingValDecl)
-                value_pattern
-                ?pick("(" / list+(pattern_arg, ",") ")")
-                ?pick("when" expr)
+            null(BindingValDecl)
+            value_pattern
+            ?pick("(" / list+(pattern_arg, ",") ")")
+            ?pick("when" expr)
         )
         | ComplexPattern(
-                ?pick(pattern_binding "@")
-                value_pattern
-                ?pick("(" / list+(pattern_arg, ",") ")")
-                ?pick("when" expr)
+            ?pick(pattern_binding "@")
+            value_pattern
+            ?pick("(" / list+(pattern_arg, ",") ")")
+            ?pick("when" expr)
         )
         | ComplexPattern(
-                ?pick(pattern_binding "@")
-                AnyTypePattern("*")
-                "(" / list+(pattern_arg, ",") ")"
-                ?pick("when" expr)
+            ?pick(pattern_binding "@")
+            AnyTypePattern("*")
+            "("
+            /
+            list+(pattern_arg, ",")
+            ")"
+            ?pick("when" expr)
         )
         | RenamingComplexPattern(
-                pattern_binding
-                null(Pattern)
-                null(ASTList[PatternDetail])
-                ?pick("when" expr)
+            pattern_binding
+            null(Pattern)
+            null(ASTList[PatternDetail])
+            ?pick("when" expr)
         )
     )
     value_pattern <- or(
@@ -374,9 +363,7 @@ grammar lkt_grammar {
     )
     pattern_arg <- or(
         | FieldPatternDetail(ref_id ":" / pattern)
-        | PropertyPatternDetail(
-            CallExpr(ref_id "(" / args ")") ":" / pattern
-        )
+        | PropertyPatternDetail(CallExpr(ref_id "(" / args ")") ":" / pattern)
         | DestructuringPatternDetail(pattern_binding)
     )
     expr <- or(
@@ -438,18 +425,24 @@ grammar lkt_grammar {
         | primary
     )
     logic_propagate_call <- LogicPropagateCall(callable_ref "%" "(" args ")")
-    primary <- or(| lambda_expr | if_expr | raise_expr | try_expr | basic_expr)
+    primary <- or(lambda_expr | if_expr | raise_expr | try_expr | basic_expr)
     match_expr <- MatchExpr(
         "match"
         /
         expr
         "{"
-        list+(or(
-            | PatternMatchBranch("case" pattern "=>" / expr)
-            | MatchBranch(
-                "case" MatchValDecl(def_id ?pick(":" / type_ref)) "=>" / expr
+        list+(
+            or(
+                | PatternMatchBranch("case" pattern "=>" / expr)
+                | MatchBranch(
+                    "case"
+                    MatchValDecl(def_id ?pick(":" / type_ref))
+                    "=>"
+                    /
+                    expr
+                )
             )
-        ))
+        )
         "}"
     )
     num_lit <- NumLit(@Number)
@@ -479,7 +472,8 @@ grammar lkt_grammar {
         "[" / list*(expr, ",") "]" ?pick(":" / type_ref)
     )
     callable_ref <- or(
-        DotExpr(callable_ref null(NullCondQualifier) "." ref_id) | ref_id
+        DotExpr(callable_ref null(NullCondQualifier) "." ref_id)
+        | ref_id
     )
     null_cond_qual <- NullCondQualifier("?")
     basic_expr <- or(
@@ -521,7 +515,8 @@ grammar lkt_grammar {
         | array_literal
     )
     basic_name <- or(
-        DotExpr(basic_name null(NullCondQualifier) "." / ref_id) | ref_id
+        DotExpr(basic_name null(NullCondQualifier) "." / ref_id)
+        | ref_id
     )
     lambda_expr <- LambdaExpr(
         "(" lambda_param_list ")" ?pick(":" type_ref) "=>" / expr
@@ -532,9 +527,6 @@ grammar lkt_grammar {
     decl_annotation_args <- ?DeclAnnotationArgs("(" args ")")
     decl_annotation <- DeclAnnotation("@" / id decl_annotation_args)
     query_comprehension <- Query(
-        "from" expr
-        "match" pattern
-        ?pick("select" expr)
-        ?pick("if" expr)
+        "from" expr "match" pattern ?pick("select" expr) ?pick("if" expr)
     )
 }
