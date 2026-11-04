@@ -557,7 +557,10 @@ class Decl: LktNode implements DeclarationInterface {
                         )
                         .do(
                             (arr) =>
-                                arr.at(0)?.imprecise_common_ancestor_list(arr)
+                                arr.at(0)?.common_ancestor_list(
+                                    arr,
+                                    imprecise=true
+                                )
                         )
                 )
             )
@@ -2071,20 +2074,27 @@ class TypeDecl: Decl implements TypeInterface {
                     )
             )
 
-    |" Return the nearest common ancestor of ``self`` and ``other_types``,
-    |" ignoring any type that does not share a common ancestor with the rest of
-    |" the types.
-    fun imprecise_common_ancestor_list(
-        other_types: Array[Entity[TypeDecl]]
+    |" Return the nearest common ancestor of ``self`` and ``other_types``.
+    |"
+    |" If no common ancestor exists for all types, the behavior depends on
+    |" ``imprecise``:
+    |" - If true, return the common ancestor of the lowest-indexed types that
+    |" share a common ancestor.
+    |" - If false, return null.
+    fun common_ancestor_list(
+        other_types: Array[Entity[TypeDecl]],
+        imprecise: Bool = false
     ): Entity[TypeDecl] =
         if other_types.length() == 0 then self
 
         elif self.is_null
         then
-            other_types.find((t) => not t.is_null)
-            ?.imprecise_common_ancestor_list(other_types)
+            other_types.find((t) => not t.is_null)?.common_ancestor_list(
+                other_types,
+                imprecise
+            )
 
-        else self.common_ancestor_helper(other_types, 0, true)
+        else self.common_ancestor_helper(other_types, 0, imprecise)
 
     |" Return true if Self and other are matching type that can be permuted.
     @predicate_error("expected $Self, got $other")
@@ -2283,8 +2293,9 @@ class TypeDecl: Decl implements TypeInterface {
     fun make_stream_of_common_ancestor(
         other_type: Entity[TypeDecl]
     ): Entity[TypeDecl] =
-        self?.get_indexable_content_type()?.imprecise_common_ancestor_list(
-            [other_type]
+        self?.get_indexable_content_type()?.common_ancestor_list(
+            [other_type],
+            imprecise=true
         )
         ?.make_stream_type()
 
@@ -3554,11 +3565,12 @@ class AnyOf: Expr {
                 %and self.actual_type_var <- self.bool_type()
             )
             %and self.expr.expected_type_var
-                <- TypeDecl.imprecise_common_ancestor_list%(
+                <- TypeDecl.common_ancestor_list%(
                     ([self.expr] & self.values.as_array()).filtermap(
                         (e) => e.actual_type_var,
                         (e) => e.has_context_free_type()
-                    )
+                    ),
+                    true
                 )
         )
         %and self.values.logic_all(
@@ -3604,7 +3616,7 @@ class ArrayLiteral: Expr {
         if logic_vars.length() != 0
         then
             self.expected_exprs_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.common_ancestor_list%(logic_vars, true)
         elif self.xref_entry_point()
         then
             self.expected_exprs_type_var
@@ -3630,8 +3642,9 @@ class ArrayLiteral: Expr {
                     }
                 else
                     self.actual_element_type
-                    <- TypeDecl.imprecise_common_ancestor_list%(
-                        self.exprs.map((expr) => expr.actual_type_var)
+                    <- TypeDecl.common_ancestor_list%(
+                        self.exprs.map((expr) => expr.actual_type_var),
+                        true
                     )
             else
                 self.actual_element_type <- self.element_type.referenced_decl()
@@ -4285,8 +4298,12 @@ class BinOp: Expr {
             elif self.op is Op.OrInt
             then
                 self.actual_type_var
-                    <- TypeDecl.imprecise_common_ancestor_list%(
-                        [self.left.actual_type_var, self.right.actual_type_var]
+                    <- TypeDecl.common_ancestor_list%(
+                        [
+                            self.left.actual_type_var,
+                            self.right.actual_type_var
+                        ],
+                        true
                     )
                 %and full_propagation
                 %and check_right_type
@@ -4969,7 +4986,7 @@ class IfExpr: Expr {
         # Assign the common ancestor type for all branches to our "branch
         # merge" variable.
         self.expected_branch_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.common_ancestor_list%(logic_vars, true)
 
         # Unify our "branch merge" variable with expected types for all branch
         # expressions.
@@ -5022,8 +5039,9 @@ class IfExpr: Expr {
 
         # Set the type of the IfExpr
         %and self.actual_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(
-                self.branch_exprs().map((e) => e.actual_type_var)
+            <- TypeDecl.common_ancestor_list%(
+                self.branch_exprs().map((e) => e.actual_type_var),
+                true
             )
 }
 
@@ -5490,7 +5508,7 @@ class MatchExpr: Expr {
             or? [self.expected_type_var];
 
         self.expected_branch_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.common_ancestor_list%(logic_vars, true)
         %and self.branches.logic_all(
             (b) => b.expr.expected_type_var <-> self.expected_branch_type_var
         )
@@ -5512,8 +5530,9 @@ class MatchExpr: Expr {
             )
         )
         %and self.actual_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(
-                self.branch_exprs().map((e) => e.actual_type_var)
+            <- TypeDecl.common_ancestor_list%(
+                self.branch_exprs().map((e) => e.actual_type_var),
+                true
             )
 }
 
@@ -5662,7 +5681,7 @@ class TryExpr: Expr {
             or? [self.expected_type_var];
 
         self.expected_expr_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.common_ancestor_list%(logic_vars, true)
         %and self.exprs().logic_all(
             (e) => e.expected_type_var <-> self.expected_expr_type_var
         )
@@ -5687,8 +5706,9 @@ class TryExpr: Expr {
             )
         )
         %and self.actual_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(
-                self.exprs().map((e) => e.actual_type_var)
+            <- TypeDecl.common_ancestor_list%(
+                self.exprs().map((e) => e.actual_type_var),
+                true
             )
 
     fun has_context_free_type(): Bool = false
