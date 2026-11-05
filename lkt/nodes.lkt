@@ -2063,15 +2063,19 @@ class TypeDecl: Decl implements TypeInterface {
         then self.common_ancestor(other_types.at(idx), imprecise)
         else
             other_types.at(idx).do(
-                (t) =>
-                    t.common_ancestor(
+                (t) => {
+                    val tail_ancestor =
                         self.common_ancestor_helper(
                             other_types,
                             idx + 1,
                             imprecise
-                        ),
-                        imprecise
-                    )
+                        );
+                    if tail_ancestor.is_null and not imprecise
+                    then
+                        # Bubble-up null results if `imprecise` is false
+                        null[Entity[TypeDecl]]
+                    else t.common_ancestor(tail_ancestor, imprecise)
+                }
             )
 
     |" Return the nearest common ancestor of ``self`` and ``other_types``.
