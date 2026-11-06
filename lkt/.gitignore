@@ -5,3 +5,4 @@ bootstrap/obj
 bootstrap/ocaml
 bootstrap/scripts
 bootstrap/src-mains
+lktformat/obj

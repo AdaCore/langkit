@@ -25,6 +25,7 @@ import drivers.lkt_compile_driver
 import drivers.lkt_parse_driver
 import drivers.lkt_toolbox_driver
 import drivers.lkt_unparse_driver
+import drivers.lktformat_driver
 import drivers.python_driver
 from drivers.vscode_ext_generate_driver import VSCodeExtGenerateDriver
 
@@ -53,6 +54,7 @@ class LangkitTestsuite(Testsuite):
         "lkt_compile": drivers.lkt_compile_driver.LktCompileDriver,
         "lkt_parse": drivers.lkt_parse_driver.LktParseDriver,
         "lkt_unparse": drivers.lkt_unparse_driver.LktUnparseDriver,
+        "lktformat": drivers.lktformat_driver.LktformatDriver,
         "python": drivers.python_driver.PythonDriver,
         "vscode_ext_generate": VSCodeExtGenerateDriver,
     }

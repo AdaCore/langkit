@@ -22,7 +22,6 @@ pragma Warnings (On, "internal");
 
 with GNAT.Regpat;
 
-with GNATCOLL.Iconv;
 with GNATCOLL.Opt_Parse;
 with Prettier_Ada.Documents.Json;
 
@@ -3105,11 +3104,6 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       function Convert (Arg : String) return Sloc_Specifier;
 
-      procedure Write_Encoded
-        (Content : Unbounded_String; Output : File_Type; Charset : String);
-      --  Transcode the UTF-8-encoded Content to Charset and write the result
-      --  to Output.
-
       function Process_One_File (Filename : String) return Lk_Unit;
       --  Run the unparser on the given source file and return the anlysis unit
       --  used to reformat it.
@@ -3153,79 +3147,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                                     (Arg (Matches (4).First
                                           ..  Matches (4).Last))));
       end Convert;
-
-      -------------------
-      -- Write_Encoded --
-      -------------------
-
-      procedure Write_Encoded
-        (Content : Unbounded_String; Output : File_Type; Charset : String)
-      is
-         use Ada.Strings.Unbounded.Aux;
-
-         Content_Buffer      : Big_String_Access;
-         Content_Buffer_Last : Natural;
-      begin
-         --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
-         --  them here.
-
-         if Content = Null_Unbounded_String then
-            return;
-         end if;
-
-         --  To avoid overflowing the secondary stack with big sources, use the
-         --  internal Ada.Strings.Wide_Wide_Unbounded.Aux.Get_String API to
-         --  access the reformatted source string.
-
-         Get_String (Content, Content_Buffer, Content_Buffer_Last);
-
-         --  Transcode Content_Buffer from UTF-8 (the encoding for Prettier's
-         --  output) to the same charset as the original source file. Use
-         --  GNATCOLL.Iconv to achieve that and a 4096-bytes long transcoding
-         --  buffer (work in chunks).
-
-         declare
-            use GNATCOLL.Iconv;
-
-            State  : Iconv_T;
-            Status : Iconv_Result := Full_Buffer;
-
-            Inbuf       : String renames
-              Content_Buffer.all (1 ..  Content_Buffer_Last);
-            Input_Index : Positive := Inbuf'First;
-
-            Outbuf       : String (1 .. 4096);
-            Output_Index : Positive := Outbuf'First;
-         begin
-            --  This should never raise an Unsupported_Conversion exception
-            --  since, if we got here, we managed to successfully parse a
-            --  source file using Charset.Get.
-
-            State := Iconv_Open (To_Code => Charset, From_Code => "utf-8");
-
-            while Status /= GNATCOLL.Iconv.Success loop
-               Iconv (State, Inbuf, Input_Index, Outbuf, Output_Index, Status);
-               case Status is
-                  when Invalid_Multibyte_Sequence
-                     | Incomplete_Multibyte_Sequence
-                  =>
-
-                     --  All codepoints in Content are supposed to come from
-                     --  the source file, which was decoded using Charset, so
-                     --  we should never have any trouble re-encoding these
-                     --  codepoints.
-
-                     raise Program_Error;
-
-                  when GNATCOLL.Iconv.Success | Full_Buffer =>
-                     Put (Output, Outbuf (Outbuf'First .. Output_Index - 1));
-                     Output_Index := Outbuf'First;
-               end case;
-            end loop;
-
-            Iconv_Close (State);
-         end;
-      end Write_Encoded;
 
       Parser : Argument_Parser := Create_Argument_Parser
         (Help => "Pretty-print a source file");
@@ -3506,13 +3427,21 @@ package body Langkit_Support.Generic_API.Unparsing is
 
             --  Finally, write the formatted source code on the standard output
             --  or on the requested output file.
+            --
+            --  Transcode Formatted from UTF-8 (the encoding for Prettier's
+            --  output) to the same charset as the original source file.
+            --
+            --  Calls to Write_Encoded should never raise GNATCOLL.Iconv
+            --  exceptions since, if we got here, we managed to successfully
+            --  parse the source file using Charset.Get.
 
             if Length (Output_Filename.Get) > 0 then
                Create (F, Name => To_String (Output_Filename.Get));
-               Write_Encoded (Formatted, F, Unit.Charset);
+               Write_Encoded (F, Formatted, "utf-8", Unit.Charset);
                Close (F);
             else
-               Write_Encoded (Formatted, Standard_Output, Unit.Charset);
+               Write_Encoded
+                 (Standard_Output, Formatted, "utf-8", Unit.Charset);
             end if;
             return Unit;
          end;

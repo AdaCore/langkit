@@ -1,0 +1,42 @@
+with "liblktlang";
+
+project Lktformat is
+   type Build_Mode_Type is ("dev", "prod");
+   Build_Mode : Build_Mode_Type :=
+     external ("LKTFORMAT_BUILD_MODE", external ("BUILD_MODE", "dev"));
+
+   type Library_Kind_Type is ("static", "relocatable", "static-pic");
+   Library_Kind_Param : Library_Kind_Type := external
+     ("LKTFORMAT_LIBRARY_TYPE", external ("LIBRARY_TYPE", "static"));
+
+   for Languages use ("Ada");
+   for Source_Dirs use ("src");
+   for Main use ("lktformat.adb");
+   for Object_Dir use "obj/" & Build_Mode;
+
+   Common_Ada_Cargs := ("-gnatwa", "-gnatyg", "-fPIC", "-gnat2022");
+
+   package Compiler is
+      case Build_Mode is
+         when "dev" =>
+            for Default_Switches ("Ada") use
+               Common_Ada_Cargs & ("-g", "-O0", "-gnatwe", "-gnata");
+
+         when "prod" =>
+            --  Debug information is useful even with optimization for
+            --  profiling, for instance.
+            for Default_Switches ("Ada") use
+               Common_Ada_Cargs & ("-g", "-Ofast");
+      end case;
+   end Compiler;
+
+   package Binder is
+      case Build_Mode is
+         when "dev" =>
+            for Switches ("Ada") use ("-Es");
+         when "prod" =>
+            for Switches ("Ada") use ("-E");
+      end case;
+   end Binder;
+
+end Lktformat;

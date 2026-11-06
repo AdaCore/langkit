@@ -1,0 +1,7 @@
+description: |
+  Check that, when a Lkt source file cannot be parsed (here: bar.lkt), it is
+  left unmodified, correctly reported, and the other source files are
+  reformatted regardless.
+driver: lktformat
+argv: [foo.lkt, bar.lkt, qux.lkt]
+expected_status_code: 1
