@@ -964,6 +964,7 @@ public final class BindingsTests {
             System.out.println("  Kind: " + nodeType.kind());
             System.out.println("  Is token node: " + nodeType.isTokenNode());
             System.out.println("  Is list node: " + nodeType.isListNode());
+            System.out.println("  Docstring: " + nodeType.doc());
             System.out.println(
                 "  Parsing fields: " + Arrays.toString(nodeType.fields())
             );
@@ -985,7 +986,8 @@ public final class BindingsTests {
                 var fieldName = fieldEntry.getKey();
                 var field = fieldEntry.getValue();
                 System.out.println("  - Name: " + fieldName);
-                System.out.println("  - Is nullable: " + field.isNullable());
+                System.out.println("    Docstring: " + field.doc());
+                System.out.println("    Is nullable: " + field.isNullable());
                 System.out.println(
                     "    Member reference: " + field.memberRef()
                 );
@@ -1022,19 +1024,20 @@ public final class BindingsTests {
             System.out.println(
                 "- Struct: " + structType.clazz().getSimpleName()
             );
+            System.out.println("  Docstring: " + structType.doc());
             System.out.println("  Is public: " + structType.isPublic());
-            System.out.println(
-                "  Fields: " + structType.fields()
-                    .stream()
-                    .map(
-                        p -> p.name() +
-                        ": " +
-                        p.type().getSimpleName() +
-                        " = " +
-                        p.defaultValue().map(BindingsTests::toString)
-                    )
-                    .toList()
-            );
+            System.out.println("  Fields:");
+            for (var fieldEntry : structType.fields()) {
+                System.out.println("  - Name: " + fieldEntry.name());
+                System.out.println(
+                    "    Type: " + fieldEntry.type().getSimpleName()
+                );
+                System.out.println(
+                    "    Default value: "
+                    + fieldEntry.defaultValue().map(BindingsTests::toString)
+                );
+                System.out.println("    Docstring: " + fieldEntry.doc());
+            }
         }
 
         // Show all enum reflection information
@@ -1048,6 +1051,7 @@ public final class BindingsTests {
         ) {
             var enumType = enumEntry.getValue();
             System.out.println("- Enum: " + enumType.clazz().getSimpleName());
+            System.out.println("  Docstring: " + enumType.doc());
             System.out.println(
                 "  Values: " + enumType.values()
                     .stream()

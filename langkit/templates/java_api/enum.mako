@@ -22,6 +22,7 @@
         public static final LangkitSupport.Reflection.Enum description =
             new LangkitSupport.Reflection.Enum(
                 ${java_type}.class,
+                ${api.format_doc_arg(cls)},
                 new ArrayList<>()
             );
 

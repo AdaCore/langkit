@@ -166,6 +166,7 @@
                 ${"true" if cls.is_list_type else "false"},
                 ${java_type}.class,
                 "${java_type}",
+                ${api.format_doc_arg(cls)},
                 new String[] {
                     ${",".join([f'"{name}"' for name in field_names])}
                 },
@@ -219,6 +220,7 @@
                     description.fieldDescriptions().put(
                         "${method.native_name}",
                         new LangkitSupport.Reflection.Field(
+                            ${api.format_doc_arg(field)},
                             method,
                             parameters,
                             MemberReference.${member_ref_name},

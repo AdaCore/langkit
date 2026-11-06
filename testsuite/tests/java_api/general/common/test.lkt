@@ -13,10 +13,12 @@ grammar foo_grammar {
     string <- StringLiteral(@String)
 }
 
+|" A primary color.
 enum Color {
     case red, green, blue
 }
 
+|" The base of all nodes of the ``foo`` language.
 @abstract
 @with_abstract_list
 class FooNode implements Node[FooNode] {
@@ -30,6 +32,7 @@ class FooNode implements Node[FooNode] {
             )
         )
 
+    |" Get the length of the provided array as an integer.
     @exported
     fun count(seq: Array[Entity[Example]]): Int = seq.length()
 
@@ -149,6 +152,7 @@ class StringLiteral: FooNode {
 }
 
 class Var: FooNode {
+    |" The argument sequence of this argument variable declaration.
     @parse_field arg: Sequence
 }
 
@@ -164,7 +168,9 @@ struct Metadata {
     eq_ignored: Bool
 }
 
+|" A structure type that contains an entity.
 struct FooNodeStruct {
+    |" Some arbitrary entity.
     node: Entity[FooNode]
 }
 

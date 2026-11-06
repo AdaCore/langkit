@@ -540,8 +540,8 @@ class AbstractNodeData:
             provided, this overrides the default code generation of
             ``EvalMemberExpr``.
 
-        :param final: If True, this field/property cannot be overriden. This is
-            possible only for concrete fields/properties.
+        :param final: If True, this field/property cannot be overridden. This
+            is possible only for concrete fields/properties.
 
         :param implements: If provided, callback that returns the generic
             interface method that this member implements.
@@ -624,7 +624,7 @@ class AbstractNodeData:
     @property
     def is_overriding(self) -> bool:
         """
-        Return whether this field overrides an inheritted one in a base class.
+        Return whether this field overrides an inherited one in a base class.
         """
         return self.base is not None
 
