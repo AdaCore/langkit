@@ -310,10 +310,6 @@ test.lkt:28:32-28:34: error: Int does not implement the Iterable[T] trait
  28 | val not_iterable_source = from 42 match 1
     |                                ^^ 
 
-test.lkt:28:5-28:24: error: could not determine type
- 28 | val not_iterable_source = from 42 match 1
-    |     ^^^^^^^^^^^^^^^^^^^ 
-
 Decl <ValDecl "not_iterable_source" test.lkt:28:1-28:42>
      has_type None
 

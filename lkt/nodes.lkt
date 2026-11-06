@@ -557,7 +557,10 @@ class Decl: LktNode implements DeclarationInterface {
                         )
                         .do(
                             (arr) =>
-                                arr.at(0)?.imprecise_common_ancestor_list(arr)
+                                arr.at(0)?.common_ancestor_list(
+                                    arr,
+                                    imprecise=true
+                                )
                         )
                 )
             )
@@ -615,10 +618,7 @@ class Decl: LktNode implements DeclarationInterface {
                         # entity of the function's owning type.
                         FunctionType(
                             params=(
-                                node.entity_type()
-                                    .instantiate_generic_type_decl(
-                                        [td.owning_type().as_entity]
-                                    )
+                                td.owning_type().as_entity.make_entity_type()
                                     .singleton()
                                 & ft.params
                             ),
@@ -663,10 +663,7 @@ class Decl: LktNode implements DeclarationInterface {
                 case bvd: BindingValDecl =>
                     match bvd.parent {
                         case p: BindingPattern => p.get_output_type()
-                        case p: PropertyPatternDetail =>
-                            p.referenced_decl()?.get_type()
-                        case p: DestructuringPatternDetail =>
-                            p.referenced_decl()?.get_type()
+                        case d: DestructuringPatternDetail => d.get_type()
                         case _ =>
                             raise[Entity[TypeDecl]] PropertyError(
                                 "Invalid parsing tree"
@@ -685,10 +682,7 @@ class Decl: LktNode implements DeclarationInterface {
                 case etd: ExplicitlyTypedDecl =>
                     etd.decl_type.referenced_decl()
                 case gd: GenericDecl => gd.decl.get_type()
-                case sd: SelfDecl =>
-                    self.entity_type().instantiate_generic_type_decl(
-                        [sd.owning_type()]
-                    )
+                case sd: SelfDecl => sd.owning_type()?.make_entity_type()
                 case nd: NodeDecl => nd.owning_type()
                 case _ => null[Entity[TypeDecl]]
             }
@@ -705,7 +699,7 @@ class Decl: LktNode implements DeclarationInterface {
             not (cast_to.is_null or self.is_null)
             and node == node.entity_type().node
             and cast_to.node != node.entity_type().node
-        then node.entity_type().instantiate_generic_type_decl([cast_to])
+        then cast_to.make_entity_type()
         else cast_to
 
     |" Return the type of ``E.keep[T]`` when ``keep_type`` materializes the
@@ -727,7 +721,7 @@ class Decl: LktNode implements DeclarationInterface {
                     )
                 )
                 and keep_type.node != node.entity_type().node
-            then node.entity_type().instantiate_generic_type_decl([keep_type])
+            then keep_type.make_entity_type()
             else keep_type;
 
         elt_type?.make_array_type()
@@ -743,9 +737,9 @@ class Decl: LktNode implements DeclarationInterface {
 
         elif
             not prefix_type.is_null
-            and prefix_type.node == node.entity_type().node
-            and self.full_decl()?.has_annotation(s"parse_field")
-        then node.entity_type().instantiate_generic_type_decl([suffix_type])
+            and prefix_type.is_entity_type()
+            and self.is_parse_field()
+        then suffix_type?.make_entity_type()
 
         # If we are accessing a lazy field through a type, or a @property
         # annotated function, consider it as a reference to a property-like
@@ -765,6 +759,11 @@ class Decl: LktNode implements DeclarationInterface {
 
         else suffix_type
     }
+
+    |" Return whether this field is a node parse field (is annotated with
+    |" ``@parse_field``).
+    fun is_parse_field(): Bool =
+        self.full_decl()?.has_annotation(s"parse_field")
 
     |" Return the declaration that ``E.M`` references when ``self`` is the type
     |" of ``E`` and ``current_name`` is the member reference ``M``.
@@ -902,10 +901,9 @@ class Decl: LktNode implements DeclarationInterface {
                         ResolvedParam(
                                 name=s"var",
                                 param_type=(
-                                    node.entity_type()
-                                    .instantiate_generic_type_decl(
-                                        [fd.owning_type().as_entity]
-                                    )
+                                    fd.owning_type()
+                                    .as_entity
+                                    .make_entity_type()
                                 ),
                                 has_default_value=false,
                                 decl=SynthParamDecl().as_entity
@@ -975,7 +973,7 @@ class Decl: LktNode implements DeclarationInterface {
             )
 
     |" Check that the parent GenericDecl has nb_types parameter types
-    @predicate_error("Incorrect number of parameter types")
+    @predicate_error("incorrect number of parameter types")
     fun has_correct_type_arg_number(nb_types: Int): Bool =
         self.is_null
         or match self.parent {
@@ -1984,17 +1982,28 @@ class TypeDecl: Decl implements TypeInterface {
     fun is_int_type(): Bool =
         (self.is_null or self == self.int_type()) or self == self.bigint_type()
 
+    |" Return whether ``self`` is a node type, or is null.
+    fun is_node_type(): Bool =
+        self.is_null
+        or self.is_subtype(self.node_env.get_first(s"RootNode__").as[TypeDecl])
+
+    |" Return whether the type is an instantiation of the ``Entity`` type.
+    fun is_entity_type(): Bool =
+        self.is_null or node == self.entity_type().node
+
     @predicate_error(
         "expression must be of type Int, BigInt or Node, got $Self"
     )
-    fun is_int_or_node(): Bool =
-        self.is_null
-        or self.is_int_type()
-        or self.is_subtype(self.node_env.get_first(s"RootNode__").as[TypeDecl])
+    fun is_int_or_node(): Bool = self.is_int_type() or self.is_node_type()
 
     @predicate_error("expression must be a stream, got $Self")
     fun is_stream(): Bool =
         self.is_null or self.node == self.stream_type().node
+
+    @predicate_error("$Self and $other have no common ancestor")
+    fun have_common_ancestor(other: Entity[TypeDecl]): Bool =
+        self.is_null
+        or not self.common_ancestor(other, imprecise=false).is_null
 
     |" Helper for the ``get_*_type`` methods below: if ``self`` is an
     |" instantiation of ``gen_type``, return the type with which it was
@@ -2044,9 +2053,7 @@ class TypeDecl: Decl implements TypeInterface {
         node.is_null
         or not (node is ClassDecl)
         or rhs.is_null
-        or rhs.is_subtype(
-            self.entity_type().instantiate_generic_type_decl([self])
-        )
+        or rhs.is_subtype(self.make_entity_type())
 
     |" Wrapper around ``TypeDecl.common_ancestor`` that returns the nearest
     |" common ancestor for ``self`` and all types for the ``other_types`` slice
@@ -2062,31 +2069,42 @@ class TypeDecl: Decl implements TypeInterface {
         then self.common_ancestor(other_types.at(idx), imprecise)
         else
             other_types.at(idx).do(
-                (t) =>
-                    t.common_ancestor(
+                (t) => {
+                    val tail_ancestor =
                         self.common_ancestor_helper(
                             other_types,
                             idx + 1,
                             imprecise
-                        ),
-                        imprecise
-                    )
+                        );
+                    if tail_ancestor.is_null and not imprecise
+                    then
+                        # Bubble-up null results if `imprecise` is false
+                        null[Entity[TypeDecl]]
+                    else t.common_ancestor(tail_ancestor, imprecise)
+                }
             )
 
-    |" Return the nearest common ancestor of ``self`` and ``other_types``,
-    |" ignoring any type that does not share a common ancestor with the rest of
-    |" the types.
-    fun imprecise_common_ancestor_list(
-        other_types: Array[Entity[TypeDecl]]
+    |" Return the nearest common ancestor of ``self`` and ``other_types``.
+    |"
+    |" If no common ancestor exists for all types, the behavior depends on
+    |" ``imprecise``:
+    |" - If true, return the common ancestor of the lowest-indexed types that
+    |" share a common ancestor.
+    |" - If false, return null.
+    fun common_ancestor_list(
+        other_types: Array[Entity[TypeDecl]],
+        imprecise: Bool = false
     ): Entity[TypeDecl] =
         if other_types.length() == 0 then self
 
         elif self.is_null
         then
-            other_types.find((t) => not t.is_null)
-            ?.imprecise_common_ancestor_list(other_types)
+            other_types.find((t) => not t.is_null)?.common_ancestor_list(
+                other_types,
+                imprecise
+            )
 
-        else self.common_ancestor_helper(other_types, 0, true)
+        else self.common_ancestor_helper(other_types, 0, imprecise)
 
     |" Return true if Self and other are matching type that can be permuted.
     @predicate_error("expected $Self, got $other")
@@ -2242,6 +2260,24 @@ class TypeDecl: Decl implements TypeInterface {
         )
     }
 
+    @predicate_error(
+        "pattern accepts values of type $output_type, but the matched"
+        & " expression is of type $Self"
+    )
+    fun is_valid_pattern_input(output_type: Entity[TypeDecl]): Bool =
+        self.is_null or self.commutative_matching_type(output_type)
+
+    @predicate_error(
+        "cannot construct heterogenous list pattern, expecting $Self, got"
+        & " $sub_pattern_type"
+    )
+    fun is_list_pattern_homogeneous(sub_pattern_type: Entity[TypeDecl]): Bool =
+        self.is_null
+        or self.commutative_matching_type(
+            sub_pattern_type,
+            allow_common_ancestor=true
+        )
+
     |" Return the return type of the FunctionType.
     fun get_return_type(): Entity[TypeDecl] =
         self.as[FunctionType]?.return_type
@@ -2272,6 +2308,12 @@ class TypeDecl: Decl implements TypeInterface {
     fun make_stream_type(): Entity[TypeDecl] =
         self?.stream_type().instantiate_generic_type_decl([self])
 
+    |" Create a rebound ``Entity`` type declaration, using ``self`` as the type
+    |" parameter.
+    @memoized
+    fun make_entity_type(): Entity[TypeDecl] =
+        self?.entity_type()?.instantiate_generic_type_decl([self])
+
     |" For a stream type declaration and another one, create a new stream type
     |" instantiated with the common ancestor of ``self`` elements type and
     |" ``other_type``.
@@ -2279,12 +2321,13 @@ class TypeDecl: Decl implements TypeInterface {
     fun make_stream_of_common_ancestor(
         other_type: Entity[TypeDecl]
     ): Entity[TypeDecl] =
-        self?.get_indexable_content_type()?.imprecise_common_ancestor_list(
-            [other_type]
+        self?.get_indexable_content_type()?.common_ancestor_list(
+            [other_type],
+            imprecise=true
         )
         ?.make_stream_type()
 
-    |" Get the type parameter used to rebind the Array type declaration.
+    |" Return the type parameter used to rebind the Array type declaration.
     fun get_indexable_content_type(): Entity[TypeDecl] =
         if self.is_null then null[Entity[TypeDecl]]
         elif self.is_indexable_type()
@@ -2497,7 +2540,7 @@ class TypeDecl: Decl implements TypeInterface {
                                 # corresponding ``NodeBuilder`` type, and the
                                 # parameter for a user field has the same type
                                 # as the field.
-                                if f.full_decl().has_annotation(s"parse_field")
+                                if f.is_parse_field()
                                 then t?.as_node_builder_type()
                                 else t
                             },
@@ -2624,11 +2667,11 @@ class FunctionType: TypeDecl {
     fun should_ignore_constructor_arg(): Bool =
         self?.origin?.full_decl()?.has_annotation(s"ignore_constructor_arg")
 
-    @predicate_error("Propagate functions must return entities")
+    @predicate_error("propagate functions must return entities")
     fun returns_entity(): Bool =
         self.is_null or self.return_type.node == self.entity_type().node
 
-    @predicate_error("Predicate functions must return booleans")
+    @predicate_error("predicate functions must return booleans")
     fun returns_bool(): Bool =
         self.is_null or self.return_type.matching_type(self.bool_type())
 
@@ -3085,6 +3128,34 @@ enum class ExcludesNull: LktNode {
 |" ``OrPattern`` and ``TypePattern``.
 @abstract
 class Pattern: LktNode {
+    |" Logic variable containing the type that is provided as input to this
+    |" pattern.
+    input_type_var: LogicVar
+
+    fun xref_entry_point(): Bool =
+        # Only consider top-level patterns as entry points
+        self.is_top_level()
+
+    fun xref_equation(): Equation =
+        self.input_type_var <- self.get_input_type()
+        %and (
+            if self.is_top_level()
+            then {
+                # Only check pattern input/output matching on top-level
+                # patterns.
+                bind error_location = node;
+                TypeDecl.is_valid_pattern_input%(
+                    self.input_type_var,
+                    self.get_output_type()
+                )
+            }
+            else %true
+        )
+
+    |" Return whether this pattern is the top-level one in the pattern owning
+    |" expression.
+    fun is_top_level(): Bool = not self.parent is Pattern | ASTList[Pattern]
+
     |" Return the type of the value passed to this pattern.
     @memoized
     fun get_input_type(): Entity[TypeDecl] = {
@@ -3096,13 +3167,11 @@ class Pattern: LktNode {
             case i: Isa => i.expr.get_type()
             case m: MatchExpr => m.match_expr.get_type()
             case q: Query => q.source.get_type()?.get_indexable_content_type()
-            case l: ListPattern =>
-                if self is EllipsisPattern then l.get_output_type()
-                else l.get_output_type()?.get_indexable_content_type()
-            case p: Pattern => p.get_input_type()
-            case d: FieldPatternDetail => d.referenced_decl()?.get_type()
-            case d: PropertyPatternDetail =>
-                d.referenced_decl()?.get_type().as[FunctionType]?.return_type
+            case p: Pattern =>
+                if p is ListPattern and not self is EllipsisPattern
+                then p.as[ListPattern].get_elem_input_type()
+                else p.get_input_type()
+            case d: PatternDetail => d.get_type()
             case _ =>
                 raise[Entity[TypeDecl]] PropertyError(
                     "Cannot determine input type of the pattern"
@@ -3113,8 +3182,6 @@ class Pattern: LktNode {
     |" Return the type of values that match this pattern.
     @memoized
     fun get_output_type(): Entity[TypeDecl] = self.get_input_type()
-
-    fun xref_equation(): Equation = %true
 }
 
 |" Base of all patterns that may introduce a new binding in the lexical
@@ -3131,6 +3198,9 @@ class BindingPattern: Pattern {
 class ScopedPattern: Pattern {
     @parse_field
     sub_pattern: Pattern
+
+    fun xref_equation(): Equation =
+        self.super() %and self.sub_pattern.xref_equation()
 
     fun get_output_type(): Entity[TypeDecl] =
         self.sub_pattern.get_output_type()
@@ -3149,12 +3219,68 @@ enum class BoolPattern: Pattern {
 
 |" Pattern to match on integers.
 class IntegerPattern: Pattern implements TokenNode {
+    fun get_output_type(): Entity[TypeDecl] = self.int_type()
 }
 
 |" Pattern to match on lists.
 class ListPattern: Pattern {
     @parse_field
     sub_patterns: ASTList[Pattern]
+
+    first_elem_output_type_var: LogicVar
+
+    fun xref_equation(): Equation =
+        self.super()
+
+        # Build one equation for each sub-pattern
+        %and self.sub_patterns.logic_all((p) => p.xref_equation())
+
+        %and (
+            # If the list contains more that one sub-pattern, check that it
+            # is homogeneous.
+            if self.non_ellipsis_sub_patterns.length() > 1
+            then
+                self.first_elem_output_type_var
+                    <- self.non_ellipsis_sub_patterns[0].get_output_type()
+                %and self.non_ellipsis_sub_patterns.logic_all(
+                    (p) => {
+                        bind error_location = p.node;
+                        TypeDecl.is_list_pattern_homogeneous%(
+                            self.first_elem_output_type_var,
+                            p.get_output_type()
+                        )
+                    }
+                )
+            else %true
+        )
+
+    fun get_output_type(): Entity[TypeDecl] =
+        if self.get_elem_output_type().is_null then self.array_type()
+        else self.get_elem_output_type().make_array_type()
+
+    |" Return all sub-pattern nodes that aren't of the ``EllipsisPattern``
+    |" type.
+    @memoized
+    @property
+    fun non_ellipsis_sub_patterns(): Array[Entity[Pattern]] =
+        self.sub_patterns.filter((p) => not p is EllipsisPattern)
+
+    |" Return the type to input to subpatterns of this list.
+    @memoized
+    fun get_elem_input_type(): Entity[TypeDecl] =
+        self.get_input_type()?.get_indexable_content_type()
+
+    |" Return the output type that sub-patterns of this list should have.
+    @memoized
+    fun get_elem_output_type(): Entity[TypeDecl] =
+        if self.non_ellipsis_sub_patterns.length() > 0
+        then {
+            val output_types =
+                self.non_ellipsis_sub_patterns.map((p) => p.get_output_type());
+            output_types[0].common_ancestor_list(output_types)
+            or? self.get_elem_input_type()
+        }
+        else self.get_elem_input_type()
 }
 
 |" Composition of any of the following components:
@@ -3180,27 +3306,33 @@ class ComplexPattern: BindingPattern {
     @parse_field
     predicate: Expr
 
-    fun xref_entry_point(): Bool = true
+    fun xref_equation(): Equation =
+        self.super()
 
-    fun xref_equation(): Equation = {
         # Build one sub-equation for each pattern detail
-        val details_eq =
-            self.details.logic_all((d) => d.xref_detail_equation());
+        %and self.details.logic_all((d) => d.xref_detail_equation())
 
-        # Build the equation for the predicate (if present)
-        if self.predicate.is_null then details_eq
-        else
-            details_eq
-            %and self.predicate.xref_equation()
-            %and self.predicate.expected_type_var <- self.bool_type()
-            %and {
-                bind error_location = node.predicate;
-                TypeDecl.commutative_matching_type%(
-                    self.predicate.expected_type_var,
-                    self.predicate.actual_type_var
-                )
-            }
-    }
+        # Get the equation of the inner pattern if there is one
+        %and (
+            if not self.pattern.is_null then self.pattern.xref_equation()
+            else %true
+        )
+
+        # Check that the predicate is a boolean if there is one
+        %and (
+            if not self.predicate.is_null
+            then
+                self.predicate.xref_equation()
+                %and self.predicate.expected_type_var <- self.bool_type()
+                %and {
+                    bind error_location = node.predicate;
+                    TypeDecl.commutative_matching_type%(
+                        self.predicate.expected_type_var,
+                        self.predicate.actual_type_var
+                    )
+                }
+            else %true
+        )
 
     fun get_output_type(): Entity[TypeDecl] =
         if self.pattern.is_null then self.get_input_type()
@@ -3217,7 +3349,37 @@ class TypePattern: Pattern {
     @parse_field
     type_name: TypeRef
 
-    fun get_output_type(): Entity[TypeDecl] = self.type_name.referenced_decl()
+    fun get_output_type(): Entity[TypeDecl] =
+        # Implicitly wrap the referenced type in an entity if it is a node
+        # type and the input type is an entity type.
+        if (
+            self.referenced_type().is_node_type()
+            and self.get_input_type().is_entity_type()
+        )
+        then self.instantiated_referenced_type().make_entity_type()
+        else self.instantiated_referenced_type()
+
+    |" Return the ``TypeDecl`` referenced by this type pattern, instantiated
+    |" with generic parameters provided by the input type if required.
+    @memoized
+    fun instantiated_referenced_type(): Entity[TypeDecl] = {
+        val ref_type = self.referenced_type();
+
+        # Return the instantiated version of the referenced type if it is a
+        # generic type and the input type is an instantiation of the same
+        # generic type.
+        if (
+            ref_type.is_generic()
+            and self.get_input_type().is_generic()
+            and ref_type.node == self.get_input_type().node
+        )
+        then self.get_input_type()
+        else ref_type
+    }
+
+    |" Return the ``TypeDecl`` referenced by this type pattern.
+    @memoized
+    fun referenced_type(): Entity[TypeDecl] = self.type_name.referenced_decl()
 }
 
 |" Pattern that matches if its inner pattern doesn't match.
@@ -3226,6 +3388,20 @@ class TypePattern: Pattern {
 |"
 |"    val non_objects = select not ObjectDecl
 class NotPattern: ScopedPattern {
+    fun xref_equation(): Equation =
+        # Create the base equation
+        self.super()
+
+        # Check that the output type of the sub-pattern is matching the input
+        # type of this one.
+        %and {
+            bind error_location = node.sub_pattern;
+            TypeDecl.is_valid_pattern_input%(
+                self.input_type_var,
+                self.sub_pattern.get_output_type()
+            )
+        }
+
     fun get_output_type(): Entity[TypeDecl] =
         # All we know is that the type of matched values is not the output
         # type of `self.sub_pattern`, but that doesn't allow us to make our
@@ -3252,6 +3428,22 @@ class OrPattern: Pattern {
     @parse_field
     right_sub_pattern: ScopedPattern
 
+    left_output_type_var: LogicVar
+
+    fun xref_equation(): Equation =
+        self.super()
+        %and self.left_sub_pattern.xref_equation()
+        %and self.right_sub_pattern.xref_equation()
+        %and self.left_output_type_var
+            <- self.left_sub_pattern.get_output_type()
+        %and {
+            bind error_location = node;
+            TypeDecl.have_common_ancestor%(
+                self.left_output_type_var,
+                self.right_sub_pattern.get_output_type()
+            )
+        }
+
     fun get_output_type(): Entity[TypeDecl] =
         self.left_sub_pattern.get_output_type().common_ancestor(
             self.right_sub_pattern.get_output_type(),
@@ -3264,6 +3456,9 @@ class OrPattern: Pattern {
 class ParenPattern: Pattern {
     @parse_field
     sub_pattern: Pattern
+
+    fun xref_equation(): Equation =
+        self.super() %and self.sub_pattern.xref_equation()
 
     fun get_output_type(): Entity[TypeDecl] =
         self.sub_pattern.get_output_type()
@@ -3304,8 +3499,26 @@ class PatternDetail: LktNode {
     @abstract
     fun xref_detail_equation(): Equation
 
+    |" Return the type of values that this pattern detail matches.
+    @abstract
+    @memoized
+    fun get_type(): Entity[TypeDecl]
+
     |" Return the pattern that owns this pattern detail.
-    fun parent_pattern(): Entity[Pattern] = self.parent.parent.as![Pattern]
+    fun parent_pattern(): Entity[ComplexPattern] =
+        self.parent.parent.as![ComplexPattern]
+
+    |" Return the type of the provided ``decl`` wrapped in an ``Entity``
+    |" instantiation if this declaration designates a parse field and the
+    |" output type of the parent pattern is also an instance of ``Entity``.
+    fun wrap_type_in_entity(decl: Entity[Decl]): Entity[TypeDecl] = {
+        val ref_type = decl?.get_type();
+        val wrap_in_entity = (
+            self.parent_pattern().get_output_type()?.is_entity_type()
+            and decl?.is_parse_field()
+        );
+        if wrap_in_entity then ref_type.make_entity_type() else ref_type
+    }
 }
 
 |" Pattern detail denoting an access to a field.
@@ -3319,6 +3532,9 @@ class FieldPatternDetail: PatternDetail {
     fun referenced_decl(): Entity[Decl] =
         self.parent_pattern().get_output_type()?.type_var_suffix_ref(self.id)
 
+    fun get_type(): Entity[TypeDecl] =
+        self.wrap_type_in_entity(self.referenced_decl())
+
     fun xref_detail_equation(): Equation =
         # Bind "id" to the member declaration, emit a diagnostic if we could
         # not find a corresponding member declaration.
@@ -3331,13 +3547,6 @@ class FieldPatternDetail: PatternDetail {
                 self.id
             )
         }
-
-        # Include equations from the "expected_value" field if they do not
-        # belong to an independent xref entry point.
-        %and (
-            if self.expected_value.xref_entry_point() then %true
-            else self.expected_value.xref_equation()
-        )
 }
 
 |" Pattern detail denoting an access to a property in a node pattern.
@@ -3356,6 +3565,9 @@ class PropertyPatternDetail: PatternDetail {
         self.parent_pattern().get_output_type()?.type_var_suffix_ref(
             self.property_name()
         )
+
+    fun get_type(): Entity[TypeDecl] =
+        self.referenced_decl()?.get_type().as[FunctionType]?.return_type
 
     fun xref_detail_equation(): Equation = {
         val name = self.property_name();
@@ -3376,13 +3588,6 @@ class PropertyPatternDetail: PatternDetail {
         # Bind the resolved property return type to CallExpr.name, to satisfy
         # xref_call_equation's requirements.
         %and name.actual_type_var <- member?.get_type()
-
-        # Include equations from the "expected_value" field if they do not
-        # belong to an independent xref entry point.
-        %and (
-            if self.expected_value.xref_entry_point() then %true
-            else self.expected_value.xref_equation()
-        )
     }
 }
 
@@ -3391,14 +3596,41 @@ class DestructuringPatternDetail: PatternDetail {
     @parse_field
     decl: BindingValDecl
 
+    |" Strip all wrapping patterns that don't modify the matched type and
+    |" return the resulting pattern.
+    fun strip_pattern(pattern: Entity[Pattern]): Entity[Pattern] = match
+        pattern
+    {
+        case p: ParenPattern => self.strip_pattern(p.sub_pattern)
+        case s: ScopedPattern => self.strip_pattern(s.sub_pattern)
+        case c: ComplexPattern =>
+            if c.pattern.is_null then c else self.strip_pattern(c.pattern)
+        case _ => pattern
+    }
+
+    |" Return the type designated by the parent pattern.
+    fun pattern_designated_type(): Entity[TypeDecl] = match
+        self.strip_pattern(self.parent_pattern().pattern)
+    {
+        # In the case of a `TypePattern` we get the constructor of the
+        # referenced type.
+        case t: TypePattern => t.referenced_type()
+        case _ => self.parent_pattern().get_output_type()
+    }
+
     |" Return the member that this pattern detail matches.
     fun referenced_decl(): Entity[Decl] = {
-        # This pattern detail is the Nth detail of the parent pattern: match it
-        # with the Nth member of the parent type, in constructor order.
-        val holder_type = self.parent_pattern().get_output_type();
+        # When matching against an explicit type, use it instead of the
+        # inferred type. This is necessary so that bare node type matchers
+        # applied to entity values have access to the members of the bare node
+        # type instead of the ones of the entity type.
+        val holder_type = self.pattern_designated_type();
         val params = holder_type?.get_params();
         params.at(self.child_index).decl
     }
+
+    fun get_type(): Entity[TypeDecl] =
+        self.wrap_type_in_entity(self.referenced_decl())
 
     fun xref_detail_equation(): Equation = {
         # Set decl's type to the corresponding member of the parent type. If
@@ -3408,7 +3640,7 @@ class DestructuringPatternDetail: PatternDetail {
         self.decl.syn_name.actual_type_var <- decl?.get_type()
         %and Decl.extra_component%(
             self.decl.syn_name.actual_type_var,
-            self.parent_pattern().get_output_type()
+            self.pattern_designated_type()
         )
     }
 }
@@ -3550,11 +3782,12 @@ class AnyOf: Expr {
                 %and self.actual_type_var <- self.bool_type()
             )
             %and self.expr.expected_type_var
-                <- TypeDecl.imprecise_common_ancestor_list%(
+                <- TypeDecl.common_ancestor_list%(
                     ([self.expr] & self.values.as_array()).filtermap(
                         (e) => e.actual_type_var,
                         (e) => e.has_context_free_type()
-                    )
+                    ),
+                    true
                 )
         )
         %and self.values.logic_all(
@@ -3600,7 +3833,7 @@ class ArrayLiteral: Expr {
         if logic_vars.length() != 0
         then
             self.expected_exprs_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.common_ancestor_list%(logic_vars, true)
         elif self.xref_entry_point()
         then
             self.expected_exprs_type_var
@@ -3626,8 +3859,9 @@ class ArrayLiteral: Expr {
                     }
                 else
                     self.actual_element_type
-                    <- TypeDecl.imprecise_common_ancestor_list%(
-                        self.exprs.map((expr) => expr.actual_type_var)
+                    <- TypeDecl.common_ancestor_list%(
+                        self.exprs.map((expr) => expr.actual_type_var),
+                        true
                     )
             else
                 self.actual_element_type <- self.element_type.referenced_decl()
@@ -4281,8 +4515,12 @@ class BinOp: Expr {
             elif self.op is Op.OrInt
             then
                 self.actual_type_var
-                    <- TypeDecl.imprecise_common_ancestor_list%(
-                        [self.left.actual_type_var, self.right.actual_type_var]
+                    <- TypeDecl.common_ancestor_list%(
+                        [
+                            self.left.actual_type_var,
+                            self.right.actual_type_var
+                        ],
+                        true
                     )
                 %and full_propagation
                 %and check_right_type
@@ -4779,8 +5017,8 @@ class RefId: Id implements TokenNode, ReferenceInterface {
                 or p.parent.do((v1) => v1.parent is BlockExpr)
         )
 
-    |" Get the first declaration found for this RefId. This first tries to get
-    |" variables declared before Self.from_node, if no variable was found,
+    |" Return the first declaration found for this RefId. This first tries to
+    |" get variables declared before Self.from_node, if no variable was found,
     |" find a type or function anywhere in the node environment.
     @memoized
     fun first_var_in_env(): Entity[Decl] = {
@@ -4965,7 +5203,7 @@ class IfExpr: Expr {
         # Assign the common ancestor type for all branches to our "branch
         # merge" variable.
         self.expected_branch_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.common_ancestor_list%(logic_vars, true)
 
         # Unify our "branch merge" variable with expected types for all branch
         # expressions.
@@ -5018,8 +5256,9 @@ class IfExpr: Expr {
 
         # Set the type of the IfExpr
         %and self.actual_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(
-                self.branch_exprs().map((e) => e.actual_type_var)
+            <- TypeDecl.common_ancestor_list%(
+                self.branch_exprs().map((e) => e.actual_type_var),
+                true
             )
 }
 
@@ -5486,7 +5725,7 @@ class MatchExpr: Expr {
             or? [self.expected_type_var];
 
         self.expected_branch_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.common_ancestor_list%(logic_vars, true)
         %and self.branches.logic_all(
             (b) => b.expr.expected_type_var <-> self.expected_branch_type_var
         )
@@ -5508,8 +5747,9 @@ class MatchExpr: Expr {
             )
         )
         %and self.actual_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(
-                self.branch_exprs().map((e) => e.actual_type_var)
+            <- TypeDecl.common_ancestor_list%(
+                self.branch_exprs().map((e) => e.actual_type_var),
+                true
             )
 }
 
@@ -5658,7 +5898,7 @@ class TryExpr: Expr {
             or? [self.expected_type_var];
 
         self.expected_expr_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(logic_vars)
+            <- TypeDecl.common_ancestor_list%(logic_vars, true)
         %and self.exprs().logic_all(
             (e) => e.expected_type_var <-> self.expected_expr_type_var
         )
@@ -5683,8 +5923,9 @@ class TryExpr: Expr {
             )
         )
         %and self.actual_type_var
-            <- TypeDecl.imprecise_common_ancestor_list%(
-                self.exprs().map((e) => e.actual_type_var)
+            <- TypeDecl.common_ancestor_list%(
+                self.exprs().map((e) => e.actual_type_var),
+                true
             )
 
     fun has_context_free_type(): Bool = false

@@ -1,0 +1,10 @@
+test.lkt:11:14-11:21: error: pattern accepts values of type String, but the matched expression is of type Int
+ 11 | val _ = i is "Hello"
+    |              ^^^^^^^ 
+test.lkt:13:10-13:12: error: pattern accepts values of type String, but the matched expression is of type Int
+ 13 |     case "" => true
+    |          ^^ 
+test.lkt:15:24-15:31: error: pattern accepts values of type String, but the matched expression is of type Int
+ 15 | val _ = from [i] match "Hello"
+    |                        ^^^^^^^ 
+

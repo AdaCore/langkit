@@ -1,0 +1,16 @@
+test.lkt:12:14-12:15: error: pattern accepts values of type Int, but the matched expression is of type Bool
+ 12 | val _ = b is 1
+    |              ^ 
+test.lkt:13:14-13:44: error: pattern accepts values of type Int, but the matched expression is of type Bool
+ 13 | val _ = b is 100000000000000000000000000000
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+test.lkt:15:10-15:11: error: pattern accepts values of type Int, but the matched expression is of type Bool
+ 15 |     case 1 => true
+    |          ^ 
+test.lkt:16:10-16:40: error: pattern accepts values of type Int, but the matched expression is of type Bool
+ 16 |     case 100000000000000000000000000000 => true
+    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+test.lkt:18:24-18:25: error: pattern accepts values of type Int, but the matched expression is of type Bool
+ 18 | val _ = from [b] match 1
+    |                        ^ 
+

@@ -39,179 +39,743 @@ Decl <FieldDecl "other_field" test.lkt:8:5-8:34>
    Expr <SingleLineStringLit test.lkt:8:27-8:34>
         has_type <StructDecl prelude: "String">
 
-Decl <ValDecl "a" test.lkt:11:1-11:12>
+Decl <ValDecl "i" test.lkt:12:1-12:11>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:12:9-12:11>
+        has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "s" test.lkt:13:1-13:16>
+     has_type <StructDecl prelude: "String">
+
+   Expr <SingleLineStringLit test.lkt:13:9-13:16>
+        has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "a" test.lkt:14:1-14:12>
      has_type <ClassDecl "A" test.lkt:1:1-3:2>
 
-   Expr <CallExpr test.lkt:11:9-11:12>
+   Expr <CallExpr test.lkt:14:9-14:12>
         has_type <ClassDecl "A" test.lkt:1:1-3:2>
 
-      Id   <RefId "A" test.lkt:11:9-11:10>
+      Id   <RefId "A" test.lkt:14:9-14:10>
            has_type <FunctionType "(Int) -> A" test.lkt>
            references <ClassDecl "A" test.lkt:1:1-3:2>
 
-Decl <ValDecl "_" test.lkt:14:1-14:41>
+Decl <ValDecl "b" test.lkt:15:1-15:12>
+     has_type <ClassDecl "B" test.lkt:4:1-6:2>
+
+   Expr <CallExpr test.lkt:15:9-15:12>
+        has_type <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "B" test.lkt:15:9-15:10>
+           has_type <FunctionType "(Bool, Int) -> B" test.lkt>
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+Decl <ValDecl "d" test.lkt:16:1-16:12>
+     has_type <ClassDecl "D" test.lkt:10:1-10:11>
+
+   Expr <CallExpr test.lkt:16:9-16:12>
+        has_type <ClassDecl "D" test.lkt:10:1-10:11>
+
+      Id   <RefId "D" test.lkt:16:9-16:10>
+           has_type <FunctionType "() -> D" test.lkt>
+           references <ClassDecl "D" test.lkt:10:1-10:11>
+
+Decl <ValDecl "l_a" test.lkt:17:1-17:16>
+     has_type <StructDecl prelude: "Array[A]">
+
+   Expr <ArrayLiteral test.lkt:17:11-17:16>
+        has_type <StructDecl prelude: "Array[A]">
+
+      Expr <CallExpr test.lkt:17:12-17:15>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+
+         Id   <RefId "A" test.lkt:17:12-17:13>
+              has_type <FunctionType "(Int) -> A" test.lkt>
+              references <ClassDecl "A" test.lkt:1:1-3:2>
+
+Decl <ValDecl "_" test.lkt:20:1-20:19>
      has_type <EnumTypeDecl prelude: "Bool">
 
-   Expr <Isa test.lkt:14:9-14:41>
+   Expr <Isa test.lkt:20:9-20:19>
         has_type <EnumTypeDecl prelude: "Bool">
 
-      Id   <RefId "a" test.lkt:14:9-14:10>
-           has_type <ClassDecl "A" test.lkt:1:1-3:2>
-           references <ValDecl "a" test.lkt:11:1-11:12>
+      Id   <RefId "i" test.lkt:20:9-20:10>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "i" test.lkt:12:1-12:11>
 
-      Decl <BindingValDecl "x" test.lkt:14:14-14:15>
-           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+Decl <ValDecl "_" test.lkt:21:1-21:23>
+     has_type <EnumTypeDecl prelude: "Bool">
 
-      Id   <RefId "B" test.lkt:14:17-14:18>
+   Expr <Isa test.lkt:21:9-21:23>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "s" test.lkt:21:9-21:10>
+           has_type <StructDecl prelude: "String">
+           references <ValDecl "s" test.lkt:13:1-13:16>
+
+Decl <ValDecl "_" test.lkt:22:1-22:19>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:22:9-22:19>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "a" test.lkt:22:9-22:10>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+           references <ValDecl "a" test.lkt:14:1-14:12>
+
+      Id   <RefId "A" test.lkt:22:14-22:15>
+           has_type None
+           references <ClassDecl "A" test.lkt:1:1-3:2>
+
+      Id   <RefId "B" test.lkt:22:18-22:19>
            has_type None
            references <ClassDecl "B" test.lkt:4:1-6:2>
 
-      Id   <RefId "C" test.lkt:14:21-14:22>
-           has_type None
-           references <ClassDecl "C" test.lkt:7:1-9:2>
-
-      Expr <BinOp test.lkt:14:29-14:41>
-           has_type <EnumTypeDecl prelude: "Bool">
-
-         Expr <DotExpr test.lkt:14:29-14:36>
-              has_type <StructDecl prelude: "Int">
-
-            Id   <RefId "x" test.lkt:14:29-14:30>
-                 has_type <ClassDecl "A" test.lkt:1:1-3:2>
-                 references <BindingValDecl "x" test.lkt:14:14-14:15>
-
-            Id   <RefId "field" test.lkt:14:31-14:36>
-                 has_type <StructDecl prelude: "Int">
-                 references <FieldDecl "field" test.lkt:2:5-2:19>
-
-         Expr <NumLit test.lkt:14:40-14:41>
-              has_type <StructDecl prelude: "Int">
-
-Decl <ValDecl "_" test.lkt:15:1-15:42>
+Decl <ValDecl "_" test.lkt:23:1-23:19>
      has_type <EnumTypeDecl prelude: "Bool">
 
-   Expr <Isa test.lkt:15:9-15:42>
+   Expr <Isa test.lkt:23:9-23:19>
         has_type <EnumTypeDecl prelude: "Bool">
 
-      Id   <RefId "a" test.lkt:15:9-15:10>
-           has_type <ClassDecl "A" test.lkt:1:1-3:2>
-           references <ValDecl "a" test.lkt:11:1-11:12>
+      Id   <RefId "b" test.lkt:23:9-23:10>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
+           references <ValDecl "b" test.lkt:15:1-15:12>
 
-      Decl <BindingValDecl "x" test.lkt:15:15-15:16>
+      Id   <RefId "A" test.lkt:23:14-23:15>
+           has_type None
+           references <ClassDecl "A" test.lkt:1:1-3:2>
+
+      Id   <RefId "B" test.lkt:23:18-23:19>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+Decl <ValDecl "_" test.lkt:24:1-24:42>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:24:9-24:42>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "b" test.lkt:24:9-24:10>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
+           references <ValDecl "b" test.lkt:15:1-15:12>
+
+      Decl <BindingValDecl "x" test.lkt:24:14-24:15>
            has_type <ClassDecl "B" test.lkt:4:1-6:2>
 
-      Id   <RefId "B" test.lkt:15:17-15:18>
-           has_type None
-           references <ClassDecl "B" test.lkt:4:1-6:2>
+      Decl <BindingValDecl "_" test.lkt:24:17-24:18>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
 
-      Expr <DotExpr test.lkt:15:24-15:37>
+      Decl <BindingValDecl "_" test.lkt:24:21-24:22>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Expr <DotExpr test.lkt:24:29-24:42>
            has_type <EnumTypeDecl prelude: "Bool">
 
-         Id   <RefId "x" test.lkt:15:24-15:25>
+         Id   <RefId "x" test.lkt:24:29-24:30>
               has_type <ClassDecl "B" test.lkt:4:1-6:2>
-              references <BindingValDecl "x" test.lkt:15:15-15:16>
+              references <BindingValDecl "x" test.lkt:24:14-24:15>
 
-         Id   <RefId "other_field" test.lkt:15:26-15:37>
+         Id   <RefId "other_field" test.lkt:24:31-24:42>
               has_type <EnumTypeDecl prelude: "Bool">
               references <FieldDecl "other_field" test.lkt:5:5-5:29>
 
-      Id   <RefId "C" test.lkt:15:40-15:41>
-           has_type None
-           references <ClassDecl "C" test.lkt:7:1-9:2>
-
-Decl <ValDecl "_" test.lkt:16:1-16:41>
+Decl <ValDecl "_" test.lkt:25:1-25:41>
      has_type <EnumTypeDecl prelude: "Bool">
 
-   Expr <Isa test.lkt:16:9-16:41>
+   Expr <Isa test.lkt:25:9-25:41>
         has_type <EnumTypeDecl prelude: "Bool">
 
-      Id   <RefId "a" test.lkt:16:9-16:10>
+      Id   <RefId "a" test.lkt:25:9-25:10>
            has_type <ClassDecl "A" test.lkt:1:1-3:2>
-           references <ValDecl "a" test.lkt:11:1-11:12>
+           references <ValDecl "a" test.lkt:14:1-14:12>
 
-<ComplexPattern test.lkt:16:14-16:41> failed nameres:
-test.lkt:16:31-16:36: error: undefined entity
- 16 | val _ = a is (x@B | C) when x.field == 1
-    |                               ^^^^^ 
+      Decl <BindingValDecl "x" test.lkt:25:14-25:15>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
 
-      Decl <BindingValDecl "x" test.lkt:16:15-16:16>
-           has_type <ClassDecl "B" test.lkt:4:1-6:2>
-
-      Id   <RefId "B" test.lkt:16:17-16:18>
+      Id   <RefId "B" test.lkt:25:17-25:18>
            has_type None
            references <ClassDecl "B" test.lkt:4:1-6:2>
 
-      Id   <RefId "C" test.lkt:16:21-16:22>
+      Id   <RefId "C" test.lkt:25:21-25:22>
            has_type None
            references <ClassDecl "C" test.lkt:7:1-9:2>
 
-      Expr <BinOp test.lkt:16:29-16:41>
-           has_type None
+      Expr <BinOp test.lkt:25:29-25:41>
+           has_type <EnumTypeDecl prelude: "Bool">
 
-         Expr <DotExpr test.lkt:16:29-16:36>
-              has_type None
+         Expr <DotExpr test.lkt:25:29-25:36>
+              has_type <StructDecl prelude: "Int">
 
-<RefId "x" test.lkt:16:29-16:30> failed nameres:
-test.lkt:16:29-16:30: error: undefined entity
- 16 | val _ = a is (x@B | C) when x.field == 1
-    |                             ^ 
+            Id   <RefId "x" test.lkt:25:29-25:30>
+                 has_type <ClassDecl "A" test.lkt:1:1-3:2>
+                 references <BindingValDecl "x" test.lkt:25:14-25:15>
 
-            Id   <RefId "x" test.lkt:16:29-16:30>
-                 has_type None
-                 references None
+            Id   <RefId "field" test.lkt:25:31-25:36>
+                 has_type <StructDecl prelude: "Int">
+                 references <FieldDecl "field" test.lkt:2:5-2:19>
 
-            Id   <RefId "field" test.lkt:16:31-16:36>
-                 has_type None
-                 references None
+         Expr <NumLit test.lkt:25:40-25:41>
+              has_type <StructDecl prelude: "Int">
 
-         Expr <NumLit test.lkt:16:40-16:41>
-              has_type None
-
-Decl <ValDecl "_" test.lkt:17:1-17:43>
+Decl <ValDecl "_" test.lkt:26:1-26:41>
      has_type <EnumTypeDecl prelude: "Bool">
 
-   Expr <Isa test.lkt:17:9-17:43>
+   Expr <Isa test.lkt:26:9-26:41>
         has_type <EnumTypeDecl prelude: "Bool">
 
-      Id   <RefId "a" test.lkt:17:9-17:10>
-           has_type <ClassDecl "A" test.lkt:1:1-3:2>
-           references <ValDecl "a" test.lkt:11:1-11:12>
-
-      Decl <BindingValDecl "x" test.lkt:17:15-17:16>
+      Id   <RefId "b" test.lkt:26:9-26:10>
            has_type <ClassDecl "B" test.lkt:4:1-6:2>
+           references <ValDecl "b" test.lkt:15:1-15:12>
 
-      Id   <RefId "B" test.lkt:17:17-17:18>
+      Decl <BindingValDecl "x" test.lkt:26:14-26:15>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+
+      Id   <RefId "B" test.lkt:26:17-26:18>
            has_type None
            references <ClassDecl "B" test.lkt:4:1-6:2>
 
-<ComplexPattern test.lkt:17:22-17:41> failed nameres:
-test.lkt:17:31-17:36: error: undefined entity
- 17 | val _ = a is (x@B | (C when x.field == 1))
-    |                               ^^^^^ 
-
-      Id   <RefId "C" test.lkt:17:22-17:23>
+      Id   <RefId "C" test.lkt:26:21-26:22>
            has_type None
            references <ClassDecl "C" test.lkt:7:1-9:2>
 
-      Expr <BinOp test.lkt:17:29-17:41>
+      Expr <BinOp test.lkt:26:29-26:41>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+         Expr <DotExpr test.lkt:26:29-26:36>
+              has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "x" test.lkt:26:29-26:30>
+                 has_type <ClassDecl "A" test.lkt:1:1-3:2>
+                 references <BindingValDecl "x" test.lkt:26:14-26:15>
+
+            Id   <RefId "field" test.lkt:26:31-26:36>
+                 has_type <StructDecl prelude: "Int">
+                 references <FieldDecl "field" test.lkt:2:5-2:19>
+
+         Expr <NumLit test.lkt:26:40-26:41>
+              has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "_" test.lkt:27:1-30:2>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <MatchExpr test.lkt:27:9-30:2>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "i" test.lkt:27:15-27:16>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "i" test.lkt:12:1-12:11>
+
+      Id   <RefId "true" test.lkt:28:19-28:23>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+      Id   <RefId "false" test.lkt:29:23-29:28>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "false">
+
+Decl <ValDecl "_" test.lkt:31:1-31:29>
+     has_type <StructDecl prelude: "Stream[A]">
+
+   Expr <Query test.lkt:31:9-31:29>
+        has_type <StructDecl prelude: "Stream[A]">
+
+      Id   <RefId "l_a" test.lkt:31:14-31:17>
+           has_type <StructDecl prelude: "Array[A]">
+           references <ValDecl "l_a" test.lkt:17:1-17:16>
+
+      Id   <RefId "A" test.lkt:31:24-31:25>
+           has_type None
+           references <ClassDecl "A" test.lkt:1:1-3:2>
+
+      Id   <RefId "B" test.lkt:31:28-31:29>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+Decl <ValDecl "_" test.lkt:34:1-34:21>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:34:9-34:21>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "i" test.lkt:34:9-34:10>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "i" test.lkt:12:1-12:11>
+
+<ComplexPattern test.lkt:34:14-34:21> failed nameres:
+test.lkt:34:14-34:21: error: pattern accepts values of type A, but the matched expression is of type Int
+ 34 | val _ = i is (B | C)
+    |              ^^^^^^^ 
+
+      Id   <RefId "B" test.lkt:34:15-34:16>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "C" test.lkt:34:19-34:20>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+Decl <ValDecl "_" test.lkt:35:1-35:21>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:35:9-35:21>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "a" test.lkt:35:9-35:10>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+           references <ValDecl "a" test.lkt:14:1-14:12>
+
+<ComplexPattern test.lkt:35:14-35:21> failed nameres:
+test.lkt:35:15-35:20: error: B and D have no common ancestor
+ 35 | val _ = a is (B | D)
+    |               ^^^^^ 
+
+      Id   <RefId "B" test.lkt:35:15-35:16>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "D" test.lkt:35:19-35:20>
+           has_type None
+           references <ClassDecl "D" test.lkt:10:1-10:11>
+
+Decl <ValDecl "_" test.lkt:36:1-36:42>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:36:9-36:42>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "b" test.lkt:36:9-36:10>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
+           references <ValDecl "b" test.lkt:15:1-15:12>
+
+<ComplexPattern test.lkt:36:14-36:42> failed nameres:
+test.lkt:36:31-36:42: error: A has no component other_field
+ 36 | val _ = b is x@(C | B) when x.other_field
+    |                               ^^^^^^^^^^^ 
+
+      Decl <BindingValDecl "x" test.lkt:36:14-36:15>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+
+      Id   <RefId "C" test.lkt:36:17-36:18>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+      Id   <RefId "B" test.lkt:36:21-36:22>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Expr <DotExpr test.lkt:36:29-36:42>
            has_type None
 
-         Expr <DotExpr test.lkt:17:29-17:36>
-              has_type None
+         Id   <RefId "x" test.lkt:36:29-36:30>
+              has_type <ClassDecl "A" test.lkt:1:1-3:2>
+              references <BindingValDecl "x" test.lkt:36:14-36:15>
 
-<RefId "x" test.lkt:17:29-17:30> failed nameres:
-test.lkt:17:29-17:30: error: undefined entity
- 17 | val _ = a is (x@B | (C when x.field == 1))
+         Id   <RefId "other_field" test.lkt:36:31-36:42>
+              has_type None
+              references None
+
+Decl <ValDecl "_" test.lkt:37:1-39:2>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <MatchExpr test.lkt:37:9-39:2>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "a" test.lkt:37:15-37:16>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+           references <ValDecl "a" test.lkt:14:1-14:12>
+
+<ComplexPattern test.lkt:38:10-38:17> failed nameres:
+test.lkt:38:11-38:16: error: B and D have no common ancestor
+ 38 |     case (B | D) => true
+    |           ^^^^^ 
+
+      Id   <RefId "B" test.lkt:38:11-38:12>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "D" test.lkt:38:15-38:16>
+           has_type None
+           references <ClassDecl "D" test.lkt:10:1-10:11>
+
+      Id   <RefId "true" test.lkt:38:21-38:25>
+           has_type <EnumTypeDecl prelude: "Bool">
+           references <EnumLitDecl prelude: "true">
+
+Decl <ValDecl "_" test.lkt:40:1-40:25>
+     has_type <StructDecl prelude: "Stream[D]">
+
+   Expr <Query test.lkt:40:9-40:25>
+        has_type <StructDecl prelude: "Stream[D]">
+
+      Id   <RefId "l_a" test.lkt:40:14-40:17>
+           has_type <StructDecl prelude: "Array[A]">
+           references <ValDecl "l_a" test.lkt:17:1-17:16>
+
+<ComplexPattern test.lkt:40:24-40:25> failed nameres:
+test.lkt:40:24-40:25: error: pattern accepts values of type D, but the matched expression is of type A
+ 40 | val _ = from l_a match D
+    |                        ^ 
+
+      Id   <RefId "D" test.lkt:40:24-40:25>
+           has_type None
+           references <ClassDecl "D" test.lkt:10:1-10:11>
+
+Decl <ValDecl "_" test.lkt:43:1-46:2>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:43:9-46:2>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "a" test.lkt:43:9-43:10>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+           references <ValDecl "a" test.lkt:14:1-14:12>
+
+      Decl <BindingValDecl "x" test.lkt:44:5-44:6>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "B" test.lkt:44:7-44:8>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Expr <DotExpr test.lkt:44:14-44:27>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+         Id   <RefId "x" test.lkt:44:14-44:15>
+              has_type <ClassDecl "B" test.lkt:4:1-6:2>
+              references <BindingValDecl "x" test.lkt:44:5-44:6>
+
+         Id   <RefId "other_field" test.lkt:44:16-44:27>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <FieldDecl "other_field" test.lkt:5:5-5:29>
+
+      Decl <BindingValDecl "x" test.lkt:45:7-45:8>
+           has_type <ClassDecl "C" test.lkt:7:1-9:2>
+
+      Id   <RefId "C" test.lkt:45:9-45:10>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+      Expr <BinOp test.lkt:45:16-45:43>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+         Expr <CallExpr test.lkt:45:16-45:38>
+              has_type <StructDecl prelude: "Int">
+
+            Expr <DotExpr test.lkt:45:16-45:36>
+                 has_type <FunctionType prelude: "() -> Int">
+
+               Expr <DotExpr test.lkt:45:16-45:29>
+                    has_type <StructDecl prelude: "String">
+
+                  Id   <RefId "x" test.lkt:45:16-45:17>
+                       has_type <ClassDecl "C" test.lkt:7:1-9:2>
+                       references <BindingValDecl "x" test.lkt:45:7-45:8>
+
+                  Id   <RefId "other_field" test.lkt:45:18-45:29>
+                       has_type <StructDecl prelude: "String">
+                       references <FieldDecl "other_field" test.lkt:8:5-8:34>
+
+               Id   <RefId "length" test.lkt:45:30-45:36>
+                    has_type <FunctionType prelude: "() -> Int">
+                    references <FunDecl prelude: "length">
+
+         Expr <NumLit test.lkt:45:42-45:43>
+              has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "_" test.lkt:47:1-47:42>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:47:9-47:42>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "a" test.lkt:47:9-47:10>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+           references <ValDecl "a" test.lkt:14:1-14:12>
+
+      Decl <BindingValDecl "x" test.lkt:47:15-47:16>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "B" test.lkt:47:17-47:18>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Expr <DotExpr test.lkt:47:24-47:37>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+         Id   <RefId "x" test.lkt:47:24-47:25>
+              has_type <ClassDecl "B" test.lkt:4:1-6:2>
+              references <BindingValDecl "x" test.lkt:47:15-47:16>
+
+         Id   <RefId "other_field" test.lkt:47:26-47:37>
+              has_type <EnumTypeDecl prelude: "Bool">
+              references <FieldDecl "other_field" test.lkt:5:5-5:29>
+
+      Id   <RefId "C" test.lkt:47:40-47:41>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+Decl <ValDecl "_" test.lkt:48:1-48:41>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:48:9-48:41>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "a" test.lkt:48:9-48:10>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+           references <ValDecl "a" test.lkt:14:1-14:12>
+
+      Decl <BindingValDecl "x" test.lkt:48:14-48:15>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+
+      Id   <RefId "B" test.lkt:48:17-48:18>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "C" test.lkt:48:21-48:22>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+      Expr <BinOp test.lkt:48:28-48:40>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+         Expr <DotExpr test.lkt:48:28-48:35>
+              has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "x" test.lkt:48:28-48:29>
+                 has_type <ClassDecl "A" test.lkt:1:1-3:2>
+                 references <BindingValDecl "x" test.lkt:48:14-48:15>
+
+            Id   <RefId "field" test.lkt:48:30-48:35>
+                 has_type <StructDecl prelude: "Int">
+                 references <FieldDecl "field" test.lkt:2:5-2:19>
+
+         Expr <NumLit test.lkt:48:39-48:40>
+              has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "_" test.lkt:49:1-49:35>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:49:9-49:35>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "a" test.lkt:49:9-49:10>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+           references <ValDecl "a" test.lkt:14:1-14:12>
+
+<ComplexPattern test.lkt:49:14-49:35> failed nameres:
+test.lkt:49:29-49:30: error: undefined entity
+ 49 | val _ = a is (x@B | C) when x == b
     |                             ^ 
 
-            Id   <RefId "x" test.lkt:17:29-17:30>
-                 has_type None
-                 references None
+      Decl <BindingValDecl "x" test.lkt:49:15-49:16>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
 
-            Id   <RefId "field" test.lkt:17:31-17:36>
-                 has_type None
-                 references None
+      Id   <RefId "B" test.lkt:49:17-49:18>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
 
-         Expr <NumLit test.lkt:17:40-17:41>
+      Id   <RefId "C" test.lkt:49:21-49:22>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+      Expr <BinOp test.lkt:49:29-49:35>
+           has_type None
+
+         Id   <RefId "x" test.lkt:49:29-49:30>
               has_type None
+              references None
+
+         Id   <RefId "b" test.lkt:49:34-49:35>
+              has_type None
+              references None
+
+Decl <ValDecl "_" test.lkt:50:1-50:37>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:50:9-50:37>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "a" test.lkt:50:9-50:10>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+           references <ValDecl "a" test.lkt:14:1-14:12>
+
+<ComplexPattern test.lkt:50:14-50:37> failed nameres:
+test.lkt:50:29-50:30: error: undefined entity
+ 50 | val _ = a is (x@B | (C when x == b))
+    |                             ^ 
+
+      Decl <BindingValDecl "x" test.lkt:50:15-50:16>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "B" test.lkt:50:17-50:18>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "C" test.lkt:50:22-50:23>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+      Expr <BinOp test.lkt:50:29-50:35>
+           has_type None
+
+         Id   <RefId "x" test.lkt:50:29-50:30>
+              has_type None
+              references None
+
+         Id   <RefId "b" test.lkt:50:34-50:35>
+              has_type None
+              references None
+
+Decl <ValDecl "_" test.lkt:51:1-51:48>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <Isa test.lkt:51:9-51:48>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "a" test.lkt:51:9-51:10>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+           references <ValDecl "a" test.lkt:14:1-14:12>
+
+<ComplexPattern test.lkt:51:14-51:48> failed nameres:
+test.lkt:51:30-51:41: error: A has no component other_field
+ 51 | val _ = a is x@(B | C when x.other_field == "")
+    |                              ^^^^^^^^^^^ 
+
+      Decl <BindingValDecl "x" test.lkt:51:14-51:15>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+
+      Id   <RefId "B" test.lkt:51:17-51:18>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "C" test.lkt:51:21-51:22>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+      Expr <BinOp test.lkt:51:28-51:47>
+           has_type None
+
+         Expr <DotExpr test.lkt:51:28-51:41>
+              has_type None
+
+            Id   <RefId "x" test.lkt:51:28-51:29>
+                 has_type <ClassDecl "A" test.lkt:1:1-3:2>
+                 references <BindingValDecl "x" test.lkt:51:14-51:15>
+
+            Id   <RefId "other_field" test.lkt:51:30-51:41>
+                 has_type None
+                 references None
+
+         Expr <SingleLineStringLit test.lkt:51:45-51:47>
+              has_type None
+
+<ValDecl "_" test.lkt:52:1-55:2> failed nameres:
+test.lkt:54:23-54:24: error: undefined entity
+ 54 |     case (x@1 | 2) => x == 1
+    |                       ^ 
+
+Decl <ValDecl "_" test.lkt:52:1-55:2>
+     has_type None
+
+   Expr <MatchExpr test.lkt:52:9-55:2>
+        has_type None
+
+      Id   <RefId "i" test.lkt:52:15-52:16>
+           has_type <StructDecl prelude: "Int">
+           references <ValDecl "i" test.lkt:12:1-12:11>
+
+      Decl <BindingValDecl "x" test.lkt:53:10-53:11>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <BinOp test.lkt:53:23-53:29>
+           has_type None
+
+         Id   <RefId "x" test.lkt:53:23-53:24>
+              has_type None
+              references None
+
+         Expr <NumLit test.lkt:53:28-53:29>
+              has_type None
+
+      Decl <BindingValDecl "x" test.lkt:54:11-54:12>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <BinOp test.lkt:54:23-54:29>
+           has_type None
+
+         Id   <RefId "x" test.lkt:54:23-54:24>
+              has_type None
+              references None
+
+         Expr <NumLit test.lkt:54:28-54:29>
+              has_type None
+
+Decl <ValDecl "_" test.lkt:56:1-56:49>
+     has_type <StructDecl prelude: "Stream[A]">
+
+   Expr <Query test.lkt:56:9-56:49>
+        has_type <StructDecl prelude: "Stream[A]">
+
+      Id   <RefId "l_a" test.lkt:56:14-56:17>
+           has_type <StructDecl prelude: "Array[A]">
+           references <ValDecl "l_a" test.lkt:17:1-17:16>
+
+      Decl <BindingValDecl "x" test.lkt:56:24-56:25>
+           has_type <ClassDecl "A" test.lkt:1:1-3:2>
+
+      Id   <RefId "B" test.lkt:56:27-56:28>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "C" test.lkt:56:31-56:32>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+      Expr <BinOp test.lkt:56:37-56:49>
+           has_type <EnumTypeDecl prelude: "Bool">
+
+         Expr <DotExpr test.lkt:56:37-56:44>
+              has_type <StructDecl prelude: "Int">
+
+            Id   <RefId "x" test.lkt:56:37-56:38>
+                 has_type <ClassDecl "A" test.lkt:1:1-3:2>
+                 references <BindingValDecl "x" test.lkt:56:24-56:25>
+
+            Id   <RefId "field" test.lkt:56:39-56:44>
+                 has_type <StructDecl prelude: "Int">
+                 references <FieldDecl "field" test.lkt:2:5-2:19>
+
+         Expr <NumLit test.lkt:56:48-56:49>
+              has_type <StructDecl prelude: "Int">
+
+<ValDecl "_" test.lkt:57:1-57:38> failed nameres:
+test.lkt:57:37-57:38: error: undefined entity
+ 57 | val _ = from l_a match (x@B | C) if x
+    |                                     ^ 
+
+Decl <ValDecl "_" test.lkt:57:1-57:38>
+     has_type None
+
+   Expr <Query test.lkt:57:9-57:38>
+        has_type None
+
+      Id   <RefId "l_a" test.lkt:57:14-57:17>
+           has_type <StructDecl prelude: "Array[A]">
+           references <ValDecl "l_a" test.lkt:17:1-17:16>
+
+      Decl <BindingValDecl "x" test.lkt:57:25-57:26>
+           has_type <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "B" test.lkt:57:27-57:28>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-6:2>
+
+      Id   <RefId "C" test.lkt:57:31-57:32>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-9:2>
+
+      Id   <RefId "x" test.lkt:57:37-57:38>
+           has_type None
+           references None
 

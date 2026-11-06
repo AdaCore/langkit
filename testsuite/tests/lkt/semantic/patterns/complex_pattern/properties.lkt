@@ -10,10 +10,11 @@ class C {
     fun p2(): String = "foo"
 }
 
+val s = null[S]
 val c = null[C]
 
 val _ = c is C(nosuchprop(): "foo")
-val _ = c is S(t(): "foo")
+val _ = s is S(t(): "foo")
 val _ = c is C(p1(1, false): s)
 val _ = c is C(p1(1, false): S(i_s, t_s))
 val _ = c is C(p1(1): s)

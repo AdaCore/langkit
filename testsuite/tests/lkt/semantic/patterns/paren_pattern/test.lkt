@@ -1,0 +1,14 @@
+val b = true
+val i = 42
+
+val _ = b is (true)
+val _ = i is (1)
+val _ = b is ((((((((true))))))))
+val _ = b is (1)
+val _ = i is ((((((((true))))))))
+val _ = match i {
+    case (1) => true
+    case (((((1))))) => true
+    case (((((true))))) => false
+}
+val _ = from [b] match ((((((1))))))

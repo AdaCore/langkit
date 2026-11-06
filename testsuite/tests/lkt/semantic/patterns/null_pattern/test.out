@@ -1,0 +1,4 @@
+test.lkt:15:26-15:27: error: expected Bool, got Int
+ 15 | val _ = i is x@null when x
+    |                          ^ 
+

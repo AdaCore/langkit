@@ -1,9 +1,35 @@
 val b = true
+val i = 42
 
-# Test that binding patterns in "not patterns" aren't accessible outside
+# Test valid usages
+val _ = b is not true
+val _ = i is not 1
+val _ = b is not not not not true
+val _ = match b {
+    case not false => true
+    case not true => false
+}
+val _ = from [i] match not 1
+
+# Test erroneous usages
+val _ = b is not 1
+val _ = i is not not not not true
+val _ = match b {
+    case not 1 => true
+    case not "" => true
+}
+val _ = from [b] match not 1
+
+# Test bindings visibility
 val _ = b is x@(not true) when x
 val _ = b is not (x@true when x)
 val _ = b is (not x@true) when x
+val _ = match i {
+    case x@(not 1) => x == 1
+    case (not x@1) => x == 1
+}
+val _ = from [b] match x@(not true) if x
+val _ = from [b] match (not x@true) if x
 
 # Test that the output type of "not patterns" is sound, i.e. the type of `x`
 # in the pattern below should be inferred to `A` and not `B`.

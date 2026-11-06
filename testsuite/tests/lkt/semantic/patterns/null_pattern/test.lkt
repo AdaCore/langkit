@@ -1,0 +1,15 @@
+class A {}
+
+val i = 42
+val b = true
+val a = A()
+
+val _ = i is null
+val _ = b is x@null when x
+val _ = a is null
+val _ = match i {
+    case null => true
+}
+val _ = from [i] match null
+
+val _ = i is x@null when x

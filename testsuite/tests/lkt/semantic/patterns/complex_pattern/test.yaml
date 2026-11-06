@@ -3,3 +3,4 @@ entry_points:
   - test.lkt
   - destructuring.lkt
   - properties.lkt
+  - node_types.lkt

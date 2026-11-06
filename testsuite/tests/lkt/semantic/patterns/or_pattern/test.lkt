@@ -7,11 +7,51 @@ class B: A {
 class C: A {
     other_field: String = "hello"
 }
+class D {}
 
+val i = 42
+val s = "hello"
 val a = A()
+val b = B()
+val d = D()
+val l_a = [A()]
 
-# Test that binding in "or patterns" aren't accessible outside
+# Test valid usages
+val _ = i is 1 | 2
+val _ = s is "a" | "b"
+val _ = a is A | B
+val _ = b is A | B
+val _ = b is x@(_ | _) when x.other_field
 val _ = a is x@(B | C) when x.field == 1
+val _ = b is x@(B | C) when x.field == 1
+val _ = match i {
+    case 1 | 2 => true
+    case 3 | 4 | 5 => false
+}
+val _ = from l_a match A | B
+
+# Test erroneous usages
+val _ = i is (B | C)
+val _ = a is (B | D)
+val _ = b is x@(C | B) when x.other_field
+val _ = match a {
+    case (B | D) => true
+}
+val _ = from l_a match D
+
+# Test bindings visibility
+val _ = a is (
+    x@B when x.other_field
+    | x@C when x.other_field.length() == 1
+)
 val _ = a is (x@B when x.other_field | C)
-val _ = a is (x@B | C) when x.field == 1
-val _ = a is (x@B | (C when x.field == 1))
+val _ = a is x@(B | C when x.field == 1)
+val _ = a is (x@B | C) when x == b
+val _ = a is (x@B | (C when x == b))
+val _ = a is x@(B | C when x.other_field == "")
+val _ = match i {
+    case x@(1 | 2) => x == 1
+    case (x@1 | 2) => x == 1
+}
+val _ = from l_a match x@(B | C) if x.field == 1
+val _ = from l_a match (x@B | C) if x

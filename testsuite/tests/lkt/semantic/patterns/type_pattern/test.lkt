@@ -1,0 +1,55 @@
+class MyClass {}
+class ChildClass: MyClass {}
+class OtherChild: MyClass {}
+
+class MyNode implements Node[MyNode] {}
+class ChildNode: MyNode {}
+
+struct MyStruct {}
+
+enum MyEnum {case A}
+
+generic[T, U] struct GenStruct {
+    a: T
+    b: U
+}
+
+val cls = MyClass()
+val child = ChildClass()
+val node = MyNode()
+val entity = Entity(MyNode(), null)
+val s = MyStruct()
+val e = MyEnum.A
+val i = 42
+
+# Check explicit type references
+val _ = cls is MyClass
+val _ = cls is ChildClass
+val _ = child is MyClass
+val _ = child is ChildClass
+val _ = s is MyStruct
+val _ = e is MyEnum
+val _ = GenStruct(1, 2) is GenStruct(a: 1, b: 2)
+val _ = GenStruct(true, "Hello") is GenStruct(b: "Hello", a: true)
+val _ = match cls {
+    case ChildClass => true
+    case OtherChild => true
+    case MyClass => true
+}
+val _ = from [cls] match ChildClass
+
+# Check implicit entity matching
+val _ = node is x@ChildNode when x == node
+val _ = entity is x@ChildNode when x == entity
+
+# Test invalid usages
+val _ = i is MyClass
+val _ = child is OtherChild
+val _ = i is MyStruct
+val _ = i is MyEnum
+val _ = entity is x@MyNode when x == node
+val _ = GenStruct(1, 2) is GenStruct(a: "", b: true)
+val _ = match child {
+    case OtherChild => true
+}
+val _ = from [child] match OtherChild
