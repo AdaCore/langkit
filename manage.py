@@ -210,6 +210,17 @@ def create_subparser(
     return subparser
 
 
+def lkt_config_args(args: Namespace) -> list[str]:
+    """
+    Return ``lkm`` arguments to load the regular Liblktlang library.
+    """
+    return [
+        "--config",
+        str(LKT_LIB_ROOT / "langkit.yaml"),
+        f"--build-mode={args.build_mode}",
+    ]
+
+
 def run_subprocess(
     args: Namespace,
     argv: list[str],
@@ -411,8 +422,7 @@ def printenv(args: Namespace) -> None:
                     "-m",
                     "langkit.scripts.lkm",
                     "printenv",
-                    f"--config={LKT_LIB_ROOT / 'langkit.yaml'}",
-                    f"--build-mode={args.build_mode}",
+                    *lkt_config_args(args),
                     "-J",
                     f"--output={tmpf.name}",
                 ],
@@ -578,10 +588,8 @@ def make(args: Namespace) -> None:
     lib_types = ",".join(l.value for l in args.library_types)
     argv = [
         "make",
-        "--config",
-        str(LKT_LIB_ROOT / "langkit.yaml"),
+        *lkt_config_args(args),
         f"--library-types={lib_types}",
-        f"--build-mode={args.build_mode}",
         f"-j{args.jobs}",
     ]
 
@@ -630,9 +638,7 @@ def make_lsp(args: Namespace) -> None:
 
     argv = [
         "make-lsp",
-        "--config",
-        str(LKT_LIB_ROOT / "langkit.yaml"),
-        f"--build-mode={args.build_mode}",
+        *lkt_config_args(args),
         f"-j{args.jobs}",
     ]
     if args.native_lsp:
