@@ -53,3 +53,4 @@ val _ = match child {
     case OtherChild => true
 }
 val _ = from [child] match OtherChild
+val _ = i is NoSuchType
