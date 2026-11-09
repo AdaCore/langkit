@@ -25,4 +25,7 @@ test.lkt:53:10-53:20: error: pattern accepts values of type OtherChild, but the 
 test.lkt:55:28-55:38: error: pattern accepts values of type OtherChild, but the matched expression is of type ChildClass
  55 | val _ = from [child] match OtherChild
     |                            ^^^^^^^^^^ 
+test.lkt:56:14-56:24: error: undefined entity
+ 56 | val _ = i is NoSuchType
+    |              ^^^^^^^^^^ 
 

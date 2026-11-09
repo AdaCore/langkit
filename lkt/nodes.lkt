@@ -3353,10 +3353,10 @@ class TypePattern: Pattern {
         # Implicitly wrap the referenced type in an entity if it is a node
         # type and the input type is an entity type.
         if (
-            self.referenced_type().is_node_type()
-            and self.get_input_type().is_entity_type()
+            self.referenced_type()?.is_node_type()
+            and self.get_input_type()?.is_entity_type()
         )
-        then self.instantiated_referenced_type().make_entity_type()
+        then self.instantiated_referenced_type()?.make_entity_type()
         else self.instantiated_referenced_type()
 
     |" Return the ``TypeDecl`` referenced by this type pattern, instantiated
@@ -3369,8 +3369,8 @@ class TypePattern: Pattern {
         # generic type and the input type is an instantiation of the same
         # generic type.
         if (
-            ref_type.is_generic()
-            and self.get_input_type().is_generic()
+            ref_type?.is_generic()
+            and self.get_input_type()?.is_generic()
             and ref_type.node == self.get_input_type().node
         )
         then self.get_input_type()
