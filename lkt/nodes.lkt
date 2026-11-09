@@ -6432,7 +6432,8 @@ class TypeRef: LktNode {
     |" called on it.
     fun xref_entry_point(): Bool =
         not (
-            (node.parent is TypeRef or node.parent.parent is TypeRef)
+            node.parent is TypeRef
+            or node.parent.parent is TypeRef
             or node.parent.parent is GenericInstantiation
         )
 
