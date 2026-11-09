@@ -30,5 +30,6 @@ for prop in ("prop", "prop2"):
     for with_null in (False, True):
         check(prop, with_null=with_null)
 check("prop3")
+check("prop4")
 
 print("main.py: Done.")
