@@ -1,0 +1,19 @@
+test.lkt:15:14-15:15: error: undefined entity
+ 15 | val _ = e is T.a
+    |              ^ 
+test.lkt:16:14-16:17: error: Int is not an enum type
+ 16 | val _ = e is Int.a
+    |              ^^^ 
+test.lkt:16:18-16:19: error: Int has no component a
+ 16 | val _ = e is Int.a
+    |                  ^ 
+test.lkt:17:16-17:17: error: E has no component z
+ 17 | val _ = e is E.z
+    |                ^ 
+test.lkt:18:14-18:17: error: pattern accepts values of type E, but the matched expression is of type Int
+ 18 | val _ = i is E.a
+    |              ^^^ 
+test.lkt:19:16-19:17: error: f is not an enum literal
+ 19 | val _ = e is E.f
+    |                ^ 
+

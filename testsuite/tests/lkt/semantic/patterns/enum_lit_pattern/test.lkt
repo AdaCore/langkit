@@ -1,0 +1,19 @@
+import common
+
+enum E {
+    case a, b, c
+
+    fun f(): Bool = true
+}
+
+val i = 42
+val e = E.c
+val common_e = common.E.b
+
+val _ = e is E.a
+val _ = common_e is common.E.a
+val _ = e is T.a
+val _ = e is Int.a
+val _ = e is E.z
+val _ = i is E.a
+val _ = e is E.f
