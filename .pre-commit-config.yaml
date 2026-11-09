@@ -7,3 +7,11 @@ repos:
           - --line-length=79
         name: black-24.10.0
         exclude: ^lkt/bootstrap/
+  - repo: local
+    hooks:
+      - id: lktformat
+        name: Run lktformat
+        entry: lktformat
+        language: system
+        files: "^.*\\.lkt$"
+        exclude: "^testsuite/tests/.*$"

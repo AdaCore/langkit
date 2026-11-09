@@ -390,16 +390,16 @@ class SingleParam: PythonNode {
                 case l: ASTList[Id] =>
                     l.map(
                         (i) =>
-                        EnvAssoc(
-                            key=i.sym(),
-                            value=node,
-                            dest_env=DesignatedEnv(
-                                kind=DesignatedEnvKind.current_env,
-                                env_name=null[Symbol],
-                                direct_env=null[LexicalEnv]
-                            ),
-                            metadata=null[Metadata]
-                        )
+                            EnvAssoc(
+                                key=i.sym(),
+                                value=node,
+                                dest_env=DesignatedEnv(
+                                    kind=DesignatedEnvKind.current_env,
+                                    env_name=null[Symbol],
+                                    direct_env=null[LexicalEnv]
+                                ),
+                                metadata=null[Metadata]
+                            )
                     )
                 case _ => null[Array[EnvAssoc]]
             }
@@ -429,16 +429,16 @@ class AssignStmt: Stmt {
         add_all_to_env(
             node.l_value.filtermap(
                 (e) =>
-                EnvAssoc(
-                    key=e.as![Id].sym(),
-                    value=node,
-                    dest_env=DesignatedEnv(
-                        kind=DesignatedEnvKind.current_env,
-                        env_name=null[Symbol],
-                        direct_env=null[LexicalEnv]
+                    EnvAssoc(
+                        key=e.as![Id].sym(),
+                        value=node,
+                        dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env,
+                            env_name=null[Symbol],
+                            direct_env=null[LexicalEnv]
+                        ),
+                        metadata=null[Metadata]
                     ),
-                    metadata=null[Metadata]
-                ),
                 (e) => e is Id
             )
         )

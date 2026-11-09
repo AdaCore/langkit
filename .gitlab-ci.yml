@@ -4,6 +4,10 @@ include:
   - component: $CI_SERVER_FQDN/eng/gitlab-templates/pre-commit@~latest
     inputs:
       stage: single
+  - local: .gitlab-dates.yaml
+
+variables:
+  LKTFORMAT_DATE: !reference [.dates, lktformat]
 
 stages:
   - single
@@ -16,6 +20,22 @@ stages:
 check_issue:
   extends: .check_issue
   stage: single
+
+
+##############
+# PRE-COMMIT #
+##############
+
+pre-commit:
+  before_script:
+    - generic_anod_ci
+    - . /tmp/ci_env.sh
+
+    # Install the right lktformat version and make it available
+    - gl-sections open "Install lktformat"
+    - anod install lktformat -Qdate=$LKTFORMAT_DATE
+    - eval `anod printenv lktformat -Qdate=$LKTFORMAT_DATE`
+    - gl-sections close
 
 
 ##########################

@@ -27,20 +27,14 @@ class Pattern {
 
 class ScopedPattern {
     val f_sub_pattern =
-        if this_field is OrPattern
-        then recurse_flatten
-        else recurse
+        if this_field is OrPattern then recurse_flatten else recurse
 }
 
 class ComplexPattern {
-    val f_pattern = group(
-        if this_field is OrPattern
-        then recurse_flatten
-        else recurse
-    )
+    val f_pattern =
+        group(if this_field is OrPattern then recurse_flatten else recurse)
     val f_details =
-        if this_field.is_empty
-        then recurse
+        if this_field.is_empty then recurse
         else group(indent(softline, recurse), softline)
 }
 
@@ -56,16 +50,11 @@ class NullPattern {
 class OrPattern {
     val node = group(recurse)
     val f_left_sub_pattern = [
-        if this_field is OrPattern
-        then recurse_flatten
-        else recurse,
-        line
+        if this_field is OrPattern then recurse_flatten else recurse, line
     ]
     val f_right_sub_pattern = [
         whitespace,
-        if this_field is OrPattern
-        then recurse_flatten
-        else recurse
+        if this_field is OrPattern then recurse_flatten else recurse
     ]
 }
 
@@ -104,23 +93,31 @@ class DestructuringPatternDetail {
 }
 
 class BaseCallExpr {
-    val f_name = group(
+    val f_name =
         group(
-            if this_node.parent
-                is BinOp | LogicAssign | LogicPredicate | LogicUnify
-            then
-                indent(
+            group(
+                if
+                    this_node.parent is BinOp
+                    | LogicAssign
+                    | LogicPredicate
+                    | LogicUnify
+                then
+                    indent(
+                        if
+                            this_field is DotExpr
+                            | KeepExpr
+                            | CastExpr
+                            | CallExpr
+                        then recurse_flatten
+                        else recurse
+                    )
+                else
                     if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
                     then recurse_flatten
-                    else recurse
-                )
-            else
-                if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
-                then recurse_flatten
-                else recurse,
-            id="name"
+                    else recurse,
+                id="name"
+            )
         )
-    )
 }
 
 class BaseLexerCaseRuleAlt {
@@ -150,8 +147,9 @@ class BinOp {
             #
             # "==" has higher parsing precedence, so it breaks "less easily"
             # than "and", which has lower parsing precedence.
-            if this_node.parent.as[BinOp].f_op.p_parsing_precedence()
-               == this_node.as[BinOp].f_op.p_parsing_precedence()
+            if
+                this_node.parent.as[BinOp].f_op.p_parsing_precedence()
+                == this_node.as[BinOp].f_op.p_parsing_precedence()
             then
                 [
                     recurse(f_left),
@@ -207,22 +205,25 @@ class BlockStringLit {
 }
 
 class CallExpr {
-    val node = group(
-        recurse(f_name),
-        "(",
-        if this_node.f_args.is_empty
-        then recurse(f_args)
-        elif this_node.parent
-            is BinOp | LogicAssign | LogicPredicate | LogicUnify
-        then
-            ifBreak(
-                group(indent(indent(softline, recurse(f_args)), softline)),
-                group(indent(softline, recurse(f_args)), softline),
-                groupId="name"
-            )
-        else group(indent(softline, recurse(f_args)), softline),
-        ")"
-    )
+    val node =
+        group(
+            recurse(f_name),
+            "(",
+            if this_node.f_args.is_empty then recurse(f_args)
+            elif
+                this_node.parent is BinOp
+                | LogicAssign
+                | LogicPredicate
+                | LogicUnify
+            then
+                ifBreak(
+                    group(indent(indent(softline, recurse(f_args)), softline)),
+                    group(indent(softline, recurse(f_args)), softline),
+                    groupId="name"
+                )
+            else group(indent(softline, recurse(f_args)), softline),
+            ")"
+        )
 }
 
 class CallExprList {
@@ -243,26 +244,24 @@ class CharLit {
 }
 
 class ClassDecl {
-    val node =
-        [
-            group(
-               [
-                  "class",
-                  recurse(f_syn_name),
-                  recurse(f_syn_base_type),
-                  recurse(f_traits),
-                  if this_node.f_traits.is_empty then whitespace else [],
-                  "{"
-               ]
-            ),
-            recurse(f_decls),
-            "}"
-        ]
+    val node = [
+        group(
+            [
+                "class",
+                recurse(f_syn_name),
+                recurse(f_syn_base_type),
+                recurse(f_traits),
+                if this_node.f_traits.is_empty then whitespace else [],
+                "{"
+            ]
+        ),
+        recurse(f_decls),
+        "}"
+    ]
     val f_syn_base_type = [":", whitespace, recurse]
     val f_traits = [indent([line, "implements", recurse]), line]
     val f_decls =
-        if this_field.is_empty
-        then [hardline, recurse]
+        if this_field.is_empty then [hardline, recurse]
         else [indent(hardline, recurse), hardline]
 }
 
@@ -286,10 +285,8 @@ class DefaultListTypeRef {
 class DotExpr {
     val node =
         if this_node.parent is BinOp
-        then
-            group(indent(recurse, bubbleUpTrailingTrivias=true))
-        else
-            group(recurse)
+        then group(indent(recurse, bubbleUpTrailingTrivias=true))
+        else group(recurse)
 
     val f_prefix = [
         if this_field is DotExpr | KeepExpr | CastExpr | CallExpr
@@ -304,28 +301,25 @@ class DynVarDecl {
 }
 
 class ElsifBranch {
-    val node =
-        [
-            hardline,
-            flushLineBreaks,
-            group(
-                match this_node.f_cond_expr {
-                    case BlockExpr | ParenExpr =>
-                        ["elif", whitespace, recurse(f_cond_expr)]
-                    case _ =>
-                        group(indent("elif", line, recurse(f_cond_expr)))
-                },
-                line,
+    val node = [
+        hardline,
+        flushLineBreaks,
+        group(
+            match this_node.f_cond_expr {
+                case BlockExpr | ParenExpr =>
+                    ["elif", whitespace, recurse(f_cond_expr)]
+                case _ => group(indent("elif", line, recurse(f_cond_expr)))
+            },
+            line,
 
-                flushLineBreaks,
-                match this_node.f_then_expr {
-                    case BlockExpr | ParenExpr =>
-                        ["then", whitespace, recurse(f_then_expr)]
-                    case _ =>
-                        group(indent("then", line, recurse(f_then_expr)))
-                }
-            )
-        ]
+            flushLineBreaks,
+            match this_node.f_then_expr {
+                case BlockExpr | ParenExpr =>
+                    ["then", whitespace, recurse(f_then_expr)]
+                case _ => group(indent("then", line, recurse(f_then_expr)))
+            }
+        )
+    ]
 }
 
 class ElsifBranchList {
@@ -348,28 +342,23 @@ class EnumClassCaseList {
 }
 
 class EnumClassDecl {
-    val node =
-        [
-            "enum",
-            "class",
-            recurse(f_syn_name),
-            recurse(f_syn_base_type),
-            recurse(f_traits),
-            whitespace,
-            "{",
-            indent(recurse(f_branches), recurse(f_decls)),
-            hardline,
-            "}"
-        ]
+    val node = [
+        "enum",
+        "class",
+        recurse(f_syn_name),
+        recurse(f_syn_base_type),
+        recurse(f_traits),
+        whitespace,
+        "{",
+        indent(recurse(f_branches), recurse(f_decls)),
+        hardline,
+        "}"
+    ]
     val f_syn_base_type = [":", whitespace, recurse]
     val f_branches =
-        if this_field.is_empty
-        then [recurse]
-        else [hardline, recurse]
+        if this_field.is_empty then [recurse] else [hardline, recurse]
     val f_decls =
-        if this_field.is_empty
-        then [recurse]
-        else [hardline, recurse]
+        if this_field.is_empty then [recurse] else [hardline, recurse]
 }
 
 class EnumLitDecl {
@@ -380,38 +369,29 @@ class EnumLitDeclList {
 }
 
 class EnumTypeDecl {
-    val node =
-        [
-            "enum",
-            recurse(f_syn_name),
-            recurse(f_traits),
-            whitespace,
-            "{",
-            indent(
-                hardline,
-                "case",
-                group(indent(line, recurse(f_literals))),
-                recurse(f_decls)
-            ),
+    val node = [
+        "enum",
+        recurse(f_syn_name),
+        recurse(f_traits),
+        whitespace,
+        "{",
+        indent(
             hardline,
-            "}"
-        ]
+            "case",
+            group(indent(line, recurse(f_literals))),
+            recurse(f_decls)
+        ),
+        hardline,
+        "}"
+    ]
     val f_decls =
-        if this_field.is_empty
-        then [recurse]
-        else [hardline, recurse]
+        if this_field.is_empty then [recurse] else [hardline, recurse]
 }
 
 class EnvSpecDecl {
     val f_syn_name = [recurse, whitespace]
     val f_actions = [
-        indent(
-            if this_field.is_empty
-            then []
-            else hardline,
-            recurse
-        ),
-        hardline
+        indent(if this_field.is_empty then [] else hardline, recurse), hardline
     ]
 }
 
@@ -438,16 +418,15 @@ class FieldDecl {
             ]
         )
     val f_trait_ref = [indent([line, "implements", recurse]), line]
-    val f_default_val =
-        [
-            if this_node.f_trait_ref is null then whitespace else [],
-            "=",
-            match this_field {
-                case BlockExpr => [whitespace, recurse]
-                case ParenExpr => [whitespace, recurse]
-                case _ => group(indent(line, recurse))
-            }
-        ]
+    val f_default_val = [
+        if this_node.f_trait_ref is null then whitespace else [],
+        "=",
+        match this_field {
+            case BlockExpr => [whitespace, recurse]
+            case ParenExpr => [whitespace, recurse]
+            case _ => group(indent(line, recurse))
+        }
+    ]
 }
 
 class FullDecl {
@@ -459,15 +438,14 @@ class FullDeclList {
 }
 
 class FunParamDecl {
-    val node =
-        [
-            recurse(f_decl_annotations),
-            recurse(f_syn_name),
-            ":",
-            whitespace,
-            recurse(f_decl_type),
-            recurse(f_default_val)
-        ]
+    val node = [
+        recurse(f_decl_annotations),
+        recurse(f_syn_name),
+        ":",
+        whitespace,
+        recurse(f_decl_type),
+        recurse(f_default_val)
+    ]
     val f_default_val = [whitespace, "=", group(indent(line, recurse))]
 }
 
@@ -476,48 +454,45 @@ class FunParamDeclList {
 }
 
 class FunDecl {
-    val node =
-        [
-            group(
-                [
-                    "fun",
-                    recurse(f_syn_name),
-                    "(",
-                    group(indent(softline, recurse(f_params)), softline),
-                    ")",
-                    ":",
-                    whitespace,
-                    recurse(f_return_type),
-                    recurse(f_trait_ref)
-                ]
-            ),
-            recurse(f_body)
-        ]
+    val node = [
+        group(
+            [
+                "fun",
+                recurse(f_syn_name),
+                "(",
+                group(indent(softline, recurse(f_params)), softline),
+                ")",
+                ":",
+                whitespace,
+                recurse(f_return_type),
+                recurse(f_trait_ref)
+            ]
+        ),
+        recurse(f_body)
+    ]
     val f_trait_ref = [indent([line, "implements", recurse]), line]
-    val f_body =
-        [
-            if this_node.f_trait_ref is null then whitespace else [],
-            match this_field {
-                case ArrayLiteral | BlockExpr | MatchExpr =>
-                    ["=", whitespace, recurse]
-                case _ => group(indent("=", line, recurse))
-            }
-        ]
+    val f_body = [
+        if this_node.f_trait_ref is null then whitespace else [],
+        match this_field {
+            case ArrayLiteral | BlockExpr | MatchExpr =>
+                ["=", whitespace, recurse]
+            case _ => group(indent("=", line, recurse))
+        }
+    ]
 }
 
 class FunctionTypeRef {
 }
 
 class GenericDecl {
-    val node =
-        [
-            "generic",
-            "[",
-            group(indent(softline, recurse(f_generic_param_decls)), softline),
-            "]",
-            hardline,
-            recurse(f_decl)
-        ]
+    val node = [
+        "generic",
+        "[",
+        group(indent(softline, recurse(f_generic_param_decls)), softline),
+        "]",
+        hardline,
+        recurse(f_decl)
+    ]
 }
 
 class GenericParamDeclList {
@@ -543,18 +518,11 @@ class GrammarCut {
 }
 
 class GrammarDecl {
-    val node =
-        [
-            "grammar",
-            recurse(f_syn_name),
-            whitespace,
-            "{",
-            recurse(f_rules),
-            "}"
-        ]
+    val node = [
+        "grammar", recurse(f_syn_name), whitespace, "{", recurse(f_rules), "}"
+    ]
     val f_rules =
-        if this_field.is_empty
-        then [hardline, recurse]
+        if this_field.is_empty then [hardline, recurse]
         else [indent(hardline, recurse), hardline]
 }
 
@@ -579,14 +547,13 @@ class GrammarImplicitPick {
 }
 
 class GrammarList {
-    val node =
-        [
-            recurse(f_list_type),
-            recurse(f_kind),
-            "(",
-            group(indent(softline, recurse(f_expr), recurse(f_sep)), softline),
-            ")"
-        ]
+    val node = [
+        recurse(f_list_type),
+        recurse(f_kind),
+        "(",
+        group(indent(softline, recurse(f_expr), recurse(f_sep)), softline),
+        ")"
+    ]
     val f_sep = [",", line, recurse]
 }
 
@@ -620,31 +587,29 @@ class GrammarPick {
 }
 
 class GrammarPredicate {
-    val node =
-        [
-            recurse(f_expr),
-            whitespace,
-            "|>",
-            whitespace,
-            "when",
-            "(",
-            recurse(f_prop_ref),
-            ")"
-        ]
+    val node = [
+        recurse(f_expr),
+        whitespace,
+        "|>",
+        whitespace,
+        "when",
+        "(",
+        recurse(f_prop_ref),
+        ")"
+    ]
 }
 
 class GrammarRuleDecl {
-    val node =
-        [
-            recurse(f_syn_name),
-            whitespace,
-            "<-",
-            match this_node.f_expr {
-                case TokenLit | TokenPatternLit =>
-                    indent(group(line, recurse(f_expr)))
-                case _ => [whitespace, recurse(f_expr)]
-            }
-        ]
+    val node = [
+        recurse(f_syn_name),
+        whitespace,
+        "<-",
+        match this_node.f_expr {
+            case TokenLit | TokenPatternLit =>
+                indent(group(line, recurse(f_expr)))
+            case _ => [whitespace, recurse(f_expr)]
+        }
+    ]
 }
 
 class GrammarRuleRef {
@@ -668,8 +633,7 @@ class IfExpr {
                 match this_node.f_cond_expr {
                     case BlockExpr | ParenExpr =>
                         ["if", whitespace, recurse(f_cond_expr)]
-                    case _ =>
-                        group(indent("if", line, recurse(f_cond_expr)))
+                    case _ => group(indent("if", line, recurse(f_cond_expr)))
                 },
                 line,
 
@@ -677,8 +641,7 @@ class IfExpr {
                 match this_node.f_then_expr {
                     case BlockExpr | ParenExpr =>
                         ["then", whitespace, recurse(f_then_expr)]
-                    case _ =>
-                        group(indent("then", line, recurse(f_then_expr)))
+                    case _ => group(indent("then", line, recurse(f_then_expr)))
                 }
             ),
 
@@ -689,8 +652,7 @@ class IfExpr {
             match this_node.f_else_expr {
                 case BlockExpr | ParenExpr =>
                     ["else", whitespace, recurse(f_else_expr)]
-                case _ =>
-                    group(indent("else", line, recurse(f_else_expr)))
+                case _ => group(indent("else", line, recurse(f_else_expr)))
             }
 
         )
@@ -703,13 +665,7 @@ class ImportFrom {
 }
 
 class ImportAllFrom {
-    val node = [
-        "from",
-        recurse(f_module_name),
-        "import",
-        whitespace,
-        "*"
-    ]
+    val node = ["from", recurse(f_module_name), "import", whitespace, "*"]
 }
 
 class ImportedName {
@@ -753,34 +709,31 @@ class LambdaParamDeclList {
 }
 
 class LambdaExpr {
-    val node =
-        [
-            "(",
-            recurse(f_params),
-            ")",
-            recurse(f_return_type),
-            whitespace,
-            match this_node.f_body {
-                case ArrayLiteral | BlockExpr | ParenExpr | MatchExpr =>
-                    ["=>", whitespace, recurse(f_body)]
-                case _ =>
-                    group(
-                        indent(
-                            "=>",
-                            line,
-                            flushLineBreaks,
-                            match this_node.f_body {
-                                case BlockExpr =>
-                                    [recurse(f_body)]
-                                case _ =>
-                                    group(recurse(f_body))
-                            }
-                        ),
-                        bubbleUpLeadingTrivias=false,
-                        bubbleUpTrailingTrivias=false
-                    )
-            }
-        ]
+    val node = [
+        "(",
+        recurse(f_params),
+        ")",
+        recurse(f_return_type),
+        whitespace,
+        match this_node.f_body {
+            case ArrayLiteral | BlockExpr | ParenExpr | MatchExpr =>
+                ["=>", whitespace, recurse(f_body)]
+            case _ =>
+                group(
+                    indent(
+                        "=>",
+                        line,
+                        flushLineBreaks,
+                        match this_node.f_body {
+                            case BlockExpr => [recurse(f_body)]
+                            case _ => group(recurse(f_body))
+                        }
+                    ),
+                    bubbleUpLeadingTrivias=false,
+                    bubbleUpTrailingTrivias=false
+                )
+        }
+    ]
     val f_params = group(indent(softline, recurse), softline)
     val f_return_type = [":", whitespace, recurse]
 }
@@ -788,15 +741,15 @@ class LambdaExpr {
 class LangkitRoot {
     val f_imports = [
         recurse,
-        if this_field.is_empty or this_node.f_decls.is_empty
-        then []
+        if this_field.is_empty or this_node.f_decls.is_empty then []
         else [hardline, hardline]
     ]
 }
 
 class LexerCaseRule {
-    val node =
-        ["match", recurse(f_expr), whitespace, "{", recurse(f_alts), "}"]
+    val node = [
+        "match", recurse(f_expr), whitespace, "{", recurse(f_alts), "}"
+    ]
     val f_alts = [indent(hardline, recurse), hardline]
 }
 
@@ -805,20 +758,20 @@ class LexerCaseRuleSend {
 }
 
 class LexerDecl {
-    val node =
-        ["lexer", recurse(f_syn_name), whitespace, "{", recurse(f_rules), "}"]
+    val node = [
+        "lexer", recurse(f_syn_name), whitespace, "{", recurse(f_rules), "}"
+    ]
     val f_rules =
-        if this_field.is_empty
-        then [hardline, recurse]
+        if this_field.is_empty then [hardline, recurse]
         else [indent(hardline, recurse), hardline]
 }
 
 class LexerFamilyDecl {
-    val node =
-        ["family", recurse(f_syn_name), whitespace, "{", recurse(f_rules), "}"]
+    val node = [
+        "family", recurse(f_syn_name), whitespace, "{", recurse(f_rules), "}"
+    ]
     val f_rules =
-        if this_field.is_empty
-        then [hardline, recurse]
+        if this_field.is_empty then [hardline, recurse]
         else [indent(hardline, recurse), hardline]
 }
 
@@ -839,8 +792,10 @@ class LogicAssign {
                     line,
                     "<-",
                     whitespace,
-                    if this_node.f_value
-                        is ArrayLiteral |BaseCallExpr | MatchExpr
+                    if
+                        this_node.f_value is ArrayLiteral
+                        | BaseCallExpr
+                        | MatchExpr
                     then recurse(f_value)
                     else
                         indent(recurse(f_value), bubbleUpTrailingTrivias=true),
@@ -853,8 +808,7 @@ class LogicAssign {
                 line,
                 "<-",
                 whitespace,
-                if this_node.f_value
-                    is ArrayLiteral |BaseCallExpr | MatchExpr
+                if this_node.f_value is ArrayLiteral | BaseCallExpr | MatchExpr
                 then recurse(f_value)
                 else indent(recurse(f_value), bubbleUpTrailingTrivias=true)
             )
@@ -864,23 +818,26 @@ class LogicExpr {
 }
 
 class LogicPredicate {
-    val node = group(
-        recurse(f_name),
-        "%",
-        "(",
-        if this_node.f_args.is_empty
-        then recurse(f_args)
-        elif this_node.parent
-            is BinOp | LogicAssign | LogicPredicate | LogicUnify
-        then
-            ifBreak(
-                group(indent(indent(softline, recurse(f_args)), softline)),
-                group(indent(softline, recurse(f_args)), softline),
-                groupId="name"
-            )
-        else group(indent(softline, recurse(f_args)), softline),
-        ")"
-    )
+    val node =
+        group(
+            recurse(f_name),
+            "%",
+            "(",
+            if this_node.f_args.is_empty then recurse(f_args)
+            elif
+                this_node.parent is BinOp
+                | LogicAssign
+                | LogicPredicate
+                | LogicUnify
+            then
+                ifBreak(
+                    group(indent(indent(softline, recurse(f_args)), softline)),
+                    group(indent(softline, recurse(f_args)), softline),
+                    groupId="name"
+                )
+            else group(indent(softline, recurse(f_args)), softline),
+            ")"
+        )
 }
 
 class LogicPropagate {
@@ -898,33 +855,30 @@ class LogicPropagate {
                 )
             )
         else
-            group(
-                recurse(f_dest_var),
-                line,
-                "<-",
-                whitespace,
-                recurse(f_call)
-            )
+            group(recurse(f_dest_var), line, "<-", whitespace, recurse(f_call))
 }
 
 class LogicPropagateCall {
-    val node = group(
-        recurse(f_name),
-        "%",
-        "(",
-        if this_node.f_args.is_empty
-        then recurse(f_args)
-        elif this_node.parent
-            is BinOp | LogicAssign | LogicPredicate | LogicUnify
-        then
-            ifBreak(
-                group(indent(indent(softline, recurse(f_args)), softline)),
-                group(indent(softline, recurse(f_args)), softline),
-                groupId="name"
-            )
-        else group(indent(softline, recurse(f_args)), softline),
-        ")"
-    )
+    val node =
+        group(
+            recurse(f_name),
+            "%",
+            "(",
+            if this_node.f_args.is_empty then recurse(f_args)
+            elif
+                this_node.parent is BinOp
+                | LogicAssign
+                | LogicPredicate
+                | LogicUnify
+            then
+                ifBreak(
+                    group(indent(indent(softline, recurse(f_args)), softline)),
+                    group(indent(softline, recurse(f_args)), softline),
+                    groupId="name"
+                )
+            else group(indent(softline, recurse(f_args)), softline),
+            ")"
+        )
 }
 
 class LogicUnify {
@@ -937,8 +891,10 @@ class LogicUnify {
                     line,
                     "<->",
                     whitespace,
-                    if this_node.f_rhs
-                        is ArrayLiteral | BaseCallExpr | MatchExpr
+                    if
+                        this_node.f_rhs is ArrayLiteral
+                        | BaseCallExpr
+                        | MatchExpr
                     then recurse(f_rhs)
                     else indent(recurse(f_rhs), bubbleUpTrailingTrivias=true),
                     bubbleUpTrailingTrivias=true
@@ -950,35 +906,32 @@ class LogicUnify {
                 line,
                 "<->",
                 whitespace,
-                if this_node.f_rhs
-                    is ArrayLiteral | BaseCallExpr | MatchExpr
+                if this_node.f_rhs is ArrayLiteral | BaseCallExpr | MatchExpr
                 then recurse(f_rhs)
                 else indent(recurse(f_rhs), bubbleUpTrailingTrivias=true)
             )
 }
 
 class MatchBranch {
-    val node =
-        [
-            "case",
-            whitespace,
-            recurse(f_decl),
-            whitespace,
-            "=>",
-            group(indent(line, recurse(f_expr)))
-        ]
+    val node = [
+        "case",
+        whitespace,
+        recurse(f_decl),
+        whitespace,
+        "=>",
+        group(indent(line, recurse(f_expr)))
+    ]
 }
 
 class PatternMatchBranch {
-    val node =
-        [
-            "case",
-            whitespace,
-            recurse(f_pattern),
-            whitespace,
-            "=>",
-            group(indent(line, recurse(f_expr)))
-        ]
+    val node = [
+        "case",
+        whitespace,
+        recurse(f_pattern),
+        whitespace,
+        "=>",
+        group(indent(line, recurse(f_expr)))
+    ]
 }
 
 class BaseMatchBranchList {
@@ -986,15 +939,14 @@ class BaseMatchBranchList {
 }
 
 class MatchExpr {
-    val node =
-        [
-            "match",
-            group(indent(line, recurse(f_match_expr)), line),
-            "{",
-            indent(hardline, recurse(f_branches)),
-            hardline,
-            "}"
-        ]
+    val node = [
+        "match",
+        group(indent(line, recurse(f_match_expr)), line),
+        "{",
+        indent(hardline, recurse(f_branches)),
+        hardline,
+        "}"
+    ]
 }
 
 class MatchValDecl {
@@ -1065,19 +1017,17 @@ class SingleLineStringLit {
 }
 
 class StructDecl {
-    val node =
-        [
-            "struct",
-            recurse(f_syn_name),
-            recurse(f_traits),
-            whitespace,
-            "{",
-            recurse(f_decls),
-            "}"
-        ]
+    val node = [
+        "struct",
+        recurse(f_syn_name),
+        recurse(f_traits),
+        whitespace,
+        "{",
+        recurse(f_decls),
+        "}"
+    ]
     val f_decls =
-        if this_field.is_empty
-        then [hardline, recurse]
+        if this_field.is_empty then [hardline, recurse]
         else [indent(hardline, recurse), hardline]
 }
 
@@ -1103,19 +1053,17 @@ class TokenRef {
 }
 
 class TraitDecl {
-    val node =
-        [
-            "trait",
-            recurse(f_syn_name),
-            whitespace,
-            recurse(f_traits),
-            "{",
-            recurse(f_decls),
-            "}"
-        ]
+    val node = [
+        "trait",
+        recurse(f_syn_name),
+        whitespace,
+        recurse(f_traits),
+        "{",
+        recurse(f_decls),
+        "}"
+    ]
     val f_decls =
-        if this_field.is_empty
-        then [hardline, recurse]
+        if this_field.is_empty then [hardline, recurse]
         else [indent(hardline, recurse), hardline]
 }
 
