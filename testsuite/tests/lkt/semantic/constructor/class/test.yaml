@@ -1,1 +1,2 @@
 driver: lkt
+entry_points: [test.lkt, logic_vars.lkt]

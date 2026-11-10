@@ -39,5 +39,10 @@ SynthNode3 main.txt:1:1-1:15
 |f_name:
 |  Name main.txt:1:2-1:6: main
 
+== prop4() ==
+SynthNode4 main.txt:1:1-1:15
+|f_name:
+|  Name main.txt:1:2-1:6: main
+
 main.py: Done.
 Done

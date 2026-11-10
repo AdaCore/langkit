@@ -2788,6 +2788,14 @@ class ClassDecl: BasicClassDecl {
                                 or d.has_annotation(s"null_field")
                             )
                         )
+
+                        # Do not include fields if their type has the
+                        # @auto_storage annotation.
+                        and not (
+                            d.decl.as[FieldDecl].decl_type.referenced_decl()
+                            ?.full_decl()
+                            .has_annotation(s"auto_storage")
+                        )
                 )
         )
 

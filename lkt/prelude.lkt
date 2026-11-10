@@ -445,6 +445,7 @@ struct String implements Sized, Indexable[Char], Iterable[Char] {
 |" ASTNodeType. At some point we might want to make it generic, like list and
 |" array types.
 @builtin
+@auto_storage
 struct LogicVar {
     @builtin
     fun get_value(): Entity[RootNode__]

@@ -2956,8 +2956,12 @@ class BaseStructType(CompiledType):
             elif isinstance(f, Field):
                 return not f.null
 
+            elif isinstance(f, UserField):
+                # Logic variable fields are never explicitly initialized
+                return not f.type.is_logic_var_type
+
             else:
-                return isinstance(f, UserField)
+                return False
 
         return {
             f.original_name: f

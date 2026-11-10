@@ -1,0 +1,9 @@
+class C {
+    a: Int
+    b: LogicVar
+    c: Int
+}
+
+val v1 = C(1, 2)
+val v2 = C(a=1, c=2)
+val invalid = C(a=1, b=0, c=2)

@@ -56,6 +56,10 @@ class LiteralSequence: FooNode {
     @exported
     @memoized
     fun prop3(): Entity[SynthNode3] = SynthNode3(name=node.name).as_bare_entity
+
+    @exported
+    @memoized
+    fun prop4(): Entity[SynthNode4] = SynthNode4(name=node.name).as_bare_entity
 }
 
 class Name: FooNode implements TokenNode {
@@ -83,4 +87,10 @@ class SynthNode3Parent: FooNode {
 class SynthNode3: SynthNode3Parent {
     @parse_field name: Name
     @parse_field @null_field value: Literal
+}
+
+@synthetic
+class SynthNode4: FooNode {
+    type_var: LogicVar
+    @parse_field name: Name
 }

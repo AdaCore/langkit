@@ -102,3 +102,102 @@ Decl <ValDecl "invalid" test.lkt:13:1-13:25>
       Expr <NumLit test.lkt:13:23-13:24>
            has_type <StructDecl prelude: "Int">
 
+Resolving logic_vars.lkt
+========================
+Decl <FieldDecl "a" logic_vars.lkt:2:5-2:11>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" logic_vars.lkt:2:8-2:11>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <FieldDecl "b" logic_vars.lkt:3:5-3:16>
+     has_type <StructDecl prelude: "LogicVar">
+
+   Id   <RefId "LogicVar" logic_vars.lkt:3:8-3:16>
+        has_type None
+        references <StructDecl prelude: "LogicVar">
+
+Decl <FieldDecl "c" logic_vars.lkt:4:5-4:11>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" logic_vars.lkt:4:8-4:11>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <ValDecl "v1" logic_vars.lkt:7:1-7:17>
+     has_type <ClassDecl "C" logic_vars.lkt:1:1-5:2>
+
+   Expr <CallExpr logic_vars.lkt:7:10-7:17>
+        has_type <ClassDecl "C" logic_vars.lkt:1:1-5:2>
+
+      Id   <RefId "C" logic_vars.lkt:7:10-7:11>
+           has_type <FunctionType "(Int, Int) -> C" logic_vars.lkt>
+           references <ClassDecl "C" logic_vars.lkt:1:1-5:2>
+
+      Expr <NumLit logic_vars.lkt:7:12-7:13>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit logic_vars.lkt:7:15-7:16>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "v2" logic_vars.lkt:8:1-8:21>
+     has_type <ClassDecl "C" logic_vars.lkt:1:1-5:2>
+
+   Expr <CallExpr logic_vars.lkt:8:10-8:21>
+        has_type <ClassDecl "C" logic_vars.lkt:1:1-5:2>
+
+      Id   <RefId "C" logic_vars.lkt:8:10-8:11>
+           has_type <FunctionType "(Int, Int) -> C" logic_vars.lkt>
+           references <ClassDecl "C" logic_vars.lkt:1:1-5:2>
+
+      Id   <RefId "a" logic_vars.lkt:8:12-8:13>
+           has_type None
+           references <FieldDecl "a" logic_vars.lkt:2:5-2:11>
+
+      Expr <NumLit logic_vars.lkt:8:14-8:15>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "c" logic_vars.lkt:8:17-8:18>
+           has_type None
+           references <FieldDecl "c" logic_vars.lkt:4:5-4:11>
+
+      Expr <NumLit logic_vars.lkt:8:19-8:20>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "invalid" logic_vars.lkt:9:1-9:31> failed nameres:
+logic_vars.lkt:9:22-9:23: error: extraneous parameter for C
+ 9 | val invalid = C(a=1, b=0, c=2)
+   |                      ^ 
+
+Decl <ValDecl "invalid" logic_vars.lkt:9:1-9:31>
+     has_type None
+
+   Expr <CallExpr logic_vars.lkt:9:15-9:31>
+        has_type None
+
+      Id   <RefId "C" logic_vars.lkt:9:15-9:16>
+           has_type None
+           references None
+
+      Id   <RefId "a" logic_vars.lkt:9:17-9:18>
+           has_type None
+           references None
+
+      Expr <NumLit logic_vars.lkt:9:19-9:20>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "b" logic_vars.lkt:9:22-9:23>
+           has_type None
+           references None
+
+      Expr <NumLit logic_vars.lkt:9:24-9:25>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "c" logic_vars.lkt:9:27-9:28>
+           has_type None
+           references None
+
+      Expr <NumLit logic_vars.lkt:9:29-9:30>
+           has_type <StructDecl prelude: "Int">
+
