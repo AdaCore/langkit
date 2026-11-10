@@ -532,8 +532,15 @@ sub-parser: it references the ``prod_expr`` rule instead. On the other hand,
 layering pattern is used to deal with associativity in the parser: going into
 details of parsing methods is not the purpose of this tutorial but fortunately
 there are many articles that explain `how this works
-<https://www.google.fr/search?q=recursive+descent+parser+associativity>`_. Just
-remember that: yes, Langkit handles left recursion.
+<https://www.google.fr/search?q=recursive+descent+parser+associativity>`_.
+
+.. note::
+
+   Langkit handles direct left recursion, meaning that a reference to a grammar
+   rule is allowed to appear in first position inside its own definition.
+   However, indirect left recursion is not supported, meaning it is not allowed
+   to reference another rule that itself references back the original rule in
+   its first position.
 
 .. code-block:: python
 
