@@ -9,10 +9,6 @@ grammar foo_grammar {
 
 @abstract
 class FooNode implements Node[FooNode] {
-    fun null_node(): FooNode = null[FooNode]
-
-    @exported
-    fun invalid_pattern(): Bool = node.null_node() is Def(f_example: null)
 }
 
 class Def: FooNode {
@@ -20,4 +16,6 @@ class Def: FooNode {
 }
 
 class Example: FooNode implements TokenNode {
+    @exported
+    fun invalid_pattern(): Bool = node.parent is not Def
 }
