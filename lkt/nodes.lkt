@@ -512,6 +512,12 @@ class Decl: LktNode implements DeclarationInterface {
     @predicate_error("$Self is not a type")
     fun is_type_decl(): Bool = node is TypeDecl
 
+    @predicate_error("$Self is not an enum type")
+    fun is_enum_type_decl(): Bool = node is EnumTypeDecl
+
+    @predicate_error("$Self is not an enum literal")
+    fun is_enum_lit_decl(): Bool = node is EnumLitDecl
+
     @predicate_error("undefined entity")
     fun is_defined(): Bool = not node.is_null
 
@@ -3228,6 +3234,55 @@ enum class BoolPattern: Pattern {
 |" Pattern to match on integers.
 class IntegerPattern: Pattern implements TokenNode {
     fun get_output_type(): Entity[TypeDecl] = self.int_type()
+}
+
+|" Pattern to match enum literals.
+class EnumLiteralPattern: Pattern {
+    @parse_field
+    type_ref: TypeRef
+    @parse_field
+    member_ref: RefId
+
+    type_var: LogicVar
+
+    fun xref_equation(): Equation = {
+        bind error_location = node.member_ref;
+        bind origin = null[Entity[TypeDecl]];
+        val enum_type = self.type_ref.referenced_decl();
+        val enum_lit =
+            enum_type?.defined_scope().get_first(
+                self.member_ref.symbol,
+                lookup=LookupKind.flat
+            );
+
+        # The "type_ref" field is an xref entry point, so no need to re-resolve
+        # it here: validate that it references an enum type and then focus on
+        # the member reference.
+        self.super()
+        %and self.type_var <- enum_type
+        %and self.member_ref.ref_var <- enum_lit
+        %and (
+            if enum_type.is_null then %true
+            else (
+                {
+                    bind error_location = node.type_ref;
+                    Decl.is_enum_type_decl%(self.type_var)
+                }
+                %and Decl.has_component%(
+                    self.member_ref.ref_var,
+                    enum_type,
+                    self.member_ref
+                )
+            )
+        )
+        %and (
+            if enum_lit.is_null then %true
+            else Decl.is_enum_lit_decl%(self.member_ref.ref_var)
+        )
+    }
+
+    fun get_output_type(): Entity[TypeDecl] =
+        self.type_ref.referenced_decl().as[EnumTypeDecl]
 }
 
 |" Pattern to match on lists.
@@ -6432,7 +6487,8 @@ class TypeRef: LktNode {
     |" called on it.
     fun xref_entry_point(): Bool =
         not (
-            (node.parent is TypeRef or node.parent.parent is TypeRef)
+            node.parent is TypeRef
+            or node.parent.parent is TypeRef
             or node.parent.parent is GenericInstantiation
         )
 

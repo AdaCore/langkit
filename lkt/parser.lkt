@@ -272,8 +272,8 @@ grammar lkt_grammar {
         type_ref_id null(NullCondQualifier) "." / ref_id
     )
     type_expr <- or(
-        | DotExpr(module_id null(NullCondQualifier) "." / type_ref_id)
-        | DotExpr(type_expr null(NullCondQualifier) "." / type_ref_id)
+        | DotExpr(module_id null(NullCondQualifier) "." type_ref_id)
+        | DotExpr(type_expr null(NullCondQualifier) "." type_ref_id)
         | type_ref_id
     )
     type_ref <- or(
@@ -339,6 +339,7 @@ grammar lkt_grammar {
         )
     )
     value_pattern <- or(
+        | EnumLiteralPattern(type_ref "." ref_id |> when(Id.is_not_type_name))
         | TypePattern(type_ref)
         | NullPattern("null")
         | regex_pattern
