@@ -3171,7 +3171,7 @@ class ExpressionCompiler:
                 ptn.f_pattern, L.TypePattern
             ) and not ptn.f_details.children and not ptn.f_predicate:
                 return [ptn.f_pattern.f_type_name]
-            case L.ScopedPattern():
+            case L.ScopedPattern() if not isinstance(ptn, L.NotPattern):
                 return self.flatten_pattern(ptn.f_sub_pattern)
             case _:
                 error(
