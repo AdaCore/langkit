@@ -258,16 +258,16 @@ private package ${ada_lib_name}.Implementation is
    subtype Long_Long_Natural is Long_Long_Integer
       range 0 .. Long_Long_Integer'Last;
 
-   ${struct_types.incomplete_decl(T.env_md)}
-   ${struct_types.decl(T.env_md, incomplete_nullexpr=False)}
+   ${struct_types.incomplete_decl(T.env_md, incomplete_nullexpr=False)}
+   ${struct_types.decl(T.env_md)}
    ${struct_types.nullexpr_decl(T.env_md)}
 
    ## Special case for the env metadata struct, where the Hash function is
    ## explicitly declared because it has specific logic.
    function Hash (Self : ${T.env_md.name}) return Hash_Type;
 
-   ${struct_types.incomplete_decl(T.InnerEnvAssoc)}
-   ${struct_types.decl(T.InnerEnvAssoc, incomplete_nullexpr=False)}
+   ${struct_types.incomplete_decl(T.InnerEnvAssoc, incomplete_nullexpr=False)}
+   ${struct_types.decl(T.InnerEnvAssoc)}
    ${struct_types.nullexpr_decl(T.InnerEnvAssoc)}
    function Get_Key (Self : ${T.InnerEnvAssoc.name}) return Thin_Symbol
    is (Thin (Self.Key));
@@ -691,16 +691,6 @@ private package ${ada_lib_name}.Implementation is
    --  Constructors for synthetizing node builders may rely on other types, so
    --  they are declared later.
 
-   -----------------------------------------------
-   -- Structure types (incomplete declarations) --
-   -----------------------------------------------
-
-   % for struct_type in ctx.struct_types:
-      % if not struct_type.has_early_decl and struct_type.is_codegen_type:
-         ${struct_types.incomplete_decl(struct_type)}
-      % endif
-   % endfor
-
    -------------------------------------------
    -- Array types (incomplete declarations) --
    -------------------------------------------
@@ -730,6 +720,16 @@ private package ${ada_lib_name}.Implementation is
    % for set_type in ctx.set_types:
       % if not set_type.has_early_decl and set_type.is_codegen_type:
          ${set_types.incomplete_decl(set_type)}
+      % endif
+   % endfor
+
+   -----------------------------------------------
+   -- Structure types (incomplete declarations) --
+   -----------------------------------------------
+
+   % for struct_type in ctx.struct_types:
+      % if not struct_type.has_early_decl and struct_type.is_codegen_type:
+         ${struct_types.incomplete_decl(struct_type)}
       % endif
    % endfor
 
@@ -792,6 +792,19 @@ private package ${ada_lib_name}.Implementation is
       function Trace_Image (T : Source_Location) return String renames Image;
       function Trace_Image (Self : Ref_Categories) return String;
    % endif
+
+   ---------------------
+   --  Set containers --
+   ---------------------
+
+   % for elt_type in sorted(ctx.codegen_set_types):
+      package ${elt_type.hashed_sets_pkg_name}
+        is new Ada.Containers.Hashed_Sets
+          (Element_Type        => ${elt_type.name},
+           "="                 => ${elt_type.equivalent_function_name},
+           Equivalent_Elements => ${elt_type.equivalent_function_name},
+           Hash                => Hash);
+   % endfor
 
    -----------------------------------------
    -- Structure types (full declarations) --

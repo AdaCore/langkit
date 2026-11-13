@@ -642,6 +642,12 @@ class CompileCtx:
         pass.
         """
 
+        self.codegen_set_types: set[CompiledType] = set()
+        """
+        Set of element types for which codegen needs to generate an
+        ``Ada.Containers.Hashed_Sets`` instantiation.
+        """
+
         self.memoized_properties: set[PropertyDef] = set()
         """
         Set of all PropertyDef instances that are memoized.

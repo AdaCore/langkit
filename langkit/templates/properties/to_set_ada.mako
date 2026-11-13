@@ -20,7 +20,7 @@
 
       declare
          Item_To_Append : constant ${element_type.name} := ${expr};
-         Dummy_Position : ${set_type.hashed_sets_pkg_name}.Cursor;
+         Dummy_Position : ${element_type.hashed_sets_pkg_name}.Cursor;
          Inserted       : Boolean;
       begin
          ${result_var}.Items.Insert

@@ -29,6 +29,12 @@
 <%def name="incomplete_decl(cls)">
    type ${cls.pointed};
    type ${cls.name} is access all ${cls.pointed};
+
+   function Equivalent (L, R : ${cls.name}) return Boolean;
+
+   % if cls.requires_hash_function:
+      function Hash (R : ${cls.name}) return Hash_Type;
+   % endif
 </%def>
 
 <%def name="ada_api_converters_decl(cls)">
@@ -214,8 +220,6 @@
    procedure Inc_Ref (T : ${cls.name});
    procedure Dec_Ref (T : in out ${cls.name});
 
-   function Equivalent (L, R : ${cls.name}) return Boolean;
-
    % if ctx.properties_logging:
       function Trace_Image (A : ${cls.name}) return String;
    % endif
@@ -223,10 +227,6 @@
    % if cls.requires_unique_function:
       function Make_Unique (A : ${cls.name}) return ${cls.name};
       --  Return a copy of A with duplicated elements removed
-   % endif
-
-   % if cls.requires_hash_function:
-      function Hash (R : ${cls.name}) return Hash_Type;
    % endif
 
   procedure Free is new Ada.Unchecked_Deallocation

@@ -31,6 +31,23 @@ class ExampleUnit: FooNode {
         val tmp = self.examples.map((x) => x.text).to_set();
         tmp.length()
     }
+
+    # Make sure code generation is valid when a set type
+    # (Set[Array[Int]) depends on an array type (Array[Int]).
+
+    @memoized
+    fun int_arrays(i: Int): Array[Array[Int]] =
+        if i == 0
+        then []: Array[Int]
+        else {
+            val prev = self.int_arrays(i - 1);
+            prev & [prev.at(-1) & [i]]
+        }
+
+    @memoized
+    @ignored
+    fun int_array_set(i: Int): Set[Array[Int]] =
+        self.int_arrays(i).to_set()
 }
 
 class Example: FooNode {
