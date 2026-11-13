@@ -464,6 +464,9 @@ private package ${ada_lib_name}.Implementation is
 
    ## Generate Hash functions for "built-in types" if need be
 
+   function Hash (Context : Internal_Context) return Hash_Type;
+   function Hash (Unit : Internal_Unit) return Hash_Type;
+
    % if T.Address.requires_hash_function:
 
       --  On all relevant targets, addresses returned by the system allocator
@@ -2312,9 +2315,6 @@ private package ${ada_lib_name}.Implementation is
       PLE_Root_Index : out Positive);
    --  Caching wrapper around Context.Unit_Provider.Get_Unit_And_PLE_Root
 
-   function Hash (Context : Internal_Context) return Hash_Type;
-   --  Implementation for Analysis.Hash
-
    function Has_With_Trivia (Context : Internal_Context) return Boolean;
    --  Implementation for Analysis.Has_With_Trivia
 
@@ -2347,9 +2347,6 @@ private package ${ada_lib_name}.Implementation is
 
    function Context (Unit : Internal_Unit) return Internal_Context;
    --  Implementation for Analysis.Context
-
-   function Hash (Unit : Internal_Unit) return Hash_Type;
-   --  Implementation for Analysis.Hash
 
    procedure Reparse (Unit : Internal_Unit; Charset : String);
    --  Implementation for Analysis.Reparse

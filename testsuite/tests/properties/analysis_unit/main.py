@@ -31,4 +31,9 @@ print("unit.root.eval_unit(42) = {}".format(res_int))
 
 print("unit.root.eval_unit(unit) = {}".format(u.root.p_eval_unit(u)))
 
+print(
+    "unit.root.singleton_set_length(unit)"
+    f" = {u.root.p_singleton_set_length(u)}"
+)
+
 print("main.py: Done.")

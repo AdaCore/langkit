@@ -15,6 +15,10 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun id_unit(u: AnalysisUnit): AnalysisUnit = u
+
+    # Code generation used to produce invalid Ada sources for Set[AnalysisUnit]
+    @exported
+    fun singleton_set_length(u: AnalysisUnit): Int = [u].to_set().length()
 }
 
 @abstract
