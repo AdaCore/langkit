@@ -5266,6 +5266,7 @@ class ArrayType(CompiledType):
 
     def require_unique_function(self) -> None:
         self.element_type.require_hash_function()
+        self.element_type.require_codegen_set_type()
         self.array_codegen_type._requires_unique_function = True
 
     def require_hash_function(self) -> None:

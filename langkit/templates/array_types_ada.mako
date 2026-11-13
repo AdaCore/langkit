@@ -474,7 +474,6 @@
       function Make_Unique (A : ${cls.name}) return ${cls.name} is
          <%
             elt_type = cls.element_type
-            elt_equiv_func = elt_type.equivalent_function_name
          %>
 
          --  To keep the order of the result deterministic, this function works
@@ -491,12 +490,7 @@
       begin
          --  Step 1: compute Duplicates
          declare
-            package Sets is new Ada.Containers.Hashed_Sets
-              (Element_Type        => ${elt_type.name},
-               "="                 => ${elt_equiv_func},
-               Equivalent_Elements => ${elt_equiv_func},
-               Hash                => Hash);
-            Set : Sets.Set;
+            Set : ${elt_type.hashed_sets_pkg_name}.Set;
          begin
             for I in A.Items'Range loop
                declare
