@@ -1454,6 +1454,10 @@ class CompileCtx:
         # the underlying required helpers.
         self.add_pending_required_hash_function(T.entity)
 
+        # Named envs are implemented on top of sets of bare nodes: make sure we
+        # generate code for them.
+        self.root_node_type.require_codegen_set_type()
+
         # Create the type for grammar rules
         EnumType(
             self,

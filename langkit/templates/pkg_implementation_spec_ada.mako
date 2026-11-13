@@ -973,11 +973,6 @@ private package ${ada_lib_name}.Implementation is
    --
    --     Key (Cur) = Element (Cur).Env.Node
 
-   package Node_Sets is new Ada.Containers.Hashed_Sets
-     (Element_Type        => ${T.root_node.name},
-      Hash                => Hash,
-      Equivalent_Elements => "=");
-
    type Named_Env_Descriptor is record
       Name : Symbol_Type;
       --  Name corresponding to this descriptor. Useful during debugging.
@@ -1014,7 +1009,7 @@ private package ${ada_lib_name}.Implementation is
       --  This set allows efficient env parent link updates when
       --  Env_With_Precedence changes.
 
-      Nodes_With_Foreign_Env : Node_Sets.Set;
+      Nodes_With_Foreign_Env : ${T.root_node.hashed_sets_pkg_name}.Set;
       --  Set of nodes whose env (Self_Env) must be Env_With_Precedence.
       --
       --  This set allows efficient Self_Env updates when Env_With_Precedence
