@@ -2,26 +2,48 @@
 error: Version number does not comply with PEP 440: invalid-version
 
 == 1 / invalid-build-date ==
-error: Local version identifier does not comply with PEP 440: invalid-build-date
+error: Invalid build date: invalid-build-date
+
+== 1 / w20230901 ==
+error: Invalid build date: w20230901
+
+== 1 / 20230901w ==
+error: Invalid build date: 20230901w
 
 == 1 / None ==
 Code generation was successful
 PEP 440 version: 1
 
-== 98!76.54.32a10.post123.dev456 / None ==
+== 98!97.54 / None ==
 Code generation was successful
-PEP 440 version: 98!76.54.32a10.post123.dev456
+PEP 440 version: 98!97.54
 
-== 25.0w.20230901 / None ==
-Code generation was successful
-PEP 440 version: 25.0+w.20230901
+== 98!76.54.32a10 / None ==
+error: Langkit does not support 'pre' parts in version numbers: a10
 
-== 1 / 20230901 ==
+== 98!76.54.post123 / None ==
+error: Langkit does not support 'post' parts in version numbers: .post123
+
+== 98!76.54.dev456 / None ==
+error: Langkit does not support 'dev' parts in version numbers: .dev456
+
+== 98!97.54+foo / None ==
+error: Langkit does not support 'local' parts in version numbers: foo
+
+== 25.1 / 20230901 ==
 Code generation was successful
-PEP 440 version: 1+20230901
+PEP 440 version: 25.1
 
 == 25.0w / 20230901 ==
 Code generation was successful
-PEP 440 version: 25.0+w.20230901
+PEP 440 version: 25.0.dev20230901
+
+== 25.1rc / 20230901 ==
+Code generation was successful
+PEP 440 version: 25.1rc20230901
+
+== 25.1rc / None ==
+Code generation was successful
+PEP 440 version: 25.1
 
 Done
