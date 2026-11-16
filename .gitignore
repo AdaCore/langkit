@@ -66,7 +66,10 @@ contrib/lkt/build
 /misc
 
 .gdb_history
-.vscode
+
+# Ancr generated config/env files
+.vscode/
+.env
 
 .mypy_cache
 
