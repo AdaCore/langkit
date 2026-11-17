@@ -8,8 +8,8 @@ driver: lkt_build_and_run
 
 config:
   library:
-    version: 1.version.number
-    build_date: build.date.number
+    version: "1.2"
+    build_date: "20230901"
 py_script: main.py
 gpr_mains: [main.adb]
 post_scripts: [test.py]

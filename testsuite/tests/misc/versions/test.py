@@ -23,8 +23,8 @@ def run(label, version=None, build_date=None):
         library=C.LibraryConfig(
             root_directory=os.path.dirname(__file__),
             language_name=names.Name("Foo"),
-            version="1.version.number",
-            build_date="build.date.number",
+            version="1.2",
+            build_date="20230901",
         ),
     )
 
@@ -46,5 +46,5 @@ def run(label, version=None, build_date=None):
 
 
 print("")
-run("Conflict on version", version="1.something")
-run("Conflict on build date", build_date="something")
+run("Conflict on version", version="1.3")
+run("Conflict on build date", build_date="20230902")

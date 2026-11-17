@@ -14,26 +14,45 @@ if TYPE_CHECKING:
     from langkit.compile_context import CompileCtx
 
 
-pep440_public_version_identifier_re = re.compile(
-    # Epoch segment
-    r"(\d+!)?"
-    # Release segment
-    r"\d+(\.\d+)*"
-    # Pre-release segment
-    r"((a|b|rc)\d+)?"
-    # Post-release segment
-    r"(.post\d+)?"
-    # Development release segment
-    r"(.dev\d+)?"
-)
-"""
-Regular expression that matches PEP440-compliant version numbers.
+# Regular expression that matches PEP440-compliant version numbers.
+#
+# Copied from <https://packaging.python.org/en/latest/specifications
+# /version-specifiers/#version-specifiers-regex>.
+pep440_version_identifier_pattern = r"""
+    v?
+    (?:
+        (?:(?P<epoch>[0-9]+)!)?                           # epoch
+        (?P<release>[0-9]+(?:\.[0-9]+)*)                  # release segment
+        (?P<pre>                                          # pre-release
+            [-_\.]?
+            (?P<pre_l>(a|b|c|rc|alpha|beta|pre|preview))
+            [-_\.]?
+            (?P<pre_n>[0-9]+)?
+        )?
+        (?P<post>                                         # post release
+            (?:-(?P<post_n1>[0-9]+))
+            |
+            (?:
+                [-_\.]?
+                (?P<post_l>post|rev|r)
+                [-_\.]?
+                (?P<post_n2>[0-9]+)?
+            )
+        )?
+        (?P<dev>                                          # dev release
+            [-_\.]?
+            (?P<dev_l>dev)
+            [-_\.]?
+            (?P<dev_n>[0-9]+)?
+        )?
+    )
+    (?:\+(?P<local>[a-z0-9]+(?:[-_\.][a-z0-9]+)*))?       # local version
 """
 
-pep440_local_version_identifier_re = re.compile("^[a-zA-Z0-9.]*$")
-"""
-Regular expression that matches PEP440-compliant local version identifiers.
-"""
+pep440_public_version_identifier_re = re.compile(
+    r"^\s*" + pep440_version_identifier_pattern + r"\s*$",
+    re.VERBOSE | re.IGNORECASE,
+)
 
 
 class PythonAPISettings(AbstractAPISettings):
@@ -45,41 +64,53 @@ class PythonAPISettings(AbstractAPISettings):
         self.context = ctx
         self.c_api_settings = c_api_settings
 
-        # The version numbers for Python packages are now required to follow
-        # PEP 440. First check that "ctx.version" has a PEP 440-compliant
-        # prefix (use a default version number if none is given).
+        # Use a default version number if none is given
         version = ctx.config.library.version
         if version == "undefined":
             version = "0.1"
+
+        # Handle AdaCore-specific version suffixes
+        is_wavefront = False
+        is_release_candidate = False
+        if version.endswith("w"):
+            is_wavefront = True
+            version = version[:-1]
+        elif version.endswith("rc"):
+            is_release_candidate = True
+            version = version[:-2]
+
+        # Check that the rest is a valid epoch+release segment (following PEP
+        # 440).
         m = pep440_public_version_identifier_re.match(version)
         if m is None:
             error(
                 f"Version number does not comply with PEP 440: {version}",
                 location=Location.nowhere,
             )
+        for name in ("pre", "post", "dev", "local"):
+            value = m.group(name)
+            if value:
+                error(
+                    f"Langkit does not support '{name}' parts in version"
+                    f" numbers: {value}",
+                    location=Location.nowhere,
+                )
 
-        # Decompose "version" into the PEP 440-compliant part, and put the rest
-        # of it plus the build date to the "local version identifier".
-        pep440_version = m.group(0)
-        local_version_identifier = version[m.end(0) :]
+        # Add a build date suffix for wavefronts and release candidates
         build_date = ctx.config.library.build_date
         if build_date != "undefined":
-            local_version_identifier = (
-                f"{local_version_identifier}.{build_date}"
-                if local_version_identifier
-                else build_date
-            )
+            if re.match("^[0-9]+$", build_date) is None:
+                error(
+                    f"Invalid build date: {build_date}",
+                    location=Location.nowhere,
+                )
+            elif is_wavefront:
+                version += f".dev{build_date}"
+            elif is_release_candidate:
+                version += f"rc{build_date}"
 
-        m = pep440_local_version_identifier_re.match(local_version_identifier)
-        if m is None:
-            error(
-                "Local version identifier does not comply with PEP 440:"
-                f" {local_version_identifier}",
-                location=Location.nowhere,
-            )
-        if local_version_identifier:
-            pep440_version += f"+{local_version_identifier}"
-        self.pep440_version = pep440_version
+        assert pep440_public_version_identifier_re.match(version)
+        self.pep440_version = version
 
     @property
     def root_astnode_name(self) -> str:
