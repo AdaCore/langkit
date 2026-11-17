@@ -3672,6 +3672,12 @@ public final class ${ctx.lib_name.camel}
         }
 
         % if ctx.generate_unparsers:
+        /** Return the NONE rewriting node for this library. */
+        @Override
+        public RewritingNode getNoneRewritingNode() {
+            return RewritingNode.NONE;
+        }
+
         /**
          * Get the currently open rewriting context associated to this
          * analysis context. The null value is returned if the current context

@@ -70,6 +70,15 @@ public class RewritingTests {
                 context.getRewritingContext() == null
             );
 
+            assertTrue(
+                "Analysis context returns the library none rewriting node",
+                context.getNoneRewritingNode() == RewritingNode.NONE
+            );
+            assertTrue(
+                "Getting the none rewriting node does not start rewriting",
+                context.getRewritingContext() == null
+            );
+
             // Open a context and close it manually
             System.out.println("Creating rewriting context");
             RewritingContext rcontext1 = context.startRewriting();
