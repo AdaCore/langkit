@@ -1,6 +1,8 @@
 ===== Start the Java rewriting tests =====
 --- Rewriting context ---
 Asserting: Rewriting context reference is null
+Asserting: Analysis context returns the library none rewriting node
+Asserting: Getting the none rewriting node does not start rewriting
 Creating rewriting context
 Asserting: Rewriting context reference to analysis context
 Try: Creating an other rewriting context

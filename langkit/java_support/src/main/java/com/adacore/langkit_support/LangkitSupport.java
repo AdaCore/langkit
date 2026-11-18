@@ -674,6 +674,13 @@ public class LangkitSupport {
         }
 
         /**
+         * Return this library's NONE rewriting node.
+         */
+        public default RewritingNodeInterface getNoneRewritingNode() {
+            throw new NotImplementedException();
+        }
+
+        /**
          * Start a rewriting session for Context.
          *
          * This handle will keep track of all changes to do on Context's
