@@ -834,16 +834,6 @@ package body ${ada_lib_name}.Implementation is
       PLE_Root_Index := U.PLE_Root_Index;
    end Get_Unit_And_PLE_Root;
 
-   ----------
-   -- Hash --
-   ----------
-
-   function Hash (Context : Internal_Context) return Hash_Type is
-      function H is new Hash_Access (Analysis_Context_Type, Internal_Context);
-   begin
-      return H (Context);
-   end Hash;
-
    ---------------------
    -- Has_With_Trivia --
    ---------------------
@@ -983,16 +973,6 @@ package body ${ada_lib_name}.Implementation is
    begin
       return Unit.Context;
    end Context;
-
-   ----------
-   -- Hash --
-   ----------
-
-   function Hash (Unit : Internal_Unit) return Hash_Type is
-      function H is new Hash_Access (Analysis_Unit_Type, Internal_Unit);
-   begin
-      return H (Unit);
-   end Hash;
 
    -------------
    -- Reparse --
@@ -3027,6 +3007,26 @@ package body ${ada_lib_name}.Implementation is
         (${T.root_node.value_type_name}, ${T.root_node.name});
    begin
       return H (Node);
+   end Hash;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Unit : Internal_Unit) return Hash_Type is
+      function H is new Hash_Access (Analysis_Unit_Type, Internal_Unit);
+   begin
+      return H (Unit);
+   end Hash;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Context : Internal_Context) return Hash_Type is
+      function H is new Hash_Access (Analysis_Context_Type, Internal_Context);
+   begin
+      return H (Context);
    end Hash;
 
    % if T.Bool.requires_hash_function:

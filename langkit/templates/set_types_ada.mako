@@ -10,16 +10,9 @@
    <%
       elt_type = cls.element_type
       elt_equiv_func = elt_type.equivalent_function_name
-      pkg_name = cls.hashed_sets_pkg_name
    %>
 
-   package ${pkg_name} is new Ada.Containers.Hashed_Sets
-     (Element_Type        => ${elt_type.name},
-      "="                 => ${elt_equiv_func},
-      Equivalent_Elements => ${elt_equiv_func},
-      Hash                => Hash);
-
-   subtype ${cls.set_type_name} is ${pkg_name}.Set;
+   subtype ${cls.set_type_name} is ${elt_type.hashed_sets_pkg_name}.Set;
 
    type ${cls.pointed} is record
       Ref_Count : Integer;
@@ -55,10 +48,7 @@
 
 <%def name="body(cls)">
 
-   <%
-      elt_type = cls.element_type
-      pkg_name = cls.hashed_sets_pkg_name
-   %>
+   <% elt_type = cls.element_type %>
 
    -------------
    -- Inc_Ref --

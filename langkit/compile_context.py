@@ -642,6 +642,12 @@ class CompileCtx:
         pass.
         """
 
+        self.codegen_set_types: set[CompiledType] = set()
+        """
+        Set of element types for which codegen needs to generate an
+        ``Ada.Containers.Hashed_Sets`` instantiation.
+        """
+
         self.memoized_properties: set[PropertyDef] = set()
         """
         Set of all PropertyDef instances that are memoized.
@@ -1447,6 +1453,10 @@ class CompileCtx:
         # We expose a hash function for public entities, so we must generate
         # the underlying required helpers.
         self.add_pending_required_hash_function(T.entity)
+
+        # Named envs are implemented on top of sets of bare nodes: make sure we
+        # generate code for them.
+        self.root_node_type.require_codegen_set_type()
 
         # Create the type for grammar rules
         EnumType(

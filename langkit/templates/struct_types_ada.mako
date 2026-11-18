@@ -208,15 +208,7 @@
    end;
 </%def>
 
-<%def name="incomplete_decl(cls)">
-   % if not cls.is_predeclared:
-      type ${cls.name};
-      ${ada_doc(cls, 6)}
-   % endif
-</%def>
-
-<%def name="decl(cls, incomplete_nullexpr=True)">
-
+<%def name="incomplete_decl(cls, incomplete_nullexpr=True)">
    % if not cls.is_predeclared:
       <%
          fields = cls.get_fields(include_inherited=False)
@@ -236,10 +228,22 @@
          % endif
       end record
         with Convention => C;
+      ${ada_doc(cls, 6)}
+
       % if incomplete_nullexpr:
       ${cls.nullexpr} : constant ${cls.name};
       % endif
    % endif
+
+   % if cls.has_equivalent_function \
+         and not cls.has_builtin_equivalent_function:
+      function Equivalent (L, R : ${cls.name}) return Boolean;
+   % endif
+
+   ${decl_hash(cls)}
+</%def>
+
+<%def name="decl(cls)">
 
    % if cls.is_refcounted:
       procedure Inc_Ref (R : ${cls.name});
@@ -251,13 +255,6 @@
         (Node : ${cls.element_type.name}; Info : ${T.EntityInfo.name})
          return ${cls.name};
    % endif
-
-   % if cls.has_equivalent_function \
-         and not cls.has_builtin_equivalent_function:
-      function Equivalent (L, R : ${cls.name}) return Boolean;
-   % endif
-
-   ${decl_hash(cls)}
 
    % if ctx.properties_logging:
       function Trace_Image (R : ${cls.name}) return String;

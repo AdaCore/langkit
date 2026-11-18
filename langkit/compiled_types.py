@@ -1187,6 +1187,24 @@ class CompiledType:
         """
         self.codegen_type._requires_hash_function = True
 
+    def require_codegen_set_type(self) -> None:
+        """
+        Add ``self.codegen_type`` to the context's ``codegen_set_types`` set.
+        """
+        self.context.codegen_set_types.add(self.codegen_type)
+
+    @property
+    def hashed_sets_pkg_name(self) -> names.Name:
+        """
+        Name of the instance of ``Ada.Containers.Hashed_Sets`` that has
+        ``self`` as an element type.
+        """
+        return (
+            self.unique_name + names.Name("Hashed_Sets")
+            if self.is_codegen_type
+            else self.codegen_type.hashed_sets_pkg_name
+        )
+
     def add_as_memoization_key(self, context: CompileCtx) -> None:
         """
         Add `self` to the set of types that are used as keys in the hashed maps
@@ -5248,6 +5266,7 @@ class ArrayType(CompiledType):
 
     def require_unique_function(self) -> None:
         self.element_type.require_hash_function()
+        self.element_type.require_codegen_set_type()
         self.array_codegen_type._requires_unique_function = True
 
     def require_hash_function(self) -> None:
@@ -5345,6 +5364,7 @@ class SetType(CompiledType):
         )
         context.add_pending_composite_type(self)
         context.add_pending_required_hash_function(element_type)
+        element_type.require_codegen_set_type()
 
     @property
     def name(self) -> names.Name:
@@ -5391,18 +5411,6 @@ class SetType(CompiledType):
             self.element_type.unique_name + names.Name("Set_Record")
             if self.is_codegen_type
             else self.set_codegen_type.pointed
-        )
-
-    @property
-    def hashed_sets_pkg_name(self) -> names.Name:
-        """
-        Name of the instance of ``Ada.Containers.Hashed_Sets`` used by this
-        set type to store its elements.
-        """
-        return (
-            self.element_type.unique_name + names.Name("Hashed_Sets")
-            if self.is_codegen_type
-            else self.set_codegen_type.hashed_sets_pkg_name
         )
 
 

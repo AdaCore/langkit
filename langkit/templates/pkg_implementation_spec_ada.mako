@@ -258,16 +258,16 @@ private package ${ada_lib_name}.Implementation is
    subtype Long_Long_Natural is Long_Long_Integer
       range 0 .. Long_Long_Integer'Last;
 
-   ${struct_types.incomplete_decl(T.env_md)}
-   ${struct_types.decl(T.env_md, incomplete_nullexpr=False)}
+   ${struct_types.incomplete_decl(T.env_md, incomplete_nullexpr=False)}
+   ${struct_types.decl(T.env_md)}
    ${struct_types.nullexpr_decl(T.env_md)}
 
    ## Special case for the env metadata struct, where the Hash function is
    ## explicitly declared because it has specific logic.
    function Hash (Self : ${T.env_md.name}) return Hash_Type;
 
-   ${struct_types.incomplete_decl(T.InnerEnvAssoc)}
-   ${struct_types.decl(T.InnerEnvAssoc, incomplete_nullexpr=False)}
+   ${struct_types.incomplete_decl(T.InnerEnvAssoc, incomplete_nullexpr=False)}
+   ${struct_types.decl(T.InnerEnvAssoc)}
    ${struct_types.nullexpr_decl(T.InnerEnvAssoc)}
    function Get_Key (Self : ${T.InnerEnvAssoc.name}) return Thin_Symbol
    is (Thin (Self.Key));
@@ -463,6 +463,9 @@ private package ${ada_lib_name}.Implementation is
    --  AST_Envs.Create_Dynamic_Lexical_Env.
 
    ## Generate Hash functions for "built-in types" if need be
+
+   function Hash (Context : Internal_Context) return Hash_Type;
+   function Hash (Unit : Internal_Unit) return Hash_Type;
 
    % if T.Address.requires_hash_function:
 
@@ -688,16 +691,6 @@ private package ${ada_lib_name}.Implementation is
    --  Constructors for synthetizing node builders may rely on other types, so
    --  they are declared later.
 
-   -----------------------------------------------
-   -- Structure types (incomplete declarations) --
-   -----------------------------------------------
-
-   % for struct_type in ctx.struct_types:
-      % if not struct_type.has_early_decl and struct_type.is_codegen_type:
-         ${struct_types.incomplete_decl(struct_type)}
-      % endif
-   % endfor
-
    -------------------------------------------
    -- Array types (incomplete declarations) --
    -------------------------------------------
@@ -727,6 +720,16 @@ private package ${ada_lib_name}.Implementation is
    % for set_type in ctx.set_types:
       % if not set_type.has_early_decl and set_type.is_codegen_type:
          ${set_types.incomplete_decl(set_type)}
+      % endif
+   % endfor
+
+   -----------------------------------------------
+   -- Structure types (incomplete declarations) --
+   -----------------------------------------------
+
+   % for struct_type in ctx.struct_types:
+      % if not struct_type.has_early_decl and struct_type.is_codegen_type:
+         ${struct_types.incomplete_decl(struct_type)}
       % endif
    % endfor
 
@@ -789,6 +792,19 @@ private package ${ada_lib_name}.Implementation is
       function Trace_Image (T : Source_Location) return String renames Image;
       function Trace_Image (Self : Ref_Categories) return String;
    % endif
+
+   ---------------------
+   --  Set containers --
+   ---------------------
+
+   % for elt_type in sorted(ctx.codegen_set_types):
+      package ${elt_type.hashed_sets_pkg_name}
+        is new Ada.Containers.Hashed_Sets
+          (Element_Type        => ${elt_type.name},
+           "="                 => ${elt_type.equivalent_function_name},
+           Equivalent_Elements => ${elt_type.equivalent_function_name},
+           Hash                => Hash);
+   % endfor
 
    -----------------------------------------
    -- Structure types (full declarations) --
@@ -957,11 +973,6 @@ private package ${ada_lib_name}.Implementation is
    --
    --     Key (Cur) = Element (Cur).Env.Node
 
-   package Node_Sets is new Ada.Containers.Hashed_Sets
-     (Element_Type        => ${T.root_node.name},
-      Hash                => Hash,
-      Equivalent_Elements => "=");
-
    type Named_Env_Descriptor is record
       Name : Symbol_Type;
       --  Name corresponding to this descriptor. Useful during debugging.
@@ -998,7 +1009,7 @@ private package ${ada_lib_name}.Implementation is
       --  This set allows efficient env parent link updates when
       --  Env_With_Precedence changes.
 
-      Nodes_With_Foreign_Env : Node_Sets.Set;
+      Nodes_With_Foreign_Env : ${T.root_node.hashed_sets_pkg_name}.Set;
       --  Set of nodes whose env (Self_Env) must be Env_With_Precedence.
       --
       --  This set allows efficient Self_Env updates when Env_With_Precedence
@@ -2312,9 +2323,6 @@ private package ${ada_lib_name}.Implementation is
       PLE_Root_Index : out Positive);
    --  Caching wrapper around Context.Unit_Provider.Get_Unit_And_PLE_Root
 
-   function Hash (Context : Internal_Context) return Hash_Type;
-   --  Implementation for Analysis.Hash
-
    function Has_With_Trivia (Context : Internal_Context) return Boolean;
    --  Implementation for Analysis.Has_With_Trivia
 
@@ -2347,9 +2355,6 @@ private package ${ada_lib_name}.Implementation is
 
    function Context (Unit : Internal_Unit) return Internal_Context;
    --  Implementation for Analysis.Context
-
-   function Hash (Unit : Internal_Unit) return Hash_Type;
-   --  Implementation for Analysis.Hash
 
    procedure Reparse (Unit : Internal_Unit; Charset : String);
    --  Implementation for Analysis.Reparse
