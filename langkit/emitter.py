@@ -115,6 +115,7 @@ class Emitter:
         config = context.config
 
         self.context = context
+        self.config = config
         self.verbosity = context.verbosity
 
         # Use a different cache when emitting code for the language server so
@@ -151,12 +152,12 @@ class Emitter:
         self.coverage = config.emission.coverage
         self.gnatcov = context.gnatcov
         self.portable_project = config.emission.portable_project
-        self.standalone = self.context.config.library.standalone
+        self.standalone = config.library.standalone
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
         self.extensions_src_dir = None
-        src_dir = os.path.join(self.context.extensions_dir, "src")
+        src_dir = self.extensions_dir("src")
         if os.path.isdir(src_dir):
             self.extensions_src_dir = src_dir
             for filename in os.listdir(src_dir):
@@ -324,6 +325,12 @@ class Emitter:
 
         self.builtin_unparsing_overridings: dict[names.Name, str] = {}
 
+    def extensions_dir(self, *args: str) -> str:
+        """
+        ``os.path.join`` wrapper for files in the extensions directory.
+        """
+        return os.path.join(self.context.extensions_dir, *args)
+
     def register_builtin_file(self, filename: str, contents: bytes) -> str:
         """
         Register a new builtin file for the generated library.
@@ -345,7 +352,7 @@ class Emitter:
             """
             Get the JSON unparsing configuration from the given filename.
             """
-            filename = os.path.join(ctx.extensions_dir, filename)
+            filename = self.extensions_dir(filename)
 
             # If given a Lkt file, translate it to JSON
             if filename.endswith(".lkt"):
@@ -457,18 +464,11 @@ class Emitter:
 
         It is meant to be inlined in the generated library.
         """
-        unparsing_cfg_filename = (
-            self.context.config.library.defaults.unparsing_config
-        )
+        unparsing_cfg_filename = self.config.library.defaults.unparsing_config
         if unparsing_cfg_filename is None:
             return b'{"node_configs": {}}'
         else:
-            with open(
-                os.path.join(
-                    self.context.extensions_dir, unparsing_cfg_filename
-                ),
-                "rb",
-            ) as fp:
+            with open(self.extensions_dir(unparsing_cfg_filename), "rb") as fp:
                 return fp.read()
 
     def add_with_clauses_from_lkt(self, context: CompileCtx) -> None:
@@ -508,7 +508,7 @@ class Emitter:
         """
         Compute the set of main programs for the generated library.
         """
-        self.main_programs = set(self.context.config.mains.main_programs)
+        self.main_programs = set(self.config.mains.main_programs)
         self.main_programs.add("parse")
         if self.generate_unparsers:
             self.main_programs.add("unparse")
@@ -913,7 +913,7 @@ class Emitter:
                     for_coverage=True,
                 )
 
-        if self.context.config.emission.per_node_implementation_packages:
+        if self.config.emission.per_node_implementation_packages:
             assert not self.context.global_impl_packages
             for pkg_list in self.context.per_node_impl_packages.values():
                 process_pkg_list(pkg_list)
@@ -1227,11 +1227,7 @@ class Emitter:
                 )
             else:
                 with open(
-                    os.path.join(
-                        ctx.extensions_dir,
-                        ctx.config.language_server.main,
-                    ),
-                    "r",
+                    self.extensions_dir(ctx.config.language_server.main), "r"
                 ) as f:
                     self.write_source_file(
                         os.path.join(
@@ -1257,12 +1253,14 @@ class Emitter:
         """
         Generate the sources for the VS Code extension.
         """
-        if ctx.config.vscode_ext is None:
+        cfg = ctx.config.vscode_ext
+        if cfg is None:
             printcol(
                 "No VS code extension configuration was provided",
                 Colors.FAIL,
             )
             return
+
         for template, export_file, export_dir in [
             (
                 "vscode_ext/src__extension_ts",
@@ -1285,74 +1283,52 @@ class Emitter:
                 os.path.join(export_dir, export_file), code, None
             )
 
-    def copy_readme(self, ctx: CompileCtx) -> None:
-        """
-        Copy the content ``readme_file`` in the README.md file generated in the
-        VSCode extension directory.
-        """
-        # Asser that the configuration contains a readme file
-        assert ctx.config.vscode_ext is not None
-        assert ctx.config.vscode_ext.readme_file is not None
+        # If provided, copy the README and language configuration files to the
+        # VS Code extension directory.
+        if cfg.readme_file:
+            self.copy_file(
+                self.extensions_dir(cfg.readme_file),
+                os.path.join(self.vscode_ext_dir, "README.md"),
+            )
+        if cfg.language_config_file:
+            self.copy_file(
+                self.extensions_dir(cfg.language_config_file),
+                os.path.join(
+                    self.vscode_ext_dir,
+                    self.config.library.language_name.camel
+                    + "-language-configuration.json",
+                ),
+            )
 
-        # Then copy the readme file
-        self.copy_file_to_vscode_dir(
-            ctx,
-            ctx.config.vscode_ext.readme_file,
-            "README.md",
-        )
+        # Generate the TextMate grammar file
+        if cfg.textmate_config_file:
+            code = ctx.render_template(
+                "vscode_ext/textmate_grammar",
+                tm_settings=self.context.textmate_grammar_settings,
+            )
+            self.write_source_file(
+                os.path.join(
+                    self.vscode_syntaxes_dir,
+                    self.config.library.language_name.camel
+                    + ".tmGrammar.json",
+                ),
+                code,
+                None,
+            )
 
-    def copy_language_config(self, ctx: CompileCtx) -> None:
+    def copy_file(self, source: str, dest: str) -> None:
         """
-        Copy the language configuration provided through the language config to
-        the generated VSCode extension directory.
+        Copy a source file (relative to the language spec source directory) to
+        a destination (relative to the emitted library directory).
         """
-        # Assert that the language configuraiton exists
-        assert ctx.config.vscode_ext is not None
-        assert ctx.config.vscode_ext.language_config_file is not None
-
-        # Then copy the language configuration
-        self.copy_file_to_vscode_dir(
-            ctx,
-            ctx.config.vscode_ext.language_config_file,
-            (
-                ctx.config.library.language_name.camel
-                + "-language-configuration.json"
-            ),
-        )
-
-    def copy_file_to_vscode_dir(
-        self, ctx: CompileCtx, source_file: str, target_file: str
-    ) -> None:
-        """
-        Helper function to copy the ``source_file`` (that should be relative to
-        the extensions directory) to the ``target_file`` in the VSCode
-        extension generated directory.
-        """
-        source_path = os.path.join(ctx.extensions_dir, source_file)
-        target_path = os.path.join(self.vscode_ext_dir, target_file)
-
-        # Read the source configuration
-        source_content = None
-        with open(source_path, "r") as f:
-            source_content = f.read()
-
-        # Write the target file with the language configuration
-        self.write_source_file(target_path, source_content, None)
-
-    def emit_textmate_grammar(self, ctx: CompileCtx) -> None:
-        """
-        Generate the TextMate grammar file.
-        """
-        code = ctx.render_template(
-            "vscode_ext/textmate_grammar",
-            tm_settings=ctx.textmate_grammar_settings,
-        )
+        with open(
+            os.path.join(self.config.library.root_directory, source),
+            "r",
+        ) as f:
+            contents = f.read()
         self.write_source_file(
-            os.path.join(
-                self.vscode_syntaxes_dir,
-                f"{ctx.config.library.language_name.camel}.tmGrammar.json",
-            ),
-            code,
+            os.path.join(self.config.emission.library_directory, dest),
+            contents,
             None,
         )
 
@@ -1606,9 +1582,7 @@ class Emitter:
 
         # If relevant bits in the configuration changed, consider that the
         # cache is stale (i.e. trigger recompilation).
-        if not self.cache.has_same_value(
-            "config", cache_summary(self.context.config)
-        ):
+        if not self.cache.has_same_value("config", cache_summary(self.config)):
             log_reason("Configuration changed")
             return True
 
@@ -1694,7 +1668,7 @@ class Emitter:
                         add(os.path.join(path, f))
 
         # Keep track of the relevant bits in the configuration
-        self.cache.set_entry("config", cache_summary(self.context.config))
+        self.cache.set_entry("config", cache_summary(self.config))
 
         # Keep track of the list of input/output files
         self.cache.set_entry("input_files", input_files)
