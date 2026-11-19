@@ -1,0 +1,12 @@
+== test.lkt ==
+Code generation was successful
+
+== test.py ==
+# pyproject.toml[project] begin
+[project]
+name = 'Libfoolang'
+version = '0.1'
+urls = {"homepage" = "https://example.org/libfoolang", "documentation" = "https://example.org/libfoolang/doc"}
+# pyproject.toml[project] end
+
+lkt_compile: Done

@@ -1,0 +1,9 @@
+driver: lkt_compile
+sync_trees:
+  - ../common
+config:
+  library:
+    python_api:
+      urls:
+        homepage: https://example.org/libfoolang
+        documentation: https://example.org/libfoolang/doc

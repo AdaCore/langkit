@@ -1016,6 +1016,16 @@ class Emitter:
             language=None,
         )
 
+        # Distribute the README file, if any
+        readme = ctx.config.library.python_api.readme_file
+        readme_basename = None
+        if readme:
+            readme_basename = os.path.basename(readme)
+            self.copy_file(
+                self.extensions_dir(readme),
+                os.path.join(self.python_dir, readme_basename),
+            )
+
         # Emit the pyproject.toml file to easily install the Python binding or
         # build a wheel for it.
         pyproject_file = os.path.join(
@@ -1023,7 +1033,9 @@ class Emitter:
         )
         self.write_source_file(
             pyproject_file,
-            ctx.render_template("python_api/pyproject_toml"),
+            ctx.render_template(
+                "python_api/pyproject_toml", readme_basename=readme_basename
+            ),
             language=None,
         )
 

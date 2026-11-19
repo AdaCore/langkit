@@ -1,0 +1,12 @@
+== test.lkt ==
+Code generation was successful
+
+== test.py ==
+# pyproject.toml[project] begin
+[project]
+name = 'Libfoolang'
+version = '0.1'
+license = "GPL-3.0-or-later"
+# pyproject.toml[project] end
+
+lkt_compile: Done
