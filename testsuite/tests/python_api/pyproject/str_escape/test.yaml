@@ -1,0 +1,7 @@
+driver: lkt_compile
+sync_trees:
+  - ../common
+config:
+  library:
+    python_api:
+      description: "\x00 ' \\ \" ~ \x7f \xff \u0100 \uffff \U00010000"

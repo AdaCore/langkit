@@ -1,0 +1,13 @@
+== test.lkt ==
+Code generation was successful
+
+== test.py ==
+# pyproject.toml[project] begin
+[project]
+name = 'Libfoolang'
+version = '0.1'
+authors = [{"name" = "Alice"}, {"name" = "Bob", "email" = "bob@example.com"}, {"email" = "hodor@example.com"}]
+maintainers = [{"name" = "Eve"}]
+# pyproject.toml[project] end
+
+lkt_compile: Done

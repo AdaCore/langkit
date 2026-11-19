@@ -1,0 +1,7 @@
+driver: lkt_compile
+sync_trees:
+  - ../common
+config:
+  library:
+    python_api:
+      license: "GPL-3.0-or-later"

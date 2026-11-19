@@ -314,6 +314,58 @@ class CacheCollectionConfig:
 
 
 @dataclasses.dataclass
+class Person:
+    """
+    Name and/or email address for an author/maintainer.
+    """
+
+    name: str | None = None
+    email: str | None = None
+
+
+@dataclasses.dataclass
+class PythonAPIConfig:
+    """
+    Metadata for the generated Python API.
+    """
+
+    authors: list[Person] = dataclasses.field(default_factory=list)
+    maintainers: list[Person] = dataclasses.field(default_factory=list)
+
+    description: str | None = None
+    """
+    One-line description of the project, to show as the "headline" of the
+    project page.
+    """
+
+    readme_file: str | None = None
+    """
+    Filename relative to the extensions directory, to contain a longer
+    description of the project.
+    """
+
+    license: str | None = None
+    """
+    Valid SPDX license expression.
+    """
+
+    keywords: list[str] = dataclasses.field(default_factory=list)
+    """
+    List of keywords for PyPI's search.
+    """
+
+    urls: dict[str, str] = dataclasses.field(default_factory=dict)
+    """
+    Labelled list of URLs associated with the project.
+    """
+
+    requires_python: str | None = None
+    """
+    Specifies the Python version requirement. For example: ``>= 3.8``.
+    """
+
+
+@dataclasses.dataclass
 class LibraryConfig:
     """
     Configuration for the library to compile.
@@ -445,6 +497,10 @@ class LibraryConfig:
     configuration), or a "*.lkt" filename (for a Lkt configuration,
     automatically translated to JSON).
     """
+
+    python_api: PythonAPIConfig = dataclasses.field(
+        default_factory=PythonAPIConfig
+    )
 
     @property
     def actual_library_name(self) -> Name:
