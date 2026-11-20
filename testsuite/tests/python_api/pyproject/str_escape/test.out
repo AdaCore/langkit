@@ -1,0 +1,12 @@
+== test.lkt ==
+Code generation was successful
+
+== test.py ==
+# pyproject.toml[project] begin
+[project]
+name = 'Libfoolang'
+version = '0.1'
+description = "\u0000 ' \\ \" ~ \u007f \u00ff \u0100 \uffff \U00010000"
+# pyproject.toml[project] end
+
+lkt_compile: Done

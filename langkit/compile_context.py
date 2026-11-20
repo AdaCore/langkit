@@ -2706,26 +2706,14 @@ class CompileCtx:
         """
         Return the list of passes to generate the VS Code extension.
         """
+        if self.config.vscode_ext is None:
+            return []
+
         from langkit.passes import (
             Emitter,
             EmitterPass,
             GlobalPass,
             errors_checkpoint_pass,
-        )
-
-        has_readme = (
-            self.config.vscode_ext is not None
-            and self.config.vscode_ext.readme_file is not None
-        )
-
-        has_language_config = (
-            self.config.vscode_ext is not None
-            and self.config.vscode_ext.language_config_file is not None
-        )
-
-        has_textmate_config = (
-            self.config.vscode_ext is not None
-            and self.config.vscode_ext.textmate_config_file is not None
         )
 
         # Create the list of passes to generate the VSCode extension
@@ -2734,28 +2722,13 @@ class CompileCtx:
             EmitterPass(
                 "emit VS Code extension", Emitter.emit_vscode_extension
             ),
-            EmitterPass(
-                "copy README",
-                Emitter.copy_readme,
-                disabled=not has_readme,
-            ),
-            EmitterPass(
-                "copy language configuration",
-                Emitter.copy_language_config,
-                disabled=not has_language_config,
-            ),
-            EmitterPass(
-                "emit TextMate grammar",
-                Emitter.emit_textmate_grammar,
-                disabled=not has_textmate_config,
-            ),
             self.end_code_emission_pass,
         ]
 
         # If a TextMate grammar configuration file has been provided, we need
         # to add some passes to compile the language lexer and load the
         # configuration file.
-        if has_textmate_config:
+        if self.config.vscode_ext.textmate_config_file:
             res = [
                 *self.lower_lkt_passes,
                 *self.compile_lexer_passes,
