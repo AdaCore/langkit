@@ -1515,6 +1515,16 @@ class ManageScript:
             os.path.join(share_dir, os.path.basename(gdbinit_filename)),
         )
 
+        # Install the Python bindings' README, if present
+        py_cfg = self.context.config.library.python_api
+        python_dir = os.path.join(self.dirs.install_dir("python"))
+        if py_cfg.readme_file:
+            os.makedirs(python_dir, exist_ok=True)
+            shutil.copyfile(
+                os.path.join(self.context.extensions_dir, py_cfg.readme_file),
+                os.path.join(python_dir, os.path.basename(py_cfg.readme_file)),
+            )
+
         # Install the remaining miscellaneous files
         for fpath in [
             os.path.join("python", "pyproject.toml"),
