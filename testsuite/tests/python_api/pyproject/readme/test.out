@@ -1,0 +1,18 @@
+== test.lkt ==
+Code generation was successful
+
+== test.py ==
+# pyproject.toml[project] begin
+[project]
+name = 'Libfoolang'
+version = '0.1'
+readme = "README.md"
+# pyproject.toml[project] end
+# README.md begin
+Libfoolang Python API README
+============================
+
+Welcome.
+# README.md end
+
+lkt_compile: Done

@@ -1502,20 +1502,28 @@ class ManageScript:
         scripts = glob.glob(self.dirs.build_dir("scripts", "*"))
         install_dir = self.dirs.install_dir("bin")
         if scripts:
-            if not os.path.exists(install_dir):
-                os.mkdir(install_dir)
+            os.makedirs(install_dir, exist_ok=True)
             for f in scripts:
                 shutil.copy2(f, os.path.join(install_dir, os.path.basename(f)))
 
         # Install the GDB helpers setup script in "share"
         share_dir = self.dirs.install_dir("share", lib_name)
-        if not path.isdir(share_dir):
-            os.makedirs(share_dir)
+        os.makedirs(share_dir, exist_ok=True)
         gdbinit_filename = self.dirs.build_dir("gdbinit.py")
         shutil.copyfile(
             gdbinit_filename,
             os.path.join(share_dir, os.path.basename(gdbinit_filename)),
         )
+
+        # Install the Python bindings' README, if present
+        py_cfg = self.context.config.library.python_api
+        python_dir = os.path.join(self.dirs.install_dir("python"))
+        if py_cfg.readme_file:
+            os.makedirs(python_dir, exist_ok=True)
+            shutil.copyfile(
+                os.path.join(self.context.extensions_dir, py_cfg.readme_file),
+                os.path.join(python_dir, os.path.basename(py_cfg.readme_file)),
+            )
 
         # Install the remaining miscellaneous files
         for fpath in [
@@ -1549,9 +1557,7 @@ class ManageScript:
             os.path.join("lib", "windows", "*"),
         ]:
             install_path = os.path.dirname(self.dirs.install_dir(fpath))
-            if not path.isdir(install_path):
-                os.makedirs(install_path)
-
+            os.makedirs(install_path, exist_ok=True)
             for f in glob.glob(self.dirs.build_dir(fpath)):
                 shutil.copyfile(
                     f, os.path.join(install_path, os.path.basename(f))
@@ -1563,9 +1569,7 @@ class ManageScript:
             files,
         ) in self.context.config.library.extra_install_files.items():
             install_path = self.dirs.install_dir(dest_dir)
-            if not os.path.isdir(install_path):
-                os.makedirs(install_path)
-
+            os.makedirs(install_path, exist_ok=True)
             for f in files:
                 dest = os.path.join(install_path, os.path.basename(f))
                 if os.path.isfile(f):

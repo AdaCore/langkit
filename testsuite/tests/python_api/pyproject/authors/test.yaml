@@ -1,0 +1,13 @@
+driver: lkt_compile
+sync_trees:
+  - ../common
+config:
+  library:
+    python_api:
+      authors:
+        - name: Alice
+        - name: Bob
+          email: bob@example.com
+        - email: hodor@example.com
+      maintainers:
+        - name: Eve
